@@ -27,8 +27,6 @@ describe('Repository', function(){
 	if (mock) {
 		api.initSimpleMockServer();
 	} else {
-		api.fakeRepositoryChanged = function() {};
-		api.mockRoute = function() {};
 		before(function(done) {
 			api('POST', '/testing/createdir', undefined, function(err, res) {
 				testDir = res.path;
@@ -59,7 +57,6 @@ describe('Repository', function(){
 	it('should be initable', function(done) {
 		waitFor(viewModel.content().status, 'inited', done);
 		viewModel.content().initRepository();
-		api.fakeRepositoryChanged(testDir);
 	});
 
 	var testFile = 'somefile';
