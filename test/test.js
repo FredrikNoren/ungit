@@ -243,6 +243,43 @@ describe('git', function () {
 			});
 	});
 
+	it('modifying a test file should work', function(done) {
+		request(app)
+			.post(restGit.pathPrefix + '/testing/changefile')
+			.send({ file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	it('modified file should show up in status', function(done) {
+		request(app)
+			.get(restGit.pathPrefix + '/status')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
+					name: testFile,
+					status: 'modified'
+				});
+				done();
+			});
+	});
+
+	it('discarding changes should work', function(done) {
+		request(app)
+			.post(restGit.pathPrefix + '/discardchanges')
+			.send({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
 	var testFile2 = 'my test.txt';
 
 	it('creating a multi word test file should work', function(done) {
@@ -271,6 +308,15 @@ describe('git', function () {
 				});
 				done();
 			});
+	});
+
+	it('discarding the new file should work', function(done) {
+		request(app)
+			.post(restGit.pathPrefix + '/discardchanges')
+			.send({ path: testDir, file: testFile2 })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
 	});
 
 

@@ -86,4 +86,14 @@ describe('Repository', function(){
 		}, done);
 	});
 
+	it('modifying a file should make it show in staged files', function(done) {
+		waitFor(viewModel.content().files, function(files) { return files.length == 1; }, done);
+		api('POST', '/testing/changefile', { file: testFile });
+	});
+
+	it('discarding changes should make it disapear from staged files', function(done) {
+		waitFor(viewModel.content().files, function(files) { return files.length == 0; }, done);
+		viewModel.content().files()[0].discardChanges();
+	});
+
 })

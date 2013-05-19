@@ -41,12 +41,15 @@ exports.registerApi = function(app, server, dev) {
 		result.files = [];
 		lines.slice(1).forEach(function(line) {
 			if (line == '') return;
-			var words = line.split(' ');
-			var file = { name: words.slice(1).join(' ').trim() };
-			if (words[0] == '??')
+			var status = line.slice(0, 2);
+			var filename = line.slice(3);
+			var file = { name: filename.trim() };
+			if (status == '??')
 				file.status = 'untracked';
-			else if (words[0] == 'A')
+			else if (status == 'A ')
 				file.status = 'staged new';
+			else if (status == ' M')
+				file.status = 'modified';
 			result.files.push(file);
 		});
 	}
@@ -107,6 +110,27 @@ exports.registerApi = function(app, server, dev) {
 					res.json(400, { status: 'fail', error: error, stderr: stderr });
 				else
 					res.json({ status: 'ok' });
+		});
+	});
+
+	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
+		var repoPath = req.body.path;
+		if (!fs.existsSync(repoPath))
+			return res.json(400, { status: 'fail', error: 'No such path: ' + repoPath });
+		child_process.exec('git checkout -- "' + req.body.file + '"', { cwd: repoPath },
+			function (error, stdout, stderr) {
+				if (error !== null) {
+					if (stderr.trim() == 'error: pathspec \'' + req.body.file + '\' did not match any file(s) known to git.') {
+						fs.unlink(path.join(repoPath, req.body.file), function(err) {
+							if (err) res.json(400, { status: 'fail', error: err });
+							else res.json({ status: 'ok' });
+						})
+					} else {
+						res.json(400, { status: 'fail', error: error, stderr: stderr });
+					}
+				} else {
+					res.json({ status: 'ok' });
+				}
 		});
 	});
 
@@ -209,6 +233,10 @@ exports.registerApi = function(app, server, dev) {
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
 			fs.writeFileSync(path.join(testDir, req.body.file), 'test content');
+			res.json({ status: 'ok' });
+		});
+		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
+			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n' + Math.random());
 			res.json({ status: 'ok' });
 		});
 		app.post(exports.pathPrefix + '/testing/removedir', function(req, res){

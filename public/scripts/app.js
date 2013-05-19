@@ -39,6 +39,7 @@ var FileViewModel = function(args) {
 	this.staged = ko.observable(args.staged);
 	this.name = args.name;
 	this.repository = args.repository;
+	this.isNew = ko.observable(args.isNew);
 }
 FileViewModel.prototype.toogleStaged = function() {
 	var self = this;
@@ -47,6 +48,9 @@ FileViewModel.prototype.toogleStaged = function() {
 	if (!isStaged) method = '/stage';
 	else method = '/unstage';
 	api('POST', method, { path: this.repository.path, file: this.name });
+}
+FileViewModel.prototype.discardChanges = function() {
+	api('POST', '/discardchanges', { path: this.repository.path, file: this.name });
 }
 
 function capitaliseFirstLetter(string) {
@@ -103,6 +107,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 				return a.name > b.name ? 1 : -1;
 			}).forEach(function(args) {
 				args.staged = args.status.indexOf('staged') >= 0;
+				args.isNew = args.status.indexOf('untracked') >= 0;
 				args.repository = self;
 				self.files.push(new FileViewModel(args));
 			});
