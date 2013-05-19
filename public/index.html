@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
+    <link rel="stylesheet/css" type="text/css" href="/styles/normalize.css" />
+	<link rel="stylesheet" href="/styles/animate.css"/>
+	<link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<script type="text/html" id="empty">
+	<div class='crash'>
+		<div class='box'>
+			<h1>Nothing</h1>
+			This is a temporary empty page.
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="crash">
+	<div class='crash'>
+		<div class='box'>
+			<h1>Whooops</h1>
+			Something went wrong, reload the page to start over.
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="repository">
+	<div class="repository">
+
+		<div class="titleHeader animated fadeInLeft">
+			<img class='icon' src='images/repository.png'>
+			<div class='preTitle'>Repository</div>
+			<div class='title' data-bind='text: title'></div>
+		</div>
+		<div class="hr"></div>
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
+			Loading...
+		</div>
+		<div class="uninited" data-bind="visible: status() == 'uninited'">
+			<div>"<span data-bind="text: path"></span>" is not a repository.</div>
+			<button class="initRepository" data-bind='click: initRepository'>Initialize a repository here!</button>
+		</div>
+		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
+			<div class="path" data-bind="text: path"></div>
+			
+			<div class="log">
+				<div class="logEntry staging" data-bind="css: { commitValidationError: commitValidationError }">
+					<div class="date">Now</div>
+					<a class="author" data-bind="text: commitAuthorName, attr: { href: 'mailto:' +  commitAuthorEmail() }"></a>
+					<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
+					<div class="files" data-bind="foreach: files">
+						<div class="file">
+							<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
+							<span data-bind="text: name"></span>
+						</div>
+					</div>
+					<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+					<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+				</div>
+
+				<div data-bind="foreach: logEntries">
+					<div class="logEntry">
+						<div class="date" data-bind="text: date"></div>
+						<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+						<div class="title" data-bind="text: title"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<div class="main">
+
+	<div data-bind="template: { name: templateChooser, data: content }"></div>
+
+</div>
+
+<script type="text/javascript" src="/scripts/lib/less-1.3.3.min.js"></script>
+<script type='text/javascript' src='/scripts/lib/knockout-2.2.1.js'></script>
+<script type="text/javascript" src="/scripts/lib/jquery-2.0.0.min.js"></script>
+<script type="text/javascript" src="/scripts/lib/google.ui.fastbutton.js"></script>
+<script type="text/javascript" src="/scripts/lib/superagent.js"></script>
+<script type="text/javascript" src="/scripts/lib/signals.js"></script>
+<script type="text/javascript" src="/scripts/lib/hasher.js"></script>
+<script type="text/javascript" src="/scripts/lib/crossroads.js"></script>
+<script type="text/javascript" src="/scripts/lib/uuid.js"></script>
+<script type="text/javascript" src="/scripts/lib/moment.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src='/scripts/app.js'></script>
+<script type='text/javascript' src='/scripts/main.js'></script>
+
+</body>
+</html>

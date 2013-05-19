@@ -1,0 +1,19 @@
+{
+  "name": "pep-git",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha --reporter spec"
+  },
+  "main": "./server",
+  "dependencies" : {
+    "express" : "*",
+    "mocha": "*",
+    "expect.js": "*",
+    "supertest": "*",
+    "underscore": "*",
+    "temp": "*",
+    "watchr": "*",
+    "socket.io": "*"
+  }
+}
