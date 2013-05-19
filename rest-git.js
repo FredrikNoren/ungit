@@ -107,8 +107,17 @@ exports.registerApi = function(app, server, dev) {
 			var file = _.find(status.files, function(file) { return file.name == req.query.file });
 			if (file.staged) {
 				git('diff --cached "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
-			} else {
+			} else if (!file.isNew) {
 				git('diff "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+			} else {
+				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
+					if (err) return res.json(400, { error: err });
+					var diffs = [];
+					var diff = { };
+					diff.lines = text.split('\n').map(function(line) { return '+\t' + line; });
+					diffs.push(diff);
+					res.json(diffs);
+				});
 			}
 		});
 	});

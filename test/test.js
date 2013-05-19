@@ -160,6 +160,23 @@ describe('git', function () {
 			});
 	});
 
+	it('diff on created file should work', function(done) {
+		req
+			.get(restGit.pathPrefix + '/diff')
+			.query({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body).to.be.an('array');
+				expect(res.body.length).to.be.greaterThan(0);
+				expect(res.body[0].lines).to.be.an('array');
+				expect(res.body[0].lines.length).to.be.greaterThan(0);
+				done();
+			});
+	});
+
 	it('stage should succeed on existing file', function(done) {
 		req
 			.post(restGit.pathPrefix + '/stage')
