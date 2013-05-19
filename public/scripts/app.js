@@ -81,9 +81,11 @@ var RepositoryViewModel = function(path) {
 	this.logEntries = ko.observableArray();
 	this.updateStatus();
 	this.updateLog();
+	this.watcherReady = ko.observable(false);
 	var socket = io.connect('http://localhost:3000');
 	socket.emit('watch', { path: path, safeMode: options.watcherSafeMode });
 	socket.on('ready', function (data) {
+		self.watcherReady(true);
 	});
 	socket.on('changed', function (data) {
 		self.updateStatus();
