@@ -23,6 +23,12 @@ body {
 	padding: 0.5em;
 }
 
+@placeholderColor: #e5e5e5;
+::-webkit-input-placeholder { color: @placeholderColor; }
+::-moz-placeholder { color: @placeholderColor; } /* firefox 19+ */
+:-ms-input-placeholder { color: @placeholderColor; } /* ie */
+input:-moz-placeholder { color: @placeholderColor; }
+
 h1 {
 	margin: 0px;
 	padding: 0px;
@@ -72,13 +78,18 @@ textarea {
 }
 .checkbox {
 	background: #fefefe;
-	border: 0.3em solid #eee;
-	width: 0.7em;
-	height: 0.7em;
+	border: 5px solid #eee;
+	width: 20px;
 	display: inline-block;
+	border-radius: 3px;
+	font-size: 0.7em;
 	&.checked {
 		background: #68B6ED;
 		//border-color: transparent;
+	}
+	&:after {
+		content: '.';
+		opacity: 0;
 	}
 }
 .validationError {
@@ -160,18 +171,29 @@ a {
 				padding: 10px;
 				margin: 10px;
 				&.staging {
+					background: #fffff7; /* Old browsers */
+					background: -moz-linear-gradient(top,  #fffff7 0%, #fffee8 100%); /* FF3.6+ */
+					background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fffff7), color-stop(100%,#fffee8)); /* Chrome,Safari4+ */
+					background: -webkit-linear-gradient(top,  #fffff7 0%,#fffee8 100%); /* Chrome10+,Safari5.1+ */
+					background: -o-linear-gradient(top,  #fffff7 0%,#fffee8 100%); /* Opera 11.10+ */
+					background: -ms-linear-gradient(top,  #fffff7 0%,#fffee8 100%); /* IE10+ */
+					background: linear-gradient(to bottom,  #fffff7 0%,#fffee8 100%); /* W3C */
+					filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fffff7', endColorstr='#fffee8',GradientType=0 ); /* IE6-9 */
+
 					.commitMessage {
 						display: block;
 						width: 100%;
 						font-size: 1.6em;
 						box-sizing:border-box;
 						-moz-box-sizing:border-box;
+						border-radius: 5px;
+						padding: 10px;
 					}
 					.files {
 						font-size: 1.3em;
 						padding: 0.3em;
 						.new {
-							background: #87E83C;
+							background: #B5F584;
 							color: #fff;
 							border-radius: 3px;
 							padding: 3px;
@@ -180,20 +202,19 @@ a {
 							font-size: 0.7em;
 						}
 						.discard {
-							background: #000;
+							background: #e0e0e0;
 							color: #fff;
 							font-size: 0.7em;
 							border-radius: 3px;
 							padding: 3px;
 							padding-left: 5px;
 							padding-right: 5px;
-							opacity: 0.2;
 							cursor: pointer;
 							.explanation {
 								display: none;
 							}
 							&:hover {
-								opacity: 1;
+								background: #000;
 								.explanation {
 									display: inline-block;
 								}

@@ -26,7 +26,7 @@ describe('Repository', function(){
 	this.timeout(6000);
 
 	beforeEach(function(done) {
-		setTimeout(done, 1000);
+		setTimeout(done, 200);
 	});
 
 	before(function(done) {
