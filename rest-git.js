@@ -35,23 +35,6 @@ exports.registerApi = function(app, server, dev) {
 		});
 	}
 
-	var parseGitStatus = function(text, result) {
-		var lines = text.split('\n');
-		result.branch = _.last(lines[0].split(' '));
-		result.inited = true;
-		result.files = [];
-		lines.slice(1).forEach(function(line) {
-			if (line == '') return;
-			var status = line.slice(0, 2);
-			var filename = line.slice(3).trim();
-			if (filename[0] == '"' && _.last(filename) == '"')
-				filename = filename.slice(1, filename.length - 1);
-			var file = { name: filename };
-			file.staged = status[0] == 'A' || status[0] == 'M';
-			file.isNew = status[0] == '?' || status[0] == 'A';
-			result.files.push(file);
-		});
-	}
 
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var path = req.query.path;
@@ -66,9 +49,7 @@ exports.registerApi = function(app, server, dev) {
 						res.json(400, { status: 'fail', error: error, stderr: stderr });
 				}
 				else {
-					var result = { status: 'ok' };
-					parseGitStatus(stdout, result);
-					res.json(result);
+					res.json({ status: 'ok', inited: true, result: gitCliParser.parseGitStatus(stdout) });
 				}
 		});
 	});

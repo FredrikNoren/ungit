@@ -92,7 +92,7 @@ describe('git', function () {
 			.end(function(err, res){
 				if (err) return done(err);
 				expect(res.body.inited).to.be(true);
-				expect(res.body.branch).to.be('master');
+				expect(res.body.result.branch).to.be('master');
 				done();
 			});
 	});
@@ -150,9 +150,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
+				expect(res.body.result.files).to.be.a('array');
+				expect(res.body.result.files.length).to.be(1);
+				expect(res.body.result.files[0]).to.eql({
 					name: testFile,
 					isNew: true,
 					staged: false
@@ -179,9 +179,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
+				expect(res.body.result.files).to.be.a('array');
+				expect(res.body.result.files.length).to.be(1);
+				expect(res.body.result.files[0]).to.eql({
 					name: testFile,
 					isNew: true,
 					staged: true
@@ -265,9 +265,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
+				expect(res.body.result.files).to.be.a('array');
+				expect(res.body.result.files.length).to.be(1);
+				expect(res.body.result.files[0]).to.eql({
 					name: testFile,
 					isNew: false,
 					staged: false
@@ -319,9 +319,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
+				expect(res.body.result.files).to.be.a('array');
+				expect(res.body.result.files.length).to.be(1);
+				expect(res.body.result.files[0]).to.eql({
 					name: testFile2,
 					isNew: true,
 					staged: false

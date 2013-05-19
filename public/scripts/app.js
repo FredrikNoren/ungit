@@ -125,7 +125,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 		if (res.body.inited) {
 			self.status('inited');
 			self.files.removeAll();
-			res.body.files.sort(function(a, b) {
+			res.body.result.files.sort(function(a, b) {
 				return a.name > b.name ? 1 : -1;
 			}).forEach(function(args) {
 				args.repository = self;
