@@ -1,8 +1,4 @@
 
-var options = {
-	watcherSafeMode: false
-};
-
 var MainViewModel = function() {
 	this.content = ko.observable(new EmptyViewModel());
 }
@@ -20,22 +16,6 @@ var CrashViewModel = function() {
 }
 CrashViewModel.prototype.template = 'crash';
 
-var api = function(method, path, body, callback) {
-	var q = superagent(method, '/api' + path);
-	if (method == 'GET')
-		q.query(body);
-	else
-		q.send(body);
-	q.set('Accept', 'application/json')
-		.end(function(error, res){
-			if (error || !res.ok) {
-				if (callback && callback({ error: error, res: res })) return;
-				else viewModel.content(new CrashViewModel());
-			}
-			else if(callback)
-				callback(null, res.body);
-		});
-}
 
 var FileViewModel = function(args) {
 	var self = this;
@@ -52,17 +32,17 @@ FileViewModel.prototype.toogleStaged = function() {
 	var method;
 	if (!isStaged) method = '/stage';
 	else method = '/unstage';
-	api('POST', method, { path: this.repository.path, file: this.name });
+	api.query('POST', method, { path: this.repository.path, file: this.name });
 }
 FileViewModel.prototype.discardChanges = function() {
-	api('POST', '/discardchanges', { path: this.repository.path, file: this.name });
+	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
 	if (this.showDiffs()) this.showDiffs(false);
 	else {
 		this.showDiffs(true);
-		api('GET', '/diff', { file: this.name, path: this.repository.path }, function(err, diffs) {
+		api.query('GET', '/diff', { file: this.name, path: this.repository.path }, function(err, diffs) {
 			if (err) return;
 			self.diffs.removeAll();
 			diffs.forEach(function(diff) {
@@ -83,7 +63,7 @@ function capitaliseFirstLetter(string) {
 }
 
 var gitConfig = ko.observable({});
-api('GET', '/config', undefined, function(err, config) {
+api.query('GET', '/config', undefined, function(err, config) {
 	if (err) return;
 	gitConfig(config);
 });
@@ -112,20 +92,15 @@ var RepositoryViewModel = function(path) {
 	this.updateStatus();
 	this.updateLog();
 	this.watcherReady = ko.observable(false);
-	var socket = io.connect('http://localhost:3000');
-	socket.emit('watch', { path: path, safeMode: options.watcherSafeMode });
-	socket.on('ready', function (data) {
-		self.watcherReady(true);
-	});
-	socket.on('changed', function (data) {
-		self.updateStatus();
-		self.updateLog();
+	api.watchRepository(path, {
+		ready: function() { self.watcherReady(true) },
+		changed: function() { self.updateStatus(); self.updateLog(); }
 	});
 }
 RepositoryViewModel.prototype.template = 'repository';
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
-	api('GET', '/status', { path: this.path }, function(err, status){
+	api.query('GET', '/status', { path: this.path }, function(err, status){
 		if (!err) {
 			self.status('inited');
 			self.files.removeAll();
@@ -136,7 +111,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 				self.files.push(new FileViewModel(args));
 			});
 			if (opt_callback) opt_callback();
-		} else if (err.res.body.errorCode == 'not-a-repository') {
+		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
 			return true;
 		}
@@ -144,7 +119,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 }
 RepositoryViewModel.prototype.updateLog = function() {
 	var self = this;
-	api('GET', '/log', { path: this.path }, function(err, logEntries) {
+	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
 		if (err) return;
 		self.logEntries.removeAll();
 		logEntries.forEach(function(entry) {
@@ -157,11 +132,11 @@ RepositoryViewModel.prototype.updateLog = function() {
 }
 RepositoryViewModel.prototype.initRepository = function() {
 	var self = this;
-	api('POST', '/init', { path: this.path });
+	api.query('POST', '/init', { path: this.path });
 }
 RepositoryViewModel.prototype.commit = function() {
 	var self = this;
-	api('POST', '/commit', { path: this.path, message: this.commitMessage() }, function(err, res) {
+	api.query('POST', '/commit', { path: this.path, message: this.commitMessage() }, function(err, res) {
 		self.commitMessage('');
 	});
 }

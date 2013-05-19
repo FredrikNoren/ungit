@@ -3,8 +3,6 @@ function browseTo(path) {
   crossroads.parse(path);
 }
 
-options.watcherSafeMode = false;
-
 var testDir;
 
 var waitFor = function(property, value, callback) {
@@ -22,24 +20,30 @@ var waitFor = function(property, value, callback) {
 	}
 }
 
+var mock = true;
+
 describe('Repository', function(){
-	this.timeout(6000);
 
-	beforeEach(function(done) {
-		setTimeout(done, 200);
-	});
-
-	before(function(done) {
-		api('POST', '/testing/createdir', undefined, function(err, res) {
-			testDir = res.path;
-			// For some reason you can't watch very newly created dirs, so wait a short while here
-			setTimeout(done, 500);
+	if (mock) {
+		api.initSimpleMockServer();
+	} else {
+		api.fakeRepositoryChanged = function() {};
+		api.mockRoute = function() {};
+		before(function(done) {
+			api('POST', '/testing/createdir', undefined, function(err, res) {
+				testDir = res.path;
+				// For some reason you can't watch very newly created dirs, so wait a short while here
+				setTimeout(done, 500);
+			});
 		});
-	});
 
-	after(function(done) {
-		api('POST', '/testing/removedir', undefined, function() { done(); });
-	});
+		after(function(done) {
+			api('POST', '/testing/removedir', undefined, function() { done(); });
+		});
+
+		beforeEach(function(done) { setTimeout(done, 200); });
+		this.timeout(6000);
+	}
 
 	it('should become ready', function(done) {
 		browseTo('repository?path=' + testDir);
@@ -55,6 +59,7 @@ describe('Repository', function(){
 	it('should be initable', function(done) {
 		waitFor(viewModel.content().status, 'inited', done);
 		viewModel.content().initRepository();
+		api.fakeRepositoryChanged(testDir);
 	});
 
 	var testFile = 'somefile';
@@ -62,7 +67,7 @@ describe('Repository', function(){
 	it('stageable files should show up', function(done) {
 		expect(viewModel.content().files().length).to.be(0);
 		waitFor(viewModel.content().files, function(files) { return files.length == 1; }, done);
-		api('POST', '/testing/createfile', { file: testFile });
+		api.query('POST', '/testing/createfile', { file: testFile });
 	});
 
 	it('should be possible to stage a file', function(done) {
@@ -88,12 +93,13 @@ describe('Repository', function(){
 
 	it('modifying a file should make it show in staged files', function(done) {
 		waitFor(viewModel.content().files, function(files) { return files.length == 1; }, done);
-		api('POST', '/testing/changefile', { file: testFile });
+		api.query('POST', '/testing/changefile', { file: testFile });
 	});
 
 	it('discarding changes should make it disapear from staged files', function(done) {
 		waitFor(viewModel.content().files, function(files) { return files.length == 0; }, done);
 		viewModel.content().files()[0].discardChanges();
 	});
+
 
 })
