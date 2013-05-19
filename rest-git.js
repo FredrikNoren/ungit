@@ -6,6 +6,7 @@ var path = require('path');
 var temp = require('temp');
 var socketIO = require('socket.io');
 var watchr = require('watchr');
+var gitCliParser = require('./gitCliParser');
 
 exports.pathPrefix = '';
 
@@ -120,7 +121,7 @@ exports.registerApi = function(app, server, dev) {
 				if (error !== null) {
 					res.json(400, { status: 'fail', error: error, stderr: stderr });
 				} else {
-					res.json({ status: 'ok', diff: stdout });
+					res.json({ status: 'ok', diffs: gitCliParser.parseGitDiff(stdout) });
 				}
 		});
 	});

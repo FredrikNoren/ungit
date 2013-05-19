@@ -41,10 +41,8 @@ var FileViewModel = function(args) {
 	this.name = args.name;
 	this.repository = args.repository;
 	this.isNew = ko.observable(args.isNew);
-	this.diff = ko.observable();
-	api('GET', '/diff', { file: this.name, path: this.repository.path }, function(res) {
-		self.diff(res.body.diff);
-	});
+	this.diffs = ko.observableArray();
+	this.showDiffs = ko.observable(false);
 }
 FileViewModel.prototype.toogleStaged = function() {
 	var self = this;
@@ -56,6 +54,25 @@ FileViewModel.prototype.toogleStaged = function() {
 }
 FileViewModel.prototype.discardChanges = function() {
 	api('POST', '/discardchanges', { path: this.repository.path, file: this.name });
+}
+FileViewModel.prototype.toogleDiffs = function() {
+	var self = this;
+	if (this.showDiffs()) this.showDiffs(false);
+	else {
+		this.showDiffs(true);
+		api('GET', '/diff', { file: this.name, path: this.repository.path }, function(res) {
+			self.diffs.removeAll();
+			res.body.diffs.forEach(function(diff) {
+				diff.lines.forEach(function(line) {
+					self.diffs.push({
+						added: line[0] == '+',
+						removed: line[0] == '-' || line[0] == '\\',
+						text: line.slice(1)
+					});
+				});
+			});
+		});
+	}
 }
 
 function capitaliseFirstLetter(string) {

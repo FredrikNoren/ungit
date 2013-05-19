@@ -285,7 +285,7 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.diff).to.be.ok();
+				expect(res.body.diffs).to.be.ok();
 				done();
 			});
 	});

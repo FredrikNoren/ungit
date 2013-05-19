@@ -79,10 +79,14 @@ textarea {
 .checkbox {
 	background: #fefefe;
 	border: 5px solid #eee;
-	width: 20px;
+	width: 15px;
 	display: inline-block;
 	border-radius: 3px;
 	font-size: 0.7em;
+	cursor: pointer;;
+	&:hover {
+		background: #B6D9F2;
+	}
 	&.checked {
 		background: #68B6ED;
 		//border-color: transparent;
@@ -190,8 +194,36 @@ a {
 						padding: 10px;
 					}
 					.files {
-						font-size: 1.3em;
+						.name {
+							font-size: 1.3em;
+							cursor: pointer;
+							padding: 3px;
+							border-radius: 3px;
+							border: 1px solid transparent;
+							&:hover {
+								background: #fff;
+								border-color: #bbb;
+							}
+						}
 						padding: 0.3em;
+						.diffs {
+							background: #fff;
+							padding-top: 5px;
+							padding-bottom: 5px;
+							border: 1px solid #bbb;
+							border-radius: 5px;
+							margin: 5px;
+							.diff {
+								padding-left: 3px;
+								padding-right: 3px;
+								&.added {
+									background: #66F27B;
+								}
+								&.removed {
+									background: #E86756;
+								}
+							}
+						}
 						.new {
 							background: #B5F584;
 							color: #fff;
@@ -199,12 +231,10 @@ a {
 							padding: 3px;
 							padding-left: 5px;
 							padding-right: 5px;
-							font-size: 0.7em;
 						}
 						.discard {
 							background: #e0e0e0;
 							color: #fff;
-							font-size: 0.7em;
 							border-radius: 3px;
 							padding: 3px;
 							padding-left: 5px;
