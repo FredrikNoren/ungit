@@ -111,6 +111,20 @@ exports.registerApi = function(app, server, dev) {
 		});
 	});
 
+	app.get(exports.pathPrefix + '/diff', function(req, res){
+		var repoPath = req.query.path;
+		if (!fs.existsSync(repoPath))
+			return res.json(400, { status: 'fail', error: 'No such path: ' + repoPath });
+		child_process.exec('git diff "' + req.query.file + '"', { cwd: repoPath },
+			function (error, stdout, stderr) {
+				if (error !== null) {
+					res.json(400, { status: 'fail', error: error, stderr: stderr });
+				} else {
+					res.json({ status: 'ok', diff: stdout });
+				}
+		});
+	});
+
 	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
 		var repoPath = req.body.path;
 		if (!fs.existsSync(repoPath))
@@ -230,11 +244,11 @@ exports.registerApi = function(app, server, dev) {
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
-			fs.writeFileSync(path.join(testDir, req.body.file), 'test content');
+			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n');
 			res.json({ status: 'ok' });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
-			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n' + Math.random());
+			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n' + Math.random() + '\n');
 			res.json({ status: 'ok' });
 		});
 		app.post(exports.pathPrefix + '/testing/removedir', function(req, res){

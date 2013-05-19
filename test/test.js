@@ -14,10 +14,12 @@ restGit.registerApi(app, null, true);
 var testDir;
 var gitConfig;
 
+var req = request(app);
+
 describe('git', function () {
 
 	it('creating test dir should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/testing/createdir')
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
@@ -31,7 +33,7 @@ describe('git', function () {
 	});
 
 	it('config should return config data', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/config')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -49,7 +51,7 @@ describe('git', function () {
 
 
 	it('status should say uninited in uninited directory', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -63,7 +65,7 @@ describe('git', function () {
 	});
 
 	it('status should fail in non-existing directory', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: path.join(testDir, 'nowhere') })
 			.set('Accept', 'application/json')
@@ -72,7 +74,7 @@ describe('git', function () {
 	});
 
 	it('init should succeed in uninited directory', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/init')
 			.send({ path: testDir })
 			.set('Accept', 'application/json')
@@ -81,7 +83,7 @@ describe('git', function () {
 	});
 
 	it('status should succeed in inited directory', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -96,7 +98,7 @@ describe('git', function () {
 	});
 
 	it('commit should fail on when there\'s no files to commit', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/commit')
 			.send({ path: testDir, message: 'test' })
 			.set('Accept', 'application/json')
@@ -107,7 +109,7 @@ describe('git', function () {
 	var testFile = 'somefile';
 
 	it('log should be empty before first commit', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/log')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -122,7 +124,7 @@ describe('git', function () {
 	});
 
 	it('stage should fail on non-existing file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/stage')
 			.send({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
@@ -131,7 +133,7 @@ describe('git', function () {
 	});
 
 	it('creating test file should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/testing/createfile')
 			.send({ file: testFile })
 			.set('Accept', 'application/json')
@@ -140,7 +142,7 @@ describe('git', function () {
 	});
 
 	it('status should list untracked file', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -160,7 +162,7 @@ describe('git', function () {
 	});
 
 	it('stage should succeed on existing file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/stage')
 			.send({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
@@ -169,7 +171,7 @@ describe('git', function () {
 	});
 
 	it('status should list staged file', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -189,7 +191,7 @@ describe('git', function () {
 	});
 
 	it('unstage should succeed on staged file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/unstage')
 			.send({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
@@ -198,7 +200,7 @@ describe('git', function () {
 	});
 
 	it('stage should succeed on unstaged file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/stage')
 			.send({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
@@ -209,7 +211,7 @@ describe('git', function () {
 	var commitMessage = 'test';
 
 	it('commit should fail without commit message', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/commit')
 			.send({ path: testDir, message: undefined })
 			.set('Accept', 'application/json')
@@ -218,7 +220,7 @@ describe('git', function () {
 	});
 
 	it('commit should succeed on when there\'s files to commit', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/commit')
 			.send({ path: testDir, message: commitMessage })
 			.set('Accept', 'application/json')
@@ -227,7 +229,7 @@ describe('git', function () {
 	});
 
 	it('log should show latest commit', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/log')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -246,7 +248,7 @@ describe('git', function () {
 	});
 
 	it('modifying a test file should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/testing/changefile')
 			.send({ file: testFile })
 			.set('Accept', 'application/json')
@@ -255,7 +257,7 @@ describe('git', function () {
 	});
 
 	it('modified file should show up in status', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -274,8 +276,22 @@ describe('git', function () {
 			});
 	});
 
+	it('diff on modified file should work', function(done) {
+		req
+			.get(restGit.pathPrefix + '/diff')
+			.query({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body.diff).to.be.ok();
+				done();
+			});
+	});
+
 	it('discarding changes should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/discardchanges')
 			.send({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
@@ -286,7 +302,7 @@ describe('git', function () {
 	var testFile2 = 'my test.txt';
 
 	it('creating a multi word test file should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/testing/createfile')
 			.send({ file: testFile2 })
 			.set('Accept', 'application/json')
@@ -295,7 +311,7 @@ describe('git', function () {
 	});
 
 	it('status should list the new file', function(done) {
-		request(app)
+		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
@@ -315,7 +331,7 @@ describe('git', function () {
 	});
 
 	it('stage should succeed on unstaged file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/stage')
 			.send({ path: testDir, file: testFile2 })
 			.set('Accept', 'application/json')
@@ -324,7 +340,7 @@ describe('git', function () {
 	});
 
 	it('unstage should succeed on staged file', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/unstage')
 			.send({ path: testDir, file: testFile2 })
 			.set('Accept', 'application/json')
@@ -333,7 +349,7 @@ describe('git', function () {
 	});
 
 	it('discarding the new file should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/discardchanges')
 			.send({ path: testDir, file: testFile2 })
 			.set('Accept', 'application/json')
@@ -343,12 +359,12 @@ describe('git', function () {
 
 
 	it('removing test dir should work', function(done) {
-		request(app)
+		req
 			.post(restGit.pathPrefix + '/testing/removedir')
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200, done);
-	})
+	});
 
 
 })
