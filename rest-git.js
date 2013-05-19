@@ -45,10 +45,11 @@ exports.registerApi = function(app, server, dev) {
 	}
 
 	var git = function(command, repoPath, res, parser, callback) {
-		child_process.exec('git ' + command, { cwd: repoPath },
+		command = 'git ' + command;
+		child_process.exec(command, { cwd: repoPath },
 			function (error, stdout, stderr) {
 				if (error !== null) {
-					var err = { status: 'fail', errorCode: 'unkown', command: command, error: error, stderr: stderr };
+					var err = { errorCode: 'unkown', command: command, error: error, stderr: stderr };
 					if (stderr.indexOf('Not a git repository') >= 0)
 						err.errorCode = 'not-a-repository';
 					if (callback) callback(err, stdout);
@@ -87,7 +88,9 @@ exports.registerApi = function(app, server, dev) {
 				git('rm --cached "' + req.body.file + '"', repoPath, res);
 			} else {
 				git('reset HEAD "' + req.body.file + '"', repoPath, res, null, function(err, text) {
-					if (err && err.stderr != 'warning: LF will be replaced by CRLF in somefile.\nThe file will have its original line endings in your working directory.\n') 
+					if (err && 
+						err.stderr != 'warning: LF will be replaced by CRLF in somefile.\nThe file will have its original line endings in your working directory.\n' &&
+						err.stderr != '') 
 						res.json(400, err);
 					else
 						res.json({});
@@ -97,8 +100,17 @@ exports.registerApi = function(app, server, dev) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
-		if (!verifyPath(req.query.path, res)) return;
-		git('diff "' + req.query.file + '"', req.query.path, res, gitCliParser.parseGitDiff);
+		var repoPath = req.query.path;
+		if (!verifyPath(repoPath, res)) return;
+		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
+			if (err) return res.json(400, err);
+			var file = _.find(status.files, function(file) { return file.name == req.query.file });
+			if (file.staged) {
+				git('diff --cached "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+			} else {
+				git('diff "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+			}
+		});
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
@@ -122,7 +134,7 @@ exports.registerApi = function(app, server, dev) {
 	app.post(exports.pathPrefix + '/commit', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.message === undefined)
-			return res.json(400, { status: 'fail', error: 'Must specify commit message' });
+			return res.json(400, { error: 'Must specify commit message' });
 		git('commit -m "' + req.body.message + '"', req.body.path, res);
 	});
 
@@ -153,20 +165,20 @@ exports.registerApi = function(app, server, dev) {
 		app.post(exports.pathPrefix + '/testing/createdir', function(req, res){
 			temp.mkdir('test-temp-dir', function(err, path) {
 				testDir = path;
-				res.json({ status: 'ok', path: path });
+				res.json({ path: path });
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
 			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n');
-			res.json({ status: 'ok' });
+			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
 			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n' + Math.random() + '\n');
-			res.json({ status: 'ok' });
+			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/removedir', function(req, res){
 			temp.cleanup();
-			res.json({ status: 'ok' });
+			res.json({ });
 		});
 	}
 

@@ -116,8 +116,8 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.entries).to.be.a('array');
-				expect(res.body.entries.length).to.be(0);
+				expect(res.body).to.be.a('array');
+				expect(res.body.length).to.be(0);
 				done();
 			});
 	});
@@ -285,6 +285,9 @@ describe('git', function () {
 			.end(function(err, res){
 				if (err) return done(err);
 				expect(res.body).to.be.an('array');
+				expect(res.body.length).to.be.greaterThan(0);
+				expect(res.body[0].lines).to.be.an('array');
+				expect(res.body[0].lines.length).to.be.greaterThan(0);
 				done();
 			});
 	});
@@ -314,6 +317,23 @@ describe('git', function () {
 					isNew: false,
 					staged: true
 				});
+				done();
+			});
+	});
+
+	it('diff on modified and staged file should work', function(done) {
+		req
+			.get(restGit.pathPrefix + '/diff')
+			.query({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body).to.be.an('array');
+				expect(res.body.length).to.be.greaterThan(0);
+				expect(res.body[0].lines).to.be.an('array');
+				expect(res.body[0].lines.length).to.be.greaterThan(0);
 				done();
 			});
 	});
