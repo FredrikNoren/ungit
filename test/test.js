@@ -152,7 +152,8 @@ describe('git', function () {
 				expect(res.body.files.length).to.be(1);
 				expect(res.body.files[0]).to.eql({
 					name: testFile,
-					status: 'untracked'
+					isNew: true,
+					staged: false
 				});
 				done();
 			});
@@ -180,7 +181,8 @@ describe('git', function () {
 				expect(res.body.files.length).to.be(1);
 				expect(res.body.files[0]).to.eql({
 					name: testFile,
-					status: 'staged new'
+					isNew: true,
+					staged: true
 				});
 				done();
 			});
@@ -265,7 +267,8 @@ describe('git', function () {
 				expect(res.body.files.length).to.be(1);
 				expect(res.body.files[0]).to.eql({
 					name: testFile,
-					status: 'modified'
+					isNew: false,
+					staged: false
 				});
 				done();
 			});
@@ -304,10 +307,29 @@ describe('git', function () {
 				expect(res.body.files.length).to.be(1);
 				expect(res.body.files[0]).to.eql({
 					name: testFile2,
-					status: 'untracked'
+					isNew: true,
+					staged: false
 				});
 				done();
 			});
+	});
+
+	it('stage should succeed on unstaged file', function(done) {
+		request(app)
+			.post(restGit.pathPrefix + '/stage')
+			.send({ path: testDir, file: testFile2 })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	it('unstage should succeed on staged file', function(done) {
+		request(app)
+			.post(restGit.pathPrefix + '/unstage')
+			.send({ path: testDir, file: testFile2 })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
 	});
 
 	it('discarding the new file should work', function(done) {

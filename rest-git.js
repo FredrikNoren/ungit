@@ -42,14 +42,12 @@ exports.registerApi = function(app, server, dev) {
 		lines.slice(1).forEach(function(line) {
 			if (line == '') return;
 			var status = line.slice(0, 2);
-			var filename = line.slice(3);
-			var file = { name: filename.trim() };
-			if (status == '??')
-				file.status = 'untracked';
-			else if (status == 'A ')
-				file.status = 'staged new';
-			else if (status == ' M')
-				file.status = 'modified';
+			var filename = line.slice(3).trim();
+			if (filename[0] == '"' && _.last(filename) == '"')
+				filename = filename.slice(1, filename.length - 1);
+			var file = { name: filename };
+			file.staged = status[0] == 'A' || status[0] == 'M';
+			file.isNew = status[0] == '?' || status[0] == 'A';
 			result.files.push(file);
 		});
 	}
@@ -91,7 +89,7 @@ exports.registerApi = function(app, server, dev) {
 		var path = req.body.path;
 		if (!fs.existsSync(path))
 			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git add ' + req.body.file, { cwd: path },
+		child_process.exec('git add "' + req.body.file + '"', { cwd: path },
 			function (error, stdout, stderr) {
 				if (error !== null)
 					res.json(400, { status: 'fail', error: error, stderr: stderr });
@@ -104,7 +102,7 @@ exports.registerApi = function(app, server, dev) {
 		var path = req.body.path;
 		if (!fs.existsSync(path))
 			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git rm --cached ' + req.body.file, { cwd: path },
+		child_process.exec('git rm --cached "' + req.body.file + '"', { cwd: path },
 			function (error, stdout, stderr) {
 				if (error !== null)
 					res.json(400, { status: 'fail', error: error, stderr: stderr });

@@ -106,8 +106,6 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 			res.body.files.sort(function(a, b) {
 				return a.name > b.name ? 1 : -1;
 			}).forEach(function(args) {
-				args.staged = args.status.indexOf('staged') >= 0;
-				args.isNew = args.status.indexOf('untracked') >= 0;
 				args.repository = self;
 				self.files.push(new FileViewModel(args));
 			});
