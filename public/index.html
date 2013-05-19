@@ -59,6 +59,7 @@
 							<span data-bind="text: name"></span>
 							<span class="new" data-bind="visible: isNew">New</span>
 							<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+							<div class="diff" data-bind="text: diff"></div>
 						</div>
 					</div>
 					<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>

@@ -36,10 +36,15 @@ var api = function(method, path, body, callback) {
 }
 
 var FileViewModel = function(args) {
+	var self = this;
 	this.staged = ko.observable(args.staged);
 	this.name = args.name;
 	this.repository = args.repository;
 	this.isNew = ko.observable(args.isNew);
+	this.diff = ko.observable();
+	api('GET', '/diff', { file: this.name, path: this.repository.path }, function(res) {
+		self.diff(res.body.diff);
+	});
 }
 FileViewModel.prototype.toogleStaged = function() {
 	var self = this;
