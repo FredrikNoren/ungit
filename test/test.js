@@ -41,25 +41,25 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.config).to.be.an('object');
-				expect(res.body.config['user.name']).to.be.ok();
-				expect(res.body.config['user.email']).to.be.ok();
-				gitConfig = res.body.config;
+				expect(res.body).to.be.an('object');
+				expect(res.body['user.name']).to.be.ok();
+				expect(res.body['user.email']).to.be.ok();
+				gitConfig = res.body;
 				done();
 			});
 	});
 
 
-	it('status should say uninited in uninited directory', function(done) {
+	it('status should fail in uninited directory', function(done) {
 		req
 			.get(restGit.pathPrefix + '/status')
 			.query({ path: testDir })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
-			.expect(200)
+			.expect(400)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.inited).to.be(false);
+				expect(res.body.errorCode).to.be('not-a-repository');
 				done();
 			});
 	});
@@ -91,8 +91,7 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.inited).to.be(true);
-				expect(res.body.result.branch).to.be('master');
+				expect(res.body.branch).to.be('master');
 				done();
 			});
 	});
@@ -150,9 +149,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.result.files).to.be.a('array');
-				expect(res.body.result.files.length).to.be(1);
-				expect(res.body.result.files[0]).to.eql({
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
 					name: testFile,
 					isNew: true,
 					staged: false
@@ -179,9 +178,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.result.files).to.be.a('array');
-				expect(res.body.result.files.length).to.be(1);
-				expect(res.body.result.files[0]).to.eql({
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
 					name: testFile,
 					isNew: true,
 					staged: true
@@ -219,7 +218,7 @@ describe('git', function () {
 			.expect(400, done);
 	});
 
-	it('commit should succeed on when there\'s files to commit', function(done) {
+	it('commit should succeed when there\'s files to commit', function(done) {
 		req
 			.post(restGit.pathPrefix + '/commit')
 			.send({ path: testDir, message: commitMessage })
@@ -237,12 +236,12 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.entries).to.be.a('array');
-				expect(res.body.entries.length).to.be(1);
-				expect(res.body.entries[0].message).to.be(commitMessage);
-				expect(res.body.entries[0].title).to.be(commitMessage);
-				expect(res.body.entries[0].authorName).to.be(gitConfig['user.name']);
-				expect(res.body.entries[0].authorEmail).to.be(gitConfig['user.email']);
+				expect(res.body).to.be.a('array');
+				expect(res.body.length).to.be(1);
+				expect(res.body[0].message).to.be(commitMessage);
+				expect(res.body[0].title).to.be(commitMessage);
+				expect(res.body[0].authorName).to.be(gitConfig['user.name']);
+				expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
 				done();
 			});
 	});
@@ -265,9 +264,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.result.files).to.be.a('array');
-				expect(res.body.result.files.length).to.be(1);
-				expect(res.body.result.files[0]).to.eql({
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
 					name: testFile,
 					isNew: false,
 					staged: false
@@ -285,7 +284,65 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.diffs).to.be.ok();
+				expect(res.body).to.be.an('array');
+				done();
+			});
+	});
+
+	it('stage should succeed on modified file', function(done) {
+		req
+			.post(restGit.pathPrefix + '/stage')
+			.send({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	it('modified and staged file should show up in status', function(done) {
+		req
+			.get(restGit.pathPrefix + '/status')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
+					name: testFile,
+					isNew: false,
+					staged: true
+				});
+				done();
+			});
+	});
+
+	it('unstage should succeed on modified file', function(done) {
+		req
+			.post(restGit.pathPrefix + '/unstage')
+			.send({ path: testDir, file: testFile })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	it('modified, staged and then unstaged file should show up in status', function(done) {
+		req
+			.get(restGit.pathPrefix + '/status')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
+					name: testFile,
+					isNew: false,
+					staged: false
+				});
 				done();
 			});
 	});
@@ -319,9 +376,9 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.result.files).to.be.a('array');
-				expect(res.body.result.files.length).to.be(1);
-				expect(res.body.result.files[0]).to.eql({
+				expect(res.body.files).to.be.a('array');
+				expect(res.body.files.length).to.be(1);
+				expect(res.body.files[0]).to.eql({
 					name: testFile2,
 					isNew: true,
 					staged: false

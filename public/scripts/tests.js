@@ -30,8 +30,8 @@ describe('Repository', function(){
 	});
 
 	before(function(done) {
-		api('POST', '/testing/createdir', undefined, function(res) {
-			testDir = res.body.path;
+		api('POST', '/testing/createdir', undefined, function(err, res) {
+			testDir = res.path;
 			// For some reason you can't watch very newly created dirs, so wait a short while here
 			setTimeout(done, 500);
 		});

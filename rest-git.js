@@ -35,184 +35,115 @@ exports.registerApi = function(app, server, dev) {
 		});
 	}
 
+	var verifyPath = function(path, res) {
+		if (!fs.existsSync(path)) {
+			res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
+			return false;
+		} else {
+			return true;
+		}
+	}
 
-	app.get(exports.pathPrefix + '/status', function(req, res){
-		var path = req.query.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git status -s -b', { cwd: path },
+	var git = function(command, repoPath, res, parser, callback) {
+		child_process.exec('git ' + command, { cwd: repoPath },
 			function (error, stdout, stderr) {
 				if (error !== null) {
+					var err = { status: 'fail', errorCode: 'unkown', command: command, error: error, stderr: stderr };
 					if (stderr.indexOf('Not a git repository') >= 0)
-						res.json(200, { status: 'ok', inited: false });
-					else
-						res.json(400, { status: 'fail', error: error, stderr: stderr });
+						err.errorCode = 'not-a-repository';
+					if (callback) callback(err, stdout);
+					else res.json(400, err);
 				}
 				else {
-					res.json({ status: 'ok', inited: true, result: gitCliParser.parseGitStatus(stdout) });
+					if (callback) callback(null, parser ? parser(stdout) : stdout);
+					else res.json(parser ? parser(stdout) : {});
 				}
 		});
-	});
+	}
 
-	app.post(exports.pathPrefix + '/init', function(req, res){
-		var path = req.body.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git init', { cwd: path },
-			function (error, stdout, stderr) {
-				if (error !== null)
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				else
-					res.json({ status: 'ok' });
-		});
-	});
-
-	app.post(exports.pathPrefix + '/stage', function(req, res){
-		var path = req.body.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git add "' + req.body.file + '"', { cwd: path },
-			function (error, stdout, stderr) {
-				if (error !== null)
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				else
-					res.json({ status: 'ok' });
-		});
-	});
-
-	app.post(exports.pathPrefix + '/unstage', function(req, res){
-		var path = req.body.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git rm --cached "' + req.body.file + '"', { cwd: path },
-			function (error, stdout, stderr) {
-				if (error !== null)
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				else
-					res.json({ status: 'ok' });
-		});
-	});
-
-	app.get(exports.pathPrefix + '/diff', function(req, res){
+	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
-		if (!fs.existsSync(repoPath))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + repoPath });
-		child_process.exec('git diff "' + req.query.file + '"', { cwd: repoPath },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				} else {
-					res.json({ status: 'ok', diffs: gitCliParser.parseGitDiff(stdout) });
-				}
+		if (!verifyPath(repoPath, res)) return;
+		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus);
+	});
+
+	app.post(exports.pathPrefix + '/init', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('init', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/stage', function(req, res) {
+		if (!verifyPath(req.body.path)) return;
+		git('add "' + req.body.file + '"', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/unstage', function(req, res) {
+		var repoPath = req.body.path;
+		if (!verifyPath(repoPath, res)) return;
+		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
+			if (err) return res.json(400, err);
+			var file = _.find(status.files, function(file) { return file.name == req.body.file });
+			if (file.isNew) {
+				git('rm --cached "' + req.body.file + '"', repoPath, res);
+			} else {
+				git('reset HEAD "' + req.body.file + '"', repoPath, res, null, function(err, text) {
+					if (err && err.stderr != 'warning: LF will be replaced by CRLF in somefile.\nThe file will have its original line endings in your working directory.\n') 
+						res.json(400, err);
+					else
+						res.json({});
+				});
+			}
 		});
+	});
+
+	app.get(exports.pathPrefix + '/diff', function(req, res) {
+		if (!verifyPath(req.query.path, res)) return;
+		git('diff "' + req.query.file + '"', req.query.path, res, gitCliParser.parseGitDiff);
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
-		var repoPath = req.body.path;
-		if (!fs.existsSync(repoPath))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + repoPath });
-		child_process.exec('git checkout -- "' + req.body.file + '"', { cwd: repoPath },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					if (stderr.trim() == 'error: pathspec \'' + req.body.file + '\' did not match any file(s) known to git.') {
-						fs.unlink(path.join(repoPath, req.body.file), function(err) {
-							if (err) res.json(400, { status: 'fail', error: err });
-							else res.json({ status: 'ok' });
-						})
-					} else {
-						res.json(400, { status: 'fail', error: error, stderr: stderr });
-					}
+		if (!verifyPath(req.body.path, res)) return;
+		git('checkout -- "' + req.body.file + '"', req.body.path, res, null, function(err, text) {
+			if (err !== null) {
+				if (err.stderr.trim() == 'error: pathspec \'' + req.body.file + '\' did not match any file(s) known to git.') {
+					fs.unlink(path.join(req.body.path, req.body.file), function(err) {
+						if (err) res.json(400, { command: 'unlink', error: err });
+						else res.json({});
+					})
 				} else {
-					res.json({ status: 'ok' });
+					res.json(400, err);
 				}
+			} else {
+				res.json({});
+			}
 		});
 	});
 
 	app.post(exports.pathPrefix + '/commit', function(req, res){
-		var path = req.body.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
+		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.message === undefined)
 			return res.json(400, { status: 'fail', error: 'Must specify commit message' });
-		child_process.exec('git commit -m "' + req.body.message + '"', { cwd: path },
-			function (error, stdout, stderr) {
-				if (error !== null)
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				else
-					res.json({ status: 'ok' });
-		});
+		git('commit -m "' + req.body.message + '"', req.body.path, res);
 	});
-
-	var parseGitLog = function(data) {
-		var commits = [];
-		var currentCommmit;
-		var inCommitIndex = 0;
-		data.split('\n').forEach(function(row) {
-			if (row.indexOf('commit ') == 0) {
-				currentCommmit = { message: '' };
-				commits.push(currentCommmit);
-				inCommitIndex = 0;
-			}
-			if (inCommitIndex == 0)
-				currentCommmit.sha1 = _.last(row.split(' '));
-			else if (inCommitIndex == 1) {
-				var author = row.split(' ').slice(1).join(' ');
-				var capture = (/([^<]+)<([^>]+)>/g).exec(author);
-				currentCommmit.authorName = capture[1].trim();
-				currentCommmit.authorEmail = capture[2].trim();
-			} else if (inCommitIndex == 2)
-				currentCommmit.date = row.split(' ').slice(1).join(' ');
-			else
-				currentCommmit.message = (currentCommmit.message + '\n' + row).trim();
-			if (inCommitIndex == 4)
-				currentCommmit.title = row.trim();
-			inCommitIndex++;
-		});
-		return commits;
-	}
 
 	app.get(exports.pathPrefix + '/log', function(req, res){
-		var path = req.query.path;
-		if (!fs.existsSync(path))
-			return res.json(400, { status: 'fail', error: 'No such path: ' + path });
-		child_process.exec('git log', { cwd: path },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					if (stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-						res.json({ status: 'ok', entries: [] });
-					else if (stderr.indexOf('fatal: Not a git repository') == 0)
-						res.json({ status: 'fail', error: 'Not a git repository', entries: [] });
-					else
-						res.json(400, { status: 'fail', error: error, stderr: stderr });
-				}
-				else {
-					var data = parseGitLog(stdout);
-					var result = { status: 'ok', entries: data };
-					res.json(result);
-				}
+		if (!verifyPath(req.query.path, res)) return;
+		git('log', req.query.path, res, gitCliParser.parseGitLog, function(err, log) {
+			if (err) {
+				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+					res.json([]);
+				else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+					res.json([]);
+				else
+					res.json(400, err);
+			} else {
+				res.json(log);
+			}
 		});
 	});
 
-	var parseGitConfig = function(text) {
-		var conf = {};
-		text.split('\n').forEach(function(row) {
-			var ss = row.split('=');
-			conf[ss[0]] = ss[1];
-		});
-		return conf;
-	}
-
 	app.get(exports.pathPrefix + '/config', function(req, res){
-		child_process.exec('git config --list', { },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					res.json(400, { status: 'fail', error: error, stderr: stderr });
-				} else {
-					var data = parseGitConfig(stdout);
-					var result = { status: 'ok', config: data };
-					res.json(result);
-				}
-		});
+		git('config --list', undefined, res, gitCliParser.parseGitConfig);
 	});
 
 	if (dev) {

@@ -28,10 +28,12 @@ var api = function(method, path, body, callback) {
 		q.send(body);
 	q.set('Accept', 'application/json')
 		.end(function(error, res){
-			if (error || !res.ok)
-				viewModel.content(new CrashViewModel());
+			if (error || !res.ok) {
+				if (callback && callback({ error: error, res: res })) return;
+				else viewModel.content(new CrashViewModel());
+			}
 			else if(callback)
-				callback(res);
+				callback(null, res.body);
 		});
 }
 
@@ -60,9 +62,10 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showDiffs()) this.showDiffs(false);
 	else {
 		this.showDiffs(true);
-		api('GET', '/diff', { file: this.name, path: this.repository.path }, function(res) {
+		api('GET', '/diff', { file: this.name, path: this.repository.path }, function(err, diffs) {
+			if (err) return;
 			self.diffs.removeAll();
-			res.body.diffs.forEach(function(diff) {
+			diffs.forEach(function(diff) {
 				diff.lines.forEach(function(line) {
 					self.diffs.push({
 						added: line[0] == '+',
@@ -80,8 +83,9 @@ function capitaliseFirstLetter(string) {
 }
 
 var gitConfig = ko.observable({});
-api('GET', '/config', undefined, function(res){
-	gitConfig(res.body.config);
+api('GET', '/config', undefined, function(err, config) {
+	if (err) return;
+	gitConfig(config);
 });
 
 var RepositoryViewModel = function(path) {
@@ -121,27 +125,29 @@ var RepositoryViewModel = function(path) {
 RepositoryViewModel.prototype.template = 'repository';
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
-	api('GET', '/status', { path: this.path }, function(res){
-		if (res.body.inited) {
+	api('GET', '/status', { path: this.path }, function(err, status){
+		if (!err) {
 			self.status('inited');
 			self.files.removeAll();
-			res.body.result.files.sort(function(a, b) {
+			status.files.sort(function(a, b) {
 				return a.name > b.name ? 1 : -1;
 			}).forEach(function(args) {
 				args.repository = self;
 				self.files.push(new FileViewModel(args));
 			});
 			if (opt_callback) opt_callback();
-		} else {
+		} else if (err.res.body.errorCode == 'not-a-repository') {
 			self.status('uninited');
+			return true;
 		}
 	});
 }
 RepositoryViewModel.prototype.updateLog = function() {
 	var self = this;
-	api('GET', '/log', { path: this.path }, function(res){
+	api('GET', '/log', { path: this.path }, function(err, logEntries) {
+		if (err) return;
 		self.logEntries.removeAll();
-		res.body.entries.forEach(function(entry) {
+		logEntries.forEach(function(entry) {
 			var date = entry.date;
 			entry.date = ko.observable(moment(date).fromNow());
 			setInterval(function() { entry.date(moment(date).fromNow()); }, 1000 * 60);
@@ -155,7 +161,7 @@ RepositoryViewModel.prototype.initRepository = function() {
 }
 RepositoryViewModel.prototype.commit = function() {
 	var self = this;
-	api('POST', '/commit', { path: this.path, message: this.commitMessage() }, function(res){
+	api('POST', '/commit', { path: this.path, message: this.commitMessage() }, function(err, res) {
 		self.commitMessage('');
 	});
 }

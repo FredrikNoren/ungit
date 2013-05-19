@@ -80,3 +80,41 @@ exports.parseGitDiff = function(text) {
 	}
 	return diffs;
 }
+
+exports.parseGitLog = function(data) {
+	var commits = [];
+	var currentCommmit;
+	var inCommitIndex = 0;
+	data.split('\n').forEach(function(row) {
+		if (row.indexOf('commit ') == 0) {
+			currentCommmit = { message: '' };
+			commits.push(currentCommmit);
+			inCommitIndex = 0;
+		}
+		if (inCommitIndex == 0)
+			currentCommmit.sha1 = _.last(row.split(' '));
+		else if (inCommitIndex == 1) {
+			var author = row.split(' ').slice(1).join(' ');
+			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
+			currentCommmit.authorName = capture[1].trim();
+			currentCommmit.authorEmail = capture[2].trim();
+		} else if (inCommitIndex == 2)
+			currentCommmit.date = row.split(' ').slice(1).join(' ');
+		else
+			currentCommmit.message = (currentCommmit.message + '\n' + row).trim();
+		if (inCommitIndex == 4)
+			currentCommmit.title = row.trim();
+		inCommitIndex++;
+	});
+	return commits;
+};
+
+
+exports.parseGitConfig = function(text) {
+	var conf = {};
+	text.split('\n').forEach(function(row) {
+		var ss = row.split('=');
+		conf[ss[0]] = ss[1];
+	});
+	return conf;
+}
