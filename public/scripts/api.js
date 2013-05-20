@@ -17,7 +17,7 @@ var api = {
 			});
 	},
 	watchRepository: function(repositoryPath, callbacks) {
-		var socket = io.connect('http://localhost:3000');
+		var socket = io.connect();
 		socket.emit('watch', { path: repositoryPath });
 		socket.on('ready', function (data) {
 			if (callbacks.ready) callbacks.ready();
