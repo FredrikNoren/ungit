@@ -40,6 +40,12 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showDiffs()) this.showDiffs(false);
 	else {
 		this.showDiffs(true);
+		this.invalidateDiff();
+	}
+}
+FileViewModel.prototype.invalidateDiff = function() {
+	var self = this;
+	if (this.showDiffs()) {
 		api.query('GET', '/diff', { file: this.name(), path: this.repository.path }, function(err, diffs) {
 			if (err) return;
 			self.diffs.removeAll();
@@ -99,9 +105,9 @@ RepositoryViewModel.prototype.template = 'repository';
 RepositoryViewModel.prototype.update = function() {
 	this.updateStatus();
 	this.updateLog();
-	/*this.files().forEach(function(file) {
-		file.updateDiff();
-	});*/
+	this.files().forEach(function(file) {
+		file.invalidateDiff();
+	});
 }
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
