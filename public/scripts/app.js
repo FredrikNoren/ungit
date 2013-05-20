@@ -16,33 +16,31 @@ var CrashViewModel = function() {
 }
 CrashViewModel.prototype.template = 'crash';
 
+var idCounter = 0;
+var newId = function() { return idCounter++; };
 
-var FileViewModel = function(args) {
+var FileViewModel = function(repository) {
 	var self = this;
-	this.staged = ko.observable(args.staged);
-	this.name = args.name;
-	this.repository = args.repository;
-	this.isNew = ko.observable(args.isNew);
+	this.repository = repository;
+
+	this.staged = ko.observable(true);
+	this.name = ko.observable();
+	this.isNew = ko.observable(false);
 	this.diffs = ko.observableArray();
 	this.showDiffs = ko.observable(false);
 }
 FileViewModel.prototype.toogleStaged = function() {
-	var self = this;
-	var isStaged = this.staged();
-	var method;
-	if (!isStaged) method = '/stage';
-	else method = '/unstage';
-	api.query('POST', method, { path: this.repository.path, file: this.name });
+	this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name });
+	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name() });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
 	if (this.showDiffs()) this.showDiffs(false);
 	else {
 		this.showDiffs(true);
-		api.query('GET', '/diff', { file: this.name, path: this.repository.path }, function(err, diffs) {
+		api.query('GET', '/diff', { file: this.name(), path: this.repository.path }, function(err, diffs) {
 			if (err) return;
 			self.diffs.removeAll();
 			diffs.forEach(function(diff) {
@@ -94,22 +92,37 @@ var RepositoryViewModel = function(path) {
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
 		ready: function() { self.watcherReady(true) },
-		changed: function() { self.updateStatus(); self.updateLog(); }
+		changed: function() { self.update(); }
 	});
 }
 RepositoryViewModel.prototype.template = 'repository';
+RepositoryViewModel.prototype.update = function() {
+	this.updateStatus();
+	this.updateLog();
+	/*this.files().forEach(function(file) {
+		file.updateDiff();
+	});*/
+}
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
 	api.query('GET', '/status', { path: this.path }, function(err, status){
 		if (!err) {
 			self.status('inited');
-			self.files.removeAll();
-			status.files.sort(function(a, b) {
-				return a.name > b.name ? 1 : -1;
-			}).forEach(function(args) {
-				args.repository = self;
-				self.files.push(new FileViewModel(args));
-			});
+			var updateId = newId();
+			for(var file in status.files) {
+				var fileViewModel = _.find(self.files(), function(fileVM) { return fileVM.name() == file });
+				if (!fileViewModel) {
+					fileViewModel = new FileViewModel(self);
+					fileViewModel.name(file);
+					self.files.push(fileViewModel);
+				}
+				fileViewModel.isNew(status.files[file].isNew);
+				fileViewModel.lastUpdateId = updateId;
+			}
+			for (var i = self.files().length - 1; i >= 0; i--) {
+				if (self.files()[i].lastUpdateId != updateId)
+					self.files.splice(i, 1);
+			}
 			if (opt_callback) opt_callback();
 		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
@@ -136,7 +149,12 @@ RepositoryViewModel.prototype.initRepository = function() {
 }
 RepositoryViewModel.prototype.commit = function() {
 	var self = this;
-	api.query('POST', '/commit', { path: this.path, message: this.commitMessage() }, function(err, res) {
+	var files = this.files().filter(function(file) {
+		return file.staged();
+	}).map(function(file) {
+		return file.name();
+	});
+	api.query('POST', '/commit', { path: this.path, message: this.commitMessage(), files: files }, function(err, res) {
 		self.commitMessage('');
 	});
 }

@@ -5,17 +5,17 @@ exports.parseGitStatus = function(text) {
 	var lines = text.split('\n');
 	result.branch = _.last(lines[0].split(' '));
 	result.inited = true;
-	result.files = [];
+	result.files = {};
 	lines.slice(1).forEach(function(line) {
 		if (line == '') return;
 		var status = line.slice(0, 2);
 		var filename = line.slice(3).trim();
 		if (filename[0] == '"' && _.last(filename) == '"')
 			filename = filename.slice(1, filename.length - 1);
-		var file = { name: filename };
+		var file = {};
 		file.staged = status[0] == 'A' || status[0] == 'M';
 		file.isNew = status[0] == '?' || status[0] == 'A';
-		result.files.push(file);
+		result.files[filename] = file;
 	});
 	return result;
 };

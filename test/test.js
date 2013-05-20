@@ -99,7 +99,7 @@ describe('git', function () {
 	it('commit should fail on when there\'s no files to commit', function(done) {
 		req
 			.post(restGit.pathPrefix + '/commit')
-			.send({ path: testDir, message: 'test' })
+			.send({ path: testDir, message: 'test', files: [] })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400, done);
@@ -122,10 +122,10 @@ describe('git', function () {
 			});
 	});
 
-	it('stage should fail on non-existing file', function(done) {
+	it('commit should fail on non-existing file', function(done) {
 		req
-			.post(restGit.pathPrefix + '/stage')
-			.send({ path: testDir, file: testFile })
+			.post(restGit.pathPrefix + '/commit')
+			.send({ path: testDir, message: 'test', files: [testFile] })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400, done);
@@ -149,10 +149,8 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile,
+				expect(Object.keys(res.body.files).length).to.be(1);
+				expect(res.body.files[testFile]).to.eql({
 					isNew: true,
 					staged: false
 				});
@@ -177,59 +175,22 @@ describe('git', function () {
 			});
 	});
 
-	it('stage should succeed on existing file', function(done) {
+	it('diff on non existing file should fail', function(done) {
 		req
-			.post(restGit.pathPrefix + '/stage')
-			.send({ path: testDir, file: testFile })
+			.get(restGit.pathPrefix + '/diff')
+			.query({ path: testDir, file: 'non-file.txt' })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
-			.expect(200, done);
+			.expect(400, done);
 	});
 
-	it('status should list staged file', function(done) {
-		req
-			.get(restGit.pathPrefix + '/status')
-			.query({ path: testDir })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(function(err, res){
-				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile,
-					isNew: true,
-					staged: true
-				});
-				done();
-			});
-	});
-
-	it('unstage should succeed on staged file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/unstage')
-			.send({ path: testDir, file: testFile })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
-	});
-
-	it('stage should succeed on unstaged file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/stage')
-			.send({ path: testDir, file: testFile })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
-	});
 
 	var commitMessage = 'test';
 
 	it('commit should fail without commit message', function(done) {
 		req
 			.post(restGit.pathPrefix + '/commit')
-			.send({ path: testDir, message: undefined })
+			.send({ path: testDir, message: undefined, files: [testFile] })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400, done);
@@ -238,7 +199,7 @@ describe('git', function () {
 	it('commit should succeed when there\'s files to commit', function(done) {
 		req
 			.post(restGit.pathPrefix + '/commit')
-			.send({ path: testDir, message: commitMessage })
+			.send({ path: testDir, message: commitMessage, files: [testFile] })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200, done);
@@ -281,10 +242,8 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile,
+				expect(Object.keys(res.body.files).length).to.be(1);
+				expect(res.body.files[testFile]).to.eql({
 					isNew: false,
 					staged: false
 				});
@@ -305,81 +264,6 @@ describe('git', function () {
 				expect(res.body.length).to.be.greaterThan(0);
 				expect(res.body[0].lines).to.be.an('array');
 				expect(res.body[0].lines.length).to.be.greaterThan(0);
-				done();
-			});
-	});
-
-	it('stage should succeed on modified file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/stage')
-			.send({ path: testDir, file: testFile })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
-	});
-
-	it('modified and staged file should show up in status', function(done) {
-		req
-			.get(restGit.pathPrefix + '/status')
-			.query({ path: testDir })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(function(err, res){
-				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile,
-					isNew: false,
-					staged: true
-				});
-				done();
-			});
-	});
-
-	it('diff on modified and staged file should work', function(done) {
-		req
-			.get(restGit.pathPrefix + '/diff')
-			.query({ path: testDir, file: testFile })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(function(err, res){
-				if (err) return done(err);
-				expect(res.body).to.be.an('array');
-				expect(res.body.length).to.be.greaterThan(0);
-				expect(res.body[0].lines).to.be.an('array');
-				expect(res.body[0].lines.length).to.be.greaterThan(0);
-				done();
-			});
-	});
-
-	it('unstage should succeed on modified file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/unstage')
-			.send({ path: testDir, file: testFile })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
-	});
-
-	it('modified, staged and then unstaged file should show up in status', function(done) {
-		req
-			.get(restGit.pathPrefix + '/status')
-			.query({ path: testDir })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(function(err, res){
-				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile,
-					isNew: false,
-					staged: false
-				});
 				done();
 			});
 	});
@@ -413,33 +297,13 @@ describe('git', function () {
 			.expect(200)
 			.end(function(err, res){
 				if (err) return done(err);
-				expect(res.body.files).to.be.a('array');
-				expect(res.body.files.length).to.be(1);
-				expect(res.body.files[0]).to.eql({
-					name: testFile2,
+				expect(Object.keys(res.body.files).length).to.be(1);
+				expect(res.body.files[testFile2]).to.eql({
 					isNew: true,
 					staged: false
 				});
 				done();
 			});
-	});
-
-	it('stage should succeed on unstaged file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/stage')
-			.send({ path: testDir, file: testFile2 })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
-	});
-
-	it('unstage should succeed on staged file', function(done) {
-		req
-			.post(restGit.pathPrefix + '/unstage')
-			.send({ path: testDir, file: testFile2 })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
 	});
 
 	it('discarding the new file should work', function(done) {
@@ -451,6 +315,45 @@ describe('git', function () {
 			.expect(200, done);
 	});
 
+	var testSubDir = 'sub';
+
+	it('creating test sub dir should work', function(done) {
+		req
+			.post(restGit.pathPrefix + '/testing/createsubdir')
+			.send({ dir: testSubDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
+
+	it('creating a test file in sub dir should work', function(done) {
+		req
+			.post(restGit.pathPrefix + '/testing/createfile')
+			.send({ file: testFile3 })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200, done);
+	});
+
+	it('status should list the new file', function(done) {
+		req
+			.get(restGit.pathPrefix + '/status')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(function(err, res){
+				if (err) return done(err);
+				expect(Object.keys(res.body.files).length).to.be(1);
+				expect(res.body.files[testFile3]).to.eql({
+					isNew: true,
+					staged: false
+				});
+				done();
+			});
+	});
 
 	it('removing test dir should work', function(done) {
 		req

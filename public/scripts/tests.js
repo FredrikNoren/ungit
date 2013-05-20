@@ -61,18 +61,10 @@ describe('Repository', function(){
 
 	var testFile = 'somefile';
 
-	it('stageable files should show up', function(done) {
+	it('files should show up', function(done) {
 		expect(viewModel.content().files().length).to.be(0);
 		waitFor(viewModel.content().files, function(files) { return files.length == 1; }, done);
 		api.query('POST', '/testing/createfile', { file: testFile });
-	});
-
-	it('should be possible to stage a file', function(done) {
-		viewModel.content().files()[0].toogleStaged();
-		waitFor(viewModel.content().files, function(files) {
-			if (files.length != 1) return false;
-			return files[0].staged();
-		}, done);
 	});
 
 	it('should be possible to commit', function(done) {

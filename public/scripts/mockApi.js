@@ -4,6 +4,12 @@ var MockApi = function() {
 		GET: crossroads.create(),
 		POST: crossroads.create()
 	};
+	this.routers.GET.bypassed.add(function(request){
+	    throw new Error('Unkown GET route: ' + request);
+	});
+	this.routers.POST.bypassed.add(function(request){
+	    throw new Error('Unkown POST route: ' + request);
+	});
 	this.routes = {
 		GET: {},
 		POST: {}
@@ -46,32 +52,32 @@ MockApi.prototype.fakeRepositoryChanged = function(repositoryPath) {
 }
 MockApi.prototype.initSimpleMockServer = function() {
 	var self = this;
+	var log = [];
+	var status = { files: {} };
 	self.mockRoute('GET', '/status', {}, { errorCode: 'not-a-repository' });
-	self.mockRoute('GET', '/log', []);
-	self.mockRoute('POST', '/unstage', function() { self.fakeRepositoryChanged(); });
+	self.mockRoute('GET', '/log', function() { return log; });
+	self.mockRoute('GET', '/config', { 'user.name': 'test', 'user.email': 'test@test.com' });
 	self.mockRoute('POST', '/init', function() {
-		self.mockRoute('GET', '/status', { files: [] });
+		self.mockRoute('GET', '/status', function() { return status; });
 		self.fakeRepositoryChanged();
 	});
 	self.mockRoute('POST', '/testing/createfile', function(body) {
-		self.mockRoute('GET', '/status', { files: [ { name: body.file, isNew: true } ] });
+		status.files[body.file] = { isNew: true };
 		self.fakeRepositoryChanged();
 	});
 	self.mockRoute('POST', '/testing/changefile', function(body) {
-		self.mockRoute('GET', '/status', { files: [ { name: body.file, isNew: false } ] });
+		status.files[body.file] = { isNew: false };
 		self.fakeRepositoryChanged();
 	});
-	self.mockRoute('POST', '/stage', function(body) {
-		self.mockRoute('GET', '/status', { files: [ { name: body.file, isNew: true, staged: true } ] });
+	self.mockRoute('POST', '/commit', function(body) {
+		if (!body.message || !body.files || body.files.length == 0)
+			throw new Error('Bad request: ' + JSON.stringify(body));
+		log.unshift({ title: body.message });
+		body.files.forEach(function(file) { delete status.files[file]; });
 		self.fakeRepositoryChanged();
 	});
-	self.mockRoute('POST', '/commit', function() {
-		self.mockRoute('GET', '/log', [ { title: 'Test' } ]);
-		self.mockRoute('GET', '/status', { files: [] });
-		self.fakeRepositoryChanged();
-	});
-	self.mockRoute('POST', '/discardchanges', function() {
-		self.mockRoute('GET', '/status', { files: [] });
+	self.mockRoute('POST', '/discardchanges', function(body) {
+		delete status.files[body.file];
 		self.fakeRepositoryChanged();
 	});
 }

@@ -10,6 +10,8 @@ var gitCliParser = require('./gitCliParser');
 
 exports.pathPrefix = '';
 
+var debug = true;
+
 exports.registerApi = function(app, server, dev) {
 
 	app.use(express.bodyParser());
@@ -29,8 +31,10 @@ exports.registerApi = function(app, server, dev) {
 					}
 				};
 				if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
-				console.dir(watchOptions);
 				watchr.watch(watchOptions);
+
+				// Just to make it painful to work with if we don't handle changes correctly
+				if (debug) setInterval(function() { socket.emit('changed'); }, 1000);
 			});
 		});
 	}
@@ -65,7 +69,7 @@ exports.registerApi = function(app, server, dev) {
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus);
+		git('status -s -b -u', repoPath, res, gitCliParser.parseGitStatus);
 	});
 
 	app.post(exports.pathPrefix + '/init', function(req, res) {
@@ -73,42 +77,16 @@ exports.registerApi = function(app, server, dev) {
 		git('init', req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/stage', function(req, res) {
-		if (!verifyPath(req.body.path)) return;
-		git('add "' + req.body.file + '"', req.body.path, res);
-	});
-
-	app.post(exports.pathPrefix + '/unstage', function(req, res) {
-		var repoPath = req.body.path;
-		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
-			if (err) return res.json(400, err);
-			var file = _.find(status.files, function(file) { return file.name == req.body.file });
-			if (file.isNew) {
-				git('rm --cached "' + req.body.file + '"', repoPath, res);
-			} else {
-				git('reset HEAD "' + req.body.file + '"', repoPath, res, null, function(err, text) {
-					if (err && 
-						err.stderr != 'warning: LF will be replaced by CRLF in somefile.\nThe file will have its original line endings in your working directory.\n' &&
-						err.stderr != '') 
-						res.json(400, err);
-					else
-						res.json({});
-				});
-			}
-		});
-	});
-
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
+		git('status -s -b -u', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
 			if (err) return res.json(400, err);
-			var file = _.find(status.files, function(file) { return file.name == req.query.file });
-			if (file.staged) {
-				git('diff --cached "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+			var file = status.files[req.query.file];
+			if (!file) {
+				res.json(400, { error: 'No such file: ' + req.query.file });
 			} else if (!file.isNew) {
-				git('diff "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+				git('diff HEAD "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });
@@ -145,7 +123,11 @@ exports.registerApi = function(app, server, dev) {
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.message === undefined)
 			return res.json(400, { error: 'Must specify commit message' });
-		git('commit -m "' + req.body.message + '"', req.body.path, res);
+		if (!(req.body.files instanceof Array) || req.body.files.length == 0)
+			return res.json(400, { error: 'Must specify files to commit' });
+		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
+			git('commit -m "' + req.body.message + '"', req.body.path, res);
+		});
 	});
 
 	app.get(exports.pathPrefix + '/log', function(req, res){
@@ -176,6 +158,11 @@ exports.registerApi = function(app, server, dev) {
 			temp.mkdir('test-temp-dir', function(err, path) {
 				testDir = path;
 				res.json({ path: path });
+			});
+		});
+		app.post(exports.pathPrefix + '/testing/createsubdir', function(req, res){
+			fs.mkdir(path.join(testDir, req.body.dir), function() {
+				res.json({});
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
