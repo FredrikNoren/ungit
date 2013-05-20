@@ -114,6 +114,7 @@ exports.registerApi = function(app, server, dev) {
 					if (err) return res.json(400, { error: err });
 					var diffs = [];
 					var diff = { };
+					text = text.toString();
 					diff.lines = text.split('\n').map(function(line) { return '+\t' + line; });
 					diffs.push(diff);
 					res.json(diffs);
