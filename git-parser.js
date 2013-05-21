@@ -118,3 +118,14 @@ exports.parseGitConfig = function(text) {
 	});
 	return conf;
 }
+
+exports.parseGitBranches = function(text) {
+	var branches = [];
+	text.split('\n').forEach(function(row) {
+		if (row.trim() == '') return;
+		var branch = { name: row.slice(2) };
+		if(row[0] == '*') branch.current = true;
+		branches.push(branch);
+	});
+	return branches;
+}

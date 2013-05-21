@@ -146,6 +146,16 @@ exports.registerApi = function(app, server, dev) {
 		});
 	});
 
+	app.get(exports.pathPrefix + '/branches', function(req, res){
+		if (!verifyPath(req.query.path, res)) return;
+		git('branch', req.query.path, res, gitParser.parseGitBranches);
+	});
+
+	app.post(exports.pathPrefix + '/branches', function(req, res){
+		if (!verifyPath(req.body.path, res)) return;
+		git('branch "' + req.body.name + '" "' + (req.body.startPoint || 'HEAD') + '"', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig);
 	});
