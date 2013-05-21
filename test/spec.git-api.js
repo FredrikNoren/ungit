@@ -415,6 +415,33 @@ describe('git', function () {
 			}));
 	});
 
+	it('should be possible to switch to a branch', function(done) {
+		req
+			.post(restGit.pathPrefix + '/branch')
+			.send({ path: testDir, name: testBranch })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done));
+	});
+
+	it('listing branches should show the new branch as current', function(done) {
+		req
+			.get(restGit.pathPrefix + '/branches')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(res.body.length).to.be(2);
+				expect(res.body[0].name).to.be('master');
+				expect(res.body[0].current).to.be(undefined);
+				expect(res.body[1].name).to.be(testBranch);
+				expect(res.body[1].current).to.be(true);
+				done();
+			}));
+	});
+
 	it('removing test dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/removedir')
