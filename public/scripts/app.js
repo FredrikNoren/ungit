@@ -93,8 +93,11 @@ var RepositoryViewModel = function(path) {
 		return "";
 	});
 	this.logEntries = ko.observableArray();
-	this.updateStatus();
-	this.updateLog();
+	this.branches = ko.observableArray();
+	this.branch = ko.observable();
+	this.showBranches = ko.observable(false);
+	this.newBranchName = ko.observable();
+	this.update();
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
 		ready: function() { self.watcherReady(true) },
@@ -105,6 +108,7 @@ RepositoryViewModel.prototype.template = 'repository';
 RepositoryViewModel.prototype.update = function() {
 	this.updateStatus();
 	this.updateLog();
+	this.updateBranches();
 	this.files().forEach(function(file) {
 		file.invalidateDiff();
 	});
@@ -148,6 +152,26 @@ RepositoryViewModel.prototype.updateLog = function() {
 			self.logEntries.push(entry);
 		});
 	});
+}
+RepositoryViewModel.prototype.updateBranches = function() {
+	var self = this;
+	api.query('GET', '/branches', { path: this.path }, function(err, branches) {
+		if (err) return;
+		self.branches.removeAll();
+		branches.forEach(function(branch) {
+			branch.current = !!branch.current;
+			branch.switchTo = function() { api.query('POST', '/branch', { path: self.path, name: branch.name }) };
+			self.branches.push(branch);
+			if (branch.current) self.branch(branch.name);
+		});
+	});
+}
+RepositoryViewModel.prototype.toogleShowBranches = function() {
+	this.showBranches(!this.showBranches());
+}
+RepositoryViewModel.prototype.createNewBranch = function() {
+	api.query('POST', '/branches', { path: this.path, name: this.newBranchName() });
+	this.newBranchName('');
 }
 RepositoryViewModel.prototype.initRepository = function() {
 	var self = this;

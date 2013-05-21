@@ -47,29 +47,37 @@
 		</div>
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
 			<div class="path" data-bind="text: path"></div>
-			
-			<div class="log">
-				<div class="logEntry staging" data-bind="css: { commitValidationError: commitValidationError }">
-					<div class="date">Now</div>
-					<a class="author" data-bind="text: commitAuthorName, attr: { href: 'mailto:' +  commitAuthorEmail() }"></a>
-					<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
-					<div class="files" data-bind="foreach: files">
-						<div class="file">
-							<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
-							<span class="name" data-bind="text: name, click: toogleDiffs"></span>
-							<span class="new" data-bind="visible: isNew">New</span>
-							<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
-							<div class="diffs" data-bind="visible: showDiffs, foreach: diffs">
-								<div class="diff" data-bind="text: text, css: { added: added, removed: removed}"></div>
-							</div>
+			<div class="branching block">
+				Current branch: <span class="currentBranch" data-bind="text: branch, click: toogleShowBranches"></span>
+				<div class="branches" data-bind="visible: showBranches">
+					<div data-bind="foreach: branches">
+						<span class="branch" data-bind="text: name, css: { current: current }, click: switchTo"></span>
+					</div>
+					<input type="text" placeholder="New branch" data-bind="value: newBranchName"><button data-bind="click: createNewBranch">Create new branch</button>
+				</div>
+			</diV>
+
+			<div class="staging block" data-bind="css: { commitValidationError: commitValidationError }">
+				<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
+				<div class="files" data-bind="foreach: files">
+					<div class="file">
+						<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
+						<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+						<span class="new" data-bind="visible: isNew">New</span>
+						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+						<div class="diffs" data-bind="visible: showDiffs, foreach: diffs">
+							<div class="diff" data-bind="text: text, css: { added: added, removed: removed}"></div>
 						</div>
 					</div>
-					<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
-					<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 				</div>
-
+				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+			</div>
+			
+			<div class="log">
+				
 				<div data-bind="foreach: logEntries">
-					<div class="logEntry">
+					<div class="logEntry block">
 						<div class="date" data-bind="text: date"></div>
 						<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
 						<div class="title" data-bind="text: title"></div>

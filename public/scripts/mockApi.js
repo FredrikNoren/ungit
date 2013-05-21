@@ -54,6 +54,7 @@ MockApi.prototype.initSimpleMockServer = function() {
 	var self = this;
 	var log = [];
 	var status = { files: {} };
+	var branches = [ { name: 'master', current: true } ];
 	self.mockRoute('GET', '/status', {}, { errorCode: 'not-a-repository' });
 	self.mockRoute('GET', '/log', function() { return log; });
 	self.mockRoute('GET', '/config', { 'user.name': 'test', 'user.email': 'test@test.com' });
@@ -80,6 +81,15 @@ MockApi.prototype.initSimpleMockServer = function() {
 		delete status.files[body.file];
 		self.fakeRepositoryChanged();
 	});
+	/*self.mockRoute('GET', '/branches', function(body) {
+		return branches;
+	});
+	self.mockRoute('POST', '/branches', function(body) {
+		branches.push({ name: body.name });
+	});
+	self.mockRoute('POST', '/branch', function(body) {
+		branches.forEach(function(branch) { branch.current = branch.name == body.name ? true : undefined; });
+	});*/
 }
 
 var api = new MockApi();

@@ -90,5 +90,9 @@ describe('Repository', function(){
 		viewModel.content().files()[0].discardChanges();
 	});
 
+	it('should show branches', function() {
+		expect(viewModel.content().branches.length).to.be(1);
+		expect(viewModel.content().branches[0].name).to.be('master');
+	});
 
 })
