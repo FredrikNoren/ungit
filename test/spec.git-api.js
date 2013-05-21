@@ -5,7 +5,7 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var child_process = require('child_process');
-var restGit = require('../rest-git');
+var restGit = require('../git-api');
 
 var app = express();
 

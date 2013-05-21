@@ -6,7 +6,7 @@ var path = require('path');
 var temp = require('temp');
 var socketIO = require('socket.io');
 var watchr = require('watchr');
-var gitCliParser = require('./gitCliParser');
+var gitParser = require('./git-parser');
 
 exports.pathPrefix = '';
 
@@ -69,7 +69,7 @@ exports.registerApi = function(app, server, dev) {
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b -u', repoPath, res, gitCliParser.parseGitStatus);
+		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus);
 	});
 
 	app.post(exports.pathPrefix + '/init', function(req, res) {
@@ -80,13 +80,13 @@ exports.registerApi = function(app, server, dev) {
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b -u', repoPath, res, gitCliParser.parseGitStatus, function(err, status) {
+		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, function(err, status) {
 			if (err) return res.json(400, err);
 			var file = status.files[req.query.file];
 			if (!file) {
 				res.json(400, { error: 'No such file: ' + req.query.file });
 			} else if (!file.isNew) {
-				git('diff HEAD "' + req.query.file + '"', repoPath, res, gitCliParser.parseGitDiff);
+				git('diff HEAD "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });
@@ -132,7 +132,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.get(exports.pathPrefix + '/log', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
-		git('log', req.query.path, res, gitCliParser.parseGitLog, function(err, log) {
+		git('log', req.query.path, res, gitParser.parseGitLog, function(err, log) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
 					res.json([]);
@@ -147,7 +147,7 @@ exports.registerApi = function(app, server, dev) {
 	});
 
 	app.get(exports.pathPrefix + '/config', function(req, res){
-		git('config --list', undefined, res, gitCliParser.parseGitConfig);
+		git('config --list', undefined, res, gitParser.parseGitConfig);
 	});
 
 	if (dev) {

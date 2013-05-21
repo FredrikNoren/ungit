@@ -1,14 +1,14 @@
 
 var express = require('express');
-var restGit = require('./rest-git');
+var gitApi = require('./git-api');
 
 var app = express();
 var server = require('http').createServer(app);
 
-restGit.pathPrefix = '/api';
+gitApi.pathPrefix = '/api';
 
 app.use(express.static(__dirname + '/public'));
-restGit.registerApi(app, server, true);
+gitApi.registerApi(app, server, true);
 
 
 server.listen(3000);
