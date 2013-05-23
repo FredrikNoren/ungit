@@ -32,15 +32,38 @@ Vector2.mul = function(a, val) {
 	return new Vector2(a.x * val, a.y * val);
 }
 
-var LogNodeIcon = function() {
+var LogNodeIcon = function(logEntry) {
+	this.logEntry = logEntry;
 	this.position = new Vector2();
 	this.radius = 30;
 }
 LogNodeIcon.prototype.draw = function(context) {
-	context.fillStyle = "#F2361D";
+	context.fillStyle = this.branch.color;
+	context.setLineDash(undefined);
 	context.beginPath();
 	context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
 	context.fill();
+
+	context.fillStyle = "#C9C9C9";
+	context.font = "bold 16px Arial";
+	context.fillText(this.branch.name, this.position.x + this.radius + 10, this.position.y);
+}
+
+var CommitNode = function(x, y) {
+	this.position = new Vector2(x, y);
+	this.radius = 30;
+}
+CommitNode.prototype.draw = function(context) {
+	context.strokeStyle = this.branch.color;
+	context.setLineDash([10, 5]);
+	context.lineWidth = 7;
+	context.beginPath();
+	context.arc(this.position.x, this.position.y, this.radius - context.lineWidth/2, 0, 2 * Math.PI);
+	context.stroke();
+
+	context.fillStyle = "#C9C9C9";
+	context.font = "bold 16px Arial";
+	context.fillText('Commit', this.position.x + this.radius + 10, this.position.y);
 }
 
 var LogEdge = function(node1, node2) {
@@ -48,7 +71,8 @@ var LogEdge = function(node1, node2) {
 	this.node2 = node2;
 }
 LogEdge.prototype.draw = function(context) {
-	context.fillStyle = "#F2361D";
+	context.strokeStyle = "#737373";
+	context.setLineDash(undefined);
 	context.lineWidth = 10;
 	context.beginPath();
 	var a = this.node1.position;
@@ -63,7 +87,9 @@ LogEdge.prototype.draw = function(context) {
 
 var getLogGraph = function(log) {
 	var logGraph = {};
-	log.forEach(function(entry) { logGraph[entry.sha1] = entry });
+	log.forEach(function(entry) {
+		logGraph[entry.sha1] = entry;
+	});
 	return logGraph;
 }
 
@@ -89,12 +115,25 @@ var splitIntoBranches = function(log) {
 	});
 }
 
+var randomColor = function() {
+	var randomHex = function() {
+		var r = Math.floor(Math.random() * 256).toString(16);
+		if (r.length == 1) r = '0' + r;
+		return r;
+	}
+	return '#' + randomHex() + randomHex() + randomHex();
+}
+
 var buildSceneGraph = function(log) {
 
+	if (log.length == 0) return [];
+
+	var HEAD;
 	log.forEach(function(entry) {
 		entry.time = moment(entry.date);
 		entry.refs = entry.refs || [];
 		entry.parents = entry.parents || [];
+		if (entry.refs.indexOf('HEAD') >= 0) HEAD = entry;
 	});
 	log.sort(function(a, b) { return a.time.unix() < b.time.unix(); });
 
@@ -106,19 +145,30 @@ var buildSceneGraph = function(log) {
 
 	var branches = {};
 
-	var getBranch = function(name) {
+	var getBranch = function(name, entry) {
 		var branch = branches[name];
-		if (!branch) branch = branches[name] = { order: Object.keys(branches).length };
+		if (!branch) branch = branches[name] = {
+			name: name,
+			order: Object.keys(branches).length,
+			color: randomColor(),
+			topCommit: entry
+		};
 		return branch;
 	}
 
 	var y = 30;
 
+	var commitNode = new CommitNode(30, y);
+	sceneGraph.push(commitNode);
+
+	y += 120;
+
 	log.forEach(function(entry) {
-		var logNodeIcon = new LogNodeIcon();
+		var logNodeIcon = new LogNodeIcon(entry);
 		sceneGraph.push(logNodeIcon);
 
-		var branch = getBranch(entry.branch);
+		var branch = getBranch(entry.branch, entry);
+		logNodeIcon.branch = branch;
 
 		logNodeIcon.position.x = 30 + 60 * branch.order;
 		logNodeIcon.position.y = y;
@@ -134,15 +184,21 @@ var buildSceneGraph = function(log) {
 		});
 	});
 
+	sceneGraph.push(new LogEdge(commitNode, HEAD.graphNode));
+
+	commitNode.branch = HEAD.graphNode.branch;
+
 	return sceneGraph;	
 }
 
 logRenderer.render = function(log, element) {
 	
 	var context = element.getContext("2d");
+	context.clearRect(0, 0, element.width, element.height)
 
 	var sceneGraph = buildSceneGraph(log);
 	sceneGraph.forEach(function(node) {
+		console.log('Drawing ', node);
 		node.draw(context);
 	});
 	

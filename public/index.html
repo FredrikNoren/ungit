@@ -55,9 +55,13 @@
 					</div>
 					<input type="text" placeholder="New branch" data-bind="value: newBranchName"><button data-bind="click: createNewBranch">Create new branch</button>
 				</div>
-			</diV>
+			</div>
 
-			<div class="staging block" data-bind="css: { commitValidationError: commitValidationError }">
+			<div data-bind="graphLog: logEntries">
+
+			</div>
+
+			<!--div class="staging block" data-bind="css: { commitValidationError: commitValidationError }">
 				<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
 				<div class="files" data-bind="foreach: files">
 					<div class="file">
@@ -83,7 +87,8 @@
 						<div class="title" data-bind="text: title"></div>
 					</div>
 				</div>
-			</div>
+			</div-->
+
 		</div>
 	</div>
 </script>
@@ -107,6 +112,7 @@
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type='text/javascript' src='/scripts/api.js'></script>
+<script type='text/javascript' src='/scripts/logrenderer.js'></script>
 <script type='text/javascript' src='/scripts/app.js'></script>
 <script type='text/javascript' src='/scripts/main.js'></script>
 

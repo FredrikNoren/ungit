@@ -92,7 +92,7 @@ var RepositoryViewModel = function(path) {
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
-	this.logEntries = ko.observableArray();
+	this.logEntries = ko.observable([]);
 	this.branches = ko.observableArray();
 	this.branch = ko.observable();
 	this.showBranches = ko.observable(false);
@@ -144,13 +144,12 @@ RepositoryViewModel.prototype.updateLog = function() {
 	var self = this;
 	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
 		if (err) return;
-		self.logEntries.removeAll();
 		logEntries.forEach(function(entry) {
 			var date = entry.date;
 			entry.date = ko.observable(moment(date).fromNow());
 			setInterval(function() { entry.date(moment(date).fromNow()); }, 1000 * 60);
-			self.logEntries.push(entry);
 		});
+		self.logEntries(logEntries);
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {

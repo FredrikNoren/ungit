@@ -34,7 +34,7 @@ exports.registerApi = function(app, server, dev) {
 				watchr.watch(watchOptions);
 
 				// Just to make it painful to work with if we don't handle changes correctly
-				if (debug) setInterval(function() { socket.emit('changed'); }, 1000);
+				//if (debug) setInterval(function() { socket.emit('changed'); }, 1000);
 			});
 		});
 	}
