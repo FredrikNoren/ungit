@@ -43,10 +43,6 @@ LogNodeIcon.prototype.draw = function(context) {
 	context.beginPath();
 	context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
 	context.fill();
-
-	context.fillStyle = "#C9C9C9";
-	context.font = "bold 16px Arial";
-	context.fillText(this.branch.name, this.position.x + this.radius + 10, this.position.y);
 }
 
 var CommitNode = function(x, y) {
@@ -60,10 +56,6 @@ CommitNode.prototype.draw = function(context) {
 	context.beginPath();
 	context.arc(this.position.x, this.position.y, this.radius - context.lineWidth/2, 0, 2 * Math.PI);
 	context.stroke();
-
-	context.fillStyle = "#C9C9C9";
-	context.font = "bold 16px Arial";
-	context.fillText('Commit', this.position.x + this.radius + 10, this.position.y);
 }
 
 var LogEdge = function(node1, node2) {
@@ -116,9 +108,9 @@ var randomColor = function() {
 	return '#' + randomHex() + randomHex() + randomHex();
 }
 
-var buildSceneGraph = function(log) {
+var buildSceneGraph = function(log, branchViewModels) {
 
-	if (log.length == 0) return [];
+	if (log.length == 0 || branchViewModels.length == 0) return [];
 
 	var HEAD;
 	log.forEach(function(entry) {
@@ -134,14 +126,20 @@ var buildSceneGraph = function(log) {
 
 	var branches = {};
 
-	var getBranch = function(name, entry) {
+	var getBranch = function(name, y, entry) {
 		var branch = branches[name];
-		if (!branch) branch = branches[name] = {
-			name: name,
-			order: Object.keys(branches).length,
-			color: randomColor(),
-			topCommit: entry
-		};
+		if (!branch) {
+			var branchViewModel = _.find(branchViewModels, function(bvm) { return 'refs/heads/' + bvm.name == name });
+			branch = branches[name] = {
+				name: name,
+				order: Object.keys(branches).length,
+				color: randomColor(),
+				topCommit: entry,
+				branchViewModel: branchViewModel
+			};
+			branchViewModel.x(30 + 60 * branch.order);
+			branchViewModel.y(y);
+		}
 		return branch;
 	}
 
@@ -156,7 +154,7 @@ var buildSceneGraph = function(log) {
 		var logNodeIcon = new LogNodeIcon(entry);
 		sceneGraph.push(logNodeIcon);
 
-		var branch = getBranch(entry.branch, entry);
+		var branch = getBranch(entry.branch, y, entry);
 		logNodeIcon.branch = branch;
 
 		logNodeIcon.position.x = 30 + 60 * branch.order;
@@ -182,12 +180,12 @@ var buildSceneGraph = function(log) {
 	return sceneGraph;	
 }
 
-logRenderer.render = function(log, element) {
+logRenderer.render = function(log, element, branchViewModels) {
 	
 	var context = element.getContext("2d");
 	context.clearRect(0, 0, element.width, element.height)
 
-	var sceneGraph = buildSceneGraph(log);
+	var sceneGraph = buildSceneGraph(log, branchViewModels);
 	sceneGraph.forEach(function(node) {
 		console.log('Drawing ', node);
 		node.draw(context);

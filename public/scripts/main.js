@@ -27,10 +27,10 @@ ko.bindingHandlers.graphLog = {
         var canvas = $('<canvas width="1000" height="2000">');
         $(element).append(canvas);
     },
-    update: function(element, valueAccessor) {
+    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
         var log = ko.utils.unwrapObservable(valueAccessor());
         var canvas = $(element).find('canvas').get(0);
-        logRenderer.render(log, canvas);
+        logRenderer.render(log, canvas, ko.utils.unwrapObservable(viewModel.branches));
     }
 };
 

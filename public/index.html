@@ -37,7 +37,7 @@
 			<div class='title' data-bind='text: title'></div>
 		</div>
 		<div class="hr"></div>
-		<div class="path" data-bind="text: path"></div>
+		<div class="path animated fadeInLeft" data-bind="text: path"></div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
@@ -81,6 +81,16 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="branches" data-bind="foreach: branches">
+					<div class="branch" data-bind="style: { left: x() + 'px', top: y() + 'px' }">
+						<img src="images/grayArrowLeft.png" class="arrowLeft">
+						<div class="branchBox">
+							<div class="name" data-bind="text: name"></div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 
 		</div>

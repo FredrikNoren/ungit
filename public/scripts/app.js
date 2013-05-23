@@ -93,7 +93,7 @@ var RepositoryViewModel = function(path) {
 		return "";
 	});
 	this.logEntries = ko.observable([]);
-	this.branches = ko.observableArray();
+	this.branches = ko.observable([]);
 	this.branch = ko.observable();
 	this.showBranches = ko.observable(false);
 	this.newBranchName = ko.observable();
@@ -156,13 +156,12 @@ RepositoryViewModel.prototype.updateBranches = function() {
 	var self = this;
 	api.query('GET', '/branches', { path: this.path }, function(err, branches) {
 		if (err) return;
-		self.branches.removeAll();
 		branches.forEach(function(branch) {
 			branch.current = !!branch.current;
 			branch.switchTo = function() { api.query('POST', '/branch', { path: self.path, name: branch.name }) };
-			self.branches.push(branch);
 			if (branch.current) self.branch(branch.name);
 		});
+		self.branches(branches.map(function(b) { return new BranchViewModel(b); }));
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {

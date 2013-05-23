@@ -24,3 +24,10 @@ var LogEntryViewModel = function(entry) {
 LogEntryViewModel.fromBackendList = function(log) {
 	return log.map(function(entry) { return new LogEntryViewModel(entry); });
 }
+
+var BranchViewModel = function(branch) {
+	this.x = ko.observable(0);
+	this.y = ko.observable(0);
+	this.name = branch.name;
+	this.current = branch.current;
+}
