@@ -330,47 +330,6 @@ describe('git', function () {
 			.end(wrapErrorHandler(done));
 	});
 
-	var testSubDir = 'sub';
-
-	it('creating test sub dir should work', function(done) {
-		req
-			.post(restGit.pathPrefix + '/testing/createsubdir')
-			.send({ dir: testSubDir })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(wrapErrorHandler(done));
-	});
-
-	var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
-
-	it('creating a test file in sub dir should work', function(done) {
-		req
-			.post(restGit.pathPrefix + '/testing/createfile')
-			.send({ file: testFile3 })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(wrapErrorHandler(done));
-	});
-
-	it('status should list the new file', function(done) {
-		req
-			.get(restGit.pathPrefix + '/status')
-			.query({ path: testDir })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200)
-			.end(wrapErrorHandler(done, function(err, res) {
-				expect(Object.keys(res.body.files).length).to.be(1);
-				expect(res.body.files[testFile3]).to.eql({
-					isNew: true,
-					staged: false
-				});
-				done();
-			}));
-	});
-
 	it('listing branches should work', function(done) {
 		req
 			.get(restGit.pathPrefix + '/branches')
@@ -438,6 +397,98 @@ describe('git', function () {
 				expect(res.body[0].current).to.be(undefined);
 				expect(res.body[1].name).to.be(testBranch);
 				expect(res.body[1].current).to.be(true);
+				done();
+			}));
+	});
+
+
+	var testSubDir = 'sub';
+
+	it('creating test sub dir should work', function(done) {
+		req
+			.post(restGit.pathPrefix + '/testing/createsubdir')
+			.send({ dir: testSubDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done));
+	});
+
+	var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
+
+	it('creating a test file in sub dir should work', function(done) {
+		req
+			.post(restGit.pathPrefix + '/testing/createfile')
+			.send({ file: testFile3 })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done));
+	});
+
+	it('status should list the new file', function(done) {
+		req
+			.get(restGit.pathPrefix + '/status')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(Object.keys(res.body.files).length).to.be(1);
+				expect(res.body.files[testFile3]).to.eql({
+					isNew: true,
+					staged: false
+				});
+				done();
+			}));
+	});
+
+	var commitMessage3 = 'commit3';
+
+	it('commit should succeed with file in sub dir', function(done) {
+		req
+			.post(restGit.pathPrefix + '/commit')
+			.send({ path: testDir, message: commitMessage3, files: [testFile3] })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done));
+	});
+
+	it('log should show both branches and all commits', function(done) {
+		req
+			.get(restGit.pathPrefix + '/log')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(res.body).to.be.a('array');
+				expect(res.body.length).to.be(2);
+				var objs = {};
+				res.body.forEach(function(obj) {
+					obj.refs.sort();
+					objs[obj.refs[0]] = obj;
+				});
+				var master = objs['refs/heads/master'];
+				var HEAD = objs['HEAD'];
+				expect(master.message).to.be(commitMessage);
+				expect(master.title).to.be(commitMessage);
+				expect(master.time).to.be.a('number');
+				expect(master.authorName).to.be(gitConfig['user.name']);
+				expect(master.authorEmail).to.be(gitConfig['user.email']);
+				expect(master.refs).to.eql(['refs/heads/master']);
+				expect(master.parents).to.eql([]);
+				expect(master.sha1).to.be.ok();
+
+				expect(HEAD.message).to.be(commitMessage3);
+				expect(HEAD.title).to.be(commitMessage3);
+				expect(HEAD.time).to.be.a('number');
+				expect(HEAD.authorName).to.be(gitConfig['user.name']);
+				expect(HEAD.authorEmail).to.be(gitConfig['user.email']);
+				expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
+				expect(HEAD.parents).to.eql([master.sha1]);
+				expect(HEAD.sha1).to.be.ok();
 				done();
 			}));
 	});

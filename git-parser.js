@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var moment = require('moment');
 
 exports.parseGitStatus = function(text) {
 	var result = {};
@@ -84,27 +85,45 @@ exports.parseGitDiff = function(text) {
 exports.parseGitLog = function(data) {
 	var commits = [];
 	var currentCommmit;
-	var inCommitIndex = 0;
-	data.split('\n').forEach(function(row) {
-		if (row.indexOf('commit ') == 0) {
-			currentCommmit = { message: '' };
-			commits.push(currentCommmit);
-			inCommitIndex = 0;
+	var parseCommitLine = function(row) {
+		currentCommmit = { };
+		var ss = row.split('(');
+		var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
+		currentCommmit.sha1 = sha1s[0];
+		currentCommmit.parents = sha1s.slice(1);
+		if (ss[1]) {
+			var refs = ss[1].slice(0, ss[1].length - 1);
+			currentCommmit.refs = refs.split(', ');
 		}
-		if (inCommitIndex == 0)
-			currentCommmit.sha1 = _.last(row.split(' '));
-		else if (inCommitIndex == 1) {
+		commits.push(currentCommmit);
+		parser = parseHeaderLine;
+	}
+	var parseHeaderLine = function(row) {
+		if (row.indexOf('Author: ') == 0) {
 			var author = row.split(' ').slice(1).join(' ');
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
 			currentCommmit.authorName = capture[1].trim();
 			currentCommmit.authorEmail = capture[2].trim();
-		} else if (inCommitIndex == 2)
-			currentCommmit.date = row.split(' ').slice(1).join(' ');
-		else
-			currentCommmit.message = (currentCommmit.message + '\n' + row).trim();
-		if (inCommitIndex == 4)
+		} else if (row.indexOf('Date: ') == 0) {
+			currentCommmit.time = moment(row.slice('Date: '.length)).unix();
+		} else {
+			parser = parseCommitMessage;
+		}
+	}
+	var parseCommitMessage = function(row) {
+		if (row.trim() == '') {
+			parser = parseCommitLine;
+			return;
+		}
+		if (currentCommmit.title === undefined)
 			currentCommmit.title = row.trim();
-		inCommitIndex++;
+		if (currentCommmit.message) currentCommmit.message += '\n';
+		else currentCommmit.message = '';
+		currentCommmit.message += row.trim();
+	}
+	var parser = parseCommitLine;
+	data.split('\n').forEach(function(row) {
+		parser(row);
 	});
 	return commits;
 };
