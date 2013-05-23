@@ -161,7 +161,7 @@ RepositoryViewModel.prototype.updateBranches = function() {
 			branch.switchTo = function() { api.query('POST', '/branch', { path: self.path, name: branch.name }) };
 			if (branch.current) self.branch(branch.name);
 		});
-		self.branches(branches.map(function(b) { return new BranchViewModel(b); }));
+		self.branches(branches.map(function(b) { return new BranchViewModel(self.path, b); }));
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {

@@ -83,10 +83,10 @@
 				</div>
 
 				<div class="branches" data-bind="foreach: branches">
-					<div class="branch" data-bind="style: { left: x() + 'px', top: y() + 'px' }">
+					<div class="branch" data-bind="style: { left: x() + 'px', top: y() + 'px' }, css: { current: current }">
 						<img src="images/grayArrowLeft.png" class="arrowLeft">
 						<div class="branchBox">
-							<div class="name" data-bind="text: name"></div>
+							<div class="name" data-bind="text: name, click: checkout"></div>
 						</div>
 					</div>
 				</div>
