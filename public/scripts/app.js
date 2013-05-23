@@ -149,7 +149,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 			entry.date = ko.observable(moment(date).fromNow());
 			setInterval(function() { entry.date(moment(date).fromNow()); }, 1000 * 60);
 		});
-		self.logEntries(logEntries);
+		self.logEntries(LogEntryViewModel.fromBackendList(logEntries));
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {

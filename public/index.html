@@ -37,6 +37,7 @@
 			<div class='title' data-bind='text: title'></div>
 		</div>
 		<div class="hr"></div>
+		<div class="path" data-bind="text: path"></div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
@@ -46,22 +47,9 @@
 			<button class="initRepository" data-bind='click: initRepository'>Initialize a repository here!</button>
 		</div>
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
-			<div class="path" data-bind="text: path"></div>
-			<div class="branching block">
-				Current branch: <span class="currentBranch" data-bind="text: branch, click: toogleShowBranches"></span>
-				<div class="branches" data-bind="visible: showBranches">
-					<div data-bind="foreach: branches">
-						<span class="branch" data-bind="text: name, css: { current: current }, click: switchTo"></span>
-					</div>
-					<input type="text" placeholder="New branch" data-bind="value: newBranchName"><button data-bind="click: createNewBranch">Create new branch</button>
-				</div>
-			</div>
 
-			<div data-bind="graphLog: logEntries">
-
-			</div>
-
-			<!--div class="staging block" data-bind="css: { commitValidationError: commitValidationError }">
+			<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
+				<img src="images/yellowArrowRight.png" class="arrowRight">
 				<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
 				<div class="files" data-bind="foreach: files">
 					<div class="file">
@@ -79,15 +67,21 @@
 			</div>
 			
 			<div class="log">
+
+				<div class="graphLog" data-bind="graphLog: logEntries">
+				</div>
 				
 				<div data-bind="foreach: logEntries">
-					<div class="logEntry block">
-						<div class="date" data-bind="text: date"></div>
-						<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
-						<div class="title" data-bind="text: title"></div>
+					<div class="logEntry" data-bind="style: { left: x() + 'px', top: y() + 'px' }">
+						<img src="images/whiteArrowRight.png" class="arrowRight">
+						<div class="logEntryBox">
+							<div class="title" data-bind="text: title"></div>
+							<div class="date" data-bind="text: date"></div>
+							<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+						</div>
 					</div>
 				</div>
-			</div-->
+			</div>
 
 		</div>
 	</div>
@@ -112,6 +106,7 @@
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type='text/javascript' src='/scripts/api.js'></script>
+<script type='text/javascript' src='/scripts/logViewModel.js'></script>
 <script type='text/javascript' src='/scripts/logrenderer.js'></script>
 <script type='text/javascript' src='/scripts/app.js'></script>
 <script type='text/javascript' src='/scripts/main.js'></script>

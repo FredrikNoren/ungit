@@ -142,6 +142,9 @@ a {
 }
 
 .repository {
+	.path {
+		color: #bbb;
+	}
 	.uninited {
 		h1 {
 			color: #555;
@@ -153,41 +156,60 @@ a {
 		}
 	}
 	.inited {
-		.path {
-			color: #bbb;
-		}
+		position: relative;
 
-		.block {
-			padding: 10px;
-			margin: 10px;
-			margin-left: 0px;
-			margin-right: 0px;
-		}
 
-		.branching {
-			background: #AFD9ED;
+		.log {
 
-			color: #555;
-			.currentBranch {
-				color: #000;
-				font-weight: bold;
-				cursor: pointer;
+			position: relative;
+			top: -60px;
+
+			.graphLog {
+				position: absolute;
+				left: 500px;
 			}
 
-			.branches {
-				border-top: 1px solid #999;
-				padding: 10px;
-				.branch {
-					cursor: pointer;
+			.logEntry {
+				position: absolute;
+				
+				.arrowRight {
+					position: absolute;
+					right: -15px;
+					top: -15px;
 				}
-				.current {
-					font-weight: bold;
+				.logEntryBox {
+					position: relative;
+					top: -20px;
+					background: rgba(255, 255, 255, 0.9);
+					padding: 10px;
+					width: 470px;
+					box-sizing:border-box;
+					-moz-box-sizing:border-box;	
+					.author, .date {
+						color: #999;
+					}
+					.title {
+						font-size: 1.3em;
+					}
 				}
 			}
 		}
+
 
 		.staging {
 			background: rgb(255, 251, 219);
+			position: relative;
+			padding: 10px;
+
+			width: 470px;
+			box-sizing:border-box;
+			-moz-box-sizing:border-box;	
+
+			.arrowRight {
+				position: absolute;
+				right: -15px;
+				bottom: 15px;
+			}
 
 			.commitMessage {
 				display: block;
@@ -261,22 +283,5 @@ a {
 			}
 		}
 
-		.log {
-			.logEntry {
-				position: relative;
-				.author {
-					position: absolute;
-					top: 10px;
-					right: 10px;
-				}
-				.author, .date {
-					color: #999;
-				}
-				.title {
-					font-size: 1.3em;
-				}
-				background: rgba(255, 255, 255, 0.9);
-			}
-		}
 	}
 }

@@ -107,14 +107,6 @@ var markBranches = function(log, logGraph) {
 	});
 }
 
-var splitIntoBranches = function(log) {
-
-
-	log.forEach(function(entry) {
-		getBranch()
-	});
-}
-
 var randomColor = function() {
 	var randomHex = function() {
 		var r = Math.floor(Math.random() * 256).toString(16);
@@ -130,9 +122,6 @@ var buildSceneGraph = function(log) {
 
 	var HEAD;
 	log.forEach(function(entry) {
-		entry.time = moment(entry.date);
-		entry.refs = entry.refs || [];
-		entry.parents = entry.parents || [];
 		if (entry.refs.indexOf('HEAD') >= 0) HEAD = entry;
 	});
 	log.sort(function(a, b) { return a.time.unix() < b.time.unix(); });
@@ -172,6 +161,8 @@ var buildSceneGraph = function(log) {
 
 		logNodeIcon.position.x = 30 + 60 * branch.order;
 		logNodeIcon.position.y = y;
+		entry.graphNodeX(logNodeIcon.position.x);
+		entry.graphNodeY(logNodeIcon.position.y);
 
 		entry.graphNode = logNodeIcon;
 
