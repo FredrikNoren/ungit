@@ -105,7 +105,7 @@ exports.parseGitLog = function(data) {
 			currentCommmit.authorName = capture[1].trim();
 			currentCommmit.authorEmail = capture[2].trim();
 		} else if (row.indexOf('Date: ') == 0) {
-			currentCommmit.time = moment(row.slice('Date: '.length)).unix();
+			currentCommmit.date = row.slice('Date: '.length).trim();
 		} else {
 			parser = parseCommitMessage;
 		}

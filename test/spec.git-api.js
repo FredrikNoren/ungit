@@ -474,7 +474,7 @@ describe('git', function () {
 				var HEAD = objs['HEAD'];
 				expect(master.message).to.be(commitMessage);
 				expect(master.title).to.be(commitMessage);
-				expect(master.time).to.be.a('number');
+				expect(master.date).to.be.a('string');
 				expect(master.authorName).to.be(gitConfig['user.name']);
 				expect(master.authorEmail).to.be(gitConfig['user.email']);
 				expect(master.refs).to.eql(['refs/heads/master']);
@@ -483,7 +483,7 @@ describe('git', function () {
 
 				expect(HEAD.message).to.be(commitMessage3);
 				expect(HEAD.title).to.be(commitMessage3);
-				expect(HEAD.time).to.be.a('number');
+				expect(HEAD.date).to.be.a('string');
 				expect(HEAD.authorName).to.be(gitConfig['user.name']);
 				expect(HEAD.authorEmail).to.be(gitConfig['user.email']);
 				expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
