@@ -138,7 +138,7 @@ var buildSceneGraph = function(log, branchViewModels) {
 				branchViewModel: branchViewModel
 			};
 			branchViewModel.x(30 + 60 * branch.order);
-			branchViewModel.y(y);
+			branchViewModel.y = entry.y;
 		}
 		return branch;
 	}
@@ -149,6 +149,8 @@ var buildSceneGraph = function(log, branchViewModels) {
 	sceneGraph.push(commitNode);
 
 	y += 120;
+
+	getBranch(HEAD.branch, y, HEAD);
 
 	log.forEach(function(entry) {
 		var logNodeIcon = new LogNodeIcon(entry);
