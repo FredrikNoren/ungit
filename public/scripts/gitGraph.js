@@ -8,14 +8,11 @@ var GitGraphViewModel = function() {
 }
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
-	console.log('ADD NODES', nodes.length);
 	var self = this;
 	var nodeVMs = [];
 	nodes.forEach(function(node) {
 		var nodeViewModel = new NodeViewModel(node);
-		console.log('ADD NODE');
 		nodeVMs.push(nodeViewModel);
-		console.log('ADDED NODE');
 		self.nodesById[node.sha1] = nodeViewModel;
 		if (node.refs) {
 			node.refs.forEach(function(ref) {
@@ -23,6 +20,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref });
 					self.refs.push(refViewModel);
 				}
+				refViewModel.node(nodeViewModel);
 			});
 		}
 	});
@@ -68,22 +66,26 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 	var updateTimeStamp = moment().valueOf();
 
+	var branchOrder = 0;
 	var y = 30;
 
 	y += 120; // Leave room for the "commit node" (see logrednerer.js)
-	
-	var branchOrder = 0;
+
+	var fixRefOrder = function(ref, node) {
+		if (ref.normalizeTimeStamp != updateTimeStamp) {
+			ref.branchOrder = branchOrder++;
+			ref.normalizeTimeStamp = updateTimeStamp;
+		}
+	}
+
+	// Make sure the "ideological branch" is the leftmost
+	fixRefOrder(refsByRefName[HEAD.idealogicalBranch], HEAD);
+
 
 	nodes.forEach(function(node) {
-		console.log('branchOrder', branchOrder);
 		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
 
-		if (idealogicalBranch.normalizeTimeStamp != updateTimeStamp) {
-			idealogicalBranch.node(node);
-			idealogicalBranch.branchOrder = branchOrder++;
-			idealogicalBranch.normalizeTimeStamp = updateTimeStamp;
-			console.log(idealogicalBranch, updateTimeStamp);
-		}
+		fixRefOrder(idealogicalBranch, node);
 
 		node.x(30 + 60 * idealogicalBranch.branchOrder);
 		node.y(y);
