@@ -81,24 +81,29 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	// Make sure the "ideological branch" is the leftmost
 	fixRefOrder(refsByRefName[HEAD.idealogicalBranch], HEAD);
 
+	var prevNode;
 	nodes.forEach(function(node) {
+
 		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
 
 		fixRefOrder(idealogicalBranch, node);
 
 		node.x(30 + 60 * idealogicalBranch.branchOrder);
 		if (node.idealogicalBranch == HEAD.idealogicalBranch) {
-			node.y(y + 60);
-			y += 120;
+			if (prevNode && prevNode.idealogicalBranch == HEAD.idealogicalBranch)
+				y += 120;
+			else
+				y += 60;
 			node.radius(30);
 			node.logBoxVisible(true);
 		} else {
-			node.y(y + 30);
 			y += 60;
 			node.radius(15);
 			node.logBoxVisible(false);
 		}
+		node.y(y);
 
+		prevNode = node;
 	});
 }
 
