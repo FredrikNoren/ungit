@@ -66,13 +66,13 @@
 				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 			</div>
 			
-			<div class="log">
+			<div class="graph" data-bind="with: graph">
 
-				<div class="graphLog" data-bind="graphLog: logEntries">
+				<div class="graphLog" data-bind="graphLog: $data">
 				</div>
 				
-				<div data-bind="foreach: logEntries">
-					<div class="logEntry" data-bind="style: { left: x() + 'px', top: y() + 'px' }">
+				<div data-bind="foreach: nodes">
+					<div class="logEntry" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
 						<img src="images/whiteArrowRight.png" class="arrowRight">
 						<div class="logEntryBox">
 							<div class="title" data-bind="text: title"></div>
@@ -82,8 +82,8 @@
 					</div>
 				</div>
 
-				<div class="branches" data-bind="foreach: branches">
-					<div class="branch" data-bind="style: { left: x() + 'px', top: y() + 'px' }, css: { current: current }">
+				<div class="branches" data-bind="foreach: refs">
+					<div class="branch" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, css: { current: current }">
 						<img src="images/grayArrowLeft.png" class="arrowLeft">
 						<div class="branchBox">
 							<div class="name" data-bind="text: name, click: checkout"></div>
@@ -116,7 +116,7 @@
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type='text/javascript' src='/scripts/api.js'></script>
-<script type='text/javascript' src='/scripts/logViewModel.js'></script>
+<script type='text/javascript' src='/scripts/gitGraph.js'></script>
 <script type='text/javascript' src='/scripts/vector2.js'></script>
 <script type='text/javascript' src='/scripts/logrenderer.js'></script>
 <script type='text/javascript' src='/scripts/app.js'></script>

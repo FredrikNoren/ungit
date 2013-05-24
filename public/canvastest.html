@@ -30,7 +30,7 @@ body {
 <script type="text/javascript" src="/scripts/lib/moment.js"></script>
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type='text/javascript' src='/scripts/lib/knockout-2.2.1.js'></script>
-<script type='text/javascript' src='/scripts/logViewModel.js'></script>
+<script type='text/javascript' src='/scripts/gitGraph.js'></script>
 <script type='text/javascript' src='/scripts/vector2.js'></script>
 <script type='text/javascript' src='/scripts/logrenderer.js'></script>
 <script type='text/javascript' src='/test/spec.vector2.js'></script>
@@ -43,13 +43,14 @@ var log = [
 {"sha1":"81c6e0156c0ecdd3e14c3d9dd01e0c1ac61966df","parents":["ae03f555da711c045a6848d27483f9d79d7f57c2"],"refs":["refs/heads/master"],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","date":"Thu May 23 21:03:01 2013 +0200","title":"Main","message":"Main"},
 {"sha1":"ae03f555da711c045a6848d27483f9d79d7f57c2","parents":[],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","date":"Thu May 23 21:02:37 2013 +0200","title":"Init","message":"Init"}];
 
-log = LogEntryViewModel.fromBackendList(log);
+var graph = new GitGraphViewModel();
+graph.setNodes(log);
 
 var runner = mocha.run(function(failures) {
 	if (runner.failures) return;
 	var c = document.getElementById("canvas");
 	var logArgs = function(name) { console.log(name, arguments); }
-	logRenderer.render(log, c, logArgs.bind(undefined, 'commit'), logArgs.bind(undefined, 'branch'));
+	logRenderer.render(c, graph.nodes(), graph.nodesById, graph.refsByRefName);
 });
 
 

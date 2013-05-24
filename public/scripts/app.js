@@ -92,11 +92,7 @@ var RepositoryViewModel = function(path) {
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
-	this.logEntries = ko.observable([]);
-	this.branches = ko.observable([]);
-	this.branch = ko.observable();
-	this.showBranches = ko.observable(false);
-	this.newBranchName = ko.observable();
+	this.graph = new GitGraphViewModel();
 	this.update();
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
@@ -149,11 +145,11 @@ RepositoryViewModel.prototype.updateLog = function() {
 			entry.date = ko.observable(moment(date).fromNow());
 			setInterval(function() { entry.date(moment(date).fromNow()); }, 1000 * 60);
 		});
-		self.logEntries(LogEntryViewModel.fromBackendList(logEntries));
+		self.graph.setNodes(logEntries);
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {
-	var self = this;
+	/*var self = this;
 	api.query('GET', '/branches', { path: this.path }, function(err, branches) {
 		if (err) return;
 		branches.forEach(function(branch) {
@@ -162,7 +158,7 @@ RepositoryViewModel.prototype.updateBranches = function() {
 			if (branch.current) self.branch(branch.name);
 		});
 		self.branches(branches.map(function(b) { return new BranchViewModel(self.path, b); }));
-	});
+	});*/
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {
 	this.showBranches(!this.showBranches());

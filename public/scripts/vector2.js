@@ -28,3 +28,6 @@ Vector2.add = function(a, b) {
 Vector2.mul = function(a, val) {
 	return new Vector2(a.x * val, a.y * val);
 }
+Vector2.random = function() {
+	return new Vector2(Math.random(), Math.random());
+}
