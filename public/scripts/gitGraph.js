@@ -36,19 +36,23 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 
 GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, idealogicalBranch) {
+		e.idealogicalBranch = idealogicalBranch;
 		while (e.parents.length > 0) {
 			e = nodesById[e.parents[0]];
 			e.idealogicalBranch = idealogicalBranch;
 		}
 	}
+	var getIdeologicalBranch = function(e) {
+		return _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });
+	}
 	nodes.forEach(function(e) {
 		if (e.idealogicalBranch) return;
 		var i = 0;
-		var idealogicalBranch = e.idealogicalBranch = _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });
-		if (!e.idealogicalBranch) return;
+		var idealogicalBranch = getIdeologicalBranch(e);
+		if (!idealogicalBranch) return;
 		recursivelyMarkBranch(e, idealogicalBranch);
 	});
-	recursivelyMarkBranch(HEAD, HEAD.idealogicalBranch);
+	recursivelyMarkBranch(HEAD, getIdeologicalBranch(HEAD));
 }
 
 GitGraphViewModel.randomColor = function() {
