@@ -26,7 +26,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 				refViewModel.node(nodeViewModel);
 				return refViewModel;
 			});
-			//nodeViewModel.refs(refVMs);
+			nodeViewModel.refsViewModels(refVMs);
 		}
 	});
 	GitGraphViewModel.normalize(nodeVMs, this.nodesById, this.refsByRefName);
@@ -117,7 +117,7 @@ NodeViewModel = function(args) {
 	});
 	this.radius = ko.observable(30);
 	this.boxDisplayX = ko.computed(function() {
-		return 0;
+		return self.x();
 	});
 	this.boxDisplayY = ko.computed(function() {
 		return self.y();
@@ -131,6 +131,7 @@ NodeViewModel = function(args) {
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);
+	this.refsViewModels = ko.observable([]);
 }
 
 var RefViewModel = function(args) {

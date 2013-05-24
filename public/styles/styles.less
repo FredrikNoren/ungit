@@ -164,60 +164,73 @@ a {
 
 			position: relative;
 			top: -60px;
+			left: 500px;
 
 			.graphLog {
 				position: absolute;
-				left: 500px;
 			}
 
-			.logEntry {
+			.node {
 				position: absolute;
 				
-				.arrowRight {
+				.log {
 					position: absolute;
-					right: -15px;
-					top: -15px;
-				}
-				.logEntryBox {
-					position: relative;
-					top: -20px;
-					background: rgba(255, 255, 255, 0.9);
-					padding: 10px;
-					width: 470px;
-					box-sizing:border-box;
-					-moz-box-sizing:border-box;	
-					.author, .date {
-						color: #999;
+					left: -530px;
+					.arrowRight {
+						position: absolute;
+						right: -15px;
+						top: -15px;
 					}
-					.title {
-						font-size: 1.3em;
+					.logEntryBox {
+						position: relative;
+						top: -20px;
+						background: rgba(255, 255, 255, 0.9);
+						padding: 10px;
+						width: 470px;
+						box-sizing:border-box;
+						-moz-box-sizing:border-box;	
+						.author, .date {
+							color: #999;
+						}
+						.title {
+							font-size: 1.3em;
+						}
 					}
 				}
-			}
 
-			.branches {
-				position: absolute;
-				left: 550px;
-				top: -16px;
-				.branch {
-					background: #474747;
-					color: #fff;
-					padding: 5px;
-					padding-left: 10px;
-					padding-right: 10px;
+				.refs {
 					position: absolute;
-					cursor: pointer;
-					opacity: 0.6;
-					&.current {
-						font-weight: bold;
-						opacity: 1;
-					}
+					left: 50px;
+					top: -16px;
+					width: 500px;
 					.arrowLeft {
 						position: absolute;
 						left: -15px;
 						top: 1px;
 					}
+					.refsList {
+						display: inline-block;
+					}
+					.ref {
+						position: relative;
+						display: inline-block;
+						background: #474747;
+						color: #fff;
+						padding: 5px;
+						padding-left: 10px;
+						padding-right: 10px;
+						cursor: pointer;
+						opacity: 0.6;
+						.name {
+							display: inline-block;
+						}
+						&.current {
+							font-weight: bold;
+							opacity: 1;
+						}
+					}
 				}
+
 			}
 		}
 

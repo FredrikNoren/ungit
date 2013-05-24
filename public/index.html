@@ -71,23 +71,30 @@
 				<div class="graphLog" data-bind="graphLog: $data">
 				</div>
 				
-				<div data-bind="foreach: nodes">
-					<div class="logEntry" data-bind="visible: logBoxVisible, style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
-						<img src="images/whiteArrowRight.png" class="arrowRight">
-						<div class="logEntryBox">
-							<div class="title" data-bind="text: title"></div>
-							<div class="date" data-bind="text: date"></div>
-							<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+				<div class="nodes" data-bind="foreach: nodes">
+					<div class="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+						<div class="log" data-bind="visible: logBoxVisible">
+							<img src="images/whiteArrowRight.png" class="arrowRight">
+							<div class="logEntryBox">
+								<div class="title" data-bind="text: title"></div>
+								<div class="date" data-bind="text: date"></div>
+								<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+							</div>
 						</div>
-					</div>
-				</div>
 
-				<div class="branches" data-bind="foreach: refs">
-					<div class="branch" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, css: { current: current }">
-						<img src="images/grayArrowLeft.png" class="arrowLeft">
-						<div class="branchBox">
-							<div class="name" data-bind="text: name, click: checkout"></div>
+						<div class="refs">
+							<div class="refsList" data-bind="foreach: refsViewModels">
+								<div class="ref" data-bind="css: { current: current }">
+									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
+									<div class="name" data-bind="text: name, click: checkout"></div>
+								</div>
+							</div>
+							<!--div class="ref newRef">
+								<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: refsViewModels().length == 0">
+								<div class="name">NEW</div>
+							</div-->
 						</div>
+
 					</div>
 				</div>
 
