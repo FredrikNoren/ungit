@@ -161,6 +161,11 @@ exports.registerApi = function(app, server, dev) {
 		git('checkout "' + req.body.name + '"', req.body.path, res);
 	});
 
+	app.get(exports.pathPrefix + '/branch', function(req, res){
+		if (!verifyPath(req.query.path, res)) return;
+		git('rev-parse --abbrev-ref HEAD', req.query.path, res, function(branch) { return branch.trim(); });
+	});
+
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig);
 	});

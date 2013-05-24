@@ -401,6 +401,19 @@ describe('git', function () {
 			}));
 	});
 
+	it('get branch should show the new branch as current', function(done) {
+		req
+			.get(restGit.pathPrefix + '/branch')
+			.query({ path: testDir })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200)
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(res.body).to.be(testBranch);
+				done();
+			}));
+	});
+
 
 	var testSubDir = 'sub';
 

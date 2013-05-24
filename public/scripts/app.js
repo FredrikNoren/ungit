@@ -149,16 +149,11 @@ RepositoryViewModel.prototype.updateLog = function() {
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {
-	/*var self = this;
-	api.query('GET', '/branches', { path: this.path }, function(err, branches) {
+	var self = this;
+	api.query('GET', '/branch', { path: this.path }, function(err, branch) {
 		if (err) return;
-		branches.forEach(function(branch) {
-			branch.current = !!branch.current;
-			branch.switchTo = function() { api.query('POST', '/branch', { path: self.path, name: branch.name }) };
-			if (branch.current) self.branch(branch.name);
-		});
-		self.branches(branches.map(function(b) { return new BranchViewModel(self.path, b); }));
-	});*/
+		self.graph.activeBranch(branch);
+	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {
 	this.showBranches(!this.showBranches());

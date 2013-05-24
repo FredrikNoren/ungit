@@ -6,6 +6,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.nodesById = {};
 	this.refsByRefName = {};
 	this.repoPath = repoPath;
+	this.activeBranch = ko.observable();
 }
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
@@ -16,14 +17,16 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		nodeVMs.push(nodeViewModel);
 		self.nodesById[node.sha1] = nodeViewModel;
 		if (node.refs) {
-			node.refs.forEach(function(ref) {
+			var refVMs = node.refs.map(function(ref) {
 				var refViewModel = self.refsByRefName[ref];
 				if (!refViewModel) {
-					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref, repoPath: self.repoPath });
+					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref, graph: self });
 					self.refs.push(refViewModel);
 				}
 				refViewModel.node(nodeViewModel);
+				return refViewModel;
 			});
+			//nodeViewModel.refs(refVMs);
 		}
 	});
 	GitGraphViewModel.normalize(nodeVMs, this.nodesById, this.refsByRefName);
@@ -142,10 +145,14 @@ var RefViewModel = function(args) {
 		return self.node().y();
 	});
 	this.name = args.name;
-	this.current = false;
-	this.repoPath = args.repoPath;
+	this.branchName = this.name.slice('refs/heads/'.length);
+	this.isBranch = this.name.indexOf('refs/heads/') != -1;
+	this.graph = args.graph;
+	this.current = ko.computed(function() {
+		return self.isBranch && self.graph.activeBranch() == self.branchName;
+	});
 	this.color = GitGraphViewModel.randomColor();
 }
 RefViewModel.prototype.checkout = function() {
-	api.query('POST', '/branch', { path: this.repoPath, name: this.name.slice('refs/heads/'.length) });
+	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.branchName });
 }
