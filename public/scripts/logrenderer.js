@@ -86,17 +86,22 @@ var getLogGraph = function(log) {
 }
 
 var markBranches = function(log, logGraph) {
+	var HEAD;
+	var recursivelyMarkBranch = function(e, branch) {
+		while (e.parents.length > 0) {
+			e = logGraph[e.parents[0]];
+			e.branch = branch;
+		}
+	}
 	log.forEach(function(e) {
 		if (e.branch) return;
 		var i = 0;
 		var branch = e.branch = _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });
+		if (e.refs.indexOf('HEAD') !== -1) HEAD = e;
 		if (!e.branch) return;
-		while (e.parents.length > 0) {
-			e = logGraph[e.parents[0]];
-			if (e.branch) return;
-			e.branch = branch;
-		}
+		recursivelyMarkBranch(e, branch);
 	});
+	recursivelyMarkBranch(HEAD, HEAD.branch);
 }
 
 var randomColor = function() {
@@ -108,9 +113,9 @@ var randomColor = function() {
 	return '#' + randomHex() + randomHex() + randomHex();
 }
 
-var buildSceneGraph = function(log, branchViewModels) {
+var buildSceneGraph = function(log, onLogEntryPositionChanged, onBranchPositionChanged) {
 
-	if (log.length == 0 || branchViewModels.length == 0) return [];
+	if (log.length == 0) return [];
 
 	var HEAD;
 	log.forEach(function(entry) {
@@ -129,16 +134,12 @@ var buildSceneGraph = function(log, branchViewModels) {
 	var getBranch = function(name, y, entry) {
 		var branch = branches[name];
 		if (!branch) {
-			var branchViewModel = _.find(branchViewModels, function(bvm) { return 'refs/heads/' + bvm.name == name });
 			branch = branches[name] = {
 				name: name,
 				order: Object.keys(branches).length,
 				color: randomColor(),
 				topCommit: entry,
-				branchViewModel: branchViewModel
 			};
-			branchViewModel.x(30 + 60 * branch.order);
-			branchViewModel.y = entry.y;
 		}
 		return branch;
 	}
@@ -161,8 +162,12 @@ var buildSceneGraph = function(log, branchViewModels) {
 
 		logNodeIcon.position.x = 30 + 60 * branch.order;
 		logNodeIcon.position.y = y;
-		entry.graphNodeX(logNodeIcon.position.x);
-		entry.graphNodeY(logNodeIcon.position.y);
+		onLogEntryPositionChanged(entry.sha1, logNodeIcon.position.x, logNodeIcon.position.y);
+		if (branch.x === undefined) {
+			branch.x = logNodeIcon.position.x;
+			branch.y = logNodeIcon.position.y;
+			onBranchPositionChanged(branch.name, branch.x, branch.y);
+		}
 
 		entry.graphNode = logNodeIcon;
 
@@ -182,12 +187,12 @@ var buildSceneGraph = function(log, branchViewModels) {
 	return sceneGraph;	
 }
 
-logRenderer.render = function(log, element, branchViewModels) {
+logRenderer.render = function(log, element, onLogEntryPositionChanged, onBranchPositionChanged) {
 	
 	var context = element.getContext("2d");
 	context.clearRect(0, 0, element.width, element.height)
 
-	var sceneGraph = buildSceneGraph(log, branchViewModels);
+	var sceneGraph = buildSceneGraph(log, onLogEntryPositionChanged, onBranchPositionChanged);
 	sceneGraph.forEach(function(node) {
 		console.log('Drawing ', node);
 		node.draw(context);

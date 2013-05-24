@@ -26,7 +26,7 @@ body {
 
 <script src="scripts/lib/expect.js"></script>
 <script src="scripts/lib/mocha.js"></script>
-<script>mocha.setup('tdd')</script>
+<script>mocha.setup('bdd')</script>
 <script type="text/javascript" src="/scripts/lib/moment.js"></script>
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type='text/javascript' src='/scripts/lib/knockout-2.2.1.js'></script>
@@ -46,7 +46,8 @@ log = LogEntryViewModel.fromBackendList(log);
 var runner = mocha.run(function(failures) {
 	if (runner.failures) return;
 	var c = document.getElementById("canvas");
-	logRenderer.render(log, c);
+	var logArgs = function(name) { console.log(name, arguments); }
+	logRenderer.render(log, c, logArgs.bind(undefined, 'commit'), logArgs.bind(undefined, 'branch'));
 });
 
 
