@@ -89,10 +89,13 @@
 									<div class="name" data-bind="text: name, click: checkout"></div>
 								</div>
 							</div>
-							<!--div class="ref newRef">
+							<div class="ref newRef">
 								<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: refsViewModels().length == 0">
-								<div class="name">NEW</div>
-							</div-->
+								<form data-bind="submit: createBranch">
+									<input class="name" type="text" placeholder="&#x271A;" data-bind="value: newBranchName">
+									<input class="submit" type="submit">
+								</form>
+							</div>
 						</div>
 
 					</div>

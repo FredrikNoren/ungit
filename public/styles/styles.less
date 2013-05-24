@@ -228,6 +228,36 @@ a {
 							font-weight: bold;
 							opacity: 1;
 						}
+						&.newRef {
+							opacity: 0.1;
+							form {
+								margin: 0px;
+								padding: 0px;
+							}
+							input.name {
+								background: #474747;
+								color: #fff;
+								border: 0px;
+								font-size: 1em;
+								padding: 0px;
+								margin: 0px;
+								width: 15px;
+								&:focus {
+									width: 200px;
+								}
+							}
+							input.submit {
+								visibility: hidden;
+								position: absolute;
+								width: 0px;
+								height: 0px;
+								margin: 0px;
+								padding: 0px;
+							}
+							&:hover {
+								opacity: 0.8;
+							}
+						}
 					}
 				}
 

@@ -13,6 +13,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var self = this;
 	var nodeVMs = [];
 	nodes.forEach(function(node) {
+		node.graph = self;
 		var nodeViewModel = new NodeViewModel(node);
 		nodeVMs.push(nodeViewModel);
 		self.nodesById[node.sha1] = nodeViewModel;
@@ -110,6 +111,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 NodeViewModel = function(args) {
 	var self = this;
+	this.graph = args.graph;
 	this.x = ko.observable(0);
 	this.y = ko.observable(0);
 	this.position = ko.computed(function() {
@@ -132,6 +134,10 @@ NodeViewModel = function(args) {
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);
 	this.refsViewModels = ko.observable([]);
+	this.newBranchName = ko.observable();
+}
+NodeViewModel.prototype.createBranch = function() {
+	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 }
 
 var RefViewModel = function(args) {
