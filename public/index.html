@@ -72,7 +72,7 @@
 				</div>
 				
 				<div data-bind="foreach: nodes">
-					<div class="logEntry" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+					<div class="logEntry" data-bind="visible: logBoxVisible, style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
 						<img src="images/whiteArrowRight.png" class="arrowRight">
 						<div class="logEntryBox">
 							<div class="title" data-bind="text: title"></div>

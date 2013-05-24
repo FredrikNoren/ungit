@@ -92,7 +92,7 @@ var RepositoryViewModel = function(path) {
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
-	this.graph = new GitGraphViewModel();
+	this.graph = new GitGraphViewModel(path);
 	this.update();
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {

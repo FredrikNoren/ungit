@@ -1,10 +1,11 @@
 
 
-var GitGraphViewModel = function() {
+var GitGraphViewModel = function(repoPath) {
 	this.nodes = ko.observable([]);
 	this.refs = ko.observableArray();
 	this.nodesById = {};
 	this.refsByRefName = {};
+	this.repoPath = repoPath;
 }
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
@@ -16,8 +17,9 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		self.nodesById[node.sha1] = nodeViewModel;
 		if (node.refs) {
 			node.refs.forEach(function(ref) {
-				if (!self.refsByRefName[ref]) {
-					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref });
+				var refViewModel = self.refsByRefName[ref];
+				if (!refViewModel) {
+					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref, repoPath: self.repoPath });
 					self.refs.push(refViewModel);
 				}
 				refViewModel.node(nodeViewModel);
@@ -67,9 +69,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	var updateTimeStamp = moment().valueOf();
 
 	var branchOrder = 0;
-	var y = 30;
-
-	y += 120; // Leave room for the "commit node" (see logrednerer.js)
+	var y = 60; // Leave room for the "commit node" (see logrednerer.js)
 
 	var fixRefOrder = function(ref, node) {
 		if (ref.normalizeTimeStamp != updateTimeStamp) {
@@ -81,16 +81,24 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	// Make sure the "ideological branch" is the leftmost
 	fixRefOrder(refsByRefName[HEAD.idealogicalBranch], HEAD);
 
-
 	nodes.forEach(function(node) {
 		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
 
 		fixRefOrder(idealogicalBranch, node);
 
 		node.x(30 + 60 * idealogicalBranch.branchOrder);
-		node.y(y);
+		if (node.idealogicalBranch == HEAD.idealogicalBranch) {
+			node.y(y + 60);
+			y += 120;
+			node.radius(30);
+			node.logBoxVisible(true);
+		} else {
+			node.y(y + 30);
+			y += 60;
+			node.radius(15);
+			node.logBoxVisible(false);
+		}
 
-		y += 120;
 	});
 }
 
@@ -101,7 +109,7 @@ NodeViewModel = function(args) {
 	this.position = ko.computed(function() {
 		return new Vector2(self.x(), self.y());
 	});
-	this.radius = 30;
+	this.radius = ko.observable(30);
 	this.boxDisplayX = ko.computed(function() {
 		return 0;
 	});
@@ -116,6 +124,7 @@ NodeViewModel = function(args) {
 	this.date = args.date;
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
+	this.logBoxVisible = ko.observable(true);
 }
 
 var RefViewModel = function(args) {
@@ -131,9 +140,9 @@ var RefViewModel = function(args) {
 	});
 	this.name = args.name;
 	this.current = false;
-	this.path = args.path;
+	this.repoPath = args.repoPath;
 	this.color = GitGraphViewModel.randomColor();
 }
 RefViewModel.prototype.checkout = function() {
-	api.query('POST', '/branch', { path: this.path, name: this.name });
+	api.query('POST', '/branch', { path: this.repoPath, name: this.name.slice('refs/heads/'.length) });
 }

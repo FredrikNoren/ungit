@@ -11,8 +11,6 @@ logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 	context.moveTo(a.x, a.y);
 	context.lineTo(b.x, b.y);
 }
-logRenderer.drawNode = function(context, node) {
-}
 
 logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 
@@ -33,14 +31,14 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 		node.parents.forEach(function(parentId) {
 			var parent = nodesById[parentId];
 			logRenderer.drawLineBetweenNodes(context,
-				{ position: node.position(), radius: node.radius },
-				{ position: parent.position(), radius: parent.radius });
+				{ position: node.position(), radius: node.radius() },
+				{ position: parent.position(), radius: parent.radius() });
 		});
 	});
 	if (HEAD) {
 		logRenderer.drawLineBetweenNodes(context,
 			{ position: commitNodePosition, radius: 30 },
-			{ position: HEAD.position(), radius: HEAD.radius });
+			{ position: HEAD.position(), radius: HEAD.radius() });
 		context.stroke();
 	}
 	
@@ -49,7 +47,7 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 	nodes.forEach(function(node) {
 		context.fillStyle = refsByRefName[node.idealogicalBranch].color;
 		context.beginPath();
-		context.arc(node.x(), node.y(), node.radius, 0, 2 * Math.PI);
+		context.arc(node.x(), node.y(), node.radius(), 0, 2 * Math.PI);
 		context.fill();
 	});
 	if (HEAD) {
