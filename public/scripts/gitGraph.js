@@ -37,10 +37,10 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, idealogicalBranch) {
 		e.idealogicalBranch = idealogicalBranch;
-		while (e.parents.length > 0) {
-			e = nodesById[e.parents[0]];
-			e.idealogicalBranch = idealogicalBranch;
-		}
+		e.parents.forEach(function(parentId) {
+			var parent = nodesById[parentId];
+			recursivelyMarkBranch(parent, idealogicalBranch);
+		});
 	}
 	var getIdeologicalBranch = function(e) {
 		return _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });

@@ -106,12 +106,14 @@ exports.parseGitLog = function(data) {
 			currentCommmit.authorEmail = capture[2].trim();
 		} else if (row.indexOf('Date: ') == 0) {
 			currentCommmit.date = row.slice('Date: '.length).trim();
-		} else {
+		} else if (row.trim() == '') {
 			parser = parseCommitMessage;
+		} else {
+			// Ignore other headers
 		}
 	}
-	var parseCommitMessage = function(row) {
-		if (row.trim() == '') {
+	var parseCommitMessage = function(row, index) {
+		if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
 			parser = parseCommitLine;
 			return;
 		}
@@ -122,9 +124,11 @@ exports.parseGitLog = function(data) {
 		currentCommmit.message += row.trim();
 	}
 	var parser = parseCommitLine;
-	data.split('\n').forEach(function(row) {
-		parser(row);
+	var rows = data.split('\n');
+	rows.forEach(function(row, index) {
+		parser(row, index);
 	});
+	commits.forEach(function(commit) { commit.message = commit.message.trim(); });
 	return commits;
 };
 

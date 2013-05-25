@@ -16,6 +16,10 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 
 	console.log('RENDER', nodes.length);
 
+	if (!nodes.length) return;
+
+	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
+
 	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') != -1; });
 	var commitNodePosition = new Vector2(30, 30);
 	
