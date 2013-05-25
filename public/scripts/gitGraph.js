@@ -138,6 +138,9 @@ NodeViewModel = function(args) {
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);
 	this.refsViewModels = ko.observable([]);
+	this.branches = ko.computed(function() {
+		return self.refsViewModels().filter(function(r) { return r.isBranch; });
+	});
 	this.newBranchName = ko.observable();
 }
 NodeViewModel.prototype.createBranch = function() {

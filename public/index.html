@@ -83,14 +83,14 @@
 						</div>
 
 						<div class="refs">
-							<div class="refsList" data-bind="foreach: refsViewModels">
+							<div class="refsList" data-bind="foreach: branches">
 								<div class="ref" data-bind="css: { current: current }">
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
-									<div class="name" data-bind="text: name, click: checkout"></div>
+									<div class="name" data-bind="text: branchName, click: checkout"></div>
 								</div>
 							</div>
 							<div class="ref newRef">
-								<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: refsViewModels().length == 0">
+								<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: branches().length == 0">
 								<form data-bind="submit: createBranch">
 									<input class="name" type="text" placeholder="&#x271A;" data-bind="value: newBranchName">
 									<input class="submit" type="submit">
