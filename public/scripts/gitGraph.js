@@ -68,6 +68,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	nodes.sort(function(a, b) { return a.time.unix() < b.time.unix(); });
 
 	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') !== -1; });
+	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
 	
 	//var concurrentBranches = { };

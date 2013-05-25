@@ -163,7 +163,15 @@ exports.registerApi = function(app, server, dev) {
 
 	app.get(exports.pathPrefix + '/branch', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
-		git('rev-parse --abbrev-ref HEAD', req.query.path, res, function(branch) { return branch.trim(); });
+		var HEADFile = path.join(req.query.path, '.git', 'HEAD');
+		if (!fs.existsSync(HEADFile)) 
+			return res.json(400, { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile });
+		fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
+			text = text.toString();
+			var rows = text.split('\n');
+			var branch = rows[0].slice('ref: refs/heads/'.length);
+			res.json(branch);
+		});
 	});
 
 	app.get(exports.pathPrefix + '/config', function(req, res){

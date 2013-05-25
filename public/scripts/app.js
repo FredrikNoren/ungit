@@ -151,6 +151,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 RepositoryViewModel.prototype.updateBranches = function() {
 	var self = this;
 	api.query('GET', '/branch', { path: this.path }, function(err, branch) {
+		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.activeBranch(branch);
 	});
