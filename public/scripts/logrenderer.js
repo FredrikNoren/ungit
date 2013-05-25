@@ -35,7 +35,10 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 				{ position: parent.position(), radius: parent.radius() });
 		});
 	});
+	context.stroke();
 	if (HEAD) {
+		context.beginPath();
+		context.setLineDash([10, 5]);
 		logRenderer.drawLineBetweenNodes(context,
 			{ position: commitNodePosition, radius: 30 },
 			{ position: HEAD.position(), radius: HEAD.radius() });
