@@ -208,7 +208,7 @@ var RefViewModel = function(args) {
 	this.show = true;
 	this.graph = args.graph;
 	this.current = ko.computed(function() {
-		return self.isBranch && self.graph.activeBranch() == self.branchName;
+		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
 	this.color = GitGraphViewModel.randomColor();
 }
