@@ -74,7 +74,7 @@ GitGraphViewModel.randomColor = function() {
 }
 
 GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
-	nodes.sort(function(a, b) { return a.time.unix() < b.time.unix(); });
+	nodes.sort(function(a, b) { return b.time.unix() - a.time.unix(); });
 
 	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') !== -1; });
 	if (!HEAD) return;
@@ -115,7 +115,6 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 		// Free branch slots when we reach the end of a branch
 		/*if (node == idealogicalBranch.node()) {
-			console.log('FREE', idealogicalBranch.branchOrder);
 			branchSlots[idealogicalBranch.branchOrder] = undefined;
 		}*/
 	}
@@ -164,7 +163,8 @@ NodeViewModel = function(args) {
 	this.parents = args.parents || [];
 	this.title = args.title;
 	this.sha1 = args.sha1;
-	this.date = args.date;
+	this.date = ko.observable(moment(args.date).fromNow());
+	setInterval(function() { self.date(moment(args.date).fromNow()); }, 1000 * 60);
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);

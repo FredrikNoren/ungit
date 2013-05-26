@@ -140,11 +140,6 @@ RepositoryViewModel.prototype.updateLog = function() {
 	var self = this;
 	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
 		if (err) return;
-		logEntries.forEach(function(entry) {
-			var date = entry.date;
-			entry.date = ko.observable(moment(date).fromNow());
-			setInterval(function() { entry.date(moment(date).fromNow()); }, 1000 * 60);
-		});
 		self.graph.setNodes(logEntries);
 	});
 }
