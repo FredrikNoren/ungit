@@ -27,6 +27,11 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 				refViewModel.node(nodeViewModel);
 				return refViewModel;
 			});
+			refVMs.sort(function(a, b) {
+				if (a.isLocalBranch && !b.isLocalBranch) return -1;
+				if (!a.isLocalBranch && b.isLocalBranch) return 1;
+				return a.displayName < b.displayName ? -1 : 1;
+			});
 			nodeViewModel.refs(refVMs);
 		}
 	});
