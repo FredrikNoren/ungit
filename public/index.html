@@ -32,12 +32,9 @@
 	<div class="repository">
 
 		<div class="titleHeader animated fadeInLeft">
-			<img class='icon' src='images/repository.png'>
-			<div class='preTitle'>Repository</div>
-			<div class='title' data-bind='text: title'></div>
+			<span class="path" data-bind="text: titleSubPath"></span><span class='title' data-bind='text: title'></span>
 		</div>
 		<div class="hr"></div>
-		<div class="path animated fadeInLeft" data-bind="text: path"></div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...

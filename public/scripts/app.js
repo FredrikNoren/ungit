@@ -84,7 +84,9 @@ var RepositoryViewModel = function(path) {
 		return gitConfig()['user.email'];
 	});
 	this.path = path;
-	var pathSplit = path.split('/');
+	var p2 = path.replace(/\\/g, '/');
+	var pathSplit = p2.split('/');
+	this.titleSubPath = pathSplit.slice(0, pathSplit.length - 1).join('/') + '/';
 	this.title = capitaliseFirstLetter(pathSplit[pathSplit.length - 1]);
 	this.commitValidationError = ko.computed(function() {
 		if (!self.files().some(function(file) { return file.staged(); }))
