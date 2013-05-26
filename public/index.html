@@ -84,9 +84,10 @@
 
 						<div class="refs">
 							<div class="refsList" data-bind="foreach: branches">
-								<div class="ref" data-bind="css: { current: current }">
+								<div class="ref" data-bind="css: { current: current, remote: isRemoteBranch }">
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
-									<div class="name" data-bind="text: branchName, click: checkout"></div>
+									<div class="name" data-bind="text: displayName, click: checkout"></div>
+									<span data-bind="visible: isRemoteBranch">(remote)</span>
 								</div>
 							</div>
 							<div class="ref newRef">

@@ -190,8 +190,18 @@ var RefViewModel = function(args) {
 		return self.node().y();
 	});
 	this.name = args.name;
-	this.branchName = this.name.slice('refs/heads/'.length);
-	this.isBranch = this.name.indexOf('refs/heads/') != -1;
+	this.displayName = this.name;
+	this.isTag = this.name.indexOf('refs/tags/') == 0;
+	this.isLocalHEAD = this.name == 'HEAD';
+	this.isRemoteHEAD = this.name == 'refs/remotes/origin/HEAD';
+	this.isLocalBranch = this.name.indexOf('refs/heads/') == 0;
+	this.isRemoteBranch = this.name.indexOf('refs/remotes/origin/') == 0 && !this.isRemoteHEAD;
+	this.isHEAD = this.isLocalHEAD || this.isRemoteHEAD;
+	this.isBranch = this.isLocalBranch || this.isRemoteBranch;
+	this.isRemote = this.isRemoteBranch;
+	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
+	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
+	this.show = true;
 	this.graph = args.graph;
 	this.current = ko.computed(function() {
 		return self.isBranch && self.graph.activeBranch() == self.branchName;
