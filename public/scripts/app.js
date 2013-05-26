@@ -92,8 +92,10 @@ var RepositoryViewModel = function(path) {
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
+	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(path);
 	this.update();
+	this.fetch();
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
 		ready: function() { self.watcherReady(true) },
@@ -107,6 +109,13 @@ RepositoryViewModel.prototype.update = function() {
 	this.updateBranches();
 	this.files().forEach(function(file) {
 		file.invalidateDiff();
+	});
+}
+RepositoryViewModel.prototype.fetch = function() {
+	var self = this;
+	this.isFetching(true);
+	api.query('POST', '/fetch', { path: this.path }, function(err, status) {
+		self.isFetching(false);
 	});
 }
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
