@@ -88,27 +88,40 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 	//var concurrentBranches = { };
 
-
-	var branchOrder = 0;
+	var branchSlots = [];
 	var y = 30; // Leave room for the "commit node" (see logrednerer.js)
 
-	var fixRefOrder = function(ref, node) {
-		if (ref.normalizeTimeStamp != updateTimeStamp) {
-			ref.branchOrder = branchOrder++;
-			ref.normalizeTimeStamp = updateTimeStamp;
-		}
-	}
+	// Then iterate from the bottom to fix the orders of the branches
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		var node = nodes[i];
+		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
+		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
 
-	// Make sure the "ideological branch" is the leftmost
-	fixRefOrder(refsByRefName[HEAD.idealogicalBranch], HEAD);
+		// First occurence of the branch, find an empty slot for the branch
+		if (idealogicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
+			idealogicalBranch.lastSlottedTimeStamp = updateTimeStamp;
+			var slot = 0;
+			for(;slot < branchSlots.length; slot++)
+				if (branchSlots[slot] === undefined) break;
+			if (slot == branchSlots.length) {
+				branchSlots.push(idealogicalBranch);
+				slot = branchSlots.length - 1;
+			}
+			idealogicalBranch.branchOrder = slot;
+			branchSlots[slot] = slot;
+		}
+
+		node.branchOrder = idealogicalBranch.branchOrder;
+
+		// Free branch slots when we reach the end of a branch
+		/*if (node == idealogicalBranch.node()) {
+			console.log('FREE', idealogicalBranch.branchOrder);
+			branchSlots[idealogicalBranch.branchOrder] = undefined;
+		}*/
+	}
 
 	var prevNode;
 	nodes.forEach(function(node) {
-
-		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
-
-		fixRefOrder(idealogicalBranch, node);
-
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) {
 			if (!prevNode)
 				y += 90;
@@ -120,8 +133,8 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 			node.radius(30);
 			node.logBoxVisible(true);
 		} else {
-			node.x(30 + 60 * idealogicalBranch.branchOrder);
 			y += 60;
+			node.x(30 + 60 * (branchSlots.length - node.branchOrder));
 			node.radius(15);
 			node.logBoxVisible(false);
 		}
