@@ -13,9 +13,6 @@ logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 }
 
 logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
-
-	console.log('RENDER', nodes.length);
-
 	if (!nodes.length) return;
 
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;

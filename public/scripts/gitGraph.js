@@ -55,13 +55,11 @@ GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById
 	nodes.forEach(function(e) {
 		var i = 0;
 		var idealogicalBranch = getIdeologicalBranch(e);
-		console.log(idealogicalBranch, e);
 		if (idealogicalBranch == 'refs/heads/master') master = e;
 		if (!idealogicalBranch) return;
 		recursivelyMarkBranch(e, idealogicalBranch);
 	});
 	if (master) {
-		console.log('mark master');
 		recursivelyMarkBranch(master, 'refs/heads/master');
 	}
 }
