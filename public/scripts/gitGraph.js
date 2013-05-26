@@ -27,10 +27,10 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 				refViewModel.node(nodeViewModel);
 				return refViewModel;
 			});
-			nodeViewModel.refsViewModels(refVMs);
+			nodeViewModel.refs(refVMs);
 		}
 	});
-	GitGraphViewModel.normalize(nodeVMs, this.nodesById, this.refsByRefName);
+	nodeVMs = GitGraphViewModel.normalize(nodeVMs, this.nodesById, this.refsByRefName);
 	this.nodes(nodeVMs);
 }
 
@@ -49,18 +49,18 @@ GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById
 		});
 	}
 	var getIdeologicalBranch = function(e) {
-		return _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });
+		return _.find(e.refs(), function(ref) { return ref.isLocalBranch; });
 	}
 	var master;
 	nodes.forEach(function(e) {
 		var i = 0;
 		var idealogicalBranch = getIdeologicalBranch(e);
-		if (idealogicalBranch == 'refs/heads/master') master = e;
 		if (!idealogicalBranch) return;
+		if (idealogicalBranch.name == 'refs/heads/master') master = e;
 		recursivelyMarkBranch(e, idealogicalBranch);
 	});
 	if (master) {
-		recursivelyMarkBranch(master, 'refs/heads/master');
+		recursivelyMarkBranch(master, master.idealogicalBranch);
 	}
 }
 
@@ -76,9 +76,12 @@ GitGraphViewModel.randomColor = function() {
 GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	nodes.sort(function(a, b) { return b.time.unix() - a.time.unix(); });
 
-	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') !== -1; });
+	var HEAD = _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
 	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
+
+	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
+	nodes = nodes.filter(function(node) { return node.idealogicalBranch; })
 
 	var updateTimeStamp = moment().valueOf();
 
@@ -95,7 +98,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		var node = nodes[i];
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-		var idealogicalBranch = refsByRefName[node.idealogicalBranch];
+		var idealogicalBranch = node.idealogicalBranch;
 
 		// First occurence of the branch, find an empty slot for the branch
 		if (idealogicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
@@ -141,6 +144,8 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 		prevNode = node;
 	});
+
+	return nodes;
 }
 
 NodeViewModel = function(args) {
@@ -159,7 +164,6 @@ NodeViewModel = function(args) {
 		return self.y();
 	});
 	this.time = moment(args.date);
-	this.refs = args.refs || [];
 	this.parents = args.parents || [];
 	this.title = args.title;
 	this.sha1 = args.sha1;
@@ -168,9 +172,9 @@ NodeViewModel = function(args) {
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);
-	this.refsViewModels = ko.observable([]);
+	this.refs = ko.observable([]);
 	this.branches = ko.computed(function() {
-		return self.refsViewModels().filter(function(r) { return r.isBranch; });
+		return self.refs().filter(function(r) { return r.isBranch; });
 	});
 	this.newBranchName = ko.observable();
 }
@@ -191,7 +195,7 @@ var RefViewModel = function(args) {
 	});
 	this.name = args.name;
 	this.displayName = this.name;
-	this.isTag = this.name.indexOf('refs/tags/') == 0;
+	this.isTag = this.name.indexOf('tag: refs/tags/') == 0;
 	this.isLocalHEAD = this.name == 'HEAD';
 	this.isRemoteHEAD = this.name == 'refs/remotes/origin/HEAD';
 	this.isLocalBranch = this.name.indexOf('refs/heads/') == 0;
@@ -209,5 +213,5 @@ var RefViewModel = function(args) {
 	this.color = GitGraphViewModel.randomColor();
 }
 RefViewModel.prototype.checkout = function() {
-	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.branchName });
+	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }

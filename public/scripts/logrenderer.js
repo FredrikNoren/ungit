@@ -17,7 +17,7 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
 
-	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') != -1; });
+	var HEAD = _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
 	var commitNodePosition = new Vector2(30, 30);
 	
 	var context = element.getContext("2d");
@@ -49,13 +49,16 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 	// Draw nodes
 	context.setLineDash(undefined);
 	nodes.forEach(function(node) {
-		context.fillStyle = refsByRefName[node.idealogicalBranch].color;
+		if (node.idealogicalBranch)
+			context.fillStyle = node.idealogicalBranch.color;
+		else
+			context.fillStyle = "#666666";
 		context.beginPath();
 		context.arc(node.x(), node.y(), node.radius(), 0, 2 * Math.PI);
 		context.fill();
 	});
 	if (HEAD) {
-		context.strokeStyle = refsByRefName[HEAD.idealogicalBranch].color;
+		context.strokeStyle = HEAD.idealogicalBranch.color;
 		context.setLineDash([10, 5]);
 		context.lineWidth = 7;
 		context.beginPath();
