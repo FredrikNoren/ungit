@@ -15,7 +15,7 @@ var app = express();
 
 restGit.registerApi(app, null, true);
 
-var testDirLocal, testDirRemote;
+var testDirLocal1, testDirLocal2, testDirRemote;
 var gitConfig;
 
 var req = request(app);
@@ -28,7 +28,14 @@ describe('git-api remote', function () {
 			function(done) {
 				common.post(req, '/testing/createdir', undefined, done, function(err, res) {
 					expect(res.body.path).to.be.ok();
-					testDirLocal = res.body.path;
+					testDirLocal1 = res.body.path;
+					done();
+				});
+			},
+			function(done) {
+				common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+					expect(res.body.path).to.be.ok();
+					testDirLocal2 = res.body.path;
 					done();
 				});
 			},
@@ -42,68 +49,91 @@ describe('git-api remote', function () {
 		], done);
 	});
 
-	it('init "remote" test dir should work', function(done) {
-		common.post(req, '/init', { path: testDirRemote }, done);
+	it('init a bare "remote" test dir should work', function(done) {
+		common.post(req, '/init', { path: testDirRemote, bare: true }, done);
 	});
 
-	it('creating a commit in "remote" repo should work', function(done) {
-		var testFile = path.join(testDirRemote, "testfile1.txt");
+	it('cloning "remote" to "local1" should work', function(done) {
+		common.post(req, '/clone', { path: testDirLocal1, remote: testDirRemote }, done);
+	});
+
+	it('creating a commit in "local1" repo should work', function(done) {
+		var testFile = path.join(testDirLocal1, "testfile1.txt");
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDirRemote, message: "Init", files: [testFile] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Init", files: [testFile] }, done); }
 		], done);
 	});
 
-	it('cloning "remote" test dir should work', function(done) {
-		common.post(req, '/clone', { path: testDirLocal, remote: testDirRemote }, done);
-	});
-
-	it('log in "local" should show the init commit', function(done) {
-		common.get(req, '/log', { path: testDirLocal }, done, function(err, res) {
+	it('log in "local1" should show the init commit', function(done) {
+		common.get(req, '/log', { path: testDirLocal1 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			var init = res.body[0];
 			expect(init.message).to.be('Init');
+			expect(init.refs).to.contain('HEAD');
+			expect(init.refs).to.contain('refs/heads/master');
 			done();
 		});
 	});
 
-	it('creating a commit in "remote" repo should work', function(done) {
-		var testFile = path.join(testDirRemote, "testfile2.txt");
+	it('pushing form "local" to "remote" should work', function(done) {
+		common.post(req, '/push', { path: testDirLocal1 }, done);
+	});
+
+	it('cloning "remote" to "local2" should work', function(done) {
+		common.post(req, '/clone', { path: testDirLocal2, remote: testDirRemote }, done);
+	});
+
+	it('log in "local2" should show the init commit', function(done) {
+		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+			expect(res.body).to.be.a('array');
+			expect(res.body.length).to.be(1);
+			var init = res.body[0];
+			expect(init.message).to.be('Init');
+			expect(init.refs).to.contain('HEAD');
+			expect(init.refs).to.contain('refs/heads/master');
+			expect(init.refs).to.contain('refs/remotes/origin/master');
+			expect(init.refs).to.contain('refs/remotes/origin/HEAD');
+			done();
+		});
+	});
+
+	it('creating and pushing a commit in "local1" repo should work', function(done) {
+		var testFile = path.join(testDirLocal1, "testfile2.txt");
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDirRemote, message: "Commit2", files: [testFile] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [testFile] }, done); },
+			function(done) { common.post(req, '/push', { path: testDirLocal1 }, done); }
 		], done);
 	});
 
-	it('fetching in "local" should work', function(done) {
-		common.post(req, '/fetch', { path: testDirLocal }, done);
+	it('fetching in "local2" should work', function(done) {
+		common.post(req, '/fetch', { path: testDirLocal2 }, done);
 	});
 
-	it('fetching in "remote" should work', function(done) {
-		common.post(req, '/fetch', { path: testDirRemote }, done);
-	});
-
-	it('log in "local" should show remote as one step ahead', function(done) {
-		common.get(req, '/log', { path: testDirLocal }, done, function(err, res) {
+	it('log in "local2" should show the branch as one behind', function(done) {
+		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
 			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
-			expect(init.refs).to.eql(['HEAD', 'refs/heads/master']);
-			expect(commit2.refs).to.eql(['refs/remotes/origin/master', 'refs/remotes/origin/HEAD']);
+			expect(init.refs).to.contain('HEAD');
+			expect(init.refs).to.contain('refs/heads/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/HEAD');
 			done();
 		});
 	});
 
 	it('rebasing local master onto remote master should work in "local"', function(done) {
-		common.post(req, '/rebase', { path: testDirLocal, onto: 'origin/master' }, done);
+		common.post(req, '/rebase', { path: testDirLocal2, onto: 'origin/master' }, done);
 	});
 
-	it('log in "local" should show the repos as in sync', function(done) {
-		common.get(req, '/log', { path: testDirLocal }, done, function(err, res) {
+	it('log in "local2" should show the branch as in sync', function(done) {
+		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
@@ -118,7 +148,7 @@ describe('git-api remote', function () {
 			done();
 		});
 	});
-
+	
 	it('cleaning up test dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/cleanup')

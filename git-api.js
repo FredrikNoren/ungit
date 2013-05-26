@@ -74,7 +74,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/init', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('init', req.body.path, res);
+		git('init' + (req.body.bare ? ' --bare --shared' : ''), req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/clone', function(req, res) {
@@ -95,6 +95,11 @@ exports.registerApi = function(app, server, dev) {
 				res.json({});
 			}
 		});
+	});
+
+	app.post(exports.pathPrefix + '/push', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('push origin HEAD', req.body.path, res);
 	});
 
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
