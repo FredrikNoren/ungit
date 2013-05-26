@@ -65,6 +65,12 @@
 				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
 				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 			</div>
+
+			<div class="graphUtils">
+				<img src="images/grayArrowDown.png" class="arrowDown">
+				<div class="title">Branch: <span data-bind="text: graph.activeBranch()"></span></div>
+				<div class="fetchingIndicator">Fetching nodes from remote...</div>
+			</div>
 			
 			<div class="graph" data-bind="with: graph">
 

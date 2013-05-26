@@ -77,6 +77,16 @@ exports.registerApi = function(app, server, dev) {
 		git('init', req.body.path, res);
 	});
 
+	app.post(exports.pathPrefix + '/clone', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('clone "' + req.body.remote + '" .', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/fetch', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('fetch', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
@@ -180,28 +190,25 @@ exports.registerApi = function(app, server, dev) {
 
 	if (dev) {
 
-		var testDir;
-
 		app.post(exports.pathPrefix + '/testing/createdir', function(req, res){
 			temp.mkdir('test-temp-dir', function(err, path) {
-				testDir = path;
 				res.json({ path: path });
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createsubdir', function(req, res){
-			fs.mkdir(path.join(testDir, req.body.dir), function() {
+			fs.mkdir(req.body.dir, function() {
 				res.json({});
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
-			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n');
+			fs.writeFileSync(req.body.file, 'test content\n');
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
-			fs.writeFileSync(path.join(testDir, req.body.file), 'test content\n' + Math.random() + '\n');
+			fs.writeFileSync(req.body.file, 'test content\n' + Math.random() + '\n');
 			res.json({ });
 		});
-		app.post(exports.pathPrefix + '/testing/removedir', function(req, res){
+		app.post(exports.pathPrefix + '/testing/cleanup', function(req, res){
 			temp.cleanup();
 			res.json({ });
 		});

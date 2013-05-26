@@ -15,6 +15,7 @@
     "temp": "*",
     "watchr": "*",
     "socket.io": "*",
-    "moment": "*"
+    "moment": "*",
+    "async": "*"
   }
 }

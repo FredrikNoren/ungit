@@ -6,6 +6,8 @@ var fs = require('fs');
 var path = require('path');
 var child_process = require('child_process');
 var restGit = require('../git-api');
+var common = require('./common.js');
+var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 
@@ -16,21 +18,7 @@ var gitConfig;
 
 var req = request(app);
 
-var wrapErrorHandler = function(done, callback) {
-	return function(err, res) {
-		if (err) {
-			console.dir(err);
-			console.dir(res.body);
-			done(err, res);
-		} else if (callback) {
-			callback(err, res);
-		} else {
-			done(err, res);
-		}
-	}
-}
-
-describe('git', function () {
+describe('git-api', function () {
 
 	it('creating test dir should work', function(done) {
 		req
@@ -147,7 +135,7 @@ describe('git', function () {
 	it('creating test file should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/createfile')
-			.send({ file: testFile })
+			.send({ file: path.join(testDir, testFile) })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200)
@@ -241,7 +229,7 @@ describe('git', function () {
 	it('modifying a test file should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/changefile')
-			.send({ file: testFile })
+			.send({ file: path.join(testDir, testFile) })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200)
@@ -296,7 +284,7 @@ describe('git', function () {
 	it('creating a multi word test file should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/createfile')
-			.send({ file: testFile2 })
+			.send({ file: path.join(testDir, testFile2) })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200)
@@ -420,7 +408,7 @@ describe('git', function () {
 	it('creating test sub dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/createsubdir')
-			.send({ dir: testSubDir })
+			.send({ dir: path.join(testDir, testSubDir) })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200)
@@ -432,7 +420,7 @@ describe('git', function () {
 	it('creating a test file in sub dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/createfile')
-			.send({ file: testFile3 })
+			.send({ file: path.join(testDir, testFile3) })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200)
@@ -506,9 +494,9 @@ describe('git', function () {
 			}));
 	});
 
-	it('removing test dir should work', function(done) {
+	it('cleaning up test dir should work', function(done) {
 		req
-			.post(restGit.pathPrefix + '/testing/removedir')
+			.post(restGit.pathPrefix + '/testing/cleanup')
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200, done);
