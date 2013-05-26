@@ -84,7 +84,17 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/fetch', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('fetch', req.body.path, res);
+		git('fetch', req.body.path, res, undefined, function(err, text) {
+			if (err) {
+				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
+					res.json({});
+				} else {
+					res.json(400, err);
+				}
+			} else {
+				res.json({});
+			}
+		});
 	});
 
 	app.get(exports.pathPrefix + '/diff', function(req, res) {

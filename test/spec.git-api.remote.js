@@ -80,6 +80,10 @@ describe('git-api remote', function () {
 		common.post(req, '/fetch', { path: testDirLocal }, done);
 	});
 
+	it('fetching in "remote" should work', function(done) {
+		common.post(req, '/fetch', { path: testDirRemote }, done);
+	});
+
 	it('log in "local" should show remote as one step ahead', function(done) {
 		common.get(req, '/log', { path: testDirLocal }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
