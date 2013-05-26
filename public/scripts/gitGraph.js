@@ -39,6 +39,14 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.nodes(nodeVMs);
 }
 
+GitGraphViewModel.prototype.getHEAD = function() {
+	return GitGraphViewModel.getHEAD(this.nodes());
+}
+
+GitGraphViewModel.getHEAD = function(nodes) {
+	return _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
+}
+
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 	callback(node);
 	node.parents.forEach(function(parentId) {
@@ -81,7 +89,7 @@ GitGraphViewModel.randomColor = function() {
 GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	nodes.sort(function(a, b) { return b.time.unix() - a.time.unix(); });
 
-	var HEAD = _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
+	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
 

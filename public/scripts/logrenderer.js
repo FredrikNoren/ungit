@@ -17,7 +17,7 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
 
-	var HEAD = _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
+	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	var commitNodePosition = new Vector2(30, 30);
 	
 	var context = element.getContext("2d");
