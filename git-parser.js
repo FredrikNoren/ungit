@@ -86,7 +86,7 @@ exports.parseGitLog = function(data) {
 	var commits = [];
 	var currentCommmit;
 	var parseCommitLine = function(row) {
-		currentCommmit = { };
+		currentCommmit = { refs: [] };
 		var ss = row.split('(');
 		var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
 		currentCommmit.sha1 = sha1s[0];

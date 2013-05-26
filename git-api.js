@@ -184,6 +184,11 @@ exports.registerApi = function(app, server, dev) {
 		});
 	});
 
+	app.post(exports.pathPrefix + '/rebase', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('rebase "' + req.body.onto + '"', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig);
 	});

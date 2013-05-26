@@ -94,6 +94,27 @@ describe('git-api remote', function () {
 		});
 	});
 
+	it('rebasing local master onto remote master should work in "local"', function(done) {
+		common.post(req, '/rebase', { path: testDirLocal, onto: 'origin/master' }, done);
+	});
+
+	it('log in "local" should show the repos as in sync', function(done) {
+		common.get(req, '/log', { path: testDirLocal }, done, function(err, res) {
+			expect(res.body).to.be.a('array');
+			expect(res.body.length).to.be(2);
+			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
+			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
+			expect(init).to.be.ok();
+			expect(commit2).to.be.ok();
+			expect(init.refs).to.eql([]);
+			expect(commit2.refs).to.contain('HEAD');
+			expect(commit2.refs).to.contain('refs/heads/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/HEAD');
+			done();
+		});
+	});
+
 	it('cleaning up test dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/cleanup')
