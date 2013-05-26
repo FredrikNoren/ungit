@@ -62,7 +62,7 @@ GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById
 		});
 	}
 	var getIdeologicalBranch = function(e) {
-		return _.find(e.refs(), function(ref) { return ref.isLocalBranch; });
+		return _.find(e.refs(), function(ref) { return ref.isBranch; });
 	}
 	var master;
 	nodes.forEach(function(e) {
