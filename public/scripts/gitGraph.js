@@ -34,25 +34,36 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.nodes(nodeVMs);
 }
 
+GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
+	callback(node);
+	node.parents.forEach(function(parentId) {
+		var parent = nodesById[parentId];
+		GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
+	});
+}
+
 GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, idealogicalBranch) {
-		e.idealogicalBranch = idealogicalBranch;
-		e.parents.forEach(function(parentId) {
-			var parent = nodesById[parentId];
-			recursivelyMarkBranch(parent, idealogicalBranch);
+		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
+			node.idealogicalBranch = idealogicalBranch;
 		});
 	}
 	var getIdeologicalBranch = function(e) {
 		return _.find(e.refs, function(ref) { return ref && ref != 'HEAD' && ref.indexOf('tag: ') != 0; });
 	}
+	var master;
 	nodes.forEach(function(e) {
-		if (e.idealogicalBranch) return;
 		var i = 0;
 		var idealogicalBranch = getIdeologicalBranch(e);
+		console.log(idealogicalBranch, e);
+		if (idealogicalBranch == 'refs/heads/master') master = e;
 		if (!idealogicalBranch) return;
 		recursivelyMarkBranch(e, idealogicalBranch);
 	});
-	recursivelyMarkBranch(HEAD, getIdeologicalBranch(HEAD));
+	if (master) {
+		console.log('mark master');
+		recursivelyMarkBranch(master, 'refs/heads/master');
+	}
 }
 
 GitGraphViewModel.randomColor = function() {
@@ -70,10 +81,15 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	var HEAD = _.find(nodes, function(node) { return node.refs.indexOf('HEAD') !== -1; });
 	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
-	
-	//var concurrentBranches = { };
 
 	var updateTimeStamp = moment().valueOf();
+
+	GitGraphViewModel.traverseNodeParents(HEAD, nodesById, function(node) {
+		node.ancestorOfHEADTimeStamp = updateTimeStamp;
+	});
+
+	//var concurrentBranches = { };
+
 
 	var branchOrder = 0;
 	var y = 60; // Leave room for the "commit node" (see logrednerer.js)
@@ -95,15 +111,16 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 		fixRefOrder(idealogicalBranch, node);
 
-		node.x(30 + 60 * idealogicalBranch.branchOrder);
-		if (node.idealogicalBranch == HEAD.idealogicalBranch) {
-			if (prevNode && prevNode.idealogicalBranch == HEAD.idealogicalBranch)
+		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) {
+			if (prevNode && prevNode.ancestorOfHEADTimeStamp == updateTimeStamp)
 				y += 120;
 			else
 				y += 60;
+			node.x(30);
 			node.radius(30);
 			node.logBoxVisible(true);
 		} else {
+			node.x(30 + 60 * idealogicalBranch.branchOrder);
 			y += 60;
 			node.radius(15);
 			node.logBoxVisible(false);

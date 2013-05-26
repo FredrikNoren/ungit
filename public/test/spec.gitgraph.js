@@ -18,7 +18,7 @@ describe('markBranches', function() {
 		GitGraphViewModel.markNodesIdealogicalBranches(getHead(nodes1), nodes1, nodesById(nodes1));
 		expect(nodes1[0].idealogicalBranch).to.be('refs/heads/testing');
 		expect(nodes1[1].idealogicalBranch).to.be('refs/heads/master');
-		expect(nodes1[2].idealogicalBranch).to.be('refs/heads/testing');
+		expect(nodes1[2].idealogicalBranch).to.be('refs/heads/master');
 	});
 
 
@@ -31,7 +31,7 @@ describe('markBranches', function() {
 		GitGraphViewModel.markNodesIdealogicalBranches(getHead(nodes2), nodes2, nodesById(nodes2));
 		expect(nodes2[0].idealogicalBranch).to.be('refs/heads/master');
 		expect(nodes2[1].idealogicalBranch).to.be('refs/heads/testing');
-		expect(nodes2[2].idealogicalBranch).to.be('refs/heads/testing');
+		expect(nodes2[2].idealogicalBranch).to.be('refs/heads/master');
 	});
 
 	var nodes3 = [
@@ -46,8 +46,8 @@ describe('markBranches', function() {
 		expect(nodes3[0].idealogicalBranch).to.be('refs/heads/master');
 		expect(nodes3[1].idealogicalBranch).to.be('refs/heads/testing');
 		expect(nodes3[2].idealogicalBranch).to.be('refs/heads/testing');
-		expect(nodes3[3].idealogicalBranch).to.be('refs/heads/develop');
-		expect(nodes3[4].idealogicalBranch).to.be('refs/heads/develop');
+		expect(nodes3[3].idealogicalBranch).to.be('refs/heads/master');
+		expect(nodes3[4].idealogicalBranch).to.be('refs/heads/master');
 	});
 
 })
