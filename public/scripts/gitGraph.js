@@ -92,7 +92,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 
 	var branchOrder = 0;
-	var y = 60; // Leave room for the "commit node" (see logrednerer.js)
+	var y = 30; // Leave room for the "commit node" (see logrednerer.js)
 
 	var fixRefOrder = function(ref, node) {
 		if (ref.normalizeTimeStamp != updateTimeStamp) {
@@ -112,7 +112,9 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 		fixRefOrder(idealogicalBranch, node);
 
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) {
-			if (prevNode && prevNode.ancestorOfHEADTimeStamp == updateTimeStamp)
+			if (!prevNode)
+				y += 90;
+			else if (prevNode.ancestorOfHEADTimeStamp == updateTimeStamp)
 				y += 120;
 			else
 				y += 60;
