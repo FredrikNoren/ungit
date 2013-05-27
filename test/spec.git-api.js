@@ -156,7 +156,7 @@ describe('git-api', function () {
 		common.get(req, '/log', { path: testDir }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
-			expect(res.body[0].message).to.be(commitMessage);
+			expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
 			expect(res.body[0].title).to.be(commitMessage);
 			expect(res.body[0].authorName).to.be(gitConfig['user.name']);
 			expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
@@ -309,7 +309,7 @@ describe('git-api', function () {
 			});
 			var master = objs['refs/heads/master'];
 			var HEAD = objs['HEAD'];
-			expect(master.message).to.be(commitMessage);
+			expect(master.message.indexOf(commitMessage)).to.be(0);
 			expect(master.title).to.be(commitMessage);
 			expect(master.date).to.be.a('string');
 			expect(master.authorName).to.be(gitConfig['user.name']);
@@ -318,7 +318,7 @@ describe('git-api', function () {
 			expect(master.parents).to.eql([]);
 			expect(master.sha1).to.be.ok();
 
-			expect(HEAD.message).to.be(commitMessage3);
+			expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
 			expect(HEAD.title).to.be(commitMessage3);
 			expect(HEAD.date).to.be.a('string');
 			expect(HEAD.authorName).to.be(gitConfig['user.name']);

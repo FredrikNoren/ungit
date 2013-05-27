@@ -70,7 +70,7 @@ describe('git-api remote', function () {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			var init = res.body[0];
-			expect(init.message).to.be('Init');
+			expect(init.message.indexOf('Init')).to.be(0);
 			expect(init.refs).to.contain('HEAD');
 			expect(init.refs).to.contain('refs/heads/master');
 			done();
@@ -90,7 +90,7 @@ describe('git-api remote', function () {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			var init = res.body[0];
-			expect(init.message).to.be('Init');
+			expect(init.message.indexOf('Init')).to.be(0);
 			expect(init.refs).to.contain('HEAD');
 			expect(init.refs).to.contain('refs/heads/master');
 			expect(init.refs).to.contain('refs/remotes/origin/master');
