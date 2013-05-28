@@ -248,10 +248,12 @@ RefViewModel.prototype.checkout = function() {
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }
 RefViewModel.prototype.push = function() {
+	this.graph.pushHover(null);
 	api.query('POST', '/push', { path: this.graph.repoPath });
 }
 RefViewModel.prototype.reset = function() {
-	api.query('POST', '/reset', { path: this.graph.repoPath, ref: this.name, target: this.remote().name });
+	this.graph.resetHover(null);
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.remoteRef().name });
 }
 RefViewModel.prototype.mouseoverPush = function() {
 	this.graph.pushHover(this);

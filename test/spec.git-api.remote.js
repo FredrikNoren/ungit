@@ -77,7 +77,7 @@ describe('git-api remote', function () {
 		});
 	});
 
-	it('pushing form "local" to "remote" should work', function(done) {
+	it('pushing form "local1" to "remote" should work', function(done) {
 		common.post(req, '/push', { path: testDirLocal1 }, done);
 	});
 
@@ -128,7 +128,7 @@ describe('git-api remote', function () {
 		});
 	});
 
-	it('rebasing local master onto remote master should work in "local"', function(done) {
+	it('rebasing local master onto remote master should work in "local2"', function(done) {
 		common.post(req, '/rebase', { path: testDirLocal2, onto: 'origin/master' }, done);
 	});
 
@@ -145,6 +145,39 @@ describe('git-api remote', function () {
 			expect(commit2.refs).to.contain('refs/heads/master');
 			expect(commit2.refs).to.contain('refs/remotes/origin/master');
 			expect(commit2.refs).to.contain('refs/remotes/origin/HEAD');
+			done();
+		});
+	});
+
+	it('creating a commit in "local2" repo should work', function(done) {
+		var testFile = path.join(testDirLocal2, "testfile3.txt");
+		async.series([
+			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
+			function(done) { common.post(req, '/commit', { path: testDirLocal2, message: "Commit3", files: [testFile] }, done); }
+		], done);
+	});
+
+	it('resetting local master to remote master should work in "local2"', function(done) {
+		common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master' }, done);
+	});
+
+	it('log in "local2" should show the branch as in sync', function(done) {
+		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+			expect(res.body.length).to.be(2);
+			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
+			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
+			expect(init.refs).to.eql([]);
+			expect(commit2.refs).to.contain('HEAD');
+			expect(commit2.refs).to.contain('refs/heads/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/master');
+			expect(commit2.refs).to.contain('refs/remotes/origin/HEAD');
+			done();
+		});
+	});
+
+	it('status should show nothing', function(done) {
+		common.get(req, '/status', { path: testDirLocal2 }, done, function(err, res) {
+			expect(Object.keys(res.body.files).length).to.be(0);
 			done();
 		});
 	});

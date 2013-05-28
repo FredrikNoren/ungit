@@ -102,6 +102,11 @@ exports.registerApi = function(app, server, dev) {
 		git('push origin HEAD', req.body.path, res);
 	});
 
+	app.post(exports.pathPrefix + '/reset', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('reset --hard "' + req.body.to + '"', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
