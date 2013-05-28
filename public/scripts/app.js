@@ -120,12 +120,6 @@ RepositoryViewModel.prototype.fetch = function() {
 		self.isFetching(false);
 	});
 }
-RepositoryViewModel.prototype.pull = function() {
-	api.query('POST', '/rebase', { path: this.path, onto: 'origin/' + this.graph.activeBranch() });
-}
-RepositoryViewModel.prototype.push = function() {
-	api.query('POST', '/push', { path: this.path });
-}
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
 	api.query('GET', '/status', { path: this.path }, function(err, status){
