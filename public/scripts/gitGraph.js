@@ -9,7 +9,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.activeBranch = ko.observable();
 	this.pushHover = ko.observable();
 	this.resetHover = ko.observable();
-	this.pullHover = ko.observable();
+	this.rebaseHover = ko.observable();
 }
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
@@ -164,7 +164,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 			node.logBoxVisible(true);
 		} else {
 			y += 60;
-			node.x(30 + 60 * (branchSlots.length - node.branchOrder));
+			node.x(30 + 90 * (branchSlots.length - node.branchOrder));
 			node.radius(15);
 			node.logBoxVisible(false);
 		}
@@ -209,6 +209,14 @@ NodeViewModel = function(args) {
 NodeViewModel.prototype.createBranch = function() {
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 }
+NodeViewModel.prototype.isAncestor = function(node) {
+	if (node == this) return true;
+	for (var v in this.parents) {
+		var n = this.graph.nodesById[this.parents[v]];
+		if (n.isAncestor(node)) return true;
+	}
+	return false;
+}
 
 var RefViewModel = function(args) {
 	var self = this;
@@ -241,8 +249,13 @@ var RefViewModel = function(args) {
 		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
 	this.color = GitGraphViewModel.randomColor();
-	this.pushVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node()});
-	this.resetVisible = ko.computed(function() { return self.pushVisible()});
+	this.remoteIsAncestor = ko.computed(function() {
+		if (!self.remoteRef()) return false;
+		return self.node().isAncestor(self.remoteRef().node());
+	});
+	this.pushVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && self.remoteIsAncestor(); });
+	this.rebaseVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && !self.remoteIsAncestor(); });
+	this.resetVisible = ko.computed(function() { return self.pushVisible() || self.rebaseVisible(); });
 }
 RefViewModel.prototype.checkout = function() {
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
@@ -255,6 +268,10 @@ RefViewModel.prototype.reset = function() {
 	this.graph.resetHover(null);
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.remoteRef().name });
 }
+RefViewModel.prototype.rebase = function() {
+	this.graph.rebaseHover(null);
+	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.remoteRef().name });
+}
 RefViewModel.prototype.mouseoverPush = function() {
 	this.graph.pushHover(this);
 }
@@ -266,4 +283,10 @@ RefViewModel.prototype.mouseoverReset = function() {
 }
 RefViewModel.prototype.mouseoutReset = function() {
 	this.graph.resetHover(null);
+}
+RefViewModel.prototype.mouseoverRebase = function() {
+	this.graph.rebaseHover(this);
+}
+RefViewModel.prototype.mouseoutRebase = function() {
+	this.graph.rebaseHover(null);
 }

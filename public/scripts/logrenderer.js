@@ -19,7 +19,7 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.beginPath();
 	context.setLineDash(undefined);
 	context.translate(endPosition.x, endPosition.y);
-	context.rotate(startPosition.sub(endPosition).angleXY());
+	context.rotate(-startPosition.sub(endPosition).angleXY());
 	context.moveTo(-arrowSize, arrowSize);
 	context.lineTo(0, 0);
 	context.lineTo(arrowSize, arrowSize);
@@ -92,24 +92,41 @@ logRenderer.render = function(element, graph) {
 	context.lineWidth = 3;
 
 	// Draw push lines
-	var pushRef = graph.pushHover();
-	if (pushRef) {
-		var remote = pushRef.remoteRef();
+	if (graph.pushHover()) {
+		var local = graph.pushHover();
+		var remote = local.remoteRef();
 		context.setLineDash(refLineDash);
 		context.strokeStyle = "rgb(61, 139, 255)";
-		var endPosition = new Vector2(pushRef.node().x() + pushRef.node().radius() + xRefLineOffset, pushRef.node().y() + yRefLineOffset);
-		var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yRefLineOffset);
+		var yOffset = yRefLineOffset;
+		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
+		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
 		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
 	}
 
 	// Draw reset lines
-	var resetRef = graph.resetHover();
-	if (resetRef) {
-		var remote = resetRef.remoteRef();
+	if (graph.resetHover()) {
+		var local = graph.resetHover();
+		var remote = local.remoteRef();
 		context.setLineDash(refLineDash);
 		context.strokeStyle = "rgb(255, 129, 31)";
-		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yRefLineOffset);
-		var startPosition = new Vector2(resetRef.node().x() + resetRef.node().radius() + xRefLineOffset, resetRef.node().y() + yRefLineOffset);
+		var yOffset = yRefLineOffset;
+		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
+		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
+		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+	}
+
+	// Draw rebase lines
+	if (graph.rebaseHover()) {
+		var local = graph.rebaseHover();
+		var remote = local.remoteRef();
+		context.setLineDash(refLineDash);
+		context.strokeStyle = "#41DE3C";
+		var yOffset = yRefLineOffset;
+		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
+		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
 		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
 	}
 }
