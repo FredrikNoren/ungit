@@ -95,13 +95,13 @@
 									<span data-bind="visible: isRemoteBranch">(remote)</span>
 								</div>
 								<span data-bind="visible: current">
-									<div class="refbox push" data-bind="click: push, event: { mouseover: mouseoverPush, mouseout: mouseoutPush }">
+									<div class="refbox push" data-bind="click: push, visible: pushVisible, event: { mouseover: mouseoverPush, mouseout: mouseoutPush }">
 										&#11014;
 										<span class="tooltip">Push changes to remote</span>
 									</div>
-									<div class="refbox reset" data-bind="click: reset, event: { mouseover: mouseoverReset, mouseout: mouseoutReset }">
+									<div class="refbox reset" data-bind="click: reset, visible: resetVisible, event: { mouseover: mouseoverReset, mouseout: mouseoutReset }">
 										&#11015;
-										<span class="tooltip">Reset to remote</span>
+										<span class="tooltip">Drop changes</span>
 									</div>
 								</span>
 							</div>

@@ -241,6 +241,8 @@ var RefViewModel = function(args) {
 		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
 	this.color = GitGraphViewModel.randomColor();
+	this.pushVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node()});
+	this.resetVisible = ko.computed(function() { return self.pushVisible()});
 }
 RefViewModel.prototype.checkout = function() {
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
