@@ -7,6 +7,9 @@ var GitGraphViewModel = function(repoPath) {
 	this.refsByRefName = {};
 	this.repoPath = repoPath;
 	this.activeBranch = ko.observable();
+	this.pushHover = ko.observable();
+	this.resetHover = ko.observable();
+	this.pullHover = ko.observable();
 }
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
@@ -92,6 +95,18 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
+
+	// Make sure refs know their "remote"
+	for(var refName in refsByRefName) {
+		var ref = refsByRefName[refName];
+		if (ref.isLocalBranch) {
+			var remote = refsByRefName['refs/remotes/origin/' + ref.displayName];
+			if (remote) {
+				ref.remoteRef(remote);
+				remote.localRef(ref);
+			}
+		}
+	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
 	nodes = nodes.filter(function(node) { return node.idealogicalBranch; })
@@ -220,6 +235,8 @@ var RefViewModel = function(args) {
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
 	this.show = true;
 	this.graph = args.graph;
+	this.remoteRef = ko.observable();
+	this.localRef = ko.observable();
 	this.current = ko.computed(function() {
 		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
@@ -227,4 +244,22 @@ var RefViewModel = function(args) {
 }
 RefViewModel.prototype.checkout = function() {
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
+}
+RefViewModel.prototype.push = function() {
+	api.query('POST', '/push', { path: this.graph.repoPath });
+}
+RefViewModel.prototype.reset = function() {
+	api.query('POST', '/reset', { path: this.graph.repoPath, ref: this.name, target: this.remote().name });
+}
+RefViewModel.prototype.mouseoverPush = function() {
+	this.graph.pushHover(this);
+}
+RefViewModel.prototype.mouseoutPush = function() {
+	this.graph.pushHover(null);
+}
+RefViewModel.prototype.mouseoverReset = function() {
+	this.graph.resetHover(this);
+}
+RefViewModel.prototype.mouseoutReset = function() {
+	this.graph.resetHover(null);
 }

@@ -19,6 +19,10 @@ Vector2.prototype.add = function(v) {
 Vector2.prototype.mul = function(v) {
 	return Vector2.mul(this, v);
 }
+Vector2.prototype.angleXY = function() {
+	return Vector2.angleXY(this);
+}
+
 Vector2.sub = function(a, b) {
 	return new Vector2(a.x - b.x, a.y - b.y);
 }
@@ -30,4 +34,7 @@ Vector2.mul = function(a, val) {
 }
 Vector2.random = function() {
 	return new Vector2(Math.random(), Math.random());
+}
+Vector2.angleXY = function(a) {
+	return Math.atan2(a.x, a.y);
 }

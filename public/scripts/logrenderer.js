@@ -11,8 +11,27 @@ logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 	context.moveTo(a.x, a.y);
 	context.lineTo(b.x, b.y);
 }
+logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowSize) {
+	context.beginPath();
+	context.moveTo(endPosition.x, endPosition.y);
+	context.lineTo(startPosition.x, startPosition.y);
+	context.stroke();
+	context.beginPath();
+	context.setLineDash(undefined);
+	context.translate(endPosition.x, endPosition.y);
+	context.rotate(startPosition.sub(endPosition).angleXY());
+	context.moveTo(-arrowSize, arrowSize);
+	context.lineTo(0, 0);
+	context.lineTo(arrowSize, arrowSize);
+	context.stroke();
+}
 
-logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
+logRenderer.render = function(element, graph) {
+
+	var nodes = graph.nodes(),
+		nodesById = graph.nodesById,
+		refsByRefName = graph.refsByRefName;
+
 	if (!nodes.length) return;
 
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
@@ -66,4 +85,31 @@ logRenderer.render = function(element, nodes, nodesById, refsByRefName) {
 		context.stroke();
 	}
 
+	var arrowSize = 7;
+	var xRefLineOffset = 30;
+	var yRefLineOffset = 20;
+	var refLineDash = [10, 5]
+	context.lineWidth = 3;
+
+	// Draw push lines
+	var pushRef = graph.pushHover();
+	if (pushRef) {
+		var remote = pushRef.remoteRef();
+		context.setLineDash(refLineDash);
+		context.strokeStyle = "rgb(61, 139, 255)";
+		var endPosition = new Vector2(pushRef.node().x() + pushRef.node().radius() + xRefLineOffset, pushRef.node().y() + yRefLineOffset);
+		var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yRefLineOffset);
+		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+	}
+
+	// Draw reset lines
+	var resetRef = graph.resetHover();
+	if (resetRef) {
+		var remote = resetRef.remoteRef();
+		context.setLineDash(refLineDash);
+		context.strokeStyle = "rgb(255, 129, 31)";
+		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yRefLineOffset);
+		var startPosition = new Vector2(resetRef.node().x() + resetRef.node().radius() + xRefLineOffset, resetRef.node().y() + yRefLineOffset);
+		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+	}
 }

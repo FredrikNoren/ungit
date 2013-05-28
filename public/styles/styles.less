@@ -224,7 +224,7 @@ a {
 					.refsList {
 						display: inline-block;
 					}
-					.ref {
+					.refbox {
 						position: relative;
 						display: inline-block;
 						background: #474747;
@@ -243,6 +243,24 @@ a {
 						}
 						&.remote {
 							color: #89BCE8;
+						}
+						&.push, &.reset {
+							opacity: 1;
+							color: #fff;
+							.tooltip {
+								display: none;
+							}
+							&:hover {
+								.tooltip {
+									display: inline-block;
+								}
+							}
+						}
+						&.push {
+							background: rgb(61, 139, 255);
+						}
+						&.reset {
+							background: rgb(255, 129, 31);
 						}
 						&.newRef {
 							opacity: 0.1;

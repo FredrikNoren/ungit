@@ -30,7 +30,7 @@ ko.bindingHandlers.graphLog = {
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
         var graph = ko.utils.unwrapObservable(valueAccessor());
         var canvas = $(element).find('canvas').get(0);
-        logRenderer.render(canvas, graph.nodes(), graph.nodesById, graph.refsByRefName);
+        logRenderer.render(canvas, graph);
     }
 };
 
