@@ -162,7 +162,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.get(exports.pathPrefix + '/log', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
-		git('log --decorate=full --all --parents', req.query.path, res, gitParser.parseGitLog, function(err, log) {
+		git('log --decorate=full --pretty=fuller --all --parents', req.query.path, res, gitParser.parseGitLog, function(err, log) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
 					res.json([]);

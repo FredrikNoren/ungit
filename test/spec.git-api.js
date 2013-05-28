@@ -311,18 +311,24 @@ describe('git-api', function () {
 			var HEAD = objs['HEAD'];
 			expect(master.message.indexOf(commitMessage)).to.be(0);
 			expect(master.title).to.be(commitMessage);
-			expect(master.date).to.be.a('string');
+			expect(master.authorDate).to.be.a('string');
 			expect(master.authorName).to.be(gitConfig['user.name']);
 			expect(master.authorEmail).to.be(gitConfig['user.email']);
+			expect(master.commitDate).to.be.a('string');
+			expect(master.committerName).to.be(gitConfig['user.name']);
+			expect(master.committerEmail).to.be(gitConfig['user.email']);
 			expect(master.refs).to.eql(['refs/heads/master']);
 			expect(master.parents).to.eql([]);
 			expect(master.sha1).to.be.ok();
 
 			expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
 			expect(HEAD.title).to.be(commitMessage3);
-			expect(HEAD.date).to.be.a('string');
+			expect(HEAD.authorDate).to.be.a('string');
 			expect(HEAD.authorName).to.be(gitConfig['user.name']);
 			expect(HEAD.authorEmail).to.be(gitConfig['user.email']);
+			expect(HEAD.commitDate).to.be.a('string');
+			expect(HEAD.committerName).to.be(gitConfig['user.name']);
+			expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
 			expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
 			expect(HEAD.parents).to.eql([master.sha1]);
 			expect(HEAD.sha1).to.be.ok();

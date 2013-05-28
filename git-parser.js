@@ -104,8 +104,15 @@ exports.parseGitLog = function(data) {
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
 			currentCommmit.authorName = capture[1].trim();
 			currentCommmit.authorEmail = capture[2].trim();
-		} else if (row.indexOf('Date: ') == 0) {
-			currentCommmit.date = row.slice('Date: '.length).trim();
+		} else if (row.indexOf('Commit: ') == 0) {
+			var author = row.split(' ').slice(1).join(' ');
+			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
+			currentCommmit.committerName = capture[1].trim();
+			currentCommmit.committerEmail = capture[2].trim();
+		} else if (row.indexOf('AuthorDate: ') == 0) {
+			currentCommmit.authorDate = row.slice('AuthorDate: '.length).trim();
+		} else if (row.indexOf('CommitDate: ') == 0) {
+			currentCommmit.commitDate = row.slice('CommitDate: '.length).trim();
 		} else if (row.trim() == '') {
 			parser = parseCommitMessage;
 		} else {

@@ -90,7 +90,7 @@ GitGraphViewModel.randomColor = function() {
 }
 
 GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
-	nodes.sort(function(a, b) { return b.time.unix() - a.time.unix(); });
+	nodes.sort(function(a, b) { return b.commitTime.unix() - a.commitTime.unix(); });
 
 	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	if (!HEAD) return;
@@ -191,12 +191,13 @@ NodeViewModel = function(args) {
 	this.boxDisplayY = ko.computed(function() {
 		return self.y();
 	});
-	this.time = moment(args.date);
+	this.commitTime = moment(args.commitDate);
+	this.authorTime = moment(args.authorDate);
 	this.parents = args.parents || [];
 	this.title = args.title;
 	this.sha1 = args.sha1;
-	this.date = ko.observable(moment(args.date).fromNow());
-	setInterval(function() { self.date(moment(args.date).fromNow()); }, 1000 * 60);
+	this.authorDate = ko.observable(moment(args.authorDate).fromNow());
+	setInterval(function() { self.authorDate(moment(args.authorDate).fromNow()); }, 1000 * 60);
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
 	this.logBoxVisible = ko.observable(true);
