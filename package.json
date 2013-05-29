@@ -11,6 +11,7 @@
     "mocha": "*",
     "expect.js": "*",
     "supertest": "*",
+    "superagent": "*",
     "underscore": "*",
     "temp": "*",
     "watchr": "*",

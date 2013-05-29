@@ -101,7 +101,10 @@ var RepositoryViewModel = function(path) {
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
 		ready: function() { self.watcherReady(true) },
-		changed: function() { self.update(); }
+		changed: function() { self.update(); },
+		requestCredentials: function(callback) {
+			callback({ username: window.prompt('Username'), password: window.prompt('Password') });
+		}
 	});
 }
 RepositoryViewModel.prototype.template = 'repository';

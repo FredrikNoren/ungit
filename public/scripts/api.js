@@ -25,5 +25,12 @@ var api = {
 		socket.on('changed', function (data) {
 			if (callbacks.changed) callbacks.changed();
 		});
+		socket.on('request-credentials', function (data) {
+			if (callbacks.requestCredentials) {
+				callbacks.requestCredentials(function(credentials) {
+					socket.emit('credentials', credentials);
+				});
+			}
+		});
 	}
 }

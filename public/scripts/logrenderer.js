@@ -32,7 +32,7 @@ logRenderer.render = function(element, graph) {
 		nodesById = graph.nodesById,
 		refsByRefName = graph.refsByRefName;
 
-	if (!nodes.length) return;
+	if (!nodes || !nodes.length) return;
 
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
 

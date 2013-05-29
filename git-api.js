@@ -16,9 +16,12 @@ exports.registerApi = function(app, server, dev) {
 
 	app.use(express.bodyParser());
 
+	var sockets = [];
+
 	if (server) {
 		var io = socketIO.listen(server);
 		io.sockets.on('connection', function (socket) {
+			sockets.push(socket);
 			socket.on('watch', function (data) {
 				var watchOptions = {
 					path: data.path,
@@ -211,6 +214,16 @@ exports.registerApi = function(app, server, dev) {
 
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig);
+	});
+
+	// This method isn't called by the client but by credentials-helper.js
+	app.get(exports.pathPrefix + '/credentials', function(req, res) {
+		sockets.forEach(function(socket) {
+			socket.on('credentials', function(data) {
+				res.json(data);
+			});
+			socket.emit('request-credentials');
+		});
 	});
 
 	if (dev) {
