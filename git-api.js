@@ -102,7 +102,9 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/push', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('push origin HEAD', req.body.path, res);
+		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
+		var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + '"';
+		git(credentialsOption + ' push origin HEAD', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/reset', function(req, res) {
