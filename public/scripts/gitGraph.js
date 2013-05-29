@@ -218,6 +218,16 @@ NodeViewModel.prototype.isAncestor = function(node) {
 	}
 	return false;
 }
+NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
+	var path = [];
+	var thisNode = this;
+	do {
+		path.push(thisNode);
+		thisNode = this.graph.nodesById[thisNode.parents[0]];
+	} while (!node.isAncestor(thisNode));
+	path.push(thisNode);
+	return path;
+}
 
 var RefViewModel = function(args) {
 	var self = this;

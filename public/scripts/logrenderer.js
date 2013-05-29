@@ -24,6 +24,15 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.lineTo(0, 0);
 	context.lineTo(arrowSize, arrowSize);
 	context.stroke();
+	context.setTransform(1, 0, 0, 1, 0, 0);
+}
+logRenderer.crossOverNodes = function(context, nodes) {
+	nodes.forEach(function(node) {
+		context.moveTo(node.x() - node.radius(), node.y() - node.radius());
+		context.lineTo(node.x() + node.radius(), node.y() + node.radius());
+		context.moveTo(node.x() + node.radius(), node.y() - node.radius());
+		context.lineTo(node.x() - node.radius(), node.y() + node.radius());
+	});
 }
 
 logRenderer.render = function(element, graph) {
@@ -108,25 +117,52 @@ logRenderer.render = function(element, graph) {
 	if (graph.resetHover()) {
 		var local = graph.resetHover();
 		var remote = local.remoteRef();
-		context.setLineDash(refLineDash);
+		context.setLineDash(null);
 		context.strokeStyle = "rgb(255, 129, 31)";
-		var yOffset = yRefLineOffset;
-		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
-		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
-		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
-		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+
+		context.beginPath();
+		logRenderer.crossOverNodes(context, local.node().getPathToCommonAncestor(remote.node()).slice(0, -1));
+		context.stroke();
 	}
 
 	// Draw rebase lines
 	if (graph.rebaseHover()) {
 		var local = graph.rebaseHover();
 		var remote = local.remoteRef();
-		context.setLineDash(refLineDash);
+		context.setLineDash(null);
+		context.lineWidth = 3;
 		context.strokeStyle = "#41DE3C";
-		var yOffset = yRefLineOffset;
-		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
-		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
-		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
-		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+
+		var path = local.node().getPathToCommonAncestor(remote.node());
+
+		context.beginPath();
+		logRenderer.crossOverNodes(context, path.slice(0, -1));
+		context.stroke();
+
+		context.lineWidth = 7;
+		context.setLineDash([10, 5]);
+
+		var newNodes = path.slice(0, -1).map(function(node) {
+			return {
+				position: new Vector2(
+					remote.node().x() + (node.x() - _.last(path).x()),
+					remote.node().y() + (node.y() - _.last(path).y())),
+				radius: node.radius()
+			};
+		});
+		newNodes.forEach(function(node) {
+			context.beginPath();
+			context.arc(node.position.x, node.position.y, node.radius - context.lineWidth / 2, 0, 2 * Math.PI);
+			context.stroke();
+		});
+
+		var prevNode = { position: remote.node().position(), radius: remote.node().radius() };
+		newNodes.reverse().forEach(function(node) {
+			context.beginPath();
+			context.setLineDash([10, 5]);
+			logRenderer.drawLineBetweenNodes(context, node, prevNode);
+			context.stroke();
+			prevNode = node;
+		});
 	}
 }
