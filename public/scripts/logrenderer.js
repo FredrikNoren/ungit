@@ -2,7 +2,7 @@
 
 var logRenderer = {};
 
-logRenderer.origin = new Vector2(0, 200);
+logRenderer.origin = new Vector2(5, 200);
 
 logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 	var a = nodeA.position;
@@ -60,6 +60,16 @@ logRenderer.render = function(element, graph) {
 	context.clearRect(0, 0, element.width, element.height);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 
+	// Rebase
+	var rebaseNodes = {}
+	var rebasePath;
+	if (graph.rebaseHover()) {
+		var local = graph.rebaseHover();
+		var remote = local.remoteRef();
+		rebasePath = local.node().getPathToCommonAncestor(remote.node());
+		rebasePath.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
+	}
+
 	// Draw lines
 	context.strokeStyle = "#737373";
 	context.setLineDash(undefined);
@@ -86,7 +96,9 @@ logRenderer.render = function(element, graph) {
 	// Draw nodes
 	context.setLineDash(undefined);
 	nodes.forEach(function(node) {
-		if (node.idealogicalBranch)
+		if (rebaseNodes[node.sha1])
+			context.fillStyle = "#bbbbbb";
+		else if (node.idealogicalBranch)
 			context.fillStyle = node.idealogicalBranch.color;
 		else
 			context.fillStyle = "#666666";
@@ -125,6 +137,7 @@ logRenderer.render = function(element, graph) {
 	// Draw reset lines
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
+	context.lineWidth = 7;
 	if (graph.resetHover()) {
 		var local = graph.resetHover();
 		var remote = local.remoteRef();
@@ -144,11 +157,7 @@ logRenderer.render = function(element, graph) {
 		context.lineWidth = 3;
 		context.strokeStyle = "#41DE3C";
 
-		var path = local.node().getPathToCommonAncestor(remote.node());
-
-		context.beginPath();
-		logRenderer.crossOverNodes(context, path.slice(0, -1));
-		context.stroke();
+		var path = rebasePath;
 
 		context.lineWidth = 7;
 		context.setLineDash([10, 5]);
