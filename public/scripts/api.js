@@ -9,7 +9,7 @@ var api = {
 		q.set('Accept', 'application/json')
 			.end(function(error, res){
 				if (error || !res.ok) {
-					if (callback && callback({ error: error, res: res, errorCode: res.body.errorCode })) return;
+					if (callback && callback({ error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' })) return;
 					else viewModel.content(new CrashViewModel());
 				}
 				else if (callback)

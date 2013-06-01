@@ -36,6 +36,7 @@ ko.bindingHandlers.graphLog = {
 
 ko.applyBindings(viewModel);
 
+
 //setup hasher
 function parseHash(newHash, oldHash){
   crossroads.parse(newHash);
