@@ -49,7 +49,7 @@ logRenderer.render = function(element, graph) {
 	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + logRenderer.origin.y;
 	var width = 0;
 	nodes.forEach(function(node) {
-		width = Math.max(width, node.x() + node.radius() + 2);
+		width = Math.max(width, node.x() + node.radius() + logRenderer.origin.x + 200);
 	});
 	element.width = width;
 
@@ -119,7 +119,7 @@ logRenderer.render = function(element, graph) {
 	var xRefLineOffset = 30;
 	var yRefLineOffset = 20;
 	var refLineDash = [10, 5]
-	context.lineWidth = 3;
+	context.lineWidth = 7;
 
 	// Draw push lines
 	if (graph.pushHover()) {
@@ -137,7 +137,6 @@ logRenderer.render = function(element, graph) {
 	// Draw reset lines
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
-	context.lineWidth = 7;
 	if (graph.resetHover()) {
 		var local = graph.resetHover();
 		var remote = local.remoteRef();
