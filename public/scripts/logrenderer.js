@@ -17,7 +17,7 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	context.beginPath();
-	context.moveTo(endPosition.x, endPosition.y);
+	context.moveTo(endPosition.x, endPosition.y + (endPosition.y > startPosition.y ? -arrowSize : +arrowSize));
 	context.lineTo(startPosition.x, startPosition.y);
 	context.stroke();
 	context.beginPath();
@@ -27,7 +27,8 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.moveTo(-arrowSize, arrowSize);
 	context.lineTo(0, 0);
 	context.lineTo(arrowSize, arrowSize);
-	context.stroke();
+	context.closePath();
+	context.fill();
 }
 logRenderer.crossOverNodes = function(context, nodes) {
 	nodes.forEach(function(node) {
@@ -115,7 +116,7 @@ logRenderer.render = function(element, graph) {
 		context.stroke();
 	}
 
-	var arrowSize = 7;
+	var arrowSize = 16;
 	var xRefLineOffset = 30;
 	var yRefLineOffset = 20;
 	var refLineDash = [10, 5]
@@ -126,7 +127,9 @@ logRenderer.render = function(element, graph) {
 		var local = graph.pushHover();
 		var remote = local.remoteRef();
 		context.setLineDash(refLineDash);
-		context.strokeStyle = "rgb(61, 139, 255)";
+		context.strokeStyle =
+		context.fillStyle =
+			"rgb(61, 139, 255)";
 		var yOffset = yRefLineOffset;
 		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
 		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
