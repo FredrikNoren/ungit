@@ -15,11 +15,43 @@ button, body {
 }
 
 body {
+	position: relative;
 }
 
 .crash {
 	margin: 20px;
 	padding: 20px;
+}
+
+.dialog {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0px;
+	top: 0px;
+	background: rgba(0, 0, 0, 0.5);
+	.modalContainer {
+		position: absolute;
+		top: 30%;
+		width: 100%;
+		text-align: center;
+		.modal {
+			background: #000;
+			color: #fff;
+			display: inline-block;
+			padding: 30px;
+			.pushDialog {
+				.status {
+					font-size: 1.3em;
+					color: #89BCE8;
+				}
+				form {
+					margin-top: 20px;
+					text-align: left;
+				}
+			}
+		}
+	}
 }
 
 .box {
@@ -40,7 +72,7 @@ h1 {
 	font-size: 2.5em;
 }
 
-button {
+button, input[type="submit"] {
 	background: #68B6ED;
 	color: #fff;
 	border: 0px;
@@ -50,15 +82,15 @@ button {
 	padding-bottom: 5px;
 	background: #68b6ed;
 }
-button:active {
+button:active, input[type="submit"]:active {
 	position: relative;
 	left: 5px;
 	top: 5px;
 }
-button:disabled {
+button:disabled, input[type="submit"]:disabled {
 	background: #ababab;
 }
-button:disabled:active {
+button:disabled:active, input[type="submit"]:disabled:active {
 	left: 0px;
 	top: 0px;
 }

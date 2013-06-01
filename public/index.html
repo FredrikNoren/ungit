@@ -125,11 +125,33 @@
 	</div>
 </script>
 
+
+<script type="text/html" id="pushDialog">
+	<div class="pushDialog" data-bind="debug: $data">
+		<div class="status">Pushing changes to remote...</div>
+		<form data-bind="submit: submitCredentials, visible: showCredentialsForm">
+		<div>Remote requires authentication</div>
+		<div>Username: <input type="text" data-bind="value: username"></div>
+		<div>Password: <input type="text" data-bind="value: password"></div>
+		<div><input type="submit"></div>
+		</form>
+	</div>
+</script>
+
 <div class="main">
 
 	<div data-bind="template: { name: templateChooser, data: content }"></div>
 
 </div>
+
+<!-- ko if: dialog -->
+<div class="dialog animated fadeIn">
+	<div class="modalContainer">
+		<div class="modal" data-bind="template: { name: templateChooser, data: dialog }"></div>
+	</div>
+</div>
+<!-- /ko -->
+
 
 <script type="text/javascript" src="/scripts/lib/less-1.3.3.min.js"></script>
 <script type='text/javascript' src='/scripts/lib/knockout-2.2.1.js'></script>

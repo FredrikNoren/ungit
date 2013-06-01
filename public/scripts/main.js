@@ -1,4 +1,15 @@
 
+ko.bindingHandlers.debug = {
+    init: function(element, valueAccessor) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        console.log('DEBUG INIT', value);
+    },
+    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        console.log('DEBUG UPDATE', value);
+    }
+};
+
 ko.bindingHandlers.fastClick = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var value = valueAccessor();

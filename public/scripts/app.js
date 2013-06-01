@@ -1,12 +1,37 @@
 
 var MainViewModel = function() {
+	var self = this;
+	this.dialog = ko.observable(null);
 	this.content = ko.observable(new EmptyViewModel());
 }
 MainViewModel.prototype.templateChooser = function(data) {
+	if (!data) return '';
 	return data.template;
 };
 
 var viewModel = new MainViewModel();
+
+function PushDialogViewModel(repoPath) {
+	this.repoPath = repoPath;
+	this.showCredentialsForm = ko.observable(false);
+	this.username = ko.observable();
+	this.password = ko.observable();
+	setTimeout(this.startPush.bind(this), 1);
+}
+PushDialogViewModel.prototype.template = 'pushDialog';
+PushDialogViewModel.prototype.askForCredentials = function(callback) {
+	this.credentialsCallback = callback;
+	this.showCredentialsForm(true);
+}
+PushDialogViewModel.prototype.submitCredentials = function() {
+	this.credentialsCallback({ username: this.username(), password: this.password() });
+	this.showCredentialsForm(false);
+}
+PushDialogViewModel.prototype.startPush = function() {
+	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId }, function(err, res) {
+		viewModel.dialog(null);
+	});
+}
 
 function EmptyViewModel() {
 }
@@ -112,7 +137,7 @@ var RepositoryViewModel = function(path) {
 		ready: function() { self.watcherReady(true) },
 		changed: function() { self.update(); },
 		requestCredentials: function(callback) {
-			callback({ username: window.prompt('Username'), password: window.prompt('Password') });
+			viewModel.dialog().askForCredentials(callback);
 		}
 	});
 }
