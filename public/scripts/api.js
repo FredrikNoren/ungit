@@ -17,7 +17,11 @@ var api = {
 			});
 	},
 	watchRepository: function(repositoryPath, callbacks) {
+		var self = this;
 		var socket = io.connect();
+		socket.on('socketId', function (data) {
+			this.socketId = data;
+		});
 		socket.emit('watch', { path: repositoryPath });
 		socket.on('ready', function (data) {
 			if (callbacks.ready) callbacks.ready();

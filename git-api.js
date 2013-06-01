@@ -22,6 +22,7 @@ exports.registerApi = function(app, server, dev) {
 		var io = socketIO.listen(server);
 		io.sockets.on('connection', function (socket) {
 			sockets.push(socket);
+			socket.emit('socketId', sockets.length - 1);
 			socket.on('watch', function (data) {
 				var watchOptions = {
 					path: data.path,
@@ -103,7 +104,8 @@ exports.registerApi = function(app, server, dev) {
 	app.post(exports.pathPrefix + '/push', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
-		var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + '"';
+		if (req.body.socketId)
+			var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
 		git(credentialsOption + ' push origin HEAD', req.body.path, res);
 	});
 
@@ -220,12 +222,11 @@ exports.registerApi = function(app, server, dev) {
 
 	// This method isn't called by the client but by credentials-helper.js
 	app.get(exports.pathPrefix + '/credentials', function(req, res) {
-		sockets.forEach(function(socket) {
-			socket.on('credentials', function(data) {
-				res.json(data);
-			});
-			socket.emit('request-credentials');
+		var socket = sockets[req.query.socketId];
+		socket.once('credentials', function(data) {
+			res.json(data);
 		});
+		socket.emit('request-credentials');
 	});
 
 	if (dev) {

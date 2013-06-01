@@ -273,7 +273,7 @@ RefViewModel.prototype.checkout = function() {
 }
 RefViewModel.prototype.push = function() {
 	this.graph.pushHover(null);
-	api.query('POST', '/push', { path: this.graph.repoPath });
+	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId });
 }
 RefViewModel.prototype.reset = function() {
 	this.graph.resetHover(null);
