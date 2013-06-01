@@ -24,7 +24,7 @@ ko.bindingHandlers.editableText = {
 
 ko.bindingHandlers.graphLog = {
     init: function(element, valueAccessor) {
-        var canvas = $('<canvas width="1000" height="2000">');
+        var canvas = $('<canvas width="200" height="500">');
         $(element).append(canvas);
     },
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {

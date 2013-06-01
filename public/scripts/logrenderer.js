@@ -2,6 +2,8 @@
 
 var logRenderer = {};
 
+logRenderer.origin = new Vector2(0, 200);
+
 logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 	var a = nodeA.position;
 	var b = nodeB.position;
@@ -12,6 +14,8 @@ logRenderer.drawLineBetweenNodes = function(context, nodeA, nodeB) {
 	context.lineTo(b.x, b.y);
 }
 logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowSize) {
+	context.setTransform(1, 0, 0, 1, 0, 0);
+	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	context.beginPath();
 	context.moveTo(endPosition.x, endPosition.y);
 	context.lineTo(startPosition.x, startPosition.y);
@@ -24,7 +28,6 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.lineTo(0, 0);
 	context.lineTo(arrowSize, arrowSize);
 	context.stroke();
-	context.setTransform(1, 0, 0, 1, 0, 0);
 }
 logRenderer.crossOverNodes = function(context, nodes) {
 	nodes.forEach(function(node) {
@@ -43,13 +46,19 @@ logRenderer.render = function(element, graph) {
 
 	if (!nodes || !nodes.length) return;
 
-	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 2;
+	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + logRenderer.origin.y;
+	var width = 0;
+	nodes.forEach(function(node) {
+		width = Math.max(width, node.x() + node.radius() + 2);
+	});
+	element.width = width;
 
 	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	var commitNodePosition = new Vector2(30, 30);
 	
 	var context = element.getContext("2d");
-	context.clearRect(0, 0, element.width, element.height)
+	context.clearRect(0, 0, element.width, element.height);
+	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 
 	// Draw lines
 	context.strokeStyle = "#737373";
@@ -114,6 +123,8 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw reset lines
+	context.setTransform(1, 0, 0, 1, 0, 0);
+	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	if (graph.resetHover()) {
 		var local = graph.resetHover();
 		var remote = local.remoteRef();
