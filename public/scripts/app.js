@@ -100,8 +100,13 @@ var RepositoryViewModel = function(path) {
 	});
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(path);
-	this.update();
-	this.fetch();
+	this.updateStatus();
+	this.status.subscribe(function(newValue) {
+		if (newValue == 'inited') {
+			self.update();
+			self.fetch();
+		}
+	});
 	this.watcherReady = ko.observable(false);
 	api.watchRepository(path, {
 		ready: function() { self.watcherReady(true) },
@@ -121,6 +126,7 @@ RepositoryViewModel.prototype.update = function() {
 	});
 }
 RepositoryViewModel.prototype.fetch = function() {
+	if (this.status() != 'inited') return;
 	var self = this;
 	this.isFetching(true);
 	api.query('POST', '/fetch', { path: this.path }, function(err, status) {
@@ -155,6 +161,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	});
 }
 RepositoryViewModel.prototype.updateLog = function() {
+	if (this.status() != 'inited') return;
 	var self = this;
 	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
 		if (err) return;
@@ -162,6 +169,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {
+	if (this.status() != 'inited') return;
 	var self = this;
 	api.query('GET', '/branch', { path: this.path }, function(err, branch) {
 		if (err && err.errorCode == 'not-a-repository') return true;
