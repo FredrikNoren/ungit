@@ -20,7 +20,7 @@ var api = {
 		var self = this;
 		var socket = io.connect();
 		socket.on('socketId', function (data) {
-			this.socketId = data;
+			self.socketId = data;
 		});
 		socket.emit('watch', { path: repositoryPath });
 		socket.on('ready', function (data) {
