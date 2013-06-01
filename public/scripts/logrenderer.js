@@ -132,8 +132,8 @@ logRenderer.render = function(element, graph) {
 			"rgb(61, 139, 255)";
 		var yOffset = yRefLineOffset;
 		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
-		var endPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
-		var startPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
+		var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+		var endPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
 		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
 	}
 
