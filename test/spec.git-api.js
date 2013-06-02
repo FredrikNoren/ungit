@@ -111,7 +111,8 @@ describe('git-api', function () {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile]).to.eql({
 				isNew: true,
-				staged: false
+				staged: false,
+				removed: false
 			});
 			done();
 		});
@@ -175,7 +176,8 @@ describe('git-api', function () {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile]).to.eql({
 				isNew: false,
-				staged: false
+				staged: false,
+				removed: false
 			});
 			done();
 		});
@@ -206,7 +208,8 @@ describe('git-api', function () {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile2]).to.eql({
 				isNew: true,
-				staged: false
+				staged: false,
+				removed: false
 			});
 			done();
 		});
@@ -239,7 +242,8 @@ describe('git-api', function () {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile3]).to.eql({
 				isNew: true,
-				staged: false
+				staged: false,
+				removed: false
 			});
 			done();
 		});
@@ -266,6 +270,23 @@ describe('git-api', function () {
 			expect(HEAD.committerName).to.be(gitConfig['user.name']);
 			expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
 			expect(HEAD.sha1).to.be.ok();
+			done();
+		});
+	});
+
+
+	it('removing a test file should work', function(done) {
+		common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) }, done);
+	});
+
+	it('status should list the removoed file', function(done) {
+		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+			expect(Object.keys(res.body.files).length).to.be(1);
+			expect(res.body.files[testFile]).to.eql({
+				isNew: false,
+				staged: false,
+				removed: true
+			});
 			done();
 		});
 	});

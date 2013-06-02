@@ -250,6 +250,10 @@ exports.registerApi = function(app, server, dev) {
 			fs.writeFileSync(req.body.file, 'test content\n' + Math.random() + '\n');
 			res.json({ });
 		});
+		app.post(exports.pathPrefix + '/testing/removefile', function(req, res){
+			fs.unlinkSync(req.body.file);
+			res.json({ });
+		});
 		app.post(exports.pathPrefix + '/testing/cleanup', function(req, res){
 			temp.cleanup();
 			res.json({ });
