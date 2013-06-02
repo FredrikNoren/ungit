@@ -115,6 +115,7 @@ var RepositoryViewModel = function(path) {
 	this.commitAuthorEmail = ko.computed(function() {
 		return gitConfig()['user.email'];
 	});
+	this.isCommitting = ko.observable(false);
 	this.path = path;
 	var p2 = path.replace(/\\/g, '/');
 	var pathSplit = p2.split('/');
@@ -225,6 +226,7 @@ RepositoryViewModel.prototype.cloneRepository = function() {
 }
 RepositoryViewModel.prototype.commit = function() {
 	var self = this;
+	this.isCommitting(true);
 	var files = this.files().filter(function(file) {
 		return file.staged();
 	}).map(function(file) {
@@ -232,6 +234,8 @@ RepositoryViewModel.prototype.commit = function() {
 	});
 	api.query('POST', '/commit', { path: this.path, message: this.commitMessage(), files: files }, function(err, res) {
 		self.commitMessage('');
+		self.files.removeAll();
+		self.isCommitting(false);
 	});
 }
 
