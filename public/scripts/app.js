@@ -192,7 +192,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 	var self = this;
 	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
 		if (err) return;
-		self.graph.setNodes(logEntries);
+		self.graph.setNodesFromLog(logEntries);
 	});
 }
 RepositoryViewModel.prototype.updateBranches = function() {

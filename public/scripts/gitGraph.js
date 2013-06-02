@@ -3,6 +3,7 @@
 var GitGraphViewModel = function(repoPath) {
 	this.nodes = ko.observable([]);
 	this.refs = ko.observableArray();
+	this.daySeparators = ko.observable();
 	this.nodesById = {};
 	this.refsByRefName = {};
 	this.repoPath = repoPath;
@@ -12,7 +13,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.rebaseHover = ko.observable();
 }
 
-GitGraphViewModel.prototype.setNodes = function(nodes) {
+GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 	var self = this;
 	var nodeVMs = [];
 	nodes.forEach(function(node) {
@@ -38,8 +39,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 			nodeViewModel.refs(refVMs);
 		}
 	});
-	nodeVMs = GitGraphViewModel.normalize(nodeVMs, this.nodesById, this.refsByRefName);
-	this.nodes(nodeVMs);
+	this.setNodes(nodeVMs);
 }
 
 GitGraphViewModel.prototype.getHEAD = function() {
@@ -89,18 +89,19 @@ GitGraphViewModel.randomColor = function() {
 	return '#' + randomHex() + randomHex() + randomHex();
 }
 
-GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
+GitGraphViewModel.prototype.setNodes = function(nodes) {
+	var daySeparators = [];
 	nodes.sort(function(a, b) { return b.commitTime.unix() - a.commitTime.unix(); });
 
 	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	if (!HEAD) return;
-	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, nodesById);
+	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, this.nodesById);
 
 	// Make sure refs know their "remote"
-	for(var refName in refsByRefName) {
-		var ref = refsByRefName[refName];
+	for(var refName in this.refsByRefName) {
+		var ref = this.refsByRefName[refName];
 		if (ref.isLocalBranch) {
-			var remote = refsByRefName['refs/remotes/origin/' + ref.displayName];
+			var remote = this.refsByRefName['refs/remotes/origin/' + ref.displayName];
 			if (remote) {
 				ref.remoteRef(remote);
 				remote.localRef(ref);
@@ -113,7 +114,7 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 
 	var updateTimeStamp = moment().valueOf();
 
-	GitGraphViewModel.traverseNodeParents(HEAD, nodesById, function(node) {
+	GitGraphViewModel.traverseNodeParents(HEAD, this.nodesById, function(node) {
 		node.ancestorOfHEADTimeStamp = updateTimeStamp;
 	});
 
@@ -170,10 +171,15 @@ GitGraphViewModel.normalize = function(nodes, nodesById, refsByRefName) {
 		}
 		node.y(y);
 
+		if (prevNode && prevNode.commitTime.dayOfYear() != node.commitTime.dayOfYear()) {
+			daySeparators.push({ x: 0, y: node.y(), date: node.commitTime.format('ll') });
+		}
+
 		prevNode = node;
 	});
 
-	return nodes;
+	this.nodes(nodes);
+	this.daySeparators(daySeparators);
 }
 
 NodeViewModel = function(args) {

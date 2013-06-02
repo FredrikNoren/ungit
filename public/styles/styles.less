@@ -155,6 +155,8 @@ a {
 	}
 }
 
+@logWidth: 670px;
+
 .repository {
 	.path {
 		color: #bbb;
@@ -178,7 +180,7 @@ a {
 			background: #474747;
 			position: absolute;
 			top: 0px;
-			left: 780px;
+			left: (@logWidth + 110px);
 			color: #fff;
 			padding: 10px;
 			.arrowDown {
@@ -199,7 +201,7 @@ a {
 
 			position: relative;
 			top: -60px;
-			left: 700px;
+			left: (@logWidth + 30px);
 
 			.graphLog {
 				position: relative;
@@ -212,7 +214,7 @@ a {
 				
 				.log {
 					position: absolute;
-					left: -730px;
+					left: -(@logWidth + 60px);
 					.arrowRight {
 						position: absolute;
 						right: -15px;
@@ -223,7 +225,7 @@ a {
 						top: -20px;
 						background: rgba(255, 255, 255, 0.9);
 						padding: 10px;
-						width: 670px;
+						width: @logWidth;
 						box-sizing:border-box;
 						-moz-box-sizing:border-box;	
 						.author, .date {
@@ -322,6 +324,25 @@ a {
 					}
 				}
 
+			}
+
+			.daySeparators {
+				position: absolute;
+				top: -15px;
+				left: -(@logWidth + 130px);
+				.daySeparator {
+					position: absolute;
+					font-size: 0.6em;
+					color: #999;
+					width: 70px;
+					background: #fff;
+					padding: 5px;
+					.arrowRight {
+						position: absolute;
+						right: -15px;
+						top: -3px;
+					}
+				}
 			}
 		}
 

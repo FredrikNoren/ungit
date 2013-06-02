@@ -44,7 +44,7 @@ var log = [
 {"sha1":"ae03f555da711c045a6848d27483f9d79d7f57c2","parents":[],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","date":"Thu May 23 21:02:37 2013 +0200","title":"Init","message":"Init"}];
 
 var graph = new GitGraphViewModel();
-graph.setNodes(log);
+graph.setNodesFromLog(log);
 
 var runner = mocha.run(function(failures) {
 	if (runner.failures) return;

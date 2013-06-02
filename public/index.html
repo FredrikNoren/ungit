@@ -71,6 +71,13 @@
 			
 			<div class="graph" data-bind="with: graph">
 
+				<div class="daySeparators" data-bind="foreach: daySeparators">
+					<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+						<img src="images/whiteArrowRight.png" class="arrowRight">
+						<div class="dateLabel" data-bind="text: date"></div>
+					</div>
+				</div>
+
 				<div class="graphLog" data-bind="graphLog: $data">
 				</div>
 				
@@ -128,7 +135,7 @@
 
 
 <script type="text/html" id="pushDialog">
-	<div class="pushDialog" data-bind="debug: $data">
+	<div class="pushDialog">
 		<div class="status">Pushing changes to remote...</div>
 		<form data-bind="submit: submitCredentials, visible: showCredentialsForm">
 		<div>Remote requires authentication</div>
