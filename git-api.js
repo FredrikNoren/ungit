@@ -128,7 +128,7 @@ exports.registerApi = function(app, server, dev) {
 			if (err) return res.json(400, err);
 			var file = status.files[req.query.file];
 			if (!file) {
-				res.json(400, { error: 'No such file: ' + req.query.file });
+				res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
 			} else if (!file.isNew) {
 				git(cliConfigPager + ' diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {

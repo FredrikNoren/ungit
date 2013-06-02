@@ -243,6 +243,7 @@ FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
+	this.showDiffs(false);
 	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name() });
 }
 FileViewModel.prototype.toogleDiffs = function() {
