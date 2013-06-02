@@ -41,25 +41,29 @@ logRenderer.crossOverNodes = function(context, nodes) {
 
 logRenderer.render = function(element, graph) {
 
-	var nodes = graph.nodes(),
+	var nodes = graph.nodes() || [],
 		nodesById = graph.nodesById,
 		refsByRefName = graph.refsByRefName;
 
-	if (!nodes || !nodes.length) return;
+	if (nodes && nodes.length) {
+		element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + logRenderer.origin.y;
+		var width = 0;
+		nodes.forEach(function(node) {
+			width = Math.max(width, node.x() + node.radius() + logRenderer.origin.x + 200);
+		});
+		element.width = width;
+	} else {
+		element.height = logRenderer.origin.y + 200;
+		element.width = logRenderer.origin.x + 200;
+	}
 
-	element.height = nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + logRenderer.origin.y;
-	var width = 0;
-	nodes.forEach(function(node) {
-		width = Math.max(width, node.x() + node.radius() + logRenderer.origin.x + 200);
-	});
-	element.width = width;
-
-	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	var commitNodePosition = new Vector2(30, 30);
-	
+
 	var context = element.getContext("2d");
 	context.clearRect(0, 0, element.width, element.height);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
+
+	var HEAD = GitGraphViewModel.getHEAD(nodes);
 
 	// Rebase
 	var rebaseNodes = {}
@@ -108,14 +112,14 @@ logRenderer.render = function(element, graph) {
 		context.arc(node.x(), node.y(), node.radius(), 0, 2 * Math.PI);
 		context.fill();
 	});
-	if (HEAD) {
-		context.strokeStyle = HEAD.idealogicalBranch.color;
-		context.setLineDash([10, 5]);
-		context.lineWidth = 7;
-		context.beginPath();
-		context.arc(commitNodePosition.x, commitNodePosition.y, 30 - context.lineWidth / 2, 0, 2 * Math.PI);
-		context.stroke();
-	}
+	// Commit node
+	context.strokeStyle = HEAD ? HEAD.idealogicalBranch.color : GitGraphViewModel.randomColor();
+	context.setLineDash([10, 5]);
+	context.lineWidth = 7;
+	context.beginPath();
+	context.arc(commitNodePosition.x, commitNodePosition.y, 30 - context.lineWidth / 2, 0, 2 * Math.PI);
+	context.stroke();
+
 
 	var arrowSize = 16;
 	var xRefLineOffset = 30;

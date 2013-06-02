@@ -80,7 +80,11 @@ var PathViewModel = function(path) {
 	var pathSplit = p2.split('/');
 	this.titleSubPath = pathSplit.slice(0, pathSplit.length - 1).join('/') + '/';
 	this.title = capitaliseFirstLetter(pathSplit[pathSplit.length - 1]);
-
+	this.updateStatus();
+}
+PathViewModel.prototype.template = 'path';
+PathViewModel.prototype.updateStatus = function() {
+	var self = this;
 	api.query('GET', '/status', { path: this.path }, function(err, status){
 		if (!err) {
 			self.status('repository');
@@ -94,10 +98,12 @@ var PathViewModel = function(path) {
 		}
 	});
 }
-PathViewModel.prototype.template = 'path';
 PathViewModel.prototype.initRepository = function() {
 	var self = this;
-	api.query('POST', '/init', { path: this.path });
+	api.query('POST', '/init', { path: this.path }, function(err, res) {
+		if (err) return;
+		self.updateStatus();
+	});
 }
 PathViewModel.prototype.cloneRepository = function() {
 	var self = this;
