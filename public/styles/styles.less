@@ -380,6 +380,7 @@ a {
 					border-radius: 5px;
 					margin: 5px;
 					font-size: 0.9em;
+					color: #666;
 					.diff {
 						padding-left: 3px;
 						padding-right: 3px;
@@ -387,19 +388,26 @@ a {
 						word-wrap: break-word;
 						&.added {
 							background: #66F27B;
+							color: #000;
 						}
 						&.removed {
 							background: #E86756;
+							color: #fff;
 						}
 					}
 				}
-				.new {
-					background: #B5F584;
+				.new, .deleted {
 					color: #fff;
 					border-radius: 3px;
 					padding: 3px;
 					padding-left: 5px;
 					padding-right: 5px;
+				}
+				.new {
+					background: #B5F584;
+				}
+				.deleted {
+					background: #DB3712;
 				}
 				.discard {
 					background: #e0e0e0;

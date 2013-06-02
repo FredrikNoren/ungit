@@ -55,6 +55,7 @@ var FileViewModel = function(repository) {
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
+	this.removed = ko.observable(false);
 	this.diffs = ko.observableArray();
 	this.showDiffs = ko.observable(false);
 }
@@ -172,6 +173,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 					self.files.push(fileViewModel);
 				}
 				fileViewModel.isNew(status.files[file].isNew);
+				fileViewModel.removed(status.files[file].removed);
 				fileViewModel.lastUpdateId = updateId;
 			}
 			for (var i = self.files().length - 1; i >= 0; i--) {
