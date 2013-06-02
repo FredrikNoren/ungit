@@ -22,7 +22,7 @@ var req = request(app);
 describe('git-api branching', function () {
 
 	before(function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, done, function(dir) {
 			testDir = dir;
 			common.get(req, '/config', { path: testDir }, done, function(err, res) {
 				gitConfig = res.body;

@@ -249,6 +249,12 @@ exports.registerApi = function(app, server, dev) {
 		git('rebase "' + req.body.onto + '"', req.body.path, res);
 	});
 
+
+	app.post(exports.pathPrefix + '/submodules', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('submodule add "' + req.body.submoduleUrl + '" "' + req.body.submodulePath + '"', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig);
 	});

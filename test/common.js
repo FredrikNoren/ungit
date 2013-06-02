@@ -1,4 +1,6 @@
 var expect = require('expect.js');
+var async = require('async');
+var path = require('path');
 var restGit = require('../git-api');
 
 var common = exports;
@@ -41,7 +43,7 @@ common.post = function(req, path, payload, done, callback) {
 		.end(common.wrapErrorHandler(done, callback || done));
 }
 
-common.createSmallRepo = function(req, done, callback) {
+common.createEmptyRepo = function(req, done, callback) {
 	var testDir;
 	common.post(req, '/testing/createdir', undefined, done, function(err, res) {
 		expect(res.body.path).to.be.ok();
@@ -49,5 +51,16 @@ common.createSmallRepo = function(req, done, callback) {
 		common.post(req, '/init', { path: testDir }, done, function() {
 			callback(testDir);
 		});
+	});
+}
+common.createSmallRepo = function(req, done, callback) {
+	common.createEmptyRepo(req, done, function(dir) {
+		var testFile = 'smalltestfile.txt';
+		async.series([
+			function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
+			function(done) { common.post(req, '/commit', { path: dir, message: 'Init', files: [testFile] }, function() {
+				callback(dir);
+			}); }
+		], done);
 	});
 }
