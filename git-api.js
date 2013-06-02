@@ -104,8 +104,9 @@ exports.registerApi = function(app, server, dev) {
 	app.post(exports.pathPrefix + '/push', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
+		var credentialsOption = '';
 		if (req.body.socketId)
-			var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
+			credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
 		git(credentialsOption + ' push origin HEAD', req.body.path, res);
 	});
 
