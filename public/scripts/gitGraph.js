@@ -105,6 +105,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 			if (remote) {
 				ref.remoteRef(remote);
 				remote.localRef(ref);
+				remote.color = ref.color;
 			}
 		}
 	}
