@@ -6,6 +6,7 @@ var path = require('path');
 var temp = require('temp');
 var socketIO = require('socket.io');
 var watchr = require('watchr');
+var async=  require('async');
 var gitParser = require('./git-parser');
 
 exports.pathPrefix = '';
@@ -15,6 +16,8 @@ var debug = true;
 exports.registerApi = function(app, server, dev) {
 
 	app.use(express.bodyParser());
+
+	var cliConfigPager = '-c core.pager=cat';
 
 	var sockets = [];
 
@@ -54,10 +57,10 @@ exports.registerApi = function(app, server, dev) {
 
 	var git = function(command, repoPath, res, parser, callback) {
 		command = 'git ' + command;
-		child_process.exec(command, { cwd: repoPath },
+		child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
 			function (error, stdout, stderr) {
 				if (error !== null) {
-					var err = { errorCode: 'unkown', command: command, error: error, stderr: stderr };
+					var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
 					if (stderr.indexOf('Not a git repository') >= 0)
 						err.errorCode = 'not-a-repository';
 					if (callback) callback(err, stdout);
@@ -127,7 +130,7 @@ exports.registerApi = function(app, server, dev) {
 			if (!file) {
 				res.json(400, { error: 'No such file: ' + req.query.file });
 			} else if (!file.isNew) {
-				git('diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
+				git(cliConfigPager + ' diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });
@@ -179,17 +182,27 @@ exports.registerApi = function(app, server, dev) {
 				if (fileStatus.removed) toRemove.push(file);
 				else toAdd.push(file);
 			}
-			git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
-				git('rm ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
-					git('commit -m "' + req.body.message + '"', req.body.path, res);
-				});
+
+			async.series([
+				function(done) {
+					if (toAdd.length == 0) done();
+					else git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, done);
+				},
+				function(done) {
+					if (toRemove.length == 0) done();
+					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, done);
+				}
+			], function() {
+				git('commit -m "' + req.body.message + '"', req.body.path, res);
 			});
 		});
 	});
 
 	app.get(exports.pathPrefix + '/log', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
-		git('log --decorate=full --pretty=fuller --all --parents', req.query.path, res, gitParser.parseGitLog, function(err, log) {
+		var limit = '';
+		if (req.query.limit) limit = '--max-count=' + req.query.limit;
+		git(cliConfigPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.query.path, res, gitParser.parseGitLog, function(err, log) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
 					res.json([]);

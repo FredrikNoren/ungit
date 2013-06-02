@@ -314,6 +314,16 @@ describe('git-api', function () {
 		});
 	});
 
+
+	it('log with limit should only return specified number of items', function(done) {
+		common.get(req, '/log', { path: testDir, limit: 1 }, done, function(err, res) {
+			expect(res.body).to.be.a('array');
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
+
 	it('cleaning up test dir should work', function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);
 	});
