@@ -1,8 +1,9 @@
-
+var expect = require('expect.js');
 var restGit = require('../git-api');
 
+var common = exports;
 
-exports.wrapErrorHandler = function(done, callback) {
+common.wrapErrorHandler = function(done, callback) {
 	return function(err, res) {
 		if (err) {
 			console.dir(err);
@@ -16,7 +17,7 @@ exports.wrapErrorHandler = function(done, callback) {
 	}
 }
 
-exports.get = function(req, path, payload, done, callback) {
+common.get = function(req, path, payload, done, callback) {
 	var r = req
 		.get(restGit.pathPrefix + path);
 	if (payload !== undefined)
@@ -25,10 +26,10 @@ exports.get = function(req, path, payload, done, callback) {
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
 		.expect(200)
-		.end(exports.wrapErrorHandler(done, callback || done));
+		.end(common.wrapErrorHandler(done, callback || done));
 }
 
-exports.post = function(req, path, payload, done, callback) {
+common.post = function(req, path, payload, done, callback) {
 	var r = req
 		.post(restGit.pathPrefix + path);
 	if (payload !== undefined)
@@ -37,5 +38,16 @@ exports.post = function(req, path, payload, done, callback) {
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
 		.expect(200)
-		.end(exports.wrapErrorHandler(done, callback || done));
+		.end(common.wrapErrorHandler(done, callback || done));
+}
+
+common.createSmallRepo = function(req, done, callback) {
+	var testDir;
+	common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+		expect(res.body.path).to.be.ok();
+		testDir = res.body.path;
+		common.post(req, '/init', { path: testDir }, done, function() {
+			callback(testDir);
+		});
+	});
 }

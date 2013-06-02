@@ -2,6 +2,8 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
+var _ = require('underscore');
+var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var child_process = require('child_process');
@@ -220,55 +222,6 @@ describe('git-api', function () {
 			.end(wrapErrorHandler(done));
 	});
 
-	it('listing branches should work', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(true);
-			done();
-		});
-	});
-
-	var testBranch = 'testBranch';
-
-	it('creating a branch should work', function(done) {
-		common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done);
-	});
-
-	it('listing branches should show the new branch', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
-			expect(res.body.length).to.be(2);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(true);
-			expect(res.body[1].name).to.be(testBranch);
-			expect(res.body[1].current).to.be(undefined);
-			done();
-		});
-	});
-
-	it('should be possible to switch to a branch', function(done) {
-		common.post(req, '/branch', { path: testDir, name: testBranch }, done);
-	});
-
-	it('listing branches should show the new branch as current', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
-			expect(res.body.length).to.be(2);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(undefined);
-			expect(res.body[1].name).to.be(testBranch);
-			expect(res.body[1].current).to.be(true);
-			done();
-		});
-	});
-
-	it('get branch should show the new branch as current', function(done) {
-		common.get(req, '/branch', { path: testDir }, done, function(err, res) {
-			expect(res.body).to.be(testBranch);
-			done();
-		});
-	});
-
-
 	var testSubDir = 'sub';
 
 	it('creating test sub dir should work', function(done) {
@@ -298,28 +251,11 @@ describe('git-api', function () {
 		common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [testFile3] }, done);
 	});
 
-	it('log should show both branches and all commits', function(done) {
+	it('log should show last commit', function(done) {
 		common.get(req, '/log', { path: testDir }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
-			var objs = {};
-			res.body.forEach(function(obj) {
-				obj.refs.sort();
-				objs[obj.refs[0]] = obj;
-			});
-			var master = objs['refs/heads/master'];
-			var HEAD = objs['HEAD'];
-			expect(master.message.indexOf(commitMessage)).to.be(0);
-			expect(master.title).to.be(commitMessage);
-			expect(master.authorDate).to.be.a('string');
-			expect(master.authorName).to.be(gitConfig['user.name']);
-			expect(master.authorEmail).to.be(gitConfig['user.email']);
-			expect(master.commitDate).to.be.a('string');
-			expect(master.committerName).to.be(gitConfig['user.name']);
-			expect(master.committerEmail).to.be(gitConfig['user.email']);
-			expect(master.refs).to.eql(['refs/heads/master']);
-			expect(master.parents).to.eql([]);
-			expect(master.sha1).to.be.ok();
+			var HEAD = res.body[0];
 
 			expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
 			expect(HEAD.title).to.be(commitMessage3);
@@ -329,8 +265,6 @@ describe('git-api', function () {
 			expect(HEAD.commitDate).to.be.a('string');
 			expect(HEAD.committerName).to.be(gitConfig['user.name']);
 			expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
-			expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
-			expect(HEAD.parents).to.eql([master.sha1]);
 			expect(HEAD.sha1).to.be.ok();
 			done();
 		});
