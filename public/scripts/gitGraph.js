@@ -13,6 +13,14 @@ var GitGraphViewModel = function(repoPath) {
 	this.rebaseHover = ko.observable();
 }
 
+GitGraphViewModel.prototype.loadNodesFromApi = function() {
+	var self = this;
+	api.query('GET', '/log', { path: this.repoPath, limit: GitGraphViewModel.maxNNodes }, function(err, logEntries) {
+		if (err) return;
+		self.setNodesFromLog(logEntries);
+	});
+}
+
 GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 	var self = this;
 	var nodeVMs = [];
@@ -51,10 +59,12 @@ GitGraphViewModel.getHEAD = function(nodes) {
 }
 
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
+	if (node.index() >= GitGraphViewModel.maxNNodes) return;
 	callback(node);
 	node.parents.forEach(function(parentId) {
 		var parent = nodesById[parentId];
-		GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
+		if (parent)
+			GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
 	});
 }
 
@@ -89,9 +99,13 @@ GitGraphViewModel.randomColor = function() {
 	return '#' + randomHex() + randomHex() + randomHex();
 }
 
+GitGraphViewModel.maxNNodes = 100;
+
 GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var daySeparators = [];
 	nodes.sort(function(a, b) { return b.commitTime.unix() - a.commitTime.unix(); });
+	nodes.forEach(function(node, i) { node.index(i); });
+	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
 	var HEAD = GitGraphViewModel.getHEAD(nodes);
 	if (!HEAD) return;
@@ -207,6 +221,7 @@ NodeViewModel = function(args) {
 	setInterval(function() { self.authorDate(moment(args.authorDate).fromNow()); }, 1000 * 60);
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
+	this.index = ko.observable();
 	this.logBoxVisible = ko.observable(true);
 	this.refs = ko.observable([]);
 	this.branches = ko.computed(function() {
@@ -218,10 +233,11 @@ NodeViewModel.prototype.createBranch = function() {
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 }
 NodeViewModel.prototype.isAncestor = function(node) {
+	if (this.index() >= GitGraphViewModel.maxNNodes) return false;
 	if (node == this) return true;
 	for (var v in this.parents) {
 		var n = this.graph.nodesById[this.parents[v]];
-		if (n.isAncestor(node)) return true;
+		if (n && n.isAncestor(node)) return true;
 	}
 	return false;
 }

@@ -194,11 +194,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 }
 RepositoryViewModel.prototype.updateLog = function() {
 	if (this.status() != 'inited') return;
-	var self = this;
-	api.query('GET', '/log', { path: this.path }, function(err, logEntries) {
-		if (err) return;
-		self.graph.setNodesFromLog(logEntries);
-	});
+	this.graph.loadNodesFromApi();
 }
 RepositoryViewModel.prototype.updateBranches = function() {
 	if (this.status() != 'inited') return;

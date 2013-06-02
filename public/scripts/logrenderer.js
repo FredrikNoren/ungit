@@ -79,9 +79,10 @@ logRenderer.render = function(element, graph) {
 	nodes.forEach(function(node) {
 		node.parents.forEach(function(parentId) {
 			var parent = nodesById[parentId];
-			logRenderer.drawLineBetweenNodes(context,
-				{ position: node.position(), radius: node.radius() },
-				{ position: parent.position(), radius: parent.radius() });
+			if (parent)
+				logRenderer.drawLineBetweenNodes(context,
+					{ position: node.position(), radius: node.radius() },
+					{ position: parent.position(), radius: parent.radius() });
 		});
 	});
 	context.stroke();
