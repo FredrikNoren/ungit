@@ -301,6 +301,18 @@ describe('git-api', function () {
 		});
 	});
 
+	var commitMessage4 = 'Removed some file';
+
+	it('commit on removed file should work', function(done) {
+		common.post(req, '/commit', { path: testDir, message: commitMessage4, files: [testFile] }, done);
+	});
+
+	it('status should list nothing', function(done) {
+		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+			expect(Object.keys(res.body.files).length).to.be(0);
+			done();
+		});
+	});
 
 	it('cleaning up test dir should work', function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);

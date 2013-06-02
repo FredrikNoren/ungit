@@ -69,11 +69,14 @@ exports.registerApi = function(app, server, dev) {
 				}
 		});
 	}
+	git.status = function(repoPath, res, callback) {
+		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, callback);
+	}
 
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus);
+		git.status(repoPath, res);
 	});
 
 	app.post(exports.pathPrefix + '/init', function(req, res) {
@@ -118,7 +121,7 @@ exports.registerApi = function(app, server, dev) {
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
-		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, function(err, status) {
+		git.status(repoPath, res, function(err, status) {
 			if (err) return res.json(400, err);
 			var file = status.files[req.query.file];
 			if (!file) {
@@ -163,8 +166,24 @@ exports.registerApi = function(app, server, dev) {
 			return res.json(400, { error: 'Must specify commit message' });
 		if (!(req.body.files instanceof Array) || req.body.files.length == 0)
 			return res.json(400, { error: 'Must specify files to commit' });
-		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
-			git('commit -m "' + req.body.message + '"', req.body.path, res);
+		git.status(req.body.path, res, function(err, status) {
+			var toAdd = [];
+			var toRemove = [];
+			for(var v in req.body.files) {
+				var file = req.body.files[v];
+				var fileStatus = status.files[file] || status.files[path.relative(req.body.path, file)];
+				if (!fileStatus) {
+					res.json(400, { error: 'No such file in staging: ' + file });
+					return;
+				}
+				if (fileStatus.removed) toRemove.push(file);
+				else toAdd.push(file);
+			}
+			git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
+				git('rm ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, function() {
+					git('commit -m "' + req.body.message + '"', req.body.path, res);
+				});
+			});
 		});
 	});
 
