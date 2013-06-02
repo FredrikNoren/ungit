@@ -124,7 +124,7 @@ exports.registerApi = function(app, server, dev) {
 			if (!file) {
 				res.json(400, { error: 'No such file: ' + req.query.file });
 			} else if (!file.isNew) {
-				git('diff HEAD "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
+				git('diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });

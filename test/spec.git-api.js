@@ -279,7 +279,7 @@ describe('git-api', function () {
 		common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) }, done);
 	});
 
-	it('status should list the removoed file', function(done) {
+	it('status should list the removed file', function(done) {
 		common.get(req, '/status', { path: testDir }, done, function(err, res) {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile]).to.eql({
@@ -290,6 +290,17 @@ describe('git-api', function () {
 			done();
 		});
 	});
+
+	it('diff on removed file should work', function(done) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
+			expect(res.body).to.be.an('array');
+			expect(res.body.length).to.be.greaterThan(0);
+			expect(res.body[0].lines).to.be.an('array');
+			expect(res.body[0].lines.length).to.be.greaterThan(0);
+			done();
+		});
+	});
+
 
 	it('cleaning up test dir should work', function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);
