@@ -167,9 +167,35 @@ a {
 			color: #555;
 		}
 		position: relative;
+		text-align: center;
+		.topic {
+			text-align: left;
+		}
 		.initRepository {
-			margin-top: 1em;
+			margin-top: 60px;
+			margin-bottom: 30px;
+		}
+		.initRepository, input[type="submit"] {
 			font-size: 1.6em;
+		}
+		.or {
+			color: #666;
+			.line {
+				width: 200px;
+				height: 0px;
+				border-top: 1px solid #bbb;
+				display: inline-block;
+				position: relative;
+				top: -5px;
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+		}
+		.cloneRepository {
+			margin-top: 30px;
+			input[type="text"] {
+				width: 300px;
+			}
 		}
 	}
 	.inited {

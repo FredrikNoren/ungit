@@ -86,7 +86,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/clone', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('clone "' + req.body.remote + '" .', req.body.path, res);
+		git('clone "' + req.body.url + '" ' + '"' + req.body.destinationDir + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/fetch', function(req, res) {

@@ -54,7 +54,7 @@ describe('git-api remote', function () {
 	});
 
 	it('cloning "remote" to "local1" should work', function(done) {
-		common.post(req, '/clone', { path: testDirLocal1, remote: testDirRemote }, done);
+		common.post(req, '/clone', { path: testDirLocal1, url: testDirRemote, destinationDir: '.' }, done);
 	});
 
 	it('creating a commit in "local1" repo should work', function(done) {
@@ -82,7 +82,7 @@ describe('git-api remote', function () {
 	});
 
 	it('cloning "remote" to "local2" should work', function(done) {
-		common.post(req, '/clone', { path: testDirLocal2, remote: testDirRemote }, done);
+		common.post(req, '/clone', { path: testDirLocal2, url: testDirRemote, destinationDir: '.' }, done);
 	});
 
 	it('log in "local2" should show the init commit', function(done) {

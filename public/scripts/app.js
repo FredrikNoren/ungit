@@ -105,6 +105,8 @@ api.query('GET', '/config', undefined, function(err, config) {
 var RepositoryViewModel = function(path) {
 	var self = this;
 	this.status = ko.observable('loading');
+	this.cloneurl = ko.observable();
+	this.clonedestination = ko.observable();
 	this.files = ko.observableArray();
 	this.commitMessage = ko.observable();
 	this.commitAuthorName = ko.computed(function() {
@@ -127,18 +129,18 @@ var RepositoryViewModel = function(path) {
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(path);
 	this.updateStatus();
+	this.watcherReady = ko.observable(false);
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
 			self.fetch();
-		}
-	});
-	this.watcherReady = ko.observable(false);
-	api.watchRepository(path, {
-		ready: function() { self.watcherReady(true) },
-		changed: function() { self.update(); },
-		requestCredentials: function(callback) {
-			viewModel.dialog().askForCredentials(callback);
+			api.watchRepository(path, {
+				ready: function() { self.watcherReady(true) },
+				changed: function() { self.update(); },
+				requestCredentials: function(callback) {
+					viewModel.dialog().askForCredentials(callback);
+				}
+			});
 		}
 	});
 }
@@ -184,6 +186,9 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
 			return true;
+		} else if (err.errorCode == 'no-such-path') {
+			self.status('invalidpath');
+			return true;
 		}
 	});
 }
@@ -214,6 +219,13 @@ RepositoryViewModel.prototype.createNewBranch = function() {
 RepositoryViewModel.prototype.initRepository = function() {
 	var self = this;
 	api.query('POST', '/init', { path: this.path });
+}
+RepositoryViewModel.prototype.cloneRepository = function() {
+	var self = this;
+	api.query('POST', '/clone', { path: this.path, url: this.cloneurl(), destinationDir: this.clonedestination() }, function(err, res) {
+		if (err) return;
+		browseTo('repository?path=' + encodeURIComponent(self.path + '/' + self.clonedestination()));
+	});
 }
 RepositoryViewModel.prototype.commit = function() {
 	var self = this;
