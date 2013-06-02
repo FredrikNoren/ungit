@@ -6,8 +6,8 @@ var api = {
 			q.query(body);
 		else
 			q.send(body);
-		q.set('Accept', 'application/json')
-			.end(function(error, res){
+		q.set('Accept', 'application/json');
+		q.end(function(error, res){
 				if (error || !res.ok) {
 					if (callback && callback({ error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' })) return;
 					else viewModel.content(new CrashViewModel());

@@ -28,8 +28,8 @@
 	</div>
 </script>
 
-<script type="text/html" id="repository">
-	<div class="repository">
+<script type="text/html" id="path">
+	<div class="path">
 
 		<div class="titleHeader animated fadeInLeft">
 			<span class="path" data-bind="text: titleSubPath"></span><span class='title' data-bind='text: title'></span>
@@ -39,6 +39,10 @@
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
 		</div>
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'cloning'">
+			Cloning repository...
+		</div>
 		
 		<div class="uninited" data-bind="visible: status() == 'uninited'">
 			<div class="topic">"<span data-bind="text: path"></span>" is not a repository.</div>
@@ -46,9 +50,9 @@
 			<div class="or"><div class="line"></div>or<div class="line"></div></div>
 			<form class="cloneRepository" data-bind="submit: cloneRepository">
 				<div>Clone from</div>
-				<div><input type="text" placeholder="url" data-bind="value: cloneurl"></div>
+				<div><input type="text" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'"></div>
 				<div>to</div>
-				<div><input type="text" placeholder="destination folder" data-bind="value: clonedestination"></div>
+				<div><input type="text" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }"></div>
 				<div><input type="submit" value="Clone repository!"></div>
 			</form>
 		</div>
@@ -57,6 +61,21 @@
 			<div>"<span data-bind="text: path"></span>" is not a valid path.</div>
 		</div>
 
+		<!-- ko if: repository -->
+		<div data-bind="template: { name: 'repository', data: repository }">
+		</div>
+		<!-- /ko -->
+
+	</div>
+</script>
+
+<script type="text/html" id="repository">
+	<div class="repository">
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
+			Loading...
+		</div>
+		
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
 
 			<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
