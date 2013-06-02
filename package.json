@@ -1,5 +1,5 @@
 {
-  "name": "pep-git",
+  "name": "draper",
   "version": "0.0.1",
   "scripts": {
     "start": "node server.js",
