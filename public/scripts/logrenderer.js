@@ -63,7 +63,7 @@ logRenderer.render = function(element, graph) {
 	context.clearRect(0, 0, element.width, element.height);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 
-	var HEAD = GitGraphViewModel.getHEAD(nodes);
+	var HEAD = graph.HEAD();
 
 	// Rebase
 	var rebaseNodes = {}
@@ -113,7 +113,7 @@ logRenderer.render = function(element, graph) {
 		context.fill();
 	});
 	// Commit node
-	context.strokeStyle = HEAD ? HEAD.idealogicalBranch.color : GitGraphViewModel.randomColor();
+	context.strokeStyle = HEAD && HEAD.idealogicalBranch ? HEAD.idealogicalBranch.color : GitGraphViewModel.randomColor();
 	context.setLineDash([10, 5]);
 	context.lineWidth = 7;
 	context.beginPath();

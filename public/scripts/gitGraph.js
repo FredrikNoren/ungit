@@ -8,6 +8,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.refsByRefName = {};
 	this.repoPath = repoPath;
 	this.activeBranch = ko.observable();
+	this.HEAD = ko.observable();
 	this.pushHover = ko.observable();
 	this.resetHover = ko.observable();
 	this.rebaseHover = ko.observable();
@@ -26,7 +27,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 	var nodeVMs = [];
 	nodes.forEach(function(node) {
 		node.graph = self;
-		var nodeViewModel = new NodeViewModel(node);
+		var nodeViewModel = self.nodesById[node.sha1] || new NodeViewModel(node);
 		nodeVMs.push(nodeViewModel);
 		self.nodesById[node.sha1] = nodeViewModel;
 		if (node.refs) {
@@ -47,11 +48,8 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 			nodeViewModel.refs(refVMs);
 		}
 	});
+	this.HEAD(GitGraphViewModel.getHEAD(nodeVMs));
 	this.setNodes(nodeVMs);
-}
-
-GitGraphViewModel.prototype.getHEAD = function() {
-	return GitGraphViewModel.getHEAD(this.nodes());
 }
 
 GitGraphViewModel.getHEAD = function(nodes) {
@@ -107,7 +105,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	nodes.forEach(function(node, i) { node.index(i); });
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
-	var HEAD = GitGraphViewModel.getHEAD(nodes);
+	var HEAD = this.HEAD();
 	if (!HEAD) return;
 	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, this.nodesById);
 
@@ -292,6 +290,9 @@ var RefViewModel = function(args) {
 	this.resetVisible = ko.computed(function() { return self.pushVisible() || self.rebaseVisible(); });
 }
 RefViewModel.prototype.checkout = function() {
+	this.graph.activeBranch(this.displayName);
+	this.graph.HEAD(this.node());
+	this.graph.setNodes(this.graph.nodes());
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }
 RefViewModel.prototype.push = function() {
