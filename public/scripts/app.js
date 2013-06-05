@@ -1,8 +1,12 @@
 
 var MainViewModel = function() {
 	var self = this;
+	this.path = ko.observable();
 	this.dialog = ko.observable(null);
 	this.content = ko.observable(new EmptyViewModel());
+}
+MainViewModel.prototype.submitPath = function() {
+	browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
 MainViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
@@ -279,5 +283,6 @@ crossroads.addRoute('/', function() {
 });
 
 crossroads.addRoute('/repository{?query}', function(query) {
+	viewModel.path(query.path);
 	viewModel.content(new PathViewModel(query.path));
 })

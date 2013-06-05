@@ -32,9 +32,8 @@
 	<div class="path">
 
 		<div class="titleHeader animated fadeInLeft">
-			<span class="path" data-bind="text: titleSubPath"></span><span class='title' data-bind='text: title'></span>
+			<img src="images/logo.png" class="logo"><span class='title' data-bind='text: title'></span>
 		</div>
-		<div class="hr"></div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
@@ -186,7 +185,13 @@
 
 <div class="main">
 
-	<div data-bind="template: { name: templateChooser, data: content }"></div>
+	<div class="currentDirectory">
+		<form data-bind="submit: submitPath">
+			<input type="text" data-bind="value: path">
+		</form>
+	</div>
+
+	<div class="content" data-bind="template: { name: templateChooser, data: content }"></div>
 
 </div>
 

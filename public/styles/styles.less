@@ -1,9 +1,13 @@
 
+html {
+	overflow-y: scroll;
+}
+
 html, body {
 	padding: 0;
 	margin: 0;
 	height: 100%;
-	background: #f0f0f0;
+	background: rgb(76, 149, 207);
 
 }
 button, body {
@@ -123,21 +127,7 @@ textarea {
 	display: inline-block;
 }
 
-.main {
-	max-width: 1000px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 20px;
-}
 
-
-.titleHeader {
-	font-family: SegoeUILight, 'Segoe UI Light', SegoeUI, 'Segoe UI', arial, sans-serif;
-	font-size: 1.5em;
-	.title {
-		font-size: 3.2em;
-	}
-}
 
 .hr {
 	line-height: 0px;
@@ -157,10 +147,43 @@ a {
 
 @logWidth: 670px;
 
+.content, .currentDirectory form {
+	max-width: 1000px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.content {
+}
+
+
+.currentDirectory {
+	background: #225075;
+	input[type="text"] {
+		background: transparent;
+		border: 0px;
+		color: #fff;
+		width: 100%;
+		padding: 3px;
+		font-size: 1.3em;
+	}
+}
+
 .path {
 	.path {
 		color: #bbb;
 		margin-bottom: 20px;
+	}
+
+	.titleHeader {
+		font-family: SegoeUILight, 'Segoe UI Light', SegoeUI, 'Segoe UI', arial, sans-serif;
+		font-size: 3.8em;
+		.logo {
+			vertical-align: baseline;
+			position: relative;
+			top: 20px;
+			margin-right: 20px;
+		}
 	}
 	.uninited {
 		h1 {
@@ -198,284 +221,287 @@ a {
 			}
 		}
 	}
-	.repository {
-		margin-top: 30px;
-		position: relative;
+}
+.repository {
+	background: rgb(228, 228, 228);
+	padding: 30px;
+	width: 750px;
+	margin-top: 30px;
+	position: relative;
 
-		.graphUtils {
-			background: #474747;
+	.graphUtils {
+		background: #474747;
+		position: absolute;
+		top: 0px;
+		left: (@logWidth + 110px);
+		color: #fff;
+		padding: 10px;
+		.arrowDown {
 			position: absolute;
-			top: 0px;
-			left: (@logWidth + 110px);
-			color: #fff;
-			padding: 10px;
-			.arrowDown {
-				position: absolute;
-				left: 10px;
-				bottom: -15px;
-			}
-			.title {
-				font-size: 1.3em;
-			}
-			.fetchingIndicator {
-				font-size: 1.3em;
-				color: #89BCE8;
-			}
+			left: 10px;
+			bottom: -15px;
 		}
-
-		.graph {
-
-			position: relative;
-			top: -60px;
-			left: (@logWidth + 30px);
-
-			.graphLog {
-				position: relative;
-				top: -200px;
-				left: -5px;
-			}
-
-			.node {
-				position: absolute;
-				
-				.log {
-					position: absolute;
-					left: -(@logWidth + 60px);
-					.arrowRight {
-						position: absolute;
-						right: -15px;
-						top: -15px;
-					}
-					.logEntryBox {
-						position: relative;
-						top: -20px;
-						background: rgba(255, 255, 255, 0.9);
-						padding: 10px;
-						width: @logWidth;
-						box-sizing:border-box;
-						-moz-box-sizing:border-box;	
-						.author, .date {
-							color: #999;
-						}
-						.title {
-							font-size: 1.3em;
-						}
-					}
-				}
-
-				.refs {
-					position: absolute;
-					left: 50px;
-					top: -16px;
-					width: 500px;
-					.arrowLeft {
-						position: absolute;
-						left: -15px;
-						top: 1px;
-					}
-					.refsList {
-						display: inline-block;
-					}
-					.refbox {
-						position: relative;
-						display: inline-block;
-						background: #474747;
-						color: #fff;
-						padding: 5px;
-						padding-left: 10px;
-						padding-right: 10px;
-						cursor: pointer;
-						opacity: 0.6;
-						.name {
-							display: inline-block;
-						}
-						&.current {
-							font-weight: bold;
-							opacity: 1;
-						}
-						&.remote {
-							color: #89BCE8;
-						}
-						&.push, &.reset, &.rebase {
-							opacity: 1;
-							color: #fff;
-							.tooltip {
-								display: none;
-							}
-							&:hover {
-								.tooltip {
-									display: inline-block;
-								}
-							}
-						}
-						&.push {
-							background: rgb(61, 139, 255);
-						}
-						&.reset {
-							background: rgb(255, 129, 31);
-						}
-						&.rebase {
-							background: #41DE3C;
-						}
-						&.newRef {
-							opacity: 0.1;
-							form {
-								margin: 0px;
-								padding: 0px;
-							}
-							input.name {
-								background: #474747;
-								color: #fff;
-								border: 0px;
-								font-size: 1em;
-								padding: 0px;
-								margin: 0px;
-								width: 15px;
-								&:focus {
-									width: 200px;
-								}
-							}
-							input.submit {
-								visibility: hidden;
-								position: absolute;
-								width: 0px;
-								height: 0px;
-								margin: 0px;
-								padding: 0px;
-							}
-							&:hover {
-								opacity: 0.8;
-							}
-						}
-					}
-				}
-
-			}
-
-			.daySeparators {
-				position: absolute;
-				top: -15px;
-				left: -(@logWidth + 130px);
-				.daySeparator {
-					position: absolute;
-					font-size: 0.6em;
-					color: #999;
-					width: 70px;
-					background: #fff;
-					padding: 5px;
-					.arrowRight {
-						position: absolute;
-						right: -15px;
-						top: -3px;
-					}
-				}
-			}
+		.title {
+			font-size: 1.3em;
 		}
-
-
-		.staging {
-			background: rgb(255, 251, 219);
-			position: relative;
-			padding: 10px;
-
-			width: 670px;
-			box-sizing:border-box;
-			-moz-box-sizing:border-box;	
-
-			.arrowRight {
-				position: absolute;
-				right: -15px;
-				bottom: 15px;
-			}
-
-			.commitMessage {
-				display: block;
-				width: 100%;
-				font-size: 1.6em;
-				box-sizing:border-box;
-				-moz-box-sizing:border-box;
-				border-radius: 5px;
-				padding: 10px;
-			}
-			.commitButton {
-				font-size: 1.6em;
-			}
-			.validationError {
-				display: none;
-			}
-			&:hover .validationError {
-				display: inline-block;
-			}
-			.files {
-				.name {
-					font-size: 1.3em;
-					cursor: pointer;
-					padding: 3px;
-					border-radius: 3px;
-					border: 1px solid transparent;
-					&:hover {
-						background: #fff;
-						border-color: #bbb;
-					}
-				}
-				padding: 0.3em;
-				.diffs {
-					background: #fff;
-					padding-top: 5px;
-					padding-bottom: 5px;
-					border: 1px solid #bbb;
-					border-radius: 5px;
-					margin: 5px;
-					font-size: 0.9em;
-					color: #666;
-					.diff {
-						padding-left: 3px;
-						padding-right: 3px;
-						white-space: pre;
-						word-wrap: break-word;
-						&.added {
-							background: #66F27B;
-							color: #000;
-						}
-						&.removed {
-							background: #E86756;
-							color: #fff;
-						}
-					}
-				}
-				.new, .deleted {
-					color: #fff;
-					border-radius: 3px;
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
-				}
-				.new {
-					background: #B5F584;
-				}
-				.deleted {
-					background: #DB3712;
-				}
-				.discard {
-					background: #e0e0e0;
-					color: #fff;
-					border-radius: 3px;
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
-					cursor: pointer;
-					.explanation {
-						display: none;
-					}
-					&:hover {
-						background: #000;
-						.explanation {
-							display: inline-block;
-						}
-					}
-				}
-			}
+		.fetchingIndicator {
+			font-size: 1.3em;
+			color: #89BCE8;
 		}
-
 	}
+
+	.graph {
+
+		position: relative;
+		top: -60px;
+		left: (@logWidth + 30px);
+
+		.graphLog {
+			position: relative;
+			top: -200px;
+			left: -5px;
+		}
+
+		.node {
+			position: absolute;
+			
+			.log {
+				position: absolute;
+				left: -(@logWidth + 60px);
+				.arrowRight {
+					position: absolute;
+					right: -15px;
+					top: -15px;
+				}
+				.logEntryBox {
+					position: relative;
+					top: -20px;
+					background: rgb(255, 255, 255);
+					padding: 10px;
+					width: @logWidth;
+					box-sizing:border-box;
+					-moz-box-sizing:border-box;	
+					.author, .date {
+						color: #999;
+					}
+					.title {
+						font-size: 1.3em;
+					}
+				}
+			}
+
+			.refs {
+				position: absolute;
+				left: 50px;
+				top: -16px;
+				width: 500px;
+				.arrowLeft {
+					position: absolute;
+					left: -15px;
+					top: 1px;
+				}
+				.refsList {
+					display: inline-block;
+				}
+				.refbox {
+					position: relative;
+					display: inline-block;
+					background: #474747;
+					color: #fff;
+					padding: 5px;
+					padding-left: 10px;
+					padding-right: 10px;
+					cursor: pointer;
+					opacity: 0.6;
+					.name {
+						display: inline-block;
+					}
+					&.current {
+						font-weight: bold;
+						opacity: 1;
+					}
+					&.remote {
+						color: #89BCE8;
+					}
+					&.push, &.reset, &.rebase {
+						opacity: 1;
+						color: #fff;
+						.tooltip {
+							display: none;
+						}
+						&:hover {
+							.tooltip {
+								display: inline-block;
+							}
+						}
+					}
+					&.push {
+						background: rgb(61, 139, 255);
+					}
+					&.reset {
+						background: rgb(255, 129, 31);
+					}
+					&.rebase {
+						background: #41DE3C;
+					}
+					&.newRef {
+						opacity: 0.1;
+						form {
+							margin: 0px;
+							padding: 0px;
+						}
+						input.name {
+							background: #474747;
+							color: #fff;
+							border: 0px;
+							font-size: 1em;
+							padding: 0px;
+							margin: 0px;
+							width: 15px;
+							&:focus {
+								width: 200px;
+							}
+						}
+						input.submit {
+							visibility: hidden;
+							position: absolute;
+							width: 0px;
+							height: 0px;
+							margin: 0px;
+							padding: 0px;
+						}
+						&:hover {
+							opacity: 0.8;
+						}
+					}
+				}
+			}
+
+		}
+
+		.daySeparators {
+			position: absolute;
+			top: -15px;
+			left: -(@logWidth + 130px);
+			.daySeparator {
+				position: absolute;
+				font-size: 0.6em;
+				color: #999;
+				width: 70px;
+				background: #fff;
+				padding: 5px;
+				.arrowRight {
+					position: absolute;
+					right: -15px;
+					top: -3px;
+				}
+			}
+		}
+	}
+
+
+	.staging {
+		background: rgb(253, 247, 200);
+		position: relative;
+		padding: 10px;
+
+		width: 670px;
+		box-sizing:border-box;
+		-moz-box-sizing:border-box;	
+
+		.arrowRight {
+			position: absolute;
+			right: -15px;
+			bottom: 15px;
+		}
+
+		.commitMessage {
+			display: block;
+			width: 100%;
+			font-size: 1.6em;
+			box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			border-radius: 5px;
+			padding: 10px;
+		}
+		.commitButton {
+			font-size: 1.6em;
+		}
+		.validationError {
+			display: none;
+		}
+		&:hover .validationError {
+			display: inline-block;
+		}
+		.files {
+			.name {
+				font-size: 1.3em;
+				cursor: pointer;
+				padding: 3px;
+				border-radius: 3px;
+				border: 1px solid transparent;
+				&:hover {
+					background: #fff;
+					border-color: #bbb;
+				}
+			}
+			padding: 0.3em;
+			.diffs {
+				background: #fff;
+				padding-top: 5px;
+				padding-bottom: 5px;
+				border: 1px solid #bbb;
+				border-radius: 5px;
+				margin: 5px;
+				font-size: 0.9em;
+				color: #666;
+				.diff {
+					padding-left: 3px;
+					padding-right: 3px;
+					white-space: pre;
+					word-wrap: break-word;
+					&.added {
+						background: #66F27B;
+						color: #000;
+					}
+					&.removed {
+						background: #E86756;
+						color: #fff;
+					}
+				}
+			}
+			.new, .deleted {
+				color: #fff;
+				border-radius: 3px;
+				padding: 3px;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.new {
+				background: #B5F584;
+			}
+			.deleted {
+				background: #DB3712;
+			}
+			.discard {
+				background: #e0e0e0;
+				color: #fff;
+				border-radius: 3px;
+				padding: 3px;
+				padding-left: 5px;
+				padding-right: 5px;
+				cursor: pointer;
+				.explanation {
+					display: none;
+				}
+				&:hover {
+					background: #000;
+					.explanation {
+						display: inline-block;
+					}
+				}
+			}
+		}
+	}
+
 }
