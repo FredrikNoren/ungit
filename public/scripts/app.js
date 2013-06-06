@@ -132,6 +132,7 @@ var RepositoryViewModel = function(path) {
 		return gitConfig()['user.email'];
 	});
 	this.isCommitting = ko.observable(false);
+	this.selectedDiffFile = ko.observable();
 	this.path = path;
 	this.commitValidationError = ko.computed(function() {
 		if (!self.files().some(function(file) { return file.staged(); }))
@@ -241,26 +242,25 @@ var FileViewModel = function(repository) {
 	this.isNew = ko.observable(false);
 	this.removed = ko.observable(false);
 	this.diffs = ko.observableArray();
-	this.showDiffs = ko.observable(false);
 }
 FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-	this.showDiffs(false);
+	this.repository.selectedDiffFile(null);
 	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name() });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
-	if (this.showDiffs()) this.showDiffs(false);
+	if (this.repository.selectedDiffFile() == this) this.repository.selectedDiffFile(null);
 	else {
-		this.showDiffs(true);
+		this.repository.selectedDiffFile(this);
 		this.invalidateDiff();
 	}
 }
 FileViewModel.prototype.invalidateDiff = function() {
 	var self = this;
-	if (this.showDiffs()) {
+	if (this.repository.selectedDiffFile() == this) {
 		api.query('GET', '/diff', { file: this.name(), path: this.repository.path }, function(err, diffs) {
 			if (err) return;
 			self.diffs.removeAll();

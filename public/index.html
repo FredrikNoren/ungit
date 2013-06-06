@@ -78,23 +78,31 @@
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
 
 			<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
-				<img src="images/yellowArrowRight.png" class="arrowRight">
+				<img src="images/yellowArrowDown.png" class="arrowDown">
 				<div data-bind="visible: !isCommitting()">
-					<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
-					<div class="files" data-bind="foreach: files">
-						<div class="file">
-							<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
-							<span class="name" data-bind="text: name, click: toogleDiffs"></span>
-							<span class="new" data-bind="visible: isNew">New</span>
-							<span class="deleted" data-bind="visible: removed">Removed</span>
-							<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
-							<div class="diffs" data-bind="visible: showDiffs, foreach: diffs">
-								<div class="diff" data-bind="text: text, css: { added: added, removed: removed}"></div>
+					<table><tr><td class="commitArea">
+						<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
+						<div class="files" data-bind="foreach: files">
+							<div class="file">
+								<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
+								<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+								<span class="new" data-bind="visible: isNew">New</span>
+								<span class="deleted" data-bind="visible: removed">Removed</span>
+								<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
 							</div>
 						</div>
-					</div>
-					<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
-					<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+						<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+						<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+					</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
+						<!-- ko if: selectedDiffFile -->
+						<div class="diffs" data-bind="foreach: selectedDiffFile().diffs">
+							<div class="diff" data-bind="text: text, css: { added: added, removed: removed}"></div>
+						</div>
+						<!-- /ko -->
+						<!-- ko if: !selectedDiffFile() -->
+						Click a file to show its changes
+						<!-- /ko -->
+					</td></tr></table>
 				</div>
 				<div data-bind="visible: isCommitting">
 					Committing changes...

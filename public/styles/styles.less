@@ -145,12 +145,8 @@ a {
 	}
 }
 
-@logWidth: 670px;
-
 .content, .currentDirectory form {
-	max-width: 1000px;
-	margin-left: auto;
-	margin-right: auto;
+	margin-left: 40px;
 }
 
 .content {
@@ -222,15 +218,20 @@ a {
 		}
 	}
 }
+
+@logWidth: 670px;
+@graphTopOffset: 120px;
+
 .repository {
 	margin-top: 30px;
 	position: relative;
+	padding-right: 50px;
 
 	.graphUtils {
 		background: #474747;
 		position: absolute;
-		top: 0px;
-		left: (@logWidth + 110px);
+		margin-top: 20px;
+		left: (@logWidth + 210px);
 		color: #fff;
 		padding: 10px;
 		.arrowDown {
@@ -249,8 +250,10 @@ a {
 
 	.graph {
 
+		margin-left: 100px;
+
 		position: relative;
-		top: -60px;
+		top: 20px;
 		left: (@logWidth + 30px);
 
 		.graphLog {
@@ -402,47 +405,100 @@ a {
 		position: relative;
 		padding: 10px;
 
-		width: 670px;
 		box-sizing:border-box;
-		-moz-box-sizing:border-box;	
+		-moz-box-sizing:border-box;
 
-		.arrowRight {
+		.arrowDown {
 			position: absolute;
-			right: -15px;
-			bottom: 15px;
+			left: (@logWidth + 60px - 15px + 100px);
+			bottom: -15px;
 		}
 
-		.commitMessage {
-			display: block;
-			width: 100%;
-			font-size: 1.6em;
-			box-sizing:border-box;
-			-moz-box-sizing:border-box;
-			border-radius: 5px;
-			padding: 10px;
+		table {
+			table-layout:fixed;
+			width:100%;
 		}
-		.commitButton {
-			font-size: 1.6em;
-		}
-		.validationError {
-			display: none;
-		}
-		&:hover .validationError {
-			display: inline-block;
-		}
-		.files {
-			.name {
-				font-size: 1.3em;
-				cursor: pointer;
-				padding: 3px;
-				border-radius: 3px;
-				border: 1px solid transparent;
-				&:hover {
-					background: #fff;
-					border-color: #bbb;
+
+		.commitArea {
+			width: 600px;
+			vertical-align: top;
+			.commitMessage {
+				display: block;
+				width: 100%;
+				font-size: 1.6em;
+				box-sizing:border-box;
+				-moz-box-sizing:border-box;
+				border-radius: 5px;
+				padding: 10px;
+			}
+			.commitButton {
+				font-size: 1.6em;
+			}
+			.validationError {
+				display: none;
+			}
+			&:hover .validationError {
+				display: inline-block;
+			}
+			.files {
+				.name {
+					font-size: 1.3em;
+					cursor: pointer;
+					padding: 3px;
+					border-radius: 3px;
+					border: 1px solid transparent;
+					&:hover {
+						background: #fff;
+						border-color: #bbb;
+					}
+				}
+				padding: 0.3em;
+				
+				.new, .deleted {
+					color: #fff;
+					border-radius: 3px;
+					padding: 3px;
+					padding-left: 5px;
+					padding-right: 5px;
+				}
+				.new {
+					background: #B5F584;
+				}
+				.deleted {
+					background: #DB3712;
+				}
+				.discard {
+					background: #e0e0e0;
+					color: #fff;
+					border-radius: 3px;
+					padding: 3px;
+					padding-left: 5px;
+					padding-right: 5px;
+					cursor: pointer;
+					.explanation {
+						display: none;
+					}
+					&:hover {
+						background: #000;
+						.explanation {
+							display: inline-block;
+						}
+					}
 				}
 			}
-			padding: 0.3em;
+		}
+
+		.diffArea {
+			&.noFileSelected {
+				margin: 5px;
+				background: #fff;
+				border-radius: 5px;
+				color: #999;
+				padding: 10px;
+				border: 1px dashed #bbb;
+				opacity: 0.5;
+				text-align: center;
+			}
 			.diffs {
 				background: #fff;
 				padding-top: 5px;
@@ -464,37 +520,6 @@ a {
 					&.removed {
 						background: #E86756;
 						color: #fff;
-					}
-				}
-			}
-			.new, .deleted {
-				color: #fff;
-				border-radius: 3px;
-				padding: 3px;
-				padding-left: 5px;
-				padding-right: 5px;
-			}
-			.new {
-				background: #B5F584;
-			}
-			.deleted {
-				background: #DB3712;
-			}
-			.discard {
-				background: #e0e0e0;
-				color: #fff;
-				border-radius: 3px;
-				padding: 3px;
-				padding-left: 5px;
-				padding-right: 5px;
-				cursor: pointer;
-				.explanation {
-					display: none;
-				}
-				&:hover {
-					background: #000;
-					.explanation {
-						display: inline-block;
 					}
 				}
 			}
