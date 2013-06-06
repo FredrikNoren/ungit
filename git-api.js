@@ -223,7 +223,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/branches', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('branch "' + req.body.name + '" "' + (req.body.startPoint || 'HEAD') + '"', req.body.path, res);
+		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name + '" "' + (req.body.startPoint || 'HEAD') + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/branch', function(req, res){

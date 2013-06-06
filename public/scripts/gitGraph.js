@@ -12,6 +12,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.pushHover = ko.observable();
 	this.resetHover = ko.observable();
 	this.rebaseHover = ko.observable();
+	this.draggingRef = ko.observable();
 }
 
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
@@ -226,9 +227,18 @@ NodeViewModel = function(args) {
 		return self.refs().filter(function(r) { return r.isBranch; });
 	});
 	this.newBranchName = ko.observable();
+	this.showDropTargets = ko.computed(function() {
+		return !!self.graph.draggingRef();
+	});
 }
 NodeViewModel.prototype.createBranch = function() {
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+}
+NodeViewModel.prototype.dropMoveRef = function(ref) {
+	if (ref.current())
+		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.sha1 });
+	else
+		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.sha1, force: true });
 }
 NodeViewModel.prototype.isAncestor = function(node) {
 	if (this.index() >= GitGraphViewModel.maxNNodes) return false;
@@ -288,6 +298,12 @@ var RefViewModel = function(args) {
 	this.pushVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && self.remoteIsAncestor(); });
 	this.rebaseVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && !self.remoteIsAncestor(); });
 	this.resetVisible = ko.computed(function() { return self.pushVisible() || self.rebaseVisible(); });
+}
+RefViewModel.prototype.dragStart = function() {
+	this.graph.draggingRef(this);
+}
+RefViewModel.prototype.dragEnd = function() {
+	this.graph.draggingRef(null);
 }
 RefViewModel.prototype.checkout = function() {
 	this.graph.activeBranch(this.displayName);
