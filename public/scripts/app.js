@@ -229,6 +229,7 @@ RepositoryViewModel.prototype.commit = function() {
 	api.query('POST', '/commit', { path: this.path, message: this.commitMessage(), files: files }, function(err, res) {
 		self.commitMessage('');
 		self.files.removeAll();
+		self.selectedDiffFile(null);
 		self.isCommitting(false);
 	});
 }
@@ -242,6 +243,9 @@ var FileViewModel = function(repository) {
 	this.isNew = ko.observable(false);
 	this.removed = ko.observable(false);
 	this.diffs = ko.observableArray();
+	this.showingDiffs = ko.computed(function() {
+		return self.repository.selectedDiffFile() == self;
+	})
 }
 FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
