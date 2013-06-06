@@ -78,7 +78,10 @@
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
 
 			<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
-				<img src="images/yellowArrowDown.png" class="arrowDown">
+				<div class="arrowContainer arrowDown">
+					<img src="images/shadowArrowDown.png" class="shadow">
+					<img src="images/yellowArrowDown.png" class="arrow">
+				</div>
 				<div data-bind="visible: !isCommitting()">
 					<table><tr><td class="commitArea">
 						<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
@@ -129,8 +132,11 @@
 				<div class="nodes" data-bind="foreach: nodes">
 					<div class="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
 						<div class="log" data-bind="visible: logBoxVisible">
-							<img src="images/whiteArrowRight.png" class="arrowRight">
 							<div class="logEntryBox">
+								<div class="arrowContainer arrowRight">
+									<img src="images/shadowArrowRight.png" class="shadow">
+									<img src="images/whiteArrowRight.png" class="arrow">
+								</div>
 								<div class="title" data-bind="text: title"></div>
 								<div class="date" data-bind="text: authorDate"></div>
 								<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>

@@ -219,6 +219,19 @@ a {
 	}
 }
 
+.arrowContainer {
+	.shadow {
+		position: absolute;
+		left: 5px;
+		top: 7px;
+	}
+	.arrow {
+		position: absolute;
+		left: 0px;
+		top: 0px;
+	}
+}
+
 @logWidth: 670px;
 @graphTopOffset: 120px;
 
@@ -268,24 +281,24 @@ a {
 			.log {
 				position: absolute;
 				left: -(@logWidth + 60px);
-				.arrowRight {
-					position: absolute;
-					right: -15px;
-					top: -15px;
-				}
 				.logEntryBox {
 					position: relative;
 					top: -20px;
 					background: rgb(255, 255, 255);
 
--webkit-box-shadow: 5px 7px 0px rgba(0, 0, 0, 0.12);
--moz-box-shadow:    5px 7px 0px rgba(0, 0, 0, 0.12);
-box-shadow:         5px 7px 0px rgba(0, 0, 0, 0.12);
+					-webkit-box-shadow: 5px 7px 0px #c9c9c9;
+					-moz-box-shadow:    5px 7px 0px #c9c9c9;
+					box-shadow:         5px 7px 0px #c9c9c9;
 
 					padding: 10px;
 					width: @logWidth;
 					box-sizing:border-box;
 					-moz-box-sizing:border-box;	
+					.arrowRight {
+						position: absolute;
+						right: 0px;
+						top: 5px;
+					}
 					.author, .date {
 						color: #999;
 					}
@@ -410,17 +423,18 @@ box-shadow:         5px 7px 0px rgba(0, 0, 0, 0.12);
 		position: relative;
 		padding: 10px;
 		
--webkit-box-shadow: 5px 7px 0px rgba(0, 0, 0, 0.12);
--moz-box-shadow:    5px 7px 0px rgba(0, 0, 0, 0.12);
-box-shadow:         5px 7px 0px rgba(0, 0, 0, 0.12);
+		-webkit-box-shadow: 5px 7px 0px #c9c9c9;
+		-moz-box-shadow:    5px 7px 0px #c9c9c9;
+		box-shadow:         5px 7px 0px #c9c9c9;
 
 		box-sizing:border-box;
 		-moz-box-sizing:border-box;
 
+
 		.arrowDown {
 			position: absolute;
 			left: (@logWidth + 60px - 15px + 100px);
-			bottom: -15px;
+			bottom: 0px;
 		}
 
 		table {
