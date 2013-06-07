@@ -181,6 +181,7 @@ a {
 
 	.titleHeader {
 		font-size: 3.8em;
+		margin-bottom: 30px;
 		.logo {
 			vertical-align: baseline;
 			position: relative;
@@ -274,11 +275,16 @@ a {
 	}
 }
 
+.boxStraightShadow {
+	-webkit-box-shadow: 5px 7px 0px #c9c9c9;
+	-moz-box-shadow:    5px 7px 0px #c9c9c9;
+	box-shadow:         5px 7px 0px #c9c9c9;
+}
+
 @logWidth: 670px;
 @graphTopOffset: 120px;
 
 .repository {
-	margin-top: 30px;
 	position: relative;
 	padding-right: 50px;
 
@@ -287,10 +293,8 @@ a {
 		background: rgb(253, 247, 200);
 		position: relative;
 		padding: 10px;
-		
-		-webkit-box-shadow: 5px 7px 0px #c9c9c9;
-		-moz-box-shadow:    5px 7px 0px #c9c9c9;
-		box-shadow:         5px 7px 0px #c9c9c9;
+
+		.boxStraightShadow;
 
 		box-sizing:border-box;
 		-moz-box-sizing:border-box;
@@ -451,10 +455,8 @@ a {
 					position: relative;
 					top: -20px;
 					background: rgb(255, 255, 255);
-
-					-webkit-box-shadow: 5px 7px 0px #c9c9c9;
-					-moz-box-shadow:    5px 7px 0px #c9c9c9;
-					box-shadow:         5px 7px 0px #c9c9c9;
+					
+					.boxStraightShadow;
 
 					padding: 10px;
 					width: @logWidth;
@@ -587,5 +589,40 @@ a {
 	}
 
 
+}
 
+.home {
+	text-align: center;
+	.logo {
+		margin-top: 20px;
+		margin-bottom: 20px;
+	}
+	.repos {
+		.title {
+			font-size: 1.7em;
+			color: #CF7F23;
+			text-align: left;
+			margin: 20px;
+		}
+		display: inline-block;
+
+		.boxStraightShadow;
+
+		box-sizing:border-box;
+		-moz-box-sizing:border-box;	
+
+		width: 600px;
+		background: #333;
+		a {
+			font-size: 1.3em;
+			display: block;
+			margin: 20px;
+			background: #666;
+			padding: 10px;
+			color: #fff;
+			&:hover {
+				background: #CF7F23;
+			}
+		}
+	}
 }

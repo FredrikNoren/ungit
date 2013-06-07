@@ -9,11 +9,16 @@
 </head>
 <body>
 
-<script type="text/html" id="empty">
-	<div class='crash'>
-		<div class='box'>
-			<h1>Nothing</h1>
-			This is a temporary empty page.
+<script type="text/html" id="home">
+	<div class='home'>
+		<img src="images/logoLarge.png" class="logo">
+		<div>
+		<div class="repos">
+			<div class="title">Recent repositories</div>
+			<div data-bind="foreach: repos">
+				<a class="repo" data-bind="text: title, attr: { href: link }"></a>
+			</div>
+		</div>
 		</div>
 	</div>
 </script>
@@ -31,7 +36,7 @@
 	<div class="path">
 
 		<div class="titleHeader animated fadeInLeft">
-			<img src="images/logo.png" class="logo"><span class='title' data-bind='text: title'></span>
+			<a href="/#/"><img src="images/logo.png" class="logo"></a><span class='title' data-bind='text: title'></span>
 		</div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">

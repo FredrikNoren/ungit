@@ -3,7 +3,7 @@ var MainViewModel = function() {
 	var self = this;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
-	this.content = ko.observable(new EmptyViewModel());
+	this.content = ko.observable(new HomeViewModel());
 }
 MainViewModel.prototype.submitPath = function() {
 	browseTo('repository?path=' + encodeURIComponent(this.path()));
@@ -12,6 +12,21 @@ MainViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
 	return data.template;
 };
+
+var visitedRepositories = {
+	getAll: function() {
+		return JSON.parse(localStorage.getItem('visitedRepositories') || '[]');
+	},
+	tryAdd: function(path) {
+		var repos = this.getAll();
+		var i;
+		while((i = repos.indexOf(path)) != -1)
+			repos.splice(i, 1);
+
+		repos.unshift(path);
+		localStorage.setItem('visitedRepositories', JSON.stringify(repos));
+	}
+}
 
 var viewModel = new MainViewModel();
 
@@ -37,9 +52,15 @@ PushDialogViewModel.prototype.startPush = function() {
 	});
 }
 
-function EmptyViewModel() {
+function HomeViewModel() {
+	this.repos = visitedRepositories.getAll().map(function(path) {
+		return {
+			title: path,
+			link: '/#/repository?path=' + encodeURIComponent(path)
+		};
+	});
 }
-EmptyViewModel.prototype.template = 'empty';
+HomeViewModel.prototype.template = 'home';
 
 var CrashViewModel = function() {
 }
@@ -122,6 +143,8 @@ PathViewModel.prototype.cloneRepository = function() {
 var RepositoryViewModel = function(path) {
 	var self = this;
 	this.status = ko.observable('loading');
+
+	visitedRepositories.tryAdd(path);
 	
 	this.files = ko.observableArray();
 	this.commitMessage = ko.observable();
@@ -285,7 +308,8 @@ FileViewModel.prototype.invalidateDiff = function() {
 
 
 crossroads.addRoute('/', function() {
-	browseTo('repository?path=' + encodeURIComponent('D:/Code/pep-git/tmp')); // temporary redirect for quick testing
+	viewModel.path('');
+	viewModel.content(new HomeViewModel());
 });
 
 crossroads.addRoute('/repository{?query}', function(query) {
