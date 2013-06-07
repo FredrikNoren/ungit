@@ -7,14 +7,26 @@ var api = {
 		else
 			q.send(body);
 		q.set('Accept', 'application/json');
-		q.end(function(error, res){
-				if (error || !res.ok) {
-					if (callback && callback({ error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' })) return;
-					else viewModel.content(new CrashViewModel());
+		q.end(function(error, res) {
+			if (error || !res.ok) {
+				var errorSummary = 'unkown';
+				if (res) {
+					if (res.body) {
+						if (res.body.errorCode && res.body.errorCode != 'unkown') errorSummary = res.body.errorCode;
+						else errorSummary = res.body.error.split('\n')[0];
+					}
+					else errorSummary = res.xhr.statusText + ' ' + res.xhr.status;
 				}
-				else if (callback)
-					callback(null, res.body);
-			});
+				var err = { errorSummary: errorSummary, error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' };
+				if (callback && callback(err)) return;
+				else {
+					bugsense.addExtraData('data', JSON.stringify(err));
+					throw new Error('Backend: ' + path + ', ' + errorSummary);
+				}
+			}
+			else if (callback)
+				callback(null, res.body);
+		});
 	},
 	watchRepository: function(repositoryPath, callbacks) {
 		var self = this;

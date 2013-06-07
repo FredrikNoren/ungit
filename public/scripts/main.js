@@ -93,6 +93,11 @@ ko.bindingHandlers.graphLog = {
     }
 };
 
+window.onerror = function() {
+    viewModel.content(new CrashViewModel());
+    window.bugsense.onerror.apply(window.bugsense, arguments);
+};
+
 ko.applyBindings(viewModel);
 
 

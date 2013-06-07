@@ -66,9 +66,6 @@ var CrashViewModel = function() {
 }
 CrashViewModel.prototype.template = 'crash';
 
-window.onerror = function() {
-    viewModel.content(new CrashViewModel());
-};
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
