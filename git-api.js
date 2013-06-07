@@ -138,7 +138,7 @@ exports.registerApi = function(app, server, dev) {
 					var diffs = [];
 					var diff = { };
 					text = text.toString();
-					diff.lines = text.split('\n').map(function(line) { return '+\t' + line; });
+					diff.lines = text.split('\n').map(function(line, i) { return [null, i, line]; });
 					diffs.push(diff);
 					res.json(diffs);
 				});

@@ -67,6 +67,22 @@
 	</div>
 </script>
 
+<script type="text/html" id="fileDiff">
+	<table class="fileDiff" data-bind="foreach: $data">
+		<tr data-bind="css: { added: added, removed: removed }">
+			<td class="lineNumbers old">
+				<span class="lineNumber" data-bind="text: oldLineNumber"></span>&nbsp;
+			</td>
+			<td class="lineNumbers new">
+				<span class="lineNumber" data-bind="text: newLineNumber"></span>&nbsp;
+			</td>
+			<td class="diffs">
+				<span class="diff" data-bind="text: text, css: { added: added, removed: removed }"></span>&nbsp;
+			</td>
+		</tr>
+	</table>
+</script>
+
 <script type="text/html" id="repository">
 	<div class="repository">
 
@@ -97,9 +113,7 @@
 						<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 					</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
 						<!-- ko if: selectedDiffFile -->
-						<div class="diffs" data-bind="foreach: selectedDiffFile().diffs">
-							<div class="diff" data-bind="text: text, css: { added: added, removed: removed}"></div>
-						</div>
+							<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
 						<!-- /ko -->
 						<!-- ko if: !selectedDiffFile() -->
 						Click a file to show its changes

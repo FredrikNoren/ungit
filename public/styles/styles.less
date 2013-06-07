@@ -243,6 +243,37 @@ a {
 	}
 }
 
+.fileDiff {
+	border-spacing: 0px 0px;
+	tr, td {
+		border: 0px;
+		margin: 0px;
+		padding: 0px;
+	}
+	.lineNumbers {
+		width: 50px;
+		text-align: center;
+		border-right: 1px solid rgba(0, 0, 0, 0.1);
+		color: rgba(0, 0, 0, 0.5);
+	}
+	.added {
+		background: #66F27B;
+		color: #000;
+	}
+	.removed {
+		background: #E86756;
+		color: #fff;
+	}
+	.diffs {
+		.diff {
+			padding-left: 10px;
+			padding-right: 3px;
+			white-space: pre;
+			word-wrap: break-word;
+		}
+	}
+}
+
 @logWidth: 670px;
 @graphTopOffset: 120px;
 
@@ -346,7 +377,10 @@ a {
 		}
 
 		.diffArea {
+			position: relative;
 			vertical-align: top;
+
+
 			&.noFileSelected {
 				margin: 5px;
 				background: #fff;
@@ -357,7 +391,8 @@ a {
 				opacity: 0.5;
 				text-align: center;
 			}
-			.diffs {
+
+			.fileDiff {
 				background: #fff;
 				padding-top: 5px;
 				padding-bottom: 5px;
@@ -366,21 +401,8 @@ a {
 				margin: 5px;
 				font-size: 0.9em;
 				color: #666;
-				.diff {
-					padding-left: 3px;
-					padding-right: 3px;
-					white-space: pre;
-					word-wrap: break-word;
-					&.added {
-						background: #66F27B;
-						color: #000;
-					}
-					&.removed {
-						background: #E86756;
-						color: #fff;
-					}
-				}
 			}
+
 		}
 	}
 

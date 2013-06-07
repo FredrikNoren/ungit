@@ -40,22 +40,23 @@ describe('git-api diff', function () {
 			.end(wrapErrorHandler(done));
 	});
 
-	var content = ['A', 'few', 'lines', 'of', 'content'];
+	var content;
 
 	it('should be possible to create a file', function(done) {
+		content = ['A', 'few', 'lines', 'of', 'content', ''];
 		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
 	});
 
 	it('diff on created file should work', function(done) {
 		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
+			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
 			expect(res.body[0].lines.length).to.be(content.length);
 			for(var i = 0; i < res.body[0].lines.length; i++) {
 				var contentLine = content[i];
 				var diffLine = res.body[0].lines[i];
-				expect(diffLine).to.be('+\t' + contentLine);
+				expect(diffLine).to.eql([null, i, contentLine]);
 			}
 			done();
 		});
@@ -74,15 +75,24 @@ describe('git-api diff', function () {
 	});
 
 	it('should be possible to modify a file', function(done) {
-		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile), content: 'A\nfew\nmore\nlines\nof\ncontent\n' }, done);
+		content.splice(2, 0, 'more');
+		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
 	});
 
 	it('diff on modified file should work', function(done) {
 		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
+			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
+			expect(res.body[0].lines).to.eql([
+				[ null, null, '@@ -1,5 +1,6 @@' ],
+				[ 1, 1, ' A' ],
+				[ 2, 2, ' few' ],
+				[ null, 3, '+more' ],
+				[ 3, 4, ' lines' ],
+				[ 4, 5, ' of' ],
+				[ 5, 6, ' content' ]
+			]);
 			done();
 		});
 	});

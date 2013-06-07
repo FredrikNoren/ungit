@@ -271,9 +271,11 @@ FileViewModel.prototype.invalidateDiff = function() {
 			diffs.forEach(function(diff) {
 				diff.lines.forEach(function(line) {
 					self.diffs.push({
-						added: line[0] == '+',
-						removed: line[0] == '-' || line[0] == '\\',
-						text: line.slice(1)
+						oldLineNumber: line[0],
+						newLineNumber: line[1],
+						added: line[2][0] == '+',
+						removed: line[2][0] == '-' || line[2][0] == '\\',
+						text: line[2]
 					});
 				});
 			});

@@ -71,10 +71,25 @@ exports.parseGitDiff = function(text) {
       	diff.bMode = blob[3] ? blob[3].trim() : diff.bMode;
       	
       	// Shift away ---, +++ and @@ stuff
-      	lines.shift(); lines.shift(); lines.shift();
+      	lines.shift(); lines.shift();
 		var diff_lines = [];
+		var originalLine, newLine;
 		while(lines[0] && !/^diff/.test(lines[0])) {
-			diff_lines.push(lines.shift());
+			var line = lines.shift();
+			if (line.indexOf('@@ ') == 0) {
+				var changeGroup = /@@ -(\d+),\d+ [+](\d+),\d+/.exec(line);
+				originalLine = changeGroup[1];
+				newLine = changeGroup[2];
+				diff_lines.push([null, null, line]);
+			} else {
+				if (line[0] == '+') {
+					diff_lines.push([null, newLine++, line]);
+				} else if (line[0] == '-') {
+					diff_lines.push([originalLine++, null, line]);
+				} else {
+					diff_lines.push([originalLine++, newLine++, line]);
+				}
+			}
 		}
 		diff.lines = diff_lines;
 
