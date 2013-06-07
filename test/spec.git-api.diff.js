@@ -40,8 +40,10 @@ describe('git-api diff', function () {
 			.end(wrapErrorHandler(done));
 	});
 
+	var content = ['A', 'few', 'lines', 'of', 'content'];
+
 	it('should be possible to create a file', function(done) {
-		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile), content: 'A\nfew\nlines\nof\ncontent\n' }, done);
+		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
 	});
 
 	it('diff on created file should work', function(done) {
@@ -49,7 +51,12 @@ describe('git-api diff', function () {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
 			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
+			expect(res.body[0].lines.length).to.be(content.length);
+			for(var i = 0; i < res.body[0].lines.length; i++) {
+				var contentLine = content[i];
+				var diffLine = res.body[0].lines[i];
+				expect(diffLine).to.be('+\t' + contentLine);
+			}
 			done();
 		});
 	});
