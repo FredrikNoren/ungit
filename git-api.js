@@ -128,7 +128,8 @@ exports.registerApi = function(app, server, dev) {
 			if (err) return res.json(400, err);
 			var file = status.files[req.query.file];
 			if (!file) {
-				res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
+				if (fs.existsSync(path.join(repoPath, req.query.file))) res.json([]);
+				else res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
 			} else if (!file.isNew) {
 				git(cliConfigPager + ' diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
@@ -281,11 +282,15 @@ exports.registerApi = function(app, server, dev) {
 			});
 		});
 		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
-			fs.writeFileSync(req.body.file, 'test content\n');
+			var content = req.body.content;
+			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
+			fs.writeFileSync(req.body.file, content);
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
-			fs.writeFileSync(req.body.file, 'test content\n' + Math.random() + '\n');
+			var content = req.body.content;
+			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
+			fs.writeFileSync(req.body.file, content);
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/removefile', function(req, res){

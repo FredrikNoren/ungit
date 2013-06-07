@@ -118,26 +118,6 @@ describe('git-api', function () {
 		});
 	});
 
-	it('diff on created file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
-			done();
-		});
-	});
-
-	it('diff on non existing file should fail', function(done) {
-		req
-			.get(restGit.pathPrefix + '/diff')
-			.query({ path: testDir, file: 'non-file.txt' })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(400)
-			.end(wrapErrorHandler(done));
-	});
-
 
 	var commitMessage = 'test';
 
@@ -179,16 +159,6 @@ describe('git-api', function () {
 				staged: false,
 				removed: false
 			});
-			done();
-		});
-	});
-
-	it('diff on modified file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
 			done();
 		});
 	});
@@ -287,16 +257,6 @@ describe('git-api', function () {
 				staged: false,
 				removed: true
 			});
-			done();
-		});
-	});
-
-	it('diff on removed file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
 			done();
 		});
 	});
