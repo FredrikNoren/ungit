@@ -13,7 +13,8 @@ var api = {
 				if (res) {
 					if (res.body) {
 						if (res.body.errorCode && res.body.errorCode != 'unkown') errorSummary = res.body.errorCode;
-						else errorSummary = res.body.error.split('\n')[0];
+						else if (typeof(res.body.error) == 'string') errorSummary = res.body.error.split('\n')[0];
+						else errorSummary = JSON.stringify(res.body.error);
 					}
 					else errorSummary = res.xhr.statusText + ' ' + res.xhr.status;
 				}
