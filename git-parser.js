@@ -175,3 +175,9 @@ exports.parseGitBranches = function(text) {
 	});
 	return branches;
 }
+
+exports.parseGitRemotes = function(text) {
+	return text.split('\n').filter(function(remote) {
+		return remote != '';
+	});
+}

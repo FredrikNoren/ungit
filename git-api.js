@@ -270,6 +270,11 @@ exports.registerApi = function(app, server, dev) {
 		});
 	});
 
+	app.get(exports.pathPrefix + '/remotes', function(req, res){
+		if (!verifyPath(req.query.path, res)) return;
+		git('remote', req.query.path, res, gitParser.parseGitRemotes);
+	});
+
 	app.post(exports.pathPrefix + '/rebase', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('rebase "' + req.body.onto + '"', req.body.path, res);

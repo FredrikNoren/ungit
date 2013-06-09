@@ -53,8 +53,23 @@ describe('git-api remote', function () {
 		common.post(req, '/init', { path: testDirRemote, bare: true }, done);
 	});
 
+	it('remotes in no-remotes-repo should be zero', function(done) {
+		common.get(req, '/remotes', { path: testDirRemote }, done, function(err, res) {
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
+
 	it('cloning "remote" to "local1" should work', function(done) {
 		common.post(req, '/clone', { path: testDirLocal1, url: testDirRemote, destinationDir: '.' }, done);
+	});
+
+	it('remotes in cloned-repo should be one', function(done) {
+		common.get(req, '/remotes', { path: testDirLocal1 }, done, function(err, res) {
+			expect(res.body.length).to.be(1);
+			expect(res.body[0]).to.be('origin');
+			done();
+		});
 	});
 
 	it('creating a commit in "local1" repo should work', function(done) {
