@@ -89,7 +89,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/clone', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('clone "' + req.body.url + '" ' + '"' + req.body.destinationDir + '"', req.body.path, res);
+		git('clone "' + req.body.url.trim() + '" ' + '"' + req.body.destinationDir.trim() + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/fetch', function(req, res) {
@@ -131,7 +131,7 @@ exports.registerApi = function(app, server, dev) {
 				if (fs.existsSync(path.join(repoPath, req.query.file))) res.json([]);
 				else res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
 			} else if (!file.isNew) {
-				git(cliConfigPager + ' diff HEAD -- "' + req.query.file + '"', repoPath, res, gitParser.parseGitDiff);
+				git(cliConfigPager + ' diff HEAD -- "' + req.query.file.trim() + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });
@@ -148,9 +148,9 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('checkout -- "' + req.body.file + '"', req.body.path, res, null, function(err, text) {
+		git('checkout -- "' + req.body.file.trim() + '"', req.body.path, res, null, function(err, text) {
 			if (err !== null) {
-				if (err.stderr.trim() == 'error: pathspec \'' + req.body.file + '\' did not match any file(s) known to git.') {
+				if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
 					fs.unlink(path.join(req.body.path, req.body.file), function(err) {
 						if (err) res.json(400, { command: 'unlink', error: err });
 						else res.json({});
@@ -187,11 +187,11 @@ exports.registerApi = function(app, server, dev) {
 			async.series([
 				function(done) {
 					if (toAdd.length == 0) done();
-					else git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, done);
+					else git('add ' + toAdd.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
 				},
 				function(done) {
 					if (toRemove.length == 0) done();
-					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res, undefined, done);
+					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
 				}
 			], function() {
 				git('commit -m "' + req.body.message + '"', req.body.path, res);
@@ -224,7 +224,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/branches', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name + '" "' + (req.body.startPoint || 'HEAD') + '"', req.body.path, res);
+		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/branch', function(req, res){
@@ -245,7 +245,7 @@ exports.registerApi = function(app, server, dev) {
 				});
 			},
 			function(done) {
-				git('checkout "' + req.body.name + '"', req.body.path, res, undefined, done);
+				git('checkout "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
 			},
 			function(done) {
 				if(!hadLocalChanges) done(); 
@@ -277,13 +277,13 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/rebase', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('rebase "' + req.body.onto + '"', req.body.path, res);
+		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res);
 	});
 
 
 	app.post(exports.pathPrefix + '/submodules', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('submodule add "' + req.body.submoduleUrl + '" "' + req.body.submodulePath + '"', req.body.path, res);
+		git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.body.path, res);
 	});
 
 	app.get(exports.pathPrefix + '/config', function(req, res){
