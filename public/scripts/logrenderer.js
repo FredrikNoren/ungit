@@ -131,15 +131,17 @@ logRenderer.render = function(element, graph) {
 	if (graph.pushHover()) {
 		var local = graph.pushHover();
 		var remote = local.remoteRef();
-		context.setLineDash(refLineDash);
-		context.strokeStyle =
-		context.fillStyle =
-			"rgb(61, 139, 255)";
-		var yOffset = yRefLineOffset;
-		if (remote.node().y() < local.node().y()) yOffset = -yOffset;
-		var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
-		var endPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
-		logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+		if (remote) {
+			context.setLineDash(refLineDash);
+			context.strokeStyle =
+			context.fillStyle =
+				"rgb(61, 139, 255)";
+			var yOffset = yRefLineOffset;
+			if (remote.node().y() < local.node().y()) yOffset = -yOffset;
+			var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+			var endPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
+			logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+		}
 	}
 
 	// Draw reset lines

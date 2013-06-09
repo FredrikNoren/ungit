@@ -182,6 +182,7 @@ RepositoryViewModel.prototype.update = function() {
 	this.updateStatus();
 	this.updateLog();
 	this.updateBranches();
+	this.updateRemotes();
 	this.files().forEach(function(file) {
 		file.invalidateDiff();
 	});
@@ -229,6 +230,15 @@ RepositoryViewModel.prototype.updateBranches = function() {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.activeBranch(branch);
+	});
+}
+RepositoryViewModel.prototype.updateRemotes = function() {
+	if (this.status() != 'inited') return;
+	var self = this;
+	api.query('GET', '/remotes', { path: this.path }, function(err, remotes) {
+		if (err && err.errorCode == 'not-a-repository') return true;
+		if (err) return;
+		self.graph.hasRemotes(remotes.length != 0);
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {

@@ -13,6 +13,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.resetHover = ko.observable();
 	this.rebaseHover = ko.observable();
 	this.draggingRef = ko.observable();
+	this.hasRemotes = ko.observable(false);
 }
 
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
@@ -295,9 +296,17 @@ var RefViewModel = function(args) {
 		if (!self.remoteRef()) return false;
 		return self.node().isAncestor(self.remoteRef().node());
 	});
-	this.pushVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && self.remoteIsAncestor(); });
+	this.pushVisible = ko.computed(function() {
+		if (self.remoteRef())
+			return self.remoteRef().node() != self.node() && self.remoteIsAncestor();
+		else if (self.graph.hasRemotes()) return true;
+	});
 	this.rebaseVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && !self.remoteIsAncestor(); });
-	this.resetVisible = ko.computed(function() { return self.pushVisible() || self.rebaseVisible(); });
+	this.resetVisible = ko.computed(function() {
+		if (self.remoteRef())
+			return self.remoteRef().node() != self.node() && self.remoteIsAncestor();
+		else return self.rebaseVisible();
+	});
 }
 RefViewModel.prototype.dragStart = function() {
 	this.graph.draggingRef(this);
