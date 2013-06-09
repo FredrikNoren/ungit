@@ -229,7 +229,32 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/branch', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('checkout "' + req.body.name + '"', req.body.path, res);
+		var hadLocalChanges = true;
+		async.series([
+			function(done) {
+				git('stash', req.body.path, res, undefined, function(err, res) {
+					if (res.indexOf('No local changes to save') != -1) {
+						hadLocalChanges = false;
+						done();
+						return true;
+					}
+					if (!err) {
+						done();
+						return true;
+					}
+				});
+			},
+			function(done) {
+				git('checkout "' + req.body.name + '"', req.body.path, res, undefined, done);
+			},
+			function(done) {
+				if(!hadLocalChanges) done(); 
+				else git('stash pop', req.body.path, res, undefined, done);
+			},
+		], function(err) {
+			if (err) res.json(400, err);
+			else res.json({});
+		});
 	});
 
 	app.get(exports.pathPrefix + '/branch', function(req, res){

@@ -33,11 +33,12 @@ describe('git-api branching', function () {
 
 	var commitMessage = 'Commit 1';
 
+	var testFile1 = "testfile1.txt";
+
 	it('should be possible to commit to master', function(done) {
-		var testFile = path.join(testDir, "testfile5.txt");
 		async.series([
-			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile] }, done); }
+			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); }
 		], done);
 	});
 
@@ -90,12 +91,12 @@ describe('git-api branching', function () {
 	});
 
 	var commitMessage3 = 'Commit 3';
+	var testFile2 = "testfile2.txt";
 
 	it('should be possible to commit to the branch', function(done) {
-		var testFile = path.join(testDir, "testfile1.txt");
 		async.series([
-			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [testFile] }, done); }
+			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }, done); },
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [testFile2] }, done); }
 		], done);
 	});
 
@@ -137,5 +138,23 @@ describe('git-api branching', function () {
 		});
 	});
 
+	it('should be possible to modify some local file', function(done) {
+		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done);
+	});
 
+	it('should be possible to checkout another branch with local modifications', function(done) {
+		common.post(req, '/branch', { path: testDir, name: 'master' }, done);
+	});
+
+	it('status should list the changed file', function(done) {
+		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+			expect(Object.keys(res.body.files).length).to.be(1);
+			expect(res.body.files[testFile1]).to.eql({
+				isNew: false,
+				staged: false,
+				removed: false
+			});
+			done();
+		});
+	});
 })
