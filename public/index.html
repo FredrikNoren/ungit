@@ -97,107 +97,123 @@
 		
 		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
 
-			<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
-				<div class="arrowContainer arrowDown">
-					<img src="images/shadowArrowDown.png" class="shadow">
-					<img src="images/yellowArrowDown.png" class="arrow">
+			<!-- ko if: gerritIntegration -->
+			<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+			<!-- /ko -->
+
+			<div class="repositoryMain">
+
+
+				<!-- ko if: !gerritIntegration() -->
+				<div class="enableGerritIntegration">
+					<button data-bind="click: toogleGerritIntegration">Enable gerrit integration</button>
 				</div>
-				<div data-bind="visible: !isCommitting()">
-					<table><tr><td class="commitArea">
-						<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
-						<div class="files" data-bind="foreach: files">
-							<div class="file">
-								<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
-								<span class="name" data-bind="text: name, click: toogleDiffs"></span>
-								<span class="new" data-bind="visible: isNew">New</span>
-								<span class="deleted" data-bind="visible: removed">Removed</span>
-								<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+				<!-- /ko -->
+
+
+				<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
+					<div class="arrowContainer arrowDown">
+						<img src="images/shadowArrowDown.png" class="shadow">
+						<img src="images/yellowArrowDown.png" class="arrow">
+					</div>
+					<div data-bind="visible: !isCommitting()">
+						<table><tr><td class="commitArea">
+							<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
+							<div class="files" data-bind="foreach: files">
+								<div class="file">
+									<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
+									<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+									<span class="new" data-bind="visible: isNew">New</span>
+									<span class="deleted" data-bind="visible: removed">Removed</span>
+									<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+								</div>
 							</div>
-						</div>
-						<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
-						<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
-					</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
-						<!-- ko if: selectedDiffFile -->
-							<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
-						<!-- /ko -->
-						<!-- ko if: !selectedDiffFile() -->
-						Click a file to show its changes
-						<!-- /ko -->
-					</td></tr></table>
-				</div>
-				<div data-bind="visible: isCommitting">
-					Committing changes...
-				</div>
-			</div>
-
-			<div class="graphUtils" data-bind="visible: isFetching">
-				<img src="images/grayArrowDown.png" class="arrowDown">
-				<div class="fetchingIndicator">Fetching nodes from remote...</div>
-			</div>
-			
-			<div class="graph" data-bind="with: graph">
-
-				<div class="daySeparators" data-bind="foreach: daySeparators">
-					<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
-						<img src="images/whiteArrowRight.png" class="arrowRight">
-						<div class="dateLabel" data-bind="text: date"></div>
+							<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+							<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+						</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
+							<!-- ko if: selectedDiffFile -->
+								<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
+							<!-- /ko -->
+							<!-- ko if: !selectedDiffFile() -->
+							Click a file to show its changes
+							<!-- /ko -->
+						</td></tr></table>
+					</div>
+					<div data-bind="visible: isCommitting">
+						Committing changes...
 					</div>
 				</div>
 
-				<div class="graphLog" data-bind="graphLog: $data">
+				<div class="graphUtils" data-bind="visible: isFetching">
+					<img src="images/grayArrowDown.png" class="arrowDown">
+					<div class="fetchingIndicator">Fetching nodes from remote...</div>
 				</div>
 				
-				<div class="nodes" data-bind="foreach: nodes">
-					<div class="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
-						<div class="log" data-bind="visible: logBoxVisible">
-							<div class="logEntryBox">
-								<div class="arrowContainer arrowRight">
-									<img src="images/shadowArrowRight.png" class="shadow">
-									<img src="images/whiteArrowRight.png" class="arrow">
-								</div>
-								<div class="title" data-bind="text: title"></div>
-								<div class="date" data-bind="text: authorDate"></div>
-								<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
-							</div>
+				<div class="graph" data-bind="with: graph">
+
+					<div class="daySeparators" data-bind="foreach: daySeparators">
+						<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+							<img src="images/whiteArrowRight.png" class="arrowRight">
+							<div class="dateLabel" data-bind="text: date"></div>
 						</div>
-
-						<div class="refs">
-							<div class="refsList" data-bind="foreach: branches">
-								<div class="refbox" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
-									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
-									<div class="name" data-bind="text: displayName, click: checkout"></div>
-									<span data-bind="visible: isRemoteBranch">(remote)</span>
-								</div>
-								<span data-bind="visible: current">
-									<div class="refbox push" data-bind="click: push, visible: pushVisible, event: { mouseover: mouseoverPush, mouseout: mouseoutPush }">
-										&#11014;
-										<span class="tooltip">Push to remote</span>
-									</div>
-									<div class="refbox reset" data-bind="click: reset, visible: resetVisible, event: { mouseover: mouseoverReset, mouseout: mouseoutReset }">
-										&#11015;
-										<span class="tooltip">Reset to remote</span>
-									</div>
-									<div class="refbox rebase" data-bind="click: rebase, visible: rebaseVisible, event: { mouseover: mouseoverRebase, mouseout: mouseoutRebase }">
-										&#10145;
-										<span class="tooltip">Rebase on remote</span>
-									</div>
-								</span>
-							</div>
-
-							<span data-bind="visible: showDropTargets">
-								<div class="refbox move" data-bind="dropOver: true, drop: dropMoveRef">Move here</div>
-							</span>
-
-							<div class="refbox newRef">
-								<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: branches().length == 0">
-								<form data-bind="submit: createBranch">
-									<input class="name" type="text" placeholder="&#x271A;" data-bind="value: newBranchName">
-									<input class="submit" type="submit">
-								</form>
-							</div>
-						</div>
-
 					</div>
+
+					<div class="graphLog" data-bind="graphLog: $data">
+					</div>
+					
+					<div class="nodes" data-bind="foreach: nodes">
+						<div class="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+							<div class="log" data-bind="visible: logBoxVisible">
+								<div class="logEntryBox">
+									<div class="arrowContainer arrowRight">
+										<img src="images/shadowArrowRight.png" class="shadow">
+										<img src="images/whiteArrowRight.png" class="arrow">
+									</div>
+									<div class="title" data-bind="text: title"></div>
+									<div class="date" data-bind="text: authorDate"></div>
+									<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+								</div>
+							</div>
+
+							<div class="refs">
+								<div class="refsList" data-bind="foreach: branches">
+									<div class="refbox" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+										<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
+										<div class="name" data-bind="text: displayName, click: checkout"></div>
+										<span data-bind="visible: isRemoteBranch">(remote)</span>
+									</div>
+									<span data-bind="visible: current">
+										<div class="refbox push" data-bind="click: push, visible: pushVisible, event: { mouseover: mouseoverPush, mouseout: mouseoutPush }">
+											&#11014;
+											<span class="tooltip">Push to remote</span>
+										</div>
+										<div class="refbox reset" data-bind="click: reset, visible: resetVisible, event: { mouseover: mouseoverReset, mouseout: mouseoutReset }">
+											&#11015;
+											<span class="tooltip">Reset to remote</span>
+										</div>
+										<div class="refbox rebase" data-bind="click: rebase, visible: rebaseVisible, event: { mouseover: mouseoverRebase, mouseout: mouseoutRebase }">
+											&#10145;
+											<span class="tooltip">Rebase on remote</span>
+										</div>
+									</span>
+								</div>
+
+								<span data-bind="visible: showDropTargets">
+									<div class="refbox move" data-bind="dropOver: true, drop: dropMoveRef">Move here</div>
+								</span>
+
+								<div class="refbox newRef">
+									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: branches().length == 0">
+									<form data-bind="submit: createBranch">
+										<input class="name" type="text" placeholder="&#x271A;" data-bind="value: newBranchName">
+										<input class="submit" type="submit">
+									</form>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
 				</div>
 
 			</div>
@@ -206,6 +222,26 @@
 	</div>
 </script>
 
+<script type="text/html" id="gerritIntegration">
+	<div class="gerritIntegration">
+		<h1>Gerrit</h1>
+
+		<button data-bind="visible: showInitCommmitHook, click: initCommitHook, text: initCommitHookMessage"></button>
+		
+		<div><button data-bind="click: pushForReview">Push changes for review</button></div>
+		<div>
+			Checkout:
+			<div></div>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="alertDialog">
+	<div class="alertDialog">
+		<div class="status" data-bind="text: message"></div>
+		<button data-bind="click: close">Ok</button>
+	</div>
+</script>
 
 <script type="text/html" id="pushDialog">
 	<div class="pushDialog">

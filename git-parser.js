@@ -181,3 +181,12 @@ exports.parseGitRemotes = function(text) {
 		return remote != '';
 	});
 }
+
+
+exports.parseGitRemoteShow = function(text) {
+	var lines = text.split('\n');
+	return {
+		fetch: lines[1].slice('  Fetch URL: '.length),
+		push: lines[1].slice('  Push  URL: '.length)
+	};
+}

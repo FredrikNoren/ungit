@@ -12,6 +12,7 @@ var gitParser = require('./git-parser');
 exports.pathPrefix = '';
 
 var debug = true;
+var gerrit = true;
 
 exports.registerApi = function(app, server, dev) {
 
@@ -75,6 +76,9 @@ exports.registerApi = function(app, server, dev) {
 	git.status = function(repoPath, res, callback) {
 		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, callback);
 	}
+	git.remoteShow = function(repoPath, remoteName, res, callback) {
+		git('remote show ' + remoteName, repoPath, res, gitParser.parseGitRemoteShow, callback);
+	}
 
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
@@ -89,7 +93,9 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/clone', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('clone "' + req.body.url.trim() + '" ' + '"' + req.body.destinationDir.trim() + '"', req.body.path, res);
+		var url = req.body.url.trim();
+		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
+		git('clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/fetch', function(req, res) {
@@ -113,7 +119,7 @@ exports.registerApi = function(app, server, dev) {
 		var credentialsOption = '';
 		if (req.body.socketId)
 			credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
-		git(credentialsOption + ' push origin HEAD', req.body.path, res);
+		git(credentialsOption + ' push origin HEAD' + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/reset', function(req, res) {
@@ -275,6 +281,11 @@ exports.registerApi = function(app, server, dev) {
 		git('remote', req.query.path, res, gitParser.parseGitRemotes);
 	});
 
+	app.get(exports.pathPrefix + '/remotes/:name', function(req, res){
+		if (!verifyPath(req.query.path, res)) return;
+		git.remoteShow(req.query.path, req.params.name, res);
+	});
+
 	app.post(exports.pathPrefix + '/rebase', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res);
@@ -298,6 +309,39 @@ exports.registerApi = function(app, server, dev) {
 		});
 		socket.emit('request-credentials');
 	});
+
+
+	if (gerrit) {
+		app.get(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
+			var repoPath = req.query.path;
+			if (!verifyPath(repoPath, res)) return;
+			var hookPath = path.join(repoPath, '.git', 'hooks', 'commit-msg');
+			if (fs.existsSync(hookPath)) res.json({ exists: true });
+			else res.json({ exists: false });
+		});
+		app.post(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
+			var repoPath = req.body.path;
+			if (!verifyPath(repoPath, res)) return;
+			git.remoteShow(repoPath, 'origin', res, function(err, remote) {
+				if (err) return res.json(400, err);
+				if (remote.fetch.indexOf('ssh://') == 0) {
+					var gerritUri = remote.fetch.slice('ssh://'.length).split('/')[0].split(':');
+					var host = gerritUri[0];
+					var port = gerritUri[1];
+					var command = 'scp -p ';
+					if (port) command += ' -P ' + port + ' ';
+					command += host + ':hooks/commit-msg .git/hooks/';
+					child_process.exec(command, { cwd: repoPath },
+						function (error, stdout, stderr) {
+							if (err) return res.json(400, { err: err });
+							res.json({});
+						});
+				} else {
+					res.json(400, { error: 'Unsupported gerrit remote: ' + remote.fetch });
+				}
+			});
+		});
+	}
 
 	if (dev) {
 

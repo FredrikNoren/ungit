@@ -30,8 +30,17 @@ var visitedRepositories = {
 
 var viewModel = new MainViewModel();
 
-function PushDialogViewModel(repoPath) {
+function AlertDialogViewModel(message) {
+	this.message = message;
+}
+AlertDialogViewModel.prototype.template = 'alertDialog';
+AlertDialogViewModel.prototype.close = function() {
+	viewModel.dialog(null);
+}
+
+function PushDialogViewModel(repoPath, remoteBranch) {
 	this.repoPath = repoPath;
+	this.remoteBranch = remoteBranch;
 	this.showCredentialsForm = ko.observable(false);
 	this.username = ko.observable();
 	this.password = ko.observable();
@@ -47,7 +56,13 @@ PushDialogViewModel.prototype.submitCredentials = function() {
 	this.showCredentialsForm(false);
 }
 PushDialogViewModel.prototype.startPush = function() {
-	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId }, function(err, res) {
+	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch }, function(err, res) {
+		if (err) {
+			if (err.res.body.stderr.indexOf('ERROR: missing Change-Id in commit message footer') != -1) {
+				viewModel.dialog(new AlertDialogViewModel('Missing Change-Id'));
+				return true;
+			}
+		}
 		viewModel.dialog(null);
 	});
 }
@@ -137,11 +152,11 @@ PathViewModel.prototype.cloneRepository = function() {
 	});
 }
 
-var RepositoryViewModel = function(path) {
+var RepositoryViewModel = function(repoPath) {
 	var self = this;
 	this.status = ko.observable('loading');
 
-	visitedRepositories.tryAdd(path);
+	visitedRepositories.tryAdd(repoPath);
 	
 	this.files = ko.observableArray();
 	this.commitMessage = ko.observable();
@@ -153,22 +168,23 @@ var RepositoryViewModel = function(path) {
 	});
 	this.isCommitting = ko.observable(false);
 	this.selectedDiffFile = ko.observable();
-	this.path = path;
+	this.repoPath = repoPath;
 	this.commitValidationError = ko.computed(function() {
 		if (!self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
+	this.gerritIntegration = ko.observable(new GerritIntegrationViewModel(this));
 	this.isFetching = ko.observable(false);
-	this.graph = new GitGraphViewModel(path);
+	this.graph = new GitGraphViewModel(repoPath);
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
 			self.fetch();
-			api.watchRepository(path, {
+			api.watchRepository(repoPath, {
 				ready: function() { self.watcherReady(true) },
 				changed: function() { self.update(); },
 				requestCredentials: function(callback) {
@@ -191,13 +207,13 @@ RepositoryViewModel.prototype.fetch = function() {
 	if (this.status() != 'inited') return;
 	var self = this;
 	this.isFetching(true);
-	api.query('POST', '/fetch', { path: this.path }, function(err, status) {
+	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
 		self.isFetching(false);
 	});
 }
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
-	api.query('GET', '/status', { path: this.path }, function(err, status){
+	api.query('GET', '/status', { path: this.repoPath }, function(err, status){
 		if (err) return;
 		self.status('inited');
 		var updateId = newId();
@@ -226,7 +242,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 RepositoryViewModel.prototype.updateBranches = function() {
 	if (this.status() != 'inited') return;
 	var self = this;
-	api.query('GET', '/branch', { path: this.path }, function(err, branch) {
+	api.query('GET', '/branch', { path: this.repoPath }, function(err, branch) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.activeBranch(branch);
@@ -235,7 +251,7 @@ RepositoryViewModel.prototype.updateBranches = function() {
 RepositoryViewModel.prototype.updateRemotes = function() {
 	if (this.status() != 'inited') return;
 	var self = this;
-	api.query('GET', '/remotes', { path: this.path }, function(err, remotes) {
+	api.query('GET', '/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.hasRemotes(remotes.length != 0);
@@ -245,7 +261,7 @@ RepositoryViewModel.prototype.toogleShowBranches = function() {
 	this.showBranches(!this.showBranches());
 }
 RepositoryViewModel.prototype.createNewBranch = function() {
-	api.query('POST', '/branches', { path: this.path, name: this.newBranchName() });
+	api.query('POST', '/branches', { path: this.repoPath, name: this.newBranchName() });
 	this.newBranchName('');
 }
 RepositoryViewModel.prototype.commit = function() {
@@ -256,12 +272,18 @@ RepositoryViewModel.prototype.commit = function() {
 	}).map(function(file) {
 		return file.name();
 	});
-	api.query('POST', '/commit', { path: this.path, message: this.commitMessage(), files: files }, function(err, res) {
+	api.query('POST', '/commit', { path: this.repoPath, message: this.commitMessage(), files: files }, function(err, res) {
 		self.commitMessage('');
 		self.files.removeAll();
 		self.selectedDiffFile(null);
 		self.isCommitting(false);
 	});
+}
+RepositoryViewModel.prototype.toogleGerritIntegration = function() {
+	if (this.gerritIntegration())
+		this.gerritIntegration(null);
+	else
+		this.gerritIntegration(new GerritIntegrationViewModel());
 }
 
 var FileViewModel = function(repository) {
@@ -282,7 +304,7 @@ FileViewModel.prototype.toogleStaged = function() {
 }
 FileViewModel.prototype.discardChanges = function() {
 	this.repository.selectedDiffFile(null);
-	api.query('POST', '/discardchanges', { path: this.repository.path, file: this.name() });
+	api.query('POST', '/discardchanges', { path: this.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
@@ -295,7 +317,7 @@ FileViewModel.prototype.toogleDiffs = function() {
 FileViewModel.prototype.invalidateDiff = function() {
 	var self = this;
 	if (this.repository.selectedDiffFile() == this) {
-		api.query('GET', '/diff', { file: this.name(), path: this.repository.path }, function(err, diffs) {
+		api.query('GET', '/diff', { file: this.name(), path: this.repository.repoPath }, function(err, diffs) {
 			if (err) return;
 			self.diffs.removeAll();
 			diffs.forEach(function(diff) {
@@ -313,6 +335,28 @@ FileViewModel.prototype.invalidateDiff = function() {
 	}
 }
 
+var GerritIntegrationViewModel = function(repo) {
+	this.repo = repo;
+	this.showInitCommmitHook = ko.observable(false);
+	this.initCommitHookMessage = ko.observable('Init commit hook');
+	this.updateCommitHook();
+}
+GerritIntegrationViewModel.prototype.updateCommitHook = function() {
+	var self = this;
+	api.query('GET', '/gerrit/commithook', { path: this.repo.repoPath }, function(err, hook) {
+		self.showInitCommmitHook(!hook.exists);
+	});
+}
+GerritIntegrationViewModel.prototype.initCommitHook = function() {
+	var self = this;
+	this.initCommitHookMessage('Initing commit hook...');
+	api.query('POST', '/gerrit/commithook', { path: this.repo.repoPath }, function(err) {
+		self.updateCommitHook();
+	});
+}
+GerritIntegrationViewModel.prototype.pushForReview = function() {
+	viewModel.dialog(new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + this.repo.graph.activeBranch()));
+}
 
 crossroads.addRoute('/', function() {
 	viewModel.path('');

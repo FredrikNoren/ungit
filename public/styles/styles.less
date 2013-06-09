@@ -284,11 +284,36 @@ a {
 @logWidth: 670px;
 @graphTopOffset: 120px;
 
+.gerritIntegration {
+	background: #000;
+	color: #fff;
+	padding: 20px;
+}
+
 .repository {
 	position: relative;
 	padding-right: 50px;
+	overflow: hidden;
+	height: auto;
 
+	.gerritIntegration {
+		float: right;
+		width: 300px;
+		margin-left: 30px;
+	}
 
+	.repositoryMain {
+		width: auto;
+		overflow: hidden;
+		height: auto;
+	}
+
+	.enableGerritIntegration {
+		z-index: 100;
+		position: absolute;
+		right: 0px;
+		top: -50px;
+	}
 	.staging {
 		background: rgb(253, 247, 200);
 		position: relative;

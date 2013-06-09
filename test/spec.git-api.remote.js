@@ -72,6 +72,16 @@ describe('git-api remote', function () {
 		});
 	});
 
+	it('remote/origin in cloned-repo should work', function(done) {
+		common.get(req, '/remotes/origin', { path: testDirLocal1 }, done, function(err, res) {
+			expect(res.body).to.eql({
+				fetch: testDirRemote,
+				push: testDirRemote
+			});
+			done();
+		});
+	});
+
 	it('creating a commit in "local1" repo should work', function(done) {
 		var testFile = path.join(testDirLocal1, "testfile1.txt");
 		async.series([
