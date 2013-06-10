@@ -7,6 +7,7 @@ var temp = require('temp');
 var socketIO = require('socket.io');
 var watchr = require('watchr');
 var async=  require('async');
+var Ssh2Connection = require('ssh2');
 var gitParser = require('./git-parser');
 
 exports.pathPrefix = '';
@@ -100,7 +101,7 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/fetch', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('fetch', req.body.path, res, undefined, function(err, text) {
+		git('fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.body.path, res, undefined, function(err, text) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
 					res.json({});
@@ -312,6 +313,33 @@ exports.registerApi = function(app, server, dev) {
 
 
 	if (gerrit) {
+
+		var getGerritAddress = function(repoPath, res, callback) {
+			git.remoteShow(repoPath, 'origin', res, function(err, remote) {
+				if (err) return res.json(400, err);
+				if (remote.fetch.indexOf('ssh://') == 0) {
+					var ss = remote.fetch.slice('ssh://'.length).split('/');
+					var gerritUri = ss[0].split(':');
+					var host = gerritUri[0];
+					var port = gerritUri[1];
+					var project = ss[1];
+					project = project.slice(project.length - '.git'.length, project.length);
+					callback(null, host, port, project);
+				} else if(remote.fetch.indexOf('@') != -1) {
+					var ss = remote.fetch.split('@');
+					var gerritUri = ss[1].split(':');
+					var host = gerritUri[0];
+					var port = null;
+					var project = gerritUri[1];
+					if (project.indexOf('.git') == project.length - '.git'.length)
+						project = project.slice(0, project.length - '.git'.length);
+					callback(ss[0], host, port, project);
+				} else {
+					res.json(400, { error: 'Unsupported gerrit remote: ' + remote.fetch });
+				}
+			});
+		}
+
 		app.get(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
 			var repoPath = req.query.path;
 			if (!verifyPath(repoPath, res)) return;
@@ -319,15 +347,11 @@ exports.registerApi = function(app, server, dev) {
 			if (fs.existsSync(hookPath)) res.json({ exists: true });
 			else res.json({ exists: false });
 		});
+
 		app.post(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
 			var repoPath = req.body.path;
 			if (!verifyPath(repoPath, res)) return;
-			git.remoteShow(repoPath, 'origin', res, function(err, remote) {
-				if (err) return res.json(400, err);
-				if (remote.fetch.indexOf('ssh://') == 0) {
-					var gerritUri = remote.fetch.slice('ssh://'.length).split('/')[0].split(':');
-					var host = gerritUri[0];
-					var port = gerritUri[1];
+			getGerritAddress(repoPath, res, function(host, port) {
 					var command = 'scp -p ';
 					if (port) command += ' -P ' + port + ' ';
 					command += host + ':hooks/commit-msg .git/hooks/';
@@ -336,11 +360,50 @@ exports.registerApi = function(app, server, dev) {
 							if (err) return res.json(400, { err: err });
 							res.json({});
 						});
-				} else {
-					res.json(400, { error: 'Unsupported gerrit remote: ' + remote.fetch });
-				}
 			});
 		});
+
+		var ssh2 = function(username, host, port, command, callback) {
+			var connection = new Ssh2Connection();
+			connection.on('connect', function() {
+			});
+			connection.on('ready', function() {
+				connection.exec(command, function(err, stream) {
+					if (err) return callback(err);
+					var result = '';
+					stream.on('data', function(data, extended) {
+						result += data.toString();
+					});
+					stream.on('end', function() {
+						callback(null, result);
+					});
+				});
+			});
+			connection.on('error', function(err) {
+				callback(err);
+			});
+			connection.connect({
+				host: host,
+				port: port,
+				agent: 'pageant',
+				username: username
+			});
+		};
+
+		app.get(exports.pathPrefix + '/gerrit/changes', function(req, res) {
+			var repoPath = req.query.path;
+			if (!verifyPath(repoPath, res)) return;
+			getGerritAddress(repoPath, res, function(username, host, port, project) {
+					var command = 'gerrit query --format=JSON --current-patch-set status:open project:' + project + '';
+					ssh2(username, host, port, command, function(err, result) {
+							if (err) return res.json(400, { err: err });
+							result = result.split('\n').filter(function(r) { return r.trim(); });
+							result = result.map(function(r) { return JSON.parse(r); });
+							res.json(result);
+					});
+			});
+		});
+
 	}
 
 	if (dev) {

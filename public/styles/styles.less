@@ -288,6 +288,25 @@ a {
 	background: #000;
 	color: #fff;
 	padding: 20px;
+	.change {
+		font-size: 0.8em;
+		.subject {
+			color: #F745F7;
+			font-size: 1.5em;
+		}
+		.owner {
+			color: #bbb;
+		}
+		color: #999;
+		padding: 5px;
+		margin-top: 10px;
+		.checkout {
+			background: #B26EDF;
+		}
+		.openInGerrit {
+			background: #65BE59;
+		}
+	}
 }
 
 .repository {
@@ -306,13 +325,14 @@ a {
 		width: auto;
 		overflow: hidden;
 		height: auto;
+		padding-right: 5px;
 	}
 
 	.enableGerritIntegration {
 		z-index: 100;
 		position: absolute;
 		right: 0px;
-		top: -50px;
+		margin-top: 20px;
 	}
 	.staging {
 		background: rgb(253, 247, 200);

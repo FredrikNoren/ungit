@@ -124,14 +124,15 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		}
 	}
 
-	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-	nodes = nodes.filter(function(node) { return node.idealogicalBranch; })
-
 	var updateTimeStamp = moment().valueOf();
 
+	// Mark timestamps
 	GitGraphViewModel.traverseNodeParents(HEAD, this.nodesById, function(node) {
 		node.ancestorOfHEADTimeStamp = updateTimeStamp;
 	});
+
+	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
+	nodes = nodes.filter(function(node) { return !!node.idealogicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
 	//var concurrentBranches = { };
 

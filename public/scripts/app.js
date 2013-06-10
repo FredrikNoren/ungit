@@ -175,7 +175,7 @@ var RepositoryViewModel = function(repoPath) {
 		if (!self.commitMessage()) return "Provide a commit message";
 		return "";
 	});
-	this.gerritIntegration = ko.observable(new GerritIntegrationViewModel(this));
+	this.gerritIntegration = ko.observable(null);
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(repoPath);
 	this.updateStatus();
@@ -283,7 +283,7 @@ RepositoryViewModel.prototype.toogleGerritIntegration = function() {
 	if (this.gerritIntegration())
 		this.gerritIntegration(null);
 	else
-		this.gerritIntegration(new GerritIntegrationViewModel());
+		this.gerritIntegration(new GerritIntegrationViewModel(this));
 }
 
 var FileViewModel = function(repository) {
@@ -336,9 +336,15 @@ FileViewModel.prototype.invalidateDiff = function() {
 }
 
 var GerritIntegrationViewModel = function(repo) {
+	var self = this;
 	this.repo = repo;
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
+	this.changes = ko.observable();
+	api.query('GET', '/gerrit/changes', { path: this.repo.repoPath }, function(err, changes) {
+		if (err || !changes) return true;
+		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
+	});
 	this.updateCommitHook();
 }
 GerritIntegrationViewModel.prototype.updateCommitHook = function() {
@@ -356,6 +362,24 @@ GerritIntegrationViewModel.prototype.initCommitHook = function() {
 }
 GerritIntegrationViewModel.prototype.pushForReview = function() {
 	viewModel.dialog(new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + this.repo.graph.activeBranch()));
+}
+
+var GerritChangeViewModel = function(gerritIntegration, args) {
+	this.gerritIntegration = gerritIntegration;
+	this.subject = args.subject;
+	this.ownerName = args.owner.name;
+	this.sha1 = args.sha1;
+	this.data = args;
+};
+GerritChangeViewModel.prototype.checkout = function() {
+	var self = this;
+	api.query('POST', '/fetch', { path: this.gerritIntegration.repo.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
+		api.query('POST', '/branch', { path: self.gerritIntegration.repo.repoPath, name: 'FETCH_HEAD' });
+	});
+}
+GerritChangeViewModel.prototype.openInGerrit = function() {
+	var win = window.open(this.data.url, '_blank');
+  win.focus();
 }
 
 crossroads.addRoute('/', function() {

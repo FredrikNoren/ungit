@@ -17,6 +17,7 @@
     "watchr": "*",
     "socket.io": "*",
     "moment": "*",
-    "async": "*"
+    "async": "*",
+    "ssh2": "*"
   }
 }

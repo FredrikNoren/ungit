@@ -103,14 +103,6 @@
 
 			<div class="repositoryMain">
 
-
-				<!-- ko if: !gerritIntegration() -->
-				<div class="enableGerritIntegration">
-					<button data-bind="click: toogleGerritIntegration">Enable gerrit integration</button>
-				</div>
-				<!-- /ko -->
-
-
 				<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
 					<div class="arrowContainer arrowDown">
 						<img src="images/shadowArrowDown.png" class="shadow">
@@ -143,6 +135,12 @@
 						Committing changes...
 					</div>
 				</div>
+				
+				<!-- ko if: !gerritIntegration() -->
+				<div class="enableGerritIntegration">
+					<button data-bind="click: toogleGerritIntegration">Enable gerrit integration</button>
+				</div>
+				<!-- /ko -->
 
 				<div class="graphUtils" data-bind="visible: isFetching">
 					<img src="images/grayArrowDown.png" class="arrowDown">
@@ -230,8 +228,15 @@
 		
 		<div><button data-bind="click: pushForReview">Push changes for review</button></div>
 		<div>
-			Checkout:
-			<div></div>
+			<div data-bind="foreach: changes">
+				<div class="change">
+					<span class="subject" data-bind="text: subject"></span> by <span class="owner" data-bind="text: ownerName"></span>
+					<div>
+						<button class="checkout" data-bind="click: checkout">Checkout</button>
+						<button class="openInGerrit" data-bind="click: openInGerrit">Open in gerrit</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </script>
