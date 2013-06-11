@@ -9,9 +9,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.repoPath = repoPath;
 	this.activeBranch = ko.observable();
 	this.HEAD = ko.observable();
-	this.pushHover = ko.observable();
-	this.resetHover = ko.observable();
-	this.rebaseHover = ko.observable();
+	this.hoverGraphAction = ko.observable();
 	this.draggingRef = ko.observable();
 	this.hasRemotes = ko.observable(false);
 }
@@ -257,10 +255,10 @@ NodeViewModel.prototype.isAncestor = function(node) {
 NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 	var path = [];
 	var thisNode = this;
-	do {
+	while (!node.isAncestor(thisNode)) {
 		path.push(thisNode);
 		thisNode = this.graph.nodesById[thisNode.parents[0]];
-	} while (!node.isAncestor(thisNode));
+	}
 	path.push(thisNode);
 	return path;
 }
@@ -300,17 +298,16 @@ var RefViewModel = function(args) {
 		if (!self.remoteRef()) return false;
 		return self.node().isAncestor(self.remoteRef().node());
 	});
-	this.pushVisible = ko.computed(function() {
-		if (self.remoteRef())
-			return self.remoteRef().node() != self.node() && self.remoteIsAncestor();
-		else if (self.graph.hasRemotes()) return true;
+	this.remoteIsOffspring = ko.computed(function() {
+		if (!self.remoteRef()) return false;
+		return self.remoteRef().node().isAncestor(self.node());
 	});
-	this.rebaseVisible = ko.computed(function() { return self.remoteRef() && self.remoteRef().node() != self.node() && !self.remoteIsAncestor(); });
-	this.resetVisible = ko.computed(function() {
-		if (self.remoteRef())
-			return self.remoteRef().node() != self.node() && self.remoteIsAncestor();
-		else return self.rebaseVisible();
-	});
+	this.graphActions = [
+		new PushGraphAction(this.graph, this),
+		new ResetGraphAction(this.graph, this),
+		new RebaseGraphAction(this.graph, this),
+		new PullGraphAction(this.graph, this)
+	];
 }
 RefViewModel.prototype.dragStart = function() {
 	this.graph.draggingRef(this);
@@ -324,33 +321,87 @@ RefViewModel.prototype.checkout = function() {
 	this.graph.setNodes(this.graph.nodes());
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }
-RefViewModel.prototype.push = function() {
-	this.graph.pushHover(null);
+
+
+var GraphAction = function(graph) {
+	this.graph = graph;
+}
+GraphAction.prototype.mouseover = function() {
+	this.graph.hoverGraphAction(this);
+}
+GraphAction.prototype.mouseout = function() {
+	this.graph.hoverGraphAction(null);
+}
+
+var PushGraphAction = function(graph, ref) {
+	var self = this;
+	GraphAction.call(this, graph);
+	this.ref = ref;
+	this.visible = ko.computed(function() {
+		if (self.ref.remoteRef())
+			return self.ref.remoteRef().node() != self.ref.node() && self.ref.remoteIsAncestor();
+		else if (self.graph.hasRemotes()) return true;
+	});
+}
+inherits(PushGraphAction, GraphAction);
+PushGraphAction.prototype.style = 'push';
+PushGraphAction.prototype.icon = 'P';
+PushGraphAction.prototype.tooltip = 'Push to remote';
+PushGraphAction.prototype.perform = function() {
+	this.graph.hoverGraphAction(null);
 	viewModel.dialog(new PushDialogViewModel(this.graph.repoPath));
 }
-RefViewModel.prototype.reset = function() {
-	this.graph.resetHover(null);
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.remoteRef().name });
+
+
+var ResetGraphAction = function(graph, ref) {
+	var self = this;
+	GraphAction.call(this, graph);
+	this.ref = ref;
+	this.visible = ko.computed(function() {
+		return self.ref.remoteRef() && self.ref.remoteRef().node() != self.ref.node() && !self.ref.remoteIsOffspring();
+	});
 }
-RefViewModel.prototype.rebase = function() {
-	this.graph.rebaseHover(null);
-	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.remoteRef().name });
+inherits(ResetGraphAction, GraphAction);
+ResetGraphAction.prototype.style = 'reset';
+ResetGraphAction.prototype.icon = 'R';
+ResetGraphAction.prototype.tooltip = 'Reset to remote';
+ResetGraphAction.prototype.perform = function() {
+	this.graph.hoverGraphAction(null);
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
 }
-RefViewModel.prototype.mouseoverPush = function() {
-	this.graph.pushHover(this);
+
+
+var RebaseGraphAction = function(graph, ref) {
+	var self = this;
+	GraphAction.call(this, graph);
+	this.ref = ref;
+	this.visible = ko.computed(function() {
+		return self.ref.remoteRef() && self.ref.remoteRef().node() != self.ref.node() && !self.ref.remoteIsAncestor() && !self.ref.remoteIsOffspring();
+	});
 }
-RefViewModel.prototype.mouseoutPush = function() {
-	this.graph.pushHover(null);
+inherits(RebaseGraphAction, GraphAction);
+RebaseGraphAction.prototype.style = 'rebase';
+RebaseGraphAction.prototype.icon = 'R';
+RebaseGraphAction.prototype.tooltip = 'Rebase on remote';
+RebaseGraphAction.prototype.perform = function() {
+	this.graph.hoverGraphAction(null);
+	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.ref.remoteRef().name });
 }
-RefViewModel.prototype.mouseoverReset = function() {
-	this.graph.resetHover(this);
+
+
+var PullGraphAction = function(graph, ref) {
+	var self = this;
+	GraphAction.call(this, graph);
+	this.ref = ref;
+	this.visible = ko.computed(function() {
+		return self.ref.remoteRef() && self.ref.remoteRef().node() != self.ref.node() && self.ref.remoteIsOffspring();
+	});
 }
-RefViewModel.prototype.mouseoutReset = function() {
-	this.graph.resetHover(null);
-}
-RefViewModel.prototype.mouseoverRebase = function() {
-	this.graph.rebaseHover(this);
-}
-RefViewModel.prototype.mouseoutRebase = function() {
-	this.graph.rebaseHover(null);
+inherits(PullGraphAction, GraphAction);
+PullGraphAction.prototype.style = 'pull';
+PullGraphAction.prototype.icon = 'P';
+PullGraphAction.prototype.tooltip = 'Pull to remote';
+PullGraphAction.prototype.perform = function() {
+	this.graph.hoverGraphAction(null);
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
 }

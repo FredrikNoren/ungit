@@ -80,6 +80,34 @@ exports.registerApi = function(app, server, dev) {
 	git.remoteShow = function(repoPath, remoteName, res, callback) {
 		git('remote show ' + remoteName, repoPath, res, gitParser.parseGitRemoteShow, callback);
 	}
+	git.stashAndPop = function(repoPath, res, callback) {
+		var hadLocalChanges = true;
+		async.series([
+			function(done) {
+				git('stash', repoPath, res, undefined, function(err, res) {
+					if (res.indexOf('No local changes to save') != -1) {
+						hadLocalChanges = false;
+						done();
+						return true;
+					}
+					if (!err) {
+						done();
+						return true;
+					}
+				});
+			},
+			function(done) {
+				callback(done);
+			},
+			function(done) {
+				if(!hadLocalChanges) done(); 
+				else git('stash pop', repoPath, res, undefined, done);
+			},
+		], function(err) {
+			if (err) res.json(400, err);
+			else res.json({});
+		});
+	}
 
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
@@ -125,7 +153,9 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/reset', function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
-		git('reset --hard "' + req.body.to + '"', req.body.path, res);
+		git.stashAndPop(req.body.path, res, function(done) {
+			git('reset --hard "' + req.body.to + '"', req.body.path, res, undefined, done);
+		});
 	});
 
 	app.get(exports.pathPrefix + '/diff', function(req, res) {
@@ -237,31 +267,8 @@ exports.registerApi = function(app, server, dev) {
 
 	app.post(exports.pathPrefix + '/branch', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		var hadLocalChanges = true;
-		async.series([
-			function(done) {
-				git('stash', req.body.path, res, undefined, function(err, res) {
-					if (res.indexOf('No local changes to save') != -1) {
-						hadLocalChanges = false;
-						done();
-						return true;
-					}
-					if (!err) {
-						done();
-						return true;
-					}
-				});
-			},
-			function(done) {
-				git('checkout "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
-			},
-			function(done) {
-				if(!hadLocalChanges) done(); 
-				else git('stash pop', req.body.path, res, undefined, done);
-			},
-		], function(err) {
-			if (err) res.json(400, err);
-			else res.json({});
+		git.stashAndPop(req.body.path, res, function(done) {
+			git('checkout "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
 		});
 	});
 

@@ -187,18 +187,10 @@
 										<div class="name" data-bind="text: displayName, click: checkout"></div>
 										<span data-bind="visible: isRemoteBranch">(remote)</span>
 									</div>
-									<span data-bind="visible: current">
-										<div class="refbox push" data-bind="click: push, visible: pushVisible, event: { mouseover: mouseoverPush, mouseout: mouseoutPush }">
-											&#11014;
-											<span class="tooltip">Push to remote</span>
-										</div>
-										<div class="refbox reset" data-bind="click: reset, visible: resetVisible, event: { mouseover: mouseoverReset, mouseout: mouseoutReset }">
-											&#11015;
-											<span class="tooltip">Reset to remote</span>
-										</div>
-										<div class="refbox rebase" data-bind="click: rebase, visible: rebaseVisible, event: { mouseover: mouseoverRebase, mouseout: mouseoutRebase }">
-											&#10145;
-											<span class="tooltip">Rebase on remote</span>
+									<span data-bind="visible: current, foreach: graphActions">
+										<div class="refbox graphAction" data-bind="click: perform, visible: visible, event: { mouseover: mouseover, mouseout: mouseout }, css: style">
+											<span data-bind="text: icon"></span>
+											<span class="tooltip" data-bind="text: tooltip"></span>
 										</div>
 									</span>
 								</div>
@@ -303,6 +295,7 @@
 <script type="text/javascript" src="/scripts/lib/moment.js"></script>
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src='/scripts/utils.js'></script>
 <script type='text/javascript' src='/scripts/api.js'></script>
 <script type='text/javascript' src='/scripts/gitGraph.js'></script>
 <script type='text/javascript' src='/scripts/vector2.js'></script>
