@@ -167,6 +167,22 @@ describe('git-api', function () {
 		common.post(req, '/discardchanges', { path: testDir, file: testFile }, done);
 	});
 
+	it('modifying a test file should work', function(done) {
+		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) }, done);
+	});
+
+	it('commit ammend should work', function(done) {
+		common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile], amend: true }, done);
+	});
+
+	it('amend should not produce additional log-entry', function(done) {
+		common.get(req, '/log', { path: testDir }, done, function(err, res) {
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
+
 	var testFile2 = 'my test.txt';
 
 	it('creating a multi word test file should work', function(done) {

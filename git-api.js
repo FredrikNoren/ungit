@@ -201,7 +201,7 @@ exports.registerApi = function(app, server, dev) {
 					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
 				}
 			], function() {
-				git('commit -m "' + req.body.message + '"', req.body.path, res);
+				git('commit ' + (req.body.amend ? '--amend' : '') + ' -m "' + req.body.message + '"', req.body.path, res);
 			});
 		});
 	});
