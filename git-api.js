@@ -59,7 +59,7 @@ exports.registerApi = function(app, server, dev) {
 
 	var git = function(command, repoPath, res, parser, callback) {
 		command = 'git ' + command;
-		child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
+		return child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
 			function (error, stdout, stderr) {
 				if (error !== null) {
 					var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
@@ -175,8 +175,8 @@ exports.registerApi = function(app, server, dev) {
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.message === undefined)
 			return res.json(400, { error: 'Must specify commit message' });
-		if (!(req.body.files instanceof Array) || req.body.files.length == 0)
-			return res.json(400, { error: 'Must specify files to commit' });
+		if ((!(req.body.files instanceof Array) || req.body.files.length == 0) && !req.body.amend)
+			return res.json(400, { error: 'Must specify files or amend to commit' });
 		git.status(req.body.path, res, function(err, status) {
 			var toAdd = [];
 			var toRemove = [];
@@ -201,7 +201,8 @@ exports.registerApi = function(app, server, dev) {
 					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
 				}
 			], function() {
-				git('commit ' + (req.body.amend ? '--amend' : '') + ' -m "' + req.body.message + '"', req.body.path, res);
+				var process = git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.body.path, res);
+				process.stdin.end(req.body.message);
 			});
 		});
 	});
