@@ -121,6 +121,10 @@
 								</div>
 							</div>
 							<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+							<span class="amend">
+								<div class="checkbox" data-bind="click: toogleAmend, css: { checked: amend }"></div>
+								Amend last commit
+							</span>
 							<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 						</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
 							<!-- ko if: selectedDiffFile -->

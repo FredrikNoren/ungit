@@ -45,6 +45,7 @@ function PushDialogViewModel(repoPath, remoteBranch) {
 	this.username = ko.observable();
 	this.password = ko.observable();
 	setTimeout(this.startPush.bind(this), 1);
+	this.done = new signals.Signal();
 }
 PushDialogViewModel.prototype.template = 'pushDialog';
 PushDialogViewModel.prototype.askForCredentials = function(callback) {
@@ -56,6 +57,7 @@ PushDialogViewModel.prototype.submitCredentials = function() {
 	this.showCredentialsForm(false);
 }
 PushDialogViewModel.prototype.startPush = function() {
+	var self = this;
 	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch }, function(err, res) {
 		if (err) {
 			if (err.res.body.stderr.indexOf('ERROR: missing Change-Id in commit message footer') != -1) {
@@ -64,6 +66,7 @@ PushDialogViewModel.prototype.startPush = function() {
 			}
 		}
 		viewModel.dialog(null);
+		self.done.dispatch();
 	});
 }
 
@@ -166,6 +169,7 @@ var RepositoryViewModel = function(repoPath) {
 	this.commitAuthorEmail = ko.computed(function() {
 		return gitConfig()['user.email'];
 	});
+	this.amend = ko.observable(false);
 	this.isCommitting = ko.observable(false);
 	this.selectedDiffFile = ko.observable();
 	this.repoPath = repoPath;
@@ -260,6 +264,13 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 RepositoryViewModel.prototype.toogleShowBranches = function() {
 	this.showBranches(!this.showBranches());
 }
+RepositoryViewModel.prototype.toogleAmend = function() {
+	if (!this.amend() && !this.commitMessage())
+		this.commitMessage(this.graph.HEAD().title);
+	else if(this.amend())
+		this.commitMessage('');
+	this.amend(!this.amend());
+}
 RepositoryViewModel.prototype.createNewBranch = function() {
 	api.query('POST', '/branches', { path: this.repoPath, name: this.newBranchName() });
 	this.newBranchName('');
@@ -272,8 +283,9 @@ RepositoryViewModel.prototype.commit = function() {
 	}).map(function(file) {
 		return file.name();
 	});
-	api.query('POST', '/commit', { path: this.repoPath, message: this.commitMessage(), files: files }, function(err, res) {
+	api.query('POST', '/commit', { path: this.repoPath, message: this.commitMessage(), files: files, amend: this.amend() }, function(err, res) {
 		self.commitMessage('');
+		self.amend(false);
 		self.files.removeAll();
 		self.selectedDiffFile(null);
 		self.isCommitting(false);
@@ -341,16 +353,20 @@ var GerritIntegrationViewModel = function(repo) {
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
 	this.changes = ko.observable();
-	api.query('GET', '/gerrit/changes', { path: this.repo.repoPath }, function(err, changes) {
-		if (err || !changes) return true;
-		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
-	});
 	this.updateCommitHook();
+	this.updateChanges();
 }
 GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 	var self = this;
 	api.query('GET', '/gerrit/commithook', { path: this.repo.repoPath }, function(err, hook) {
 		self.showInitCommmitHook(!hook.exists);
+	});
+}
+GerritIntegrationViewModel.prototype.updateChanges = function() {
+	var self = this;
+	api.query('GET', '/gerrit/changes', { path: this.repo.repoPath }, function(err, changes) {
+		if (err || !changes) return true;
+		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 	});
 }
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
@@ -361,7 +377,12 @@ GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	});
 }
 GerritIntegrationViewModel.prototype.pushForReview = function() {
-	viewModel.dialog(new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + this.repo.graph.activeBranch()));
+	var self = this;
+	var dialog = new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + this.repo.graph.activeBranch());
+	dialog.done.add(function() {
+		self.updateChanges();
+	});
+	viewModel.dialog(dialog);
 }
 
 var GerritChangeViewModel = function(gerritIntegration, args) {
