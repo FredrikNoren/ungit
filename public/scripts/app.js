@@ -175,7 +175,7 @@ var RepositoryViewModel = function(repoPath) {
 	this.selectedDiffFile = ko.observable();
 	this.repoPath = repoPath;
 	this.commitValidationError = ko.computed(function() {
-		if (!self.files().some(function(file) { return file.staged(); }))
+		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
 		if (!self.commitMessageTitle()) return "Provide a title";
 		return "";
@@ -384,9 +384,26 @@ GerritIntegrationViewModel.prototype.initCommitHook = function() {
 		self.updateCommitHook();
 	});
 }
+GerritIntegrationViewModel.prototype.getChange = function(changeId) {
+	return _.find(this.changes(), function(change) { return change.data.id == changeId; });
+}
+GerritIntegrationViewModel.prototype.getChangeIdFromMessage = function(message) {
+	var changeId = _.last(message.split('\n')).trim();
+	if (changeId && changeId.indexOf('Change-Id: ') == 0) {
+		return changeId.slice('Change-Id: '.length).trim();
+	}
+}
+GerritIntegrationViewModel.prototype.getChangeFromNode = function(node) {
+	var changeId = this.getChangeIdFromMessage(node.message);
+	if (!changeId) return;
+	return this.getChange(changeId);
+}
 GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var self = this;
-	var dialog = new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + this.repo.graph.activeBranch());
+	var branch = this.repo.graph.activeBranch();
+	var change = this.getChangeFromNode(this.repo.graph.HEAD());
+	if (change) branch = change.data.branch;
+	var dialog = new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + branch);
 	dialog.done.add(function() {
 		self.updateChanges();
 	});

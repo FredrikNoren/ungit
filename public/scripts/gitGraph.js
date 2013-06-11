@@ -217,6 +217,7 @@ NodeViewModel = function(args) {
 	this.authorTime = moment(args.authorDate);
 	this.parents = args.parents || [];
 	var message = args.message.split('\n');
+	this.message = args.message;
 	this.title = message[0];
 	this.body = message.slice(2).join('\n');
 	this.sha1 = args.sha1;
