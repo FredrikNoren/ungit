@@ -21,6 +21,8 @@ var req = request(app);
 
 describe('git-api branching', function () {
 
+	this.timeout(8000);
+
 	before(function(done) {
 		common.createEmptyRepo(req, done, function(dir) {
 			testDir = dir;

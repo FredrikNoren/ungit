@@ -65,8 +65,8 @@ exports.registerApi = function(app, server, dev) {
 					var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
 					if (stderr.indexOf('Not a git repository') >= 0)
 						err.errorCode = 'not-a-repository';
-					if (callback) callback(err, stdout);
-					else res.json(400, err);
+					if (!callback || !callback(err, stdout))
+						res.json(400, err);
 				}
 				else {
 					if (callback) callback(null, parser ? parser(stdout) : stdout);
@@ -161,13 +161,13 @@ exports.registerApi = function(app, server, dev) {
 					fs.unlink(path.join(req.body.path, req.body.file), function(err) {
 						if (err) res.json(400, { command: 'unlink', error: err });
 						else res.json({});
-					})
-				} else {
-					res.json(400, err);
+					});
+					return true;
 				}
-			} else {
-				res.json({});
+				return;
 			}
+			
+			res.json({});
 		});
 	});
 

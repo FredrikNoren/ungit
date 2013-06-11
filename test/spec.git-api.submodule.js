@@ -20,6 +20,8 @@ var req = request(app);
 
 describe('git-api submodule', function () {
 
+	this.timeout(8000);
+
 	var testDirMain, testDirSecondary;
 
 	before(function(done) {
