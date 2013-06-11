@@ -216,7 +216,9 @@ NodeViewModel = function(args) {
 	this.commitTime = moment(args.commitDate);
 	this.authorTime = moment(args.authorDate);
 	this.parents = args.parents || [];
-	this.title = args.title;
+	var message = args.message.split('\n');
+	this.title = message[0];
+	this.body = message.slice(2).join('\n');
 	this.sha1 = args.sha1;
 	this.authorDate = ko.observable(moment(args.authorDate).fromNow());
 	setInterval(function() { self.authorDate(moment(args.authorDate).fromNow()); }, 1000 * 60);

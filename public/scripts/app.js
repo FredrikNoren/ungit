@@ -162,7 +162,8 @@ var RepositoryViewModel = function(repoPath) {
 	visitedRepositories.tryAdd(repoPath);
 	
 	this.files = ko.observableArray();
-	this.commitMessage = ko.observable();
+	this.commitMessageTitle = ko.observable();
+	this.commitMessageBody = ko.observable();
 	this.commitAuthorName = ko.computed(function() {
 		return gitConfig()['user.name'];
 	});
@@ -176,7 +177,7 @@ var RepositoryViewModel = function(repoPath) {
 	this.commitValidationError = ko.computed(function() {
 		if (!self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
-		if (!self.commitMessage()) return "Provide a commit message";
+		if (!self.commitMessageTitle()) return "Provide a title";
 		return "";
 	});
 	this.gerritIntegration = ko.observable(null);
@@ -265,10 +266,14 @@ RepositoryViewModel.prototype.toogleShowBranches = function() {
 	this.showBranches(!this.showBranches());
 }
 RepositoryViewModel.prototype.toogleAmend = function() {
-	if (!this.amend() && !this.commitMessage())
-		this.commitMessage(this.graph.HEAD().title);
-	else if(this.amend())
-		this.commitMessage('');
+	if (!this.amend() && !this.commitMessageTitle()) {
+		this.commitMessageTitle(this.graph.HEAD().title);
+		this.commitMessageBody(this.graph.HEAD().body);
+	}
+	else if(this.amend()) {
+		this.commitMessageTitle('');
+		this.commitMessageBody('');
+	}
 	this.amend(!this.amend());
 }
 RepositoryViewModel.prototype.createNewBranch = function() {
@@ -283,8 +288,11 @@ RepositoryViewModel.prototype.commit = function() {
 	}).map(function(file) {
 		return file.name();
 	});
-	api.query('POST', '/commit', { path: this.repoPath, message: this.commitMessage(), files: files, amend: this.amend() }, function(err, res) {
-		self.commitMessage('');
+	var commitMessage = this.commitMessageTitle();
+	if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
+	api.query('POST', '/commit', { path: this.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
+		self.commitMessageTitle('');
+		self.commitMessageBody('');
 		self.amend(false);
 		self.files.removeAll();
 		self.selectedDiffFile(null);

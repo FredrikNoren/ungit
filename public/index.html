@@ -110,7 +110,10 @@
 					</div>
 					<div data-bind="visible: !isCommitting()">
 						<table><tr><td class="commitArea">
-							<textarea class="commitMessage" placeholder="Enter a commit message" data-bind="value: commitMessage, valueUpdate: 'afterkeydown'"></textarea>
+							<div class="commitMessage">
+							<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
+							<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown'"></textarea>
+							</div>
 							<div class="files" data-bind="foreach: files">
 								<div class="file">
 									<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>

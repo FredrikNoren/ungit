@@ -140,7 +140,6 @@ describe('git-api', function () {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
-			expect(res.body[0].title).to.be(commitMessage);
 			expect(res.body[0].authorName).to.be(gitConfig['user.name']);
 			expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
 			done();
@@ -248,7 +247,6 @@ describe('git-api', function () {
 			var HEAD = res.body[0];
 
 			expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
-			expect(HEAD.title).to.be(commitMessage3);
 			expect(HEAD.authorDate).to.be.a('string');
 			expect(HEAD.authorName).to.be(gitConfig['user.name']);
 			expect(HEAD.authorEmail).to.be(gitConfig['user.email']);

@@ -362,11 +362,27 @@ a {
 			.commitMessage {
 				display: block;
 				width: 100%;
-				font-size: 1.6em;
 				box-sizing:border-box;
 				-moz-box-sizing:border-box;
 				border-radius: 5px;
-				padding: 10px;
+				.title, .body {
+					border: 1px solid #eee;
+				}
+				.title {
+					font-size: 1.2em;
+					display: block;
+					padding: 10px;
+					width: 100%;
+					box-sizing:border-box;
+					-moz-box-sizing:border-box;
+				}
+				.body {
+					display: block;
+					width: 100%;
+					padding: 5px;
+					box-sizing:border-box;
+					-moz-box-sizing:border-box;
+				}
 			}
 			.commitButton {
 				font-size: 1.6em;

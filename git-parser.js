@@ -140,8 +140,6 @@ exports.parseGitLog = function(data) {
 			parser = parseCommitLine;
 			return;
 		}
-		if (currentCommmit.title === undefined)
-			currentCommmit.title = row.trim();
 		if (currentCommmit.message) currentCommmit.message += '\n';
 		else currentCommmit.message = '';
 		currentCommmit.message += row.trim();

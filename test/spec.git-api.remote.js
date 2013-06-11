@@ -141,8 +141,8 @@ describe('git-api remote', function () {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
-			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
+			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.contain('HEAD');
@@ -161,8 +161,8 @@ describe('git-api remote', function () {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
-			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
+			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.eql([]);
@@ -189,8 +189,8 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the branch as in sync', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.title == 'Init'; });
-			var commit2 = _.find(res.body, function(node) { return node.title == 'Commit2'; });
+			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init.refs).to.eql([]);
 			expect(commit2.refs).to.contain('HEAD');
 			expect(commit2.refs).to.contain('refs/heads/master');
