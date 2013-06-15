@@ -133,6 +133,9 @@ exports.registerApi = function(app, server, dev) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
 					res.json({});
+				} else if(err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0) {
+					err.errorCode = 'no-supported-authentication-provided';
+					res.json(400, err);
 				} else {
 					res.json(400, err);
 				}

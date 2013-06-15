@@ -84,6 +84,12 @@ var CrashViewModel = function() {
 }
 CrashViewModel.prototype.template = 'crash';
 
+var UserErrorViewModel = function(args) {
+	args = args || {};
+	this.title = ko.observable(args.title);
+	this.details = ko.observable(args.details);
+}
+UserErrorViewModel.prototype.template = 'usererror';
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
@@ -213,6 +219,15 @@ RepositoryViewModel.prototype.fetch = function() {
 	var self = this;
 	this.isFetching(true);
 	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
+		if (err) {
+			if (err.errorCode == 'no-supported-authentication-provided') {
+				viewModel.content(new UserErrorViewModel({
+					title: 'Authentication error',
+					details: 'No supported authentication methods available. Try starting ssh-agent or pageant.'
+				}));
+				return true;
+			}
+		}
 		self.isFetching(false);
 	});
 }
