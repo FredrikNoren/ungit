@@ -33,6 +33,20 @@ ko.bindingHandlers.editableText = {
     }
 };
 
+var updateThrobbers = function() {
+    var throbbers = document.getElementsByClassName('throbber');
+    for (var i=0; i< throbbers.length; i++) {
+        var throbber = throbbers[i];
+        var xy = throbber.style.backgroundPosition || '0px 0px';
+        var x = xy.split(' ')[0].trim();
+        x = parseInt(x.slice(0, x.length - 2));
+        x = (x - 40) % 800;
+        throbber.style.backgroundPosition = x + 'px 0px';
+    }
+    requestAnimationFrame(updateThrobbers);
+}
+updateThrobbers();
+
 var currentlyDraggingViewModel = null;
 
 ko.bindingHandlers.dragStart = {
