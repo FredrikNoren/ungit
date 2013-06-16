@@ -71,7 +71,7 @@ describe('git-api branching', function () {
 	});
 
 	it('should be possible to switch to a branch', function(done) {
-		common.post(req, '/branch', { path: testDir, name: testBranch }, done);
+		common.post(req, '/checkout', { path: testDir, name: testBranch }, done);
 	});
 
 	it('listing branches should show the new branch as current', function(done) {
@@ -86,7 +86,7 @@ describe('git-api branching', function () {
 	});
 
 	it('get branch should show the new branch as current', function(done) {
-		common.get(req, '/branch', { path: testDir }, done, function(err, res) {
+		common.get(req, '/checkout', { path: testDir }, done, function(err, res) {
 			expect(res.body).to.be(testBranch);
 			done();
 		});
@@ -143,7 +143,7 @@ describe('git-api branching', function () {
 	});
 
 	it('should be possible to checkout another branch with local modifications', function(done) {
-		common.post(req, '/branch', { path: testDir, name: 'master' }, done);
+		common.post(req, '/checkout', { path: testDir, name: 'master' }, done);
 	});
 
 	it('status should list the changed file', function(done) {

@@ -270,7 +270,7 @@ RepositoryViewModel.prototype.updateLog = function() {
 RepositoryViewModel.prototype.updateBranches = function() {
 	if (this.status() != 'inited') return;
 	var self = this;
-	api.query('GET', '/branch', { path: this.repoPath }, function(err, branch) {
+	api.query('GET', '/checkout', { path: this.repoPath }, function(err, branch) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.activeBranch(branch);
@@ -446,7 +446,7 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;
 	api.query('POST', '/fetch', { path: this.gerritIntegration.repo.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
-		api.query('POST', '/branch', { path: self.gerritIntegration.repo.repoPath, name: 'FETCH_HEAD' });
+		api.query('POST', '/checkout', { path: self.gerritIntegration.repo.repoPath, name: 'FETCH_HEAD' });
 	});
 }
 GerritChangeViewModel.prototype.openInGerrit = function() {

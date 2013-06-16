@@ -1,6 +1,7 @@
 
 
 var GitGraphViewModel = function(repoPath) {
+	var self = this;
 	this.nodes = ko.observable([]);
 	this.refs = ko.observableArray();
 	this.daySeparators = ko.observable();
@@ -12,6 +13,23 @@ var GitGraphViewModel = function(repoPath) {
 	this.hoverGraphAction = ko.observable();
 	this.draggingRef = ko.observable();
 	this.hasRemotes = ko.observable(false);
+	this.showDropTargets = ko.computed(function() {
+		return !!self.draggingRef();
+	});
+	this.refDropActionsWorking = ko.observable(false);
+	this.showRefDropActions = ko.computed(function() {
+		return self.showDropTargets() || self.refDropActionsWorking();
+	});
+}
+
+GitGraphViewModel.prototype.dropCheckoutRef = function(ref) {
+	var self = this;
+	this.refDropActionsWorking(true);
+	api.query('POST', '/checkout', { path: this.repoPath, name: ref.displayName }, function(err) {
+		self.refDropActionsWorking(false);
+	});
+}
+GitGraphViewModel.prototype.dropDeleteRef = function() {
 }
 
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
@@ -239,7 +257,7 @@ NodeViewModel = function(args) {
 	})
 	this.branchingFormVisible = ko.observable(false);
 	this.showDropTargets = ko.computed(function() {
-		return !!self.graph.draggingRef();
+		return self.graph.showDropTargets();
 	});
 }
 NodeViewModel.prototype.showBranchingForm = function() {
@@ -336,9 +354,6 @@ RefViewModel.prototype.dragStart = function() {
 }
 RefViewModel.prototype.dragEnd = function() {
 	this.graph.draggingRef(null);
-}
-RefViewModel.prototype.checkout = function() {
-	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }
 
 

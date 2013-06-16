@@ -514,16 +514,13 @@ a {
 
 	.graph {
 
-		margin-left: 100px;
-
 		position: relative;
 		top: 30px;
-		left: (@logWidth + 30px);
 
 		.graphLog {
 			position: relative;
 			top: -200px;
-			left: -5px;
+			left: (@logWidth + 125px);
 		}
 
 		.node {
@@ -531,7 +528,7 @@ a {
 			
 			.log {
 				position: absolute;
-				left: -(@logWidth + 60px);
+				left: 70px;
 				.logEntryBox {
 					position: relative;
 					top: -20px;
@@ -559,7 +556,7 @@ a {
 
 			.refs {
 				position: absolute;
-				left: 50px;
+				left: (@logWidth + 180px);
 				top: -16px;
 				width: 900px;
 				.arrowLeft {
@@ -580,7 +577,6 @@ a {
 					padding: 5px;
 					padding-left: 10px;
 					padding-right: 10px;
-					cursor: pointer;
 					opacity: 0.6;
 					.name {
 						display: inline-block;
@@ -598,6 +594,9 @@ a {
 					}
 					&.tag {
 						color: #EEF266;
+					}
+					&.tag, &.branch {
+						cursor: move;
 					}
 					&.graphAction {
 						opacity: 1;
@@ -624,7 +623,8 @@ a {
 						background: #41DE3C;
 					}
 					&.move {
-						background: #CF7425;
+						background: rgba(0, 0, 0, 0.1);
+						width: 70px;
 					}
 					&.newRef {
 						opacity: 0.1;
@@ -673,7 +673,7 @@ a {
 		.daySeparators {
 			position: absolute;
 			top: -15px;
-			left: -(@logWidth + 130px);
+			left: 0px;
 			.daySeparator {
 				position: absolute;
 				font-size: 0.6em;
@@ -688,9 +688,46 @@ a {
 				}
 			}
 		}
+
 	}
 
+	.refDropActions {
+		position: fixed;
+		left: -300px;
+		width: 300px;
+		top: 40%;
+		background: #000;
+		-webkit-transform: translateZ(0);
 
+		-moz-transition: left 0.3s;
+		-webkit-transition: left 0.3s;
+		-o-transition: left 0.3s;
+		transition: left 0.3s;
+
+		&.active {
+			left: (@logWidth + -200px);
+		}
+
+		.throbber {
+			margin: 100px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.droparea {
+			font-size: 3em;
+			color: #fff;
+			margin: 20px;
+			border-radius: 10px;
+		}
+	}
+
+}
+
+.droparea {
+	border: 0.15em dashed #666;
+	border-radius: 3px;
+	padding: 0.3em;
 }
 
 .home {

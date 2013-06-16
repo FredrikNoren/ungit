@@ -195,7 +195,7 @@
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
 									<span class="refType" data-bind="visible: isRemoteBranch">remote: </span>
 									<span class="refType" data-bind="visible: isLocalBranch">branch: </span>
-									<div class="name" data-bind="text: displayName, click: checkout"></div>
+									<div class="name" data-bind="text: displayName"></div>
 								</div>
 								<!-- ko if: current -->
 								<!-- ko foreach: graphActions -->
@@ -211,12 +211,8 @@
 								<div class="refbox tag" data-bind="dragStart: dragStart, dragEnd: dragEnd" draggable="true">
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0 && $parent.branches().length == 0">
 									<span class="refType">tag:</span>
-									<div class="name" data-bind="text: displayName, click: checkout"></div>
+									<div class="name" data-bind="text: displayName"></div>
 								</div>
-								<!-- /ko -->
-
-								<!-- ko if: showDropTargets -->
-								<div class="refbox move" data-bind="dropOver: true, drop: dropMoveRef">Move here</div>
 								<!-- /ko -->
 
 								<div class="refbox newRef" data-bind="css: { editing: branchingFormVisible }">
@@ -230,6 +226,12 @@
 									</form>
 									<!-- /ko -->
 								</div>
+
+								<!-- ko if: showDropTargets -->
+								<div class="refbox move droparea" data-bind="dropOver: true, drop: dropMoveRef">
+								</div>
+								<!-- /ko -->
+
 							</div>
 
 						</div>
@@ -240,6 +242,17 @@
 			</div>
 
 		</div>
+		
+		<!-- ko with: graph -->
+		<div class="refDropActions" data-bind="css: { active: showRefDropActions }">
+			<div class="throbber" data-bind="visible: refDropActionsWorking"></div>
+			<div data-bind="visible: !refDropActionsWorking()">
+				<div class="droparea" data-bind="dropOver: true, drop: dropCheckoutRef">Checkout</div>
+				<div class="droparea" data-bind="dropOver: true, drop: dropDeleteRef">Delete</div>
+			</div>
+		</div>
+		<!-- /ko -->
+
 	</div>
 </script>
 

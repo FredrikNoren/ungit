@@ -273,14 +273,14 @@ exports.registerApi = function(app, server, config) {
 		git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/branch', function(req, res){
+	app.post(exports.pathPrefix + '/checkout', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git.stashAndPop(req.body.path, res, function(done) {
 			git('checkout "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
 		});
 	});
 
-	app.get(exports.pathPrefix + '/branch', function(req, res){
+	app.get(exports.pathPrefix + '/checkout', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		var HEADFile = path.join(req.query.path, '.git', 'HEAD');
 		if (!fs.existsSync(HEADFile)) 
