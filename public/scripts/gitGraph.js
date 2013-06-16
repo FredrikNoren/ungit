@@ -22,6 +22,11 @@ var GitGraphViewModel = function(repoPath) {
 	});
 }
 
+GitGraphViewModel.prototype.dropPushRef = function(ref) {
+	var self = this;
+	this.refDropActionsWorking(false);
+	viewModel.dialog(new PushDialogViewModel({ repoPath: this.repoPath, localBranch: ref.displayName, remoteBranch: ref.displayName }));
+}
 GitGraphViewModel.prototype.dropCheckoutRef = function(ref) {
 	var self = this;
 	this.refDropActionsWorking(true);
@@ -33,7 +38,7 @@ GitGraphViewModel.prototype.dropDeleteRef = function(ref) {
 	var self = this;
 	this.refDropActionsWorking(true);
 	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName }, function(err) {
+	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
 		self.refDropActionsWorking(false);
 	});
 }
@@ -321,14 +326,16 @@ var RefViewModel = function(args) {
 	});
 	this.name = args.name;
 	this.displayName = this.name;
-	this.isTag = this.name.indexOf('tag: refs/tags/') == 0;
+	this.isLocalTag = this.name.indexOf('tag: refs/tags/') == 0;
+	this.isRemoteTag = false; // TODO
+	this.isTag = this.isLocalTag || this.isRemoteTag;
 	this.isLocalHEAD = this.name == 'HEAD';
 	this.isRemoteHEAD = this.name == 'refs/remotes/origin/HEAD';
 	this.isLocalBranch = this.name.indexOf('refs/heads/') == 0;
 	this.isRemoteBranch = this.name.indexOf('refs/remotes/origin/') == 0 && !this.isRemoteHEAD;
 	this.isHEAD = this.isLocalHEAD || this.isRemoteHEAD;
 	this.isBranch = this.isLocalBranch || this.isRemoteBranch;
-	this.isRemote = this.isRemoteBranch;
+	this.isRemote = this.isRemoteBranch || this.isRemoteTag;
 	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
 	if (this.isTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
@@ -389,7 +396,7 @@ PushGraphAction.prototype.icon = 'P';
 PushGraphAction.prototype.tooltip = 'Push to remote';
 PushGraphAction.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
-	viewModel.dialog(new PushDialogViewModel(this.graph.repoPath));
+	viewModel.dialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
 }
 
 

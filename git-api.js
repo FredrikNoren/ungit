@@ -146,7 +146,7 @@ exports.registerApi = function(app, server, config) {
 		if (!verifyPath(req.body.path, res)) return;
 		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
 		var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
-		git(credentialsOption + ' push origin HEAD' + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.body.path, res);
+		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/reset', function(req, res) {
@@ -265,7 +265,10 @@ exports.registerApi = function(app, server, config) {
 
 	app.del(exports.pathPrefix + '/branches', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('branch -D "' + req.body.name.trim() + '"', req.body.path, res);
+		if (req.body.remote)
+			git('push origin :"' + req.body.name.trim() + '"', req.body.path, res);
+		else
+			git('branch -D "' + req.body.name.trim() + '"', req.body.path, res);
 	});
 
 	app.get(exports.pathPrefix + '/tags', function(req, res){
@@ -280,7 +283,10 @@ exports.registerApi = function(app, server, config) {
 
 	app.del(exports.pathPrefix + '/tags', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('tag -d "' + req.body.name.trim() + '"', req.body.path, res);
+		if (req.body.remote)
+			git('push origin :"refs/tags/' + req.body.name.trim() + '"', req.body.path, res);
+		else
+			git('tag -d "' + req.body.name.trim() + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/checkout', function(req, res){

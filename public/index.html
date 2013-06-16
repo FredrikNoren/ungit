@@ -247,6 +247,7 @@
 		<div class="refDropActions" data-bind="css: { active: showRefDropActions }">
 			<div class="throbber" data-bind="visible: refDropActionsWorking"></div>
 			<div data-bind="visible: !refDropActionsWorking()">
+				<div class="droparea" data-bind="dropOver: true, drop: dropPushRef">Push</div>
 				<div class="droparea" data-bind="dropOver: true, drop: dropCheckoutRef">Checkout</div>
 				<div class="droparea" data-bind="dropOver: true, drop: dropDeleteRef">Delete</div>
 			</div>

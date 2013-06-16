@@ -38,9 +38,10 @@ AlertDialogViewModel.prototype.close = function() {
 	viewModel.dialog(null);
 }
 
-function PushDialogViewModel(repoPath, remoteBranch) {
-	this.repoPath = repoPath;
-	this.remoteBranch = remoteBranch;
+function PushDialogViewModel(args) {
+	this.repoPath = args.repoPath;
+	this.remoteBranch = args.remoteBranch;
+	this.localBranch = args.localBranch;
 	this.showCredentialsForm = ko.observable(false);
 	this.username = ko.observable();
 	this.password = ko.observable();
@@ -58,7 +59,7 @@ PushDialogViewModel.prototype.submitCredentials = function() {
 }
 PushDialogViewModel.prototype.startPush = function() {
 	var self = this;
-	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch }, function(err, res) {
+	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch, localBranch: this.localBranch }, function(err, res) {
 		if (err) {
 			if (err.res.body.stderr.indexOf('ERROR: missing Change-Id in commit message footer') != -1) {
 				viewModel.dialog(new AlertDialogViewModel('Missing Change-Id'));
@@ -429,7 +430,7 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var branch = this.repo.graph.activeBranch();
 	var change = this.getChangeFromNode(this.repo.graph.HEAD());
 	if (change) branch = change.data.branch;
-	var dialog = new PushDialogViewModel(this.repo.repoPath, 'refs/for/' + branch);
+	var dialog = new PushDialogViewModel({ repoPath: this.repo.repoPath, remoteBranch: 'refs/for/' + branch });
 	dialog.done.add(function() {
 		self.updateChanges();
 	});
