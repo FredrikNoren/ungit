@@ -1,6 +1,11 @@
 
 var express = require('express');
 var gitApi = require('./git-api');
+var rc = require('rc')('ungit', {
+	port: 8448,
+	gerritIntegration: false,
+	dev: false
+});
 
 var app = express();
 var server = require('http').createServer(app);
@@ -8,9 +13,9 @@ var server = require('http').createServer(app);
 gitApi.pathPrefix = '/api';
 
 app.use(express.static(__dirname + '/public'));
-gitApi.registerApi(app, server, true);
+gitApi.registerApi(app, server, rc);
 
 
-server.listen(3000, function() {
-	console.log('Listening on port 3000');
+server.listen(rc.port, function() {
+	console.log('Listening on port ' + rc.port);
 });

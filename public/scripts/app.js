@@ -98,10 +98,10 @@ function capitaliseFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-var gitConfig = ko.observable({});
-api.query('GET', '/config', undefined, function(err, config) {
+var config = ko.observable({ git: {} });
+api.query('GET', '/config', undefined, function(err, config_) {
 	if (err) return;
-	gitConfig(config);
+	config(config_);
 });
 
 var PathViewModel = function(path) {
@@ -171,10 +171,10 @@ var RepositoryViewModel = function(repoPath) {
 	this.commitMessageTitle = ko.observable();
 	this.commitMessageBody = ko.observable();
 	this.commitAuthorName = ko.computed(function() {
-		return gitConfig()['user.name'];
+		return config().git['user.name'];
 	});
 	this.commitAuthorEmail = ko.computed(function() {
-		return gitConfig()['user.email'];
+		return config().git['user.email'];
 	});
 	this.amend = ko.observable(false);
 	this.isCommitting = ko.observable(false);
@@ -187,6 +187,9 @@ var RepositoryViewModel = function(repoPath) {
 		return "";
 	});
 	this.gerritIntegration = ko.observable(null);
+	this.showGerritIntegrationButton = ko.computed(function() {
+		return config().gerritIntegration && !self.gerritIntegration();
+	});
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(repoPath);
 	this.updateStatus();

@@ -12,10 +12,7 @@ var gitParser = require('./git-parser');
 
 exports.pathPrefix = '';
 
-var debug = true;
-var gerrit = true;
-
-exports.registerApi = function(app, server, dev) {
+exports.registerApi = function(app, server, config) {
 
 	app.use(express.bodyParser());
 
@@ -43,7 +40,7 @@ exports.registerApi = function(app, server, dev) {
 				watchr.watch(watchOptions);
 
 				// Just to make it painful to work with if we don't handle changes correctly
-				//if (debug) setInterval(function() { socket.emit('changed'); }, 1000);
+				//if (config.debug) setInterval(function() { socket.emit('changed'); }, 1000);
 			});
 		});
 	}
@@ -310,7 +307,11 @@ exports.registerApi = function(app, server, dev) {
 	});
 
 	app.get(exports.pathPrefix + '/config', function(req, res){
-		git('config --list', undefined, res, gitParser.parseGitConfig);
+		git('config --list', undefined, res, gitParser.parseGitConfig, function(err, gitConfig) {
+			if (err) return;
+			config.git = gitConfig;
+			res.json(config);
+		});
 	});
 
 	// This method isn't called by the client but by credentials-helper.js
@@ -323,7 +324,7 @@ exports.registerApi = function(app, server, dev) {
 	});
 
 
-	if (gerrit) {
+	if (config.gerritIntegration) {
 
 		var getGerritAddress = function(repoPath, res, callback) {
 			git.remoteShow(repoPath, 'origin', res, function(err, remote) {
@@ -417,7 +418,7 @@ exports.registerApi = function(app, server, dev) {
 
 	}
 
-	if (dev) {
+	if (config.dev) {
 
 		app.post(exports.pathPrefix + '/testing/createdir', function(req, res){
 			temp.mkdir('test-temp-dir', function(err, path) {
