@@ -1,8 +1,10 @@
-var bugsense = require('./bugsense');
-bugsense.init('ungit-node');
+var config = require('./config')();
+if (config.bugtracking) {
+	var bugsense = require('./bugsense');
+	bugsense.init('ungit-node');
+}
 var express = require('express');
 var gitApi = require('./git-api');
-var config = require('./config')();
 var winston = require('winston');
 
 var app = express();
@@ -13,9 +15,14 @@ gitApi.pathPrefix = '/api';
 app.use(express.static(__dirname + '/public'));
 gitApi.registerApi(app, server, config);
 
+app.get('/config.js', function(req, res) {
+	res.send('config = ' + JSON.stringify(config));
+});
+
 app.use(function(err, req, res, next) {
-	bugsense.notify(err, 'ungit-node');
-	winston.error(err);
+	if (config.bugtracking)
+		bugsense.notify(err, 'ungit-node');
+	winston.error(err.stack);
 	res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
 });
 

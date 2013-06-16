@@ -333,8 +333,7 @@ exports.registerApi = function(app, server, config) {
 	app.get(exports.pathPrefix + '/config', function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig, function(err, gitConfig) {
 			if (err) return;
-			config.git = gitConfig;
-			res.json(config);
+			res.json(gitConfig);
 		});
 	});
 

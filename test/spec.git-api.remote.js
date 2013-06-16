@@ -16,7 +16,6 @@ var app = express();
 restGit.registerApi(app, null, { dev: true });
 
 var testDirLocal1, testDirLocal2, testDirRemote;
-var gitConfig;
 
 var req = request(app);
 

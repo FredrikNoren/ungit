@@ -1,4 +1,7 @@
-require('./bugsense').init('credentials-helper');
+var config = require('./config')();
+if (config.bugtracking) {
+	require('./bugsense').init('credentials-helper');
+}
 var winston = require('winston');
 
 winston.add(winston.transports.File, { filename: 'credentials-helper.log' });
@@ -6,7 +9,6 @@ winston.remove(winston.transports.Console);
 winston.info('Credentials helper invoked');
 
 var superagent = require('superagent');
-var config = require('./config')();
 
 if (process.argv[3] == 'get') {
 	winston.info('Getting credentials');

@@ -5,6 +5,7 @@ module.exports = function() {
 	return rc('ungit', {
 		port: 8448,
 		gerritIntegration: false,
-		dev: false
+		dev: false,
+		bugtracking: true
 	});
 }
