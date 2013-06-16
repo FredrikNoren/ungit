@@ -164,7 +164,29 @@ describe('git-api branching', function () {
 	});
 
 	it('should be possible to list tag', function(done) {
-		common.get(req, '/tags', { path: testDir, name: 'v1.0' }, done, function(err, res) {
+		common.get(req, '/tags', { path: testDir }, done, function(err, res) {
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
+	it('should be possible to delete a tag', function(done) {
+		common.delete(req, '/tags', { path: testDir, name: 'v1.0' }, done);
+	});
+
+	it('tag should be removed', function(done) {
+		common.get(req, '/tags', { path: testDir }, done, function(err, res) {
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
+
+	it('should be possible to delete a branch', function(done) {
+		common.delete(req, '/branches', { path: testDir, name: testBranch }, done);
+	});
+
+	it('branch should be removed', function(done) {
+		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
 			expect(res.body.length).to.be(1);
 			done();
 		});

@@ -29,7 +29,13 @@ GitGraphViewModel.prototype.dropCheckoutRef = function(ref) {
 		self.refDropActionsWorking(false);
 	});
 }
-GitGraphViewModel.prototype.dropDeleteRef = function() {
+GitGraphViewModel.prototype.dropDeleteRef = function(ref) {
+	var self = this;
+	this.refDropActionsWorking(true);
+	var url = ref.isTag ? '/tags' : '/branches';
+	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName }, function(err) {
+		self.refDropActionsWorking(false);
+	});
 }
 
 GitGraphViewModel.prototype.loadNodesFromApi = function() {

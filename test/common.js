@@ -42,6 +42,17 @@ common.post = function(req, path, payload, done, callback) {
 		.expect(200)
 		.end(common.wrapErrorHandler(done, callback || done));
 }
+common.delete = function(req, path, payload, done, callback) {
+	var r = req
+		.del(restGit.pathPrefix + path);
+	if (payload !== undefined)
+		r.send(payload);
+	r
+		.set('Accept', 'application/json')
+		.expect('Content-Type', /json/)
+		.expect(200)
+		.end(common.wrapErrorHandler(done, callback || done));
+}
 
 common.createEmptyRepo = function(req, done, callback) {
 	var testDir;

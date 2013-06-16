@@ -263,6 +263,11 @@ exports.registerApi = function(app, server, config) {
 		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
+	app.del(exports.pathPrefix + '/branches', function(req, res){
+		if (!verifyPath(req.body.path, res)) return;
+		git('branch -D "' + req.body.name.trim() + '"', req.body.path, res);
+	});
+
 	app.get(exports.pathPrefix + '/tags', function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		git('tag -l', req.query.path, res, gitParser.parseGitTags);
@@ -271,6 +276,11 @@ exports.registerApi = function(app, server, config) {
 	app.post(exports.pathPrefix + '/tags', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
+	});
+
+	app.del(exports.pathPrefix + '/tags', function(req, res){
+		if (!verifyPath(req.body.path, res)) return;
+		git('tag -d "' + req.body.name.trim() + '"', req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/checkout', function(req, res){
