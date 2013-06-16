@@ -85,6 +85,8 @@ var CrashViewModel = function() {
 CrashViewModel.prototype.template = 'crash';
 
 var UserErrorViewModel = function(args) {
+	if (typeof(arguments[0]) == 'string')
+		args = { title: arguments[0], details: arguments[1] };
 	args = args || {};
 	this.title = ko.observable(args.title);
 	this.details = ko.observable(args.details);
@@ -199,6 +201,9 @@ var RepositoryViewModel = function(repoPath) {
 			self.update();
 			self.fetch();
 			api.watchRepository(repoPath, {
+				disconnect: function() {
+					viewModel.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+				},
 				ready: function() { self.watcherReady(true) },
 				changed: function() { self.update(); },
 				requestCredentials: function(callback) {

@@ -32,6 +32,12 @@ var api = {
 	watchRepository: function(repositoryPath, callbacks) {
 		var self = this;
 		var socket = io.connect();
+		socket.on('error', function(err) {
+			throw new Error('Socket error: ' + err.toString());
+		});
+		socket.on('disconnect', function(data) {
+			callbacks.disconnect();
+		});
 		socket.on('socketId', function (data) {
 			self.socketId = data;
 		});
