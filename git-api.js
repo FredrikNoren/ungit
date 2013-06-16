@@ -263,6 +263,16 @@ exports.registerApi = function(app, server, config) {
 		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
+	app.get(exports.pathPrefix + '/tags', function(req, res){
+		if (!verifyPath(req.query.path, res)) return;
+		git('tag -l', req.query.path, res, gitParser.parseGitTags);
+	});
+
+	app.post(exports.pathPrefix + '/tags', function(req, res){
+		if (!verifyPath(req.body.path, res)) return;
+		git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
+	});
+
 	app.post(exports.pathPrefix + '/branch', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git.stashAndPop(req.body.path, res, function(done) {

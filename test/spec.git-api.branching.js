@@ -157,4 +157,17 @@ describe('git-api branching', function () {
 			done();
 		});
 	});
+
+
+	it('should be possible to create a tag', function(done) {
+		common.post(req, '/tags', { path: testDir, name: 'v1.0' }, done);
+	});
+
+	it('should be possible to list tag', function(done) {
+		common.get(req, '/tags', { path: testDir, name: 'v1.0' }, done, function(err, res) {
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
 })

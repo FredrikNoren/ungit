@@ -170,6 +170,12 @@ exports.parseGitBranches = function(text) {
 	return branches;
 }
 
+exports.parseGitTags = function(text) {
+	return text.split('\n').filter(function(tag) {
+		return tag != '';
+	});
+}
+
 exports.parseGitRemotes = function(text) {
 	return text.split('\n').filter(function(remote) {
 		return remote != '';

@@ -190,30 +190,45 @@
 							</div>
 
 							<div class="refs">
-								<div class="refsList" data-bind="foreach: branches">
-									<div class="refbox" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
-										<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
-										<div class="name" data-bind="text: displayName, click: checkout"></div>
-										<span data-bind="visible: isRemoteBranch">(remote)</span>
-									</div>
-									<span data-bind="visible: current, foreach: graphActions">
-										<div class="refbox graphAction" data-bind="click: perform, visible: visible, event: { mouseover: mouseover, mouseout: mouseout }, css: style">
-											<span data-bind="text: icon"></span>
-											<span class="tooltip" data-bind="text: tooltip"></span>
-										</div>
-									</span>
+								<!-- ko foreach: branches -->
+								<div class="refbox branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
+									<span class="refType" data-bind="visible: isRemoteBranch">remote: </span>
+									<span class="refType" data-bind="visible: isLocalBranch">branch: </span>
+									<div class="name" data-bind="text: displayName, click: checkout"></div>
 								</div>
+								<!-- ko if: current -->
+								<!-- ko foreach: graphActions -->
+								<div class="refbox graphAction" data-bind="click: perform, visible: visible, event: { mouseover: mouseover, mouseout: mouseout }, css: style">
+									<span data-bind="text: icon"></span>
+									<span class="tooltip" data-bind="text: tooltip"></span>
+								</div>
+								<!-- /ko -->
+								<!-- /ko -->
+								<!-- /ko -->
 
-								<span data-bind="visible: showDropTargets">
-									<div class="refbox move" data-bind="dropOver: true, drop: dropMoveRef">Move here</div>
-								</span>
+								<!-- ko foreach: tags -->
+								<div class="refbox tag" data-bind="dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0 && $parent.branches().length == 0">
+									<span class="refType">tag:</span>
+									<div class="name" data-bind="text: displayName, click: checkout"></div>
+								</div>
+								<!-- /ko -->
 
-								<div class="refbox newRef">
-									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: branches().length == 0">
+								<!-- ko if: showDropTargets -->
+								<div class="refbox move" data-bind="dropOver: true, drop: dropMoveRef">Move here</div>
+								<!-- /ko -->
+
+								<div class="refbox newRef" data-bind="css: { editing: branchingFormVisible }">
+									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: branches().length == 0 && tags().length == 0">
+									<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+									<!-- ko if: branchingFormVisible -->
 									<form data-bind="submit: createBranch">
-										<input class="name" type="text" placeholder="&#x271A;" data-bind="value: newBranchName">
-										<input class="submit" type="submit">
+										<input class="name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus">
+										<input class="submit primaryAction" type="submit" value="Branch">
+										<button class="submit" data-bind="click: createTag">Tag</button>
 									</form>
+									<!-- /ko -->
 								</div>
 							</div>
 

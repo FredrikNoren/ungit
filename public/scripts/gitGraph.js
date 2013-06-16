@@ -229,17 +229,38 @@ NodeViewModel = function(args) {
 	this.branches = ko.computed(function() {
 		return self.refs().filter(function(r) { return r.isBranch; });
 	});
+	this.tags = ko.computed(function() {
+		return self.refs().filter(function(r) { return r.isTag; });
+	});
 	this.newBranchName = ko.observable();
+	this.newBranchNameHasFocus = ko.observable(true);
+	this.newBranchNameHasFocus.subscribe(function(newValue) {
+		if (!newValue) self.branchingFormVisible(false);
+	})
+	this.branchingFormVisible = ko.observable(false);
 	this.showDropTargets = ko.computed(function() {
 		return !!self.graph.draggingRef();
 	});
 }
+NodeViewModel.prototype.showBranchingForm = function() {
+	this.branchingFormVisible(true);
+	this.newBranchNameHasFocus(true);
+}
 NodeViewModel.prototype.createBranch = function() {
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+	this.branchingFormVisible(false);
+	this.newBranchName('');
+}
+NodeViewModel.prototype.createTag = function() {
+	api.query('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+	this.branchingFormVisible(false);
+	this.newBranchName('');
 }
 NodeViewModel.prototype.dropMoveRef = function(ref) {
 	if (ref.current())
 		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.sha1 });
+	else if (ref.isTag)
+		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.sha1, force: true });
 	else
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.sha1, force: true });
 }
@@ -286,6 +307,7 @@ var RefViewModel = function(args) {
 	this.isRemote = this.isRemoteBranch;
 	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
+	if (this.isTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
 	this.show = true;
 	this.graph = args.graph;
 	this.remoteRef = ko.observable();
@@ -316,9 +338,6 @@ RefViewModel.prototype.dragEnd = function() {
 	this.graph.draggingRef(null);
 }
 RefViewModel.prototype.checkout = function() {
-	this.graph.activeBranch(this.displayName);
-	this.graph.HEAD(this.node());
-	this.graph.setNodes(this.graph.nodes());
 	api.query('POST', '/branch', { path: this.graph.repoPath, name: this.displayName });
 }
 
