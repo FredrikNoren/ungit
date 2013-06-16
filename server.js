@@ -1,4 +1,4 @@
-
+require('./bugsense').init();
 var express = require('express');
 var gitApi = require('./git-api');
 var rc = require('rc')('ungit', {
