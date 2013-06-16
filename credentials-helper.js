@@ -20,5 +20,5 @@ if (process.argv[3] == 'get') {
 		console.log('password=' + res.body.password);
 	});
 } else {
-	throw new Error('Unkown param: ' + process.argv[3]);
+	winston.info('Unhandled param: ' + process.argv[3]);
 }
