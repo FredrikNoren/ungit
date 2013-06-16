@@ -64,22 +64,18 @@ exports.parseGitDiff = function(text) {
 			lines.shift();
 			lines.shift();
 		}
-      	
-      	var blob = /^index\s([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+)\s?(.+)?$/.exec(lines.shift());
-      	diff.aBlob = blob[1];
-      	diff.bBlob = blob[2];
-      	diff.bMode = blob[3] ? blob[3].trim() : diff.bMode;
-      	
-      	// Shift away ---, +++ and @@ stuff
-      	lines.shift(); lines.shift();
+      	      	
+      	// Shift away index, ---, +++ and @@ stuff
+      	if (lines.shift().indexOf('index ') == 0) lines.shift();
+      	lines.shift();
 		var diff_lines = [];
 		var originalLine, newLine;
 		while(lines[0] && !/^diff/.test(lines[0])) {
 			var line = lines.shift();
 			if (line.indexOf('@@ ') == 0) {
-				var changeGroup = /@@ -(\d+),\d+ [+](\d+),\d+/.exec(line);
+				var changeGroup = /@@ -(\d+)(,\d+)? [+](\d+)(,\d+)?/.exec(line);
 				originalLine = changeGroup[1];
-				newLine = changeGroup[2];
+				newLine = changeGroup[3];
 				diff_lines.push([null, null, line]);
 			} else {
 				if (line[0] == '+') {

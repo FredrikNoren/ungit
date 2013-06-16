@@ -12,7 +12,7 @@ var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 
-restGit.registerApi(app, null, true);
+restGit.registerApi(app, null, { dev: true });
 
 var testDir;
 var gitConfig;
@@ -27,7 +27,7 @@ describe('git-api branching', function () {
 		common.createEmptyRepo(req, done, function(dir) {
 			testDir = dir;
 			common.get(req, '/config', { path: testDir }, done, function(err, res) {
-				gitConfig = res.body;
+				gitConfig = res.body.git;
 				done();
 			});
 		});
