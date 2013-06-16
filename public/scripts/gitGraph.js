@@ -336,6 +336,7 @@ var RefViewModel = function(args) {
 	this.isHEAD = this.isLocalHEAD || this.isRemoteHEAD;
 	this.isBranch = this.isLocalBranch || this.isRemoteBranch;
 	this.isRemote = this.isRemoteBranch || this.isRemoteTag;
+	this.isLocal = this.isLocalBranch || this.isLocalTag;
 	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
 	if (this.isTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
