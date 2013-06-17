@@ -12,7 +12,7 @@ var server = require('http').createServer(app);
 
 gitApi.pathPrefix = '/api';
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/../public'));
 gitApi.registerApi(app, server, config);
 
 app.get('/config.js', function(req, res) {

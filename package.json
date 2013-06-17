@@ -1,11 +1,11 @@
 {
-  "name": "draper",
+  "name": "ungit",
   "version": "0.0.1",
   "scripts": {
-    "start": "node server.js",
+    "start": "node source/server.js",
     "test": "mocha --reporter spec"
   },
-  "main": "./server",
+  "main": "./source/server",
   "dependencies" : {
     "express" : "*",
     "mocha": "*",

@@ -7,7 +7,7 @@ var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var child_process = require('child_process');
-var restGit = require('../git-api');
+var restGit = require('../source/git-api');
 var common = require('./common.js');
 var wrapErrorHandler = common.wrapErrorHandler;
 
