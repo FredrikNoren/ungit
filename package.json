@@ -1,5 +1,6 @@
 {
   "name": "ungit",
+  "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "version": "0.0.1",
   "scripts": {
     "start": "node source/server.js",
@@ -7,20 +8,23 @@
   },
   "main": "./source/server",
   "dependencies" : {
-    "express" : "*",
-    "mocha": "*",
-    "expect.js": "*",
-    "supertest": "*",
-    "superagent": "*",
-    "underscore": "*",
-    "temp": "*",
-    "watchr": "*",
-    "socket.io": "*",
-    "moment": "*",
-    "async": "*",
-    "ssh2": "*",
-    "rc": "*",
-    "uuid": "*",
-    "winston": "*"
+    "express" : "3.2.6",
+    "superagent": "0.14.7",
+    "underscore": "1.4.4",
+    "temp": "0.5.0",
+    "watchr": "2.4.3",
+    "socket.io": "0.9.16",
+    "moment": "2.0.0",
+    "async": "0.2.9",
+    "ssh2": "0.2.8",
+    "rc": "0.3.0",
+    "uuid": "1.4.1",
+    "winston": "0.7.1",
+    "forever-monitor": "1.2.2"
+  },
+  "devDependencies": {
+    "mocha": "1.11.0",
+    "expect.js": "0.2.0",
+    "supertest": "0.7.0"
   }
 }
