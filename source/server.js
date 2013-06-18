@@ -7,25 +7,30 @@ var express = require('express');
 var gitApi = require('./git-api');
 var winston = require('winston');
 
-var app = express();
-var server = require('http').createServer(app);
+exports.start = function(callback) {
+	
+	var app = express();
+	var server = require('http').createServer(app);
 
-gitApi.pathPrefix = '/api';
+	gitApi.pathPrefix = '/api';
 
-app.use(express.static(__dirname + '/../public'));
-gitApi.registerApi(app, server, config);
+	app.use(express.static(__dirname + '/../public'));
+	gitApi.registerApi(app, server, config);
 
-app.get('/config.js', function(req, res) {
-	res.send('config = ' + JSON.stringify(config));
-});
+	app.get('/config.js', function(req, res) {
+		res.send('config = ' + JSON.stringify(config));
+	});
 
-app.use(function(err, req, res, next) {
-	if (config.bugtracking)
-		bugsense.notify(err, 'ungit-node');
-	winston.error(err.stack);
-	res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
-});
+	app.use(function(err, req, res, next) {
+		if (config.bugtracking)
+			bugsense.notify(err, 'ungit-node');
+		winston.error(err.stack);
+		res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
+	});
 
-server.listen(config.port, function() {
-	winston.info('Listening on port ' + config.port);
-});
+	server.listen(config.port, function() {
+		winston.info('Listening on port ' + config.port);
+		if(callback) callback();
+	});
+
+}

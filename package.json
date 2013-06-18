@@ -3,7 +3,7 @@
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "version": "0.0.1",
   "scripts": {
-    "start": "node source/server.js",
+    "start": "node ./bin/ungit",
     "test": "mocha --reporter spec"
   },
   "bin": {
@@ -22,9 +22,7 @@
     "ssh2": "0.2.8",
     "rc": "0.3.0",
     "uuid": "1.4.1",
-    "winston": "0.7.1",
-    "forever-monitor": "1.2.2",
-    "node-windows": "0.1.2"
+    "winston": "0.7.1"
   },
   "devDependencies": {
     "mocha": "1.11.0",

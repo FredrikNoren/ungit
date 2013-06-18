@@ -1,3 +1,9 @@
 #!/usr/bin/env node
+var config = require('../source/config')();
+var child_process = require('child_process');
 
-require('../source/cli').start();
+require('../source/server').start(function() {
+	var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
+	console.log('Browse to ' + currentUrl);
+	child_process.exec('start ' + currentUrl);
+});
