@@ -9,6 +9,7 @@ var watchr = require('watchr');
 var async=  require('async');
 var Ssh2Connection = require('ssh2');
 var gitParser = require('./git-parser');
+var winston = require('winston');
 
 exports.pathPrefix = '';
 
@@ -21,7 +22,14 @@ exports.registerApi = function(app, server, config) {
 	var sockets = [];
 
 	if (server) {
-		var io = socketIO.listen(server);
+		var io = socketIO.listen(server, {
+			logger: {
+				debug: winston.debug.bind(winston),
+				info: winston.info.bind(winston),
+				error: winston.error.bind(winston),
+				warn: winston.warn.bind(winston)
+			}
+		});
 		io.sockets.on('connection', function (socket) {
 			sockets.push(socket);
 			socket.emit('socketId', sockets.length - 1);
