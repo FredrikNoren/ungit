@@ -81,6 +81,49 @@
 	</div>
 </script>
 
+
+<script type="text/html" id="staging">
+	<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
+		<div class="arrowContainer arrowDown">
+			<img src="images/shadowArrowDown.png" class="shadow">
+			<img src="images/yellowArrowDown.png" class="arrow">
+		</div>
+		<div data-bind="visible: !isCommitting()">
+			<table><tr><td class="commitArea">
+				<div class="commitMessage">
+				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
+				<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown'"></textarea>
+				</div>
+				<div class="files" data-bind="foreach: files">
+					<div class="file">
+						<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
+						<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+						<span class="new" data-bind="visible: isNew">New</span>
+						<span class="deleted" data-bind="visible: removed">Removed</span>
+						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+					</div>
+				</div>
+				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+				<span class="amend">
+					<div class="checkbox" data-bind="click: toogleAmend, css: { checked: amend }"></div>
+					Amend last commit
+				</span>
+				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+			</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
+				<!-- ko if: selectedDiffFile -->
+					<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
+				<!-- /ko -->
+				<!-- ko if: !selectedDiffFile() -->
+				Click a file to show its changes
+				<!-- /ko -->
+			</td></tr></table>
+		</div>
+		<div data-bind="visible: isCommitting">
+			Committing changes...
+		</div>
+	</div>
+</script>
+
 <script type="text/html" id="fileDiff">
 	<table class="fileDiff" data-bind="foreach: $data">
 		<tr data-bind="css: { added: added, removed: removed }">
@@ -112,45 +155,7 @@
 
 			<div class="repositoryMain">
 
-				<div class="staging" data-bind="css: { commitValidationError: commitValidationError }">
-					<div class="arrowContainer arrowDown">
-						<img src="images/shadowArrowDown.png" class="shadow">
-						<img src="images/yellowArrowDown.png" class="arrow">
-					</div>
-					<div data-bind="visible: !isCommitting()">
-						<table><tr><td class="commitArea">
-							<div class="commitMessage">
-							<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
-							<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown'"></textarea>
-							</div>
-							<div class="files" data-bind="foreach: files">
-								<div class="file">
-									<div class="checkbox" data-bind="click: toogleStaged, css: { checked: staged }"></div>
-									<span class="name" data-bind="text: name, click: toogleDiffs"></span>
-									<span class="new" data-bind="visible: isNew">New</span>
-									<span class="deleted" data-bind="visible: removed">Removed</span>
-									<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
-								</div>
-							</div>
-							<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
-							<span class="amend">
-								<div class="checkbox" data-bind="click: toogleAmend, css: { checked: amend }"></div>
-								Amend last commit
-							</span>
-							<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
-						</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
-							<!-- ko if: selectedDiffFile -->
-								<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
-							<!-- /ko -->
-							<!-- ko if: !selectedDiffFile() -->
-							Click a file to show its changes
-							<!-- /ko -->
-						</td></tr></table>
-					</div>
-					<div data-bind="visible: isCommitting">
-						Committing changes...
-					</div>
-				</div>
+				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 				
 				<!-- ko if: showGerritIntegrationButton -->
 				<div class="enableGerritIntegration">
@@ -346,6 +351,7 @@
 <script type='text/javascript' src='/scripts/gitGraph.js'></script>
 <script type='text/javascript' src='/scripts/vector2.js'></script>
 <script type='text/javascript' src='/scripts/logrenderer.js'></script>
+<script type='text/javascript' src='/scripts/repository.js'></script>
 <script type='text/javascript' src='/scripts/app.js'></script>
 <script type='text/javascript' src='/scripts/main.js'></script>
 
