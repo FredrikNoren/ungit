@@ -191,20 +191,26 @@ exports.registerApi = function(app, server, config) {
 
 	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
-		git('checkout -- "' + req.body.file.trim() + '"', req.body.path, res, null, function(err, text) {
-			if (err !== null) {
-				if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
-					fs.unlink(path.join(req.body.path, req.body.file), function(err) {
-						if (err) res.json(400, { command: 'unlink', error: err });
-						else res.json({});
-					});
-					return true;
+		if (req.body.all) {
+			git('reset --hard HEAD', req.body.path, res, null, function(err) {
+				git('clean -fd', req.body.path, res);
+			});
+		} else {
+			git('checkout -- "' + req.body.file.trim() + '"', req.body.path, res, null, function(err, text) {
+				if (err !== null) {
+					if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
+						fs.unlink(path.join(req.body.path, req.body.file), function(err) {
+							if (err) res.json(400, { command: 'unlink', error: err });
+							else res.json({});
+						});
+						return true;
+					}
+					return;
 				}
-				return;
-			}
-			
-			res.json({});
-		});
+				
+				res.json({});
+			});
+		}
 	});
 
 	app.post(exports.pathPrefix + '/commit', function(req, res){

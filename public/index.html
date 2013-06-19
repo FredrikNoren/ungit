@@ -94,6 +94,7 @@
 				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
 				<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown'"></textarea>
 				</div>
+				<div class="stats"><span data-bind="text: stats"></span> - <a href="#" data-bind="click: discardAllChanges">Discard all</a></div>
 				<div class="files" data-bind="foreach: files">
 					<div class="file" data-bind="css: { showingDiffs: showingDiffs }">
 						<img src="images/whiteArrowLeftWithBorder.png" class="arrowLeft" data-bind="visible: showingDiffs">
