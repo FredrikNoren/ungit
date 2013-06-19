@@ -193,7 +193,7 @@ var FileViewModel = function(repository) {
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
 	this.removed = ko.observable(false);
-	this.diffs = ko.observableArray();
+	this.diffs = ko.observable([]);
 	this.showingDiffs = ko.computed(function() {
 		return self.repository.selectedDiffFile() == self;
 	})
@@ -218,10 +218,10 @@ FileViewModel.prototype.invalidateDiff = function() {
 	if (this.repository.selectedDiffFile() == this) {
 		api.query('GET', '/diff', { file: this.name(), path: this.repository.repoPath }, function(err, diffs) {
 			if (err) return;
-			self.diffs.removeAll();
+			var newDiffs = [];
 			diffs.forEach(function(diff) {
 				diff.lines.forEach(function(line) {
-					self.diffs.push({
+					newDiffs.push({
 						oldLineNumber: line[0],
 						newLineNumber: line[1],
 						added: line[2][0] == '+',
@@ -230,9 +230,12 @@ FileViewModel.prototype.invalidateDiff = function() {
 					});
 				});
 			});
+			self.diffs(newDiffs);
 		});
 	}
 }
+
+
 
 var GerritIntegrationViewModel = function(repo) {
 	var self = this;
