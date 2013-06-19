@@ -415,47 +415,57 @@ a {
 				display: inline-block;
 			}
 			.files {
-				.name {
-					font-size: 1.3em;
-					cursor: pointer;
-					padding: 3px;
-					border-radius: 3px;
-					border: 1px solid transparent;
-					&:hover {
-						background: #fff;
-						border-color: #bbb;
+				position: relative;
+				.file {
+					&.showingDiffs {
+						.name {
+							background: #fff;
+							border-color: #bbb;
+						}
 					}
-				}
-				padding: 0.3em;
-				
-				.new, .deleted {
-					color: #fff;
-					border-radius: 3px;
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
-				}
-				.new {
-					background: #B5F584;
-				}
-				.deleted {
-					background: #DB3712;
-				}
-				.discard {
-					background: #e0e0e0;
-					color: #fff;
-					border-radius: 3px;
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
-					cursor: pointer;
-					.explanation {
-						display: none;
+					.arrowLeft {
+						position: absolute;
+						right: -10px;
+						z-index: 10;
 					}
-					&:hover {
-						background: #000;
+					.name {
+						font-size: 1.3em;
+						cursor: pointer;
+						padding: 3px;
+						border-radius: 3px;
+						border: 1px solid transparent;
+					}
+					padding: 0.3em;
+					
+					.new, .deleted {
+						color: #fff;
+						border-radius: 3px;
+						padding: 3px;
+						padding-left: 5px;
+						padding-right: 5px;
+					}
+					.new {
+						background: #B5F584;
+					}
+					.deleted {
+						background: #DB3712;
+					}
+					.discard {
+						background: #e0e0e0;
+						color: #fff;
+						border-radius: 3px;
+						padding: 3px;
+						padding-left: 5px;
+						padding-right: 5px;
+						cursor: pointer;
 						.explanation {
-							display: inline-block;
+							display: none;
+						}
+						&:hover {
+							background: #000;
+							.explanation {
+								display: inline-block;
+							}
 						}
 					}
 				}
