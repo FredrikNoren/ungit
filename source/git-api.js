@@ -7,7 +7,8 @@ var temp = require('temp');
 var socketIO = require('socket.io');
 var watchr = require('watchr');
 var async=  require('async');
-var Ssh2Connection = require('ssh2');
+var git = require('./git');
+var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
 
@@ -18,7 +19,6 @@ exports.registerApi = function(app, server, config) {
 	app.use(express.bodyParser());
 
 	var gitConfigCliPager = '-c core.pager=cat';
-	var gitConfigNoColors = '-c color.ui=false';
 
 	var sockets = [];
 
@@ -63,57 +63,7 @@ exports.registerApi = function(app, server, config) {
 		}
 	}
 
-	var git = function(command, repoPath, res, parser, callback) {
-		command = 'git ' + gitConfigNoColors + ' ' + command;
-		return child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
-					if (stderr.indexOf('Not a git repository') >= 0)
-						err.errorCode = 'not-a-repository';
-					if (!callback || !callback(err, stdout))
-						res.json(400, err);
-				}
-				else {
-					if (callback) callback(null, parser ? parser(stdout) : stdout);
-					else res.json(parser ? parser(stdout) : {});
-				}
-		});
-	}
-	git.status = function(repoPath, res, callback) {
-		git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, callback);
-	}
-	git.remoteShow = function(repoPath, remoteName, res, callback) {
-		git('remote show ' + remoteName, repoPath, res, gitParser.parseGitRemoteShow, callback);
-	}
-	git.stashAndPop = function(repoPath, res, callback) {
-		var hadLocalChanges = true;
-		async.series([
-			function(done) {
-				git('stash', repoPath, res, undefined, function(err, res) {
-					if (res.indexOf('No local changes to save') != -1) {
-						hadLocalChanges = false;
-						done();
-						return true;
-					}
-					if (!err) {
-						done();
-						return true;
-					}
-				});
-			},
-			function(done) {
-				callback(done);
-			},
-			function(done) {
-				if(!hadLocalChanges) done(); 
-				else git('stash pop', repoPath, res, undefined, done);
-			},
-		], function(err) {
-			if (err) res.json(400, err);
-			else res.json({});
-		});
-	}
+
 
 	app.get(exports.pathPrefix + '/status', function(req, res){
 		var repoPath = req.query.path;
@@ -364,32 +314,6 @@ exports.registerApi = function(app, server, config) {
 
 	if (config.gerritIntegration) {
 
-		var getGerritAddress = function(repoPath, res, callback) {
-			git.remoteShow(repoPath, 'origin', res, function(err, remote) {
-				if (err) return res.json(400, err);
-				if (remote.fetch.indexOf('ssh://') == 0) {
-					var ss = remote.fetch.slice('ssh://'.length).split('/');
-					var gerritUri = ss[0].split(':');
-					var host = gerritUri[0];
-					var port = gerritUri[1];
-					var project = ss[1];
-					project = project.slice(project.length - '.git'.length, project.length);
-					callback(null, host, port, project);
-				} else if(remote.fetch.indexOf('@') != -1) {
-					var ss = remote.fetch.split('@');
-					var gerritUri = ss[1].split(':');
-					var host = gerritUri[0];
-					var port = null;
-					var project = gerritUri[1];
-					if (project.indexOf('.git') == project.length - '.git'.length)
-						project = project.slice(0, project.length - '.git'.length);
-					callback(ss[0], host, port, project);
-				} else {
-					res.json(400, { error: 'Unsupported gerrit remote: ' + remote.fetch });
-				}
-			});
-		}
-
 		app.get(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
 			var repoPath = req.query.path;
 			if (!verifyPath(repoPath, res)) return;
@@ -401,7 +325,7 @@ exports.registerApi = function(app, server, config) {
 		app.post(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
 			var repoPath = req.body.path;
 			if (!verifyPath(repoPath, res)) return;
-			getGerritAddress(repoPath, res, function(host, port) {
+			gerrit.getGerritAddress(repoPath, res, function(host, port) {
 					var command = 'scp -p ';
 					if (port) command += ' -P ' + port + ' ';
 					command += host + ':hooks/commit-msg .git/hooks/';
@@ -413,43 +337,16 @@ exports.registerApi = function(app, server, config) {
 			});
 		});
 
-		var ssh2 = function(username, host, port, command, callback) {
-			var connection = new Ssh2Connection();
-			connection.on('connect', function() {
-			});
-			connection.on('ready', function() {
-				connection.exec(command, function(err, stream) {
-					if (err) return callback(err);
-					var result = '';
-					stream.on('data', function(data, extended) {
-						result += data.toString();
-					});
-					stream.on('end', function() {
-						callback(null, result);
-					});
-				});
-			});
-			connection.on('error', function(err) {
-				callback(err);
-			});
-			connection.connect({
-				host: host,
-				port: port,
-				agent: 'pageant',
-				username: username
-			});
-		};
-
 		app.get(exports.pathPrefix + '/gerrit/changes', function(req, res) {
 			var repoPath = req.query.path;
 			if (!verifyPath(repoPath, res)) return;
-			getGerritAddress(repoPath, res, function(username, host, port, project) {
-					var command = 'gerrit query --format=JSON --current-patch-set status:open project:' + project + '';
-					ssh2(username, host, port, command, function(err, result) {
-							if (err) return res.json(400, { err: err });
-							result = result.split('\n').filter(function(r) { return r.trim(); });
-							result = result.map(function(r) { return JSON.parse(r); });
-							res.json(result);
+			gerrit.getGerritAddress(repoPath, res, function(username, host, port, project) {
+					var command = 'query --format=JSON --current-patch-set status:open project:' + project + '';
+					gerrit(username, host, port, command, res, function(err, result) {
+						if (err) return;
+						result = result.split('\n').filter(function(r) { return r.trim(); });
+						result = result.map(function(r) { return JSON.parse(r); });
+						res.json(result);
 					});
 			});
 		});
