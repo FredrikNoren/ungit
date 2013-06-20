@@ -17,7 +17,8 @@ exports.registerApi = function(app, server, config) {
 
 	app.use(express.bodyParser());
 
-	var cliConfigPager = '-c core.pager=cat';
+	var gitConfigCliPager = '-c core.pager=cat';
+	var gitConfigNoColors = '-c color.ui=false';
 
 	var sockets = [];
 
@@ -63,7 +64,7 @@ exports.registerApi = function(app, server, config) {
 	}
 
 	var git = function(command, repoPath, res, parser, callback) {
-		command = 'git ' + command;
+		command = 'git ' + gitConfigNoColors + ' ' + command;
 		return child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
 			function (error, stdout, stderr) {
 				if (error !== null) {
@@ -174,7 +175,7 @@ exports.registerApi = function(app, server, config) {
 				if (fs.existsSync(path.join(repoPath, req.query.file))) res.json([]);
 				else res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
 			} else if (!file.isNew) {
-				git(cliConfigPager + ' diff HEAD -- "' + req.query.file.trim() + '"', repoPath, res, gitParser.parseGitDiff);
+				git(gitConfigCliPager + ' diff HEAD -- "' + req.query.file.trim() + '"', repoPath, res, gitParser.parseGitDiff);
 			} else {
 				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
 					if (err) return res.json(400, { error: err });
@@ -253,7 +254,7 @@ exports.registerApi = function(app, server, config) {
 		if (!verifyPath(req.query.path, res)) return;
 		var limit = '';
 		if (req.query.limit) limit = '--max-count=' + req.query.limit;
-		git(cliConfigPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.query.path, res, gitParser.parseGitLog, function(err, log) {
+		git(gitConfigCliPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.query.path, res, gitParser.parseGitLog, function(err, log) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
 					res.json([]);
