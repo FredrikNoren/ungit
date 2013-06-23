@@ -197,8 +197,8 @@
 								<!-- ko foreach: branches -->
 								<div class="refbox branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0">
-									<span class="refType" data-bind="visible: isRemoteBranch">remote: </span>
-									<span class="refType" data-bind="visible: isLocalBranch">branch: </span>
+									<span class="refType" data-bind="visible: isRemoteBranch">remote branch: </span>
+									<span class="refType" data-bind="visible: isLocalBranch">local branch: </span>
 									<div class="name" data-bind="text: displayName"></div>
 								</div>
 								<!-- ko if: current -->
@@ -212,9 +212,10 @@
 								<!-- /ko -->
 
 								<!-- ko foreach: tags -->
-								<div class="refbox tag" data-bind="dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+								<div class="refbox tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
 									<img src="images/grayArrowLeft.png" class="arrowLeft" data-bind="visible: $index() == 0 && $parent.branches().length == 0">
-									<span class="refType">tag:</span>
+									<span class="refType" data-bind="visible: isRemote">remote tag: </span>
+									<span class="refType" data-bind="visible: isLocal">local tag: </span>
 									<div class="name" data-bind="text: displayName"></div>
 								</div>
 								<!-- /ko -->

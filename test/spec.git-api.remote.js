@@ -205,6 +205,23 @@ describe('git-api remote', function () {
 			done();
 		});
 	});
+
+	it('should be possible to create a tag in "local2"', function(done) {
+		common.post(req, '/tags', { path: testDirLocal2, name: 'v1.0' }, done);
+	});
+
+	it('should be possible to push a tag from "local2"', function(done) {
+		common.post(req, '/push', { path: testDirLocal2, localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
+	});
+
+	it('log in "local2" should show the local and remote tag', function(done) {
+		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
+			expect(commit2.refs).to.contain('remote-tag: refs/tags/v1.0');
+			done();
+		});
+	});
 	
 	it('cleaning up test dir should work', function(done) {
 		req

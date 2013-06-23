@@ -330,7 +330,7 @@ var RefViewModel = function(args) {
 	this.name = args.name;
 	this.displayName = this.name;
 	this.isLocalTag = this.name.indexOf('tag: refs/tags/') == 0;
-	this.isRemoteTag = false; // TODO
+	this.isRemoteTag = this.name.indexOf('remote-tag: refs/tags/') == 0;
 	this.isTag = this.isLocalTag || this.isRemoteTag;
 	this.isLocalHEAD = this.name == 'HEAD';
 	this.isRemoteHEAD = this.name == 'refs/remotes/origin/HEAD';
@@ -342,7 +342,8 @@ var RefViewModel = function(args) {
 	this.isLocal = this.isLocalBranch || this.isLocalTag;
 	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/origin/'.length);
-	if (this.isTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
+	if (this.isLocalTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
+	if (this.isRemoteTag) this.displayName = this.name.slice('remote-tag: refs/tags/'.length);
 	this.show = true;
 	this.graph = args.graph;
 	this.remoteRef = ko.observable();

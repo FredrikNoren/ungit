@@ -182,6 +182,15 @@ exports.parseGitRemotes = function(text) {
 	});
 }
 
+exports.parseGitLsRemote = function(text) {
+	return text.split('\n').filter(function(item) {
+		return item && item.indexOf('From ') != 0;
+	}).map(function(line) {
+		var sha1 = line.slice(0, 40);
+		var name = line.slice(41).trim();
+		return { sha1: sha1, name: name };
+	});
+}
 
 exports.parseGitRemoteShow = function(text) {
 	var lines = text.split('\n');

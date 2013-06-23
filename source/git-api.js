@@ -204,16 +204,33 @@ exports.registerApi = function(app, server, config) {
 		if (!verifyPath(req.query.path, res)) return;
 		var limit = '';
 		if (req.query.limit) limit = '--max-count=' + req.query.limit;
-		git(gitConfigCliPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.query.path, res, gitParser.parseGitLog, function(err, log) {
-			if (err) {
-				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-					res.json([]);
-				else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-					res.json([]);
-				else
-					res.json(400, err);
-			} else {
-				res.json(log);
+		git(' ls-remote --tags ', req.query.path, res, gitParser.parseGitLsRemote, function(err, remoteTags) {
+			if (!err || err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) {
+				var sha1ToRemoteTag = {};
+				if (!err) remoteTags.forEach(function(ref) {
+					if (ref.name.indexOf('^{}') != -1)
+						sha1ToRemoteTag[ref.sha1] = ref.name.slice(0, ref.name.length - '^{}'.length);
+				});
+
+				git(gitConfigCliPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.query.path, res, gitParser.parseGitLog, function(err, log) {
+					if (err) {
+						if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+							res.json([]);
+						else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+							res.json([]);
+						else
+							res.json(400, err);
+					} else {
+						log.forEach(function(node) {
+							if (sha1ToRemoteTag[node.sha1]) {
+								node.refs.push('remote-tag: ' + sha1ToRemoteTag[node.sha1]);
+							}
+						});
+						res.json(log);
+					}
+				});
+
+				return true;
 			}
 		});
 	});
