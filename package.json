@@ -22,7 +22,9 @@
     "ssh2": "0.2.8",
     "rc": "0.3.0",
     "uuid": "1.4.1",
-    "winston": "0.7.1"
+    "winston": "0.7.1",
+    "passport": "0.1.17",
+    "passport-local": "0.1.6"
   },
   "devDependencies": {
     "mocha": "1.11.0",

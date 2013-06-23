@@ -3,7 +3,23 @@ var MainViewModel = function() {
 	var self = this;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
-	this.content = ko.observable(new HomeViewModel());
+	this.isAuthenticated = ko.observable(!config.authentication);
+	this.realContent = ko.observable(new HomeViewModel());
+	if (config.authentication) {
+		this.authenticationScreen = new LoginViewModel();
+		this.authenticationScreen.loggedIn.add(function() {
+			self.isAuthenticated(true);
+		});
+	}
+	this.content = ko.computed({
+		write: function(value) {
+			self.realContent(value);
+		},
+		read: function() {
+			if (self.isAuthenticated()) return self.realContent();
+			else return self.authenticationScreen;
+		}
+	});
 }
 MainViewModel.prototype.submitPath = function() {
 	browseTo('repository?path=' + encodeURIComponent(this.path()));
@@ -27,8 +43,6 @@ var visitedRepositories = {
 		localStorage.setItem('visitedRepositories', JSON.stringify(repos));
 	}
 }
-
-var viewModel = new MainViewModel();
 
 function AlertDialogViewModel(message) {
 	this.message = message;
@@ -85,6 +99,37 @@ var CrashViewModel = function() {
 }
 CrashViewModel.prototype.template = 'crash';
 
+var LoginViewModel = function() {
+	var self = this;
+	this.loggedIn = new signals.Signal();
+	this.status = ko.observable('loading');
+	this.username = ko.observable();
+	this.password = ko.observable();
+	this.loginError = ko.observable();
+	api.query('GET', '/loggedin', undefined, function(err, status) {
+		if (status.loggedIn) {
+			self.loggedIn.dispatch();
+			self.status('loggedIn');
+		}
+		else self.status('login');
+	});
+}
+LoginViewModel.prototype.login = function() {
+	var self = this;
+	api.query('POST', '/login',  { username: this.username(), password: this.password() }, function(err, res) {
+		if (err) {
+			if (err.res.body.error) {
+				self.loginError(err.res.body.error);
+				return true;
+			}
+		} else {
+			self.loggedIn.dispatch();
+			self.status('loggedIn');
+		}
+	});
+}
+LoginViewModel.prototype.template = 'login';
+
 var UserErrorViewModel = function(args) {
 	if (typeof(arguments[0]) == 'string')
 		args = { title: arguments[0], details: arguments[1] };
@@ -93,12 +138,6 @@ var UserErrorViewModel = function(args) {
 	this.details = ko.observable(args.details);
 }
 UserErrorViewModel.prototype.template = 'usererror';
-
-var gitConfig = ko.observable({ });
-api.query('GET', '/config', undefined, function(err, config) {
-	if (err) return;
-	gitConfig(config);
-});
 
 var PathViewModel = function(path) {
 	var self = this;
@@ -117,10 +156,11 @@ var PathViewModel = function(path) {
 	});
 	this.cloneDestination = ko.observable();
 	this.repository = ko.observable();
-
-	this.updateStatus();
 }
 PathViewModel.prototype.template = 'path';
+PathViewModel.prototype.shown = function() {
+	this.updateStatus();
+}
 PathViewModel.prototype.updateStatus = function() {
 	var self = this;
 	api.query('GET', '/status', { path: this.path }, function(err, status){
@@ -162,3 +202,6 @@ crossroads.addRoute('/repository{?query}', function(query) {
 	viewModel.path(query.path);
 	viewModel.content(new PathViewModel(query.path));
 })
+
+
+var viewModel = new MainViewModel();

@@ -107,6 +107,14 @@ ko.bindingHandlers.graphLog = {
     }
 };
 
+ko.bindingHandlers.shown = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        var value = valueAccessor();
+        var valueUnwrapped = ko.utils.unwrapObservable(value);
+        valueUnwrapped.call(viewModel);
+    }
+};
+
 window.onerror = function() {
     viewModel.content(new CrashViewModel());
     viewModel.dialog(null);

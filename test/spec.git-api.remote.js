@@ -13,7 +13,7 @@ var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 
-restGit.registerApi(app, null, { dev: true });
+restGit.registerApi(app, null, null, { dev: true });
 
 var testDirLocal1, testDirLocal2, testDirRemote;
 

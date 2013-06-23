@@ -114,12 +114,6 @@ var StagingViewModel = function(repository) {
 	this.files = ko.observableArray();
 	this.commitMessageTitle = ko.observable();
 	this.commitMessageBody = ko.observable();
-	this.commitAuthorName = ko.computed(function() {
-		return gitConfig()['user.name'];
-	});
-	this.commitAuthorEmail = ko.computed(function() {
-		return gitConfig()['user.email'];
-	});
 	this.nFiles = ko.computed(function() {
 		return self.files().length;
 	});

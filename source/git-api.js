@@ -14,7 +14,9 @@ var winston = require('winston');
 
 exports.pathPrefix = '';
 
-exports.registerApi = function(app, server, config) {
+exports.registerApi = function(app, server, ensureAuthenticated, config) {
+
+	ensureAuthenticated = ensureAuthenticated || function(req, res, next) { next(); };
 
 	app.use(express.bodyParser());
 
@@ -65,25 +67,25 @@ exports.registerApi = function(app, server, config) {
 
 
 
-	app.get(exports.pathPrefix + '/status', function(req, res){
+	app.get(exports.pathPrefix + '/status', ensureAuthenticated, function(req, res){
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
 		git.status(repoPath, res);
 	});
 
-	app.post(exports.pathPrefix + '/init', function(req, res) {
+	app.post(exports.pathPrefix + '/init', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('init' + (req.body.bare ? ' --bare --shared' : ''), req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/clone', function(req, res) {
+	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
 		git('clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/fetch', function(req, res) {
+	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.body.path, res, undefined, function(err, text) {
 			if (err) {
@@ -101,21 +103,21 @@ exports.registerApi = function(app, server, config) {
 		});
 	});
 
-	app.post(exports.pathPrefix + '/push', function(req, res) {
+	app.post(exports.pathPrefix + '/push', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
 		var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
 		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/reset', function(req, res) {
+	app.post(exports.pathPrefix + '/reset', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git.stashAndPop(req.body.path, res, function(done) {
 			git('reset --hard "' + req.body.to + '"', req.body.path, res, undefined, done);
 		});
 	});
 
-	app.get(exports.pathPrefix + '/diff', function(req, res) {
+	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, function(req, res) {
 		var repoPath = req.query.path;
 		if (!verifyPath(repoPath, res)) return;
 		git.status(repoPath, res, function(err, status) {
@@ -140,7 +142,7 @@ exports.registerApi = function(app, server, config) {
 		});
 	});
 
-	app.post(exports.pathPrefix + '/discardchanges', function(req, res){
+	app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.all) {
 			git('reset --hard HEAD', req.body.path, res, null, function(err) {
@@ -164,7 +166,7 @@ exports.registerApi = function(app, server, config) {
 		}
 	});
 
-	app.post(exports.pathPrefix + '/commit', function(req, res){
+	app.post(exports.pathPrefix + '/commit', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.message === undefined)
 			return res.json(400, { error: 'Must specify commit message' });
@@ -200,7 +202,7 @@ exports.registerApi = function(app, server, config) {
 		});
 	});
 
-	app.get(exports.pathPrefix + '/log', function(req, res){
+	app.get(exports.pathPrefix + '/log', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		var limit = '';
 		if (req.query.limit) limit = '--max-count=' + req.query.limit;
@@ -235,17 +237,17 @@ exports.registerApi = function(app, server, config) {
 		});
 	});
 
-	app.get(exports.pathPrefix + '/branches', function(req, res){
+	app.get(exports.pathPrefix + '/branches', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		git('branch', req.query.path, res, gitParser.parseGitBranches);
 	});
 
-	app.post(exports.pathPrefix + '/branches', function(req, res){
+	app.post(exports.pathPrefix + '/branches', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
-	app.del(exports.pathPrefix + '/branches', function(req, res){
+	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.remote)
 			git('push origin :"' + req.body.name.trim() + '"', req.body.path, res);
@@ -253,17 +255,17 @@ exports.registerApi = function(app, server, config) {
 			git('branch -D "' + req.body.name.trim() + '"', req.body.path, res);
 	});
 
-	app.get(exports.pathPrefix + '/tags', function(req, res){
+	app.get(exports.pathPrefix + '/tags', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		git('tag -l', req.query.path, res, gitParser.parseGitTags);
 	});
 
-	app.post(exports.pathPrefix + '/tags', function(req, res){
+	app.post(exports.pathPrefix + '/tags', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' + req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body.path, res);
 	});
 
-	app.del(exports.pathPrefix + '/tags', function(req, res){
+	app.del(exports.pathPrefix + '/tags', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		if (req.body.remote)
 			git('push origin :"refs/tags/' + req.body.name.trim() + '"', req.body.path, res);
@@ -271,14 +273,14 @@ exports.registerApi = function(app, server, config) {
 			git('tag -d "' + req.body.name.trim() + '"', req.body.path, res);
 	});
 
-	app.post(exports.pathPrefix + '/checkout', function(req, res){
+	app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.body.path, res)) return;
 		git.stashAndPop(req.body.path, res, function(done) {
 			git('checkout "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
 		});
 	});
 
-	app.get(exports.pathPrefix + '/checkout', function(req, res){
+	app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		var HEADFile = path.join(req.query.path, '.git', 'HEAD');
 		if (!fs.existsSync(HEADFile)) 
@@ -291,28 +293,28 @@ exports.registerApi = function(app, server, config) {
 		});
 	});
 
-	app.get(exports.pathPrefix + '/remotes', function(req, res){
+	app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		git('remote', req.query.path, res, gitParser.parseGitRemotes);
 	});
 
-	app.get(exports.pathPrefix + '/remotes/:name', function(req, res){
+	app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		git.remoteShow(req.query.path, req.params.name, res);
 	});
 
-	app.post(exports.pathPrefix + '/rebase', function(req, res) {
+	app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res);
 	});
 
 
-	app.post(exports.pathPrefix + '/submodules', function(req, res) {
+	app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.body.path, res);
 	});
 
-	app.get(exports.pathPrefix + '/config', function(req, res){
+	app.get(exports.pathPrefix + '/config', ensureAuthenticated, function(req, res){
 		git('config --list', undefined, res, gitParser.parseGitConfig, function(err, gitConfig) {
 			if (err) return;
 			res.json(gitConfig);
@@ -320,7 +322,7 @@ exports.registerApi = function(app, server, config) {
 	});
 
 	// This method isn't called by the client but by credentials-helper.js
-	app.get(exports.pathPrefix + '/credentials', function(req, res) {
+	app.get(exports.pathPrefix + '/credentials', ensureAuthenticated, function(req, res) {
 		var socket = sockets[req.query.socketId];
 		socket.once('credentials', function(data) {
 			res.json(data);
@@ -331,7 +333,7 @@ exports.registerApi = function(app, server, config) {
 
 	if (config.gerrit) {
 
-		app.get(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
+		app.get(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, function(req, res) {
 			var repoPath = req.query.path;
 			if (!verifyPath(repoPath, res)) return;
 			var hookPath = path.join(repoPath, '.git', 'hooks', 'commit-msg');
@@ -339,7 +341,7 @@ exports.registerApi = function(app, server, config) {
 			else res.json({ exists: false });
 		});
 
-		app.post(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
+		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, function(req, res) {
 			var repoPath = req.body.path;
 			if (!verifyPath(repoPath, res)) return;
 			gerrit.getGerritAddress(repoPath, res, function(host, port) {
@@ -354,7 +356,7 @@ exports.registerApi = function(app, server, config) {
 			});
 		});
 
-		app.get(exports.pathPrefix + '/gerrit/changes', function(req, res) {
+		app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, function(req, res) {
 			var repoPath = req.query.path;
 			if (!verifyPath(repoPath, res)) return;
 			gerrit.getGerritAddress(repoPath, res, function(username, host, port, project) {
@@ -372,33 +374,33 @@ exports.registerApi = function(app, server, config) {
 
 	if (config.dev) {
 
-		app.post(exports.pathPrefix + '/testing/createdir', function(req, res){
+		app.post(exports.pathPrefix + '/testing/createdir', ensureAuthenticated, function(req, res){
 			temp.mkdir('test-temp-dir', function(err, path) {
 				res.json({ path: path });
 			});
 		});
-		app.post(exports.pathPrefix + '/testing/createsubdir', function(req, res){
+		app.post(exports.pathPrefix + '/testing/createsubdir', ensureAuthenticated, function(req, res){
 			fs.mkdir(req.body.dir, function() {
 				res.json({});
 			});
 		});
-		app.post(exports.pathPrefix + '/testing/createfile', function(req, res){
+		app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
 			var content = req.body.content;
 			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
 			fs.writeFileSync(req.body.file, content);
 			res.json({ });
 		});
-		app.post(exports.pathPrefix + '/testing/changefile', function(req, res){
+		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){
 			var content = req.body.content;
 			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
 			fs.writeFileSync(req.body.file, content);
 			res.json({ });
 		});
-		app.post(exports.pathPrefix + '/testing/removefile', function(req, res){
+		app.post(exports.pathPrefix + '/testing/removefile', ensureAuthenticated, function(req, res){
 			fs.unlinkSync(req.body.file);
 			res.json({ });
 		});
-		app.post(exports.pathPrefix + '/testing/cleanup', function(req, res){
+		app.post(exports.pathPrefix + '/testing/cleanup', ensureAuthenticated, function(req, res){
 			temp.cleanup();
 			res.json({ });
 		});
