@@ -308,6 +308,10 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res);
 	});
 
+	app.post(exports.pathPrefix + '/merge', function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('merge "' + req.body.with.trim() + '"', req.body.path, res);
+	});
 
 	app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;

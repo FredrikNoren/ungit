@@ -277,8 +277,14 @@ NodeViewModel = function(args) {
 		if (!newValue) self.branchingFormVisible(false);
 	})
 	this.branchingFormVisible = ko.observable(false);
-	this.showDropTargets = ko.computed(function() {
+	this.showDropMoveTarget = ko.computed(function() {
 		return self.graph.showDropTargets();
+	});
+	this.showDropRebaseTarget = ko.computed(function() {
+		return self.graph.showDropTargets() && self.graph.draggingRef().current();
+	});
+	this.showDropMergeTarget = ko.computed(function() {
+		return self.graph.showDropTargets() && self.graph.draggingRef().current();
 	});
 }
 NodeViewModel.prototype.showBranchingForm = function() {
@@ -302,6 +308,12 @@ NodeViewModel.prototype.dropMoveRef = function(ref) {
 		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.sha1, force: true });
 	else
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.sha1, force: true });
+}
+NodeViewModel.prototype.dropRebaseRef = function(ref) {
+	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.sha1 });
+}
+NodeViewModel.prototype.dropMergeRef = function(ref) {
+	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.sha1 });
 }
 NodeViewModel.prototype.isAncestor = function(node) {
 	if (this.index() >= GitGraphViewModel.maxNNodes) return false;
@@ -392,6 +404,12 @@ GraphAction.prototype.mouseover = function() {
 	this.graph.hoverGraphAction(this);
 }
 GraphAction.prototype.mouseout = function() {
+	this.graph.hoverGraphAction(null);
+}
+GraphAction.prototype.dragenter = function() {
+	this.graph.hoverGraphAction(this);
+}
+GraphAction.prototype.dragleave = function() {
 	this.graph.hoverGraphAction(null);
 }
 

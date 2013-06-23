@@ -85,6 +85,24 @@ ko.bindingHandlers.dropOver = {
     }
 }
 
+ko.bindingHandlers.dragEnter = {
+    init: function(element, valueAccessor) {
+        element.addEventListener('dragenter', function(e) {
+            var value = valueAccessor();
+            value();
+        });
+    }
+}
+
+ko.bindingHandlers.dragLeave = {
+    init: function(element, valueAccessor) {
+        element.addEventListener('dragleave', function(e) {
+            var value = valueAccessor();
+            value();
+        });
+    }
+}
+
 ko.bindingHandlers.drop = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         var value = valueAccessor();
