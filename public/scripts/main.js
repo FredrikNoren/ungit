@@ -40,7 +40,7 @@ var updateThrobbers = function() {
         var xy = throbber.style.backgroundPosition || '0px 0px';
         var x = xy.split(' ')[0].trim();
         x = parseInt(x.slice(0, x.length - 2));
-        x = (x - 40) % 800;
+        x = (x - 40) % 1440;
         throbber.style.backgroundPosition = x + 'px 0px';
     }
     requestAnimationFrame(updateThrobbers);
