@@ -160,8 +160,8 @@ StagingViewModel.prototype.setFiles = function(files) {
 }
 StagingViewModel.prototype.toogleAmend = function() {
 	if (!this.amend() && !this.commitMessageTitle()) {
-		this.commitMessageTitle(this.graph.HEAD().title);
-		this.commitMessageBody(this.graph.HEAD().body);
+		this.commitMessageTitle(this.repository.graph.HEAD().title);
+		this.commitMessageBody(this.repository.graph.HEAD().body);
 	}
 	else if(this.amend()) {
 		this.commitMessageTitle('');
