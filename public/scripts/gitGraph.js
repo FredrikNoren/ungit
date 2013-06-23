@@ -205,12 +205,12 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 				y += 60;
 			node.x(30);
 			node.radius(30);
-			node.logBoxVisible(true);
+			node.ancestorOfHEAD(true);
 		} else {
 			y += 60;
 			node.x(30 + 90 * (branchSlots.length - node.branchOrder));
 			node.radius(15);
-			node.logBoxVisible(false);
+			node.ancestorOfHEAD(false);
 		}
 		node.y(y);
 
@@ -253,7 +253,10 @@ NodeViewModel = function(args) {
 	this.authorName = args.authorName;
 	this.authorEmail = args.authorEmail;
 	this.index = ko.observable();
-	this.logBoxVisible = ko.observable(true);
+	this.ancestorOfHEAD = ko.observable(false);
+	this.logBoxVisible = ko.computed(function() {
+		return self.ancestorOfHEAD();
+	})
 	this.refs = ko.observable([]);
 	this.branches = ko.computed(function() {
 		return self.refs().filter(function(r) { return r.isBranch; });

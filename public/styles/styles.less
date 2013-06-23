@@ -562,6 +562,7 @@ a {
 			.log {
 				position: absolute;
 				left: 70px;
+
 				.logEntryBox {
 					position: relative;
 					top: -20px;
@@ -659,6 +660,15 @@ a {
 					&.move {
 						background: rgba(0, 0, 0, 0.1);
 						width: 70px;
+						opacity: 0;
+
+						-moz-transition: opacity 0.3s;
+						-webkit-transition: opacity 0.3s;
+						-o-transition: opacity 0.3s;
+						transition: opacity 0.3s;
+						&.show {
+							opacity: 1;
+						}
 					}
 					&.newRef {
 						opacity: 0.1;
