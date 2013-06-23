@@ -7,7 +7,7 @@ var defaultConfig = {
 	port: 8448,
 
 	// Enables gerrit integration
-	gerritIntegration: false,
+	gerrit: false,
 
 	// This will automatically send anonymous bug reports
 	bugtracking: true,

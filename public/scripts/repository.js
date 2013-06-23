@@ -13,7 +13,7 @@ var RepositoryViewModel = function(repoPath) {
 	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
 	this.showGerritIntegrationButton = ko.computed(function() {
-		return config.gerritIntegration && !self.gerritIntegration();
+		return config.gerrit && !self.gerritIntegration();
 	});
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(repoPath);

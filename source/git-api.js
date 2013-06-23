@@ -312,7 +312,7 @@ exports.registerApi = function(app, server, config) {
 	});
 
 
-	if (config.gerritIntegration) {
+	if (config.gerrit) {
 
 		app.get(exports.pathPrefix + '/gerrit/commithook', function(req, res) {
 			var repoPath = req.query.path;
