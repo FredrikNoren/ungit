@@ -116,8 +116,9 @@
 				<!-- /ko -->
 			</td></tr></table>
 		</div>
-		<div data-bind="visible: isCommitting">
-			Committing changes...
+		<div class="committing" data-bind="visible: isCommitting">
+			<div>Committing changes...</div>
+			<div class="throbber"></div>
 		</div>
 	</div>
 </script>
