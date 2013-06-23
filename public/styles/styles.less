@@ -14,7 +14,7 @@ html, body {
 	padding: 0;
 	margin: 0;
 	height: 100%;
-	background: rgb(228, 228, 228);
+	background: #fff;
 
 }
 button, body {
@@ -161,52 +161,64 @@ a {
 	}
 }
 
-.content, .currentDirectory form {
-	margin-left: 40px;
-}
-
 .content {
+	background: rgb(228, 228, 228);
+	padding-left: 40px;
 }
 
 
-.currentDirectory {
-	background: #3C3C3C;
-	border-bottom: 1px solid #eee;
-	input[type="text"] {
-		background: transparent;
-		border: 0px;
-		color: #fff;
-		width: 100%;
-		padding: 3px;
-		font-size: 1.7em;
-		&:focus, &:hover {
-			background: #fff;
-			color: #444;
+.header {
+	background: #4D4D4D;
+	padding-left: 40px;
+	padding-right: 40px;
+	padding-top: 20px;
+
+	.logo {
+		position: absolute;
+		margin-top: 2px;
+	}
+
+	.currentDirectory {
+		box-sizing:border-box;
+		-moz-box-sizing:border-box;
+		display: block;
+		background: #575757;
+		margin-left: 110px;
+		padding: 0px;
+
+		input[type="text"] {
+			box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			
+			background: transparent;
+			border: 0px;
+			color: #D7E1E7;
+			padding: 3px;
+			padding-left: 10px;
+			padding-right: 10px;
+			font-size: 1.7em;
+			width: 100%;
+			margin: 0px;
+			font-family: 'Open Sans';
 		}
+	}
+
+	.arrowUp {
+		margin-top: 10px;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
 	}
 }
 
 .path {
+
 	padding-top: 20px;
 	.path {
 		color: #bbb;
 		margin-bottom: 20px;
 	}
 
-	.titleHeader {
-		position: absolute;
-		right: 50px;
-		top: -25px;
-		z-index: 100;
-		font-size: 3.8em;
-		margin-bottom: 30px;
-		.logo {
-			vertical-align: baseline;
-			position: relative;
-			top: 35px;
-			margin-right: 35px;
-		}
-	}
 	.uninited {
 		h1 {
 			color: #555;

@@ -44,10 +44,6 @@
 <script type="text/html" id="path">
 	<div class="path">
 
-		<div class="titleHeader animated fadeInLeft">
-			<a href="/#/"><img src="images/logo.png" class="logo"></a></span>
-		</div>
-
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
 		</div>
@@ -310,10 +306,14 @@
 
 <div class="main">
 
-	<div class="currentDirectory">
-		<form data-bind="submit: submitPath">
+	<div class="header">
+		
+		<a class="logo" href="/#/"><img src="images/logo.png" class="logo"></a>
+
+		<form class="currentDirectory" data-bind="submit: submitPath">
 			<input type="text" data-bind="value: path">
 		</form>
+		<img src="images/lightGrayArrowUp.png" class="arrowUp">
 	</div>
 
 	<div class="content" data-bind="template: { name: templateChooser, data: content }"></div>
