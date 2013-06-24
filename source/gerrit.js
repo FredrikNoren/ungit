@@ -76,8 +76,8 @@ gerrit = function(username, host, port, command, res, callback) {
 
 var gerriAddresstSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
 var gerritAddressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
-var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):(.*).git/;
-var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):(.*).git/;
+var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
+var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
 
 gerrit.parseRemote = function(remote) {
   var match = gerriAddresstSshWithPortRegexp.exec(remote);

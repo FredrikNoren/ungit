@@ -38,4 +38,19 @@ describe('gerrit', function () {
     expect(parsed.project).to.be('my/gerrit/project');
   });
 
-});  
+  it('getGerritAddress for git without port without username without .git ending', function() {
+    var addr = 'some.address.com:my/gerrit/project';
+    var parsed = gerrit.parseRemote(addr);
+    expect(parsed.host).to.be('some.address.com');
+    expect(parsed.project).to.be('my/gerrit/project');
+  });
+
+  it('getGerritAddress for git without port with username without .git ending', function() {
+    var addr = 'someuser@some.address.com:my/gerrit/project';
+    var parsed = gerrit.parseRemote(addr);
+    expect(parsed.username).to.be('someuser');
+    expect(parsed.host).to.be('some.address.com');
+    expect(parsed.project).to.be('my/gerrit/project');
+  });
+
+});
