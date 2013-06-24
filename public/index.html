@@ -284,8 +284,9 @@
 		<div><button data-bind="click: pushForReview">Push changes for review</button></div>
 
 		<div class="changes">
-			<div class="throbber" data-bind="visible: loadingChanges"></div>
-			<div data-bind="visible: !loadingChanges()" class="animated fadeInLeft">
+			<div class="throbber" data-bind="visible: status() == 'loading'"></div>
+			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
+			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
 				<div data-bind="foreach: changes">
 					<div class="change">
 						<span class="subject" data-bind="text: subject"></span> by <span class="owner" data-bind="text: ownerName"></span>

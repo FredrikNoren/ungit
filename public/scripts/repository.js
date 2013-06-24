@@ -242,7 +242,7 @@ var GerritIntegrationViewModel = function(repo) {
 	this.repo = repo;
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
-	this.loadingChanges = ko.observable(true);
+	this.status = ko.observable('loading');
 	this.changes = ko.observable();
 	this.updateCommitHook();
 	this.updateChanges();
@@ -255,11 +255,11 @@ GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 }
 GerritIntegrationViewModel.prototype.updateChanges = function() {
 	var self = this;
-	self.loadingChanges(true);
+	self.status('loading');
 	api.query('GET', '/gerrit/changes', { path: this.repo.repoPath }, function(err, changes) {
-		if (err || !changes) return true;
+		if (err || !changes) { self.status('failed'); return true; }
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
-		self.loadingChanges(false);
+		self.status('loaded');
 	});
 }
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
