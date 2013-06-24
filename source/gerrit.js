@@ -1,7 +1,22 @@
 
 var Ssh2Connection = require('ssh2');
 var git = require('./git');
+var config = require('./config')();
+var os = require('os');
+var child_process = require('child_process');
+var _ = require('underscore');
 
+var getProcessUsername = function(callback) {
+  child_process.exec('whoami', function(err, res) {
+    if (err) callback(err);
+    else {
+      res = res.split('\n')[0];
+      if (res.indexOf('/') != -1) res = _.last(res.split('/'));
+      res = res.trim();
+      callback(null, res);
+    }
+  });
+};
 
 var ssh2 = function(username, host, port, command, callback) {
   var connection = new Ssh2Connection();
@@ -22,11 +37,26 @@ var ssh2 = function(username, host, port, command, callback) {
   connection.on('error', function(err) {
     callback(err);
   });
-  connection.connect({
+  var connectConfig = {
     host: host,
     port: port,
-    agent: 'pageant',
     username: username
+  };
+  connectConfig.agent = config.sshAgent;
+  if (!connectConfig.agent) {
+    if (os.type() == 'Windows_NT') connectConfig.agent = 'pageant';
+    else connectConfig.agent = '' + process.env.SSH_AUTH_SOCK;
+  }
+  if (config.sshUsername)
+    connectConfig.username = config.sshUsername;
+  var doConnect = function() { connection.connect(connectConfig); };
+  if (connectConfig.username) doConnect();
+  else getProcessUsername(function(err, username) {
+    if (err) callback(err);
+    else {
+      connectConfig.username = username;
+      doConnect();
+    }
   });
 };
 

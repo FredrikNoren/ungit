@@ -18,6 +18,12 @@ var defaultConfig = {
 	// Map of username/passwords which are granted access.
 	users: undefined,
 
+	// Ssh username. Defaults to what the repository is configured with, or the currently logged in user.
+	sshUsername: undefined,
+
+	// Ssh agent. Defaults to pageant on Windows and SSH_AUTH_SOCK on Unix.
+	sshAgent: undefined,
+
 	// Used for development purposes
 	dev: false,
 };
