@@ -347,6 +347,8 @@ a {
 	padding-right: 50px;
 	overflow: hidden;
 	height: auto;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
 
 	.gerritIntegration {
 		float: right;
@@ -359,6 +361,8 @@ a {
 		overflow: hidden;
 		height: auto;
 		padding-right: 5px;
+		margin-bottom: 1px;
+		padding-bottom: 1px;
 	}
 
 	.enableGerritIntegration {
@@ -606,7 +610,9 @@ a {
 .repository .graph {
 
 	position: relative;
-	top: 30px;
+	margin-top: 30px;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
 
 	.graphLog {
 		position: relative;
@@ -791,13 +797,13 @@ a {
 		}
 	}
 
-}
-
-.repository .graphFooter {
-	.throbber {
-		margin-left: 300px;
-		margin-bottom: 20px;
+	.graphFooter {
+		height: 60px;
+		.throbber {
+			margin-left: (@logWidth + 140px);
+		}
 	}
+
 }
 
 .droparea {

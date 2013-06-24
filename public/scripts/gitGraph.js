@@ -9,6 +9,7 @@ var GitGraphViewModel = function(repoPath) {
 	this.nodesById = {};
 	this.refsByRefName = {};
 	this.repoPath = repoPath;
+	this.isLoading = ko.observable(false);
 	this.activeBranch = ko.observable();
 	this.HEAD = ko.observable();
 	this.hoverGraphAction = ko.observable();
@@ -49,9 +50,11 @@ GitGraphViewModel.prototype.scrolledToEnd = function() {
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
+	this.isLoading(true);
 	api.query('GET', '/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
 		if (err) return;
 		self.setNodesFromLog(logEntries);
+		self.isLoading(false);
 	});
 }
 
@@ -99,7 +102,7 @@ GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 	});
 }
 
-GitGraphViewModel.markNodesIdealogicalBranches = function(HEAD, nodes, nodesById) {
+GitGraphViewModel.markNodesIdealogicalBranches = function(nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, idealogicalBranch) {
 		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
 			node.idealogicalBranch = idealogicalBranch;
@@ -137,8 +140,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
 	var HEAD = this.HEAD();
-	if (!HEAD) return;
-	GitGraphViewModel.markNodesIdealogicalBranches(HEAD, nodes, this.nodesById);
+	GitGraphViewModel.markNodesIdealogicalBranches(nodes, this.nodesById);
 
 	// Make sure refs know their "remote"
 	for(var refName in this.refsByRefName) {
@@ -156,9 +158,11 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var updateTimeStamp = moment().valueOf();
 
 	// Mark timestamps
-	GitGraphViewModel.traverseNodeParents(HEAD, this.nodesById, function(node) {
-		node.ancestorOfHEADTimeStamp = updateTimeStamp;
-	});
+	if (HEAD) {
+		GitGraphViewModel.traverseNodeParents(HEAD, this.nodesById, function(node) {
+			node.ancestorOfHEADTimeStamp = updateTimeStamp;
+		});
+	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
 	nodes = nodes.filter(function(node) { return !!node.idealogicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
