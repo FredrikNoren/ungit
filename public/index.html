@@ -176,12 +176,6 @@
 			<div class="repositoryMain">
 
 				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
-				
-				<!-- ko if: showGerritIntegrationButton -->
-				<div class="enableGerritIntegration">
-					<button data-bind="click: toogleGerritIntegration">Enable gerrit integration</button>
-				</div>
-				<!-- /ko -->
 
 				<div class="graphUtils" data-bind="visible: isFetching">
 					<img src="images/grayArrowDown.png" class="arrowDown">

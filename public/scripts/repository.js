@@ -12,9 +12,7 @@ var RepositoryViewModel = function(repoPath) {
 	this.repoPath = repoPath;
 	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
-	this.showGerritIntegrationButton = ko.computed(function() {
-		return config.gerrit && !self.gerritIntegration();
-	});
+	if (config.gerrit) this.gerritIntegration(new GerritIntegrationViewModel(this));
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(repoPath);
 	this.updateStatus();
@@ -97,12 +95,6 @@ RepositoryViewModel.prototype.toogleShowBranches = function() {
 RepositoryViewModel.prototype.createNewBranch = function() {
 	api.query('POST', '/branches', { path: this.repoPath, name: this.newBranchName() });
 	this.newBranchName('');
-}
-RepositoryViewModel.prototype.toogleGerritIntegration = function() {
-	if (this.gerritIntegration())
-		this.gerritIntegration(null);
-	else
-		this.gerritIntegration(new GerritIntegrationViewModel(this));
 }
 
 
