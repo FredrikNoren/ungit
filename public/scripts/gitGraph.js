@@ -2,6 +2,7 @@
 
 var GitGraphViewModel = function(repoPath) {
 	var self = this;
+	this.maxNNodes = 10;
 	this.nodes = ko.observable([]);
 	this.refs = ko.observableArray();
 	this.daySeparators = ko.observable();
@@ -42,10 +43,13 @@ GitGraphViewModel.prototype.dropDeleteRef = function(ref) {
 		self.refDropActionsWorking(false);
 	});
 }
-
+GitGraphViewModel.prototype.scrolledToEnd = function() {
+	this.maxNNodes = this.maxNNodes + 10;
+	this.loadNodesFromApi();
+}
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
-	api.query('GET', '/log', { path: this.repoPath, limit: GitGraphViewModel.maxNNodes }, function(err, logEntries) {
+	api.query('GET', '/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
 		if (err) return;
 		self.setNodesFromLog(logEntries);
 	});
@@ -86,7 +90,7 @@ GitGraphViewModel.getHEAD = function(nodes) {
 }
 
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
-	if (node.index() >= GitGraphViewModel.maxNNodes) return;
+	if (node.index() >= this.maxNNodes) return;
 	callback(node);
 	node.parents.forEach(function(parentId) {
 		var parent = nodesById[parentId];
@@ -125,8 +129,6 @@ GitGraphViewModel.randomColor = function() {
 	}
 	return '#' + randomHex() + randomHex() + randomHex();
 }
-
-GitGraphViewModel.maxNNodes = 100;
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var daySeparators = [];

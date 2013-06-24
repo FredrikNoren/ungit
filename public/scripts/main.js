@@ -115,6 +115,21 @@ ko.bindingHandlers.shown = {
     }
 };
 
+ko.bindingHandlers.scrolledToEnd = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        $(window).scroll(function() {
+            if (  document.documentElement.clientHeight + 
+                  $(document).scrollTop() >= $(document).height() )
+            {
+                var value = valueAccessor();
+                var valueUnwrapped = ko.utils.unwrapObservable(value);
+                valueUnwrapped.call(viewModel);
+            }
+        });
+    }
+};
+
+
 window.onerror = function() {
     viewModel.content(new CrashViewModel());
     viewModel.dialog(null);

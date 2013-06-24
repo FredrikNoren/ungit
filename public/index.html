@@ -182,7 +182,8 @@
 					<div class="fetchingIndicator">Fetching nodes from remote...</div>
 				</div>
 				
-				<div class="graph" data-bind="with: graph">
+				<!-- ko with: graph -->
+				<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
 
 					<div class="daySeparators" data-bind="foreach: daySeparators">
 						<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
@@ -255,6 +256,10 @@
 						</div>
 					</div>
 
+				</div>
+				<!-- /ko -->
+				<div class="graphFooter">
+					<div class="throbber"></div>
 				</div>
 
 			</div>
