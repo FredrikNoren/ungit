@@ -130,14 +130,13 @@ ko.bindingHandlers.scrolledToEnd = {
 };
 
 
-window.onerror = function() {
-    viewModel.content(new CrashViewModel());
-    viewModel.dialog(null);
+window.onerror = function(err) {
     if (config.bugtracking)
         window.bugsense.onerror.apply(window.bugsense, arguments);
+    app.content(new CrashViewModel());
 };
 
-ko.applyBindings(viewModel);
+ko.applyBindings(app);
 
 
 //setup hasher

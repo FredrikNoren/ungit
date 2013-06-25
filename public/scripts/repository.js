@@ -3,18 +3,18 @@ var idCounter = 0;
 var newId = function() { return idCounter++; };
 
 
-var RepositoryViewModel = function(repoPath) {
+var RepositoryViewModel = function(main, repoPath) {
 	var self = this;
 	this.status = ko.observable('loading');
 
 	visitedRepositories.tryAdd(repoPath);
-	
+	this.main = main;
 	this.repoPath = repoPath;
 	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
 	if (config.gerrit) this.gerritIntegration(new GerritIntegrationViewModel(this));
 	this.isFetching = ko.observable(false);
-	this.graph = new GitGraphViewModel(repoPath);
+	this.graph = new GitGraphViewModel(this);
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
 	this.status.subscribe(function(newValue) {
@@ -23,12 +23,12 @@ var RepositoryViewModel = function(repoPath) {
 			self.fetch();
 			api.watchRepository(repoPath, {
 				disconnect: function() {
-					viewModel.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+					self.main.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 				},
 				ready: function() { self.watcherReady(true) },
 				changed: function() { self.update(); },
 				requestCredentials: function(callback) {
-					viewModel.dialog().askForCredentials(callback);
+					self.main.dialog().askForCredentials(callback);
 				}
 			});
 		}
@@ -48,7 +48,7 @@ RepositoryViewModel.prototype.fetch = function() {
 	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
 		if (err) {
 			if (err.errorCode == 'no-supported-authentication-provided') {
-				viewModel.content(new UserErrorViewModel({
+				self.main.content(new UserErrorViewModel({
 					title: 'Authentication error',
 					details: 'No supported authentication methods available. Try starting ssh-agent or pageant.'
 				}));
@@ -237,9 +237,9 @@ FileViewModel.prototype.invalidateDiff = function() {
 
 
 
-var GerritIntegrationViewModel = function(repo) {
+var GerritIntegrationViewModel = function(repository) {
 	var self = this;
-	this.repo = repo;
+	this.repository = repository;
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
 	this.status = ko.observable('loading');
@@ -249,14 +249,14 @@ var GerritIntegrationViewModel = function(repo) {
 }
 GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 	var self = this;
-	api.query('GET', '/gerrit/commithook', { path: this.repo.repoPath }, function(err, hook) {
+	api.query('GET', '/gerrit/commithook', { path: this.repository.repoPath }, function(err, hook) {
 		self.showInitCommmitHook(!hook.exists);
 	});
 }
 GerritIntegrationViewModel.prototype.updateChanges = function() {
 	var self = this;
 	self.status('loading');
-	api.query('GET', '/gerrit/changes', { path: this.repo.repoPath }, function(err, changes) {
+	api.query('GET', '/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
 		if (err || !changes) { self.status('failed'); return true; }
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 		self.status('loaded');
@@ -265,7 +265,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	var self = this;
 	this.initCommitHookMessage('Initing commit hook...');
-	api.query('POST', '/gerrit/commithook', { path: this.repo.repoPath }, function(err) {
+	api.query('POST', '/gerrit/commithook', { path: this.repository.repoPath }, function(err) {
 		self.updateCommitHook();
 	});
 }
@@ -285,14 +285,14 @@ GerritIntegrationViewModel.prototype.getChangeFromNode = function(node) {
 }
 GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var self = this;
-	var branch = this.repo.graph.activeBranch();
-	var change = this.getChangeFromNode(this.repo.graph.HEAD());
+	var branch = this.repository.graph.activeBranch();
+	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
-	var dialog = new PushDialogViewModel({ repoPath: this.repo.repoPath, remoteBranch: 'refs/for/' + branch });
-	dialog.done.add(function() {
+	var dialog = new PushDialogViewModel({ repoPath: this.repository.repoPath, remoteBranch: 'refs/for/' + branch });
+	dialog.closed.add(function() {
 		self.updateChanges();
 	});
-	viewModel.dialog(dialog);
+	self.repository.main.showDialog(dialog);
 }
 
 var GerritChangeViewModel = function(gerritIntegration, args) {
@@ -304,8 +304,8 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 };
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;
-	api.query('POST', '/fetch', { path: this.gerritIntegration.repo.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
-		api.query('POST', '/checkout', { path: self.gerritIntegration.repo.repoPath, name: 'FETCH_HEAD' });
+	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
+		api.query('POST', '/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' });
 	});
 }
 GerritChangeViewModel.prototype.openInGerrit = function() {

@@ -1,4 +1,12 @@
 
+var AppViewModel = function(main) {
+	this.content = ko.observable(main);
+}
+AppViewModel.prototype.templateChooser = function(data) {
+	if (!data) return '';
+	return data.template;
+};
+
 var MainViewModel = function() {
 	var self = this;
 	this.path = ko.observable();
@@ -21,8 +29,16 @@ var MainViewModel = function() {
 		}
 	});
 }
+MainViewModel.prototype.template = 'main';
 MainViewModel.prototype.submitPath = function() {
 	browseTo('repository?path=' + encodeURIComponent(this.path()));
+}
+MainViewModel.prototype.showDialog = function(dialog) {
+	var self = this;
+	dialog.closed.add(function() {
+		self.dialog(null);
+	})
+	this.dialog(dialog);
 }
 MainViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
@@ -44,13 +60,6 @@ var visitedRepositories = {
 	}
 }
 
-function AlertDialogViewModel(message) {
-	this.message = message;
-}
-AlertDialogViewModel.prototype.template = 'alertDialog';
-AlertDialogViewModel.prototype.close = function() {
-	viewModel.dialog(null);
-}
 
 function PushDialogViewModel(args) {
 	this.repoPath = args.repoPath;
@@ -60,7 +69,8 @@ function PushDialogViewModel(args) {
 	this.username = ko.observable();
 	this.password = ko.observable();
 	setTimeout(this.startPush.bind(this), 1);
-	this.done = new signals.Signal();
+	this.closed = new signals.Signal();
+	this.userError = ko.observable();
 }
 PushDialogViewModel.prototype.template = 'pushDialog';
 PushDialogViewModel.prototype.askForCredentials = function(callback) {
@@ -71,17 +81,19 @@ PushDialogViewModel.prototype.submitCredentials = function() {
 	this.credentialsCallback({ username: this.username(), password: this.password() });
 	this.showCredentialsForm(false);
 }
+PushDialogViewModel.prototype.close = function() {
+	self.closed.dispatch();
+}
 PushDialogViewModel.prototype.startPush = function() {
 	var self = this;
 	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch, localBranch: this.localBranch }, function(err, res) {
 		if (err) {
 			if (err.res.body.stderr.indexOf('ERROR: missing Change-Id in commit message footer') != -1) {
-				viewModel.dialog(new AlertDialogViewModel('Missing Change-Id'));
+				this.userError('Missing Change-Id');
 				return true;
 			}
 		}
-		viewModel.dialog(null);
-		self.done.dispatch();
+		self.close();
 	});
 }
 
@@ -139,8 +151,9 @@ var UserErrorViewModel = function(args) {
 }
 UserErrorViewModel.prototype.template = 'usererror';
 
-var PathViewModel = function(path) {
+var PathViewModel = function(main, path) {
 	var self = this;
+	this.main = main;
 	this.path = path;
 	this.status = ko.observable('loading');
 	this.cloneUrl = ko.observable();
@@ -166,7 +179,7 @@ PathViewModel.prototype.updateStatus = function() {
 	api.query('GET', '/status', { path: this.path }, function(err, status){
 		if (!err) {
 			self.status('repository');
-			self.repository(new RepositoryViewModel(self.path));
+			self.repository(new RepositoryViewModel(self.main, self.path));
 		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
 			return true;
@@ -194,14 +207,14 @@ PathViewModel.prototype.cloneRepository = function() {
 }
 
 crossroads.addRoute('/', function() {
-	viewModel.path('');
-	viewModel.content(new HomeViewModel());
+	main.path('');
+	main.content(new HomeViewModel());
 });
 
 crossroads.addRoute('/repository{?query}', function(query) {
-	viewModel.path(query.path);
-	viewModel.content(new PathViewModel(query.path));
+	main.path(query.path);
+	main.content(new PathViewModel(main, query.path));
 })
 
-
-var viewModel = new MainViewModel();
+var main = new MainViewModel();
+var app = new AppViewModel(main);

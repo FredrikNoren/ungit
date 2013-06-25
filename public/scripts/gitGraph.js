@@ -1,6 +1,6 @@
 
 
-var GitGraphViewModel = function(repoPath) {
+var GitGraphViewModel = function(repository) {
 	var self = this;
 	this.maxNNodes = 10;
 	this.nodes = ko.observable([]);
@@ -8,7 +8,8 @@ var GitGraphViewModel = function(repoPath) {
 	this.daySeparators = ko.observable();
 	this.nodesById = {};
 	this.refsByRefName = {};
-	this.repoPath = repoPath;
+	this.repository = repository;
+	this.repoPath = repository.repoPath;
 	this.isLoading = ko.observable(false);
 	this.activeBranch = ko.observable();
 	this.HEAD = ko.observable();
@@ -27,7 +28,7 @@ var GitGraphViewModel = function(repoPath) {
 GitGraphViewModel.prototype.dropPushRef = function(ref) {
 	var self = this;
 	this.refDropActionsWorking(false);
-	viewModel.dialog(new PushDialogViewModel({ repoPath: this.repoPath, localBranch: ref.displayName, remoteBranch: ref.displayName }));
+	this.repository.main.showDialog(new PushDialogViewModel({ repoPath: this.repoPath, localBranch: ref.displayName, remoteBranch: ref.displayName }));
 }
 GitGraphViewModel.prototype.dropCheckoutRef = function(ref) {
 	var self = this;
@@ -410,7 +411,7 @@ PushGraphAction.prototype.icon = 'P';
 PushGraphAction.prototype.tooltip = 'Push to remote';
 PushGraphAction.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
-	viewModel.dialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
+	this.graph.repo.main.showDialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
 }
 
 
