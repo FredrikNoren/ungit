@@ -82,7 +82,7 @@ PushDialogViewModel.prototype.submitCredentials = function() {
 	this.showCredentialsForm(false);
 }
 PushDialogViewModel.prototype.close = function() {
-	self.closed.dispatch();
+	this.closed.dispatch();
 }
 PushDialogViewModel.prototype.startPush = function() {
 	var self = this;
