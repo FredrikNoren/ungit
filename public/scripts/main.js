@@ -131,7 +131,7 @@ ko.bindingHandlers.scrolledToEnd = {
 
 
 window.onerror = function(err) {
-    if (config.bugtracking)
+    if (ungit.config.bugtracking)
         window.bugsense.onerror.apply(window.bugsense, arguments);
     app.content(new CrashViewModel());
 };

@@ -6,6 +6,7 @@ if (config.bugtracking) {
 var express = require('express');
 var gitApi = require('./git-api');
 var winston = require('winston');
+var version = require('./version');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -84,7 +85,13 @@ exports.start = function(callback) {
 	gitApi.registerApi(app, server, ensureAuthenticated, config);
 
 	app.get('/config.js', function(req, res) {
-		res.send('config = ' + JSON.stringify(config));
+		res.send('ungit.config = ' + JSON.stringify(config));
+	});
+
+	app.get('/version.js', function(req, res) {
+		version.getVersion(function(ver) {
+			res.send('ungit.version = \'' + ver + '\'');
+		});
 	});
 
 	// Error handling

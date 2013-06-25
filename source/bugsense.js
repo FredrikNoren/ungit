@@ -3,10 +3,13 @@ var superagent = require('superagent');
 var uuid = require('uuid');
 var os = require('os');
 var winston = require('winston');
+var version = require('./version');
 
 var bugsense = exports;
 
-exports.notify = function(exception, clientName, callback) {
+bugsense.appVersion = 'unknown';
+
+bugsense.notify = function(exception, clientName, callback) {
 	
 	winston.info('Sending exception to bugsense');
 
@@ -26,7 +29,7 @@ exports.notify = function(exception, clientName, callback) {
 			},
 			"application_environment": {
 				"phone": "PC",
-				"appver": "unkown",
+				"appver": bugsense.appVersion,
 				"appname": "ungit",
 				"osver": os.type(),
 				"uid": uuid.v1()
@@ -39,11 +42,17 @@ exports.notify = function(exception, clientName, callback) {
 	
 };
 
-exports.init = function(clientName) {
+bugsense.init = function(clientName, skipFindVersion) {
 	process.on('uncaughtException', function(err) {
 		bugsense.notify(err, clientName, function() {
 			winston.error(err.stack);
 			process.exit();
 		});
 	});
+	if (!skipFindVersion) {
+		version.getVersion(function(ver) {
+			bugsense.appVersion = ver;
+			winston.info('App version: ' + bugsense.appVersion);
+		})
+	}
 }

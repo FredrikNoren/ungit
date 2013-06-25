@@ -11,9 +11,9 @@ var MainViewModel = function() {
 	var self = this;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
-	this.isAuthenticated = ko.observable(!config.authentication);
+	this.isAuthenticated = ko.observable(!ungit.config.authentication);
 	this.realContent = ko.observable(new HomeViewModel());
-	if (config.authentication) {
+	if (ungit.config.authentication) {
 		this.authenticationScreen = new LoginViewModel();
 		this.authenticationScreen.loggedIn.add(function() {
 			self.isAuthenticated(true);

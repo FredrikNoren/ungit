@@ -21,7 +21,7 @@ var api = {
 				var err = { errorSummary: errorSummary, error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' };
 				if (callback && callback(err)) return;
 				else {
-					if (config.bugtracking)
+					if (ungit.config.bugtracking)
 						bugsense.addExtraData('data', JSON.stringify(err));
 					throw new Error('Backend: ' + path + ', ' + errorSummary);
 				}
