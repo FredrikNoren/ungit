@@ -278,13 +278,13 @@ NodeViewModel = function(args) {
 	})
 	this.branchingFormVisible = ko.observable(false);
 	this.showDropMoveTarget = ko.computed(function() {
-		return self.graph.showDropTargets();
+		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self;
 	});
 	this.showDropRebaseTarget = ko.computed(function() {
-		return self.graph.showDropTargets() && self.graph.draggingRef().current();
+		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self && self.graph.draggingRef().current();
 	});
 	this.showDropMergeTarget = ko.computed(function() {
-		return self.graph.showDropTargets() && self.graph.draggingRef().current();
+		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self && self.graph.draggingRef().current();
 	});
 }
 NodeViewModel.prototype.showBranchingForm = function() {
