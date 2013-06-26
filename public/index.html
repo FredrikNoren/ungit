@@ -248,18 +248,12 @@
 									<!-- /ko -->
 								</div>
 
-								<div class="refbox move droparea" data-bind="dropOver: showDropMoveTarget, drop: dropMoveRef, css: { show: showDropMoveTarget }">
-								Move
-								</div>
 
-								<div class="refbox rebase droparea" data-bind="dropOver: showDropRebaseTarget, drop: dropRebaseRef, css: { show: showDropRebaseTarget }">
-								Rebase
+								<!-- ko foreach: dropareaGraphActions -->
+								<div class="refbox droparea" data-bind="dropOver: visible, drop: drop, css: style">
+									<span data-bind="text: text"></span>
 								</div>
-
-								<div class="refbox merge droparea" data-bind="dropOver: showDropMergeTarget, drop: dropMergeRef, css: { show: showDropMergeTarget }">
-								Merge
-								</div>
-
+								<!-- /ko -->
 							</div>
 
 						</div>

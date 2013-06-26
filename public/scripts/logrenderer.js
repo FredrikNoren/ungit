@@ -68,7 +68,7 @@ logRenderer.render = function(element, graph) {
 	// Rebase
 	var rebaseNodes = {}
 	var rebasePath;
-	if (graph.hoverGraphAction() instanceof RebaseGraphAction) {
+	if (graph.hoverGraphAction() instanceof RebaseClickableGraphAction) {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		rebasePath = local.node().getPathToCommonAncestor(remote.node());
@@ -128,7 +128,7 @@ logRenderer.render = function(element, graph) {
 	context.lineWidth = 7;
 
 	// Draw push lines
-	if (graph.hoverGraphAction() instanceof PushGraphAction) {
+	if (graph.hoverGraphAction() instanceof PushClickableGraphAction) {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		if (remote) {
@@ -147,7 +147,7 @@ logRenderer.render = function(element, graph) {
 	// Draw reset lines
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
-	if (graph.hoverGraphAction() instanceof ResetGraphAction) {
+	if (graph.hoverGraphAction() instanceof ResetClickableGraphAction) {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		context.setLineDash(null);
@@ -159,7 +159,7 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw rebase lines
-	if (graph.hoverGraphAction() instanceof RebaseGraphAction) {
+	if (graph.hoverGraphAction() instanceof RebaseClickableGraphAction) {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		context.setLineDash(null);
