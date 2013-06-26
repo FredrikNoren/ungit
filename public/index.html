@@ -250,8 +250,9 @@
 
 
 								<!-- ko foreach: dropareaGraphActions -->
-								<div class="refbox droparea" data-bind="dropOver: visible, drop: drop, css: style">
+								<div class="refbox droparea" data-bind="css: style">
 									<span data-bind="text: text"></span>
+									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
 								</div>
 								<!-- /ko -->
 							</div>

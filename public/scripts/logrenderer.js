@@ -69,10 +69,13 @@ logRenderer.render = function(element, graph) {
 	var rebaseNodes = {}
 	var rebasePath;
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
-		var local = graph.hoverGraphAction().ref;
+		var ref = graph.hoverGraphAction().ref();
 		var onto = graph.hoverGraphAction().onto();
-		rebasePath = local.node().getPathToCommonAncestor(onto.node());
-		rebasePath.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
+		if (ref && onto) {
+			if (onto instanceof RefViewModel) onto = onto.node();
+			rebasePath = ref.node().getPathToCommonAncestor(onto);
+			rebasePath.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
+		}
 	}
 
 	// Draw lines
@@ -129,7 +132,7 @@ logRenderer.render = function(element, graph) {
 
 	// Draw push lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'push') {
-		var local = graph.hoverGraphAction().ref;
+		var local = graph.hoverGraphAction().ref();
 		var remote = local.remoteRef();
 		if (remote) {
 			context.setLineDash(refLineDash);
@@ -148,7 +151,7 @@ logRenderer.render = function(element, graph) {
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'reset') {
-		var local = graph.hoverGraphAction().ref;
+		var local = graph.hoverGraphAction().ref();
 		var remote = local.remoteRef();
 		context.setLineDash(null);
 		context.strokeStyle = "rgb(255, 129, 31)";
@@ -160,38 +163,41 @@ logRenderer.render = function(element, graph) {
 
 	// Draw rebase lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
-		var local = graph.hoverGraphAction().ref;
+		var ref = graph.hoverGraphAction().ref();
 		var onto = graph.hoverGraphAction().onto();
-		context.setLineDash(null);
-		context.lineWidth = 3;
-		context.strokeStyle = "#41DE3C";
+		if (ref && onto) {
+			if (onto instanceof RefViewModel) onto = onto.node();
+			context.setLineDash(null);
+			context.lineWidth = 3;
+			context.strokeStyle = "#41DE3C";
 
-		var path = rebasePath;
+			var path = rebasePath;
 
-		context.lineWidth = 7;
-		context.setLineDash([10, 5]);
-
-		var newNodes = path.slice(0, -1).map(function(node) {
-			return {
-				position: new Vector2(
-					onto.node().x() + (node.x() - _.last(path).x()),
-					onto.node().y() + (node.y() - _.last(path).y())),
-				radius: node.radius()
-			};
-		});
-		newNodes.forEach(function(node) {
-			context.beginPath();
-			context.arc(node.position.x, node.position.y, node.radius - context.lineWidth / 2, 0, 2 * Math.PI);
-			context.stroke();
-		});
-
-		var prevNode = { position: onto.node().position(), radius: onto.node().radius() };
-		newNodes.reverse().forEach(function(node) {
-			context.beginPath();
+			context.lineWidth = 7;
 			context.setLineDash([10, 5]);
-			logRenderer.drawLineBetweenNodes(context, node, prevNode);
-			context.stroke();
-			prevNode = node;
-		});
+
+			var newNodes = path.slice(0, -1).map(function(node) {
+				return {
+					position: new Vector2(
+						onto.x() + (node.x() - _.last(path).x()),
+						onto.y() + (node.y() - _.last(path).y())),
+					radius: node.radius()
+				};
+			});
+			newNodes.forEach(function(node) {
+				context.beginPath();
+				context.arc(node.position.x, node.position.y, node.radius - context.lineWidth / 2, 0, 2 * Math.PI);
+				context.stroke();
+			});
+
+			var prevNode = { position: onto.position(), radius: onto.radius() };
+			newNodes.reverse().forEach(function(node) {
+				context.beginPath();
+				context.setLineDash([10, 5]);
+				logRenderer.drawLineBetweenNodes(context, node, prevNode);
+				context.stroke();
+				prevNode = node;
+			});
+		}
 	}
 }

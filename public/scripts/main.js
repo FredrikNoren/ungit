@@ -87,19 +87,21 @@ ko.bindingHandlers.dropOver = {
 }
 
 ko.bindingHandlers.dragEnter = {
-    init: function(element, valueAccessor) {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         element.addEventListener('dragenter', function(e) {
             var value = valueAccessor();
-            value();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
         });
     }
 }
 
 ko.bindingHandlers.dragLeave = {
-    init: function(element, valueAccessor) {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         element.addEventListener('dragleave', function(e) {
             var value = valueAccessor();
-            value();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
         });
     }
 }
