@@ -75,7 +75,8 @@ ko.bindingHandlers.dropOver = {
     init: function(element, valueAccessor) {
         element.addEventListener('dragover', function(e) {
             var value = valueAccessor();
-            if ((typeof(value) == 'function' && !value(e)) || !value)
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            if (!valueUnwrapped)
                 return;
             if (e.preventDefault)
                 e.preventDefault();
