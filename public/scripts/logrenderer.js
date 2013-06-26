@@ -68,10 +68,10 @@ logRenderer.render = function(element, graph) {
 	// Rebase
 	var rebaseNodes = {}
 	var rebasePath;
-	if (graph.hoverGraphAction() instanceof RebaseClickableGraphAction) {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
 		var local = graph.hoverGraphAction().ref;
-		var remote = local.remoteRef();
-		rebasePath = local.node().getPathToCommonAncestor(remote.node());
+		var onto = graph.hoverGraphAction().onto();
+		rebasePath = local.node().getPathToCommonAncestor(onto.node());
 		rebasePath.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
 	}
 
@@ -128,7 +128,7 @@ logRenderer.render = function(element, graph) {
 	context.lineWidth = 7;
 
 	// Draw push lines
-	if (graph.hoverGraphAction() instanceof PushClickableGraphAction) {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'push') {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		if (remote) {
@@ -147,7 +147,7 @@ logRenderer.render = function(element, graph) {
 	// Draw reset lines
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
-	if (graph.hoverGraphAction() instanceof ResetClickableGraphAction) {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'reset') {
 		var local = graph.hoverGraphAction().ref;
 		var remote = local.remoteRef();
 		context.setLineDash(null);
@@ -159,9 +159,9 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw rebase lines
-	if (graph.hoverGraphAction() instanceof RebaseClickableGraphAction) {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
 		var local = graph.hoverGraphAction().ref;
-		var remote = local.remoteRef();
+		var onto = graph.hoverGraphAction().onto();
 		context.setLineDash(null);
 		context.lineWidth = 3;
 		context.strokeStyle = "#41DE3C";
@@ -174,8 +174,8 @@ logRenderer.render = function(element, graph) {
 		var newNodes = path.slice(0, -1).map(function(node) {
 			return {
 				position: new Vector2(
-					remote.node().x() + (node.x() - _.last(path).x()),
-					remote.node().y() + (node.y() - _.last(path).y())),
+					onto.node().x() + (node.x() - _.last(path).x()),
+					onto.node().y() + (node.y() - _.last(path).y())),
 				radius: node.radius()
 			};
 		});
@@ -185,7 +185,7 @@ logRenderer.render = function(element, graph) {
 			context.stroke();
 		});
 
-		var prevNode = { position: remote.node().position(), radius: remote.node().radius() };
+		var prevNode = { position: onto.node().position(), radius: onto.node().radius() };
 		newNodes.reverse().forEach(function(node) {
 			context.beginPath();
 			context.setLineDash([10, 5]);
