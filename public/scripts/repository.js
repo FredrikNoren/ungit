@@ -12,7 +12,6 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.repoPath = repoPath;
 	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
-	if (ungit.config.gerrit) this.gerritIntegration(new GerritIntegrationViewModel(this));
 	this.isFetching = ko.observable(false);
 	this.graph = new GitGraphViewModel(this);
 	this.updateStatus();
@@ -31,6 +30,9 @@ var RepositoryViewModel = function(main, repoPath) {
 					self.main.dialog().askForCredentials(callback);
 				}
 			});
+			if (ungit.config.gerrit) {
+				self.gerritIntegration(new GerritIntegrationViewModel(self));
+			}
 		}
 	});
 }
