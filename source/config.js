@@ -3,14 +3,17 @@ var rc = require('rc');
 
 var defaultConfig = {
 	
-	// The port ungit is exposed on
+	// The port ungit is exposed on.
 	port: 8448,
 
-	// Enables gerrit integration
+	// Enables gerrit integration.
 	gerrit: false,
 
-	// This will automatically send anonymous bug reports
+	// This will automatically send anonymous bug reports.
 	bugtracking: true,
+
+	// Google analytics for usage statistics.
+	googleAnalytics: true,
 
 	// True to enable authentication. Users are defined in the users configuration property.
 	authentication: false,
@@ -24,7 +27,7 @@ var defaultConfig = {
 	// Ssh agent. Defaults to pageant on Windows and SSH_AUTH_SOCK on Unix.
 	sshAgent: undefined,
 
-	// Used for development purposes
+	// Used for development purposes.
 	dev: false,
 };
 
