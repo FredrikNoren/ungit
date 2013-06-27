@@ -9,6 +9,7 @@ var winston = require('winston');
 var version = require('./version');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var semver = require('semver');
 
 var users = config.users;
 config.users = null; // So that we don't send the users to the client
@@ -91,6 +92,20 @@ exports.start = function(callback) {
 	app.get('/version.js', function(req, res) {
 		version.getVersion(function(ver) {
 			res.send('ungit.version = \'' + ver + '\'');
+		});
+	});
+
+	app.get('/api/latestversion', function(req, res) {
+		version.getVersion(function(currentVersion) {
+			version.getLatestVersion(function(err, latestVersion) {
+				if (err) {
+					// Until the package is uploaded to npm...
+					if (err.code != 'E404') throw new Error('Unhandled getLatestVersion error: ' + err.toString());
+					else res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
+				} else {
+					res.json({ latestVersion: latestVersion, currentVersion: currentVersion, outdated: semver.gt(latestVersion, currentVersion) });
+				}
+			});
 		});
 	});
 

@@ -13,6 +13,14 @@ var MainViewModel = function() {
 	this.dialog = ko.observable(null);
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
 	this.realContent = ko.observable(new HomeViewModel());
+	this.currentVersion = ko.observable();
+	this.latestVersion = ko.observable();
+	this.newVersionAvailable = ko.observable();
+	api.query('GET', '/latestversion', undefined, function(err, version) {
+		self.currentVersion(version.currentVersion);
+		self.latestVersion(version.latestVersion);
+		self.newVersionAvailable(version.outdated);
+	});
 	if (ungit.config.authentication) {
 		this.authenticationScreen = new LoginViewModel();
 		this.authenticationScreen.loggedIn.add(function() {

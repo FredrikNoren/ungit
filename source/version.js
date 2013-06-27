@@ -1,5 +1,6 @@
 var fs = require('fs');
 var child_process = require('child_process');
+var npm = require('npm');
 
 var cachedVersion;
 
@@ -18,4 +19,15 @@ exports.getVersion = function(callback) {
 		cachedVersion = packageJson.version;
 		callback(cachedVersion);
 	}
+}
+
+exports.getLatestVersion = function(callback) {
+	var packageName = 'ungit';
+	npm.load(function() {
+		npm.commands.show([packageName, 'versions'], true, function(err, data) {
+			if(err) return callback(err);
+			var versions = data[Object.keys(data)[0]].versions;
+			callback(null, versions[versions.length - 1]);
+		});
+	});
 }

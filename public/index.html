@@ -332,13 +332,18 @@
 <script type="text/html" id="main">
 	<div class="main">
 
+		<div class="newversion" data-bind="visible: newVersionAvailable">
+			A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+		</div>
+		
 		<div class="header">
-			
+
 			<a class="logo" href="/#/"><img src="images/logo.png" class="logo"></a>
 
 			<form class="currentDirectory" data-bind="submit: submitPath">
 				<input type="text" data-bind="value: path">
 			</form>
+
 			<img src="images/lightGrayArrowUp.png" class="arrowUp">
 		</div>
 
