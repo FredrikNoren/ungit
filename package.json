@@ -32,5 +32,6 @@
     "mocha": "1.11.0",
     "expect.js": "0.2.0",
     "supertest": "0.7.0"
-  }
+  },
+  "license": "MIT"
 }
