@@ -38,3 +38,6 @@ Vector2.random = function() {
 Vector2.angleXY = function(a) {
 	return Math.atan2(a.x, a.y);
 }
+
+if (typeof module !== 'undefined')
+	module.exports = Vector2;
