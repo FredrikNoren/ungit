@@ -285,6 +285,12 @@
 	</div>
 </script>
 
+<script type="text/html" id="progressBar">
+	<div class="progressBar">
+		<div class="progress" data-bind="style: { width: progress }"></div>
+	</div>
+</script>
+
 <script type="text/html" id="gerritIntegration">
 	<div class="gerritIntegration">
 		<h1>Gerrit</h1>
@@ -294,7 +300,9 @@
 		<div><button data-bind="click: pushForReview">Push changes for review</button></div>
 
 		<div class="changes">
-			<div class="throbber" data-bind="visible: status() == 'loading'"></div>
+			<!-- ko if: status() == 'loading' -->
+			<!-- ko template: { name: 'progressBar' } --><!-- /ko -->
+			<!-- /ko -->
 			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
 			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
 				<div data-bind="foreach: changes">
@@ -397,6 +405,7 @@
 <script type='text/javascript' src='/scripts/git-graph.js'></script>
 <script type='text/javascript' src='/scripts/vector2.js'></script>
 <script type='text/javascript' src='/scripts/logrenderer.js'></script>
+<script type='text/javascript' src='/scripts/gerrit.js'></script>
 <script type='text/javascript' src='/scripts/repository.js'></script>
 <script type='text/javascript' src='/scripts/app.js'></script>
 <script type='text/javascript' src='/scripts/main.js'></script>
