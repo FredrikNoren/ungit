@@ -147,7 +147,7 @@ DeleteDropareaGraphAction.prototype.visualization = 'delete';
 DeleteDropareaGraphAction.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName, remote: ref.isRemote });
+	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote });
 }
 
 
