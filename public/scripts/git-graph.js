@@ -353,7 +353,9 @@ var RefViewModel = function(args) {
 		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
 	this.canBePushed = ko.computed(function() {
-		return self.isLocal && self.graph.hasRemotes();
+		if (!self.isLocal || !self.graph.hasRemotes()) return false;
+		if (self.remoteRef()) return self.node() != self.remoteRef().node();
+		else return true;
 	});
 	this.color = GitGraphViewModel.randomColor();
 	this.remoteIsAncestor = ko.computed(function() {
