@@ -215,12 +215,18 @@ PathViewModel.prototype.cloneRepository = function() {
 }
 
 var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
+	var self = this;
 	this.progress = ko.observable();
 	this.running = false;
 	this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
 	this.predictionMs = ko.observable();
+	this.isFirstRun = ko.observable(false);
 	this.defaultTimeMs = defaultTimeMs;
 	this.elapsedMs = ko.observable(0);
+	this.show = ko.computed(function() {
+		if (self.isFirstRun()) return self.elapsedMs() > 400;
+		else return self.predictionMs() > 400;
+	});
 }
 ProgressBarViewModel.prototype.start = function() {
 	if (this.running) return;
@@ -230,7 +236,7 @@ ProgressBarViewModel.prototype.start = function() {
 	this.elapsedMs(0);
 	var predictionMs = localStorage.getItem(this.predictionMemoryKey);
 	if (!predictionMs || isNaN(predictionMs)) {
-		this.isFirstRun = true;
+		this.isFirstRun(true);
 		predictionMs = this.defaultTimeMs;
 	} else {
 		predictionMs = parseInt(predictionMs);
@@ -251,8 +257,8 @@ ProgressBarViewModel.prototype.stop = function() {
 	this.running = false;
 	this.endTime = Date.now();
 	this.lastRealTime = this.endTime - this.startTime;
-	if (this.isFirstRun) {
-		this.isFirstRun = false;
+	if (this.isFirstRun()) {
+		this.isFirstRun(false);
 		this.predictionMs(this.lastRealTime);
 	} else {
 		this.predictionMs(this.lastRealTime * 0.1 + this.predictionMs() * 0.9);
