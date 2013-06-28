@@ -5,7 +5,7 @@ var GerritIntegrationViewModel = function(repository) {
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
 	this.status = ko.observable('loading');
-	this.progress = ko.observable('50%');
+	this.changesLoader = new ProgressBarViewModel('gerrit-' + repository.repoPath, 4000);
 	this.changes = ko.observable();
 	this.updateCommitHook();
 	this.updateChanges();
@@ -19,7 +19,9 @@ GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 GerritIntegrationViewModel.prototype.updateChanges = function() {
 	var self = this;
 	self.status('loading');
+	this.changesLoader.start();
 	api.query('GET', '/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
+		self.changesLoader.stop();
 		if (err || !changes) { self.status('failed'); return true; }
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 		self.status('loaded');

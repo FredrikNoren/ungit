@@ -287,7 +287,7 @@
 
 <script type="text/html" id="progressBar">
 	<div class="progressBar">
-		<div class="progress" data-bind="style: { width: progress }"></div>
+		<div class="progress" data-bind="style: { width: (progress() * 100) + '%' }"></div>
 	</div>
 </script>
 
@@ -301,7 +301,7 @@
 
 		<div class="changes">
 			<!-- ko if: status() == 'loading' -->
-			<!-- ko template: { name: 'progressBar' } --><!-- /ko -->
+			<!-- ko template: { name: 'progressBar', data: changesLoader } --><!-- /ko -->
 			<!-- /ko -->
 			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
 			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">

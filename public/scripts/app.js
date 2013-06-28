@@ -214,6 +214,50 @@ PathViewModel.prototype.cloneRepository = function() {
 	});
 }
 
+var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
+	this.progress = ko.observable();
+	this.running = false;
+	this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
+	this.predictionMs = ko.observable();
+	this.defaultTimeMs = defaultTimeMs;
+}
+ProgressBarViewModel.prototype.start = function() {
+	this.startTime = Date.now();
+	this.running = true;
+	this.progress(0);
+	var predictionMs = localStorage.getItem(this.predictionMemoryKey);
+	if (!predictionMs || isNaN(predictionMs)) {
+		this.isFirstRun = true;
+		predictionMs = this.defaultTimeMs;
+	} else {
+		predictionMs = parseInt(predictionMs);
+	}
+	this.predictionMs(predictionMs);
+	this.update();
+}
+ProgressBarViewModel.prototype.elapsedMs = function() {
+	return Date.now() - this.startTime;
+}
+ProgressBarViewModel.prototype.update = function() {
+	if (!this.running) return;
+	var value = this.elapsedMs() / this.predictionMs();
+	value = Math.min(1, value);
+	this.progress(value);
+	requestAnimationFrame(this.update.bind(this));
+}
+ProgressBarViewModel.prototype.stop = function() {
+	this.running = false;
+	this.endTime = Date.now();
+	this.lastRealTime = this.endTime - this.startTime;
+	if (this.isFirstRun) {
+		this.isFirstRun = false;
+		this.predictionMs(this.lastRealTime);
+	} else {
+		this.predictionMs(this.lastRealTime * 0.1 + this.predictionMs() * 0.9);
+	}
+	localStorage.setItem(this.predictionMemoryKey, this.predictionMs().toString());
+}
+
 crossroads.addRoute('/', function() {
 	main.path('');
 	main.content(new HomeViewModel());
