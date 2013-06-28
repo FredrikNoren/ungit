@@ -116,7 +116,7 @@ PushDropareaGraphAction.prototype.drop = function(ref) {
 	this.graph.repository.main.programEvents.add(programEventListener);
 	this.performProgressBar.start();
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName }, function(err, res) {
-		this.graph.repository.main.programEvents.remove(programEventListener);
+		self.graph.repository.main.programEvents.remove(programEventListener);
 		self.performProgressBar.stop();
 	});
 }
