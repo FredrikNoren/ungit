@@ -28,7 +28,9 @@ var RepositoryViewModel = function(main, repoPath) {
 				changed: function() { self.update(); },
 				requestCredentials: function(callback) {
 					var diag = new CredentialsDialogViewModel();
+					self.main.programEvents.dispatch({ event: 'credentialsRequested' });
 					diag.closed.add(function() {
+						self.main.programEvents.dispatch({ event: 'credentialsProvided' });
 						callback({ username: diag.username(), password: diag.password() });
 					})
 					self.main.showDialog(diag);

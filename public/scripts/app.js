@@ -16,6 +16,10 @@ var MainViewModel = function() {
 	this.currentVersion = ko.observable();
 	this.latestVersion = ko.observable();
 	this.newVersionAvailable = ko.observable();
+	this.programEvents = new signals.Signal();
+	this.programEvents.add(function(event) {
+		console.log('Event:', event);
+	});
 	api.query('GET', '/latestversion', undefined, function(err, version) {
 		self.currentVersion(version.currentVersion);
 		self.latestVersion(version.latestVersion);
@@ -197,6 +201,7 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
 	this.isFirstRun = ko.observable(false);
 	this.defaultTimeMs = defaultTimeMs;
 	this.elapsedMs = ko.observable(0);
+	this.paused = ko.observable(false);
 	this.show = ko.computed(function() {
 		if (self.isFirstRun()) return self.elapsedMs() > 400;
 		else return self.predictionMs() > 400;
@@ -211,10 +216,11 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
 }
 ProgressBarViewModel.prototype.start = function() {
 	if (this.running()) return;
-	this.startTime = Date.now();
 	this.running(true);
 	this.progress(0);
+	this.paused(false);
 	this.elapsedMs(0);
+	this.lastUpdate = Date.now();
 	var predictionMs = localStorage.getItem(this.predictionMemoryKey);
 	if (!predictionMs || isNaN(predictionMs)) {
 		this.isFirstRun(true);
@@ -227,17 +233,28 @@ ProgressBarViewModel.prototype.start = function() {
 }
 ProgressBarViewModel.prototype.update = function() {
 	if (!this.running()) return;
-	this.elapsedMs(Date.now() - this.startTime);
-	var value = this.elapsedMs() / this.predictionMs();
-	value = Math.min(1, value);
-	this.progress(value);
+	if (!this.paused()) {
+		var time = Date.now();
+		var delta = time - this.lastUpdate;
+		this.lastUpdate = time;
+		this.elapsedMs(this.elapsedMs() + delta);
+		var value = this.elapsedMs() / this.predictionMs();
+		value = Math.min(1, value);
+		this.progress(value);
+	}
 	requestAnimationFrame(this.update.bind(this));
+}
+ProgressBarViewModel.prototype.pause = function() {
+	this.paused(true);
+}
+ProgressBarViewModel.prototype.unpause = function() {
+	this.paused(false);
+	this.lastUpdate = Date.now();
 }
 ProgressBarViewModel.prototype.stop = function() {
 	if (!this.running()) return;
 	this.running(false);
-	this.endTime = Date.now();
-	this.lastRealTime = this.endTime - this.startTime;
+	this.lastRealTime = this.elapsedMs();
 	if (this.isFirstRun()) {
 		this.isFirstRun(false);
 		this.predictionMs(this.lastRealTime);

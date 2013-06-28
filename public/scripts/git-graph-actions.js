@@ -109,8 +109,14 @@ PushDropareaGraphAction.prototype.visualization = 'push';
 PushDropareaGraphAction.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
+	var programEventListener = function(event) {
+		if (event.event == 'credentialsRequested') self.performProgressBar.pause();
+		else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
+	};
+	this.graph.repository.main.programEvents.add(programEventListener);
 	this.performProgressBar.start();
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName }, function(err, res) {
+		this.graph.repository.main.programEvents.remove(programEventListener);
 		self.performProgressBar.stop();
 	});
 }
