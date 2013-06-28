@@ -51,6 +51,7 @@ var RebaseDropareaGraphAction = function(graph, node) {
 	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		return self.graph.showDropTargets() && 
+			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
 			!self.node.isAncestor(self.graph.draggingRef().node()) &&
 			!self.graph.draggingRef().node().isAncestor(self.node) &&
 			self.graph.draggingRef().current();
@@ -71,7 +72,8 @@ var MergeDropareaGraphAction = function(graph, node) {
 	DropareaGraphAction.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
-		return self.graph.showDropTargets() && 
+		return self.graph.showDropTargets() &&
+			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
 			!self.node.isAncestor(self.graph.draggingRef().node()) &&
 			!self.graph.draggingRef().node().isAncestor(self.node) &&
 			self.graph.draggingRef().current();
