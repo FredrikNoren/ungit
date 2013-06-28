@@ -11,3 +11,5 @@ inherits = function(ctor, superCtor) {
     }
   });
 };
+
+if (typeof exports !== 'undefined') exports.inherits = inherits;

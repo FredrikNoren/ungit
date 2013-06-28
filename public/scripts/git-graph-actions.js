@@ -1,4 +1,8 @@
 
+if (typeof exports !== 'undefined') {
+	ko = require('./lib/knockout-2.2.1.js');
+	inherits = require('./utils').inherits;
+}
 
 var DropareaGraphAction = function(graph) {
 	this.graph = graph;
@@ -24,6 +28,7 @@ var MoveDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'move ' + (self.visible() ? 'show' : ''); });
 }
+if (typeof exports !== 'undefined') exports.MoveDropareaGraphAction = MoveDropareaGraphAction;
 inherits(MoveDropareaGraphAction, DropareaGraphAction);
 MoveDropareaGraphAction.prototype.text = 'Move';
 MoveDropareaGraphAction.prototype.visualization = 'move';
@@ -51,6 +56,7 @@ var RebaseDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'rebase ' + (self.visible() ? 'show' : ''); });
 }
+if (typeof exports !== 'undefined') exports.RebaseDropareaGraphAction = RebaseDropareaGraphAction;
 inherits(RebaseDropareaGraphAction, DropareaGraphAction);
 RebaseDropareaGraphAction.prototype.text = 'Rebase';
 RebaseDropareaGraphAction.prototype.visualization = 'rebase';
@@ -71,6 +77,7 @@ var MergeDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'merge ' + (self.visible() ? 'show' : ''); });
 }
+if (typeof exports !== 'undefined') exports.MergeDropareaGraphAction = MergeDropareaGraphAction;
 inherits(MergeDropareaGraphAction, DropareaGraphAction);
 MergeDropareaGraphAction.prototype.text = 'Merge';
 MergeDropareaGraphAction.prototype.visualization = 'merge';
@@ -102,6 +109,7 @@ var PushClickableGraphAction = function(graph, ref) {
 		else if (self.graph.hasRemotes()) return true;
 	});
 }
+if (typeof exports !== 'undefined') exports.PushClickableGraphAction = PushClickableGraphAction;
 inherits(PushClickableGraphAction, ClickableGraphAction);
 PushClickableGraphAction.prototype.style = 'push';
 PushClickableGraphAction.prototype.icon = 'P';
@@ -121,6 +129,7 @@ var ResetClickableGraphAction = function(graph, ref) {
 		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && !self.ref().remoteIsOffspring();
 	});
 }
+if (typeof exports !== 'undefined') exports.ResetClickableGraphAction = ResetClickableGraphAction;
 inherits(ResetClickableGraphAction, ClickableGraphAction);
 ResetClickableGraphAction.prototype.style = 'reset';
 ResetClickableGraphAction.prototype.icon = 'R';
@@ -142,6 +151,7 @@ var RebaseClickableGraphAction = function(graph, ref) {
 		return self.onto() && self.onto().node() != self.ref().node() && !self.ref().remoteIsAncestor() && !self.ref().remoteIsOffspring();
 	});
 }
+if (typeof exports !== 'undefined') exports.RebaseClickableGraphAction = RebaseClickableGraphAction;
 inherits(RebaseClickableGraphAction, ClickableGraphAction);
 RebaseClickableGraphAction.prototype.style = 'rebase';
 RebaseClickableGraphAction.prototype.icon = 'R';
@@ -160,6 +170,7 @@ var PullClickableGraphAction = function(graph, ref) {
 		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && self.ref().remoteIsOffspring();
 	});
 }
+if (typeof exports !== 'undefined') exports.PullClickableGraphAction = PullClickableGraphAction;
 inherits(PullClickableGraphAction, ClickableGraphAction);
 PullClickableGraphAction.prototype.style = 'pull';
 PullClickableGraphAction.prototype.icon = 'P';

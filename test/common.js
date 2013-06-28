@@ -75,3 +75,17 @@ common.createSmallRepo = function(req, done, callback) {
 		], done);
 	});
 }
+
+// Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.
+common.initDummyBrowserEnvironment = function() {
+	window = {};
+	document = {
+		createElement: function() {
+			return { getElementsByTagName: function() { return []; } }
+		},
+		createComment: function() {
+			return {};
+		}
+	};
+	navigator = {};
+}

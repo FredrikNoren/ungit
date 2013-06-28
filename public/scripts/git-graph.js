@@ -1,4 +1,18 @@
 
+if (typeof exports !== 'undefined') {
+	ko = require('./lib/knockout-2.2.1.js');
+	Vector2 = require('./vector2.js');
+	var gitGraphActions = require('./git-graph-actions.js');
+	MoveDropareaGraphAction = gitGraphActions.MoveDropareaGraphAction;
+	RebaseDropareaGraphAction = gitGraphActions.RebaseDropareaGraphAction;
+	MergeDropareaGraphAction = gitGraphActions.MergeDropareaGraphAction;
+	PushClickableGraphAction = gitGraphActions.PushClickableGraphAction;
+	ResetClickableGraphAction = gitGraphActions.ResetClickableGraphAction;
+	RebaseClickableGraphAction = gitGraphActions.RebaseClickableGraphAction;
+	PullClickableGraphAction = gitGraphActions.PullClickableGraphAction;
+	moment = require('moment');
+	_ = require('underscore');
+}
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
@@ -24,6 +38,7 @@ var GitGraphViewModel = function(repository) {
 		return self.showDropTargets() || self.refDropActionsWorking();
 	});
 }
+if (typeof exports !== 'undefined') exports.GitGraphViewModel = GitGraphViewModel;
 
 GitGraphViewModel.prototype.dropPushRef = function(ref) {
 	var self = this;
