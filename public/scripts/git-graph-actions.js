@@ -115,9 +115,10 @@ PushDropareaGraphAction.prototype.drop = function(ref) {
 	};
 	this.graph.repository.main.programEvents.add(programEventListener);
 	this.performProgressBar.start();
-	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName }, function(err, res) {
+	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName, remoteBranch: ref.displayName }, function(err, res) {
 		self.graph.repository.main.programEvents.remove(programEventListener);
 		self.performProgressBar.stop();
+		self.graph.loadNodesFromApi();
 	});
 }
 
@@ -164,9 +165,14 @@ inherits(DeleteDropareaGraphAction, DropareaGraphAction);
 DeleteDropareaGraphAction.prototype.text = 'Delete';
 DeleteDropareaGraphAction.prototype.visualization = 'delete';
 DeleteDropareaGraphAction.prototype.drop = function(ref) {
+	var self = this;
 	this.graph.hoverGraphAction(null);
 	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote });
+	this.performProgressBar.start();
+	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
+		self.performProgressBar.stop();
+		self.graph.loadNodesFromApi();
+	});
 }
 
 
