@@ -69,40 +69,14 @@ var visitedRepositories = {
 }
 
 
-function PushDialogViewModel(args) {
-	this.repoPath = args.repoPath;
-	this.remoteBranch = args.remoteBranch;
-	this.localBranch = args.localBranch;
-	this.showCredentialsForm = ko.observable(false);
+function CredentialsDialogViewModel() {
 	this.username = ko.observable();
 	this.password = ko.observable();
-	setTimeout(this.startPush.bind(this), 1);
 	this.closed = new signals.Signal();
-	this.userError = ko.observable();
 }
-PushDialogViewModel.prototype.template = 'pushDialog';
-PushDialogViewModel.prototype.askForCredentials = function(callback) {
-	this.credentialsCallback = callback;
-	this.showCredentialsForm(true);
-}
-PushDialogViewModel.prototype.submitCredentials = function() {
-	this.credentialsCallback({ username: this.username(), password: this.password() });
-	this.showCredentialsForm(false);
-}
-PushDialogViewModel.prototype.close = function() {
+CredentialsDialogViewModel.prototype.template = 'credentialsDialog';
+CredentialsDialogViewModel.prototype.close = function() {
 	this.closed.dispatch();
-}
-PushDialogViewModel.prototype.startPush = function() {
-	var self = this;
-	api.query('POST', '/push', { path: this.repoPath, socketId: api.socketId, remoteBranch: this.remoteBranch, localBranch: this.localBranch }, function(err, res) {
-		if (err) {
-			if (err.res.body.stderr.indexOf('ERROR: missing Change-Id in commit message footer') != -1) {
-				this.userError('Missing Change-Id');
-				return true;
-			}
-		}
-		self.close();
-	});
 }
 
 function HomeViewModel() {

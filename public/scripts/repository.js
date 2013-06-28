@@ -27,7 +27,11 @@ var RepositoryViewModel = function(main, repoPath) {
 				ready: function() { self.watcherReady(true) },
 				changed: function() { self.update(); },
 				requestCredentials: function(callback) {
-					self.main.dialog().askForCredentials(callback);
+					var diag = new CredentialsDialogViewModel();
+					diag.closed.add(function() {
+						callback({ username: diag.username(), password: diag.password() });
+					})
+					self.main.showDialog(diag);
 				}
 			});
 			if (ungit.config.gerrit) {

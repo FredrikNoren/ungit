@@ -314,20 +314,15 @@
 	</div>
 </script>
 
-<script type="text/html" id="pushDialog">
-	<div class="pushDialog">
-		<div data-bind="visible: !userError()">
-			<div class="status">Pushing changes to remote...</div>
-			<form data-bind="submit: submitCredentials, visible: showCredentialsForm">
+<script type="text/html" id="credentialsDialog">
+	<div class="credentialsDialog">
+		<div>
+			<form data-bind="submit: close">
 			<div>Remote requires authentication</div>
 			<div>Username: <input type="text" data-bind="value: username" autofocus></div>
 			<div>Password: <input type="password" data-bind="value: password"></div>
 			<div><input type="submit" value="Submit"></div>
 			</form>
-		</div>
-		<div data-bind="visible: userError">
-			<div class="userError" data-bind="text: userError"></div>
-			<button data-bind="click: close">Ok</button>
 		</div>
 	</div>
 </script>

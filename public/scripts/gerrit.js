@@ -53,11 +53,10 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var branch = this.repository.graph.activeBranch();
 	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
-	var dialog = new PushDialogViewModel({ repoPath: this.repository.repoPath, remoteBranch: 'refs/for/' + branch });
-	dialog.closed.add(function() {
+
+	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, remoteBranch: 'refs/for/' + branch }, function(err, res) {
 		self.updateChanges();
 	});
-	self.repository.main.showDialog(dialog);
 }
 
 var GerritChangeViewModel = function(gerritIntegration, args) {

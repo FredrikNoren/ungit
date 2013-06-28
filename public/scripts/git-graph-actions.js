@@ -93,6 +93,7 @@ var PushDropareaGraphAction = function(graph, node) {
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.draggingRef().node() == self.node &&
 			self.graph.draggingRef().canBePushed();
@@ -104,8 +105,12 @@ inherits(PushDropareaGraphAction, DropareaGraphAction);
 PushDropareaGraphAction.prototype.text = 'Push';
 PushDropareaGraphAction.prototype.visualization = 'push';
 PushDropareaGraphAction.prototype.drop = function(ref) {
+	var self = this;
 	this.graph.hoverGraphAction(null);
-	this.graph.repository.main.showDialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
+	this.performProgressBar.start();
+	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName }, function(err, res) {
+		self.performProgressBar.stop();
+	});
 }
 
 var CheckoutDropareaGraphAction = function(graph, node) {
@@ -185,7 +190,8 @@ PushClickableGraphAction.prototype.tooltip = 'Push to remote';
 PushClickableGraphAction.prototype.visualization = 'push';
 PushClickableGraphAction.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
-	this.graph.repo.main.showDialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
+	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: this.ref().displayName }, function(err, res) {
+	});
 }
 
 
