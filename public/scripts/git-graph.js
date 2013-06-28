@@ -34,33 +34,9 @@ var GitGraphViewModel = function(repository) {
 	this.showDropTargets = ko.computed(function() {
 		return !!self.draggingRef();
 	});
-	this.refDropActionsWorking = ko.observable(false);
-	this.showRefDropActions = ko.computed(function() {
-		return self.showDropTargets() || self.refDropActionsWorking();
-	});
 }
 if (typeof exports !== 'undefined') exports.GitGraphViewModel = GitGraphViewModel;
 
-GitGraphViewModel.prototype.dropPushRef = function(ref) {
-	var self = this;
-	this.refDropActionsWorking(false);
-	this.repository.main.showDialog(new PushDialogViewModel({ repoPath: this.repoPath, localBranch: ref.displayName, remoteBranch: ref.displayName }));
-}
-GitGraphViewModel.prototype.dropCheckoutRef = function(ref) {
-	var self = this;
-	this.refDropActionsWorking(true);
-	api.query('POST', '/checkout', { path: this.repoPath, name: ref.displayName }, function(err) {
-		self.refDropActionsWorking(false);
-	});
-}
-GitGraphViewModel.prototype.dropDeleteRef = function(ref) {
-	var self = this;
-	this.refDropActionsWorking(true);
-	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
-		self.refDropActionsWorking(false);
-	});
-}
 GitGraphViewModel.prototype.scrolledToEnd = function() {
 	this.maxNNodes = this.maxNNodes + 10;
 	this.loadNodesFromApi();
@@ -299,7 +275,10 @@ NodeViewModel = function(args) {
 	this.dropareaGraphActions = [
 		new MoveDropareaGraphAction(this.graph, this),
 		new RebaseDropareaGraphAction(this.graph, this),
-		new MergeDropareaGraphAction(this.graph, this)
+		new MergeDropareaGraphAction(this.graph, this),
+		new PushDropareaGraphAction(this.graph, this),
+		new CheckoutDropareaGraphAction(this.graph, this),
+		new DeleteDropareaGraphAction(this.graph, this)
 	];
 }
 NodeViewModel.prototype.showBranchingForm = function() {

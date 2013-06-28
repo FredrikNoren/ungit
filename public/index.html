@@ -250,7 +250,7 @@
 
 
 								<!-- ko foreach: dropareaGraphActions -->
-								<div class="refbox droparea" data-bind="css: style">
+								<div class="refbox droparea" data-bind="css: style, visible: visible">
 									<span data-bind="text: text"></span>
 									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
 								</div>
@@ -272,17 +272,6 @@
 			</div>
 
 		</div>
-		
-		<!-- ko with: graph -->
-		<div class="refDropActions" data-bind="css: { active: showRefDropActions }">
-			<div class="throbber" data-bind="visible: refDropActionsWorking"></div>
-			<div data-bind="visible: !refDropActionsWorking()">
-				<div class="droparea push" data-bind="dropOver: true, drop: dropPushRef, visible: draggingRef() && draggingRef().canBePushed">Push</div>
-				<div class="droparea checkout" data-bind="dropOver: true, drop: dropCheckoutRef">Checkout</div>
-				<div class="droparea delete" data-bind="dropOver: true, drop: dropDeleteRef">Delete</div>
-			</div>
-		</div>
-		<!-- /ko -->
 
 	</div>
 </script>

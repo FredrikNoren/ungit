@@ -84,49 +84,6 @@
 		}
 	}
 
-	.refDropActions {
-		position: fixed;
-		left: -300px;
-		width: 300px;
-		top: 35%;
-		background: #000;
-		-webkit-transform: translateZ(0);
-
-		-moz-transition: left 0.3s;
-		-webkit-transition: left 0.3s;
-		-o-transition: left 0.3s;
-		transition: left 0.3s;
-
-		&.active {
-			left: (@logWidth + -200px);
-		}
-
-		.throbber {
-			margin: 100px;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
-		.droparea {
-			font-size: 3em;
-			color: #fff;
-			margin: 20px;
-			border-radius: 10px;
-			&:hover {
-				background: #ff00ff;
-			}
-			&.push {
-				color: rgb(61, 139, 255);
-			}
-			&.checkout {
-				color: #66D14B;
-			}
-			&.delete {
-				color: #D64D38;
-			}
-		}
-	}
-
 }
 
 .repository .staging {
@@ -418,8 +375,13 @@
 				&.merge {
 					background: #D087D4;
 				}
+				&.checkout {
+					background: #DBEB34;
+				}
+				&.delete {
+					background: #D64D38;
+				}
 				&.droparea {
-					width: 80px;
 					opacity: 0;
 
 					-moz-transition: opacity 0.3s;

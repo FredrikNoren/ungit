@@ -86,7 +86,69 @@ MergeDropareaGraphAction.prototype.drop = function(ref) {
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 });
 }
 
+var PushDropareaGraphAction = function(graph, node) {
+	var self = this;
+	DropareaGraphAction.call(this, graph);
+	this.node = node;
+	this.ref = this.dragObject;
+	this.visible = ko.computed(function() {
+		return self.graph.showDropTargets() && 
+			self.graph.draggingRef().node() == self.node &&
+			self.graph.draggingRef().canBePushed();
+	});
+	this.style = ko.computed(function() { return 'push ' + (self.visible() ? 'show' : ''); });
+}
+if (typeof exports !== 'undefined') exports.PushDropareaGraphAction = PushDropareaGraphAction;
+inherits(PushDropareaGraphAction, DropareaGraphAction);
+PushDropareaGraphAction.prototype.text = 'Push';
+PushDropareaGraphAction.prototype.visualization = 'push';
+PushDropareaGraphAction.prototype.drop = function(ref) {
+	this.graph.hoverGraphAction(null);
+	this.graph.repository.main.showDialog(new PushDialogViewModel({ repoPath: this.graph.repoPath }));
+}
 
+var CheckoutDropareaGraphAction = function(graph, node) {
+	var self = this;
+	DropareaGraphAction.call(this, graph);
+	this.node = node;
+	this.ref = this.dragObject;
+	this.visible = ko.computed(function() {
+		return self.graph.showDropTargets() && 
+			self.graph.draggingRef().node() == self.node &&
+			!self.graph.draggingRef().current();
+	});
+	this.style = ko.computed(function() { return 'checkout ' + (self.visible() ? 'show' : ''); });
+}
+if (typeof exports !== 'undefined') exports.CheckoutDropareaGraphAction = CheckoutDropareaGraphAction;
+inherits(CheckoutDropareaGraphAction, DropareaGraphAction);
+CheckoutDropareaGraphAction.prototype.text = 'Checkout';
+CheckoutDropareaGraphAction.prototype.visualization = 'checkout';
+CheckoutDropareaGraphAction.prototype.drop = function(ref) {
+	this.graph.hoverGraphAction(null);
+	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName });
+}
+
+var DeleteDropareaGraphAction = function(graph, node) {
+	var self = this;
+	DropareaGraphAction.call(this, graph);
+	this.node = node;
+	this.ref = this.dragObject;
+	this.visible = ko.computed(function() {
+		return self.graph.showDropTargets() && 
+			self.graph.draggingRef().node() == self.node &&
+			!self.graph.draggingRef().current();
+	});
+	this.style = ko.computed(function() { return 'delete ' + (self.visible() ? 'show' : ''); });
+}
+if (typeof exports !== 'undefined') exports.DeleteDropareaGraphAction = DeleteDropareaGraphAction;
+inherits(DeleteDropareaGraphAction, DropareaGraphAction);
+DeleteDropareaGraphAction.prototype.text = 'Delete';
+DeleteDropareaGraphAction.prototype.visualization = 'delete';
+DeleteDropareaGraphAction.prototype.drop = function(ref) {
+	this.graph.hoverGraphAction(null);
+	var url = ref.isTag ? '/tags' : '/branches';
+	api.query('DELETE', url, { path: this.repoPath, name: ref.displayName, remote: ref.isRemote });
+}
 
 
 var ClickableGraphAction = function(graph) {

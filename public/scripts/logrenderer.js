@@ -133,17 +133,19 @@ logRenderer.render = function(element, graph) {
 	// Draw push lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'push') {
 		var local = graph.hoverGraphAction().ref();
-		var remote = local.remoteRef();
-		if (remote) {
-			context.setLineDash(refLineDash);
-			context.strokeStyle =
-			context.fillStyle =
-				"rgb(61, 139, 255)";
-			var yOffset = yRefLineOffset;
-			if (remote.node().y() < local.node().y()) yOffset = -yOffset;
-			var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
-			var endPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
-			logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+		if (local) {
+			var remote = local.remoteRef();
+			if (remote) {
+				context.setLineDash(refLineDash);
+				context.strokeStyle =
+				context.fillStyle =
+					"rgb(61, 139, 255)";
+				var yOffset = yRefLineOffset;
+				if (remote.node().y() < local.node().y()) yOffset = -yOffset;
+				var startPosition = new Vector2(remote.node().x() + remote.node().radius() + xRefLineOffset, remote.node().y() - yOffset);
+				var endPosition = new Vector2(local.node().x() + local.node().radius() + xRefLineOffset, local.node().y() + yOffset);
+				logRenderer.drawArrowLine(context, startPosition, endPosition, arrowSize);
+			}
 		}
 	}
 
