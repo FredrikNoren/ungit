@@ -261,7 +261,9 @@
 					</div>
 
 					<div class="graphFooter">
-						<div class="throbber" data-bind="visible: isLoading"></div>
+						<!-- ko if: isLoading -->
+						<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
+						<!-- /ko -->
 					</div>
 
 				</div>
@@ -286,7 +288,8 @@
 </script>
 
 <script type="text/html" id="progressBar">
-	<div class="progressBar">
+	<div class="progressBar animated fadeIn" data-bind="visible: elapsedMs() > 400">
+		<!--span data-bind="text: predictionMs"></span-->
 		<div class="progress" data-bind="style: { width: (progress() * 100) + '%' }"></div>
 	</div>
 </script>

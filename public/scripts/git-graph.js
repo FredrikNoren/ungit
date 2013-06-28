@@ -25,6 +25,7 @@ var GitGraphViewModel = function(repository) {
 	this.repository = repository;
 	this.repoPath = repository.repoPath;
 	this.isLoading = ko.observable(false);
+	this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000);
 	this.activeBranch = ko.observable();
 	this.HEAD = ko.observable();
 	this.hoverGraphAction = ko.observable();
@@ -67,10 +68,12 @@ GitGraphViewModel.prototype.scrolledToEnd = function() {
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
 	this.isLoading(true);
+	this.nodesLoader.start();
 	api.query('GET', '/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
-		if (err) return;
+		if (err) { self.nodesLoader.stop(); return; }
 		self.setNodesFromLog(logEntries);
 		self.isLoading(false);
+		self.nodesLoader.stop();
 	});
 }
 

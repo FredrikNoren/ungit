@@ -21,10 +21,10 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 	self.status('loading');
 	this.changesLoader.start();
 	api.query('GET', '/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
-		self.changesLoader.stop();
-		if (err || !changes) { self.status('failed'); return true; }
+		if (err || !changes) { self.status('failed'); self.changesLoader.stop(); return true; }
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 		self.status('loaded');
+		self.changesLoader.stop();
 	});
 }
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
