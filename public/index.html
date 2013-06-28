@@ -253,6 +253,9 @@
 								<div class="refbox droparea" data-bind="css: style, visible: visible">
 									<span data-bind="text: text"></span>
 									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
+									<!-- ko if: performProgressBar.running -->
+									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
+									<!-- /ko -->
 								</div>
 								<!-- /ko -->
 							</div>
@@ -277,7 +280,7 @@
 </script>
 
 <script type="text/html" id="progressBar">
-	<div class="progressBar animated fadeIn" data-bind="visible: show">
+	<div class="progressBar" data-bind="visible: show, style: style">
 		<!--span data-bind="text: predictionMs"></span-->
 		<div class="progress" data-bind="style: { width: (progress() * 100) + '%' }"></div>
 	</div>

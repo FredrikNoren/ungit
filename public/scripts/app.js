@@ -217,7 +217,7 @@ PathViewModel.prototype.cloneRepository = function() {
 var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
 	var self = this;
 	this.progress = ko.observable();
-	this.running = false;
+	this.running = ko.observable(false);
 	this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
 	this.predictionMs = ko.observable();
 	this.isFirstRun = ko.observable(false);
@@ -227,11 +227,18 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
 		if (self.isFirstRun()) return self.elapsedMs() > 400;
 		else return self.predictionMs() > 400;
 	});
+	this.style = ko.computed(function() {
+		if (self.isFirstRun()) {
+			if (self.elapsedMs() > 400) return 'animated fadeIn';
+			else return '';
+		}
+		else if (self.predictionMs() > 400) return 'animated fadeIn';
+	});
 }
 ProgressBarViewModel.prototype.start = function() {
-	if (this.running) return;
+	if (this.running()) return;
 	this.startTime = Date.now();
-	this.running = true;
+	this.running(true);
 	this.progress(0);
 	this.elapsedMs(0);
 	var predictionMs = localStorage.getItem(this.predictionMemoryKey);
@@ -245,7 +252,7 @@ ProgressBarViewModel.prototype.start = function() {
 	this.update();
 }
 ProgressBarViewModel.prototype.update = function() {
-	if (!this.running) return;
+	if (!this.running()) return;
 	this.elapsedMs(Date.now() - this.startTime);
 	var value = this.elapsedMs() / this.predictionMs();
 	value = Math.min(1, value);
@@ -253,8 +260,8 @@ ProgressBarViewModel.prototype.update = function() {
 	requestAnimationFrame(this.update.bind(this));
 }
 ProgressBarViewModel.prototype.stop = function() {
-	if (!this.running) return;
-	this.running = false;
+	if (!this.running()) return;
+	this.running(false);
 	this.endTime = Date.now();
 	this.lastRealTime = this.endTime - this.startTime;
 	if (this.isFirstRun()) {

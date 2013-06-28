@@ -7,6 +7,7 @@ if (typeof exports !== 'undefined') {
 var DropareaGraphAction = function(graph) {
 	this.graph = graph;
 	this.dragObject = ko.observable();
+	this.performProgressBar = new ProgressBarViewModel('checkout-' + graph.repoPath, 1000);
 }
 DropareaGraphAction.prototype.dragEnter = function(dragObject) {
 	if (!this.visible()) return;
@@ -113,6 +114,7 @@ var CheckoutDropareaGraphAction = function(graph, node) {
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.draggingRef().node() == self.node &&
 			!self.graph.draggingRef().current();
@@ -124,8 +126,12 @@ inherits(CheckoutDropareaGraphAction, DropareaGraphAction);
 CheckoutDropareaGraphAction.prototype.text = 'Checkout';
 CheckoutDropareaGraphAction.prototype.visualization = 'checkout';
 CheckoutDropareaGraphAction.prototype.drop = function(ref) {
+	var self = this;
 	this.graph.hoverGraphAction(null);
-	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName });
+	this.performProgressBar.start();
+	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
+		self.performProgressBar.stop();
+	});
 }
 
 var DeleteDropareaGraphAction = function(graph, node) {
