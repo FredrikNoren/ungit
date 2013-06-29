@@ -38,7 +38,7 @@ GraphActions.MoveDroparea.prototype.visualization = 'move';
 GraphActions.MoveDroparea.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	if (ref.current())
-		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.sha1 });
+		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.node.sha1 });
 	else if (ref.isTag)
 		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
 	else
