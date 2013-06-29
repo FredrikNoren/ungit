@@ -108,8 +108,17 @@ button, input[type="submit"], input[type="button"] {
 	padding-top: 5px;
 	padding-bottom: 5px;
 	background: #68b6ed;
+	position: relative;
 	&.primaryAction {
 		border: 0.1em solid #fff;
+	}
+	.progressBar {
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		width: 100%;
+		height: 100%;
+		background: transparent;
 	}
 }
 button:active, input[type="submit"]:active, input[type="submit"]:active {

@@ -105,7 +105,7 @@
 			<img src="images/shadowArrowDown.png" class="shadow">
 			<img src="images/yellowArrowDown.png" class="arrow">
 		</div>
-		<div data-bind="visible: !isCommitting()">
+		<div>
 			<table><tr><td class="commitArea">
 				<div class="commitMessage">
 				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
@@ -122,7 +122,12 @@
 						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
 					</div>
 				</div>
-				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">Commit</button>
+				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">
+					Commit
+					<!-- ko if: committingProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
 				<span class="amend">
 					<div class="checkbox" data-bind="click: toogleAmend, css: { checked: amend }"></div>
 					Amend last commit
@@ -136,10 +141,6 @@
 				Click a file to show its changes
 				<!-- /ko -->
 			</td></tr></table>
-		</div>
-		<div class="committing" data-bind="visible: isCommitting">
-			<div>Committing changes...</div>
-			<div class="throbber"></div>
 		</div>
 	</div>
 </script>

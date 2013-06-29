@@ -124,7 +124,7 @@ var StagingViewModel = function(repository) {
 		return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
 	})
 	this.amend = ko.observable(false);
-	this.isCommitting = ko.observable(false);
+	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath, 1000);
 	this.selectedDiffFile = ko.observable();
 	this.commitValidationError = ko.computed(function() {
 		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
@@ -165,7 +165,7 @@ StagingViewModel.prototype.toogleAmend = function() {
 }
 StagingViewModel.prototype.commit = function() {
 	var self = this;
-	this.isCommitting(true);
+	this.committingProgressBar.start();
 	var files = this.files().filter(function(file) {
 		return file.staged();
 	}).map(function(file) {
@@ -179,7 +179,7 @@ StagingViewModel.prototype.commit = function() {
 		self.amend(false);
 		self.files.removeAll();
 		self.selectedDiffFile(null);
-		self.isCommitting(false);
+		self.committingProgressBar.stop();
 	});
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
