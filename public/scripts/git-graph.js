@@ -2,14 +2,8 @@
 if (typeof exports !== 'undefined') {
 	ko = require('./lib/knockout-2.2.1.js');
 	Vector2 = require('./vector2.js');
-	var gitGraphActions = require('./git-graph-actions.js');
-	MoveDropareaGraphAction = gitGraphActions.MoveDropareaGraphAction;
-	RebaseDropareaGraphAction = gitGraphActions.RebaseDropareaGraphAction;
-	MergeDropareaGraphAction = gitGraphActions.MergeDropareaGraphAction;
-	PushClickableGraphAction = gitGraphActions.PushClickableGraphAction;
-	ResetClickableGraphAction = gitGraphActions.ResetClickableGraphAction;
-	RebaseClickableGraphAction = gitGraphActions.RebaseClickableGraphAction;
-	PullClickableGraphAction = gitGraphActions.PullClickableGraphAction;
+	GraphActions = require('./git-graph-actions.js');
+	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 	moment = require('moment');
 	_ = require('underscore');
 }
@@ -273,12 +267,12 @@ NodeViewModel = function(args) {
 	this.branchingFormVisible = ko.observable(false);
 
 	this.dropareaGraphActions = [
-		new MoveDropareaGraphAction(this.graph, this),
-		new RebaseDropareaGraphAction(this.graph, this),
-		new MergeDropareaGraphAction(this.graph, this),
-		new PushDropareaGraphAction(this.graph, this),
-		new CheckoutDropareaGraphAction(this.graph, this),
-		new DeleteDropareaGraphAction(this.graph, this)
+		new GraphActions.MoveDroparea(this.graph, this),
+		new GraphActions.RebaseDroparea(this.graph, this),
+		new GraphActions.MergeDroparea(this.graph, this),
+		new GraphActions.PushDroparea(this.graph, this),
+		new GraphActions.CheckoutDroparea(this.graph, this),
+		new GraphActions.DeleteDroparea(this.graph, this)
 	];
 }
 NodeViewModel.prototype.showBranchingForm = function() {
@@ -367,10 +361,10 @@ var RefViewModel = function(args) {
 		return self.remoteRef().node().isAncestor(self.node());
 	});
 	this.graphActions = [
-		new PushClickableGraphAction(this.graph, this),
-		new ResetClickableGraphAction(this.graph, this),
-		new RebaseClickableGraphAction(this.graph, this),
-		new PullClickableGraphAction(this.graph, this)
+		new GraphActions.PushClickable(this.graph, this),
+		new GraphActions.ResetClickable(this.graph, this),
+		new GraphActions.RebaseClickable(this.graph, this),
+		new GraphActions.PullClickable(this.graph, this)
 	];
 }
 RefViewModel.prototype.dragStart = function() {

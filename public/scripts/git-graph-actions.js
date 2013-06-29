@@ -4,36 +4,38 @@ if (typeof exports !== 'undefined') {
 	inherits = require('./utils').inherits;
 }
 
-var DropareaGraphAction = function(graph) {
+var GraphActions = {};
+if (typeof module !== 'undefined') module.exports = GraphActions;
+
+GraphActions.DropareaBase = function(graph) {
 	this.graph = graph;
 	this.dragObject = ko.observable();
 	this.performProgressBar = new ProgressBarViewModel('checkout-' + graph.repoPath, 1000);
 }
-DropareaGraphAction.prototype.dragEnter = function(dragObject) {
+GraphActions.DropareaBase.prototype.dragEnter = function(dragObject) {
 	if (!this.visible()) return;
 	this.graph.hoverGraphAction(this);
 	this.dragObject(dragObject);
 }
-DropareaGraphAction.prototype.dragLeave = function() {
+GraphActions.DropareaBase.prototype.dragLeave = function() {
 	if (!this.visible()) return;
 	this.graph.hoverGraphAction(null);
 	this.dragObject(null);
 }
 
-var MoveDropareaGraphAction = function(graph, node) {
+GraphActions.MoveDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
 		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self.node;
 	});
 	this.style = ko.computed(function() { return 'move ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.MoveDropareaGraphAction = MoveDropareaGraphAction;
-inherits(MoveDropareaGraphAction, DropareaGraphAction);
-MoveDropareaGraphAction.prototype.text = 'Move';
-MoveDropareaGraphAction.prototype.visualization = 'move';
-MoveDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.MoveDroparea, GraphActions.DropareaBase);
+GraphActions.MoveDroparea.prototype.text = 'Move';
+GraphActions.MoveDroparea.prototype.visualization = 'move';
+GraphActions.MoveDroparea.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	if (ref.current())
 		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.sha1 });
@@ -43,9 +45,9 @@ MoveDropareaGraphAction.prototype.drop = function(ref) {
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
 }
 
-var RebaseDropareaGraphAction = function(graph, node) {
+GraphActions.RebaseDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.onto = ko.observable(this.node);
@@ -58,18 +60,17 @@ var RebaseDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'rebase ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.RebaseDropareaGraphAction = RebaseDropareaGraphAction;
-inherits(RebaseDropareaGraphAction, DropareaGraphAction);
-RebaseDropareaGraphAction.prototype.text = 'Rebase';
-RebaseDropareaGraphAction.prototype.visualization = 'rebase';
-RebaseDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.RebaseDroparea, GraphActions.DropareaBase);
+GraphActions.RebaseDroparea.prototype.text = 'Rebase';
+GraphActions.RebaseDroparea.prototype.visualization = 'rebase';
+GraphActions.RebaseDroparea.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 });
 }
 
-var MergeDropareaGraphAction = function(graph, node) {
+GraphActions.MergeDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
 		return self.graph.showDropTargets() &&
@@ -80,18 +81,17 @@ var MergeDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'merge ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.MergeDropareaGraphAction = MergeDropareaGraphAction;
-inherits(MergeDropareaGraphAction, DropareaGraphAction);
-MergeDropareaGraphAction.prototype.text = 'Merge';
-MergeDropareaGraphAction.prototype.visualization = 'merge';
-MergeDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.MergeDroparea, GraphActions.DropareaBase);
+GraphActions.MergeDroparea.prototype.text = 'Merge';
+GraphActions.MergeDroparea.prototype.visualization = 'merge';
+GraphActions.MergeDroparea.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 });
 }
 
-var PushDropareaGraphAction = function(graph, node) {
+GraphActions.PushDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -102,11 +102,10 @@ var PushDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'push ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.PushDropareaGraphAction = PushDropareaGraphAction;
-inherits(PushDropareaGraphAction, DropareaGraphAction);
-PushDropareaGraphAction.prototype.text = 'Push';
-PushDropareaGraphAction.prototype.visualization = 'push';
-PushDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.PushDroparea, GraphActions.DropareaBase);
+GraphActions.PushDroparea.prototype.text = 'Push';
+GraphActions.PushDroparea.prototype.visualization = 'push';
+GraphActions.PushDroparea.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	var programEventListener = function(event) {
@@ -122,9 +121,9 @@ PushDropareaGraphAction.prototype.drop = function(ref) {
 	});
 }
 
-var CheckoutDropareaGraphAction = function(graph, node) {
+GraphActions.CheckoutDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -135,11 +134,10 @@ var CheckoutDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'checkout ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.CheckoutDropareaGraphAction = CheckoutDropareaGraphAction;
-inherits(CheckoutDropareaGraphAction, DropareaGraphAction);
-CheckoutDropareaGraphAction.prototype.text = 'Checkout';
-CheckoutDropareaGraphAction.prototype.visualization = 'checkout';
-CheckoutDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.CheckoutDroparea, GraphActions.DropareaBase);
+GraphActions.CheckoutDroparea.prototype.text = 'Checkout';
+GraphActions.CheckoutDroparea.prototype.visualization = 'checkout';
+GraphActions.CheckoutDroparea.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	this.performProgressBar.start();
@@ -148,9 +146,9 @@ CheckoutDropareaGraphAction.prototype.drop = function(ref) {
 	});
 }
 
-var DeleteDropareaGraphAction = function(graph, node) {
+GraphActions.DeleteDroparea = function(graph, node) {
 	var self = this;
-	DropareaGraphAction.call(this, graph);
+	GraphActions.DropareaBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -160,11 +158,10 @@ var DeleteDropareaGraphAction = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'delete ' + (self.visible() ? 'show' : ''); });
 }
-if (typeof exports !== 'undefined') exports.DeleteDropareaGraphAction = DeleteDropareaGraphAction;
-inherits(DeleteDropareaGraphAction, DropareaGraphAction);
-DeleteDropareaGraphAction.prototype.text = 'Delete';
-DeleteDropareaGraphAction.prototype.visualization = 'delete';
-DeleteDropareaGraphAction.prototype.drop = function(ref) {
+inherits(GraphActions.DeleteDroparea, GraphActions.DropareaBase);
+GraphActions.DeleteDroparea.prototype.text = 'Delete';
+GraphActions.DeleteDroparea.prototype.visualization = 'delete';
+GraphActions.DeleteDroparea.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	var url = ref.isTag ? '/tags' : '/branches';
@@ -176,19 +173,19 @@ DeleteDropareaGraphAction.prototype.drop = function(ref) {
 }
 
 
-var ClickableGraphAction = function(graph) {
+GraphActions.ClickableBase = function(graph) {
 	this.graph = graph;
 }
-ClickableGraphAction.prototype.mouseover = function() {
+GraphActions.ClickableBase.prototype.mouseover = function() {
 	this.graph.hoverGraphAction(this);
 }
-ClickableGraphAction.prototype.mouseout = function() {
+GraphActions.ClickableBase.prototype.mouseout = function() {
 	this.graph.hoverGraphAction(null);
 }
 
-var PushClickableGraphAction = function(graph, ref) {
+GraphActions.PushClickable = function(graph, ref) {
 	var self = this;
-	ClickableGraphAction.call(this, graph);
+	GraphActions.ClickableBase.call(this, graph);
 	this.ref = ko.observable(ref);
 	this.visible = ko.computed(function() {
 		if (self.ref().remoteRef())
@@ -196,41 +193,39 @@ var PushClickableGraphAction = function(graph, ref) {
 		else if (self.graph.hasRemotes()) return true;
 	});
 }
-if (typeof exports !== 'undefined') exports.PushClickableGraphAction = PushClickableGraphAction;
-inherits(PushClickableGraphAction, ClickableGraphAction);
-PushClickableGraphAction.prototype.style = 'push';
-PushClickableGraphAction.prototype.icon = 'P';
-PushClickableGraphAction.prototype.tooltip = 'Push to remote';
-PushClickableGraphAction.prototype.visualization = 'push';
-PushClickableGraphAction.prototype.perform = function() {
+inherits(GraphActions.PushClickable, GraphActions.ClickableBase);
+GraphActions.PushClickable.prototype.style = 'push';
+GraphActions.PushClickable.prototype.icon = 'P';
+GraphActions.PushClickable.prototype.tooltip = 'Push to remote';
+GraphActions.PushClickable.prototype.visualization = 'push';
+GraphActions.PushClickable.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: this.ref().displayName }, function(err, res) {
 	});
 }
 
 
-var ResetClickableGraphAction = function(graph, ref) {
+GraphActions.ResetClickable = function(graph, ref) {
 	var self = this;
-	ClickableGraphAction.call(this, graph);
+	GraphActions.ClickableBase.call(this, graph);
 	this.ref = ko.observable(ref);
 	this.visible = ko.computed(function() {
 		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && !self.ref().remoteIsOffspring();
 	});
 }
-if (typeof exports !== 'undefined') exports.ResetClickableGraphAction = ResetClickableGraphAction;
-inherits(ResetClickableGraphAction, ClickableGraphAction);
-ResetClickableGraphAction.prototype.style = 'reset';
-ResetClickableGraphAction.prototype.icon = 'R';
-ResetClickableGraphAction.prototype.tooltip = 'Reset to remote';
-ResetClickableGraphAction.prototype.visualization = 'reset';
-ResetClickableGraphAction.prototype.perform = function() {
+inherits(GraphActions.ResetClickable, GraphActions.ClickableBase);
+GraphActions.ResetClickable.prototype.style = 'reset';
+GraphActions.ResetClickable.prototype.icon = 'R';
+GraphActions.ResetClickable.prototype.tooltip = 'Reset to remote';
+GraphActions.ResetClickable.prototype.visualization = 'reset';
+GraphActions.ResetClickable.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
 }
 
-var RebaseClickableGraphAction = function(graph, ref) {
+GraphActions.RebaseClickable = function(graph, ref) {
 	var self = this;
-	ClickableGraphAction.call(this, graph);
+	GraphActions.ClickableBase.call(this, graph);
 	this.ref = ko.observable(ref);
 	this.onto = ko.computed(function() {
 		return self.ref().remoteRef();
@@ -239,32 +234,30 @@ var RebaseClickableGraphAction = function(graph, ref) {
 		return self.onto() && self.onto().node() != self.ref().node() && !self.ref().remoteIsAncestor() && !self.ref().remoteIsOffspring();
 	});
 }
-if (typeof exports !== 'undefined') exports.RebaseClickableGraphAction = RebaseClickableGraphAction;
-inherits(RebaseClickableGraphAction, ClickableGraphAction);
-RebaseClickableGraphAction.prototype.style = 'rebase';
-RebaseClickableGraphAction.prototype.icon = 'R';
-RebaseClickableGraphAction.prototype.tooltip = 'Rebase on remote';
-RebaseClickableGraphAction.prototype.visualization = 'rebase';
-RebaseClickableGraphAction.prototype.perform = function() {
+inherits(GraphActions.RebaseClickable, GraphActions.ClickableBase);
+GraphActions.RebaseClickable.prototype.style = 'rebase';
+GraphActions.RebaseClickable.prototype.icon = 'R';
+GraphActions.RebaseClickable.prototype.tooltip = 'Rebase on remote';
+GraphActions.RebaseClickable.prototype.visualization = 'rebase';
+GraphActions.RebaseClickable.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.onto().name });
 }
 
-var PullClickableGraphAction = function(graph, ref) {
+GraphActions.PullClickable = function(graph, ref) {
 	var self = this;
-	ClickableGraphAction.call(this, graph);
+	GraphActions.ClickableBase.call(this, graph);
 	this.ref = ko.observable(ref);
 	this.visible = ko.computed(function() {
 		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && self.ref().remoteIsOffspring();
 	});
 }
-if (typeof exports !== 'undefined') exports.PullClickableGraphAction = PullClickableGraphAction;
-inherits(PullClickableGraphAction, ClickableGraphAction);
-PullClickableGraphAction.prototype.style = 'pull';
-PullClickableGraphAction.prototype.icon = 'P';
-PullClickableGraphAction.prototype.tooltip = 'Pull to remote';
-PullClickableGraphAction.prototype.visualization = 'pull';
-PullClickableGraphAction.prototype.perform = function() {
+inherits(GraphActions.PullClickable, GraphActions.ClickableBase);
+GraphActions.PullClickable.prototype.style = 'pull';
+GraphActions.PullClickable.prototype.icon = 'P';
+GraphActions.PullClickable.prototype.tooltip = 'Pull to remote';
+GraphActions.PullClickable.prototype.visualization = 'pull';
+GraphActions.PullClickable.prototype.perform = function() {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
 }
