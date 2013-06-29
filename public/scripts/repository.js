@@ -124,7 +124,7 @@ var StagingViewModel = function(repository) {
 		return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
 	})
 	this.amend = ko.observable(false);
-	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath, 1000);
+	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
 	this.selectedDiffFile = ko.observable();
 	this.commitValidationError = ko.computed(function() {
 		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))

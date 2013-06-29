@@ -66,11 +66,12 @@
 	<div class="path" data-bind="shown: shown">
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
-			Loading...
+			<!-- ko template: { name: 'progressBar', data: loadingProgressBar } --><!-- /ko -->
 		</div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'cloning'">
-			Cloning repository...
+			Cloning...
+			<!-- ko template: { name: 'progressBar', data: cloningProgressBar } --><!-- /ko -->
 		</div>
 		
 		<div class="uninited" data-bind="visible: status() == 'uninited'">

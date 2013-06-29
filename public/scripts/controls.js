@@ -6,6 +6,8 @@ if (typeof exports !== 'undefined') {
 
 var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime) {
 	var self = this;
+	if (defaultTimeMs === undefined) defaultTimeMs = 1000;
+	if (showTime === undefined) showTime = 200;
 	this.progress = ko.observable();
 	this.running = ko.observable(false);
 	this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
@@ -14,7 +16,6 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime
 	this.defaultTimeMs = defaultTimeMs;
 	this.elapsedMs = ko.observable(0);
 	this.paused = ko.observable(false);
-	if (showTime === undefined) showTime = 200;
 	this.show = ko.computed(function() {
 		if (self.isFirstRun()) return self.elapsedMs() > showTime;
 		else return self.predictionMs() > showTime;
