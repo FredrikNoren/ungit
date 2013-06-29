@@ -91,10 +91,10 @@ GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 	});
 }
 
-GitGraphViewModel.markNodesIdealogicalBranches = function(nodes, nodesById) {
-	var recursivelyMarkBranch = function(e, idealogicalBranch) {
+GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
+	var recursivelyMarkBranch = function(e, ideologicalBranch) {
 		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
-			node.idealogicalBranch = idealogicalBranch;
+			node.ideologicalBranch = ideologicalBranch;
 		});
 	}
 	var getIdeologicalBranch = function(e) {
@@ -103,13 +103,13 @@ GitGraphViewModel.markNodesIdealogicalBranches = function(nodes, nodesById) {
 	var master;
 	nodes.forEach(function(e) {
 		var i = 0;
-		var idealogicalBranch = getIdeologicalBranch(e);
-		if (!idealogicalBranch) return;
-		if (idealogicalBranch.name == 'refs/heads/master') master = e;
-		recursivelyMarkBranch(e, idealogicalBranch);
+		var ideologicalBranch = getIdeologicalBranch(e);
+		if (!ideologicalBranch) return;
+		if (ideologicalBranch.name == 'refs/heads/master') master = e;
+		recursivelyMarkBranch(e, ideologicalBranch);
 	});
 	if (master) {
-		recursivelyMarkBranch(master, master.idealogicalBranch);
+		recursivelyMarkBranch(master, master.ideologicalBranch);
 	}
 }
 
@@ -129,7 +129,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
 	var HEAD = this.HEAD();
-	GitGraphViewModel.markNodesIdealogicalBranches(nodes, this.nodesById);
+	GitGraphViewModel.markNodesIdeologicalBranches(nodes, this.nodesById);
 
 	// Make sure refs know their "remote"
 	for(var refName in this.refsByRefName) {
@@ -154,7 +154,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-	nodes = nodes.filter(function(node) { return !!node.idealogicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+	nodes = nodes.filter(function(node) { return !!node.ideologicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
 	//var concurrentBranches = { };
 
@@ -165,27 +165,27 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		var node = nodes[i];
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-		var idealogicalBranch = node.idealogicalBranch;
+		var ideologicalBranch = node.ideologicalBranch;
 
 		// First occurence of the branch, find an empty slot for the branch
-		if (idealogicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
-			idealogicalBranch.lastSlottedTimeStamp = updateTimeStamp;
+		if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
+			ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
 			var slot = 0;
 			for(;slot < branchSlots.length; slot++)
 				if (branchSlots[slot] === undefined) break;
 			if (slot == branchSlots.length) {
-				branchSlots.push(idealogicalBranch);
+				branchSlots.push(ideologicalBranch);
 				slot = branchSlots.length - 1;
 			}
-			idealogicalBranch.branchOrder = slot;
+			ideologicalBranch.branchOrder = slot;
 			branchSlots[slot] = slot;
 		}
 
-		node.branchOrder = idealogicalBranch.branchOrder;
+		node.branchOrder = ideologicalBranch.branchOrder;
 
 		// Free branch slots when we reach the end of a branch
-		/*if (node == idealogicalBranch.node()) {
-			branchSlots[idealogicalBranch.branchOrder] = undefined;
+		/*if (node == ideologicalBranch.node()) {
+			branchSlots[ideologicalBranch.branchOrder] = undefined;
 		}*/
 	}
 

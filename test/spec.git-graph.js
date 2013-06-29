@@ -24,9 +24,9 @@ describe('GitGraph', function() {
 				{"sha1":"ae03f555da711c045a6848d27483f9d79d7f57c2","parents":[],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","date":"Thu May 23 21:02:37 2013 +0200","title":"Init","message":"Init"}];
 			var graph = new GitGraphViewModel({});
 			graph.setNodesFromLog(nodes);
-			expect(graph.nodes()[0].idealogicalBranch.name).to.be('refs/heads/testing');
-			expect(graph.nodes()[1].idealogicalBranch.name).to.be('refs/heads/master');
-			expect(graph.nodes()[2].idealogicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[0].ideologicalBranch.name).to.be('refs/heads/testing');
+			expect(graph.nodes()[1].ideologicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[2].ideologicalBranch.name).to.be('refs/heads/master');
 		});
 
 		it('should make sure the HEAD branch is highlighted', function() {
@@ -36,9 +36,9 @@ describe('GitGraph', function() {
 				{"sha1":"ae03f555da711c045a6848d27483f9d79d7f57c2","parents":[],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","date":"Thu May 23 21:02:37 2013 +0200","title":"Init","message":"Init"}];
 			var graph = new GitGraphViewModel({});
 			graph.setNodesFromLog(nodes);
-			expect(graph.nodes()[0].idealogicalBranch.name).to.be('refs/heads/master');
-			expect(graph.nodes()[1].idealogicalBranch.name).to.be('refs/heads/testing');
-			expect(graph.nodes()[2].idealogicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[0].ideologicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[1].ideologicalBranch.name).to.be('refs/heads/testing');
+			expect(graph.nodes()[2].ideologicalBranch.name).to.be('refs/heads/master');
 		});
 
 		it('should make sure the HEAD branch is highlighted even when other branches are in front', function() {
@@ -50,11 +50,11 @@ describe('GitGraph', function() {
 				{"sha1":"ae03f555da711c045a6848d27483f9d79d7f57c2","parents":[],"authorName":"Fredrik Noren","authorEmail":"fredrik.noren@keldyn.com","title":"Init","message":"Init"}] 
 			var graph = new GitGraphViewModel({});
 			graph.setNodesFromLog(nodes);
-			expect(graph.nodes()[0].idealogicalBranch.name).to.be('refs/heads/master');
-			expect(graph.nodes()[1].idealogicalBranch.name).to.be('refs/heads/testing');
-			expect(graph.nodes()[2].idealogicalBranch.name).to.be('refs/heads/testing');
-			expect(graph.nodes()[3].idealogicalBranch.name).to.be('refs/heads/master');
-			expect(graph.nodes()[4].idealogicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[0].ideologicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[1].ideologicalBranch.name).to.be('refs/heads/testing');
+			expect(graph.nodes()[2].ideologicalBranch.name).to.be('refs/heads/testing');
+			expect(graph.nodes()[3].ideologicalBranch.name).to.be('refs/heads/master');
+			expect(graph.nodes()[4].ideologicalBranch.name).to.be('refs/heads/master');
 		});
 
 	});

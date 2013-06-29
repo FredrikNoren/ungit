@@ -107,8 +107,8 @@ logRenderer.render = function(element, graph) {
 	nodes.forEach(function(node) {
 		if (rebaseNodes[node.sha1])
 			context.fillStyle = "#bbbbbb";
-		else if (node.idealogicalBranch)
-			context.fillStyle = node.idealogicalBranch.color;
+		else if (node.ideologicalBranch)
+			context.fillStyle = node.ideologicalBranch.color;
 		else
 			context.fillStyle = "#666666";
 		context.beginPath();
@@ -116,7 +116,7 @@ logRenderer.render = function(element, graph) {
 		context.fill();
 	});
 	// Commit node
-	context.strokeStyle = HEAD && HEAD.idealogicalBranch ? HEAD.idealogicalBranch.color : GitGraphViewModel.randomColor();
+	context.strokeStyle = HEAD && HEAD.ideologicalBranch ? HEAD.ideologicalBranch.color : GitGraphViewModel.randomColor();
 	context.setLineDash([10, 5]);
 	context.lineWidth = 7;
 	context.beginPath();
