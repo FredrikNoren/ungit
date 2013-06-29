@@ -90,6 +90,10 @@ logRenderer.render = function(element, graph) {
 				logRenderer.drawLineBetweenNodes(context,
 					{ position: node.position(), radius: node.radius() },
 					{ position: parent.position(), radius: parent.radius() });
+			else
+				logRenderer.drawLineBetweenNodes(context,
+					{ position: node.position(), radius: node.radius() },
+					{ position: node.position().add(new Vector2(0, 10000)), radius: node.radius() });
 		});
 	});
 	context.stroke();
