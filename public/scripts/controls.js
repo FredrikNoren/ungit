@@ -4,7 +4,7 @@ if (typeof exports !== 'undefined') {
 }
 
 
-var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
+var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime) {
 	var self = this;
 	this.progress = ko.observable();
 	this.running = ko.observable(false);
@@ -14,16 +14,17 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs) {
 	this.defaultTimeMs = defaultTimeMs;
 	this.elapsedMs = ko.observable(0);
 	this.paused = ko.observable(false);
+	if (showTime === undefined) showTime = 200;
 	this.show = ko.computed(function() {
-		if (self.isFirstRun()) return self.elapsedMs() > 400;
-		else return self.predictionMs() > 400;
+		if (self.isFirstRun()) return self.elapsedMs() > showTime;
+		else return self.predictionMs() > showTime;
 	});
 	this.style = ko.computed(function() {
 		if (self.isFirstRun()) {
-			if (self.elapsedMs() > 400) return 'animated fadeIn';
+			if (self.elapsedMs() > showTime) return 'animated fadeIn';
 			else return '';
 		}
-		else if (self.predictionMs() > 400) return 'animated fadeIn';
+		else if (self.predictionMs() > showTime) return 'animated fadeIn';
 	});
 }
 if (typeof exports !== 'undefined') exports.ProgressBarViewModel = ProgressBarViewModel;
