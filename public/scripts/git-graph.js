@@ -98,7 +98,9 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 		});
 	}
 	var getIdeologicalBranch = function(e) {
-		return _.find(e.refs(), function(ref) { return ref.isBranch; });
+		var ref = _.find(e.refs(), function(ref) { return ref.isBranch; });
+		if (ref && ref.isRemote && ref.localRef()) ref = ref.localRef();
+		return ref;
 	}
 	var master;
 	nodes.forEach(function(e) {
@@ -129,7 +131,6 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
 	var HEAD = this.HEAD();
-	GitGraphViewModel.markNodesIdeologicalBranches(nodes, this.nodesById);
 
 	// Make sure refs know their "remote"
 	for(var refName in this.refsByRefName) {
@@ -143,6 +144,8 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 			}
 		}
 	}
+
+	GitGraphViewModel.markNodesIdeologicalBranches(nodes, this.nodesById);
 
 	var updateTimeStamp = moment().valueOf();
 
