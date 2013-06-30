@@ -219,14 +219,6 @@
 									<span class="refType" data-bind="visible: isLocalBranch">local branch: </span>
 									<div class="name" data-bind="text: displayName"></div>
 								</div>
-								<!-- ko if: current -->
-								<!-- ko foreach: graphActions -->
-								<div class="refbox graphAction" data-bind="click: perform, visible: visible, event: { mouseover: mouseover, mouseout: mouseout }, css: style">
-									<span data-bind="text: icon"></span>
-									<span class="tooltip" data-bind="text: tooltip"></span>
-								</div>
-								<!-- /ko -->
-								<!-- /ko -->
 								<!-- /ko -->
 
 								<!-- ko foreach: tags -->
@@ -235,6 +227,16 @@
 									<span class="refType" data-bind="visible: isRemote">remote tag: </span>
 									<span class="refType" data-bind="visible: isLocal">local tag: </span>
 									<div class="name" data-bind="text: displayName"></div>
+								</div>
+								<!-- /ko -->
+
+								<!-- ko foreach: dropareaGraphActions -->
+								<div class="refbox droparea" data-bind="css: style, visible: visible">
+									<span data-bind="text: text"></span>
+									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
+									<!-- ko if: performProgressBar.running -->
+									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
+									<!-- /ko -->
 								</div>
 								<!-- /ko -->
 
@@ -249,17 +251,6 @@
 									</form>
 									<!-- /ko -->
 								</div>
-
-
-								<!-- ko foreach: dropareaGraphActions -->
-								<div class="refbox droparea" data-bind="css: style, visible: visible">
-									<span data-bind="text: text"></span>
-									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
-									<!-- ko if: performProgressBar.running -->
-									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
-									<!-- /ko -->
-								</div>
-								<!-- /ko -->
 							</div>
 
 						</div>

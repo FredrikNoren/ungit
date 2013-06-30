@@ -298,14 +298,14 @@ NodeViewModel = function(args) {
 	this.branchingFormVisible = ko.observable(false);
 
 	this.dropareaGraphActions = [
-		new GraphActions.MoveDroparea(this.graph, this),
-		new GraphActions.RebaseDroparea(this.graph, this),
-		new GraphActions.MergeDroparea(this.graph, this),
-		new GraphActions.PushDroparea(this.graph, this),
-		new GraphActions.ResetDroparea(this.graph, this),
-		new GraphActions.PullDroparea(this.graph, this),
-		new GraphActions.CheckoutDroparea(this.graph, this),
-		new GraphActions.DeleteDroparea(this.graph, this),
+		new GraphActions.Move(this.graph, this),
+		new GraphActions.Rebase(this.graph, this),
+		new GraphActions.Merge(this.graph, this),
+		new GraphActions.Push(this.graph, this),
+		new GraphActions.Reset(this.graph, this),
+		new GraphActions.Pull(this.graph, this),
+		new GraphActions.Checkout(this.graph, this),
+		new GraphActions.Delete(this.graph, this),
 	];
 }
 NodeViewModel.prototype.showBranchingForm = function() {
@@ -393,12 +393,6 @@ var RefViewModel = function(args) {
 		if (!self.remoteRef()) return false;
 		return self.remoteRef().node().isAncestor(self.node());
 	});
-	this.graphActions = [
-		new GraphActions.PushClickable(this.graph, this),
-		new GraphActions.ResetClickable(this.graph, this),
-		new GraphActions.RebaseClickable(this.graph, this),
-		new GraphActions.PullClickable(this.graph, this)
-	];
 }
 RefViewModel.prototype.dragStart = function() {
 	this.graph.draggingRef(this);

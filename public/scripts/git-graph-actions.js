@@ -7,41 +7,41 @@ if (typeof exports !== 'undefined') {
 var GraphActions = {};
 if (typeof module !== 'undefined') module.exports = GraphActions;
 
-GraphActions.DropareaBase = function(graph) {
+GraphActions.ActionBase = function(graph) {
 	this.graph = graph;
 	this.dragObject = ko.observable();
 	this.performProgressBar = new ProgressBarViewModel('checkout-' + graph.repoPath, 1000);
 }
-GraphActions.DropareaBase.prototype.dragEnter = function(dragObject) {
+GraphActions.ActionBase.prototype.dragEnter = function(dragObject) {
 	if (!this.visible()) return;
 	this.graph.hoverGraphAction(this);
 	this.dragObject(dragObject);
 }
-GraphActions.DropareaBase.prototype.dragLeave = function() {
+GraphActions.ActionBase.prototype.dragLeave = function() {
 	if (!this.visible()) return;
 	this.graph.hoverGraphAction(null);
 	this.dragObject(null);
 }
-GraphActions.DropareaBase.prototype.mouseover = function() {
+GraphActions.ActionBase.prototype.mouseover = function() {
 	this.graph.hoverGraphAction(this);
 }
-GraphActions.DropareaBase.prototype.mouseout = function() {
+GraphActions.ActionBase.prototype.mouseout = function() {
 	this.graph.hoverGraphAction(null);
 }
 
-GraphActions.MoveDroparea = function(graph, node) {
+GraphActions.Move = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
 		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self.node;
 	});
 	this.style = ko.computed(function() { return 'move ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.MoveDroparea, GraphActions.DropareaBase);
-GraphActions.MoveDroparea.prototype.text = 'Move';
-GraphActions.MoveDroparea.prototype.visualization = 'move';
-GraphActions.MoveDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Move, GraphActions.ActionBase);
+GraphActions.Move.prototype.text = 'Move';
+GraphActions.Move.prototype.visualization = 'move';
+GraphActions.Move.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	if (ref.current())
 		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.node.sha1 });
@@ -51,9 +51,9 @@ GraphActions.MoveDroparea.prototype.drop = function(ref) {
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
 }
 
-GraphActions.ResetDroparea = function(graph, node) {
+GraphActions.Reset = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.onto = ko.observable(this.node);
@@ -67,10 +67,10 @@ GraphActions.ResetDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'reset ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.ResetDroparea, GraphActions.DropareaBase);
-GraphActions.ResetDroparea.prototype.text = 'Reset';
-GraphActions.ResetDroparea.prototype.visualization = 'reset';
-GraphActions.ResetDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Reset, GraphActions.ActionBase);
+GraphActions.Reset.prototype.text = 'Reset';
+GraphActions.Reset.prototype.visualization = 'reset';
+GraphActions.Reset.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	self.performProgressBar.start();
@@ -80,9 +80,9 @@ GraphActions.ResetDroparea.prototype.drop = function(ref) {
 }
 
 
-GraphActions.PullDroparea = function(graph, node) {
+GraphActions.Pull = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.onto = ko.observable(this.node);
@@ -96,10 +96,10 @@ GraphActions.PullDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'pull ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.PullDroparea, GraphActions.DropareaBase);
-GraphActions.PullDroparea.prototype.text = 'Pull';
-GraphActions.PullDroparea.prototype.visualization = 'pull';
-GraphActions.PullDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Pull, GraphActions.ActionBase);
+GraphActions.Pull.prototype.text = 'Pull';
+GraphActions.Pull.prototype.visualization = 'pull';
+GraphActions.Pull.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	self.performProgressBar.start();
@@ -108,9 +108,9 @@ GraphActions.PullDroparea.prototype.drop = function(ref) {
 	});
 }
 
-GraphActions.RebaseDroparea = function(graph, node) {
+GraphActions.Rebase = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.onto = ko.observable(this.node);
@@ -123,17 +123,17 @@ GraphActions.RebaseDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'rebase ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.RebaseDroparea, GraphActions.DropareaBase);
-GraphActions.RebaseDroparea.prototype.text = 'Rebase';
-GraphActions.RebaseDroparea.prototype.visualization = 'rebase';
-GraphActions.RebaseDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Rebase, GraphActions.ActionBase);
+GraphActions.Rebase.prototype.text = 'Rebase';
+GraphActions.Rebase.prototype.visualization = 'rebase';
+GraphActions.Rebase.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 });
 }
 
-GraphActions.MergeDroparea = function(graph, node) {
+GraphActions.Merge = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
 		return self.graph.showDropTargets() &&
@@ -144,17 +144,17 @@ GraphActions.MergeDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'merge ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.MergeDroparea, GraphActions.DropareaBase);
-GraphActions.MergeDroparea.prototype.text = 'Merge';
-GraphActions.MergeDroparea.prototype.visualization = 'merge';
-GraphActions.MergeDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Merge, GraphActions.ActionBase);
+GraphActions.Merge.prototype.text = 'Merge';
+GraphActions.Merge.prototype.visualization = 'merge';
+GraphActions.Merge.prototype.drop = function(ref) {
 	this.graph.hoverGraphAction(null);
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 });
 }
 
-GraphActions.PushDroparea = function(graph, node) {
+GraphActions.Push = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -165,10 +165,10 @@ GraphActions.PushDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'push ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.PushDroparea, GraphActions.DropareaBase);
-GraphActions.PushDroparea.prototype.text = 'Push';
-GraphActions.PushDroparea.prototype.visualization = 'push';
-GraphActions.PushDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Push, GraphActions.ActionBase);
+GraphActions.Push.prototype.text = 'Push';
+GraphActions.Push.prototype.visualization = 'push';
+GraphActions.Push.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	var programEventListener = function(event) {
@@ -184,9 +184,9 @@ GraphActions.PushDroparea.prototype.drop = function(ref) {
 	});
 }
 
-GraphActions.CheckoutDroparea = function(graph, node) {
+GraphActions.Checkout = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -197,10 +197,10 @@ GraphActions.CheckoutDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'checkout ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.CheckoutDroparea, GraphActions.DropareaBase);
-GraphActions.CheckoutDroparea.prototype.text = 'Checkout';
-GraphActions.CheckoutDroparea.prototype.visualization = 'checkout';
-GraphActions.CheckoutDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Checkout, GraphActions.ActionBase);
+GraphActions.Checkout.prototype.text = 'Checkout';
+GraphActions.Checkout.prototype.visualization = 'checkout';
+GraphActions.Checkout.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	this.performProgressBar.start();
@@ -209,9 +209,9 @@ GraphActions.CheckoutDroparea.prototype.drop = function(ref) {
 	});
 }
 
-GraphActions.DeleteDroparea = function(graph, node) {
+GraphActions.Delete = function(graph, node) {
 	var self = this;
-	GraphActions.DropareaBase.call(this, graph);
+	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
@@ -221,10 +221,10 @@ GraphActions.DeleteDroparea = function(graph, node) {
 	});
 	this.style = ko.computed(function() { return 'delete ' + (self.visible() ? 'show' : ''); });
 }
-inherits(GraphActions.DeleteDroparea, GraphActions.DropareaBase);
-GraphActions.DeleteDroparea.prototype.text = 'Delete';
-GraphActions.DeleteDroparea.prototype.visualization = 'delete';
-GraphActions.DeleteDroparea.prototype.drop = function(ref) {
+inherits(GraphActions.Delete, GraphActions.ActionBase);
+GraphActions.Delete.prototype.text = 'Delete';
+GraphActions.Delete.prototype.visualization = 'delete';
+GraphActions.Delete.prototype.drop = function(ref) {
 	var self = this;
 	this.graph.hoverGraphAction(null);
 	var url = ref.isTag ? '/tags' : '/branches';
@@ -233,95 +233,5 @@ GraphActions.DeleteDroparea.prototype.drop = function(ref) {
 		self.performProgressBar.stop();
 		self.graph.loadNodesFromApi();
 	});
-}
-
-
-GraphActions.ClickableBase = function(graph) {
-	this.graph = graph;
-}
-GraphActions.ClickableBase.prototype.mouseover = function() {
-	this.graph.hoverGraphAction(this);
-}
-GraphActions.ClickableBase.prototype.mouseout = function() {
-	this.graph.hoverGraphAction(null);
-}
-
-GraphActions.PushClickable = function(graph, ref) {
-	var self = this;
-	GraphActions.ClickableBase.call(this, graph);
-	this.ref = ko.observable(ref);
-	this.visible = ko.computed(function() {
-		if (self.ref().remoteRef())
-			return self.ref().remoteRef().node() != self.ref().node() && self.ref().remoteIsAncestor();
-		else if (self.graph.hasRemotes()) return true;
-	});
-}
-inherits(GraphActions.PushClickable, GraphActions.ClickableBase);
-GraphActions.PushClickable.prototype.style = 'push';
-GraphActions.PushClickable.prototype.icon = 'P';
-GraphActions.PushClickable.prototype.tooltip = 'Push to remote';
-GraphActions.PushClickable.prototype.visualization = 'push';
-GraphActions.PushClickable.prototype.perform = function() {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: this.ref().displayName }, function(err, res) {
-	});
-}
-
-
-GraphActions.ResetClickable = function(graph, ref) {
-	var self = this;
-	GraphActions.ClickableBase.call(this, graph);
-	this.ref = ko.observable(ref);
-	this.visible = ko.computed(function() {
-		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && !self.ref().remoteIsOffspring();
-	});
-}
-inherits(GraphActions.ResetClickable, GraphActions.ClickableBase);
-GraphActions.ResetClickable.prototype.style = 'reset';
-GraphActions.ResetClickable.prototype.icon = 'R';
-GraphActions.ResetClickable.prototype.tooltip = 'Reset to remote';
-GraphActions.ResetClickable.prototype.visualization = 'reset';
-GraphActions.ResetClickable.prototype.perform = function() {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
-}
-
-GraphActions.RebaseClickable = function(graph, ref) {
-	var self = this;
-	GraphActions.ClickableBase.call(this, graph);
-	this.ref = ko.observable(ref);
-	this.onto = ko.computed(function() {
-		return self.ref().remoteRef();
-	});
-	this.visible = ko.computed(function() {
-		return self.onto() && self.onto().node() != self.ref().node() && !self.ref().remoteIsAncestor() && !self.ref().remoteIsOffspring();
-	});
-}
-inherits(GraphActions.RebaseClickable, GraphActions.ClickableBase);
-GraphActions.RebaseClickable.prototype.style = 'rebase';
-GraphActions.RebaseClickable.prototype.icon = 'R';
-GraphActions.RebaseClickable.prototype.tooltip = 'Rebase on remote';
-GraphActions.RebaseClickable.prototype.visualization = 'rebase';
-GraphActions.RebaseClickable.prototype.perform = function() {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.onto().name });
-}
-
-GraphActions.PullClickable = function(graph, ref) {
-	var self = this;
-	GraphActions.ClickableBase.call(this, graph);
-	this.ref = ko.observable(ref);
-	this.visible = ko.computed(function() {
-		return self.ref().remoteRef() && self.ref().remoteRef().node() != self.ref().node() && self.ref().remoteIsOffspring();
-	});
-}
-inherits(GraphActions.PullClickable, GraphActions.ClickableBase);
-GraphActions.PullClickable.prototype.style = 'pull';
-GraphActions.PullClickable.prototype.icon = 'P';
-GraphActions.PullClickable.prototype.tooltip = 'Pull to remote';
-GraphActions.PullClickable.prototype.visualization = 'pull';
-GraphActions.PullClickable.prototype.perform = function() {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.ref.remoteRef().name });
 }
 
