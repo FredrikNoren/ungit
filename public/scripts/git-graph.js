@@ -63,8 +63,10 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 				if (node) {
 					refViewModel.node(node);
 					var refs = node.refs();
-					refs.push(refViewModel);
-					node.refs(refs);
+					if (refs.indexOf(refViewModel) == -1) {
+						refs.push(refViewModel);
+						node.refs(refs);
+					}
 				}
 			}
 		});
