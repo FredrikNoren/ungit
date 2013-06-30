@@ -44,6 +44,30 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 		self.setNodesFromLog(logEntries);
 		self.isLoading(false);
 		self.nodesLoader.stop();
+		self.loadRemoteTagsFromApi();
+	});
+}
+
+GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
+	var self = this;
+	api.query('GET', '/remote/tags', { path: this.repoPath }, function(err, remoteTags) {
+		if (err) {
+			if (err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) return true;
+			return
+		}
+		remoteTags.forEach(function(ref) {
+			if (ref.name.indexOf('^{}') != -1) {
+				var name = 'remote-tag: ' + ref.name.slice(0, ref.name.length - '^{}'.length);
+				var refViewModel = self.getRef(name);
+				var node = self.nodesById[ref.sha1];
+				if (node) {
+					refViewModel.node(node);
+					var refs = node.refs();
+					refs.push(refViewModel);
+					node.refs(refs);
+				}
+			}
+		});
 	});
 }
 
@@ -57,11 +81,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 		self.nodesById[node.sha1] = nodeViewModel;
 		if (node.refs) {
 			var refVMs = node.refs.map(function(ref) {
-				var refViewModel = self.refsByRefName[ref];
-				if (!refViewModel) {
-					var refViewModel = self.refsByRefName[ref] = new RefViewModel({ name: ref, graph: self });
-					self.refs.push(refViewModel);
-				}
+				var refViewModel = self.getRef(ref);
 				refViewModel.node(nodeViewModel);
 				return refViewModel;
 			});
@@ -75,6 +95,14 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 	});
 	this.HEAD(GitGraphViewModel.getHEAD(nodeVMs));
 	this.setNodes(nodeVMs);
+}
+GitGraphViewModel.prototype.getRef = function(refName) {
+	var refViewModel = this.refsByRefName[refName];
+	if (!refViewModel) {
+		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this });
+		this.refs.push(refViewModel);
+	}
+	return refViewModel;
 }
 
 GitGraphViewModel.getHEAD = function(nodes) {
