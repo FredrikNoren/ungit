@@ -79,6 +79,35 @@ GraphActions.ResetDroparea.prototype.drop = function(ref) {
 	});
 }
 
+
+GraphActions.PullDroparea = function(graph, node) {
+	var self = this;
+	GraphActions.DropareaBase.call(this, graph);
+	this.node = node;
+	this.ref = this.dragObject;
+	this.onto = ko.observable(this.node);
+	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
+		return self.graph.showDropTargets() && 
+			self.graph.draggingRef().node() == self.node &&
+			self.graph.draggingRef().remoteRef() &&
+			self.graph.draggingRef().remoteRef().node() != self.graph.draggingRef().node() &&
+			self.graph.draggingRef().remoteIsOffspring();;
+	});
+	this.style = ko.computed(function() { return 'pull ' + (self.visible() ? 'show' : ''); });
+}
+inherits(GraphActions.PullDroparea, GraphActions.DropareaBase);
+GraphActions.PullDroparea.prototype.text = 'Pull';
+GraphActions.PullDroparea.prototype.visualization = 'pull';
+GraphActions.PullDroparea.prototype.drop = function(ref) {
+	var self = this;
+	this.graph.hoverGraphAction(null);
+	self.performProgressBar.start();
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, function(err) {
+		self.performProgressBar.stop();
+	});
+}
+
 GraphActions.RebaseDroparea = function(graph, node) {
 	var self = this;
 	GraphActions.DropareaBase.call(this, graph);

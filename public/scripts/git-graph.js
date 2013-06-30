@@ -303,6 +303,7 @@ NodeViewModel = function(args) {
 		new GraphActions.MergeDroparea(this.graph, this),
 		new GraphActions.PushDroparea(this.graph, this),
 		new GraphActions.ResetDroparea(this.graph, this),
+		new GraphActions.PullDroparea(this.graph, this),
 		new GraphActions.CheckoutDroparea(this.graph, this),
 		new GraphActions.DeleteDroparea(this.graph, this),
 	];
