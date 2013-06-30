@@ -158,13 +158,15 @@ logRenderer.render = function(element, graph) {
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'reset') {
 		var local = graph.hoverGraphAction().ref();
-		var remote = local.remoteRef();
-		context.setLineDash(null);
-		context.strokeStyle = "rgb(255, 129, 31)";
+		if (local) {
+			var remote = local.remoteRef();
+			context.setLineDash(null);
+			context.strokeStyle = "rgb(255, 129, 31)";
 
-		context.beginPath();
-		logRenderer.crossOverNodes(context, local.node().getPathToCommonAncestor(remote.node()).slice(0, -1));
-		context.stroke();
+			context.beginPath();
+			logRenderer.crossOverNodes(context, local.node().getPathToCommonAncestor(remote.node()).slice(0, -1));
+			context.stroke();
+		}
 	}
 
 	// Draw rebase lines

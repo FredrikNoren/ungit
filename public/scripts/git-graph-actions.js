@@ -22,6 +22,12 @@ GraphActions.DropareaBase.prototype.dragLeave = function() {
 	this.graph.hoverGraphAction(null);
 	this.dragObject(null);
 }
+GraphActions.DropareaBase.prototype.mouseover = function() {
+	this.graph.hoverGraphAction(this);
+}
+GraphActions.DropareaBase.prototype.mouseout = function() {
+	this.graph.hoverGraphAction(null);
+}
 
 GraphActions.MoveDroparea = function(graph, node) {
 	var self = this;
@@ -43,6 +49,34 @@ GraphActions.MoveDroparea.prototype.drop = function(ref) {
 		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
 	else
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
+}
+
+GraphActions.ResetDroparea = function(graph, node) {
+	var self = this;
+	GraphActions.DropareaBase.call(this, graph);
+	this.node = node;
+	this.ref = this.dragObject;
+	this.onto = ko.observable(this.node);
+	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
+		return self.graph.showDropTargets() && 
+			self.graph.draggingRef().node() == self.node &&
+			self.graph.draggingRef().remoteRef() &&
+			self.graph.draggingRef().remoteRef().node() != self.graph.draggingRef().node() &&
+			!self.graph.draggingRef().remoteIsOffspring();;
+	});
+	this.style = ko.computed(function() { return 'reset ' + (self.visible() ? 'show' : ''); });
+}
+inherits(GraphActions.ResetDroparea, GraphActions.DropareaBase);
+GraphActions.ResetDroparea.prototype.text = 'Reset';
+GraphActions.ResetDroparea.prototype.visualization = 'reset';
+GraphActions.ResetDroparea.prototype.drop = function(ref) {
+	var self = this;
+	this.graph.hoverGraphAction(null);
+	self.performProgressBar.start();
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, function(err) {
+		self.performProgressBar.stop();
+	});
 }
 
 GraphActions.RebaseDroparea = function(graph, node) {

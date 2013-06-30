@@ -302,8 +302,9 @@ NodeViewModel = function(args) {
 		new GraphActions.RebaseDroparea(this.graph, this),
 		new GraphActions.MergeDroparea(this.graph, this),
 		new GraphActions.PushDroparea(this.graph, this),
+		new GraphActions.ResetDroparea(this.graph, this),
 		new GraphActions.CheckoutDroparea(this.graph, this),
-		new GraphActions.DeleteDroparea(this.graph, this)
+		new GraphActions.DeleteDroparea(this.graph, this),
 	];
 }
 NodeViewModel.prototype.showBranchingForm = function() {
