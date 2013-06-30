@@ -10,7 +10,7 @@ if (typeof module !== 'undefined') module.exports = GraphActions;
 GraphActions.ActionBase = function(graph) {
 	this.graph = graph;
 	this.dragObject = ko.observable();
-	this.performProgressBar = new ProgressBarViewModel('checkout-' + graph.repoPath, 1000);
+	this.performProgressBar = new ProgressBarViewModel('action-' + this.visualization + '-' + graph.repoPath, 1000);
 }
 GraphActions.ActionBase.prototype.doPerform = function(ref) {
 	var self = this;
