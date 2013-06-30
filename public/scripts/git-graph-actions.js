@@ -12,6 +12,14 @@ GraphActions.ActionBase = function(graph) {
 	this.dragObject = ko.observable();
 	this.performProgressBar = new ProgressBarViewModel('checkout-' + graph.repoPath, 1000);
 }
+GraphActions.ActionBase.prototype.doPerform = function(ref) {
+	var self = this;
+	this.graph.hoverGraphAction(null);
+	self.performProgressBar.start();
+	this.perform(ref, function() {
+		self.performProgressBar.stop();
+	});
+}
 GraphActions.ActionBase.prototype.dragEnter = function(dragObject) {
 	if (!this.visible()) return;
 	this.graph.hoverGraphAction(this);
@@ -41,14 +49,13 @@ GraphActions.Move = function(graph, node) {
 inherits(GraphActions.Move, GraphActions.ActionBase);
 GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.visualization = 'move';
-GraphActions.Move.prototype.drop = function(ref) {
-	this.graph.hoverGraphAction(null);
+GraphActions.Move.prototype.perform = function(ref, callback) {
 	if (ref.current())
-		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.node.sha1 });
+		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.node.sha1 }, callback);
 	else if (ref.isTag)
-		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
+		api.query('POST', '/tags', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true }, callback);
 	else
-		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true });
+		api.query('POST', '/branches', { path: this.graph.repoPath, name: ref.displayName, startPoint: this.node.sha1, force: true }, callback);
 }
 
 GraphActions.Reset = function(graph, node) {
@@ -70,13 +77,8 @@ GraphActions.Reset = function(graph, node) {
 inherits(GraphActions.Reset, GraphActions.ActionBase);
 GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.visualization = 'reset';
-GraphActions.Reset.prototype.drop = function(ref) {
-	var self = this;
-	this.graph.hoverGraphAction(null);
-	self.performProgressBar.start();
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, function(err) {
-		self.performProgressBar.stop();
-	});
+GraphActions.Reset.prototype.perform = function(ref, callback) {
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, callback);
 }
 
 
@@ -99,13 +101,8 @@ GraphActions.Pull = function(graph, node) {
 inherits(GraphActions.Pull, GraphActions.ActionBase);
 GraphActions.Pull.prototype.text = 'Pull';
 GraphActions.Pull.prototype.visualization = 'pull';
-GraphActions.Pull.prototype.drop = function(ref) {
-	var self = this;
-	this.graph.hoverGraphAction(null);
-	self.performProgressBar.start();
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, function(err) {
-		self.performProgressBar.stop();
-	});
+GraphActions.Pull.prototype.perform = function(ref, callback) {
+	api.query('POST', '/reset', { path: this.graph.repoPath, to: ref.remoteRef().name }, callback);
 }
 
 GraphActions.Rebase = function(graph, node) {
@@ -126,9 +123,8 @@ GraphActions.Rebase = function(graph, node) {
 inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.visualization = 'rebase';
-GraphActions.Rebase.prototype.drop = function(ref) {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 });
+GraphActions.Rebase.prototype.perform = function(ref, callback) {
+	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, callback);
 }
 
 GraphActions.Merge = function(graph, node) {
@@ -147,9 +143,8 @@ GraphActions.Merge = function(graph, node) {
 inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.visualization = 'merge';
-GraphActions.Merge.prototype.drop = function(ref) {
-	this.graph.hoverGraphAction(null);
-	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 });
+GraphActions.Merge.prototype.perform = function(ref, callback) {
+	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 }, callback);
 }
 
 GraphActions.Push = function(graph, node) {
@@ -168,19 +163,17 @@ GraphActions.Push = function(graph, node) {
 inherits(GraphActions.Push, GraphActions.ActionBase);
 GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.visualization = 'push';
-GraphActions.Push.prototype.drop = function(ref) {
+GraphActions.Push.prototype.perform = function(ref, callback) {
 	var self = this;
-	this.graph.hoverGraphAction(null);
 	var programEventListener = function(event) {
 		if (event.event == 'credentialsRequested') self.performProgressBar.pause();
 		else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
 	};
 	this.graph.repository.main.programEvents.add(programEventListener);
-	this.performProgressBar.start();
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, localBranch: ref.displayName, remoteBranch: ref.displayName }, function(err, res) {
 		self.graph.repository.main.programEvents.remove(programEventListener);
-		self.performProgressBar.stop();
 		self.graph.loadNodesFromApi();
+		callback();
 	});
 }
 
@@ -200,13 +193,8 @@ GraphActions.Checkout = function(graph, node) {
 inherits(GraphActions.Checkout, GraphActions.ActionBase);
 GraphActions.Checkout.prototype.text = 'Checkout';
 GraphActions.Checkout.prototype.visualization = 'checkout';
-GraphActions.Checkout.prototype.drop = function(ref) {
-	var self = this;
-	this.graph.hoverGraphAction(null);
-	this.performProgressBar.start();
-	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
-		self.performProgressBar.stop();
-	});
+GraphActions.Checkout.prototype.perform = function(ref, callback) {
+	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, callback);
 }
 
 GraphActions.Delete = function(graph, node) {
@@ -224,13 +212,11 @@ GraphActions.Delete = function(graph, node) {
 inherits(GraphActions.Delete, GraphActions.ActionBase);
 GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.visualization = 'delete';
-GraphActions.Delete.prototype.drop = function(ref) {
+GraphActions.Delete.prototype.perform = function(ref, callback) {
 	var self = this;
-	this.graph.hoverGraphAction(null);
 	var url = ref.isTag ? '/tags' : '/branches';
-	this.performProgressBar.start();
 	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
-		self.performProgressBar.stop();
+		callback();
 		self.graph.loadNodesFromApi();
 	});
 }

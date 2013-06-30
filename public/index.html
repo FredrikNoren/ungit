@@ -233,7 +233,7 @@
 								<!-- ko foreach: dropareaGraphActions -->
 								<div class="refbox droparea" data-bind="css: style, visible: visible">
 									<span data-bind="text: text"></span>
-									<div class="dropmask" data-bind="dropOver: visible, drop: drop, dragEnter: dragEnter, dragLeave: dragLeave"></div>
+									<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave"></div>
 									<!-- ko if: performProgressBar.running -->
 									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
 									<!-- /ko -->
