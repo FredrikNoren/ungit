@@ -49,6 +49,7 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 }
 
 GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
+	if (!this.hasRemotes()) return;
 	var self = this;
 	api.query('GET', '/remote/tags', { path: this.repoPath }, function(err, remoteTags) {
 		if (err) {

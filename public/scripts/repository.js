@@ -95,6 +95,7 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.hasRemotes(remotes.length != 0);
+		self.graph.loadRemoteTagsFromApi();
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {
