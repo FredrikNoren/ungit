@@ -39,6 +39,8 @@ logRenderer.crossOverNodes = function(context, nodes) {
 	});
 }
 
+logRenderer.commitDefaultColor = GitGraphViewModel.randomColor();
+
 logRenderer.render = function(element, graph) {
 
 	var nodes = graph.nodes() || [],
@@ -79,9 +81,9 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw lines
-	context.strokeStyle = "#737373";
+	context.strokeStyle = "#4A4A4A";
 	context.setLineDash(undefined);
-	context.lineWidth = 10;
+	context.lineWidth = 8;
 	context.beginPath();
 	nodes.forEach(function(node) {
 		node.parents.forEach(function(parentId) {
@@ -120,7 +122,7 @@ logRenderer.render = function(element, graph) {
 		context.fill();
 	});
 	// Commit node
-	context.strokeStyle = HEAD && HEAD.ideologicalBranch ? HEAD.ideologicalBranch.color : GitGraphViewModel.randomColor();
+	context.strokeStyle = HEAD && HEAD.ideologicalBranch ? HEAD.ideologicalBranch.color : logRenderer.commitDefaultColor;
 	context.setLineDash([10, 5]);
 	context.lineWidth = 7;
 	context.beginPath();

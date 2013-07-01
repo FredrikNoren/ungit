@@ -280,6 +280,9 @@ NodeViewModel = function(args) {
 	this.boxDisplayY = ko.computed(function() {
 		return self.y();
 	});
+	this.refsX = ko.computed(function() {
+		return self.radius();
+	});
 	this.commitTime = moment(args.commitDate);
 	this.authorTime = moment(args.authorDate);
 	this.parents = args.parents || [];

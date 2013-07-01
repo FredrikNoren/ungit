@@ -14,7 +14,8 @@ html, body {
 	padding: 0;
 	margin: 0;
 	height: 100%;
-	background: rgb(228, 228, 228);
+	background: #252833;
+	color: #fff;
 
 }
 button, body {
@@ -65,12 +66,6 @@ body {
 			}
 		}
 	}
-}
-
-.box {
-	border: 1px solid #eee;
-	background: #fefefe;
-	padding: 0.5em;
 }
 
 .progressBar {
@@ -138,7 +133,7 @@ textarea {
 }
 .checkbox {
 	background: #fefefe;
-	border: 5px solid #eee;
+	border: 5px solid rgba(0, 0, 0, 0.09);
 	width: 15px;
 	display: inline-block;
 	border-radius: 3px;
@@ -164,14 +159,6 @@ textarea {
 
 
 
-.hr {
-	line-height: 0px;
-	height: 0px;
-	border-top: 1px solid #ddd;
-	margin-top: 10px;
-	margin-bottom: 10px;
-}
-
 a {
 	text-decoration: none;
 	color: #000;
@@ -181,7 +168,6 @@ a {
 }
 
 .content {
-	background: rgb(228, 228, 228);
 	padding-left: 40px;
 }
 
@@ -192,7 +178,6 @@ a {
 }
 
 .header {
-	background: #4D4D4D;
 	padding-left: 40px;
 	padding-right: 40px;
 	padding-top: 20px;
@@ -206,7 +191,7 @@ a {
 		box-sizing:border-box;
 		-moz-box-sizing:border-box;
 		display: block;
-		background: #575757;
+		background: #3E3D4D;
 		margin-left: 110px;
 		padding: 0px;
 
@@ -225,13 +210,6 @@ a {
 			margin: 0px;
 			font-family: 'Open Sans';
 		}
-	}
-
-
-	.arrowUp {
-		margin-top: 10px;
-		margin-left: 140px;
-		display: block;
 	}
 }
 
@@ -295,19 +273,12 @@ a {
 }
 
 
-.boxStraightShadow {
-	-webkit-box-shadow: 5px 7px 0px #c9c9c9;
-	-moz-box-shadow:    5px 7px 0px #c9c9c9;
-	box-shadow:         5px 7px 0px #c9c9c9;
-}
-
 @import "repository.less";
 
 .gerritIntegration {
 	background: #60A6C2;
 	color: #fff;
 	padding: 20px;
-	.boxStraightShadow;
 	.changes {
 		.progressBar {
 			margin: 30px;
@@ -339,7 +310,6 @@ a {
 
 .droparea {
 	position: relative;
-	border: 0.15em dashed #666;
 	border-radius: 3px;
 	padding: 0.3em;
 	.dropmask {
@@ -365,8 +335,6 @@ a {
 			margin: 20px;
 		}
 		display: inline-block;
-
-		.boxStraightShadow;
 
 		box-sizing:border-box;
 		-moz-box-sizing:border-box;	

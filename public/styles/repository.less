@@ -35,7 +35,7 @@
 
 .repository {
 	position: relative;
-	padding-right: 50px;
+	padding-right: 40px;
 	overflow: hidden;
 	height: auto;
 	margin-bottom: 1px;
@@ -94,11 +94,10 @@
 }
 
 .repository .staging {
-	background: rgb(253, 247, 200);
+	background: #EDF0CA;
+	color: #58594E;
 	position: relative;
 	padding: 10px;
-
-	.boxStraightShadow;
 
 	box-sizing:border-box;
 	-moz-box-sizing:border-box;
@@ -193,7 +192,7 @@
 					padding-right: 5px;
 				}
 				.new {
-					background: #B5F584;
+					background: #89D64D;
 				}
 				.deleted {
 					background: #DB3712;
@@ -212,7 +211,7 @@
 					}
 				}
 				.discard {
-					background: #e0e0e0;
+					background: #CCD1B9;
 					color: #fff;
 					border-radius: 3px;
 					padding: 3px;
@@ -299,9 +298,8 @@
 				position: relative;
 				top: -20px;
 				background: rgb(255, 255, 255);
+				color: #000;
 				
-				.boxStraightShadow;
-
 				padding: 10px;
 				width: @logWidth;
 				box-sizing:border-box;
@@ -322,20 +320,15 @@
 
 		.refs {
 			position: absolute;
-			left: (@logWidth + 180px);
+			margin-left: (@logWidth + 140px);
 			top: -16px;
 			width: 900px;
-			.arrowLeft {
-				position: absolute;
-				left: -15px;
-				top: 1px;
-			}
 			.refbox {
 				float: left;
 				margin-right: 5px;
 				position: relative;
 				display: inline-block;
-				background: #474747;
+				
 				box-sizing:border-box;
 				-moz-box-sizing:border-box;	
 				color: #fff;
@@ -344,6 +337,7 @@
 				padding-left: 10px;
 				padding-right: 10px;
 				opacity: 0.6;
+
 				.name {
 					display: inline-block;
 				}
@@ -357,6 +351,7 @@
 				}
 				&.remote {
 					color: #89BCE8;
+					opacity: 0.3;
 				}
 				&.tag {
 					color: #EEF266;
@@ -396,7 +391,7 @@
 					background: #D087D4;
 				}
 				&.checkout {
-					background: #DBEB34;
+					background: #CDDB37;
 				}
 				&.delete {
 					background: #D64D38;
@@ -470,15 +465,16 @@
 		left: 0px;
 		.daySeparator {
 			position: absolute;
-			font-size: 0.6em;
-			color: #999;
+			font-size: 1.1em;
+			color: rgb(27, 26, 26);
+			text-shadow: 1px 1px rgb(43, 43, 43);
 			width: 70px;
-			background: #fff;
 			padding: 5px;
 			.arrowRight {
 				position: absolute;
 				right: -15px;
 				top: -3px;
+				display: none;
 			}
 		}
 	}
