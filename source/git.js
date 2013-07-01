@@ -1,6 +1,8 @@
 var child_process = require('child_process');
 var gitParser = require('./git-parser');
-var async=  require('async');
+var async = require('async');
+var path = require('path');
+var fs = require('fs');
 
 var gitConfigNoColors = '-c color.ui=false';
 
@@ -22,7 +24,18 @@ var git = function(command, repoPath, res, parser, callback) {
   });
 }
 git.status = function(repoPath, res, callback) {
-  git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, callback);
+  git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, function(err, status) {
+    if (err) {
+      if (callback) return callback(err, status);
+      else return false;
+    }
+    // From http://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
+    status.inRebase = fs.existsSync(path.join(repoPath, '.git', 'rebase-merge')) ||
+      fs.existsSync(path.join(repoPath, '.git', 'rebase-apply'));
+
+    if (callback) callback(null, status);
+    else res.json(status);
+  });
 }
 git.remoteShow = function(repoPath, remoteName, res, callback) {
   git('remote show ' + remoteName, repoPath, res, gitParser.parseGitRemoteShow, callback);

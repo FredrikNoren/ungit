@@ -291,14 +291,39 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		git.remoteShow(req.query.path, req.params.name, res);
 	});
 
-	app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, function(req, res) {
-		if (!verifyPath(req.body.path, res)) return;
-		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res);
-	});
-
-	app.post(exports.pathPrefix + '/merge', function(req, res) {
+	app.post(exports.pathPrefix + '/merge', ensureAuthenticated, function(req, res) {
 		if (!verifyPath(req.body.path, res)) return;
 		git('merge "' + req.body.with.trim() + '"', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('rebase "' + req.body.onto.trim() + '"', req.body.path, res, undefined, function(err) {
+			if (err) {
+				if (err.stderr.indexOf('Failed to merge in the changes.') == 0) {
+					err.errorCode = 'merge-failed';
+					res.json(400, err);
+					return true;
+				}
+				return;
+			}
+			res.json({});
+		});
+	});
+
+	app.post(exports.pathPrefix + '/rebase/continue', ensureAuthenticated, function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('rebase --continue', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/rebase/abort', ensureAuthenticated, function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('rebase --abort', req.body.path, res);
+	});
+
+	app.post(exports.pathPrefix + '/resolveconflicts', ensureAuthenticated, function(req, res) {
+		if (!verifyPath(req.body.path, res)) return;
+		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.body.path, res);
 	});
 
 	app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, function(req, res) {

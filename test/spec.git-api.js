@@ -112,7 +112,8 @@ describe('git-api', function () {
 			expect(res.body.files[testFile]).to.eql({
 				isNew: true,
 				staged: false,
-				removed: false
+				removed: false,
+				conflict: false
 			});
 			done();
 		});
@@ -156,7 +157,8 @@ describe('git-api', function () {
 			expect(res.body.files[testFile]).to.eql({
 				isNew: false,
 				staged: false,
-				removed: false
+				removed: false,
+				conflict: false
 			});
 			done();
 		});
@@ -194,7 +196,8 @@ describe('git-api', function () {
 			expect(res.body.files[testFile2]).to.eql({
 				isNew: true,
 				staged: false,
-				removed: false
+				removed: false,
+				conflict: false
 			});
 			done();
 		});
@@ -228,7 +231,8 @@ describe('git-api', function () {
 			expect(res.body.files[testFile3]).to.eql({
 				isNew: true,
 				staged: false,
-				removed: false
+				removed: false,
+				conflict: false
 			});
 			done();
 		});
@@ -269,7 +273,8 @@ describe('git-api', function () {
 			expect(res.body.files[testFile]).to.eql({
 				isNew: false,
 				staged: false,
-				removed: true
+				removed: true,
+				conflict: false
 			});
 			done();
 		});

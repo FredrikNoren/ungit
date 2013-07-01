@@ -152,7 +152,8 @@ describe('git-api branching', function () {
 			expect(res.body.files[testFile1]).to.eql({
 				isNew: false,
 				staged: false,
-				removed: false
+				removed: false,
+				conflict: false
 			});
 			done();
 		});

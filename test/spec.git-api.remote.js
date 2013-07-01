@@ -214,11 +214,17 @@ describe('git-api remote', function () {
 		common.post(req, '/push', { path: testDirLocal2, localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
 	});
 
-	it('log in "local2" should show the local and remote tag', function(done) {
+	it('log in "local2" should show the local tag', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
-			expect(commit2.refs).to.contain('remote-tag: refs/tags/v1.0');
+			done();
+		});
+	});
+
+	it('remote tags in "local2" should show the remote tag', function(done) {
+		common.get(req, '/remote/tags', { path: testDirLocal2 }, done, function(err, res) {
+			expect(res.body.map(function(tag) { return tag.name; })).to.contain('refs/tags/v1.0^{}');
 			done();
 		});
 	});
