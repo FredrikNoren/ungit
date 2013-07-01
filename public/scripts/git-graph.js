@@ -249,7 +249,8 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		goalPosition.y = y;
 		node.setPosition(goalPosition);
 
-		if (prevNode && prevNode.commitTime.dayOfYear() != node.commitTime.dayOfYear()) {
+		var secondsInADay = 60 * 60 * 24;
+		if (prevNode && Math.floor(prevNode.commitTime.unix() / secondsInADay) != Math.floor(node.commitTime.unix() / secondsInADay)) {
 			daySeparators.push({ x: 0, y: goalPosition.y, date: node.commitTime.format('ll') });
 		}
 
