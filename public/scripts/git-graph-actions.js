@@ -42,6 +42,7 @@ GraphActions.Move = function(graph, node) {
 	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && self.graph.draggingRef().node() != self.node;
 	});
 	this.style = ko.computed(function() { return 'move ' + (self.visible() ? 'show' : ''); });
@@ -112,6 +113,7 @@ GraphActions.Rebase = function(graph, node) {
 	this.ref = this.dragObject;
 	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
 			!self.node.isAncestor(self.graph.draggingRef().node()) &&
@@ -141,6 +143,7 @@ GraphActions.Merge = function(graph, node) {
 	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() &&
 			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
 			!self.node.isAncestor(self.graph.draggingRef().node()) &&
@@ -212,6 +215,7 @@ GraphActions.Delete = function(graph, node) {
 	this.node = node;
 	this.ref = this.dragObject;
 	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.draggingRef().node() == self.node &&
 			!self.graph.draggingRef().current();
