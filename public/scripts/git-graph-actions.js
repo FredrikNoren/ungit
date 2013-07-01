@@ -124,7 +124,16 @@ inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.visualization = 'rebase';
 GraphActions.Rebase.prototype.perform = function(ref, callback) {
-	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, callback);
+	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
+		if (err) {
+			if (err.errorCode = 'merge-failed') {
+				callback();
+				return true;
+			}
+			return;
+		}
+		callback();
+	});
 }
 
 GraphActions.Merge = function(graph, node) {

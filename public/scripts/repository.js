@@ -16,6 +16,9 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.graph = new GitGraphViewModel(this);
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
+	this.showLog = ko.computed(function() {
+		return !self.staging.inRebase();
+	});
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
@@ -72,6 +75,7 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 		if (err) return;
 		self.status('inited');
 		self.staging.setFiles(status.files);
+		self.staging.inRebase(!!status.inRebase);
 		if (opt_callback) opt_callback();
 	});
 }
@@ -115,6 +119,7 @@ var StagingViewModel = function(repository) {
 	this.files = ko.observableArray();
 	this.commitMessageTitle = ko.observable();
 	this.commitMessageBody = ko.observable();
+	this.inRebase = ko.observable(false);
 	this.nFiles = ko.computed(function() {
 		return self.files().length;
 	});
@@ -126,11 +131,17 @@ var StagingViewModel = function(repository) {
 	})
 	this.amend = ko.observable(false);
 	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
+	this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
+	this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
 	this.selectedDiffFile = ko.observable();
 	this.commitValidationError = ko.computed(function() {
 		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
-		if (!self.commitMessageTitle()) return "Provide a title";
+
+		if (self.files().some(function(file) { return file.conflict(); }))
+			return "Files in conflict";
+
+		if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
 		return "";
 	});
 }
@@ -146,6 +157,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 		}
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
+		fileViewModel.conflict(files[file].conflict);
 		fileViewModel.lastUpdateId = updateId;
 	}
 	for (var i = self.files().length - 1; i >= 0; i--) {
@@ -183,6 +195,20 @@ StagingViewModel.prototype.commit = function() {
 		self.committingProgressBar.stop();
 	});
 }
+StagingViewModel.prototype.rebaseContinue = function() {
+	var self = this;
+	this.rebaseContinueProgressBar.start();
+	api.query('POST', '/rebase/continue', { path: this.repository.repoPath }, function(err, res) {
+		self.rebaseContinueProgressBar.stop();
+	});
+}
+StagingViewModel.prototype.rebaseAbort = function() {
+	var self = this;
+	this.rebaseAbortProgressBar.start();
+	api.query('POST', '/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
+		self.rebaseAbortProgressBar.stop();
+	});
+}
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
 		file.invalidateDiff();
@@ -202,6 +228,7 @@ var FileViewModel = function(staging) {
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
 	this.removed = ko.observable(false);
+	this.conflict = ko.observable(false);
 	this.diffs = ko.observable([]);
 	this.showingDiffs = ko.computed(function() {
 		return self.staging.selectedDiffFile() == self;
@@ -213,6 +240,9 @@ FileViewModel.prototype.toogleStaged = function() {
 FileViewModel.prototype.discardChanges = function() {
 	this.staging.selectedDiffFile(null);
 	api.query('POST', '/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
+}
+FileViewModel.prototype.resolveConflict = function() {
+	api.query('POST', '/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;

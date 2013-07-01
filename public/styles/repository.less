@@ -47,6 +47,13 @@
 		margin-left: 30px;
 	}
 
+	.rebasing {
+		margin-left: (@logWidth + 0px);
+		margin-top: 50px;
+		font-size: 3em;
+		color: #888;
+	}
+
 	.repositoryMain {
 		width: auto;
 		overflow: hidden;
@@ -178,7 +185,7 @@
 				}
 				padding: 0.3em;
 				
-				.new, .deleted {
+				.new, .deleted, .conflict {
 					color: #fff;
 					border-radius: 3px;
 					padding: 3px;
@@ -190,6 +197,19 @@
 				}
 				.deleted {
 					background: #DB3712;
+				}
+				.conflict {
+					background: #DB12C0;
+					cursor: pointer;
+					.explanation {
+						display: none;
+					}
+					&:hover {
+						background: #A445ED;
+						.explanation {
+							display: inline-block;
+						}
+					}
 				}
 				.discard {
 					background: #e0e0e0;

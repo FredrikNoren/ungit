@@ -109,8 +109,8 @@
 		<div>
 			<table><tr><td class="commitArea">
 				<div class="commitMessage">
-				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown'">
-				<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown'"></textarea>
+				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+				<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
 				</div>
 				<div class="stats"><span data-bind="text: stats"></span> - <a href="#" data-bind="click: discardAllChanges">Discard all</a></div>
 				<div class="files" data-bind="foreach: files">
@@ -120,16 +120,29 @@
 						<span class="name" data-bind="text: name, click: toogleDiffs"></span>
 						<span class="new" data-bind="visible: isNew">New</span>
 						<span class="deleted" data-bind="visible: removed">Removed</span>
+						<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
 						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
 					</div>
 				</div>
-				<button class="commitButton" data-bind="click: commit, enable: !commitValidationError()">
+				<button class="commitButton" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
 					Commit
 					<!-- ko if: committingProgressBar.running -->
 					<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
 					<!-- /ko -->
 				</button>
-				<span class="amend">
+				<button class="rebaseContinueButton" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+					Continue rebase
+					<!-- ko if: rebaseContinueProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="rebaseAbortButton" data-bind="click: rebaseAbort, visible: inRebase">
+					Abort rebase
+					<!-- ko if: rebaseAbortProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<span class="amend" data-bind="visible: !inRebase()">
 					<div class="checkbox" data-bind="click: toogleAmend, css: { checked: amend }"></div>
 					Amend last commit
 				</span>
@@ -178,6 +191,12 @@
 			<div class="repositoryMain">
 
 				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
+
+				<!-- ko if: staging.inRebase -->
+				<div class="rebasing">Rebase in progress</div>
+				<!-- /ko -->
+
+				<!-- ko if: showLog -->
 
 				<div class="graphUtils" data-bind="visible: isFetching">
 					<img src="images/grayArrowDown.png" class="arrowDown">
@@ -263,6 +282,8 @@
 					</div>
 
 				</div>
+				<!-- /ko -->
+
 				<!-- /ko -->
 
 			</div>
