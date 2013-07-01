@@ -120,12 +120,16 @@ ko.bindingHandlers.graphLog = {
     init: function(element, valueAccessor) {
         var canvas = $('<canvas width="200" height="500">');
         $(element).append(canvas);
+
+        var prevTimestamp = 0;
+        var updateAnimationFrame = function(timestamp) {
+            var graph = ko.utils.unwrapObservable(valueAccessor());
+            logRenderer.render(canvas.get(0), graph);
+            if (document.contains(canvas.get(0))) // While the element is in the document
+                requestAnimationFrame(updateAnimationFrame);
+        }
+        requestAnimationFrame(updateAnimationFrame);
     },
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
-        var graph = ko.utils.unwrapObservable(valueAccessor());
-        var canvas = $(element).find('canvas').get(0);
-        logRenderer.render(canvas, graph);
-    }
 };
 
 ko.bindingHandlers.shown = {
@@ -150,6 +154,15 @@ ko.bindingHandlers.scrolledToEnd = {
     }
 };
 
+
+var prevTimestamp = 0;
+var updateAnimationFrame = function(timestamp) {
+    var delta = timestamp - prevTimestamp;
+    prevTimestamp = timestamp;
+    app.updateAnimationFrame(delta);
+    requestAnimationFrame(updateAnimationFrame);
+}
+requestAnimationFrame(updateAnimationFrame);
 
 window.onerror = function(err) {
     if (ungit.config.bugtracking)

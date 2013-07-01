@@ -52,6 +52,9 @@ RepositoryViewModel.prototype.update = function() {
 	this.updateRemotes();
 	this.staging.invalidateFilesDiffs();
 }
+RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	this.graph.updateAnimationFrame(deltaT);
+}
 RepositoryViewModel.prototype.fetch = function() {
 	if (this.status() != 'inited') return;
 	var self = this;

@@ -2,6 +2,9 @@
 var AppViewModel = function(main) {
 	this.content = ko.observable(main);
 }
+AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
+}
 AppViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
 	return data.template;
@@ -42,6 +45,9 @@ var MainViewModel = function() {
 	});
 }
 MainViewModel.prototype.template = 'main';
+MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
+}
 MainViewModel.prototype.submitPath = function() {
 	browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
@@ -162,6 +168,10 @@ var PathViewModel = function(main, path) {
 PathViewModel.prototype.template = 'path';
 PathViewModel.prototype.shown = function() {
 	this.updateStatus();
+}
+PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	if (this.repository())
+		this.repository().updateAnimationFrame(deltaT);
 }
 PathViewModel.prototype.updateStatus = function() {
 	var self = this;

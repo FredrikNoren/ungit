@@ -30,7 +30,11 @@ var GitGraphViewModel = function(repository) {
 	});
 }
 if (typeof exports !== 'undefined') exports.GitGraphViewModel = GitGraphViewModel;
-
+GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	this.nodes().forEach(function(node) {
+		node.updateAnimationFrame(deltaT);
+	});
+}
 GitGraphViewModel.prototype.scrolledToEnd = function() {
 	this.maxNNodes = this.maxNNodes + 10;
 	this.loadNodesFromApi();
@@ -225,6 +229,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 
 	var prevNode;
 	nodes.forEach(function(node) {
+		var goalPosition = new Vector2();
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) {
 			if (!prevNode)
 				y += 90;
@@ -232,19 +237,20 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 				y += 120;
 			else
 				y += 60;
-			node.x(30);
-			node.radius(30);
+			goalPosition.x = 30;
+			node.setRadius(30);
 			node.ancestorOfHEAD(true);
 		} else {
 			y += 60;
-			node.x(30 + 90 * (branchSlots.length - node.branchOrder));
-			node.radius(15);
+			goalPosition.x = 30 + 90 * (branchSlots.length - node.branchOrder);
+			node.setRadius(15);
 			node.ancestorOfHEAD(false);
 		}
-		node.y(y);
+		goalPosition.y = y;
+		node.setPosition(goalPosition);
 
 		if (prevNode && prevNode.commitTime.dayOfYear() != node.commitTime.dayOfYear()) {
-			daySeparators.push({ x: 0, y: node.y(), date: node.commitTime.format('ll') });
+			daySeparators.push({ x: 0, y: goalPosition.y, date: node.commitTime.format('ll') });
 		}
 
 		prevNode = node;
@@ -257,12 +263,16 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 NodeViewModel = function(args) {
 	var self = this;
 	this.graph = args.graph;
-	this.x = ko.observable(0);
-	this.y = ko.observable(0);
-	this.position = ko.computed(function() {
-		return new Vector2(self.x(), self.y());
+	this.position = ko.observable(new Vector2(0, 0));
+	this.goalPosition = ko.observable();
+	this.isAtFinalXPosition = ko.computed(function() {
+		if (!self.goalPosition()) return true;
+		return self.position().x == self.goalPosition().x;
 	});
+	this.x = ko.computed(function() { return self.position().x; });
+	this.y = ko.computed(function() { return self.position().y; });
 	this.radius = ko.observable(30);
+	this.goalRadius = ko.observable();
 	this.boxDisplayX = ko.computed(function() {
 		return self.x();
 	});
@@ -284,7 +294,7 @@ NodeViewModel = function(args) {
 	this.index = ko.observable();
 	this.ancestorOfHEAD = ko.observable(false);
 	this.logBoxVisible = ko.computed(function() {
-		return self.ancestorOfHEAD();
+		return self.ancestorOfHEAD() && self.isAtFinalXPosition();
 	})
 	this.refs = ko.observable([]);
 	this.branches = ko.computed(function() {
@@ -310,6 +320,52 @@ NodeViewModel = function(args) {
 		new GraphActions.Checkout(this.graph, this),
 		new GraphActions.Delete(this.graph, this),
 	];
+}
+NodeViewModel.prototype.setPosition = function(position) {
+	var self = this;
+	this.prevPosition = self.position();
+	if (!self.goalPosition()) self.position(position);
+	self.goalPosition(position);
+}
+NodeViewModel.prototype.setRadius = function(radius) {
+	this.prevRadius = this.radius();
+	if (!this.goalRadius()) this.radius(radius);
+	this.goalRadius(radius);
+	this.setRadiusTimestamp = Date.now();
+}
+NodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	var totalTime = 500;
+
+	var d = this.goalPosition().sub(this.position());
+	var distanceLeft = d.length();
+	if (distanceLeft != 0) {
+
+		d = this.goalPosition().sub(this.prevPosition);
+
+		var totalLength = d.length();
+		var lengthToMove = deltaT * 0.4;
+		if (distanceLeft < lengthToMove) {
+			this.position(this.goalPosition());
+		} else {
+			d = d.normalized().mul(lengthToMove);
+
+			var pos = this.position().add(d);
+			this.position(pos);
+		}
+	}
+
+	var radiusLeft = this.goalRadius() - this.radius();
+	if (radiusLeft != 0) {
+		var sign = radiusLeft ? radiusLeft < 0 ? -1 : 1 : 0;
+		radiusLeft = Math.abs(radiusLeft);
+		var totalRadiusDiff = Math.abs(this.goalRadius() - this.prevRadius);
+		var radiusToChange = totalRadiusDiff * deltaT / totalTime;
+		if (radiusLeft < radiusToChange) {
+			this.radius(this.goalRadius());
+		} else {
+			this.radius(this.radius() + sign * radiusToChange);
+		}
+	}
 }
 NodeViewModel.prototype.showBranchingForm = function() {
 	this.branchingFormVisible(true);
