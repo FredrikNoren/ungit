@@ -14,6 +14,8 @@ var git = function(command, repoPath, res, parser, callback) {
         var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
         if (stderr.indexOf('Not a git repository') >= 0)
           err.errorCode = 'not-a-repository';
+        else if (err.stderr.indexOf('Connection timed out') != -1)
+          err.errorCode = 'remote-timeout';
         if (!callback || !callback(err, stdout))
           res.json(400, err);
       }

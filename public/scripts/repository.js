@@ -61,6 +61,10 @@ RepositoryViewModel.prototype.fetch = function() {
 	this.isFetching(true);
 	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
 		if (err) {
+			if (err.errorCode == 'remote-timeout') {
+				self.repository.main.quickInfoPopup('Repository remote timeouted');
+				return true;
+			}
 			if (err.errorCode == 'no-supported-authentication-provided') {
 				self.main.content(new UserErrorViewModel({
 					title: 'Authentication error',

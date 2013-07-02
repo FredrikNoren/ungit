@@ -14,6 +14,7 @@ var MainViewModel = function() {
 	var self = this;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
+	this.quickInfoPopup = ko.observable();
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
 	this.realContent = ko.observable(new HomeViewModel());
 	this.currentVersion = ko.observable();
@@ -47,6 +48,9 @@ var MainViewModel = function() {
 MainViewModel.prototype.template = 'main';
 MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
+}
+MainViewModel.prototype.closeQuickInfoPopup = function() {
+	this.quickInfoPopup(null);
 }
 MainViewModel.prototype.submitPath = function() {
 	browseTo('repository?path=' + encodeURIComponent(this.path()));

@@ -311,7 +311,9 @@
 
 		<div class="changes">
 			<!-- ko if: status() == 'loading' -->
+			<div class="loading">
 			<!-- ko template: { name: 'progressBar', data: changesLoader } --><!-- /ko -->
+			</div>
 			<!-- /ko -->
 			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
 			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
@@ -372,6 +374,13 @@
 		<div class="modalContainer">
 			<div class="modal" data-bind="template: { name: templateChooser, data: dialog }"></div>
 		</div>
+	</div>
+	<!-- /ko -->
+
+	<!-- ko if: quickInfoPopup -->
+	<div class="quickInfoPopup animated bounceInDown">
+		<span data-bind="text: quickInfoPopup"></span>
+		<a href="#" data-bind="click: closeQuickInfoPopup">x</a>
 	</div>
 	<!-- /ko -->
 </script>
