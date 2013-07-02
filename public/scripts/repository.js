@@ -6,6 +6,7 @@ var newId = function() { return idCounter++; };
 var RepositoryViewModel = function(main, repoPath) {
 	var self = this;
 	this.status = ko.observable('loading');
+	this.remoteErrorPopup = ko.observable();
 
 	visitedRepositories.tryAdd(repoPath);
 	this.main = main;
@@ -52,6 +53,9 @@ RepositoryViewModel.prototype.update = function() {
 	this.updateRemotes();
 	this.staging.invalidateFilesDiffs();
 }
+RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
+	this.remoteErrorPopup(null);
+}
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
@@ -63,7 +67,7 @@ RepositoryViewModel.prototype.fetch = function() {
 		self.isFetching(false);
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
-				self.main.quickInfoPopup('Repository remote timeouted');
+				self.remoteErrorPopup('Repository remote timeouted');
 				return true;
 			}
 			if (err.errorCode == 'no-supported-authentication-provided') {

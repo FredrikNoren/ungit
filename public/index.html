@@ -195,6 +195,13 @@
 					<img src="images/grayArrowDown.png" class="arrowDown">
 					<div class="fetchingIndicator">Fetching nodes from remote...</div>
 				</div>
+
+				<!-- ko if: remoteErrorPopup -->
+				<div class="remoteErrorPopup animated bounceInDown">
+					<span data-bind="text: remoteErrorPopup"></span>
+					<a href="#" data-bind="click: closeRemoteErrorPopup">x</a>
+				</div>
+				<!-- /ko -->
 				
 				<!-- ko with: graph -->
 				<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
@@ -374,13 +381,6 @@
 		<div class="modalContainer">
 			<div class="modal" data-bind="template: { name: templateChooser, data: dialog }"></div>
 		</div>
-	</div>
-	<!-- /ko -->
-
-	<!-- ko if: quickInfoPopup -->
-	<div class="quickInfoPopup animated bounceInDown">
-		<span data-bind="text: quickInfoPopup"></span>
-		<a href="#" data-bind="click: closeQuickInfoPopup">x</a>
 	</div>
 	<!-- /ko -->
 </script>

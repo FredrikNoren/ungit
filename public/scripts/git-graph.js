@@ -58,7 +58,7 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 	api.query('GET', '/remote/tags', { path: this.repoPath }, function(err, remoteTags) {
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
-				self.repository.main.quickInfoPopup('Repository remote timeouted');
+				self.repository.remoteErrorPopup('Repository remote timeouted');
 				return true;
 			}
 			if (err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) return true;
