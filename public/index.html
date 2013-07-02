@@ -295,7 +295,14 @@
 
 		<button data-bind="visible: showInitCommmitHook, click: initCommitHook, text: initCommitHookMessage"></button>
 
-		<div><button data-bind="click: pushForReview">Push changes for review</button></div>
+		<div>
+			<button data-bind="click: pushForReview">
+				Push changes for review
+				<!-- ko if: pushingProgressBar.running -->
+				<!-- ko template: { name: 'progressBar', data: pushingProgressBar } --><!-- /ko -->
+				<!-- /ko -->
+			</button>
+		</div>
 
 		<div class="changes">
 			<!-- ko if: status() == 'loading' -->
@@ -307,7 +314,12 @@
 					<div class="change">
 						<span class="subject" data-bind="text: subject"></span> by <span class="owner" data-bind="text: ownerName"></span>
 						<div>
-							<button class="checkout" data-bind="click: checkout">Checkout</button>
+							<button class="checkout" data-bind="click: checkout">
+								Checkout
+								<!-- ko if: checkingOutProgressBar.running -->
+								<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
+								<!-- /ko -->
+							</button>
 							<button class="openInGerrit" data-bind="click: openInGerrit">Open in gerrit</button>
 						</div>
 					</div>

@@ -5,7 +5,8 @@ var GerritIntegrationViewModel = function(repository) {
 	this.showInitCommmitHook = ko.observable(false);
 	this.initCommitHookMessage = ko.observable('Init commit hook');
 	this.status = ko.observable('loading');
-	this.changesLoader = new ProgressBarViewModel('gerrit-' + repository.repoPath, 4000);
+	this.changesLoader = new ProgressBarViewModel('gerrit-changes-' + repository.repoPath, 4000);
+	this.pushingProgressBar = new ProgressBarViewModel('gerrit-push-' + repository.repoPath, 4000);
 	this.changes = ko.observable();
 	this.updateCommitHook();
 	this.updateChanges();
@@ -50,12 +51,14 @@ GerritIntegrationViewModel.prototype.getChangeFromNode = function(node) {
 }
 GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var self = this;
+	this.pushingProgressBar.start();
 	var branch = this.repository.graph.activeBranch();
 	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
 
 	api.query('POST', '/push', { path: this.repository.graph.repoPath, socketId: api.socketId, remoteBranch: 'refs/for/' + branch }, function(err, res) {
 		self.updateChanges();
+		self.pushingProgressBar.stop();
 	});
 }
 
@@ -65,11 +68,15 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 	this.ownerName = args.owner.name;
 	this.sha1 = args.sha1;
 	this.data = args;
+	this.checkingOutProgressBar = new ProgressBarViewModel('gerrit-checkout-' + repository.repoPath, 4000);
 };
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;
+	this.checkingOutProgressBar.start();
 	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
-		api.query('POST', '/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' });
+		api.query('POST', '/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
+			self.checkingOutProgressBar.stop();
+		});
 	});
 }
 GerritChangeViewModel.prototype.openInGerrit = function() {
