@@ -54,7 +54,7 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
 
-	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, remoteBranch: 'refs/for/' + branch }, function(err, res) {
+	api.query('POST', '/push', { path: this.repository.graph.repoPath, socketId: api.socketId, remoteBranch: 'refs/for/' + branch }, function(err, res) {
 		self.updateChanges();
 	});
 }
