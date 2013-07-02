@@ -371,13 +371,15 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, function(req, res) {
 			var repoPath = req.body.path;
 			if (!verifyPath(repoPath, res)) return;
-			gerrit.getGerritAddress(repoPath, res, function(host, port) {
+			gerrit.getGerritAddress(repoPath, res, function(username, host, port) {
 					var command = 'scp -p ';
 					if (port) command += ' -P ' + port + ' ';
 					command += host + ':hooks/commit-msg .git/hooks/';
+					var hooksPath = path.join(repoPath, '.git', 'hooks');
+					if (!fs.existsSync(hooksPath)) fs.mkdirSync(hooksPath);
 					child_process.exec(command, { cwd: repoPath },
-						function (error, stdout, stderr) {
-							if (err) return res.json(400, { err: err });
+						function (err, stdout, stderr) {
+							if (err) return res.json(400, { error: err, stdout: stdout, stderr: stderr });
 							res.json({});
 						});
 			});

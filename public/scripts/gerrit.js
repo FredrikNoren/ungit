@@ -3,8 +3,8 @@ var GerritIntegrationViewModel = function(repository) {
 	var self = this;
 	this.repository = repository;
 	this.showInitCommmitHook = ko.observable(false);
-	this.initCommitHookMessage = ko.observable('Init commit hook');
 	this.status = ko.observable('loading');
+	this.initGerritHookProgressBar = new ProgressBarViewModel('gerrit-init-hook-' + repository.repoPath, 4000);
 	this.changesLoader = new ProgressBarViewModel('gerrit-changes-' + repository.repoPath, 4000);
 	this.pushingProgressBar = new ProgressBarViewModel('gerrit-push-' + repository.repoPath, 4000);
 	this.changes = ko.observable();
@@ -30,9 +30,10 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 }
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	var self = this;
-	this.initCommitHookMessage('Initing commit hook...');
+	this.initGerritHookProgressBar.start();
 	api.query('POST', '/gerrit/commithook', { path: this.repository.repoPath }, function(err) {
 		self.updateCommitHook();
+		self.initGerritHookProgressBar.stop();
 	});
 }
 GerritIntegrationViewModel.prototype.getChange = function(changeId) {

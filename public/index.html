@@ -293,7 +293,12 @@
 	<div class="gerritIntegration">
 		<h1>Gerrit</h1>
 
-		<button data-bind="visible: showInitCommmitHook, click: initCommitHook, text: initCommitHookMessage"></button>
+		<button data-bind="visible: showInitCommmitHook, click: initCommitHook">
+			Init commit hook
+			<!-- ko if: initGerritHookProgressBar.running -->
+			<!-- ko template: { name: 'progressBar', data: initGerritHookProgressBar } --><!-- /ko -->
+			<!-- /ko -->
+		</button>
 
 		<div>
 			<button data-bind="click: pushForReview">
