@@ -60,9 +60,10 @@ RepositoryViewModel.prototype.fetch = function() {
 	var self = this;
 	this.isFetching(true);
 	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
+		self.isFetching(false);
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
-				self.repository.main.quickInfoPopup('Repository remote timeouted');
+				self.main.quickInfoPopup('Repository remote timeouted');
 				return true;
 			}
 			if (err.errorCode == 'no-supported-authentication-provided') {
@@ -73,7 +74,6 @@ RepositoryViewModel.prototype.fetch = function() {
 				return true;
 			}
 		}
-		self.isFetching(false);
 	});
 }
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
