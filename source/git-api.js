@@ -245,7 +245,17 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
-		git(' ls-remote --tags ', req.query.path, res, gitParser.parseGitLsRemote);
+		git(' ls-remote --tags ', req.query.path, res, gitParser.parseGitLsRemote, function(err, remoteTags) {
+			if (err) {
+				if (err.stderr.indexOf('Connection timed out') != -1) {
+					err.errorCode = 'ssh-remote-timeout';
+					res.json(400, err);
+					return true;
+				}
+				return;
+			}
+			res.json(remoteTags);
+		});
 	});
 
 	app.post(exports.pathPrefix + '/tags', ensureAuthenticated, function(req, res){
