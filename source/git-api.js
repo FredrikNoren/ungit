@@ -189,11 +189,19 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			async.series([
 				function(done) {
 					if (toAdd.length == 0) done();
-					else git('add ' + toAdd.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
+					else {
+						var process = git('update-index --add --stdin', req.body.path, res, undefined, done);
+						var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+						process.stdin.end(filesToAdd);
+					}
 				},
 				function(done) {
 					if (toRemove.length == 0) done();
-					else git('rm --cached -- ' + toRemove.map(function(file) { return '"' + file.trim() + '"'; }).join(' '), req.body.path, res, undefined, done);
+					else {
+						var process = git('update-index --remove --stdin', req.body.path, res, undefined, done);
+						var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+						process.stdin.end(filesToRemove);
+					}
 				}
 			], function() {
 				var process = git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.body.path, res);
