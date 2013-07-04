@@ -217,8 +217,8 @@
 					</div>
 					
 					<div class="nodes" data-bind="foreach: nodes">
-						<div class="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
-							<div class="log" data-bind="visible: logBoxVisible">
+						<div class="nodeContainer" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+							<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
 								<div class="logEntryBox">
 									<div class="arrowContainer arrowRight">
 										<img src="images/blueArrowRight.png" class="arrow">
@@ -227,6 +227,9 @@
 									<div class="date" data-bind="text: authorDate"></div>
 									<a class="author" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
 								</div>
+							</div>
+
+							<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
 							</div>
 
 							<div class="refs" data-bind="style: { left: refsX() + 'px' }">

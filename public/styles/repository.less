@@ -298,12 +298,20 @@
 		left: (@logWidth + 125px);
 	}
 
-	.node {
+	.nodeContainer {
 		position: absolute;
 		
 		.log {
 			position: absolute;
-			left: 70px;
+			margin-left: 100px;
+			&.hover {
+				z-index: 2;
+				.logEntryBox {
+					box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+					top: -25px;
+					left: -5px;
+				}
+			}
 
 			.logEntryBox {
 				position: relative;
@@ -327,6 +335,11 @@
 					font-size: 1.3em;
 				}
 			}
+		}
+
+		.node {
+			position: absolute;
+			margin-left: (@logWidth + 130px);
 		}
 
 		.refs {

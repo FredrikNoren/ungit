@@ -288,8 +288,23 @@ NodeViewModel = function(args) {
 	this.boxDisplayY = ko.computed(function() {
 		return self.y();
 	});
+	this.logBoxX = ko.computed(function() {
+		return -self.radius();
+	})
 	this.refsX = ko.computed(function() {
 		return self.radius();
+	});
+	this.nodeX = ko.computed(function() {
+		return -self.radius();
+	});
+	this.nodeY = ko.computed(function() {
+		return -self.radius();
+	});
+	this.nodeWidth = ko.computed(function() {
+		return self.radius()*2;
+	});
+	this.nodeHeight = ko.computed(function() {
+		return self.radius()*2;
 	});
 	this.commitTime = moment(args.commitDate);
 	this.authorTime = moment(args.authorDate);
@@ -305,8 +320,9 @@ NodeViewModel = function(args) {
 	this.authorEmail = args.authorEmail;
 	this.index = ko.observable();
 	this.ancestorOfHEAD = ko.observable(false);
+	this.nodeIsMousehover = ko.observable(false);
 	this.logBoxVisible = ko.computed(function() {
-		return self.ancestorOfHEAD() && self.isAtFinalXPosition();
+		return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover();
 	})
 	this.refs = ko.observable([]);
 	this.branches = ko.computed(function() {
@@ -411,6 +427,12 @@ NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 	}
 	path.push(thisNode);
 	return path;
+}
+NodeViewModel.prototype.nodeMouseover = function() {
+	this.nodeIsMousehover(true);
+}
+NodeViewModel.prototype.nodeMouseout = function() {
+	this.nodeIsMousehover(false);
 }
 
 
