@@ -70,6 +70,7 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 	this.sha1 = args.sha1;
 	this.data = args;
 	this.checkingOutProgressBar = new ProgressBarViewModel('gerrit-checkout-' + repository.repoPath, 4000);
+	this.cherryPickingProgressBar = new ProgressBarViewModel('gerrit-cherry-pick-' + repository.repoPath, 4000);
 };
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;
@@ -77,6 +78,15 @@ GerritChangeViewModel.prototype.checkout = function() {
 	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
 		api.query('POST', '/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
 			self.checkingOutProgressBar.stop();
+		});
+	});
+}
+GerritChangeViewModel.prototype.cherryPick = function() {
+	var self = this;
+	this.cherryPickingProgressBar.start();
+	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
+		api.query('POST', '/cherrypick', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
+			self.cherryPickingProgressBar.stop();
 		});
 	});
 }

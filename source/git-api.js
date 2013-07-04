@@ -268,6 +268,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		});
 	});
 
+	app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, function(req, res){
+		if (!verifyPath(req.body.path, res)) return;
+		git.stashAndPop(req.body.path, res, function(done) {
+			git('cherry-pick "' + req.body.name.trim() + '"', req.body.path, res, undefined, done);
+		});
+	});
+
 	app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, function(req, res){
 		if (!verifyPath(req.query.path, res)) return;
 		var HEADFile = path.join(req.query.path, '.git', 'HEAD');

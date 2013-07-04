@@ -334,6 +334,12 @@
 								<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
 								<!-- /ko -->
 							</button>
+							<button class="cherryPick" data-bind="click: cherryPick">
+								Cherry pick
+								<!-- ko if: cherryPickingProgressBar.running -->
+								<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
+								<!-- /ko -->
+							</button>
 							<button class="openInGerrit" data-bind="click: openInGerrit">Open in gerrit</button>
 						</div>
 					</div>
