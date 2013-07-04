@@ -61,6 +61,10 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 				self.repository.remoteErrorPopup('Repository remote timeouted');
 				return true;
 			}
+			if (err.errorCode == 'permision-denied-publickey') {
+				self.repository.remoteErrorPopup('Permission denied (publickey).');
+				return true;
+			}
 			if (err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) return true;
 			return;
 		}

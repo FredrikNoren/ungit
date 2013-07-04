@@ -16,6 +16,8 @@ var git = function(command, repoPath, res, parser, callback) {
           err.errorCode = 'not-a-repository';
         else if (err.stderr.indexOf('Connection timed out') != -1)
           err.errorCode = 'remote-timeout';
+      	else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
+      	  err.errorCode = 'permision-denied-publickey';
         if (!callback || !callback(err, stdout))
           res.json(400, err);
       }

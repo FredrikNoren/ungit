@@ -67,7 +67,11 @@ RepositoryViewModel.prototype.fetch = function() {
 		self.isFetching(false);
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
-				self.remoteErrorPopup('Repository remote timeouted');
+				self.remoteErrorPopup('Repository remote timeouted.');
+				return true;
+			}
+			if (err.errorCode == 'permision-denied-publickey') {
+				self.remoteErrorPopup('Permission denied (publickey).');
 				return true;
 			}
 			if (err.errorCode == 'no-supported-authentication-provided') {
