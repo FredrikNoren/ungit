@@ -128,15 +128,17 @@ ko.bindingHandlers.shown = {
 
 ko.bindingHandlers.scrolledToEnd = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        $(window).scroll(function() {
-            if (  document.documentElement.clientHeight + 
-                  $(document).scrollTop() >= $(document).height() )
-            {
+        var checkAtEnd = function() {
+            var elementEndY = $(element).offset().top + $(element).height();
+            var windowEndY = $(document).scrollTop() + document.documentElement.clientHeight;
+            if ( windowEndY > elementEndY - document.documentElement.clientHeight / 2) {
                 var value = valueAccessor();
                 var valueUnwrapped = ko.utils.unwrapObservable(value);
                 valueUnwrapped.call(viewModel);
             }
-        });
+        }
+        $(window).scroll(checkAtEnd);
+        $(window).resize(checkAtEnd);
     }
 };
 
