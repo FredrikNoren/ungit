@@ -206,7 +206,14 @@ inherits(GraphActions.Checkout, GraphActions.ActionBase);
 GraphActions.Checkout.prototype.text = 'Checkout';
 GraphActions.Checkout.prototype.visualization = 'checkout';
 GraphActions.Checkout.prototype.perform = function(ref, callback) {
-	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, callback);
+	var self = this;
+	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
+		if (err) return;
+		if (ref.isRemoteBranch)
+			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, callback);
+		else
+			callback();
+	});
 }
 
 GraphActions.Delete = function(graph, node) {
