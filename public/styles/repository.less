@@ -36,15 +36,13 @@
 .repository {
 	position: relative;
 	padding-right: 40px;
-	overflow: hidden;
 	height: auto;
 	margin-bottom: 1px;
 	padding-bottom: 1px;
 
 	.gerritIntegration {
-		float: right;
+		float: left;
 		width: 300px;
-		margin-left: 30px;
 	}
 
 	.rebasing {
@@ -55,12 +53,13 @@
 	}
 
 	.repositoryMain {
-		width: auto;
-		overflow: hidden;
 		height: auto;
 		padding-right: 5px;
 		margin-bottom: 1px;
 		padding-bottom: 1px;
+		&.sidebarExtended {
+			margin-left: 360px;
+		}
 	}
 
 	.enableGerritIntegration {
