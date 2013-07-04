@@ -131,7 +131,8 @@ var StagingViewModel = function(repository) {
 	var self = this;
 	this.repository = repository;
 	this.repoPath = this.repository.repoPath;
-	this.files = ko.observableArray();
+	this.filesByPath = {};
+	this.files = ko.observable([]);
 	this.commitMessageTitle = ko.observable();
 	this.commitMessageBody = ko.observable();
 	this.inRebase = ko.observable(false);
@@ -162,23 +163,19 @@ var StagingViewModel = function(repository) {
 }
 StagingViewModel.prototype.setFiles = function(files) {
 	var self = this;
-	var updateId = newId();
+	var newFiles = [];
 	for(var file in files) {
-		var fileViewModel = _.find(self.files(), function(fileVM) { return fileVM.name() == file });
+		var fileViewModel = this.filesByPath[file];
 		if (!fileViewModel) {
-			fileViewModel = new FileViewModel(self);
+			this.filesByPath[file] = fileViewModel = new FileViewModel(self);
 			fileViewModel.name(file);
-			self.files.push(fileViewModel);
 		}
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
 		fileViewModel.conflict(files[file].conflict);
-		fileViewModel.lastUpdateId = updateId;
+		newFiles.push(fileViewModel);
 	}
-	for (var i = self.files().length - 1; i >= 0; i--) {
-		if (self.files()[i].lastUpdateId != updateId)
-			self.files.splice(i, 1);
-	}
+	this.files(newFiles);
 }
 StagingViewModel.prototype.toogleAmend = function() {
 	if (!this.amend() && !this.commitMessageTitle()) {
@@ -205,7 +202,7 @@ StagingViewModel.prototype.commit = function() {
 		self.commitMessageTitle('');
 		self.commitMessageBody('');
 		self.amend(false);
-		self.files.removeAll();
+		self.files([]);
 		self.selectedDiffFile(null);
 		self.committingProgressBar.stop();
 	});
