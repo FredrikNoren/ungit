@@ -1,0 +1,8 @@
+TODO (in no particular order)
+====
+
+* 'hostbased' authentication
+
+* X11 forwarding
+
+* Diffie-Hellman group exchange support (RFC4419)
