@@ -310,6 +310,11 @@
 					box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
 					top: -25px;
 					left: -5px;
+					.arrowRight {
+						.shadow {
+							display: block;
+						}
+					}
 				}
 			}
 
@@ -327,12 +332,19 @@
 					position: absolute;
 					right: 0px;
 					top: 5px;
+					.shadow {
+						display: none;
+					}
 				}
 				.author, .date {
 					color: #707A85;
 				}
 				.title {
 					font-size: 1.3em;
+				}
+				.body {
+					white-space: pre;
+					color: #8F9FA6;
 				}
 			}
 		}
