@@ -11,6 +11,8 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var semver = require('semver');
 
+winston.add(winston.transports.File, { filename: 'server.log', maxsize: 100*1024, maxFiles: 2 });
+
 var users = config.users;
 config.users = null; // So that we don't send the users to the client
 
@@ -41,6 +43,10 @@ exports.start = function(callback) {
 
 	gitApi.pathPrefix = '/api';
 
+	app.use(function(req, res, next){
+		winston.info(req.method + ' ' + req.url);
+		next();
+	});
 	
 	var ensureAuthenticated = function(req, res, next) { next(); };
 

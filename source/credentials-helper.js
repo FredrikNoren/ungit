@@ -4,7 +4,7 @@ if (config.bugtracking) {
 }
 var winston = require('winston');
 
-winston.add(winston.transports.File, { filename: 'credentials-helper.log' });
+winston.add(winston.transports.File, { filename: 'credentials-helper.log', maxsize: 100*1024, maxFiles: 2 });
 winston.remove(winston.transports.Console);
 winston.info('Credentials helper invoked');
 
