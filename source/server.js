@@ -127,5 +127,5 @@ exports.start = function(callback) {
 		winston.info('Listening on port ' + config.port);
 		if(callback) callback();
 	});
-
+	
 }

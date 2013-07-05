@@ -13,14 +13,21 @@ bugsense.notify = function(exception, clientName, callback) {
 	
 	winston.info('Sending exception to bugsense');
 
-	superagent.agent()
-		.post('http://www.bugsense.com/api/errors')
-		.set('X-BugSense-Api-Key', '3c48046e')
-		.send({
+	winston.query({ from: new Date - 1 * 60 * 60 * 1000, until: new Date }, function (err, logData) {
+		if (err) {
+			logData = { error: 'Error querying logdata', details: err };
+		}
+
+		var payload = {
 			"client": {
 				"name": clientName,
 				//"version": "0.6"
-			}, 
+			},
+			"request": {
+				"custom_data": {
+					"log": JSON.stringify(logData)
+				}
+			},
 			"exception": {
 				"message": exception.message,
 				"where": clientName,
@@ -34,12 +41,18 @@ bugsense.notify = function(exception, clientName, callback) {
 				"osver": os.type(),
 				"uid": uuid.v1()
 			}
-		}).end(function(err, res) {
-			if (err || !res.ok) winston.info('Inception error sending error to bugsense', err);
-			else winston.info('Exception sent to bugsense');
-			if (callback) callback();
-		});
+		};
+
+		superagent.agent()
+			.post('http://www.bugsense.com/api/errors')
+			.set('X-BugSense-Api-Key', '3c48046e')
+			.send(payload).end(function(err, res) {
+				if (err || !res.ok || res.body.error) winston.info('Inception error sending error to bugsense', err, res.body);
+				else winston.info('Exception sent to bugsense');
+				if (callback) callback();
+			});
 	
+	});
 };
 
 bugsense.init = function(clientName, skipFindVersion) {
