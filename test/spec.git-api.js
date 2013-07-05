@@ -61,7 +61,10 @@ describe('git-api', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done));
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(res.body.errorCode).to.be('no-such-path');
+				done();
+			}));
 	});
 
 	it('init should succeed in uninited directory', function(done) {
