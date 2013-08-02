@@ -93,14 +93,14 @@ gerrit.parseRemote = function(remote) {
   if (match) return { host: match[1], project: match[2] };
 }
 
-gerrit.getGerritAddress = function(repoPath, res, callback) {
-  git.remoteShow(repoPath, 'origin', res, function(err, remote) {
-    if (err) return res.json(400, err);
+gerrit.getGerritAddress = function(repoPath, callback) {
+  git.remoteShow(repoPath, 'origin', null, function(err, remote) {
+    if (err) return callback(err);
     var r = gerrit.parseRemote(remote.fetch);
     if (r) {
-      callback(r.username, r.host, r.port, r.project);
+      callback(null, r.username, r.host, r.port, r.project);
     } else {
-      res.json(400, { error: 'Unsupported gerrit remote: ' + remote.fetch, details: 'getGerritAddress' });
+      callback({ error: 'Unsupported gerrit remote: ' + remote.fetch, details: 'getGerritAddress' });
     }
   });
 }

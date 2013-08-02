@@ -6,7 +6,8 @@ var fs = require('fs');
 
 var gitConfigNoColors = '-c color.ui=false';
 
-var git = function(command, repoPath, res, parser, callback) {
+var git = function(command, repoPath, parser, callback) {
+  if (typeof(callback) != 'function') throw new Error('Callback must be function');
   command = 'git ' + gitConfigNoColors + ' ' + command;
   return child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
     function (error, stdout, stderr) {
@@ -18,58 +19,56 @@ var git = function(command, repoPath, res, parser, callback) {
           err.errorCode = 'remote-timeout';
       	else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
       	  err.errorCode = 'permision-denied-publickey';
-        if (!callback || !callback(err, stdout))
-          res.json(400, err);
+        callback(err);
       }
       else {
-        if (callback) callback(null, parser ? parser(stdout) : stdout);
-        else res.json(parser ? parser(stdout) : {});
+        callback(null, parser ? parser(stdout) : stdout);
       }
   });
 }
-git.status = function(repoPath, res, callback) {
-  git('status -s -b -u', repoPath, res, gitParser.parseGitStatus, function(err, status) {
+git.status = function(repoPath, callback) {
+  git('status -s -b -u', repoPath, gitParser.parseGitStatus, function(err, status) {
     if (err) {
-      if (callback) return callback(err, status);
-      else return false;
+      callback(err, status);
+      return;
     }
     // From http://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
     status.inRebase = fs.existsSync(path.join(repoPath, '.git', 'rebase-merge')) ||
       fs.existsSync(path.join(repoPath, '.git', 'rebase-apply'));
 
-    if (callback) callback(null, status);
-    else res.json(status);
+    callback(null, status);
   });
 }
-git.remoteShow = function(repoPath, remoteName, res, callback) {
-  git('remote show ' + remoteName, repoPath, res, gitParser.parseGitRemoteShow, callback);
+git.remoteShow = function(repoPath, remoteName, callback) {
+  git('remote show ' + remoteName, repoPath, gitParser.parseGitRemoteShow, callback);
 }
-git.stashAndPop = function(repoPath, res, callback) {
+git.stashAndPop = function(repoPath, performCallback, callback) {
+  if (typeof(performCallback) != 'function') throw new Error('performCallback must be function');
   var hadLocalChanges = true;
   async.series([
     function(done) {
-      git('stash', repoPath, res, undefined, function(err, res) {
-        if (res.indexOf('No local changes to save') != -1) {
-          hadLocalChanges = false;
-          done();
-          return true;
-        }
-        if (!err) {
-          done();
-          return true;
+      git('stash', repoPath, undefined, function(err, res) {
+        if (err) {
+          done(err);
+        } else {
+          if (res.indexOf('No local changes to save') != -1) {
+            hadLocalChanges = false;
+            done();
+          } else {
+            done();
+          }
         }
       });
     },
     function(done) {
-      callback(done);
+      performCallback(done);
     },
     function(done) {
       if(!hadLocalChanges) done(); 
-      else git('stash pop', repoPath, res, undefined, done);
+      else git('stash pop', repoPath, undefined, done);
     },
-  ], function(err) {
-    if (err) res.json(400, err);
-    else res.json({});
+  ], function(err, result) {
+    callback(err, result);
   });
 }
 
