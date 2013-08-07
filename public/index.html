@@ -4,9 +4,8 @@
 	<meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
 	<link rel="stylesheet" href="/styles/animate.css"/>
-	<link rel="stylesheet/less" type="text/css" href="/less/bootstrap/bootstrap.less" />
-	<link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
 	<link rel="stylesheet/less" type="text/css" href="/less/styles.less" />
+	<link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
 	<link rel="shortcut icon" href="/favicon.ico" >
 	<title>ungit</title>
 </head>
@@ -375,26 +374,28 @@
 </script>
 
 <script type="text/html" id="main">
-	<div class="main">
 
-		<div class="newversion" data-bind="visible: newVersionAvailable">
-			A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+	<div class="newversion" data-bind="visible: newVersionAvailable">
+		A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+	</div>
+	
+	<div class="navbar navbar-static-top">
+
+		<a class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
+
+		<div class="row">
+		<form class="navbar-form pull-left" data-bind="submit: submitPath">
+			<div class="col-lg-12">
+			<input type="text" class="form-control input-lg" data-bind="value: path">
+			</div>
+		</form>
 		</div>
 		
-		<div class="header">
-
-			<a class="logo" href="/#/"><img src="images/logo.png" class="logo"></a>
-
-			<form class="currentDirectory" data-bind="submit: submitPath">
-				<input type="text" data-bind="value: path">
-			</form>
-			
-			<img src="images/repositoryBackgroundArrowUp.png" class="arrowUp">
-		</div>
-
-		<div class="content" data-bind="template: { name: templateChooser, data: content }"></div>
-
+		<img src="images/repositoryBackgroundArrowUp.png" class="arrowUp">
 	</div>
+
+	<div class="content" data-bind="template: { name: templateChooser, data: content }"></div>
+
 
 	<!-- ko if: dialog -->
 	<div class="dialog animated fadeIn">

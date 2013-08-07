@@ -238,12 +238,16 @@
 	}
 
 	.diffContainer {
+		position: relative;
 		margin-top: 2px;
 		border-radius: 3px;
 		background: rgba(255, 255, 255, 0.1);
 		width: 100%;
 		.fileDiff {
+			overflow: hidden;
+			table-layout: fixed;
 			width: 100%;
+			max-width: none;
 		}
 	}
 
