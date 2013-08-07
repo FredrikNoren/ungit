@@ -105,10 +105,11 @@
 }
 
 .repository .staging {
-	background: #EDF0CA;
-	color: #58594E;
+	background: #643A44;
+	color: #B8A5A5;
 	position: relative;
 	padding: 10px;
+	border-radius: 10px;
 
 	box-sizing:border-box;
 	-moz-box-sizing:border-box;
@@ -146,18 +147,19 @@
 			}
 			.title {
 				font-size: 1.2em;
-				display: block;
 				padding: 10px;
-				width: 100%;
-				box-sizing:border-box;
-				-moz-box-sizing:border-box;
 			}
 			.body {
-				display: block;
-				width: 100%;
 				padding: 5px;
+			}
+			.title, .body {
+				display: block;
+				background: rgba(0, 0, 0, 0.1);
 				box-sizing:border-box;
 				-moz-box-sizing:border-box;
+				width: 100%;
+				border: 0px;
+				color: rgba(255, 255, 255, 0.9);
 			}
 		}
 		.commitButton {
@@ -178,7 +180,7 @@
 				&.showingDiffs {
 					.name {
 						background: #fff;
-						border-color: #bbb;
+						color: #444;
 					}
 				}
 				.arrowLeft {
@@ -191,25 +193,22 @@
 					cursor: pointer;
 					padding: 3px;
 					border-radius: 3px;
-					border: 1px solid transparent;
 				}
 				padding: 0.3em;
 				
 				.new, .deleted, .conflict {
-					color: #fff;
-					border-radius: 3px;
 					padding: 3px;
 					padding-left: 5px;
 					padding-right: 5px;
 				}
 				.new {
-					background: #89D64D;
+					color: #89D64D;
 				}
 				.deleted {
-					background: #DB3712;
+					color: #DB3712;
 				}
 				.conflict {
-					background: #DB12C0;
+					color: #DB12C0;
 					cursor: pointer;
 					.explanation {
 						display: none;
@@ -222,8 +221,8 @@
 					}
 				}
 				.discard {
-					background: #CCD1B9;
-					color: #fff;
+					background: transparent;
+					color: rgba(255, 255, 255, 0.3);
 					border-radius: 3px;
 					padding: 3px;
 					padding-left: 5px;
@@ -234,6 +233,7 @@
 					}
 					&:hover {
 						background: #000;
+						color: rgba(255, 255, 255, 0.9);
 						.explanation {
 							display: inline-block;
 						}
@@ -250,11 +250,11 @@
 
 		&.noFileSelected {
 			margin: 5px;
-			background: #fff;
+			background: transparent;
 			border-radius: 5px;
-			color: #999;
+			color: rgba(255, 255, 255, 0.3);
 			padding: 10px;
-			border: 1px dashed #bbb;
+			border: 1px dashed rgba(255, 255, 255, 0.1);
 			opacity: 0.5;
 			text-align: center;
 		}

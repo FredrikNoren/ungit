@@ -76,7 +76,7 @@ body {
 	}
 }
 
-@placeholderColor: #e5e5e5;
+@placeholderColor: rgba(255, 255, 255, 0.3);
 ::-webkit-input-placeholder { color: @placeholderColor; }
 ::-moz-placeholder { color: @placeholderColor; } /* firefox 19+ */
 :-ms-input-placeholder { color: @placeholderColor; } /* ie */
@@ -98,6 +98,7 @@ button, input[type="submit"], input[type="button"] {
 	padding-bottom: 5px;
 	background: #68b6ed;
 	position: relative;
+	border-radius: 3px;
 	&.primaryAction {
 		border: 0.1em solid #fff;
 	}
@@ -116,7 +117,8 @@ button:active, input[type="submit"]:active, input[type="submit"]:active {
 	top: 2px;
 }
 button:disabled, input[type="submit"]:disabled, input[type="submit"]:disabled {
-	background: #ababab;
+	background: rgba(255, 255, 255, 0.5);
+	color: rgba(255, 255, 255, 0.8);
 }
 button:disabled:active, input[type="submit"]:disabled:active {
 	left: 0px;
@@ -126,19 +128,19 @@ textarea {
 	border: 1px solid #eee;
 }
 .checkbox {
-	background: #fefefe;
+	background: #B273B4;
 	border: 5px solid rgba(0, 0, 0, 0.09);
 	width: 15px;
 	display: inline-block;
 	border-radius: 3px;
 	font-size: 0.7em;
-	cursor: pointer;;
+	cursor: pointer;
+	opacity: 0.5;
 	&:hover {
-		background: #B6D9F2;
+		opacity: 0.7;
 	}
 	&.checked {
-		background: #68B6ED;
-		//border-color: transparent;
+		opacity: 1;
 	}
 	&:after {
 		content: '.';
@@ -151,6 +153,15 @@ textarea {
 	display: inline-block;
 }
 
+.checkmark {
+	color: #fff;
+	display: inline-block;
+	opacity: 0.3;
+	cursor: pointer;
+	&.checked {
+		opacity: 0.8;
+	}
+}
 
 
 a {
