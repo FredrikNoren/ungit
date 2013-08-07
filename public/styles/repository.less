@@ -128,149 +128,123 @@
 		bottom: 0px;
 	}
 
-	table {
-		table-layout:fixed;
-		width:100%;
-	}
-
-	.commitArea {
-		width: 600px;
-		vertical-align: top;
-		.commitMessage {
+	.commitMessage {
+		display: block;
+		width: 100%;
+		box-sizing:border-box;
+		-moz-box-sizing:border-box;
+		border-radius: 5px;
+		.title, .body {
+			border: 1px solid #eee;
+		}
+		.title {
+			font-size: 1.2em;
+			padding: 10px;
+			margin-bottom: 5px;
+		}
+		.body {
+			padding: 5px;
+		}
+		.title, .body {
 			display: block;
-			width: 100%;
+			background: rgba(0, 0, 0, 0.1);
 			box-sizing:border-box;
 			-moz-box-sizing:border-box;
-			border-radius: 5px;
-			.title, .body {
-				border: 1px solid #eee;
-			}
-			.title {
-				font-size: 1.2em;
-				padding: 10px;
-				margin-bottom: 5px;
-			}
-			.body {
-				padding: 5px;
-			}
-			.title, .body {
-				display: block;
-				background: rgba(0, 0, 0, 0.1);
-				box-sizing:border-box;
-				-moz-box-sizing:border-box;
-				width: 100%;
-				border: 0px;
-				color: rgba(255, 255, 255, 0.9);
-			}
+			width: 100%;
+			border: 0px;
+			color: rgba(255, 255, 255, 0.9);
 		}
-		.commitButton {
-			font-size: 1.6em;
-		}
-		.validationError {
-			display: none;
-		}
-		&:hover .validationError {
-			display: inline-block;
-		}
-		.stats {
-			font-size: 0.9em;
-		}
-		.files {
-			position: relative;
-			.file {
-				&.showingDiffs {
-					.name {
-						background: #fff;
-						color: #444;
-					}
-				}
-				.arrowLeft {
-					position: absolute;
-					right: -10px;
-					z-index: 10;
-				}
+	}
+	.commitButton {
+		font-size: 1.6em;
+	}
+	.validationError {
+		display: none;
+	}
+	&:hover .validationError {
+		display: inline-block;
+	}
+	.stats {
+		font-size: 0.9em;
+	}
+	.files {
+		position: relative;
+		.file {
+			&.showingDiffs {
 				.name {
-					font-size: 1.3em;
-					cursor: pointer;
-					padding: 3px;
-					border-radius: 3px;
+					background: rgba(255, 255, 255, 0.1);
+					color: #000;
+					border-bottom-left-radius: 0px;
+					border-bottom-right-radius: 0px;
 				}
-				padding: 0.3em;
-				
-				.new, .deleted, .conflict {
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
+			}
+			.arrowLeft {
+				position: absolute;
+				right: -10px;
+				z-index: 10;
+			}
+			.name {
+				font-size: 1.3em;
+				cursor: pointer;
+				padding: 3px;
+				border-radius: 3px;
+			}
+			padding: 0.3em;
+			
+			.new, .deleted, .conflict {
+				padding: 3px;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.new {
+				color: #89D64D;
+			}
+			.deleted {
+				color: #DB3712;
+			}
+			.conflict {
+				color: #DB12C0;
+				cursor: pointer;
+				.explanation {
+					display: none;
 				}
-				.new {
-					color: #89D64D;
-				}
-				.deleted {
-					color: #DB3712;
-				}
-				.conflict {
-					color: #DB12C0;
-					cursor: pointer;
+				&:hover {
+					background: #A445ED;
 					.explanation {
-						display: none;
-					}
-					&:hover {
-						background: #A445ED;
-						.explanation {
-							display: inline-block;
-						}
+						display: inline-block;
 					}
 				}
-				.discard {
-					background: transparent;
-					color: rgba(255, 255, 255, 0.3);
-					border-radius: 3px;
-					padding: 3px;
-					padding-left: 5px;
-					padding-right: 5px;
-					cursor: pointer;
+			}
+			.discard {
+				background: transparent;
+				color: rgba(255, 255, 255, 0.3);
+				border-radius: 3px;
+				padding: 3px;
+				padding-left: 5px;
+				padding-right: 5px;
+				cursor: pointer;
+				.explanation {
+					display: none;
+				}
+				&:hover {
+					background: #000;
+					color: rgba(255, 255, 255, 0.9);
 					.explanation {
-						display: none;
-					}
-					&:hover {
-						background: #000;
-						color: rgba(255, 255, 255, 0.9);
-						.explanation {
-							display: inline-block;
-						}
+						display: inline-block;
 					}
 				}
 			}
 		}
 	}
 
-	.diffArea {
-		position: relative;
-		vertical-align: top;
-
-
-		&.noFileSelected {
-			margin: 5px;
-			background: transparent;
-			border-radius: 5px;
-			color: rgba(255, 255, 255, 0.3);
-			padding: 10px;
-			border: 1px dashed rgba(255, 255, 255, 0.1);
-			opacity: 0.5;
-			text-align: center;
-		}
-
+	.diffContainer {
+		margin-top: 2px;
+		border-radius: 3px;
+		background: rgba(255, 255, 255, 0.1);
+		width: 100%;
 		.fileDiff {
-			background: #fff;
-			padding-top: 5px;
-			padding-bottom: 5px;
-			border: 1px solid #bbb;
-			border-radius: 5px;
-			margin: 5px;
-			font-size: 0.9em;
-			color: #666;
+			width: 100%;
 		}
-
 	}
 
 	.committing {

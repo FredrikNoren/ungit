@@ -149,7 +149,6 @@ var StagingViewModel = function(repository) {
 	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
 	this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
 	this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
-	this.selectedDiffFile = ko.observable();
 	this.commitValidationError = ko.computed(function() {
 		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
@@ -203,7 +202,6 @@ StagingViewModel.prototype.commit = function() {
 		self.commitMessageBody('');
 		self.amend(false);
 		self.files([]);
-		self.selectedDiffFile(null);
 		self.committingProgressBar.stop();
 	});
 }
@@ -227,7 +225,6 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
-	this.selectedDiffFile(null);
 	api.query('POST', '/discardchanges', { path: this.repository.repoPath, all: true });
 }
 
@@ -242,15 +239,12 @@ var FileViewModel = function(staging) {
 	this.removed = ko.observable(false);
 	this.conflict = ko.observable(false);
 	this.diffs = ko.observable([]);
-	this.showingDiffs = ko.computed(function() {
-		return self.staging.selectedDiffFile() == self;
-	})
+	this.showingDiffs = ko.observable(false);
 }
 FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-	this.staging.selectedDiffFile(null);
 	api.query('POST', '/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.resolveConflict = function() {
@@ -258,15 +252,15 @@ FileViewModel.prototype.resolveConflict = function() {
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
-	if (this.staging.selectedDiffFile() == this) this.staging.selectedDiffFile(null);
+	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
-		this.staging.selectedDiffFile(this);
+		this.showingDiffs(true);
 		this.invalidateDiff();
 	}
 }
 FileViewModel.prototype.invalidateDiff = function() {
 	var self = this;
-	if (this.staging.selectedDiffFile() == this) {
+	if (this.showingDiffs()) {
 		api.query('GET', '/diff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
 			if (err) return;
 			var newDiffs = [];

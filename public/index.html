@@ -101,60 +101,60 @@
 			<img src="images/yellowArrowDown.png" class="arrow">
 		</div>
 		<div>
-			<table><tr><td class="commitArea">
-				<div class="commitMessage">
-				<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
-				<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
+			<div class="row">
+				<div class="col-lg-3">
+					<div class="commitMessage">
+						<input class="title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+						<textarea class="body" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
+					</div>
+					<div class="stats">
+						<span data-bind="text: stats"></span> - 
+						<a href="#" data-bind="click: discardAllChanges">Discard all</a>
+						<span class="amend" data-bind="visible: !inRebase()">
+							- 
+							<span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+							<a href="#" data-bind="click: toogleAmend">Amend last commit</a>
+						</span>
+					</div>
+					
+					<button class="commitButton" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
+						Commit
+						<!-- ko if: committingProgressBar.running -->
+						<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
+						<!-- /ko -->
+					</button>
+					<button class="rebaseContinueButton" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+						Continue rebase
+						<!-- ko if: rebaseContinueProgressBar.running -->
+						<!-- ko template: { name: 'progressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
+						<!-- /ko -->
+					</button>
+					<button class="rebaseAbortButton" data-bind="click: rebaseAbort, visible: inRebase">
+						Abort rebase
+						<!-- ko if: rebaseAbortProgressBar.running -->
+						<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+						<!-- /ko -->
+					</button>
+					<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 				</div>
-				<div class="stats">
-					<span data-bind="text: stats"></span> - 
-					<a href="#" data-bind="click: discardAllChanges">Discard all</a>
-					<span class="amend" data-bind="visible: !inRebase()">
-						- 
-						<span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-						<a href="#" data-bind="click: toogleAmend">Amend last commit</a>
-					</span>
-				</div>
-				<div class="files" data-bind="foreach: files">
-					<div class="file" data-bind="css: { showingDiffs: showingDiffs }">
-						<img src="images/whiteArrowLeftWithBorder.png" class="arrowLeft" data-bind="visible: showingDiffs">
-						<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
-							&#10003;
+				<div class="col-lg-9">
+					<div class="files" data-bind="foreach: files">
+						<div class="file" data-bind="css: { showingDiffs: showingDiffs }">
+							<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
+								&#10003;
+							</div>
+							<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+							<span class="new" data-bind="visible: isNew">New</span>
+							<span class="deleted" data-bind="visible: removed">Removed</span>
+							<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
+							<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+							<!-- ko if: showingDiffs -->
+							<div class="diffContainer" data-bind="template: { name: 'fileDiff', data: diffs }"></div>
+							<!-- /ko -->
 						</div>
-						<span class="name" data-bind="text: name, click: toogleDiffs"></span>
-						<span class="new" data-bind="visible: isNew">New</span>
-						<span class="deleted" data-bind="visible: removed">Removed</span>
-						<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
-						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
 					</div>
 				</div>
-				<button class="commitButton" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
-					Commit
-					<!-- ko if: committingProgressBar.running -->
-					<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
-					<!-- /ko -->
-				</button>
-				<button class="rebaseContinueButton" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
-					Continue rebase
-					<!-- ko if: rebaseContinueProgressBar.running -->
-					<!-- ko template: { name: 'progressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
-					<!-- /ko -->
-				</button>
-				<button class="rebaseAbortButton" data-bind="click: rebaseAbort, visible: inRebase">
-					Abort rebase
-					<!-- ko if: rebaseAbortProgressBar.running -->
-					<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
-					<!-- /ko -->
-				</button>
-				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
-			</td><td class="diffArea" data-bind="css: { noFileSelected: !selectedDiffFile() }">
-				<!-- ko if: selectedDiffFile -->
-					<div data-bind="template: { name: 'fileDiff', data: selectedDiffFile().diffs }"></div>
-				<!-- /ko -->
-				<!-- ko if: !selectedDiffFile() -->
-				Click a file to show its changes
-				<!-- /ko -->
-			</td></tr></table>
+			</div>
 		</div>
 	</div>
 </script>
@@ -162,10 +162,10 @@
 <script type="text/html" id="fileDiff">
 	<table class="fileDiff" data-bind="foreach: $data">
 		<tr data-bind="css: { added: added, removed: removed }">
-			<td class="lineNumbers old">
+			<td class="lineNumbers old-line">
 				<span class="lineNumber" data-bind="text: oldLineNumber"></span>&nbsp;
 			</td>
-			<td class="lineNumbers new">
+			<td class="lineNumbers new-line">
 				<span class="lineNumber" data-bind="text: newLineNumber"></span>&nbsp;
 			</td>
 			<td class="diffs">
