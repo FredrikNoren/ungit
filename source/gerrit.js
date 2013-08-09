@@ -18,7 +18,7 @@ var getProcessUsername = function(callback) {
   });
 };
 
-var ssh2 = function(username, host, port, command, callback) {
+var ssh2 = function(remote, command, callback) {
   var connection = new Ssh2Connection();
   connection.on('connect', function() {
   });
@@ -38,9 +38,9 @@ var ssh2 = function(username, host, port, command, callback) {
     callback(err);
   });
   var connectConfig = {
-    host: host,
-    port: port,
-    username: username
+    host: remote.host,
+    port: remote.port,
+    username: remote.username
   };
   connectConfig.agent = config.sshAgent;
   if (!connectConfig.agent) {
@@ -60,9 +60,9 @@ var ssh2 = function(username, host, port, command, callback) {
   });
 };
 
-gerrit = function(username, host, port, command, res, callback) {
+gerrit = function(remote, command, res, callback) {
   command = 'gerrit ' + command;
-  ssh2(username, host, port, command, function(error, result) {
+  ssh2(remote, command, function(error, result) {
     if (error) {
       var err = { errorCode: 'unkown', command: command, error: error.toString() };
       if (!callback || !callback(err, result)) {
@@ -73,36 +73,5 @@ gerrit = function(username, host, port, command, res, callback) {
     }
   });
 };
-
-var gerriAddresstSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
-var gerritAddressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
-var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
-var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
-
-gerrit.parseRemote = function(remote) {
-  var match = gerriAddresstSshWithPortRegexp.exec(remote);
-  if (match) return { host: match[1], port: match[2], project: match[3] };
-  
-  match = gerritAddressSshWithoutPortRegexp.exec(remote);
-  if (match) return { host: match[1], project: match[2] };
-  
-  match = gerritAddressGitWithoutPortWithUsernamePortRegexp.exec(remote);
-  if (match) return { username: match[1], host: match[2], project: match[3] };
-
-  match = gerritAddressGitWithoutPortWithoutUsernameRegexp.exec(remote);
-  if (match) return { host: match[1], project: match[2] };
-}
-
-gerrit.getGerritAddress = function(repoPath, callback) {
-  git.remoteShow(repoPath, 'origin', null, function(err, remote) {
-    if (err) return callback(err);
-    var r = gerrit.parseRemote(remote.fetch);
-    if (r) {
-      callback(null, r.username, r.host, r.port, r.project);
-    } else {
-      callback({ error: 'Unsupported gerrit remote: ' + remote.fetch, details: 'getGerritAddress' });
-    }
-  });
-}
 
 module.exports = gerrit;

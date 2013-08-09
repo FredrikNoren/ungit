@@ -193,10 +193,33 @@ exports.parseGitLsRemote = function(text) {
 	});
 }
 
+
+var gerriAddresstSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
+var gerritAddressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
+var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
+var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
+
+exports.parseRemoteAddress = function(remote) {
+  var match = gerriAddresstSshWithPortRegexp.exec(remote);
+  if (match) return { address: remote, host: match[1], port: match[2], project: match[3] };
+  
+  match = gerritAddressSshWithoutPortRegexp.exec(remote);
+  if (match) return { address: remote, host: match[1], project: match[2] };
+  
+  match = gerritAddressGitWithoutPortWithUsernamePortRegexp.exec(remote);
+  if (match) return { address: remote, username: match[1], host: match[2], project: match[3] };
+
+  match = gerritAddressGitWithoutPortWithoutUsernameRegexp.exec(remote);
+  if (match) return { address: remote, host: match[1], project: match[2] };
+
+  return { address: remote };
+}
+
+
 exports.parseGitRemoteShow = function(text) {
 	var lines = text.split('\n');
 	return {
-		fetch: lines[1].slice('  Fetch URL: '.length),
-		push: lines[1].slice('  Push  URL: '.length)
+		fetch: exports.parseRemoteAddress(lines[1].slice('  Fetch URL: '.length)),
+		push: exports.parseRemoteAddress(lines[1].slice('  Push  URL: '.length))
 	};
 }
