@@ -8,25 +8,36 @@
 	<link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
 	<link rel="shortcut icon" href="/favicon.ico" >
 	<title>ungit styles</title>
+	<style>
+	.modal.example {
+		position: relative;
+		top: auto;
+		left: auto;
+		display: block;
+		overflow: visible;
+	}
+	</style>
 </head>
 <body>
 
 <div class="navbar navbar-static-top">
 
-	<a class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
+	<a class="navbar-brand" href="#"><img src="images/logo.png"></a>
 
 	<div class="row">
-	<form class="navbar-form pull-left" data-bind="submit: submitPath">
-		<div class="col-lg-12">
-		<input type="text" class="form-control input-lg" data-bind="value: path">
-		</div>
-	</form>
+		<form class="navbar-form pull-left">
+			<div class="col-lg-12">
+				<input type="text" class="form-control input-lg">
+			</div>
+		</form>
 	</div>
 	
 	<img src="images/repositoryBackgroundArrowUp.png" class="arrowUp">
 </div>
 
 <div class="container">
+	<h3>Typography</h3>
+	<p>Normal text</p>
 	<h3>Progress bar</h3>
 	<div class="progress">
 		<div class="progress-bar" style="width: 20%"></div>
@@ -57,6 +68,23 @@
 	<div class="alert alert-info" data-bind="visible: newVersionAvailable">
 		A new version of ungit is available, run 'something something' to get the newest version.
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	</div>
+
+	<h3>Modal</h3>
+	<div class="modal example">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Title</h4>
+				</div>
+				<div class="modal-body">
+					Body
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary">Button</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
