@@ -413,43 +413,22 @@
 					}
 				}
 				&.newRef {
-					opacity: 0.1;
+					opacity: 1;
 					padding-top: 2px;
 					padding-bottom: 2px;
-					.showBranchingForm, .name, .submit {
-						height: 100%;
-						margin-top: 0px;
-						margin-bottom: 0px;
-						box-sizing:border-box;
-						-moz-box-sizing:border-box;
-						border: 0px;
-					}
 					.showBranchingForm {
 						background: transparent;
+						border: 0px;
 						cursor: pointer;
 						padding: 0px;
 						margin: 0px;
-					}
-					form {
-						margin: 0px;
-						padding: 0px;
-						height: 100%;
-						box-sizing:border-box;
-						-moz-box-sizing:border-box;	
+						color: rgba(0, 0, 0, 0.4);
+						&:hover {
+							color: rgba(255, 255, 255, 0.7);
+						}
 					}
 					input.name {
-						background: transparent;
-						color: #fff;
-						border: 0px;
-						font-size: 1em;
-						padding: 3px;
-						margin: 0px;
-						width: 200px;
-					}
-					.submit {
-					}
-					&:hover, &.editing {
-						opacity: 0.8;
+						width: 150px;
 					}
 				}
 			}

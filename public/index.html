@@ -278,10 +278,10 @@
 								<div class="refbox newRef" data-bind="css: { editing: branchingFormVisible }">
 									<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
 									<!-- ko if: branchingFormVisible -->
-									<form data-bind="submit: createBranch">
-										<input class="name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus">
-										<input class="submit btn btn-primary" type="submit" value="Branch">
-										<button class="submit btn btn-default" data-bind="click: createTag">Tag</button>
+									<form class="form-inline" data-bind="submit: createBranch">
+										<input class="name form-control" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus">
+										<input class="btn btn-primary" type="submit" value="Branch">
+										<button class="btn btn-default" data-bind="click: createTag">Tag</button>
 									</form>
 									<!-- /ko -->
 								</div>
