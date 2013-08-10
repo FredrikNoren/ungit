@@ -388,10 +388,6 @@
 </script>
 
 <script type="text/html" id="main">
-
-	<div class="newversion" data-bind="visible: newVersionAvailable">
-		A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
-	</div>
 	
 	<div class="navbar navbar-static-top">
 
@@ -406,6 +402,13 @@
 		</div>
 		
 		<img src="images/repositoryBackgroundArrowUp.png" class="arrowUp">
+	</div>
+
+	<div class="container">
+		<div class="alert alert-info" data-bind="visible: newVersionAvailable">
+			A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
 	</div>
 
 	<div class="content" data-bind="template: { name: templateChooser, data: content }"></div>
@@ -447,6 +450,7 @@
 <script type="text/javascript" src="/scripts/lib/moment.js"></script>
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
 <script type="text/javascript" src="/scripts/lib/bootstrap/modal.js"></script>
+<script type="text/javascript" src="/scripts/lib/bootstrap/alert.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type='text/javascript' src='/scripts/utils.js'></script>
 <script type='text/javascript' src='/scripts/api.js'></script>
