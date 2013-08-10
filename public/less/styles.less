@@ -4,6 +4,8 @@
 @navbar-bg: #2B3844;
 @font-family-sans-serif: 'Open Sans';
 @body-bg: #252833;
+@progress-bg: rgba(0, 0, 0, 0.2);
+@progress-bar-bg: rgba(0, 0, 0, 0.2);
 
 .navbar {
 	padding-left: 40px;
@@ -37,4 +39,16 @@
 
 .crash {
 	margin-top: 20px;
+}
+
+.btn {
+	border: 0px;
+	.progress {
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		width: 100%;
+		height: 100%;
+		background: transparent;
+	}
 }

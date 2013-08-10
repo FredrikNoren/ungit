@@ -7,21 +7,6 @@
 }
 
 
-.progressBar {
-	background: rgba(0, 0, 0, 0.2);
-	width: 300px;
-	height: 30px;
-	position: relative;
-	.progress {
-		position: absolute;
-		left: 0px;
-		top: 0px;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 0px;
-	}
-}
-
 @placeholderColor: rgba(255, 255, 255, 0.3);
 ::-webkit-input-placeholder { color: @placeholderColor; }
 ::-moz-placeholder { color: @placeholderColor; } /* firefox 19+ */
@@ -47,14 +32,6 @@ button, input[type="submit"], input[type="button"] {
 	border-radius: 3px;
 	&.primaryAction {
 		border: 0.1em solid #fff;
-	}
-	.progressBar {
-		position: absolute;
-		left: 0px;
-		top: 0px;
-		width: 100%;
-		height: 100%;
-		background: transparent;
 	}
 }
 button:active, input[type="submit"]:active, input[type="submit"]:active {
@@ -197,7 +174,7 @@ a {
 	padding: 20px;
 	.changes {
 		.loading {
-			.progressBar {
+			.progress {
 				margin: 30px;
 				margin-left: auto;
 				margin-right: auto;
