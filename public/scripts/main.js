@@ -142,9 +142,16 @@ ko.bindingHandlers.scrolledToEnd = {
     }
 };
 
-ko.bindingHandlers.openmodal = {
+ko.bindingHandlers.modal = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         $(element).modal();
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        $(element).on('hidden.bs.modal', function () {
+            value.onclose.call(viewModel);
+        });
+        value.closer.call(viewModel, function() {
+            $(element).modal('hide');
+        });
     }
 };
 

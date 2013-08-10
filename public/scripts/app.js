@@ -85,7 +85,10 @@ function CredentialsDialogViewModel() {
 	this.closed = new signals.Signal();
 }
 CredentialsDialogViewModel.prototype.template = 'credentialsDialog';
-CredentialsDialogViewModel.prototype.close = function() {
+CredentialsDialogViewModel.prototype.setCloser = function(closer) {
+	this.close = closer;
+}
+CredentialsDialogViewModel.prototype.onclose = function() {
 	this.closed.dispatch();
 }
 

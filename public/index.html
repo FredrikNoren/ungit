@@ -361,7 +361,7 @@
 </script>
 
 <script type="text/html" id="credentialsDialog">
-	<div class="modal fade" data-bind="openmodal: true">
+	<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
