@@ -376,10 +376,20 @@
 				<div class="modal-header">
 					<h4 class="modal-title">Remote requires authentication</h4>
 				</div>
-				<form data-bind="submit: close">
+				<form class="form-horizontal" data-bind="submit: close">
 					<div class="modal-body">
-						<div>Username: <input type="text" data-bind="value: username" autofocus></div>
-						<div>Password: <input type="password" data-bind="value: password"></div>
+						<div class="form-group">
+							<label for="inputUsername" class="col-lg-2 control-label">Username</label>
+							<div class="col-lg-10">
+								<input type="text" class="form-control" id="inputUsername" placeholder="Username" data-bind="value: username" autofocus>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputPassword" class="col-lg-2 control-label">Password</label>
+							<div class="col-lg-10">
+								<input type="password" class="form-control" id="inputPassword" placeholder="Password" data-bind="value: password">
+								</div>
+						</div>
 					</div>
 					<div class="modal-footer">
 						<input type="submit" class="btn btn-primary" value="Submit">
