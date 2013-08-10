@@ -203,6 +203,7 @@
 
 				<!-- ko if: showFetchButton -->
 				<button class="fetchButton btn btn-default" data-bind="click: fetch, disable: fetchingProgressBar.running">
+					<span class="glyphicon glyphicon-refresh"></span>
 					Fetch remote nodes
 					<!-- ko if: fetchingProgressBar.running -->
 					<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
