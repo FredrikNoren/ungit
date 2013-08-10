@@ -15,6 +15,9 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.gerritIntegration = ko.observable(null);
 	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
+	this.showFetchButton = ko.computed(function() {
+		return self.graph.hasRemotes();
+	});
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
 	this.showLog = ko.computed(function() {
