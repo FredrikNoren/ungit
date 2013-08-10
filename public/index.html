@@ -52,7 +52,7 @@
 		<form data-bind="submit: login">
 			<div>Username: <input type="text" data-bind="value: username"></div>
 			<div>Password: <input type="password" data-bind="value: password"></div>
-			<input type="submit" value="Login">
+			<input type="submit" class="btn btn-primary" value="Login">
 		</form>
 	</div>
 </script>
@@ -72,14 +72,14 @@
 		
 		<div class="uninited" data-bind="visible: status() == 'uninited'">
 			<div class="topic">"<span data-bind="text: path"></span>" is not a repository.</div>
-			<button class="initRepository" data-bind='click: initRepository'>Initialize a repository here!</button>
+			<button class="initRepository btn btn-primary" data-bind='click: initRepository'>Initialize a repository here!</button>
 			<div class="or"><div class="line"></div>or<div class="line"></div></div>
 			<form class="cloneRepository" data-bind="submit: cloneRepository">
 				<div>Clone from</div>
 				<div><input type="text" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'"></div>
 				<div>to</div>
 				<div><input type="text" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }"></div>
-				<div><input type="submit" value="Clone repository!"></div>
+				<div><input type="submit" class="btn btn-primary" value="Clone repository!"></div>
 			</form>
 		</div>
 
@@ -118,19 +118,19 @@
 						</span>
 					</div>
 					
-					<button class="commitButton" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
+					<button class="commitButton btn btn-primary" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
 						Commit
 						<!-- ko if: committingProgressBar.running -->
 						<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
 						<!-- /ko -->
 					</button>
-					<button class="rebaseContinueButton" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+					<button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
 						Continue rebase
 						<!-- ko if: rebaseContinueProgressBar.running -->
 						<!-- ko template: { name: 'progressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
 						<!-- /ko -->
 					</button>
-					<button class="rebaseAbortButton" data-bind="click: rebaseAbort, visible: inRebase">
+					<button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
 						Abort rebase
 						<!-- ko if: rebaseAbortProgressBar.running -->
 						<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
@@ -276,8 +276,8 @@
 									<!-- ko if: branchingFormVisible -->
 									<form data-bind="submit: createBranch">
 										<input class="name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus">
-										<input class="submit primaryAction" type="submit" value="Branch">
-										<button class="submit" data-bind="click: createTag">Tag</button>
+										<input class="submit btn btn-primary" type="submit" value="Branch">
+										<button class="submit btn btn-default" data-bind="click: createTag">Tag</button>
 									</form>
 									<!-- /ko -->
 								</div>
@@ -315,7 +315,7 @@
 	<div class="gerritIntegration">
 		<h1>Gerrit</h1>
 
-		<button data-bind="visible: showInitCommmitHook, click: initCommitHook">
+		<button class="btn btn-primary" data-bind="visible: showInitCommmitHook, click: initCommitHook">
 			Init commit hook
 			<!-- ko if: initGerritHookProgressBar.running -->
 			<!-- ko template: { name: 'progressBar', data: initGerritHookProgressBar } --><!-- /ko -->
@@ -323,7 +323,7 @@
 		</button>
 
 		<div>
-			<button data-bind="click: pushForReview">
+			<button class="btn btn-primary" data-bind="click: pushForReview">
 				Push changes for review
 				<!-- ko if: pushingProgressBar.running -->
 				<!-- ko template: { name: 'progressBar', data: pushingProgressBar } --><!-- /ko -->
@@ -343,19 +343,19 @@
 					<div class="change">
 						<span class="subject" data-bind="text: subject"></span> by <span class="owner" data-bind="text: ownerName"></span>
 						<div>
-							<button class="checkout" data-bind="click: checkout">
+							<button class="checkout btn btn-default" data-bind="click: checkout">
 								Checkout
 								<!-- ko if: checkingOutProgressBar.running -->
 								<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
 								<!-- /ko -->
 							</button>
-							<button class="cherryPick" data-bind="click: cherryPick">
+							<button class="cherryPick btn btn-default" data-bind="click: cherryPick">
 								Cherry pick
 								<!-- ko if: cherryPickingProgressBar.running -->
 								<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
 								<!-- /ko -->
 							</button>
-							<button class="openInGerrit" data-bind="click: openInGerrit">Open in gerrit</button>
+							<button class="openInGerrit btn btn-default" data-bind="click: openInGerrit">Open in gerrit</button>
 						</div>
 					</div>
 				</div>
