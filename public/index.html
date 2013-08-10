@@ -12,16 +12,18 @@
 <body>
 
 <script type="text/html" id="home">
-	<div class='home'>
-		<img src="images/logoLarge.png" class="logo">
-		<div>
-		<div class="repos">
-			<div class="title">Recent repositories</div>
-			<div data-bind="foreach: repos">
-				<a class="repo" data-bind="text: title, attr: { href: link }"></a>
+	<div class="container">
+		<p class="text-center">
+			<img src="images/logoLarge.png">
+		</p>
+		
+		<div class="panel">
+			<h2>Recent repositories</h2>
+			<div class="list-group" data-bind="foreach: repos">
+				<a class="list-group-item" data-bind="text: title, attr: { href: link }"></a>
 			</div>
 		</div>
-		</div>
+		
 	</div>
 </script>
 
