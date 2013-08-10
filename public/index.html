@@ -361,16 +361,24 @@
 </script>
 
 <script type="text/html" id="credentialsDialog">
-	<div class="credentialsDialog">
-		<div>
-			<form data-bind="submit: close">
-			<div>Remote requires authentication</div>
-			<div>Username: <input type="text" data-bind="value: username" autofocus></div>
-			<div>Password: <input type="password" data-bind="value: password"></div>
-			<div><input type="submit" value="Submit"></div>
-			</form>
-		</div>
-	</div>
+	<div class="modal fade" data-bind="openmodal: true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Remote requires authentication</h4>
+				</div>
+				<form data-bind="submit: close">
+					<div class="modal-body">
+						<div>Username: <input type="text" data-bind="value: username" autofocus></div>
+						<div>Password: <input type="password" data-bind="value: password"></div>
+					</div>
+					<div class="modal-footer">
+						<input type="submit" class="btn btn-primary" value="Submit">
+					</div>
+				</form>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 </script>
 
 <script type="text/html" id="main">
@@ -398,11 +406,7 @@
 
 
 	<!-- ko if: dialog -->
-	<div class="dialog animated fadeIn">
-		<div class="modalContainer">
-			<div class="modal" data-bind="template: { name: templateChooser, data: dialog }"></div>
-		</div>
-	</div>
+	<!-- ko template: { name: templateChooser, data: dialog } --><!-- /ko -->
 	<!-- /ko -->
 </script>
 
@@ -436,6 +440,7 @@
 <script type="text/javascript" src="/scripts/lib/uuid.js"></script>
 <script type="text/javascript" src="/scripts/lib/moment.js"></script>
 <script type="text/javascript" src="/scripts/lib/underscore.js"></script>
+<script type="text/javascript" src="/scripts/lib/bootstrap/modal.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type='text/javascript' src='/scripts/utils.js'></script>
 <script type='text/javascript' src='/scripts/api.js'></script>

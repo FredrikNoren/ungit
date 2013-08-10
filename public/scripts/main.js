@@ -142,6 +142,11 @@ ko.bindingHandlers.scrolledToEnd = {
     }
 };
 
+ko.bindingHandlers.openmodal = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        $(element).modal();
+    }
+};
 
 var prevTimestamp = 0;
 var updateAnimationFrame = function(timestamp) {
