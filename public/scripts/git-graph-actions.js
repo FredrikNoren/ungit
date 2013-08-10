@@ -208,7 +208,7 @@ GraphActions.Checkout.prototype.visualization = 'checkout';
 GraphActions.Checkout.prototype.perform = function(ref, callback) {
 	var self = this;
 	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
-		if (err) return;
+		if (err && err.errorCode != 'conflict') return;
 		if (ref.isRemoteBranch)
 			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, callback);
 		else
