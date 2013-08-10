@@ -1,6 +1,8 @@
 
 @import "bootstrap/bootstrap.less";
 
+// -- BOOTSTRAP STYLING ---
+
 @navbar-bg: #2B3844;
 @font-family-sans-serif: 'Open Sans';
 @body-bg: #252833;
@@ -37,10 +39,6 @@
 	}
 }
 
-.crash {
-	margin-top: 20px;
-}
-
 .btn {
 	border: 0px;
 	.progress {
@@ -51,4 +49,18 @@
 		height: 100%;
 		background: transparent;
 	}
+}
+
+// -- LAYOUT ----
+// Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
+
+.fetchButton {
+	position: absolute;
+	margin-top: 20px;
+	right: 20px;
+	z-index: 30;
+}
+
+.crash {
+	margin-top: 20px;
 }

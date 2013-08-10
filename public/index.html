@@ -199,10 +199,12 @@
 
 				<!-- ko if: showLog -->
 
-				<div class="graphUtils" data-bind="visible: isFetching">
-					<img src="images/grayArrowDown.png" class="arrowDown">
-					<div class="fetchingIndicator">Fetching nodes from remote...</div>
-				</div>
+				<button class="fetchButton btn btn-default" data-bind="click: fetch, disable: fetchingProgressBar.running">
+					Fetch remote nodes
+					<!-- ko if: fetchingProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
 
 				<!-- ko if: remoteErrorPopup -->
 				<div class="remoteErrorPopup animated bounceInDown">

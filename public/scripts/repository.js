@@ -13,7 +13,7 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.repoPath = repoPath;
 	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
-	this.isFetching = ko.observable(false);
+	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
@@ -62,9 +62,9 @@ RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 RepositoryViewModel.prototype.fetch = function() {
 	if (this.status() != 'inited') return;
 	var self = this;
-	this.isFetching(true);
+	this.fetchingProgressBar.start();
 	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
-		self.isFetching(false);
+		self.fetchingProgressBar.stop();
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
 				self.remoteErrorPopup('Repository remote timeouted.');
