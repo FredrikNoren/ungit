@@ -19,6 +19,8 @@ var git = function(command, repoPath, parser, callback) {
           err.errorCode = 'remote-timeout';
       	else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
       	  err.errorCode = 'permision-denied-publickey';
+        else if (err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
+          err.errorCode = 'conflict';
         callback(err);
       }
       else {

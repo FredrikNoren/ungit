@@ -18,7 +18,7 @@ var testDir;
 
 var req = request(app);
 
-describe('git-api conflict', function () {
+describe('git-api conflict rebase', function () {
 
 	this.timeout(8000);
 
@@ -104,3 +104,56 @@ describe('git-api conflict', function () {
 	});
 
 })
+
+describe('git-api conflict checkout', function () {
+
+	this.timeout(8000);
+
+	var testBranch = 'testBranch';
+	var testFile1 = "testfile1.txt";
+
+	before(function(done) {
+		common.createEmptyRepo(req, done, function(dir) {
+			testDir = dir;
+			async.series([
+				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
+				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [testFile1] }, done); },
+			], done);
+		});
+	});
+
+	it('should be possible to make some changes', function(done) {
+		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done);
+	});
+
+	it('should be possible to checkout with local files that will conflict', function(done) {
+		req
+			.post(restGit.pathPrefix + '/checkout')
+			.send({ path: testDir, name: testBranch })
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(400)
+			.end(wrapErrorHandler(done, function(err, res) {
+				expect(res.body.errorCode).to.be('conflict');
+				done();
+			}));
+	});
+
+	it('status should list files in conflict', function(done) {
+		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+			expect(res.body.inRebase).to.be(false);
+			expect(Object.keys(res.body.files).length).to.be(1);
+			expect(res.body.files[testFile1]).to.eql({
+				isNew: false,
+				staged: false,
+				removed: false,
+				conflict: true
+			});
+			done();
+		});
+	});
+
+});
