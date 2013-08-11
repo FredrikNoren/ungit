@@ -120,7 +120,7 @@
 <script type="text/html" id="staging">
 	<div class="staging panel" data-bind="css: { commitValidationError: commitValidationError }">
 		<div class="arrowContainer arrowDown">
-			<img src="images/yellowArrowDown.png" class="arrow">
+			<div class="arrow"></div>
 		</div>
 		<div data-bind="visible: showNux">
 		Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
@@ -241,7 +241,6 @@
 
 					<div class="daySeparators" data-bind="foreach: daySeparators">
 						<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
-							<img src="images/whiteArrowRight.png" class="arrowRight">
 							<div class="dateLabel" data-bind="text: date"></div>
 						</div>
 					</div>
@@ -254,8 +253,8 @@
 							<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
 								<div class="logEntryBox panel">
 									<div class="arrowContainer arrowRight">
-										<img src="images/shadowArrowRight.png" class="shadow">
-										<img src="images/blueArrowRight.png" class="arrow">
+										<div class="shadow"></div>
+										<div class="arrow"></div>
 									</div>
 									<div class="title" data-bind="text: title"></div>
 									<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>

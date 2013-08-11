@@ -7,7 +7,7 @@ The easiest way to use git. On any platform. Anywhere.
  * Runs on any platform that node.js & git supports.
  * Web-based, meaning you can run it on your cloud/pure shell machine and use the ui from your browser (just browse to http://your-cloud-machine.com:8448).
  * Works well with GitHub.
- * Gerrit integration (view, checkout and push changes form/to gerrit).
+ * Gerrit integration (view, checkout and push changes from/to gerrit).
 
 Installing
 ----------
