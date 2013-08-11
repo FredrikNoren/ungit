@@ -198,6 +198,7 @@ var gerriAddresstSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
 var gerritAddressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
 var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
 var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
+var gerritAddressHttpsRegexp = /https:\/\/([^\/]*)\/(.*)/;
 
 exports.parseRemoteAddress = function(remote) {
   var match = gerriAddresstSshWithPortRegexp.exec(remote);
@@ -212,6 +213,9 @@ exports.parseRemoteAddress = function(remote) {
   match = gerritAddressGitWithoutPortWithoutUsernameRegexp.exec(remote);
   if (match) return { address: remote, host: match[1], project: match[2] };
 
+  match = gerritAddressHttpsRegexp.exec(remote);
+  if (match) return { address: remote, host: match[1], project: match[2] };
+  
   return { address: remote };
 }
 
