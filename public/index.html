@@ -68,21 +68,40 @@
 		</div>
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'cloning'">
-			Cloning...
+			<h2>Cloning...</h2>
 			<!-- ko template: { name: 'progressBar', data: cloningProgressBar } --><!-- /ko -->
 		</div>
 		
 		<div class="uninited" data-bind="visible: status() == 'uninited'">
-			<div class="topic">"<span data-bind="text: path"></span>" is not a repository.</div>
-			<button class="initRepository btn btn-primary" data-bind='click: initRepository'>Initialize a repository here!</button>
-			<div class="or"><div class="line"></div>or<div class="line"></div></div>
-			<form class="cloneRepository" data-bind="submit: cloneRepository">
-				<div>Clone from</div>
-				<div><input type="text" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'"></div>
-				<div>to</div>
-				<div><input type="text" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }"></div>
-				<div><input type="submit" class="btn btn-primary" value="Clone repository!"></div>
-			</form>
+			<div class="container">
+				<h1>Not a repository</h1>
+				<p>There is no repository at the selected path.</p>
+				<div class="row">
+					<div class="col-lg-6">
+						<div class="panel">
+							<div class="panel-heading">Create a new repository</div>
+							<button class="btn btn-primary btn-large" data-bind='click: initRepository'>Initialize a repository here!</button>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="panel">
+							<div class="panel-heading">Clone a repository</div>
+							<form data-bind="submit: cloneRepository">
+								<div class="form-group">
+									<label for="cloneFromInput">Clone from</label>
+									<input class="form-control" type="text" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
+								</div>
+								<div class="form-group">
+									<label for="cloneToInput">to</label>
+									<input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
+								</div>
+								<input type="submit" class="btn btn-primary btn-large" value="Clone repository!">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			
 		</div>
 
 		<div class="invalidpath" data-bind="visible: status() == 'invalidpath'">
