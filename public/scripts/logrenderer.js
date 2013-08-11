@@ -62,6 +62,7 @@ logRenderer.render = function(element, graph) {
 	var commitNodePosition = new Vector2(30, 30);
 
 	var context = element.getContext("2d");
+	if (!context.setLineDash) context.setLineDash = function () {}; // Firefox doesn't support this yet.
 	context.clearRect(0, 0, element.width, element.height);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 

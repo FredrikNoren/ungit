@@ -57,7 +57,7 @@ ProgressBarViewModel.prototype.update = function() {
 		value = Math.min(1, value);
 		this.progress(value);
 	}
-	requestAnimationFrame(this.update.bind(this));
+	window.requestAnimationFrame(this.update.bind(this));
 }
 ProgressBarViewModel.prototype.pause = function() {
 	this.paused(true);

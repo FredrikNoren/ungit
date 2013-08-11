@@ -1,4 +1,8 @@
 
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                              window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+window.requestAnimationFrame = requestAnimationFrame;
+
 ko.bindingHandlers.debug = {
     init: function(element, valueAccessor) {
         var value = ko.utils.unwrapObservable(valueAccessor());
@@ -111,10 +115,10 @@ ko.bindingHandlers.graphLog = {
         var updateAnimationFrame = function(timestamp) {
             var graph = ko.utils.unwrapObservable(valueAccessor());
             logRenderer.render(canvas.get(0), graph);
-            if (document.contains(canvas.get(0))) // While the element is in the document
-                requestAnimationFrame(updateAnimationFrame);
+            if ($.contains(document.body, canvas.get(0))) // While the element is in the document
+                window.requestAnimationFrame(updateAnimationFrame);
         }
-        requestAnimationFrame(updateAnimationFrame);
+        window.requestAnimationFrame(updateAnimationFrame);
     },
 };
 
@@ -160,9 +164,9 @@ var updateAnimationFrame = function(timestamp) {
     var delta = timestamp - prevTimestamp;
     prevTimestamp = timestamp;
     app.updateAnimationFrame(delta);
-    requestAnimationFrame(updateAnimationFrame);
+    window.requestAnimationFrame(updateAnimationFrame);
 }
-requestAnimationFrame(updateAnimationFrame);
+window.requestAnimationFrame(updateAnimationFrame);
 
 window.onerror = function(err) {
     if (ungit.config.bugtracking)
