@@ -27,22 +27,12 @@ var RepositoryViewModel = function(main, repoPath) {
 		if (newValue == 'inited') {
 			self.update();
 			self.fetch();
-			api.watchRepository(repoPath, {
-				disconnect: function() {
-					self.main.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
-				},
-				ready: function() { self.watcherReady(true) },
-				changed: function() { self.update(); },
-				requestCredentials: function(callback) {
-					var diag = new CredentialsDialogViewModel();
-					self.main.programEvents.dispatch({ event: 'credentialsRequested' });
-					diag.closed.add(function() {
-						self.main.programEvents.dispatch({ event: 'credentialsProvided' });
-						callback({ username: diag.username(), password: diag.password() });
-					})
-					self.main.showDialog(diag);
+			api.repositoryChanged.add(function(data) {
+				if (data.repository == self.repoPath) {
+					self.update();
 				}
 			});
+			api.watchRepository(repoPath, function() { self.watcherReady(true); });
 			if (ungit.config.gerrit) {
 				self.gerritIntegration(new GerritIntegrationViewModel(self));
 			}

@@ -35,24 +35,34 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		});
 		io.sockets.on('connection', function (socket) {
 			sockets.push(socket);
-			socket.emit('socketId', sockets.length - 1);
-			socket.on('watch', function (data) {
+			socket.emit('connected', { socketId: sockets.length - 1 });
+			socket.on('disconnect', function () {
+				if (socket.watchr) {
+					socket.watchr.close();
+					socket.watchr = null;
+					winston.info('Stop watching ' + socket.watchrPath);
+				}
+			});
+			socket.on('watch', function (data, callback) {
+				if (socket.watchr) {
+					socket.watchr.close(); // only one watcher per socket
+					winston.info('Stop watching ' + socket.watchrPath);
+				}
 				socket.join(path.normalize(data.path)); // join room for this path
 				var watchOptions = {
 					path: data.path,
 					ignoreCommonPatterns: true,
 					listener: function() {
-						socket.emit('changed');
+						socket.emit('changed', { repository: data.path });
 					},
 					next: function(err, watchers) {
-						socket.emit('ready');
+						callback();
 					}
 				};
 				if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
-				watchr.watch(watchOptions);
-
-				// Just to make it painful to work with if we don't handle changes correctly
-				//if (config.debug) setInterval(function() { socket.emit('changed'); }, 1000);
+				socket.watchrPath = data.path;
+				socket.watchr = watchr.watch(watchOptions);
+				winston.info('Start watching ' + socket.watchrPath);
 			});
 		});
 	}
@@ -68,7 +78,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	var emitRepoChanged = function(repoPath) {
 		if (io) {
-			io.sockets.in(path.normalize(repoPath)).emit('changed');
+			io.sockets.in(path.normalize(repoPath)).emit('changed', { repository: repoPath });
 			winston.info('emitting changed to sockets');
 		}
 	}

@@ -170,6 +170,10 @@ window.onerror = function(err) {
     app.content(new CrashViewModel());
 };
 
+api = new Api();
+var main = new MainViewModel();
+var app = new AppViewModel(main);
+
 ko.applyBindings(app);
 
 

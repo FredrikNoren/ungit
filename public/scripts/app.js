@@ -43,6 +43,18 @@ var MainViewModel = function() {
 			else return self.authenticationScreen;
 		}
 	});
+	api.disconnected.add(function() {
+		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+	});
+	api.getCredentialsHandler = function(callback) {
+		var diag = new CredentialsDialogViewModel();
+		self.programEvents.dispatch({ event: 'credentialsRequested' });
+		diag.closed.add(function() {
+			self.programEvents.dispatch({ event: 'credentialsProvided' });
+			callback({ username: diag.username(), password: diag.password() });
+		});
+		self.showDialog(diag);
+	}
 }
 MainViewModel.prototype.template = 'main';
 MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
@@ -221,6 +233,3 @@ crossroads.addRoute('/repository{?query}', function(query) {
 	main.path(query.path);
 	main.content(new PathViewModel(main, query.path));
 })
-
-var main = new MainViewModel();
-var app = new AppViewModel(main);
