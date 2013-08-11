@@ -83,69 +83,7 @@
 }
 
 .repository .staging {
-	background: #643A44;
-	color: #B8A5A5;
-	position: relative;
-	padding: 10px;
-	border-radius: 10px;
-	z-index: 5;
 
-	box-sizing:border-box;
-	-moz-box-sizing:border-box;
-
-	a {
-		color: #27A5E8;
-		&:hover {
-			color: #5EBFF2;
-		}
-	}
-
-
-	.arrowDown {
-		position: absolute;
-		left: (@logWidth + 60px - 15px + 100px);
-		bottom: 0px;
-	}
-
-	.commitMessage {
-		display: block;
-		width: 100%;
-		box-sizing:border-box;
-		-moz-box-sizing:border-box;
-		border-radius: 5px;
-		.title, .body {
-			border: 1px solid #eee;
-		}
-		.title {
-			font-size: 1.2em;
-			padding: 10px;
-			margin-bottom: 5px;
-		}
-		.body {
-			padding: 5px;
-		}
-		.title, .body {
-			display: block;
-			background: rgba(0, 0, 0, 0.1);
-			box-sizing:border-box;
-			-moz-box-sizing:border-box;
-			width: 100%;
-			border: 0px;
-			color: rgba(255, 255, 255, 0.9);
-		}
-	}
-	.commitButton {
-		font-size: 1.6em;
-	}
-	.validationError {
-		display: none;
-	}
-	&:hover .validationError {
-		display: inline-block;
-	}
-	.stats {
-		font-size: 0.9em;
-	}
 	.files {
 		position: relative;
 		.file {
@@ -156,11 +94,6 @@
 					border-bottom-left-radius: 0px;
 					border-bottom-right-radius: 0px;
 				}
-			}
-			.arrowLeft {
-				position: absolute;
-				right: -10px;
-				z-index: 10;
 			}
 			.name {
 				font-size: 1.3em;
@@ -192,7 +125,7 @@
 					color: #000;
 					border-radius: 3px;
 					.explanation {
-						display: inline-block;
+						display: inline;
 					}
 				}
 			}
