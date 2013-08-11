@@ -11,10 +11,10 @@ var RepositoryViewModel = function(main, repoPath) {
 	visitedRepositories.tryAdd(repoPath);
 	this.main = main;
 	this.repoPath = repoPath;
-	this.staging = new StagingViewModel(this);
 	this.gerritIntegration = ko.observable(null);
 	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
+	this.staging = new StagingViewModel(this);
 	this.showFetchButton = ko.computed(function() {
 		return self.graph.hasRemotes();
 	});
@@ -147,8 +147,14 @@ var StagingViewModel = function(repository) {
 	});
 	this.stats = ko.computed(function() {
 		return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
-	})
+	});
 	this.amend = ko.observable(false);
+	this.canAmend = ko.computed(function() {
+		return self.repository.graph.HEAD() && !self.inRebase();
+	});
+	this.showNux = ko.computed(function() {
+		return self.files().length == 0 && !self.amend();
+	});
 	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
 	this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
 	this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
