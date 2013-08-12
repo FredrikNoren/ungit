@@ -2,7 +2,7 @@
 var expect = require('expect.js');
 var common = require('./common');
 common.initDummyBrowserEnvironment();
-var GitGraphViewModel = require('../public/scripts/git-graph.js').GitGraphViewModel;
+var GitGraphViewModel = require('../public/source/git-graph.js').GitGraphViewModel;
 
 
 describe('GitGraph', function() {

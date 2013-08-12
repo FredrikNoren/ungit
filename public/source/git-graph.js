@@ -1,6 +1,6 @@
 
 if (typeof exports !== 'undefined') {
-	ko = require('./lib/knockout-2.2.1.js');
+	ko = require('../vendor/js/knockout-2.2.1.js');
 	Vector2 = require('./vector2.js');
 	GraphActions = require('./git-graph-actions.js');
 	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
