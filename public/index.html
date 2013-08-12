@@ -333,7 +333,7 @@
 
 <script type="text/html" id="gerritIntegration">
 	<div class="gerritIntegration panel">
-		<h1>Gerrit</h1>
+		<div class="panel-heading"><h1>Gerrit</h1></div>
 
 		<p>
 			<button class="btn btn-primary" data-bind="visible: showInitCommmitHook, click: initCommitHook">
@@ -362,24 +362,22 @@
 			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
 			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
 				<div data-bind="foreach: changes">
-					<div class="change">
-						<span class="subject" data-bind="text: subject"></span> by <span class="owner" data-bind="text: ownerName"></span>
-						<div>
-							<button class="checkout btn btn-default" data-bind="click: checkout">
-								Checkout
-								<!-- ko if: checkingOutProgressBar.running -->
-								<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
-								<!-- /ko -->
-							</button>
-							<button class="cherryPick btn btn-default" data-bind="click: cherryPick">
-								Cherry pick
-								<!-- ko if: cherryPickingProgressBar.running -->
-								<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
-								<!-- /ko -->
-							</button>
-							<button class="openInGerrit btn btn-default" data-bind="click: openInGerrit">Open in gerrit</button>
-						</div>
-					</div>
+					<p>
+						<hr>
+						<h4><a href="#" data-bind="text: subject, click: openInGerrit"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
+						<button class="btn btn-primary" data-bind="click: checkout">
+							Checkout
+							<!-- ko if: checkingOutProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
+						<button class="btn btn-default" data-bind="click: cherryPick">
+							Cherry pick
+							<!-- ko if: cherryPickingProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
+					</p>
 				</div>
 			</div>
 		</div>
