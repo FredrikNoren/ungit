@@ -10,10 +10,13 @@ Api.prototype._initSocket = function() {
 	var self = this;
 	this.socket = io.connect();
 	this.socket.on('error', function(err) {
-		throw new Error('Socket error: ' + err.toString());
+		self._isConnected(function(connected) {
+			if (connected) throw new Error('Socket error: ' + JSON.stringify(err));
+			else self._onDisconnect();
+		});
 	});
 	this.socket.on('disconnect', function(data) {
-		self.disconnected.dispatch();
+		self._onDisconnect();
 	});
 	this.socket.on('connected', function (data) {
 		self.socketId = data.socketId;
@@ -27,7 +30,21 @@ Api.prototype._initSocket = function() {
 		});
 	});
 }
+// Check if the server is still alive
+Api.prototype._isConnected = function(callback) {
+	superagent('GET', '/api/ping')
+		.set('Accept', 'application/json')
+		.end(function(error, res) {
+			callback(!error && res && res.ok);
+		});
+}
+Api.prototype._onDisconnect = function() {
+	if (this.isDisconnected) return;
+	this.isDisconnected = true;
+	this.disconnected.dispatch();
+}
 Api.prototype.query = function(method, path, body, callback) {
+	var self = this;
 	var q = superagent(method, '/api' + path);
 	if (method == 'GET')
 		q.query(body);
@@ -36,6 +53,11 @@ Api.prototype.query = function(method, path, body, callback) {
 	q.set('Accept', 'application/json');
 	q.end(function(error, res) {
 		if (error || !res.ok) {
+			// superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
+			if (error && error.crossDomain) {
+				self._onDisconnect();
+				return;
+			}
 			var errorSummary = 'unkown';
 			if (res) {
 				if (res.body) {

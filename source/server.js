@@ -111,6 +111,9 @@ exports.start = function(callback) {
 			});
 		});
 	});
+	app.get('/api/ping', function(req, res) {
+		res.json({});
+	});
 
 	// Error handling
 	app.use(function(err, req, res, next) {

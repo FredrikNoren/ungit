@@ -1,6 +1,10 @@
 
 var AppViewModel = function(main) {
+	var self = this;
 	this.content = ko.observable(main);
+	api.disconnected.add(function() {
+		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+	});
 }
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
@@ -42,9 +46,6 @@ var MainViewModel = function() {
 			if (self.isAuthenticated()) return self.realContent();
 			else return self.authenticationScreen;
 		}
-	});
-	api.disconnected.add(function() {
-		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 	});
 	api.getCredentialsHandler = function(callback) {
 		var diag = new CredentialsDialogViewModel();
