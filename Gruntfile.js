@@ -1,7 +1,6 @@
 module.exports = function(grunt) {
 
   var jsSources = [
-    'public/vendor/js/less-1.3.3.min.js',
     'public/vendor/js/knockout-2.2.1.js',
     'public/vendor/js/jquery-2.0.0.min.js',
     'public/vendor/js/jquery.dnd_page_scroll.js',
@@ -33,7 +32,7 @@ module.exports = function(grunt) {
     less: {
       development: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less"]
+          "public/css/styles.css": ["public/less/styles.less", "public/styles/styles.less"]
         }
       },
       production: {
