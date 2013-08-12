@@ -10,7 +10,7 @@ if (typeof exports !== 'undefined') {
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
-	this.maxNNodes = 10;
+	this.maxNNodes = 25;
 	this.nodes = ko.observable([]);
 	this.refs = ko.observableArray();
 	this.daySeparators = ko.observable();
