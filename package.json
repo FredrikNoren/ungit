@@ -51,7 +51,8 @@
     "expect.js": "0.2.0",
     "supertest": "0.7.0",
     "grunt": "0.4.1",
-    "grunt-contrib-less": "0.7.0"
+    "grunt-contrib-less": "0.7.0",
+    "grunt-contrib-concat": "0.3.0"
   },
   "license": "MIT"
 }
