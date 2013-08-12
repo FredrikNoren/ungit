@@ -220,7 +220,7 @@ StagingViewModel.prototype.rebaseAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
-		file.invalidateDiff();
+		file.invalidateDiff(false);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -239,6 +239,7 @@ var FileViewModel = function(staging) {
 	this.conflict = ko.observable(false);
 	this.diffs = ko.observable([]);
 	this.showingDiffs = ko.observable(false);
+	this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
 }
 FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
@@ -254,13 +255,15 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
 		this.showingDiffs(true);
-		this.invalidateDiff();
+		this.invalidateDiff(true);
 	}
 }
-FileViewModel.prototype.invalidateDiff = function() {
+FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this;
 	if (this.showingDiffs()) {
+		if (drawProgressBar) this.diffsProgressBar.start();
 		api.query('GET', '/diff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
+			if (drawProgressBar) self.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
 			diffs.forEach(function(diff) {

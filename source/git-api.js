@@ -79,7 +79,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	var emitRepoChanged = function(repoPath) {
 		if (io) {
 			io.sockets.in(path.normalize(repoPath)).emit('changed', { repository: repoPath });
-			winston.info('emitting changed to sockets');
+			winston.info('emitting changed to sockets, manually triggered');
 		}
 	}
 

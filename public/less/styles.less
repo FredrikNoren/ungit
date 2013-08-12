@@ -15,7 +15,7 @@
 @panel-heading-bg: #2C3541;
 @panel-border: #362C36;
 @list-group-bg: @panel-bg;
-@list-group-hover-bg: rgba(0, 0, 0, 0.1);
+@list-group-hover-bg: rgba(0, 0, 0, 0.1); 
 @list-group-border: #435158;
 @modal-content-bg: @panel-bg;
 @modal-header-border-color: @list-group-border;
@@ -33,6 +33,10 @@
 		width: 100%;
 		height: 100%;
 		background: transparent;
+		pointer-events:none;
+		.progress-bar {
+			pointer-events:none;
+		}
 	}
 	.glyphicon {
 		font-size: 0.8em;

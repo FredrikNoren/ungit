@@ -163,7 +163,12 @@
 						<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
 							&#10003;
 						</div>
-						<span class="name" data-bind="text: name, click: toogleDiffs"></span>
+						<button class="name btn btn-default">
+							<span data-bind="text: name, click: toogleDiffs"></span>
+							<!-- ko if: diffsProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: diffsProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
 						<span class="new" data-bind="visible: isNew">New</span>
 						<span class="deleted" data-bind="visible: removed">Removed</span>
 						<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
