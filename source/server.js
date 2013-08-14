@@ -47,6 +47,14 @@ exports.start = function(callback) {
 		winston.info(req.method + ' ' + req.url);
 		next();
 	});
+
+	var noCache = function(req, res, next) {
+		res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+		res.set('Pragma', 'no-cache');
+		res.set('Expires', '0');
+		next();
+	}
+	app.use(noCache);
 	
 	var ensureAuthenticated = function(req, res, next) { next(); };
 
