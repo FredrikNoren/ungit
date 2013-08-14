@@ -1,7 +1,7 @@
 {
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "mocha --reporter spec"
