@@ -57,7 +57,7 @@ describe('GitGraph', function() {
 			expect(graph.nodes()[4].ideologicalBranch.name).to.be('refs/heads/master');
 		});
 
-		it('should show a renote and local ref as in the same ideological branch', function() {
+		it('should show a remote and local ref as in the same ideological branch', function() {
 			var nodes = [
 			  { "sha1": "c72e57c486a7c67a512c5d4ff7d1a442b6d244ba", "parents": [ "2232ad0a5652109450f1a22dd3a327e505f0bce3" ], "refs": [ "refs/remotes/origin/master", "refs/remotes/origin/HEAD" ], "authorName": "Fredrik Noren", "authorEmail": "fredrik.noren@keldyn.com", "authorDate": "Sat Jun 29 11:24:18 2013 +0200", "committerName": "Fredrik Noren", "committerEmail": "fredrik.noren@keldyn.com", "commitDate": "Sat Jun 29 11:24:18 2013 +0200", "message": "test2" },
 			  { "sha1": "2232ad0a5652109450f1a22dd3a327e505f0bce3", "parents": ["c0ed39b12f4475a3c3d236fde8bbec56c257a11a"], "refs": ["refs/heads/master"], "authorName": "Fredrik Noren", "authorEmail": "fredrik.noren@keldyn.com", "authorDate": "Sat Jun 29 11:22:56 2013 +0200", "committerName": "Fredrik Noren", "committerEmail": "fredrik.noren@keldyn.com", "commitDate": "Sat Jun 29 11:22:56 2013 +0200", "message": "test"},

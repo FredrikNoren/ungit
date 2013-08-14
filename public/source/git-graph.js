@@ -139,6 +139,13 @@ GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 			GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
 	});
 }
+GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) {
+	if (node.index() >= this.maxNNodes) return;
+	callback(node);
+	var parent = nodesById[node.parents[0]];
+	if (parent)
+		GitGraphViewModel.traverseNodeLeftParents(parent, nodesById, callback);
+}
 
 GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, ideologicalBranch) {
@@ -200,7 +207,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 
 	// Mark timestamps
 	if (HEAD) {
-		GitGraphViewModel.traverseNodeParents(HEAD, this.nodesById, function(node) {
+		GitGraphViewModel.traverseNodeLeftParents(HEAD, this.nodesById, function(node) {
 			node.ancestorOfHEADTimeStamp = updateTimeStamp;
 		});
 	}
