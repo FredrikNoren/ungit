@@ -16,9 +16,12 @@ npm-debug.log
 node_modules/
 
 .ungitrc
+Gruntfile.js
 
 media/
 test/
-public/test/
-public/test.html
-public/canvastest.html
+report/
+public/source/
+public/vendor/
+public/less/
+public/styles.html
