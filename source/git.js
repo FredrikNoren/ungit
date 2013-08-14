@@ -38,6 +38,12 @@ git.status = function(repoPath, callback) {
     status.inRebase = fs.existsSync(path.join(repoPath, '.git', 'rebase-merge')) ||
       fs.existsSync(path.join(repoPath, '.git', 'rebase-apply'));
 
+    status.inMerge = fs.existsSync(path.join(repoPath, '.git', 'MERGE_HEAD'));
+
+    if (status.inMerge) {
+      status.commitMessage = fs.readFileSync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' });
+    }
+
     callback(null, status);
   });
 }

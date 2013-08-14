@@ -158,7 +158,16 @@ inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.visualization = 'merge';
 GraphActions.Merge.prototype.perform = function(ref, callback) {
-	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 }, callback);
+	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 }, function(err) {
+		if (err) {
+			if (err.errorCode = 'conflict') {
+				callback();
+				return true;
+			}
+			return;
+		}
+		callback();
+	});
 }
 
 GraphActions.Push = function(graph, node) {
