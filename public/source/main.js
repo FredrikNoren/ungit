@@ -42,7 +42,8 @@ var currentlyDraggingViewModel = null;
 ko.bindingHandlers.dragStart = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         var value = valueAccessor();
-        element.addEventListener('dragstart', function() {
+        element.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('Text', 'ungit');
             currentlyDraggingViewModel = viewModel;
             var valueUnwrapped = ko.utils.unwrapObservable(value);
             valueUnwrapped.call(viewModel, true);
@@ -100,6 +101,8 @@ ko.bindingHandlers.drop = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         var value = valueAccessor();
         element.addEventListener('drop', function(e) {
+            if (e.preventDefault)
+                e.preventDefault();
             var valueUnwrapped = ko.utils.unwrapObservable(value);
             valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
         });
