@@ -18,6 +18,8 @@ module.exports = function(grunt) {
     'public/source/api.js',
     'public/source/git-graph-actions.js',
     'public/source/git-graph.js',
+    'public/source/node.js',
+    'public/source/ref.js',
     'public/source/vector2.js',
     'public/source/logrenderer.js',
     'public/source/gerrit.js',
