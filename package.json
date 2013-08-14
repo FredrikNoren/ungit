@@ -55,5 +55,8 @@
     "grunt-contrib-concat": "0.3.0",
     "grunt-contrib-watch": "0.5.1"
   },
+  "engines" : {
+    "node": ">=0.10"
+  },
   "license": "MIT"
 }
