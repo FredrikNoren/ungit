@@ -421,11 +421,12 @@ NodeViewModel.prototype.isAncestor = function(node) {
 NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 	var path = [];
 	var thisNode = this;
-	while (!node.isAncestor(thisNode)) {
+	while (thisNode && !node.isAncestor(thisNode)) {
 		path.push(thisNode);
 		thisNode = this.graph.nodesById[thisNode.parents[0]];
 	}
-	path.push(thisNode);
+	if (thisNode)
+		path.push(thisNode);
 	return path;
 }
 NodeViewModel.prototype.nodeMouseover = function() {
