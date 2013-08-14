@@ -211,4 +211,35 @@ logRenderer.render = function(element, graph) {
 			});
 		}
 	}
+
+	// Draw merge lines
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'merge') {
+		var ref = graph.hoverGraphAction().ref();
+		var mergeWith = graph.hoverGraphAction().mergeWith();
+		if (ref && mergeWith) {
+			if (mergeWith instanceof RefViewModel) mergeWith = mergeWith.node();
+			
+			context.setLineDash([10, 5]);
+			context.lineWidth = 7;
+			context.strokeStyle = "#41DE3C";
+
+			var newNode = {
+				position: new Vector2(
+					ref.node().x() + ref.node().radius() + ((mergeWith.x() + mergeWith.radius()) - (ref.node().x() + ref.node().radius())) / 2,
+					Math.min(ref.node().y(), mergeWith.y())),
+				radius: Math.max(ref.node().radius(), mergeWith.radius())
+			};
+			newNode.position.y -= newNode.radius*2;
+
+			context.beginPath();
+			context.arc(newNode.position.x, newNode.position.y, newNode.radius, 0, 2 * Math.PI);
+			context.stroke();
+
+			context.beginPath();
+			context.setLineDash([10, 5]);
+			logRenderer.drawLineBetweenNodes(context, { position: ref.node().position(), radius: ref.node().radius() }, newNode);
+			logRenderer.drawLineBetweenNodes(context, { position: mergeWith.position(), radius: mergeWith.radius() }, newNode);
+			context.stroke();
+		}
+	}
 }

@@ -142,6 +142,8 @@ GraphActions.Merge = function(graph, node) {
 	var self = this;
 	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
+	this.ref = this.dragObject;
+	this.mergeWith = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() &&
