@@ -45,6 +45,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			});
 			socket.on('watch', function (data, callback) {
 				if (socket.watchr) {
+					socket.leave(socket.watchrPath);
 					socket.watchr.close(); // only one watcher per socket
 					winston.info('Stop watching ' + socket.watchrPath);
 				}
