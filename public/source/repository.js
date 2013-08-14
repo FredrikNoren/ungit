@@ -21,7 +21,7 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.updateStatus();
 	this.watcherReady = ko.observable(false);
 	this.showLog = ko.computed(function() {
-		return !self.staging.inRebase();
+		return !self.staging.inRebase() && !self.staging.inMerge();
 	});
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
@@ -84,6 +84,12 @@ RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 		self.status('inited');
 		self.staging.setFiles(status.files);
 		self.staging.inRebase(!!status.inRebase);
+		self.staging.inMerge(!!status.inMerge);
+		if (status.inMerge) {
+			var lines = status.commitMessage.split('\n');
+			self.staging.commitMessageTitle(lines[0]);
+			self.staging.commitMessageBody(lines.slice(1).join('\n'));
+		}
 		if (opt_callback) opt_callback();
 	});
 }
@@ -129,6 +135,10 @@ var StagingViewModel = function(repository) {
 	this.commitMessageTitle = ko.observable();
 	this.commitMessageBody = ko.observable();
 	this.inRebase = ko.observable(false);
+	this.inMerge = ko.observable(false);
+	this.commitButtonVisible = ko.computed(function() {
+		return !self.inRebase() && !self.inMerge();
+	});
 	this.nFiles = ko.computed(function() {
 		return self.files().length;
 	});
@@ -140,7 +150,7 @@ var StagingViewModel = function(repository) {
 	});
 	this.amend = ko.observable(false);
 	this.canAmend = ko.computed(function() {
-		return self.repository.graph.HEAD() && !self.inRebase();
+		return self.repository.graph.HEAD() && !self.inRebase() && !self.inMerge();
 	});
 	this.showNux = ko.computed(function() {
 		return self.files().length == 0 && !self.amend();
@@ -148,6 +158,8 @@ var StagingViewModel = function(repository) {
 	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
 	this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
 	this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
+	this.mergeContinueProgressBar = new ProgressBarViewModel('merge-continue-' + repository.repoPath);
+	this.mergeAbortProgressBar = new ProgressBarViewModel('merge-abort-' + repository.repoPath);
 	this.commitValidationError = ko.computed(function() {
 		if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
 			return "No files to commit";
@@ -216,6 +228,22 @@ StagingViewModel.prototype.rebaseAbort = function() {
 	this.rebaseAbortProgressBar.start();
 	api.query('POST', '/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
 		self.rebaseAbortProgressBar.stop();
+	});
+}
+StagingViewModel.prototype.mergeContinue = function() {
+	var self = this;
+	this.mergeContinueProgressBar.start();
+	var commitMessage = this.commitMessageTitle();
+	if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
+	api.query('POST', '/merge/continue', { path: this.repository.repoPath, message: commitMessage }, function(err, res) {
+		self.mergeContinueProgressBar.stop();
+	});
+}
+StagingViewModel.prototype.mergeAbort = function() {
+	var self = this;
+	this.mergeAbortProgressBar.start();
+	api.query('POST', '/merge/abort', { path: this.repository.repoPath }, function(err, res) {
+		self.mergeAbortProgressBar.stop();
 	});
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {

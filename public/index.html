@@ -139,7 +139,7 @@
 					</span>
 				</div>
 				
-				<button class="btn btn-primary btn-large" data-bind="click: commit, visible: !inRebase(), enable: !commitValidationError()">
+				<button class="btn btn-primary btn-large" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
 					Commit
 					<!-- ko if: committingProgressBar.running -->
 					<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
@@ -155,6 +155,18 @@
 					Abort rebase
 					<!-- ko if: rebaseAbortProgressBar.running -->
 					<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
+					Continue merge
+					<!-- ko if: mergeContinueProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: mergeContinueProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
+					Abort merge
+					<!-- ko if: mergeAbortProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: mergeAbortProgressBar } --><!-- /ko -->
 					<!-- /ko -->
 				</button>
 				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
@@ -219,7 +231,10 @@
 				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 
 				<!-- ko if: staging.inRebase -->
-				<div class="rebasing">Rebase in progress</div>
+				<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+				<!-- /ko -->
+				<!-- ko if: staging.inMerge -->
+				<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
 				<!-- /ko -->
 
 				<!-- ko if: showLog -->

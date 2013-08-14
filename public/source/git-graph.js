@@ -21,6 +21,12 @@ var GitGraphViewModel = function(repository) {
 	this.isLoading = ko.observable(false);
 	this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000, 400);
 	this.activeBranch = ko.observable();
+	this.activeRef = ko.computed(function() {
+		if (self.activeBranch())
+			return self.getRef('refs/heads/' + self.activeBranch());
+		else
+			return null;
+	});
 	this.HEAD = ko.observable();
 	this.hoverGraphAction = ko.observable();
 	this.draggingRef = ko.observable();

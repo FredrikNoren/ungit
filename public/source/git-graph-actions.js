@@ -146,11 +146,10 @@ GraphActions.Merge = function(graph, node) {
 	this.mergeWith = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
+		if (!self.graph.activeRef() || !self.graph.activeRef().node()) return false;
 		return self.graph.showDropTargets() &&
-			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
-			!self.node.isAncestor(self.graph.draggingRef().node()) &&
-			!self.graph.draggingRef().node().isAncestor(self.node) &&
-			self.graph.draggingRef().current();
+			!self.graph.draggingRef().current() &&
+			self.graph.activeRef().node() == self.node;
 	});
 	this.style = ko.computed(function() { return 'merge ' + (self.visible() ? 'show' : ''); });
 }
@@ -158,7 +157,7 @@ inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.visualization = 'merge';
 GraphActions.Merge.prototype.perform = function(ref, callback) {
-	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.node.sha1 }, function(err) {
+	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.ref().displayName }, function(err) {
 		if (err) {
 			if (err.errorCode = 'conflict') {
 				callback();
