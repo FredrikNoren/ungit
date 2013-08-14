@@ -53,11 +53,21 @@ module.exports = function(grunt) {
         dest: 'public/js/ungit.js',
         nonull: true
       }
-    }
+    },
+    watch: {
+      scripts: {
+        files: ['public/source/*.js'],
+        tasks: ['concat'],
+        options: {
+          spawn: false,
+        },
+      },
+    },
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('default', ['less:development', 'concat']);
 
