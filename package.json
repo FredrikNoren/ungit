@@ -50,7 +50,8 @@
     "passport",
     "passport-local",
     "npm",
-    "semver"
+    "semver",
+    "forever-monitor"
   ],
   "devDependencies": {
     "mocha": "1.11.0",
