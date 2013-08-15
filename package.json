@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "mocha --reporter spec"
