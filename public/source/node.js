@@ -79,6 +79,7 @@ NodeViewModel = function(args) {
 		new GraphActions.Delete(this.graph, this),
 	];
 }
+if (typeof exports !== 'undefined') exports.NodeViewModel = NodeViewModel;
 NodeViewModel.prototype.setPosition = function(position) {
 	var self = this;
 	this.prevPosition = self.position();
@@ -140,7 +141,7 @@ NodeViewModel.prototype.createTag = function() {
 	this.newBranchName('');
 }
 NodeViewModel.prototype.isAncestor = function(node) {
-	if (this.index() >= GitGraphViewModel.maxNNodes) return false;
+	if (this.index() >= this.graph.maxNNodes) return false;
 	if (node == this) return true;
 	for (var v in this.parents) {
 		var n = this.graph.nodesById[this.parents[v]];

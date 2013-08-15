@@ -2,6 +2,8 @@
 if (typeof exports !== 'undefined') {
 	ko = require('../vendor/js/knockout-2.2.1.js');
 	Vector2 = require('./vector2.js');
+	NodeViewModel = require('./node.js').NodeViewModel;
+	RefViewModel = require('./ref.js').RefViewModel;
 	GraphActions = require('./git-graph-actions.js');
 	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 	moment = require('moment');
@@ -120,7 +122,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 GitGraphViewModel.prototype.getRef = function(refName) {
 	var refViewModel = this.refsByRefName[refName];
 	if (!refViewModel) {
-		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this });
+		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.randomColor() });
 		this.refs.push(refViewModel);
 	}
 	return refViewModel;

@@ -40,7 +40,7 @@ var RefViewModel = function(args) {
 		if (self.remoteRef()) return self.node() != self.remoteRef().node();
 		else return true;
 	});
-	this.color = GitGraphViewModel.randomColor();
+	this.color = args.color;
 	this.remoteIsAncestor = ko.computed(function() {
 		if (!self.remoteRef()) return false;
 		return self.node().isAncestor(self.remoteRef().node());
@@ -50,6 +50,7 @@ var RefViewModel = function(args) {
 		return self.remoteRef().node().isAncestor(self.node());
 	});
 }
+if (typeof exports !== 'undefined') exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {
 	this.graph.draggingRef(this);
 }
