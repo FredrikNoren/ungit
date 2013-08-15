@@ -20,3 +20,11 @@ node_modules/socket.io/node_modules/socket.io-client/node_modules/ws/build/
 .bin/
 public/css/
 public/js/ungit.js
+
+node_modules/mocha/
+node_modules/expect.js/
+node_modules/supertest/
+node_modules/grunt/
+node_modules/grunt-contrib-less/
+node_modules/grunt-contrib-concat/
+node_modules/grunt-contrib-watch/
