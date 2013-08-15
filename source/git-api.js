@@ -128,8 +128,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var credentialsHelperPath = path.resolve(__dirname, 'credentials-helper.js').replace(/\\/g, '/');
-		var credentialsOption = '-c credential.helper="!node ' + credentialsHelperPath + ' ' + req.body.socketId + '"';
+		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
+		var credentialsOption = '-c credential.helper="' + credentialsHelperPath + ' ' + req.body.socketId + '"';
 		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 	});
