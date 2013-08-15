@@ -1,0 +1,8 @@
+.DS_Store
+config.json
+test/fixtures/*.json
+!test/fixtures/complete.json
+!test/fixtures/malformed.json
+node_modules/
+node_modules/*
+npm-debug.log
