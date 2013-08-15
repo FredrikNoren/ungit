@@ -114,6 +114,8 @@ exports.start = function(callback) {
 			version.getLatestVersion(function(err, latestVersion) {
 				if (err)
 					res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
+				else if (!semver.valid(currentVersion))
+					res.json({ latestVersion: latestVersion, currentVersion: currentVersion, outdated: false });
 				else
 					res.json({ latestVersion: latestVersion, currentVersion: currentVersion, outdated: semver.gt(latestVersion, currentVersion) });
 			});
