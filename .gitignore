@@ -29,3 +29,4 @@ node_modules/grunt-contrib-less/
 node_modules/grunt-contrib-concat/
 node_modules/grunt-contrib-watch/
 node_modules/grunt-lineending/
+node_modules/grunt-release/

@@ -70,7 +70,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
+  grunt.loadNpmTasks('grunt-release');
 
+  // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'concat', 'lineending:production']);
+
+  // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
+  grunt.registerTask('publish', ['default', 'release:patch']);
 
 };

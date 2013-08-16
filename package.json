@@ -61,7 +61,8 @@
     "grunt-contrib-less": "0.7.0",
     "grunt-contrib-concat": "0.3.0",
     "grunt-contrib-watch": "0.5.1",
-    "grunt-lineending": "0.2.1"
+    "grunt-lineending": "0.2.1",
+    "grunt-release": "0.5.1"
   },
   "engines" : {
     "node": ">=0.10"
