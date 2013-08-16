@@ -3,8 +3,10 @@ if (config.bugtracking) {
 	require('./bugsense').init('credentials-helper');
 }
 var winston = require('winston');
+var path = require('path');
 
-winston.add(winston.transports.File, { filename: 'credentials-helper.log', maxsize: 100*1024, maxFiles: 2 });
+if (config.logDirectory)
+	winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'credentials-helper.log'), maxsize: 100*1024, maxFiles: 2 });
 winston.remove(winston.transports.Console);
 winston.info('Credentials helper invoked');
 

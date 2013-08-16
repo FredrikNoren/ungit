@@ -10,8 +10,10 @@ var version = require('./version');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var semver = require('semver');
+var path = require('path');
 
-winston.add(winston.transports.File, { filename: 'server.log', maxsize: 100*1024, maxFiles: 2 });
+if (config.logDirectory)
+	winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
 
 var users = config.users;
 config.users = null; // So that we don't send the users to the client

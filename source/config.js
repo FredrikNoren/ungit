@@ -9,6 +9,9 @@ var defaultConfig = {
 	// Enables gerrit integration.
 	gerrit: false,
 
+	// Directory to output log files.
+	logDirectory: null,
+
 	// This will automatically send anonymous bug reports.
 	bugtracking: true,
 
