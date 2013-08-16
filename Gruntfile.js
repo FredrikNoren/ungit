@@ -32,17 +32,9 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     less: {
-      development: {
+      production: {
         files: {
           "public/css/styles.css": ["public/less/styles.less", "public/styles/styles.less", "public/styles/animate.css"]
-        }
-      },
-      production: {
-        options: {
-          yuicompress: true
-        },
-        files: {
-          "public/css/styles.css": "public/less/styles.less"
         }
       }
     },
@@ -65,12 +57,20 @@ module.exports = function(grunt) {
         },
       },
     },
+    lineending: {
+      // Debian won't accept bin files with the wrong line ending
+      production: {
+        '/bin/ungit': ['/bin/ungit'],
+        '/bin/credentials-helper': ['/bin/credentials-helper']
+      },
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-lineending');
 
-  grunt.registerTask('default', ['less:development', 'concat']);
+  grunt.registerTask('default', ['less:production', 'concat', 'lineending:production']);
 
 };
