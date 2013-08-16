@@ -18,7 +18,6 @@ if (config.logDirectory)
 var users = config.users;
 config.users = null; // So that we don't send the users to the client
 
-exports.start = function(callback) {
 
 	if (config.authentication) {
 
@@ -137,7 +136,6 @@ exports.start = function(callback) {
 
 	server.listen(config.port, function() {
 		winston.info('Listening on port ' + config.port);
-		if(callback) callback();
+		console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
 	});
 	
-}
