@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "mocha --reporter spec"
@@ -15,8 +15,8 @@
     "ungit": "./bin/ungit"
   },
   "main": "./source/server",
-  "dependencies" : {
-    "express" : "3.2.6",
+  "dependencies": {
+    "express": "3.2.6",
     "superagent": "0.14.7",
     "underscore": "1.4.4",
     "temp": "0.5.0",
@@ -34,7 +34,7 @@
     "semver": "2.0.8",
     "forever-monitor": "1.1.0"
   },
-  "bundledDependencies" : [
+  "bundledDependencies": [
     "express",
     "superagent",
     "underscore",
@@ -64,7 +64,7 @@
     "grunt-lineending": "0.2.1",
     "grunt-release": "0.5.1"
   },
-  "engines" : {
+  "engines": {
     "node": ">=0.10"
   },
   "license": "MIT"
