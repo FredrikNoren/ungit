@@ -14,7 +14,7 @@
 @panel-bg: #3C4653;
 @panel-heading-bg: #2C3541;
 @panel-border: #362C36;
-@list-group-bg: @panel-bg;
+@list-group-bg: transparent;
 @list-group-hover-bg: rgba(0, 0, 0, 0.1); 
 @list-group-border: #435158;
 @modal-content-bg: @panel-bg;
@@ -55,6 +55,12 @@
 .form-control {
 	border: 0px;
 	color: rgba(255, 255, 255, 0.8);
+}
+
+.list-group-item {
+	background: rgba(0, 0, 0, 0.09);
+	border: 0px;
+	margin-bottom: 3px;
 }
 
 // -- New generic classes ----
