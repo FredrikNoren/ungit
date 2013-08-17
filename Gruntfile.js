@@ -63,6 +63,11 @@ module.exports = function(grunt) {
         '/bin/ungit': ['/bin/ungit'],
         '/bin/credentials-helper': ['/bin/credentials-helper']
       },
+    },
+    release: {
+      options: {
+        commitMessage: 'Release <%= version %>',
+      }
     }
   });
 
