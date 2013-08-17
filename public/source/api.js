@@ -3,8 +3,13 @@ var Api = function() {
 	this.connected = new signals.Signal();
 	this.disconnected = new signals.Signal();
 	this.repositoryChanged = new signals.Signal();
+	this.changeDispatchBlockers = 0;
 	this.getCredentialsHandler = function() { throw new Error("Not implemented"); }
 	this._initSocket();
+}
+Api.prototype._dispatchChangeEvent = function(data) {
+	if (this.changeDispatchBlockers > 0) return;
+	this.repositoryChanged.dispatch(data);
 }
 Api.prototype._initSocket = function() {
 	var self = this;
@@ -22,7 +27,7 @@ Api.prototype._initSocket = function() {
 		self.socketId = data.socketId;
 	});
 	this.socket.on('changed', function (data) {
-		self.repositoryChanged.dispatch(data);
+		self._dispatchChangeEvent(data);
 	});
 	this.socket.on('request-credentials', function (data) {
 		self.getCredentialsHandler(function(credentials) {
@@ -48,10 +53,16 @@ Api.prototype.query = function(method, path, body, callback) {
 	var q = superagent(method, '/api' + path);
 	if (method == 'GET')
 		q.query(body);
-	else
+	else {
 		q.send(body);
+		// Block change events while we're doing this
+		// since it's often quite ugly updating in the middle of
+		// for instance a rebase
+		this.changeDispatchBlockers++;
+	}
 	q.set('Accept', 'application/json');
 	q.end(function(error, res) {
+		if (method != 'GET') self.changeDispatchBlockers--;
 		if (error || !res.ok) {
 			// superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
 			if (error && error.crossDomain) {
