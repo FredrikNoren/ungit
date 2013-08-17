@@ -57,8 +57,8 @@ bugsense.notify = function(exception, clientName, callback) {
 
 bugsense.init = function(clientName, skipFindVersion) {
 	process.on('uncaughtException', function(err) {
+		winston.error(err.stack.toString());
 		bugsense.notify(err, clientName, function() {
-			winston.error(err.stack);
 			process.exit();
 		});
 	});
