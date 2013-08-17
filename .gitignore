@@ -30,3 +30,4 @@ node_modules/grunt-contrib-concat/
 node_modules/grunt-contrib-watch/
 node_modules/grunt-lineending/
 node_modules/grunt-release/
+node_modules/grunt-simple-mocha/

@@ -5,7 +5,7 @@
   "version": "0.1.2",
   "scripts": {
     "start": "node ./bin/ungit",
-    "test": "mocha --reporter spec"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -62,7 +62,8 @@
     "grunt-contrib-concat": "0.3.0",
     "grunt-contrib-watch": "0.5.1",
     "grunt-lineending": "0.2.1",
-    "grunt-release": "0.5.1"
+    "grunt-release": "0.5.1",
+    "grunt-simple-mocha": "0.4.0"
   },
   "engines": {
     "node": ">=0.10"
