@@ -56,6 +56,13 @@ module.exports = function(grunt) {
           spawn: false,
         },
       },
+      less: {
+        files: ['public/less/*.less', 'public/styles/*.less'],
+        tasks: ['less:production'],
+        options: {
+          spawn: false,
+        },
+      },
     },
     lineending: {
       // Debian won't accept bin files with the wrong line ending
