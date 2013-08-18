@@ -64,7 +64,12 @@ NodeViewModel = function(args) {
 	this.newBranchName = ko.observable();
 	this.newBranchNameHasFocus = ko.observable(true);
 	this.newBranchNameHasFocus.subscribe(function(newValue) {
-		if (!newValue) self.branchingFormVisible(false);
+		if (!newValue) {
+			// Small timeout because in ff the form is hidden before the submit click event is registered otherwise
+			setTimeout(function() {
+				self.branchingFormVisible(false);
+			}, 100);
+		}
 	})
 	this.branchingFormVisible = ko.observable(false);
 
