@@ -1,81 +1,8 @@
 
-@import "../vendor/less/bootstrap/bootstrap.less";
-@import "../vendor/less/bootstrap-glyphicons.less";
+// Styles.less
+// This file contains styling that's only used in this app
 
-// -- Bootstrap styling ---
-
-@navbar-bg: #2B3844;
-@font-family-sans-serif: 'Open Sans';
-@body-bg: #252833;
-@progress-bg: rgba(0, 0, 0, 0.2);
-@progress-bar-bg: rgba(0, 0, 0, 0.2);
-@text-color: #D8D8D8;
-@text-muted: #707A85;
-@panel-bg: #3C4653;
-@panel-heading-bg: #2C3541;
-@panel-border: #362C36;
-@list-group-bg: transparent;
-@list-group-hover-bg: rgba(0, 0, 0, 0.1); 
-@list-group-border: #435158;
-@modal-content-bg: @panel-bg;
-@modal-header-border-color: @list-group-border;
-@input-bg: rgba(255, 255, 255, 0.1);
-@btn-default-bg: #556666;
-@link-hover-color: lighten(@link-color, 15%);
-
-.btn {
-	border: 0px;
-	position: relative;
-	.progress {
-		position: absolute;
-		left: 0px;
-		top: 0px;
-		width: 100%;
-		height: 100%;
-		background: transparent;
-		pointer-events:none;
-		.progress-bar {
-			pointer-events:none;
-		}
-	}
-	.glyphicon {
-		font-size: 0.8em;
-		margin-right: 0.1em;
-	}
-	&.btn-large {
-		padding-top: 10px;
-		padding-bottom: 10px;
-	}
-}
-
-.panel {
-	border: 0px;
-}
-
-.form-control {
-	border: 0px;
-	color: rgba(255, 255, 255, 0.8);
-}
-
-.list-group-item {
-	background: rgba(0, 0, 0, 0.09);
-	border: 0px;
-	margin-bottom: 3px;
-}
-
-// -- New generic classes ----
-
-.wide-container {
-	padding-left: 40px;
-	padding-right: 40px;
-}
-
-hr {
-	border: 0px;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-	background: transparent;
-	height: 0px;
-}
+@import "generic.less";
 
 // -- Application specific variables ----
 @logWidth: 450px;
@@ -109,6 +36,10 @@ hr {
 	}
 }
 
+.path {
+	padding-top: 20px;
+}
+
 .fetchButton {
 	position: absolute;
 	margin-top: 20px;
@@ -138,6 +69,8 @@ hr {
 
 	.validationError {
 		display: none;
+		color: #D6542D;
+		padding: 0.25em;
 	}
 	&:hover .validationError {
 		display: inline-block;
