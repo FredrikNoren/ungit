@@ -228,6 +228,14 @@
 
 			<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
 
+				<!-- ko if: remoteErrorPopup -->
+				<div class="alert alert-danger">
+					<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
+					<strong>Remote error!</strong>
+					<span data-bind="text: remoteErrorPopup"></span>
+				</div>
+				<!-- /ko -->
+
 				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 
 				<!-- ko if: staging.inRebase -->
@@ -247,13 +255,6 @@
 					<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
 					<!-- /ko -->
 				</button>
-				<!-- /ko -->
-
-				<!-- ko if: remoteErrorPopup -->
-				<div class="remoteErrorPopup animated bounceInDown">
-					<span data-bind="text: remoteErrorPopup"></span>
-					<a href="#" data-bind="click: closeRemoteErrorPopup">x</a>
-				</div>
 				<!-- /ko -->
 				
 				<!-- ko with: graph -->
