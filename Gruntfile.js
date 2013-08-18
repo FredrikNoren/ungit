@@ -83,7 +83,15 @@ module.exports = function(grunt) {
       },
 
       all: { src: 'test/*.js' }
-    }
+    },
+    // Plato code analysis
+    plato: {
+      all: {
+        files: {
+          'report': ['source/**/*.js', 'public/source/**/*.js'],
+        }
+      },
+    },
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
@@ -92,6 +100,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-plato');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'concat', 'lineending:production']);
