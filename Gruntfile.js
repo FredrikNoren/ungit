@@ -34,7 +34,7 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/styles/styles.less", "public/styles/animate.css"]
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"]
         }
       }
     },

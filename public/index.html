@@ -281,34 +281,34 @@
 							<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
 							</div>
 
-							<div class="refs" data-bind="style: { left: refsX() + 'px' }">
+							<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
 								<!-- ko foreach: branches -->
-								<div class="refbox branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+								<span class="ref branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
 									<img src="images/remoteIcon.png" data-bind="visible: isRemoteBranch">
 									<img src="images/branchIcon.png">
-									<div class="name" data-bind="text: displayName"></div>
-								</div>
+									<span class="name" data-bind="text: displayName"></span>
+								</span>
 								<!-- /ko -->
 
 								<!-- ko foreach: tags -->
-								<div class="refbox tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+								<span class="ref tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
 									<img src="images/remoteIcon.png" data-bind="visible: isRemote">
 									<img src="images/tagIcon.png">
-									<div class="name" data-bind="text: displayName"></div>
-								</div>
+									<span class="name" data-bind="text: displayName"></span>
+								</span>
 								<!-- /ko -->
 
 								<!-- ko foreach: dropareaGraphActions -->
-								<div class="refbox droparea" data-bind="css: style, visible: visible">
+								<span class="graphAction droparea" data-bind="css: style, visible: visible">
 									<span data-bind="text: text"></span>
 									<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave"></div>
 									<!-- ko if: performProgressBar.running -->
 									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
 									<!-- /ko -->
-								</div>
+								</span>
 								<!-- /ko -->
 
-								<div class="refbox newRef" data-bind="css: { editing: branchingFormVisible }">
+								<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
 									<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
 									<!-- ko if: branchingFormVisible -->
 									<form class="form-inline" data-bind="submit: createBranch">
@@ -317,7 +317,7 @@
 										<button class="btn btn-default" data-bind="click: createTag">Tag</button>
 									</form>
 									<!-- /ko -->
-								</div>
+								</span>
 							</div>
 
 						</div>

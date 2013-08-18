@@ -99,7 +99,7 @@
 			}
 		}
 	}
-	
+
 	.files {
 		position: relative;
 		.file {
@@ -147,6 +147,208 @@
 					}
 				}
 			}
+		}
+	}
+
+}
+
+
+.repository {
+	position: relative;
+	height: auto;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
+
+	.gerritIntegration {
+		float: left;
+		width: 300px;
+	}
+
+	.repositoryMain {
+		height: auto;
+		margin-bottom: 1px;
+		padding-bottom: 1px;
+		position: relative;
+		&.sidebarExtended {
+			margin-left: 330px;
+		}
+	}
+}
+
+.repository .graph {
+
+	position: relative;
+	margin-top: 30px;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
+
+	.graphLog {
+		position: relative;
+		display: inline-block;
+		top: -200px;
+		left: (@logWidth + 125px);
+	}
+
+	.nodeContainer {
+		position: absolute;
+		
+		.log {
+			position: absolute;
+			margin-left: 100px;
+			&.hover {
+				z-index: 2;
+				.logEntryBox {
+					box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+					background: #4B5766;
+					top: -25px;
+					left: -5px;
+					.arrowRight {
+						.shadow {
+							display: block;
+						}
+						.arrow {
+							background: url('../images/lightBlueArrowRight.png');
+						}
+					}
+				}
+			}
+
+			.logEntryBox {
+				position: relative;
+				top: -20px;
+				
+				padding: 10px;
+				width: @logWidth;
+				.arrowRight {
+					position: absolute;
+					right: 0px;
+					top: 5px;
+					.shadow {
+						display: none;
+					}
+				}
+				.title {
+					font-size: 1.3em;
+				}
+				.body {
+					white-space: pre;
+					word-wrap: break-word;
+					color: #8F9FA6;
+				}
+			}
+		}
+
+		.node {
+			position: absolute;
+			margin-left: (@logWidth + 130px);
+		}
+
+		.rightSideContainer {
+			position: absolute;
+			margin-left: (@logWidth + 140px);
+			top: -21px;
+			width: 900px;
+			height: 40px;
+		}
+
+		.ref {
+			display: inline-block;
+			opacity: 0.6;
+			cursor: move;
+			margin-left: 5px;
+			margin-right: 15px;
+			margin-top: 9px;
+
+			&.current {
+				font-weight: bold;
+				opacity: 1;
+			}
+			&.remote {
+				color: #89BCE8;
+				opacity: 0.3;
+			}
+			&.tag {
+				color: #EEF266;
+			}
+		}
+
+		.graphAction {
+			color: #fff;
+			opacity: 0.9;
+			&.push {
+				background: rgb(61, 139, 255);
+			}
+			&.pull {
+				background: #26BDBD;
+			}
+			&.reset {
+				background: rgb(255, 129, 31);
+			}
+			&.rebase {
+				background: #41DE3C;
+			}
+			&.move {
+				background: rgba(0, 0, 0, 0.1);
+			}
+			&.merge {
+				background: #D087D4;
+			}
+			&.checkout {
+				background: #CDDB37;
+			}
+			&.delete {
+				background: #D64D38;
+			}
+		}
+
+		.newRef {
+			opacity: 1;
+			padding-top: 2px;
+			padding-bottom: 2px;
+			margin-left: 5px;
+			.showBranchingForm {
+				background: transparent;
+				border: 0px;
+				cursor: pointer;
+				padding: 0px;
+				margin: 0px;
+				margin-top: 9px;
+				color: rgba(255, 255, 255, 0.1);
+				&:hover {
+					color: rgba(255, 255, 255, 0.7);
+				}
+			}
+			.form-inline {
+				display: inline-block;
+			}
+			input.name {
+				width: 150px;
+			}
+		}
+		
+
+	}
+
+	.daySeparators {
+		position: absolute;
+		top: -15px;
+		left: 0px;
+		.daySeparator {
+			position: absolute;
+			font-size: 1.1em;
+			color: #364B53;
+			text-shadow: 1px 1px rgb(21, 28, 41);
+			width: 70px;
+			padding: 5px;
+		}
+	}
+
+	.graphFooter {
+		height: 60px;
+		.progressBar {
+			position: relative;
+			top: -150px;
+			margin-left: (@logWidth);
 		}
 	}
 

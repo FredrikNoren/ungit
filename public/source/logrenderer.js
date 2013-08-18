@@ -71,7 +71,7 @@ logRenderer.render = function(element, graph) {
 	// Rebase
 	var rebaseNodes = {}
 	var rebasePath;
-	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'rebase') {
 		var ref = graph.hoverGraphAction().ref();
 		var onto = graph.hoverGraphAction().onto();
 		if (ref && onto) {
@@ -138,7 +138,7 @@ logRenderer.render = function(element, graph) {
 	context.lineWidth = 7;
 
 	// Draw push lines
-	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'push') {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'push') {
 		var local = graph.hoverGraphAction().ref();
 		if (local) {
 			var remote = local.remoteRef();
@@ -159,7 +159,7 @@ logRenderer.render = function(element, graph) {
 	// Draw reset lines
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
-	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'reset') {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'reset') {
 		var local = graph.hoverGraphAction().ref();
 		if (local) {
 			var remote = local.remoteRef();
@@ -173,7 +173,7 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw rebase lines
-	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'rebase') {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'rebase') {
 		var ref = graph.hoverGraphAction().ref();
 		var onto = graph.hoverGraphAction().onto();
 		if (ref && onto) {
@@ -213,7 +213,7 @@ logRenderer.render = function(element, graph) {
 	}
 
 	// Draw merge lines
-	if (graph.hoverGraphAction() && graph.hoverGraphAction().visualization == 'merge') {
+	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'merge') {
 		var ref = graph.hoverGraphAction().ref();
 		var mergeWith = graph.hoverGraphAction().mergeWith();
 		if (ref && mergeWith) {
