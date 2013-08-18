@@ -199,16 +199,10 @@
 
 <script type="text/html" id="fileDiff">
 	<table class="fileDiff" data-bind="foreach: $data">
-		<tr data-bind="css: { added: added, removed: removed }">
-			<td class="lineNumbers old-line">
-				<span class="lineNumber" data-bind="text: oldLineNumber"></span>&nbsp;
-			</td>
-			<td class="lineNumbers new-line">
-				<span class="lineNumber" data-bind="text: newLineNumber"></span>&nbsp;
-			</td>
-			<td class="diffs">
-				<span class="diff" data-bind="text: text, css: { added: added, removed: removed }"></span>&nbsp;
-			</td>
+		<tr data-bind="css: { fileDiffAdded: added, fileDiffRemoved: removed }">
+			<td class="fileDiffLineNumbers" data-bind="text: oldLineNumber"></td>
+			<td class="fileDiffLineNumbers" data-bind="text: newLineNumber"></td>
+			<td class="fileDiffContent" data-bind="text: text"></td>
 		</tr>
 	</table>
 </script>
