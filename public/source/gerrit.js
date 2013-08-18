@@ -76,6 +76,7 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 	this.ownerName = args.owner.name;
 	this.sha1 = args.sha1;
 	this.data = args;
+	this.gerritUrl = this.data.url;
 	this.checkingOutProgressBar = new ProgressBarViewModel('gerrit-checkout-' + repository.repoPath, 4000);
 	this.cherryPickingProgressBar = new ProgressBarViewModel('gerrit-cherry-pick-' + repository.repoPath, 4000);
 };
@@ -96,8 +97,4 @@ GerritChangeViewModel.prototype.cherryPick = function() {
 			self.cherryPickingProgressBar.stop();
 		});
 	});
-}
-GerritChangeViewModel.prototype.openInGerrit = function() {
-	var win = window.open(this.data.url, '_blank');
-  win.focus();
 }

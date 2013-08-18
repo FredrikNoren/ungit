@@ -381,7 +381,7 @@
 				<div data-bind="foreach: changes">
 					<p>
 						<hr>
-						<h4><a href="#" data-bind="text: subject, click: openInGerrit"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
+						<h4><a href="#" data-bind="text: subject, attr: { href: gerritUrl }" target="_blank"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
 						<button class="btn btn-primary" data-bind="click: checkout">
 							Checkout
 							<!-- ko if: checkingOutProgressBar.running -->
