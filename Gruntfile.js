@@ -67,8 +67,13 @@ module.exports = function(grunt) {
     lineending: {
       // Debian won't accept bin files with the wrong line ending
       production: {
-        '/bin/ungit': ['/bin/ungit'],
-        '/bin/credentials-helper': ['/bin/credentials-helper']
+        options: {
+          eol: 'lf'
+        },
+        files: {
+          './bin/ungit': ['./bin/ungit'],
+          './bin/credentials-helper': ['./bin/credentials-helper']
+        }
       },
     },
     release: {
