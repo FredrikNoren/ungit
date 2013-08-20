@@ -10,6 +10,8 @@ The easiest way to use git. On any platform. Anywhere.
  * Works well with GitHub.
  * Gerrit integration (view, checkout and push changes from/to gerrit).
 
+![](/screenshot.png)
+
 Installing
 ----------
 Requires [node.js](http://nodejs.org) and [git](http://git-scm.com/).
