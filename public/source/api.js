@@ -3,12 +3,30 @@ var Api = function() {
 	this.connected = new signals.Signal();
 	this.disconnected = new signals.Signal();
 	this.repositoryChanged = new signals.Signal();
-	this.changeDispatchBlockers = 0;
+	this._changeDispatchBlockers = 0;
+	this._triedToDispatchWhileBlocked = false;
 	this.getCredentialsHandler = function() { throw new Error("Not implemented"); }
 	this._initSocket();
 }
+Api.prototype._incChangeEventBlock = function() {
+	if (this._changeDispatchBlockers == 0) this._triedToDispatchWhileBlocked = false;
+	// Block change events while we're doing this
+	// since it's often quite ugly updating in the middle of
+	// for instance a rebase
+	this._changeDispatchBlockers++;
+}
+Api.prototype._decChangeEventBlock = function() {
+	this._changeDispatchBlockers--;
+	if (this._changeDispatchBlockers == 0 && this._triedToDispatchWhileBlocked) {
+		this._triedToDispatchWhileBlocked = false;
+		this.repositoryChanged.dispatch({ repository: null });
+	}
+}
 Api.prototype._dispatchChangeEvent = function(data) {
-	if (this.changeDispatchBlockers > 0) return;
+	if (this._changeDispatchBlockers > 0) {
+		this._triedToDispatchWhileBlocked = true;
+		return;
+	}
 	this.repositoryChanged.dispatch(data);
 }
 Api.prototype._initSocket = function() {
@@ -55,14 +73,11 @@ Api.prototype.query = function(method, path, body, callback) {
 		q.query(body);
 	else {
 		q.send(body);
-		// Block change events while we're doing this
-		// since it's often quite ugly updating in the middle of
-		// for instance a rebase
-		this.changeDispatchBlockers++;
+		this._incChangeEventBlock();
 	}
 	q.set('Accept', 'application/json');
 	q.end(function(error, res) {
-		if (method != 'GET') self.changeDispatchBlockers--;
+		if (method != 'GET') self._decChangeEventBlock();
 		if (error || !res.ok) {
 			// superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
 			if (error && error.crossDomain) {

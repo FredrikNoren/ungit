@@ -28,7 +28,7 @@ var RepositoryViewModel = function(main, repoPath) {
 			self.update();
 			self.fetch();
 			api.repositoryChanged.add(function(data) {
-				if (data.repository == self.repoPath) {
+				if (!data.repository || data.repository == self.repoPath) {
 					self.update();
 				}
 			});
