@@ -14,7 +14,7 @@ The easiest way to use git. On any platform. Anywhere.
 
 Installing
 ----------
-Requires [node.js](http://nodejs.org) and [git](http://git-scm.com/).
+Requires [node.js](http://nodejs.org) (≥ 0.10), [npm](https://npmjs.org/) (≥ 1.3.1) and [git](http://git-scm.com/).
 
 	npm install -g ungit
 
