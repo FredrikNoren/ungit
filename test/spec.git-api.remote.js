@@ -21,6 +21,7 @@ var req = request(app);
 
 describe('git-api remote', function () {
 
+	this.timeout(4000);
 
 	it('creating test dirs should work', function(done) {
 		async.parallel([

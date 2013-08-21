@@ -172,7 +172,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			});
 		} else {
 			git('checkout -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
-				if (err !== null) {
+				if (err) {
 					if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
 						fs.unlink(path.join(req.param('path'), req.body.file), function(err) {
 							if (err) res.json(400, { command: 'unlink', error: err });
@@ -217,22 +217,25 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 				function(done) {
 					if (toAdd.length == 0) done();
 					else {
-						var process = git('update-index --add --stdin', req.param('path'), undefined, done);
-						var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-						process.stdin.end(filesToAdd);
+						git('update-index --add --stdin', req.param('path'), undefined, done, function(process) {
+							var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+							process.stdin.end(filesToAdd);
+						});
 					}
 				},
 				function(done) {
 					if (toRemove.length == 0) done();
 					else {
-						var process = git('update-index --remove --stdin', req.param('path'), undefined, done);
-						var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-						process.stdin.end(filesToRemove);
+						git('update-index --remove --stdin', req.param('path'), undefined, done, function(process) {
+							var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+							process.stdin.end(filesToRemove);
+						});
 					}
 				}
 			], function() {
-				var process = git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
-				process.stdin.end(req.body.message);
+				git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
+					process.stdin.end(req.body.message);
+				});
 			});
 		});
 	});

@@ -32,6 +32,9 @@ var defaultConfig = {
 	// Set to false to show rebase and merge on drag and drop on all nodes.
 	showRebaseAndMergeOnlyOnRefs: true,
 
+	// Maximum number of concurrent git operations
+	maxConcurrentGitOperations: 4,
+
 	// Used for development purposes.
 	dev: false,
 };
