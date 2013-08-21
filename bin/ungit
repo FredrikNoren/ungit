@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var forever = require('forever-monitor');
 var config = require('../source/config')();
-var child_process = require('child_process');
+var open = require('open');
 var path = require('path');
 
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
@@ -19,7 +19,7 @@ function startupListener(data) {
 	if (data.toString().indexOf('## Ungit started ##') >= 0) {
 		var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
 		console.log('Browse to ' + currentUrl);
-		child_process.exec('start ' + currentUrl);
+		open(currentUrl);
 		child.removeListener('stdout', startupListener);
 	}
 }
