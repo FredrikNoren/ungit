@@ -19,8 +19,6 @@ Installing
 Requires [node.js](http://nodejs.org) (≥ 0.10), [npm](https://npmjs.org/) (≥ 1.3.1) and [git](http://git-scm.com/).
 
 	npm install -g ungit
-	
-If you decide to install by cloning the repo, make sure to run `npm install` then  `grunt` after cloning (to fetch dependancies, build concatanated files and compile less). If you haven't already, you can install grunt by running `npm install -g grunt-cli`.
 
 Using
 -----
@@ -46,6 +44,13 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 	"bugtracking": true
 }
 ```
+
+Developing
+----------
+
+If you decide to install by cloning the repo, make sure to run `npm install` then  `grunt` after cloning (to fetch dependancies, build concatanated files and compile less). If you haven't already, you can install grunt by running `npm install -g grunt-cli`.
+
+Once you've done that, you can start ungit by running `npm start`. Run the tests with `npm test`.
 
 License (MIT)
 -------------
