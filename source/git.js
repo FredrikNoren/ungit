@@ -12,7 +12,7 @@ var git = function(command, repoPath, parser, callback) {
   return child_process.exec(command, { cwd: repoPath, maxBuffer: 1024 * 1024 * 10 },
     function (error, stdout, stderr) {
       if (error !== null) {
-        var err = { errorCode: 'unkown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
+        var err = { errorCode: 'unknown', command: command, error: error.toString(), stderr: stderr, stdout: stdout };
         if (stderr.indexOf('Not a git repository') >= 0)
           err.errorCode = 'not-a-repository';
         else if (err.stderr.indexOf('Connection timed out') != -1)
