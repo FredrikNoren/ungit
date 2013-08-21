@@ -10,6 +10,8 @@ The easiest way to use git. On any platform. Anywhere.
  * Works well with GitHub.
  * Gerrit integration (view, checkout and push changes from/to gerrit).
 
+Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
+
 ![](/screenshot.png)
 
 Installing
