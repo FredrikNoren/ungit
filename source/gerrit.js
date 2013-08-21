@@ -64,7 +64,7 @@ gerrit = function(remote, command, res, callback) {
   command = 'gerrit ' + command;
   ssh2(remote, command, function(error, result) {
     if (error) {
-      var err = { errorCode: 'unkown', command: command, error: error.toString() };
+      var err = { errorCode: 'unknown', command: command, error: error.toString() };
       if (!callback || !callback(err, result)) {
         res.json(400, err);
       }

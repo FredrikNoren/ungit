@@ -69,16 +69,16 @@ Api.prototype.query = function(method, path, body, callback) {
 				self._onDisconnect();
 				return;
 			}
-			var errorSummary = 'unkown';
+			var errorSummary = 'unknown';
 			if (res) {
 				if (res.body) {
-					if (res.body.errorCode && res.body.errorCode != 'unkown') errorSummary = res.body.errorCode;
+					if (res.body.errorCode && res.body.errorCode != 'unknown') errorSummary = res.body.errorCode;
 					else if (typeof(res.body.error) == 'string') errorSummary = res.body.error.split('\n')[0];
 					else errorSummary = JSON.stringify(res.body.error);
 				}
 				else errorSummary = res.xhr.statusText + ' ' + res.xhr.status;
 			}
-			var err = { errorSummary: errorSummary, error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unkown' };
+			var err = { errorSummary: errorSummary, error: error, res: res, errorCode: res && res.body ? res.body.errorCode : 'unknown' };
 			if (callback && callback(err)) return;
 			else {
 				if (ungit.config.bugtracking)
