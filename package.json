@@ -32,7 +32,8 @@
     "passport-local": "0.1.6",
     "npm": "1.3.1",
     "semver": "2.0.8",
-    "forever-monitor": "1.1.0"
+    "forever-monitor": "1.1.0",
+    "open": "0.0.4"
   },
   "bundledDependencies": [
     "express",
@@ -51,7 +52,8 @@
     "passport-local",
     "npm",
     "semver",
-    "forever-monitor"
+    "forever-monitor",
+    "open"
   ],
   "devDependencies": {
     "mocha": "1.11.0",
