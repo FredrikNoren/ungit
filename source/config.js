@@ -1,4 +1,3 @@
-
 var rc = require('rc');
 
 var defaultConfig = {
@@ -13,10 +12,10 @@ var defaultConfig = {
 	logDirectory: null,
 
 	// This will automatically send anonymous bug reports.
-	bugtracking: true,
+	bugtracking: false,
 
 	// Google analytics for usage statistics.
-	googleAnalytics: true,
+	googleAnalytics: false,
 
 	// True to enable authentication. Users are defined in the users configuration property.
 	authentication: false,
