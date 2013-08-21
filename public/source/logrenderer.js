@@ -21,7 +21,7 @@ logRenderer.drawArrowLine = function(context, startPosition, endPosition, arrowS
 	context.lineTo(startPosition.x, startPosition.y);
 	context.stroke();
 	context.beginPath();
-	context.setLineDash(undefined);
+	context.setLineDash([]);
 	context.translate(endPosition.x, endPosition.y);
 	context.rotate(-startPosition.sub(endPosition).angleXY());
 	context.moveTo(-arrowSize, arrowSize);
@@ -83,7 +83,7 @@ logRenderer.render = function(element, graph) {
 
 	// Draw lines
 	context.strokeStyle = "#4A4A4A";
-	context.setLineDash(undefined);
+	context.setLineDash([]);
 	context.lineWidth = 8;
 	context.beginPath();
 	nodes.forEach(function(node) {
@@ -110,7 +110,7 @@ logRenderer.render = function(element, graph) {
 	}
 	
 	// Draw nodes
-	context.setLineDash(undefined);
+	context.setLineDash([]);
 	nodes.forEach(function(node) {
 		if (rebaseNodes[node.sha1])
 			context.fillStyle = "#bbbbbb";
@@ -163,7 +163,7 @@ logRenderer.render = function(element, graph) {
 		var local = graph.hoverGraphAction().ref();
 		if (local) {
 			var remote = local.remoteRef();
-			context.setLineDash(null);
+			context.setLineDash([]);
 			context.strokeStyle = "rgb(255, 129, 31)";
 
 			context.beginPath();
@@ -178,7 +178,7 @@ logRenderer.render = function(element, graph) {
 		var onto = graph.hoverGraphAction().onto();
 		if (ref && onto) {
 			if (onto instanceof RefViewModel) onto = onto.node();
-			context.setLineDash(null);
+			context.setLineDash([]);
 			context.lineWidth = 3;
 			context.strokeStyle = "#41DE3C";
 
