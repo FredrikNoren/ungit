@@ -183,6 +183,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
 		fileViewModel.conflict(files[file].conflict);
+		fileViewModel.invalidateDiff();
 		newFiles.push(fileViewModel);
 	}
 	this.files(newFiles);
