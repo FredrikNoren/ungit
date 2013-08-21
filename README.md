@@ -28,6 +28,14 @@ Configure
 ---------
 Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on *nix, `C:/Users/USERNAME/` on windows). Can be in either json or ini format. See source/config.js for available options.
 
+Example of `~/.ungitrc` configuration file to change default port:
+
+```json
+{
+	"port": 8080
+}
+```
+
 License (MIT)
 -------------
 
