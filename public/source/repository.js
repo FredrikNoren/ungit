@@ -214,6 +214,16 @@ StagingViewModel.prototype.commit = function() {
 	var commitMessage = this.commitMessageTitle();
 	if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 	api.query('POST', '/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
+		if (err) {
+			if (err.errorCode == 'no-git-name-email-configured') {
+				self.repository.main.content(new UserErrorViewModel({
+					title: 'Git email and/or name not configured',
+					details: 'You need to configure your git email and username to commit files.<br> Run <code>git config --global user.name "your name"</code> and <code>git config --global user.email "your@email.com"</code>'
+				}));
+				return true;
+			}
+			return;
+		}
 		self.commitMessageTitle('');
 		self.commitMessageBody('');
 		self.amend(false);
