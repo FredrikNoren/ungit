@@ -74,6 +74,10 @@ RepositoryViewModel.prototype.fetch = function() {
 				}));
 				return true;
 			}
+			if (err.errorCode == 'offline') {
+				self.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
+				return true;
+			}
 		}
 	});
 }

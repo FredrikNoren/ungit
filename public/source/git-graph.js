@@ -73,6 +73,10 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 				self.repository.remoteErrorPopup('Permission denied (publickey).');
 				return true;
 			}
+			if (err.errorCode == 'offline') {
+				self.repository.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
+				return true;
+			}
 			if (err.stderr && err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) return true;
 			return;
 		}

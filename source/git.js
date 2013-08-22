@@ -21,6 +21,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'permision-denied-publickey';
         else if (err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
           err.errorCode = 'conflict';
+        else if (err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1)
+          err.errorCode = 'offline';
         task.error = err;
         callback(err);
       }
