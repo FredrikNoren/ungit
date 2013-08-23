@@ -8,7 +8,7 @@ var child_process = require('child_process');
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
 	silent: false,
 	minUptime: 2000,
-	cwd: path.join(__dirname, '..'),
+	cwd: path.join(process.cwd(), '..'),
 	options: []
 });
 
