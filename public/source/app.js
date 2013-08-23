@@ -23,6 +23,7 @@ var MainViewModel = function() {
 	this.currentVersion = ko.observable();
 	this.latestVersion = ko.observable();
 	this.newVersionAvailable = ko.observable();
+	this.showBugtrackingNagscreen = ko.observable(!ungit.config.bugtracking && !localStorage.getItem('bugtrackingNagscreenDismissed'));
 	this.programEvents = new signals.Signal();
 	this.programEvents.add(function(event) {
 		console.log('Event:', event);
@@ -70,6 +71,24 @@ MainViewModel.prototype.showDialog = function(dialog) {
 		self.dialog(null);
 	})
 	this.dialog(dialog);
+}
+MainViewModel.prototype.enableBugtrackingAndStatistics = function() {
+	var self = this;
+	api.query('POST', '/enablebugtrackingandstats', undefined, function(err) {
+		if (err) return;
+		self.showBugtrackingNagscreen(false);
+	});
+}
+MainViewModel.prototype.enableBugtracking = function() {
+	var self = this;
+	api.query('POST', '/enablebugtracking', undefined, function(err) {
+		if (err) return;
+		self.showBugtrackingNagscreen(false);
+	});
+}
+MainViewModel.prototype.dismissBugtrackingNagscreen = function() {
+	this.showBugtrackingNagscreen(false);
+	localStorage.setItem('bugtrackingNagscreenDismissed', true);
 }
 MainViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';

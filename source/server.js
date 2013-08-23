@@ -11,6 +11,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var semver = require('semver');
 var path = require('path');
+var fs = require('fs');
 
 if (config.logDirectory)
 	winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
@@ -122,8 +123,50 @@ config.users = null; // So that we don't send the users to the client
 			});
 		});
 	});
+
 	app.get('/api/ping', function(req, res) {
 		res.json({});
+	});
+
+	function getUserHome() {
+		return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+	}
+	var userConfigPath = path.join(getUserHome(), '.ungitrc');
+	function readUserConfig(callback) {
+		fs.exists(userConfigPath, function(hasConfig) {
+			if (!hasConfig) return callback(null, {});
+
+			fs.readFile(userConfigPath, function(err, content) {
+				if (err) return callback(err);
+				else callback(null, JSON.parse(content.toString()));
+			});
+		});
+	}
+	function writeUserConfig(configContent, callback) {
+		fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2), callback);
+	}
+
+	app.post('/api/enablebugtracking', ensureAuthenticated, function(req, res) {
+		readUserConfig(function(err, userConfig) {
+			if (err) throw err;
+			userConfig.bugtracking = true;
+			writeUserConfig(userConfig, function(err) {
+				if (err) throw err;
+				res.json({});
+			});
+		});
+	});
+
+	app.post('/api/enablebugtrackingandstats', ensureAuthenticated, function(req, res) {
+		readUserConfig(function(err, userConfig) {
+			if (err) throw err;
+			userConfig.bugtracking = true;
+			userConfig.googleAnalytics = true;
+			writeUserConfig(userConfig, function(err) {
+				if (err) throw err;
+				res.json({});
+			});
+		});
 	});
 
 	// Error handling
