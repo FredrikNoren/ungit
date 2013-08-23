@@ -13,7 +13,8 @@ results
 
 npm-debug.log
 
-node_modules/
+public/css/
+public/js/ungit.js
 
 .ungitrc
 
