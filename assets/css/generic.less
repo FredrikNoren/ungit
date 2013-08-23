@@ -3,15 +3,15 @@
 // This file can be used to style any page to look like "ungit", i.e. anything that's not
 // application specific goes here.
 
-@import "../components/bootstrap/less/bootstrap.less";
-@import "bootstrap-glyphicons.less";
-
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
   src: local('Open Sans'), local('OpenSans'), url('../fonts/OpenSans.woff') format('woff');
 }
+
+@import "../components/bootstrap/less/bootstrap.less";
+@import "bootstrap-glyphicons.less";
 
 // -- Bootstrap styling ---
 
@@ -61,6 +61,7 @@
 }
 
 .panel {
+	padding: 15px;
 	border: 0px;
 }
 
@@ -122,13 +123,13 @@ hr {
 		position: absolute;
 		left: 5px;
 		top: 5px;
-		background: url('../images/shadowArrowRight.png');
+		background: url('../img/shadowArrowRight.png');
 	}
 	.arrow {
 		position: absolute;
 		left: 0px;
 		top: 0px;
-		background: url('../images/blueArrowRight.png');
+		background: url('../img/blueArrowRight.png');
 	}
 }
 

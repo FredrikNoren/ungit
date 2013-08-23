@@ -38,7 +38,7 @@
 	<div class="container">
 		<div class="panel crash">
 			<h1 data-bind="text: title"></h1>
-			<span data-bind="html: details"></span>
+			<span data-bind="text: details"></span>
 		</div>
 	</div>
 </script>
@@ -177,8 +177,8 @@
 						<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
 							&#10003;
 						</div>
-						<button class="name btn btn-default" data-bind="click: toogleDiffs">
-							<span data-bind="text: name"></span>
+						<button class="name btn btn-default">
+							<span data-bind="text: name, click: toogleDiffs"></span>
 							<!-- ko if: diffsProgressBar.running -->
 							<!-- ko template: { name: 'progressBar', data: diffsProgressBar } --><!-- /ko -->
 							<!-- /ko -->
@@ -510,8 +510,8 @@
 <script type="text/javascript" src="/js/uuid.js"></script>
 <script type="text/javascript" src="/js/moment.js"></script>
 <script type="text/javascript" src="/js/underscore.js"></script>
-<script type="text/javascript" src="/components/bootstrap-stylus/js/bootstrap-modal.js"></script>
-<script type="text/javascript" src="/components/bootstrap-stylus/js/bootstrap-alert.js"></script>
+<script type="text/javascript" src="/components/bootstrap/js/modal.js"></script>
+<script type="text/javascript" src="/components/bootstrap/js/alert.js"></script>
 <script type="text/javascript" src="/js/utils.js"></script>
 <script type="text/javascript" src="/js/api.js"></script>
 <script type="text/javascript" src="/js/git-graph-actions.js"></script>
