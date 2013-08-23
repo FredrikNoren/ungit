@@ -2,7 +2,7 @@ ungit
 ======
 [![NPM version](https://badge.fury.io/js/ungit.png)](http://badge.fury.io/js/ungit)
 
-The easiest way to use git. On any platform. Anywhere.
+The easiest way to use git. On any platform supporting node.js. Anywhere node.js is installed.
 
  * Clean and intuitive UI that makes it easy to _understand_ git.
  * Runs on any platform that node.js & git supports.
