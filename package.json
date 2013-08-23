@@ -35,26 +35,6 @@
     "forever-monitor": "1.1.0",
     "open": "0.0.4"
   },
-  "bundledDependencies": [
-    "express",
-    "superagent",
-    "underscore",
-    "temp",
-    "watchr",
-    "socket.io",
-    "moment",
-    "async",
-    "ssh2",
-    "rc",
-    "uuid",
-    "winston",
-    "passport",
-    "passport-local",
-    "npm",
-    "semver",
-    "forever-monitor",
-    "open"
-  ],
   "devDependencies": {
     "mocha": "1.11.0",
     "expect.js": "0.2.0",
