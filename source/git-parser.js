@@ -146,7 +146,7 @@ exports.parseGitLog = function(data) {
 	rows.forEach(function(row, index) {
 		parser(row, index);
 	});
-	commits.forEach(function(commit) { commit.message = commit.message.trim(); });
+	commits.forEach(function(commit) { commit.message = (typeof commit.message) === 'string' ? commit.message.trim() : ''; });
 	return commits;
 };
 
