@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 var forever = require('forever-monitor');
-var config = require('../source/config')();
+var config = require('../server/config')();
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 
-var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
+var child = new (forever.Monitor)(path.join(__dirname, '..', 'server', 'server.js'), {
 	silent: false,
 	minUptime: 2000,
 	cwd: path.join(process.cwd(), '..'),

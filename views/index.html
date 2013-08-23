@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="shortcut icon" href="/favicon.ico" >
+	<title>ungit</title>
+</head>
+<body>
+
+<script type="text/html" id="home">
+	<div class="container home">
+		<p class="text-center">
+			<img src="img/logoLarge.png" class="logo">
+		</p>
+		
+		<div class="panel">
+			<h2>Recent repositories</h2>
+			<div class="list-group" data-bind="foreach: repos">
+				<a class="list-group-item" data-bind="text: title, attr: { href: link }"></a>
+			</div>
+		</div>
+		
+	</div>
+</script>
+
+<script type="text/html" id="crash">
+	<div class="container">
+		<div class="panel crash">
+			<h1>Whooops</h1>
+			Something went wrong, reload the page to start over.
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="usererror">
+	<div class="container">
+		<div class="panel crash">
+			<h1 data-bind="text: title"></h1>
+			<span data-bind="text: details"></span>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="login">
+
+	<div data-bind="visible: status() == 'loading'">
+	</div>
+
+	<div class='login' data-bind="visible: status() == 'login'">
+		<h1>Login</h1>
+		<div class="loginError" data-bind="text: loginError"></div>
+		<form data-bind="submit: login">
+			<div>Username: <input type="text" data-bind="value: username"></div>
+			<div>Password: <input type="password" data-bind="value: password"></div>
+			<input type="submit" class="btn btn-primary" value="Login">
+		</form>
+	</div>
+</script>
+
+
+<script type="text/html" id="path">
+	<div class="path" data-bind="shown: shown">
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
+			<!-- ko template: { name: 'progressBar', data: loadingProgressBar } --><!-- /ko -->
+		</div>
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'cloning'">
+			<h2>Cloning...</h2>
+			<!-- ko template: { name: 'progressBar', data: cloningProgressBar } --><!-- /ko -->
+		</div>
+		
+		<div class="uninited" data-bind="visible: status() == 'uninited'">
+			<div class="container">
+				<h1>Not a repository</h1>
+				<p>There is no repository at the selected path.</p>
+				<div class="row">
+					<div class="col-lg-6">
+						<div class="panel">
+							<div class="panel-heading">Create a new repository</div>
+							<button class="btn btn-primary btn-large" data-bind='click: initRepository'>Initialize a repository here!</button>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="panel">
+							<div class="panel-heading">Clone a repository</div>
+							<form data-bind="submit: cloneRepository">
+								<div class="form-group">
+									<label for="cloneFromInput">Clone from</label>
+									<input class="form-control" type="text" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
+								</div>
+								<div class="form-group">
+									<label for="cloneToInput">to</label>
+									<input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
+								</div>
+								<input type="submit" class="btn btn-primary btn-large" value="Clone repository!">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+
+		<div class="invalidpath" data-bind="visible: status() == 'invalidpath'">
+			<div>"<span data-bind="text: path"></span>" is not a valid path.</div>
+		</div>
+
+		<!-- ko if: repository -->
+		<div data-bind="template: { name: 'repository', data: repository }">
+		</div>
+		<!-- /ko -->
+
+	</div>
+</script>
+
+
+<script type="text/html" id="staging">
+	<div class="staging panel" data-bind="css: { commitValidationError: commitValidationError }">
+		<div class="arrowContainer arrowDown">
+			<div class="arrow"></div>
+		</div>
+		<div data-bind="visible: showNux">
+		Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
+		</div>
+		<div class="row" data-bind="visible: !showNux()">
+			<div class="col-lg-3">
+				<input class="form-control" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+				<textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
+				<div>
+					<span data-bind="text: stats"></span> - 
+					<a href="#" data-bind="click: discardAllChanges">Discard all</a>
+					<span class="amend" data-bind="visible: canAmend">
+						- 
+						<span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+						<a href="#" data-bind="click: toogleAmend">Amend last commit</a>
+					</span>
+				</div>
+				
+				<button class="btn btn-primary btn-large" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+					Commit
+					<!-- ko if: committingProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+					Continue rebase
+					<!-- ko if: rebaseContinueProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
+					Abort rebase
+					<!-- ko if: rebaseAbortProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
+					Continue merge
+					<!-- ko if: mergeContinueProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: mergeContinueProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
+					Abort merge
+					<!-- ko if: mergeAbortProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: mergeAbortProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+			</div>
+			<div class="col-lg-9">
+				<div class="files" data-bind="foreach: files">
+					<div class="file" data-bind="css: { showingDiffs: showingDiffs }">
+						<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
+							&#10003;
+						</div>
+						<button class="name btn btn-default">
+							<span data-bind="text: name, click: toogleDiffs"></span>
+							<!-- ko if: diffsProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: diffsProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
+						<span class="new" data-bind="visible: isNew">New</span>
+						<span class="deleted" data-bind="visible: removed">Removed</span>
+						<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
+						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+						<!-- ko if: showingDiffs -->
+						<div class="diffContainer" data-bind="template: { name: 'fileDiff', data: diffs }"></div>
+						<!-- /ko -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="fileDiff">
+	<table class="fileDiff" data-bind="foreach: $data">
+		<tr data-bind="css: { fileDiffAdded: added, fileDiffRemoved: removed }">
+			<td class="fileDiffLineNumbers" data-bind="text: oldLineNumber"></td>
+			<td class="fileDiffLineNumbers" data-bind="text: newLineNumber"></td>
+			<td class="fileDiffContent" data-bind="text: text"></td>
+		</tr>
+	</table>
+</script>
+
+<script type="text/html" id="repository">
+	<div class="repository">
+
+		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
+			Loading...
+		</div>
+		
+		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
+
+			<!-- ko if: gerritIntegration -->
+			<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+			<!-- /ko -->
+
+			<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
+
+				<!-- ko if: remoteErrorPopup -->
+				<div class="alert alert-danger">
+					<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
+					<strong>Remote error!</strong>
+					<span data-bind="text: remoteErrorPopup"></span>
+				</div>
+				<!-- /ko -->
+
+				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
+
+				<!-- ko if: staging.inRebase -->
+				<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+				<!-- /ko -->
+				<!-- ko if: staging.inMerge -->
+				<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
+				<!-- /ko -->
+
+				<!-- ko if: showLog -->
+
+				<!-- ko if: showFetchButton -->
+				<button class="fetchButton btn btn-default" data-bind="click: fetch, disable: fetchingProgressBar.running">
+					<span class="glyphicon glyphicon-refresh"></span>
+					Fetch remote nodes
+					<!-- ko if: fetchingProgressBar.running -->
+					<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
+					<!-- /ko -->
+				</button>
+				<!-- /ko -->
+				
+				<!-- ko with: graph -->
+				<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
+
+					<div class="daySeparators" data-bind="foreach: daySeparators">
+						<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+							<div class="dateLabel" data-bind="text: date"></div>
+						</div>
+					</div>
+
+					<div class="graphLog" data-bind="graphLog: $data">
+					</div>
+					
+					<div class="nodes" data-bind="foreach: nodes">
+						<div class="nodeContainer" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+							<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
+								<div class="logEntryBox panel">
+									<div class="arrowContainer arrowRight">
+										<div class="shadow"></div>
+										<div class="arrow"></div>
+									</div>
+									<div class="title" data-bind="text: title"></div>
+									<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
+									<div class="text-muted" data-bind="text: authorDate"></div>
+									<a class="text-muted" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+								</div>
+							</div>
+
+							<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+							</div>
+
+							<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
+								<!-- ko foreach: branches -->
+								<span class="ref branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+									<img src="img/remoteIcon.png" data-bind="visible: isRemoteBranch">
+									<img src="img/branchIcon.png">
+									<span class="name" data-bind="text: displayName"></span>
+								</span>
+								<!-- /ko -->
+
+								<!-- ko foreach: tags -->
+								<span class="ref tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+									<img src="img/remoteIcon.png" data-bind="visible: isRemote">
+									<img src="img/tagIcon.png">
+									<span class="name" data-bind="text: displayName"></span>
+								</span>
+								<!-- /ko -->
+
+								<!-- ko foreach: dropareaGraphActions -->
+								<span class="graphAction droparea" data-bind="css: style, visible: visible">
+									<span data-bind="text: text"></span>
+									<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave"></div>
+									<!-- ko if: performProgressBar.running -->
+									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
+									<!-- /ko -->
+								</span>
+								<!-- /ko -->
+
+								<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+									<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+									<!-- ko if: branchingFormVisible -->
+									<form class="form-inline" data-bind="submit: createBranch">
+										<input class="name form-control" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus">
+										<input class="btn btn-primary" type="submit" value="Branch">
+										<button class="btn btn-default" data-bind="click: createTag">Tag</button>
+									</form>
+									<!-- /ko -->
+								</span>
+							</div>
+
+						</div>
+					</div>
+
+					<div class="graphFooter">
+						<!-- ko if: isLoading -->
+						<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
+						<!-- /ko -->
+					</div>
+
+				</div>
+				<!-- /ko -->
+
+				<!-- /ko -->
+
+			</div>
+
+		</div>
+
+	</div>
+</script>
+
+<script type="text/html" id="progressBar">
+	<div class="progress" data-bind="visible: show, style: style">
+		<!--span data-bind="text: predictionMs"></span-->
+		<div class="progress-bar" data-bind="style: { width: (progress() * 100) + '%' }"></div>
+	</div>
+</script>
+
+<script type="text/html" id="gerritIntegration">
+	<div class="gerritIntegration panel">
+		<div class="panel-heading"><h1>Gerrit</h1></div>
+
+		<p>
+			<button class="btn btn-primary" data-bind="visible: showInitCommmitHook, click: initCommitHook">
+				Init commit hook
+				<!-- ko if: initGerritHookProgressBar.running -->
+				<!-- ko template: { name: 'progressBar', data: initGerritHookProgressBar } --><!-- /ko -->
+				<!-- /ko -->
+			</button>
+		</p>
+
+		<p>
+			<button class="btn btn-primary" data-bind="click: pushForReview">
+				Push changes for review
+				<!-- ko if: pushingProgressBar.running -->
+				<!-- ko template: { name: 'progressBar', data: pushingProgressBar } --><!-- /ko -->
+				<!-- /ko -->
+			</button>
+		</p>
+
+		<div class="changes">
+			<!-- ko if: status() == 'loading' -->
+			<div class="loading">
+			<!-- ko template: { name: 'progressBar', data: changesLoader } --><!-- /ko -->
+			</div>
+			<!-- /ko -->
+			<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
+			<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
+				<div data-bind="foreach: changes">
+					<p>
+						<hr>
+						<h4><a href="#" data-bind="text: subject, attr: { href: gerritUrl }" target="_blank"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
+						<button class="btn btn-primary" data-bind="click: checkout">
+							Checkout
+							<!-- ko if: checkingOutProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
+						<button class="btn btn-default" data-bind="click: cherryPick">
+							Cherry pick
+							<!-- ko if: cherryPickingProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</button>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="credentialsDialog">
+	<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Remote requires authentication</h4>
+				</div>
+				<form class="form-horizontal" data-bind="submit: close">
+					<div class="modal-body">
+						<div class="form-group">
+							<label for="inputUsername" class="col-lg-2 control-label">Username</label>
+							<div class="col-lg-10">
+								<input type="text" class="form-control" id="inputUsername" placeholder="Username" data-bind="value: username" autofocus>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputPassword" class="col-lg-2 control-label">Password</label>
+							<div class="col-lg-10">
+								<input type="password" class="form-control" id="inputPassword" placeholder="Password" data-bind="value: password">
+								</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<input type="submit" class="btn btn-primary" value="Submit">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="main">
+	
+	<div class="navbar navbar-static-top">
+
+		<div class="container container-wide">
+			<a class="navbar-brand" href="/#/"><img src="img/logo.png"></a>
+
+			<div class="row">
+			<form class="navbar-form pull-left" data-bind="submit: submitPath">
+				<div class="col-lg-12">
+				<input type="text" class="form-control input-lg" data-bind="value: path">
+				</div>
+			</form>
+			</div>
+		</div>
+		
+		<img src="img/repositoryBackgroundArrowUp.png" class="arrowUp">
+	</div>
+
+	<div class="container">
+		<div class="alert alert-info" data-bind="visible: newVersionAvailable">
+			A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+	</div>
+
+	<div class="container container-wide" data-bind="template: { name: templateChooser, data: content }"></div>
+
+
+	<!-- ko if: dialog -->
+	<!-- ko template: { name: templateChooser, data: dialog } --><!-- /ko -->
+	<!-- /ko -->
+</script>
+
+<div class="app" data-bind="template: { name: templateChooser, data: content }">
+</div>
+
+<script type="text/javascript">ungit = {}</script>
+<script type="text/javascript" src="/config.js"></script>
+<script type="text/javascript" src="/version.js"></script>
+<script type="text/javascript" src="/js/bugsense.js"></script>
+<script type="text/javascript">
+	console.log('App version: ' + ungit.version);
+	if (ungit.config.bugtracking) {
+		console.log('Initing bugtracking');
+    	var bugsense = new Bugsense( { apiKey: '3c48046e', appversion: ungit.version } );
+
+		window.onerror = function(err) {
+		    bugsense.onerror.apply(window.bugsense, arguments);
+		};
+    }
+</script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+<!-- TODO: move to require.js -->
+<script type="text/javascript" src="/js/knockout-2.2.1.js"></script>
+<script type="text/javascript" src="/js/jquery-2.0.0.min.js"></script>
+<script type="text/javascript" src="/js/jquery.dnd_page_scroll.js"></script>
+<script type="text/javascript" src="/js/google.ui.fastbutton.js"></script>
+<script type="text/javascript" src="/js/superagent.js"></script>
+<script type="text/javascript" src="/js/signals.js"></script>
+<script type="text/javascript" src="/js/hasher.js"></script>
+<script type="text/javascript" src="/js/crossroads.js"></script>
+<script type="text/javascript" src="/js/uuid.js"></script>
+<script type="text/javascript" src="/js/moment.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/components/bootstrap-stylus/js/bootstrap-modal.js"></script>
+<script type="text/javascript" src="/components/bootstrap-stylus/js/bootstrap-alert.js"></script>
+<script type="text/javascript" src="/js/utils.js"></script>
+<script type="text/javascript" src="/js/api.js"></script>
+<script type="text/javascript" src="/js/git-graph-actions.js"></script>
+<script type="text/javascript" src="/js/git-graph.js"></script>
+<script type="text/javascript" src="/js/node.js"></script>
+<script type="text/javascript" src="/js/ref.js"></script>
+<script type="text/javascript" src="/js/vector2.js"></script>
+<script type="text/javascript" src="/js/logrenderer.js"></script>
+<script type="text/javascript" src="/js/gerrit.js"></script>
+<script type="text/javascript" src="/js/repository.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/app.js"></script>
+<script type="text/javascript" src="/js/main.js"></script>
+
+<script>
+	if (ungit.config.googleAnalytics) {
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-42045410-1', { 'cookieDomain': 'none' });
+		ga('send', 'pageview');
+		console.log('Google analytics inited');
+	}
+</script>
+
+</body>
+</html>
