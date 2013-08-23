@@ -1,0 +1,361 @@
+
+// Styles.less
+// This file contains styling that's only used in this app
+
+@import "generic.less";
+
+// -- Application specific variables ----
+@logWidth: 450px;
+
+// -- Application specific layout ----
+// Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
+
+.navbar {
+	padding-top: 15px;
+
+	.navbar-brand {
+		width: 140px;
+		max-width: 140px;
+		position: relative;
+		top: -5px;
+	}
+	.row {
+		margin-left: 130px;
+		.navbar-form {
+			width: 100%;
+			.form-control {
+				font-size: 1.7em;
+				width: 100%;
+			}
+		}
+	}
+	.arrowUp {
+		position: absolute;
+		bottom: 0px;
+		left: 300px;
+	}
+}
+
+.path {
+	padding-top: 20px;
+}
+
+.home {
+	.logo {
+		margin-top: 60px;
+		margin-bottom: 90px;
+	}
+}
+
+.fetchButton {
+	position: absolute;
+	margin-top: 20px;
+	right: 20px;
+	z-index: 30;
+}
+
+.crash {
+	margin-top: 20px;
+}
+
+// -- Application specific styling ----
+.staging {
+	background: #643A44;
+	color: #B8A5A5;
+	z-index: 5;
+	position: relative;
+
+	.arrowDown {
+		position: absolute;
+		left: (@logWidth + 60px - 15px + 100px);
+		bottom: 0px;
+		.arrow {
+			background: url('../imgs/yellowArrowDown.png');
+		}
+	}
+
+	.validationError {
+		display: none;
+		color: #D6542D;
+		padding: 0.25em;
+	}
+	&:hover .validationError {
+		display: inline-block;
+	}
+
+	.diffContainer {
+		margin-top: 0px;
+	}
+
+	.discard {
+		background: transparent;
+		color: rgba(255, 255, 255, 0.3);
+		border-radius: 3px;
+		padding: 3px;
+		padding-left: 5px;
+		padding-right: 5px;
+		cursor: pointer;
+		.explanation {
+			display: none;
+		}
+		&:hover {
+			background: #000;
+			color: rgba(255, 255, 255, 0.9);
+			.explanation {
+				display: inline-block;
+			}
+		}
+	}
+
+	.files {
+		position: relative;
+		.file {
+			&.showingDiffs {
+				.name {
+					background: rgba(255, 255, 255, 0.1);
+					color: #000;
+					border-bottom-left-radius: 0px;
+					border-bottom-right-radius: 0px;
+				}
+			}
+			.name {
+				background: transparent;
+				font-size: 1.3em;
+				cursor: pointer;
+				padding: 3px;
+				border-radius: 3px;
+				color: rgba(255, 255, 255, 0.8);
+			}
+			padding: 0.3em;
+			
+			.new, .deleted, .conflict {
+				padding: 3px;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.new {
+				color: #89D64D;
+			}
+			.deleted {
+				color: #DB3712;
+			}
+			.conflict {
+				color: #DB12C0;
+				cursor: pointer;
+				.explanation {
+					display: none;
+				}
+				&:hover {
+					background: #A445ED;
+					color: #000;
+					border-radius: 3px;
+					.explanation {
+						display: inline;
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
+.repository {
+	position: relative;
+	height: auto;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
+
+	.gerritIntegration {
+		float: left;
+		width: 300px;
+	}
+
+	.repositoryMain {
+		height: auto;
+		margin-bottom: 1px;
+		padding-bottom: 1px;
+		position: relative;
+		&.sidebarExtended {
+			margin-left: 330px;
+		}
+	}
+}
+
+.repository .graph {
+
+	position: relative;
+	margin-top: 30px;
+	margin-bottom: 1px;
+	padding-bottom: 1px;
+
+	.graphLog {
+		position: relative;
+		display: inline-block;
+		top: -200px;
+		left: (@logWidth + 125px);
+	}
+
+	.nodeContainer {
+		position: absolute;
+		
+		.log {
+			position: absolute;
+			margin-left: 100px;
+			&.hover {
+				z-index: 2;
+				.logEntryBox {
+					box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+					background: #4B5766;
+					top: -43px;
+					left: -5px;
+					.arrowRight {
+						.shadow {
+							display: block;
+						}
+						.arrow {
+							background: url('../imgs/lightBlueArrowRight.png');
+						}
+					}
+				}
+			}
+
+			.logEntryBox {
+				position: relative;
+				top: -43px;
+				
+				padding: 10px;
+				width: @logWidth;
+				.arrowRight {
+					position: absolute;
+					right: 0px;
+					top: 5px;
+					.shadow {
+						display: none;
+					}
+				}
+				.title {
+					font-size: 1.3em;
+				}
+				.body {
+					white-space: pre;
+					word-wrap: break-word;
+					color: #8F9FA6;
+				}
+			}
+		}
+
+		.node {
+			position: absolute;
+			margin-left: (@logWidth + 130px);
+		}
+
+		.rightSideContainer {
+			position: absolute;
+			margin-left: (@logWidth + 140px);
+			top: -21px;
+			width: 900px;
+			height: 40px;
+		}
+
+		.ref {
+			display: inline-block;
+			opacity: 0.6;
+			cursor: move;
+			margin-left: 5px;
+			margin-right: 15px;
+			margin-top: 9px;
+
+			&.current {
+				font-weight: bold;
+				opacity: 1;
+			}
+			&.remote {
+				color: #89BCE8;
+				opacity: 0.3;
+			}
+			&.tag {
+				color: #EEF266;
+			}
+		}
+
+		.graphAction {
+			color: #fff;
+			&.push {
+				background: rgba(61, 139, 255, 0.9);
+			}
+			&.pull {
+				background: rgba(38, 189, 189, 0.9);
+			}
+			&.reset {
+				background: rgba(255, 129, 31, 0.9);
+			}
+			&.rebase {
+				background: rgba(65, 222, 60, 0.9);
+			}
+			&.move {
+				background: rgba(0, 0, 0, 0.1);
+			}
+			&.merge {
+				background: rgba(208, 135, 212, 0.9);
+			}
+			&.checkout {
+				background: rgba(205, 219, 55, 0.9);
+			}
+			&.delete {
+				background: rgba(214, 77, 56, 0.9);
+			}
+		}
+
+		.newRef {
+			opacity: 1;
+			padding-top: 2px;
+			padding-bottom: 2px;
+			margin-left: 5px;
+			.showBranchingForm {
+				background: transparent;
+				border: 0px;
+				cursor: pointer;
+				padding: 0px;
+				margin: 0px;
+				margin-top: 9px;
+				color: rgba(255, 255, 255, 0.1);
+				&:hover {
+					color: rgba(255, 255, 255, 0.7);
+				}
+			}
+			.form-inline {
+				display: inline-block;
+			}
+			input.name {
+				width: 150px;
+			}
+		}
+		
+
+	}
+
+	.daySeparators {
+		position: absolute;
+		top: -15px;
+		left: 0px;
+		.daySeparator {
+			position: absolute;
+			font-size: 1.1em;
+			color: #364B53;
+			text-shadow: 1px 1px rgb(21, 28, 41);
+			width: 70px;
+			padding: 5px;
+		}
+	}
+
+	.graphFooter {
+		height: 60px;
+		.progressBar {
+			position: relative;
+			top: -150px;
+			margin-left: (@logWidth);
+		}
+	}
+
+}

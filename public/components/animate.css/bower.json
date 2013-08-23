@@ -1,0 +1,15 @@
+{
+  "name": "animate.css",
+  "version": "0.0.0",
+  "main": "./animate.css",
+  "gitHead": "6c6912da12db3b5011c60cb54327c5b1dfcd42d7",
+  "readme": "#Animate.css\n*Just-add-water CSS animation*\n\n`animate.css` is a bunch of cool, fun, and cross-browser animations for you to use in your projects. Great for emphasis, home pages, sliders, and general just-add-water-awesomeness.\n\n##Usage\nTo use animate.css in your website, simply drop the stylesheet into your document's `<head>`, and add the class `animated` to an element, along with any of the animation names. That's it! You've got a CSS animated element. Super!\n\nYou can do a whole bunch of other stuff with animate.css when you combine it with jQuery or add your own CSS rules. Dynamically add animations using jQuery with ease:\n\n```javascript\n$('#yourElement').addClass('animated bounceOutLeft');\n```\n\nYou can change the duration of your animations, add a delay or change the number of times that it plays!\n\n```css\n#yourElement {\n\t-vendor-animation-duration: 3s;\n\t-vendor-animation-delay: 2s;\n\t-vendor-animation-iteration-count: infinite;\n}\n```\n\n*Note: be sure to replace \"vendor\" in the CSS with the applicable vendor prefixes (webkit, moz, ms, o)*\n\n*Note: Safari in Mountion Lion (OS 10.8) has a display glitch with the Flippers. They may not appear at all until the animation is completed, or the page may have other artifacting. One fix is to add overflow: hidden to the parent div.*\n\n##License\nAnimate.css is licensed under the MIT license. (http://opensource.org/licenses/MIT)\n\n##Learn more\nYou can learn more about animate.css over at http://daneden.me/animate\nYou can also get in touch via email (dan.eden@me.com) or twitter (@_dte) if you need any help or have any issues.\n\n##Cheat Sheet\n\n####Attention seekers:\nflash\nbounce\nshake\ntada\nswing\nwobble\npulse\n\n####Flippers (currently Webkit, Firefox, &amp; IE10 only):\nflip\nflipInX\nflipOutX\nflipInY\nflipOutY\n\n####Fading entrances:\nfadeIn\nfadeInUp\nfadeInDown\nfadeInLeft\nfadeInRight\nfadeInUpBig\nfadeInDownBig\nfadeInLeftBig\nfadeInRightBig\n\n####Fading exits:\nfadeOut\nfadeOutUp\nfadeOutDown\nfadeOutLeft\nfadeOutRight\nfadeOutUpBig\nfadeOutDownBig\nfadeOutLeftBig\nfadeOutRightBig\n\n####Bouncing entrances:\nbounceIn\nbounceInDown\nbounceInUp\nbounceInLeft\nbounceInRight\n\n####Bouncing exits:\nbounceOut\nbounceOutDown\nbounceOutUp\nbounceOutLeft\nbounceOutRight\n\n####Rotating entrances:\nrotateIn\nrotateInDownLeft\nrotateInDownRight\nrotateInUpLeft\nrotateInUpRight\n\n####Rotating exits:\nrotateOut\nrotateOutDownLeft\nrotateOutDownRight\nrotateOutUpLeft\nrotateOutUpRight\n\n####Lightspeed:\nlightSpeedIn\nlightSpeedOut\n\n####Specials:\nhinge\nrollIn\nrollOut\n\n## Other Resources\n\n- There's a [Ruby gem](https://github.com/camelmasa/animate-rails) available for Animate.css\n",
+  "readmeFilename": "README.md",
+  "_id": "animate.css@2.0.0",
+  "description": "*Just-add-water CSS animation*",
+  "commit": "6c6912da12db3b5011c60cb54327c5b1dfcd42d7",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/daneden/animate.css.git"
+  }
+}

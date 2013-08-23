@@ -1,0 +1,1 @@
+$(function(){module("transition"),test("should be defined on jquery support object",function(){ok(void 0!==$.support.transition,"transition object is defined")}),test("should provide an end object",function(){ok($.support.transition?$.support.transition.end:!0,"end string is defined")})});
