@@ -148,27 +148,17 @@ config.users = null; // So that we don't send the users to the client
 		fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2), callback);
 	}
 
-	app.post('/api/enablebugtracking', ensureAuthenticated, function(req, res) {
+	app.get('/api/userconfig', ensureAuthenticated, function(req, res) {
 		readUserConfig(function(err, userConfig) {
-			if (err) throw err;
-			userConfig.bugtracking = true;
-			writeUserConfig(userConfig, function(err) {
-				if (err) throw err;
-				res.json({});
-			});
+			if (err) res.json(400, err);
+			else res.json(userConfig);
 		});
 	});
-
-	app.post('/api/enablebugtrackingandstats', ensureAuthenticated, function(req, res) {
-		readUserConfig(function(err, userConfig) {
-			if (err) throw err;
-			userConfig.bugtracking = true;
-			userConfig.googleAnalytics = true;
-			writeUserConfig(userConfig, function(err) {
-				if (err) throw err;
-				res.json({});
-			});
-		});
+	app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
+		writeUserConfig(req.body, function(err) {
+			if (err) res.json(400, err);
+			else res.json({});
+		})
 	});
 
 	// Error handling

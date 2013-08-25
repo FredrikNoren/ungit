@@ -372,7 +372,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 	});
 
-	app.get(exports.pathPrefix + '/config', ensureAuthenticated, function(req, res){
+	app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
 		git('config --list', undefined, gitParser.parseGitConfig, function(err, gitConfig) {
 			if (err) return res.json(400, err);
 			res.json(gitConfig);

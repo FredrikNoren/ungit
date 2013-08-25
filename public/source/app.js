@@ -23,7 +23,18 @@ var MainViewModel = function() {
 	this.currentVersion = ko.observable();
 	this.latestVersion = ko.observable();
 	this.newVersionAvailable = ko.observable();
-	this.showBugtrackingNagscreen = ko.observable(!ungit.config.bugtracking && !localStorage.getItem('bugtrackingNagscreenDismissed'));
+	this.showBugtrackingNagscreen = ko.observable(false);
+	// The ungit.config variable collections configuration from all different paths and only updates when
+	// ungit is restarted
+	if(!ungit.config.bugtracking && !localStorage.getItem('bugtrackingNagscreenDismissed')) {
+		// Whereas the userconfig only reflects what's in the ~/.ungitrc and updates directly,
+		// but is only used for changing around the configuration. We need to check this here
+		// since ungit may have crashed without the server crashing since we enabled bugtracking,
+		// and we don't want to show the nagscreen twice in that case.
+		api.query('GET', '/userconfig', undefined, function(err, userConfig) {
+			self.showBugtrackingNagscreen(!userConfig.bugtracking);
+		});
+	}
 	this.programEvents = new signals.Signal();
 	this.programEvents.add(function(event) {
 		console.log('Event:', event);
@@ -74,16 +85,25 @@ MainViewModel.prototype.showDialog = function(dialog) {
 }
 MainViewModel.prototype.enableBugtrackingAndStatistics = function() {
 	var self = this;
-	api.query('POST', '/enablebugtrackingandstats', undefined, function(err) {
+	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
-		self.showBugtrackingNagscreen(false);
+		userConfig.bugtracking = true;
+		userConfig.googleAnalytics = true;
+		api.query('POST', '/userconfig', userConfig, function(err) {
+			if (err) return;
+			self.showBugtrackingNagscreen(false);
+		});
 	});
 }
 MainViewModel.prototype.enableBugtracking = function() {
 	var self = this;
-	api.query('POST', '/enablebugtracking', undefined, function(err) {
+	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
-		self.showBugtrackingNagscreen(false);
+		userConfig.bugtracking = true;
+		api.query('POST', '/userconfig', userConfig, function(err) {
+			if (err) return;
+			self.showBugtrackingNagscreen(false);
+		});
 	});
 }
 MainViewModel.prototype.dismissBugtrackingNagscreen = function() {

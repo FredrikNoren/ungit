@@ -26,7 +26,7 @@ describe('git-api branching', function () {
 	before(function(done) {
 		common.createEmptyRepo(req, done, function(dir) {
 			testDir = dir;
-			common.get(req, '/config', { path: testDir }, done, function(err, res) {
+			common.get(req, '/gitconfig', { path: testDir }, done, function(err, res) {
 				gitConfig = res.body;
 				done();
 			});

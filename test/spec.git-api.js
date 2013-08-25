@@ -30,8 +30,8 @@ describe('git-api', function () {
 		});
 	});
 
-	it('config should return config data', function(done) {
-		common.get(req, '/config', { path: testDir }, done, function(err, res) {
+	it('gitconfig should return config data', function(done) {
+		common.get(req, '/gitconfig', { path: testDir }, done, function(err, res) {
 			expect(res.body).to.be.an('object');
 			expect(res.body['user.name']).to.be.ok();
 			expect(res.body['user.email']).to.be.ok();
