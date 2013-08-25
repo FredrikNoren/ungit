@@ -11,6 +11,15 @@ var defaultConfig = {
 	// Directory to output log files.
 	logDirectory: null,
 
+	// Write REST requests to the log
+	logRESTRequests: true,
+
+	// Write git commands issued to the log
+	logGitCommands: false,
+
+	// Write the result of git commands issued to the log
+	logGitOutput: false,
+
 	// This will automatically send anonymous bug reports.
 	bugtracking: false,
 

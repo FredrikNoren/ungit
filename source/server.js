@@ -45,10 +45,12 @@ config.users = null; // So that we don't send the users to the client
 
 	gitApi.pathPrefix = '/api';
 
-	app.use(function(req, res, next){
-		winston.info(req.method + ' ' + req.url);
-		next();
-	});
+	if (config.logRESTRequests) {
+		app.use(function(req, res, next){
+			winston.info(req.method + ' ' + req.url);
+			next();
+		});
+	}
 
 	var noCache = function(req, res, next) {
 		res.set('Cache-Control', 'no-cache, no-store, must-revalidate');

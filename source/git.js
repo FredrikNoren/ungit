@@ -4,13 +4,16 @@ var async = require('async');
 var path = require('path');
 var fs = require('fs');
 var config = require('./config')();
+var winston = require('winston');
 
 var gitConfigNoColors = '-c color.ui=false';
 
 var gitQueue = async.queue(function (task, callback) {
 
+  if (config.logGitCommands) winston.info('git executing: ' + task.command);
   var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10 },
     function (error, stdout, stderr) {
+      if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
         var err = { errorCode: 'unknown', command: task.command, error: error.toString(), stderr: stderr, stdout: stdout };
         if (stderr.indexOf('Not a git repository') >= 0)
