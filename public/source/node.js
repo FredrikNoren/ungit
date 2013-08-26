@@ -68,10 +68,13 @@ NodeViewModel = function(args) {
 			// Small timeout because in ff the form is hidden before the submit click event is registered otherwise
 			setTimeout(function() {
 				self.branchingFormVisible(false);
-			}, 100);
+			}, 200);
 		}
 	})
 	this.branchingFormVisible = ko.observable(false);
+	this.canCreateRef = ko.computed(function() {
+		return self.newBranchName() && self.newBranchName().trim();
+	})
 
 	this.dropareaGraphActions = [
 		new GraphActions.Move(this.graph, this),
@@ -136,11 +139,13 @@ NodeViewModel.prototype.showBranchingForm = function() {
 	this.newBranchNameHasFocus(true);
 }
 NodeViewModel.prototype.createBranch = function() {
+	if (!this.canCreateRef()) return;
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 	this.branchingFormVisible(false);
 	this.newBranchName('');
 }
 NodeViewModel.prototype.createTag = function() {
+	if (!this.canCreateRef()) return;
 	api.query('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 	this.branchingFormVisible(false);
 	this.newBranchName('');
