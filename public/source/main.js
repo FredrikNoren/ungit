@@ -225,4 +225,5 @@ hasher.init();
 
 $(document).ready(function() {
     $().dndPageScroll(); // Automatic page scrolling on drag-n-drop: http://www.planbox.com/blog/news/updates/html5-drag-and-drop-scrolling-the-page.html
+    activateAutoComplete();
 });
