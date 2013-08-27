@@ -47,6 +47,7 @@ NodeViewModel = function(args) {
 	this.authorDate = ko.observable(moment(args.authorDate).fromNow());
 	setInterval(function() { self.authorDate(moment(args.authorDate).fromNow()); }, 1000 * 60);
 	this.authorName = args.authorName;
+	this.authorGravatar = CryptoJS.MD5(args.authorEmail);
 	this.authorEmail = args.authorEmail;
 	this.index = ko.observable();
 	this.ancestorOfHEAD = ko.observable(false);
