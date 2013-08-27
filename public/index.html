@@ -272,13 +272,15 @@
 										<div class="arrow"></div>
 									</div>
 									<div class="leftSideLogEntryBox">
-										<img data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar }"></img>
+										<img data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar }" class="img-circle"></img>
 									</div>
 									<div class="rightSideLogEntryBox">
-										<div class="title" data-bind="text: title"></div>
+										<div>
+											<span class="title" data-bind="text: title"></span>
+											<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a></span>
+										</div>
 										<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
 										<div class="text-muted" data-bind="text: authorDate"></div>
-										<a class="text-muted" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
 									</div>
 								</div>
 							</div>
