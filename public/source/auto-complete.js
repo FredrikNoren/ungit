@@ -24,7 +24,7 @@ function activateAutoComplete() {
                         });
                 } else if(event.keyCode == 13){
                         event.preventDefault();
-                        url = document.URL + '/#/repository?path=' + encodeURI($('#inputPath').val());
+                        url = '/#/repository?path=' + encodeURI($('#inputPath').val());
                         window.location = url;
                 }
         });
