@@ -12,6 +12,7 @@ module.exports = function(grunt) {
     'public/vendor/js/crossroads.js',
     'public/vendor/js/uuid.js',
     'public/vendor/js/moment.js',
+    'public/vendor/js/md5.js',
     'public/vendor/js/underscore.js',
     'public/vendor/js/bootstrap/modal.js',
     'public/vendor/js/bootstrap/alert.js',

@@ -266,15 +266,22 @@
 					<div class="nodes" data-bind="foreach: nodes">
 						<div class="nodeContainer" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
 							<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
-								<div class="logEntryBox panel">
+								<div class="logEntryBox panel clearfix">
 									<div class="arrowContainer arrowRight">
 										<div class="shadow"></div>
 										<div class="arrow"></div>
 									</div>
-									<div class="title" data-bind="text: title"></div>
-									<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
-									<div class="text-muted" data-bind="text: authorDate"></div>
-									<a class="text-muted" data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a>
+									<img class="pull-left img-circle gravatar"
+										data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar + '?default=404' }" 
+										onerror="this.style.display='none';">
+									<div>
+										<div>
+											<span class="title" data-bind="text: title"></span>
+											<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail }"></a></span>
+										</div>
+										<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
+										<div class="text-muted" data-bind="text: authorDate"></div>
+									</div>
 								</div>
 							</div>
 
