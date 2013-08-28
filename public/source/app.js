@@ -88,7 +88,7 @@ MainViewModel.prototype.enableBugtrackingAndStatistics = function() {
 	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
 		userConfig.bugtracking = true;
-		userConfig.googleAnalytics = true;
+		userConfig.sendUsageStatistics = true;
 		api.query('POST', '/userconfig', userConfig, function(err) {
 			if (err) return;
 			self.showBugtrackingNagscreen(false);

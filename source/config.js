@@ -24,7 +24,7 @@ var defaultConfig = {
 	bugtracking: false,
 
 	// Google analytics for usage statistics.
-	googleAnalytics: false,
+	sendUsageStatistics: false,
 
 	// True to enable authentication. Users are defined in the users configuration property.
 	authentication: false,

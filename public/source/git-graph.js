@@ -77,7 +77,7 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 				self.repository.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
 				return true;
 			}
-			if (err.stderr && err.stderr.indexOf('fatal: No remote configured to list refs from.') == 0) return true;
+			if (err.stderr && err.stderr.indexOf('No remote configured to list refs from.') != -1) return true;
 			return;
 		}
 		remoteTags.forEach(function(ref) {

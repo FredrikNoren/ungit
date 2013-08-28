@@ -4,6 +4,10 @@ var config = require('../source/config')();
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
+var semver = require('semver');
+
+if (config.bugtracking)
+	require('../source/bugsense').init('ungit-launcher');
 
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
 	silent: false,
@@ -32,7 +36,13 @@ child_process.exec('git --version', function(err, stdout, stderr) {
 	if (err) {
 		console.log('Can\'t run "git --version". Is git installed and available in your path?');
 	} else {
-		child.start();
+		var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
+		var requiredVersion = '>=1.8.x';
+		if (!semver.satisfies(version, requiredVersion)) {
+			console.log('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+		} else {
+			child.start();
+		}
 	}
 
 });
