@@ -131,7 +131,10 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
 		var credentialsOption = '-c credential.helper="' + credentialsHelperPath + ' ' + req.body.socketId + '"';
 		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
-			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, function(err, result) {
+				if (err && err.stderr.indexOf('non-fast-forward') != -1) err.errorCode = 'non-fast-forward';
+				jsonResultOrFailAndTriggerChange(req.param('path'), res, err, result);
+			});
 	});
 
 	app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
