@@ -6,6 +6,9 @@ var path = require('path');
 var child_process = require('child_process');
 var semver = require('semver');
 
+if (config.bugtracking)
+	require('../source/bugsense').init('ungit-launcher');
+
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
 	silent: false,
 	minUptime: 2000,
