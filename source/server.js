@@ -176,7 +176,7 @@ config.users = null; // So that we don't send the users to the client
 							filteredFiles.push(file);
 						}
 					});
-					this.res.send('{"files": ["' + filteredFiles.join('","') + '"]}');
+					this.res.json('["' + filteredFiles.join('","') + '"]');
 				}
 			}.bind({res: res}));
 		}

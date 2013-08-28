@@ -191,18 +191,15 @@ ko.bindingHandlers.autocomplete = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         ko.utils.registerEventHandler(element, "keyup", function(event) {
             if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
-                $.ajax({
-                    type: "GET",
-                    url: "api/fs/listDirectories",
-                    data: {term: $('#inputPath').val()},
-                    cache: false
-                }).done(function(msg) {
-                    result = $.parseJSON(msg);
-                    $("#inputPath").autocomplete({
-                        source: result.files
-                    });
-                    $("#inputPath").autocomplete("search", $('#inputPath').val());
-                }).fail(function(jqXHR, textStatus){
+                api.query('GET', '/fs/listDirectories', {term: $('#inputPath').val()}, function(err, directoryList) {
+                    if(!err) {
+                        result = $.parseJSON(directoryList);
+                        $("#inputPath").autocomplete({
+                            source: result
+                        });
+                        $("#inputPath").autocomplete("search", $('#inputPath').val());
+                    } else {
+                    }
                 });
             } else if(event.keyCode == 13){
                 event.preventDefault();
