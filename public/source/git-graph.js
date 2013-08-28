@@ -6,6 +6,7 @@ if (typeof exports !== 'undefined') {
 	RefViewModel = require('./ref.js').RefViewModel;
 	GraphActions = require('./git-graph-actions.js');
 	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
+	CryptoJS = require('../vendor/js/md5.js').CryptoJS;
 	moment = require('moment');
 	_ = require('underscore');
 }
