@@ -193,7 +193,7 @@ ko.bindingHandlers.autocomplete = {
             if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
                 $.ajax({
                     type: "GET",
-                    url: "getFiles",
+                    url: "api/fs/listDirectories",
                     data: {term: $('#inputPath').val()},
                     cache: false
                 }).done(function(msg) {

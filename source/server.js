@@ -161,7 +161,7 @@ config.users = null; // So that we don't send the users to the client
 		})
 	});
 
-	app.get('/getFiles', function(req, res) {
+	app.get('/api/fs/listDirectories', function(req, res) {
 		dir = req.query.term;
 		if(dir) {
 			fs.readdir(dir, function(err, files) {
