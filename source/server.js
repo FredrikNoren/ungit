@@ -167,7 +167,7 @@ config.users = null; // So that we don't send the users to the client
 			fs.readdir(dir, function(err, files) {
 				if(err) {
 					winston.error(err.stack);
-					this.res.json(400, err);
+					res.json(400, err);
 				} else {
 					filteredFiles = [];
 					files.forEach(function(file) {
@@ -177,9 +177,9 @@ config.users = null; // So that we don't send the users to the client
 							filteredFiles.push(file);
 						}
 					});
-					this.res.json('["' + filteredFiles.join('","') + '"]');
+					res.json('["' + filteredFiles.join('","') + '"]');
 				}
-			}.bind({res: res}));
+			});
 		}
 	});
 
