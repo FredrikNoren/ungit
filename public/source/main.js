@@ -187,6 +187,32 @@ ko.bindingHandlers.modal = {
     }
 };
 
+ko.bindingHandlers.autocomplete = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        ko.utils.registerEventHandler(element, "keyup", function(event) {
+            if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
+                api.query('GET', '/fs/listDirectories', {term: $('#inputPath').val()}, function(err, directoryList) {
+                    if(!err) {
+                        result = $.parseJSON(directoryList);
+                        $("#inputPath").autocomplete({
+                            source: result
+                        });
+                        $("#inputPath").autocomplete("search", $('#inputPath').val());
+                    } else {
+                    }
+                });
+            } else if(event.keyCode == 13){
+                event.preventDefault();
+                url = '/#/repository?path=' + encodeURI($('#inputPath').val());
+                window.location = url;
+            }
+
+            return true;
+        });
+    }
+};
+
+
 var prevTimestamp = 0;
 var updateAnimationFrame = function(timestamp) {
     var delta = timestamp - prevTimestamp;

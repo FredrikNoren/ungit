@@ -161,6 +161,28 @@ config.users = null; // So that we don't send the users to the client
 		})
 	});
 
+	app.get('/api/fs/listDirectories', function(req, res) {
+		dir = req.query.term;
+		if(dir) {
+			fs.readdir(dir, function(err, files) {
+				if(err) {
+					winston.error(err.stack);
+					res.json(400, err);
+				} else {
+					filteredFiles = [];
+					files.forEach(function(file) {
+						file = dir + file;
+						stat = fs.statSync(file);
+						if(stat && stat.isDirectory()) {
+							filteredFiles.push(file);
+						}
+					});
+					res.json('["' + filteredFiles.join('","') + '"]');
+				}
+			});
+		}
+	});
+
 	// Error handling
 	app.use(function(err, req, res, next) {
 		if (config.bugtracking)
