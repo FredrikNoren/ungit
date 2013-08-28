@@ -79,6 +79,7 @@ git.status = function(repoPath, callback) {
 git.remoteShow = function(repoPath, remoteName, callback) {
   git('remote show ' + remoteName, repoPath, gitParser.parseGitRemoteShow, callback);
 }
+
 git.stashAndPop = function(repoPath, performCallback, callback) {
   if (typeof(performCallback) != 'function') throw new Error('performCallback must be function');
   var hadLocalChanges = true;
@@ -86,7 +87,12 @@ git.stashAndPop = function(repoPath, performCallback, callback) {
     function(done) {
       git('stash', repoPath, undefined, function(err, res) {
         if (err) {
-          done(err);
+          if (err.stderr.indexOf('You do not have the initial commit yet') != -1) {
+            hadLocalChanges = false;
+            done();
+          } else {
+            done(err);
+          }
         } else {
           if (res.indexOf('No local changes to save') != -1) {
             hadLocalChanges = false;

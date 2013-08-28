@@ -52,7 +52,7 @@ RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
-RepositoryViewModel.prototype.fetch = function() {
+RepositoryViewModel.prototype.fetch = function(callback) {
 	if (this.status() != 'inited') return;
 	var self = this;
 	this.fetchingProgressBar.start();
@@ -61,10 +61,12 @@ RepositoryViewModel.prototype.fetch = function() {
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {
 				self.remoteErrorPopup('Repository remote timeouted.');
+				if (callback) callback();
 				return true;
 			}
 			if (err.errorCode == 'permision-denied-publickey') {
 				self.remoteErrorPopup('Permission denied (publickey).');
+				if (callback) callback();
 				return true;
 			}
 			if (err.errorCode == 'no-supported-authentication-provided') {
@@ -72,13 +74,16 @@ RepositoryViewModel.prototype.fetch = function() {
 					title: 'Authentication error',
 					details: 'No supported authentication methods available. Try starting ssh-agent or pageant.'
 				}));
+				if (callback) callback();
 				return true;
 			}
 			if (err.errorCode == 'offline') {
 				self.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
+				if (callback) callback();
 				return true;
 			}
 		}
+		if (callback) callback();
 	});
 }
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {

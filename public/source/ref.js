@@ -43,7 +43,7 @@ var RefViewModel = function(args) {
 	this.color = args.color;
 	this.remoteIsAncestor = ko.computed(function() {
 		if (!self.remoteRef()) return false;
-		return self.node().isAncestor(self.remoteRef().node());
+		return self.node() && self.node().isAncestor(self.remoteRef().node());
 	});
 	this.remoteIsOffspring = ko.computed(function() {
 		if (!self.remoteRef()) return false;

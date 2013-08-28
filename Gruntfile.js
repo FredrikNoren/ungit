@@ -99,6 +99,32 @@ module.exports = function(grunt) {
         }
       },
     },
+
+    // Minify images (basically just lossless compression)
+    imagemin: {
+      default: {
+        options: {
+          optimizationLevel: 3
+        },
+        files: [{
+          expand: true,
+          cwd: 'assets/client/images/',
+          src: ['**/*.png'],
+          dest: 'public/images/'
+        }]
+      }
+    },
+
+    // Embed images in css
+    imageEmbed: {
+      default: {
+        src: [ "public/css/styles.css" ],
+        dest: "public/css/styles.css",
+        options: {
+          deleteAfterEncoding: false
+        }
+      }
+    },
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
@@ -108,9 +134,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-plato');
+  grunt.loadNpmTasks('grunt-contrib-imagemin');
+  grunt.loadNpmTasks('grunt-image-embed');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'concat', 'lineending:production']);
+  grunt.registerTask('default', ['less:production', 'concat', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
   grunt.registerTask('test', ['simplemocha']);
