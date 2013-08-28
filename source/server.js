@@ -166,7 +166,8 @@ config.users = null; // So that we don't send the users to the client
 		if(dir) {
 			fs.readdir(dir, function(err, files) {
 				if(err) {
-					console.log(err);
+					winston.error(err.stack);
+					this.res.json(400, err);
 				} else {
 					filteredFiles = [];
 					files.forEach(function(file) {
