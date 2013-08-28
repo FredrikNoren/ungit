@@ -126,7 +126,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
 GitGraphViewModel.prototype.getRef = function(refName) {
 	var refViewModel = this.refsByRefName[refName];
 	if (!refViewModel) {
-		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.randomColor() });
+		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.colorFromHashOfString(refName) });
 		this.refs.push(refViewModel);
 	}
 	return refViewModel;
@@ -175,6 +175,9 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 	if (master) {
 		recursivelyMarkBranch(master, master.ideologicalBranch);
 	}
+}
+GitGraphViewModel.colorFromHashOfString = function(string) {
+	return '#' + CryptoJS.MD5(string).toString().slice(0, 6);
 }
 
 GitGraphViewModel.randomColor = function() {
