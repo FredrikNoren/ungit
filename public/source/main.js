@@ -187,6 +187,35 @@ ko.bindingHandlers.modal = {
     }
 };
 
+ko.bindingHandlers.autocomplete = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        ko.utils.registerEventHandler(element, "keyup", function(event) {
+            if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
+                $.ajax({
+                    type: "GET",
+                    url: "getFiles",
+                    data: {term: $('#inputPath').val()},
+                    cache: false
+                }).done(function(msg) {
+                    result = $.parseJSON(msg);
+                    $("#inputPath").autocomplete({
+                        source: result.files
+                    });
+                    $("#inputPath").autocomplete("search", $('#inputPath').val());
+                }).fail(function(jqXHR, textStatus){
+                });
+            } else if(event.keyCode == 13){
+                event.preventDefault();
+                url = '/#/repository?path=' + encodeURI($('#inputPath').val());
+                window.location = url;
+            }
+
+            return true;
+        });
+    }
+};
+
+
 var prevTimestamp = 0;
 var updateAnimationFrame = function(timestamp) {
     var delta = timestamp - prevTimestamp;
@@ -225,5 +254,4 @@ hasher.init();
 
 $(document).ready(function() {
     $().dndPageScroll(); // Automatic page scrolling on drag-n-drop: http://www.planbox.com/blog/news/updates/html5-drag-and-drop-scrolling-the-page.html
-    activateAutoComplete();
 });

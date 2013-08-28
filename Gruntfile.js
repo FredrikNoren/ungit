@@ -28,8 +28,7 @@ module.exports = function(grunt) {
     'public/source/repository.js',
     'public/source/controls.js',
     'public/source/app.js',
-    'public/source/main.js',
-    'public/source/auto-complete.js'
+    'public/source/main.js'
   ];
 
   grunt.initConfig({
