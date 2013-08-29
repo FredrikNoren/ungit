@@ -1,4 +1,5 @@
 var rc = require('rc');
+var optimist = require('optimist');
 
 var defaultConfig = {
 	
@@ -44,10 +45,24 @@ var defaultConfig = {
 	// Maximum number of concurrent git operations
 	maxConcurrentGitOperations: 4,
 
+	// Launch a browser window with ungit when ungit is started
+	launchBrowser: true,
+
 	// Used for development purposes.
 	dev: false,
 };
 
 module.exports = function() {
-	return rc('ungit', defaultConfig);
+	// Works for now but should be moved to bin/ungit
+	var argv = optimist
+		.usage('ungit [-b]')
+		.alias('b', 'launchBrowser')
+		.describe('b', 'Launch a browser window with ungit when the ungit server is started')
+		.argv;
+
+	if (argv.help) {
+	    optimist.showHelp();
+	    process.exit(0);
+	}
+	return rc('ungit', defaultConfig, argv);
 }

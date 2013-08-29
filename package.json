@@ -33,7 +33,8 @@
     "npm": "1.3.1",
     "semver": "2.0.8",
     "forever-monitor": "1.1.0",
-    "open": "0.0.4"
+    "open": "0.0.4",
+    "optimist": "0.6.0"
   },
   "devDependencies": {
     "mocha": "1.11.0",

@@ -13,7 +13,7 @@ var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.j
 	silent: false,
 	minUptime: 2000,
 	cwd: path.join(process.cwd(), '..'),
-	options: []
+	options: process.argv.slice(2)
 });
 
 child.on('exit', function () {
@@ -24,7 +24,8 @@ function startupListener(data) {
 	if (data.toString().indexOf('## Ungit started ##') >= 0) {
 		var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
 		console.log('Browse to ' + currentUrl);
-		open(currentUrl);
+		if (config.launchBrowser) 
+			open(currentUrl);
 		child.removeListener('stdout', startupListener);
 	}
 }
