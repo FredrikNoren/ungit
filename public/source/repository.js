@@ -52,6 +52,7 @@ RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
+RepositoryViewModel.prototype.clickFetch = function() { this.fetch(); }
 RepositoryViewModel.prototype.fetch = function(callback) {
 	if (this.status() != 'inited') return;
 	var self = this;
