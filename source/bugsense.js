@@ -1,15 +1,19 @@
 
-var superagent = require('superagent');
-var uuid = require('uuid');
-var os = require('os');
+
 var winston = require('winston');
 var version = require('./version');
 
+var os;
+var superagent;
+var uuid;
 var bugsense = exports;
 
 bugsense.appVersion = 'unknown';
 
 bugsense.notify = function(exception, clientName, callback) {
+	if (!os) os = require('os');
+	if (!superagent) superagent = require('superagent');
+	if (!uuid) uuid = require('uuid');
 	
 	winston.info('Sending exception to bugsense');
 
@@ -63,9 +67,9 @@ bugsense.init = function(clientName, skipFindVersion) {
 		});
 	});
 	if (!skipFindVersion) {
-		version.getVersion(function(ver) {
+		version.getVersion(function(err, ver) {
 			bugsense.appVersion = ver;
 			winston.info('App version: ' + bugsense.appVersion);
-		})
+		});
 	}
 }

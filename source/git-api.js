@@ -4,13 +4,14 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var temp = require('temp');
-var socketIO = require('socket.io');
-var watchr = require('watchr');
 var async=  require('async');
 var git = require('./git');
 var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
+var socketIO;
+var watchr;
+
 
 exports.pathPrefix = '';
 
@@ -23,47 +24,53 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	var gitConfigCliPager = '-c core.pager=cat';
 
 	var sockets = [];
+	var io;
 
 	if (server) {
-		var io = socketIO.listen(server, {
-			logger: {
-				debug: winston.debug.bind(winston),
-				info: winston.info.bind(winston),
-				error: winston.error.bind(winston),
-				warn: winston.warn.bind(winston)
-			}
-		});
-		io.sockets.on('connection', function (socket) {
-			sockets.push(socket);
-			socket.emit('connected', { socketId: sockets.length - 1 });
-			socket.on('disconnect', function () {
-				if (socket.watchr) {
-					socket.watchr.close();
-					socket.watchr = null;
-					winston.info('Stop watching ' + socket.watchrPath);
+		// To speed up loading times, we start this the next tick since it doesn't have to be instantly started with the server
+		process.nextTick(function() {
+			if (!socketIO) socketIO = require('socket.io');
+			if (!watchr) watchr = require('watchr');
+			io = socketIO.listen(server, {
+				logger: {
+					debug: winston.debug.bind(winston),
+					info: winston.info.bind(winston),
+					error: winston.error.bind(winston),
+					warn: winston.warn.bind(winston)
 				}
 			});
-			socket.on('watch', function (data, callback) {
-				if (socket.watchr) {
-					socket.leave(socket.watchrPath);
-					socket.watchr.close(); // only one watcher per socket
-					winston.info('Stop watching ' + socket.watchrPath);
-				}
-				socket.join(path.normalize(data.path)); // join room for this path
-				var watchOptions = {
-					path: data.path,
-					ignoreCommonPatterns: true,
-					listener: function() {
-						socket.emit('changed', { repository: data.path });
-					},
-					next: function(err, watchers) {
-						callback();
+			io.sockets.on('connection', function (socket) {
+				sockets.push(socket);
+				socket.emit('connected', { socketId: sockets.length - 1 });
+				socket.on('disconnect', function () {
+					if (socket.watchr) {
+						socket.watchr.close();
+						socket.watchr = null;
+						winston.info('Stop watching ' + socket.watchrPath);
 					}
-				};
-				if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
-				socket.watchrPath = data.path;
-				socket.watchr = watchr.watch(watchOptions);
-				winston.info('Start watching ' + socket.watchrPath);
+				});
+				socket.on('watch', function (data, callback) {
+					if (socket.watchr) {
+						socket.leave(socket.watchrPath);
+						socket.watchr.close(); // only one watcher per socket
+						winston.info('Stop watching ' + socket.watchrPath);
+					}
+					socket.join(path.normalize(data.path)); // join room for this path
+					var watchOptions = {
+						path: data.path,
+						ignoreCommonPatterns: true,
+						listener: function() {
+							socket.emit('changed', { repository: data.path });
+						},
+						next: function(err, watchers) {
+							callback();
+						}
+					};
+					if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
+					socket.watchrPath = data.path;
+					socket.watchr = watchr.watch(watchOptions);
+					winston.info('Start watching ' + socket.watchrPath);
+				});
 			});
 		});
 	}

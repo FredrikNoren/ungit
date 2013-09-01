@@ -1,6 +1,6 @@
 var fs = require('fs');
 var child_process = require('child_process');
-var npm = require('npm');
+var path = require('path');
 
 var cachedVersion;
 
@@ -8,29 +8,36 @@ var version = exports;
 
 version.getVersion = function(callback) {
 	if (cachedVersion) callback(cachedVersion);
-	version.getPackageJsonVersion(function(packageJsonVersion) {
-		if (fs.existsSync(__dirname + '/../.git')) {
-			child_process.exec('git rev-parse --short HEAD', { cwd: __dirname + '/../' }, function(err, revision) {
-				revision.replace('\n', ' ');
-				revision = revision.trim();
+	version.getPackageJsonVersion(function(err, packageJsonVersion) {
+		if (err) return callback(err);
+		fs.exists(path.join(__dirname, '..', '.git'), function(gitExists) {
+			if (gitExists) {
+				child_process.exec('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') }, function(err, revision) {
+					revision.replace('\n', ' ');
+					revision = revision.trim();
 
-				cachedVersion = 'dev-' + packageJsonVersion + '-' + revision;
-				callback(cachedVersion);
-			});
-		} else {
-			cachedVersion = packageJsonVersion;
-			callback(cachedVersion);
-		}
+					cachedVersion = 'dev-' + packageJsonVersion + '-' + revision;
+					callback(null, cachedVersion);
+				});
+			} else {
+				cachedVersion = packageJsonVersion;
+				callback(null, cachedVersion);
+			}
+		});
 	});
 }
 
 version.getPackageJsonVersion = function(callback) {
-	var packageJson = fs.readFileSync(__dirname + '/../package.json');
-	packageJson = JSON.parse(packageJson);
-	callback(packageJson.version);
+	fs.readFile(path.join(__dirname, '..', 'package.json'), { encoding: 'utf8' }, function(err, packageJson) {
+		if (err) return callback(err);
+		var p = JSON.parse(packageJson.toString());
+		callback(null, p.version);
+	});
 }
 
+var npm;
 version.getLatestVersion = function(callback) {
+	if (!npm) npm = require('npm');
 	var packageName = 'ungit';
 	npm.load(function() {
 		npm.commands.show([packageName, 'versions'], true, function(err, data) {

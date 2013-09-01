@@ -114,13 +114,13 @@ config.users = null; // So that we don't send the users to the client
 	});
 
 	app.get('/version.js', function(req, res) {
-		version.getVersion(function(ver) {
+		version.getVersion(function(err, ver) {
 			res.send('ungit.version = \'' + ver + '\'');
 		});
 	});
 
 	app.get('/api/latestversion', function(req, res) {
-		version.getVersion(function(currentVersion) {
+		version.getVersion(function(err, currentVersion) {
 			version.getLatestVersion(function(err, latestVersion) {
 				if (err)
 					res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });

@@ -58,10 +58,20 @@ function verifyGitVersion(callback) {
 	});
 }
 
+var http = require('http');
 function checkIfUngitIsRunning(callback) {
-	superagent.agent().get('http://localhost:' + config.port + '/api/ping').end(function(err, res) {
-		if (err || !res.ok) callback(null, false);
-		else callback(null, true);
+	// Fastest way to find out if a port is used or not/i.e. if ungit is running
+	var net = require('net');
+	var server = net.createServer(function(c) { });
+	server.listen(config.port, function(err) {
+		server.close(function() {
+			callback(null, false);
+		});
+	});
+	server.on('error', function (e) {
+	  if (e.code == 'EADDRINUSE') {
+	    callback(null, true);
+	  }
 	});
 }
 
