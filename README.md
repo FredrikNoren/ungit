@@ -1,6 +1,7 @@
 ungit
 ======
 [![NPM version](https://badge.fury.io/js/ungit.png)](http://badge.fury.io/js/ungit)
+[![Build Status](https://travis-ci.org/FredrikNoren/ungit.png)](https://travis-ci.org/FredrikNoren/ungit)
 
 The easiest way to use git. On any platform. Anywhere.
 
