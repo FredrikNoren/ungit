@@ -115,8 +115,12 @@ exports.parseGitLog = function(data) {
 		if (row.indexOf('Author: ') == 0) {
 			var author = row.split(' ').slice(1).join(' ');
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
-			currentCommmit.authorName = capture[1].trim();
-			currentCommmit.authorEmail = capture[2].trim();
+			if (capture) {
+				currentCommmit.authorName = capture[1].trim();
+				currentCommmit.authorEmail = capture[2].trim();
+			} else {
+				currentCommmit.authorName = author;
+			}
 		} else if (row.indexOf('Commit: ') == 0) {
 			var author = row.split(' ').slice(1).join(' ');
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
