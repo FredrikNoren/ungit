@@ -29,10 +29,6 @@ Anywhere you want to start, just type:
 
 This will launch the server and open up a browser with the ui.
 
-Bugs
-----
-You can help out by enabling bugtracking in the config (set "bugtracking": true, see config section below): this will make ungit send an anonymous bugreport every time it crashes, which makes it much easier to know what problems users are experiencing.
-
 Configure
 ---------
 Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on *nix, `C:/Users/USERNAME/` on windows). Can be in either json or ini format. See source/config.js for available options.
