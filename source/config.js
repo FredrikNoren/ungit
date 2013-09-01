@@ -48,6 +48,9 @@ var defaultConfig = {
 	// Launch a browser window with ungit when ungit is started
 	launchBrowser: true,
 
+	// Instead of launching ungit with the current folder force a different path to be used. Can be set to null to force the home screen.
+	forcedLaunchPath: undefined,
+
 	// Used for development purposes.
 	dev: false,
 };

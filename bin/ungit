@@ -23,9 +23,11 @@ child.on('exit', function () {
 });
 
 function launchBrowser() {
-	var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
+	var currentUrl = 'http://localhost:' + config.port;
+	if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
+	else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
 	console.log('Browse to ' + currentUrl);
-	if (config.launchBrowser) 
+	if (config.launchBrowser)
 		open(currentUrl);
 }
 
