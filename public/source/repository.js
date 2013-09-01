@@ -56,8 +56,16 @@ RepositoryViewModel.prototype.clickFetch = function() { this.fetch(); }
 RepositoryViewModel.prototype.fetch = function(callback) {
 	if (this.status() != 'inited') return;
 	var self = this;
+
+	var programEventListener = function(event) {
+		if (event.event == 'credentialsRequested') self.fetchingProgressBar.pause();
+		else if (event.event == 'credentialsProvided') self.fetchingProgressBar.unpause();
+	};
+	this.main.programEvents.add(programEventListener);
+
 	this.fetchingProgressBar.start();
-	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
+	api.query('POST', '/fetch', { path: this.repoPath, socketId: api.socketId }, function(err, status) {
+		self.main.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
 		if (err) {
 			if (err.errorCode == 'remote-timeout') {

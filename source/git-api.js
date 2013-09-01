@@ -124,7 +124,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'), undefined, function(err, text) {
+		git(credentialsOption(req.body.socketId) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'), undefined, function(err, text) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
 					res.json({});
