@@ -26,6 +26,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'conflict';
         else if (err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1)
           err.errorCode = 'offline';
+        else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
+          err.errorCode = 'proxy-authentication-required';
         else if (err.stderr.indexOf('Please tell me who you are') != -1)
           err.errorCode = 'no-git-name-email-configured';
         task.error = err;

@@ -78,6 +78,10 @@ GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
 				self.repository.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
 				return true;
 			}
+			if (err.errorCode == 'proxy-authentication-required') {
+				self.repository.remoteErrorPopup('Proxy error; proxy requires authentication.');
+				return true;
+			}
 			if (err.stderr && err.stderr.indexOf('No remote configured to list refs from.') != -1) return true;
 			return;
 		}
