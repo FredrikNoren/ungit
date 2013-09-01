@@ -189,4 +189,16 @@ describe('git-api conflict merge', function () {
 		});
 	});
 
+	it('should be possible fix the conflict', function(done) {
+		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done);
+	});
+
+	it('should be possible to resolve', function(done) {
+		common.post(req, '/resolveconflicts', { path: testDir, files: [testFile1] }, done);
+	});
+
+	it('should be possible continue the merge', function(done) {
+		common.post(req, '/merge/continue', { path: testDir, message: 'something' }, done);
+	});
+
 });

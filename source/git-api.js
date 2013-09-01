@@ -334,8 +334,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var process = git('commit --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
-		process.stdin.end(req.body.message);
+		git('commit --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
+			process.stdin.end(req.body.message);
+		});
 	});
 
 	app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
