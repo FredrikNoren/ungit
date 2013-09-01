@@ -30,7 +30,7 @@ exports.parseGitDiff = function(text) {
     
 	while(lines.length && lines[0]) {
 		var diff = {};
-		var path = /^diff\s--git\sa\/(.+?)\sb\/(.+)$/.exec(lines.shift());
+		var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
 		diff.aPath = path[1];
 		diff.bPath = path[2];
       
