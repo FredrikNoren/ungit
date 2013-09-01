@@ -5,6 +5,7 @@ var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var semver = require('semver');
+var superagent = require('superagent');
 
 if (config.bugtracking)
 	require('../source/bugsense').init('ungit-launcher');
@@ -21,30 +22,56 @@ child.on('exit', function () {
 	console.log('ungit can\'t start, see logs for more information.');
 });
 
+function launchBrowser() {
+	var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
+	console.log('Browse to ' + currentUrl);
+	if (config.launchBrowser) 
+		open(currentUrl);
+}
+
 function startupListener(data) {
 	if (data.toString().indexOf('## Ungit started ##') >= 0) {
-		var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
-		console.log('Browse to ' + currentUrl);
-		if (config.launchBrowser) 
-			open(currentUrl);
+		launchBrowser();
 		child.removeListener('stdout', startupListener);
 	}
 }
 
 child.on('stdout', startupListener);
 
-child_process.exec('git --version', function(err, stdout, stderr) {
+function verifyGitVersion(callback) {
+	child_process.exec('git --version', function(err, stdout, stderr) {
 
-	if (err) {
-		console.log('Can\'t run "git --version". Is git installed and available in your path?');
-	} else {
-		var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
-		var requiredVersion = '>=1.8.x';
-		if (!semver.satisfies(version, requiredVersion)) {
-			console.log('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+		if (err) {
+			callback('Can\'t run "git --version". Is git installed and available in your path?');
 		} else {
-			child.start();
+			var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
+			var requiredVersion = '>=1.8.x';
+			if (!semver.satisfies(version, requiredVersion)) {
+				callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+			} else {
+				callback();
+			}
 		}
-	}
 
+	});
+}
+
+function checkIfUngitIsRunning(callback) {
+	superagent.agent().get('http://localhost:' + config.port + '/api/ping').end(function(err, res) {
+		if (err || !res.ok) callback(null, false);
+		else callback(null, true);
+	});
+}
+
+checkIfUngitIsRunning(function(err1, ungitRunning) {
+	if (ungitRunning) {
+		console.log('Ungit server already running');
+		launchBrowser();
+	}
+	else {
+		verifyGitVersion(function(err) {
+			if (err) console.log(err);
+			else child.start();
+		});
+	}
 });
