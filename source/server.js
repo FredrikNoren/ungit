@@ -63,6 +63,7 @@ config.users = null; // So that we don't send the users to the client
 		// The default timeout is 2 min, but since operations such as clone can take much
 		// longer than that, we increase the timeout to 2h.
 		res.setTimeout(2 * 60 * 60 * 1000);
+		next();
 	});
 	
 	var ensureAuthenticated = function(req, res, next) { next(); };
