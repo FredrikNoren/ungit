@@ -53,7 +53,7 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['public/source/*.js'],
-        tasks: ['concat'],
+        tasks: ['concat_sourcemap'],
         options: {
           spawn: false,
         },
