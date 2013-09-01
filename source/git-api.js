@@ -102,6 +102,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		emitRepoChanged(repoPath);
 	}
 
+
+	function credentialsOption(socketId) {
+		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
+		return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + '" ';
+	}
+
+
 	app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.status(req.param('path'), jsonResultOrFail.bind(null, res));
 	});
@@ -113,7 +120,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, function(req, res) {
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-		git('clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.param('path'), undefined, jsonResultOrFail.bind(null, res));
+		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.param('path'), undefined, jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -135,9 +142,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-		var credentialsOption = '-c credential.helper="' + credentialsHelperPath + ' ' + req.body.socketId + '"';
-		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
+		git(credentialsOption(req.body.socketId) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, function(err, result) {
 				if (err && err.stderr.indexOf('non-fast-forward') != -1) err.errorCode = 'non-fast-forward';
 				jsonResultOrFailAndTriggerChange(req.param('path'), res, err, result);

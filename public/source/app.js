@@ -256,7 +256,15 @@ PathViewModel.prototype.cloneRepository = function() {
 	self.status('cloning');
 	this.cloningProgressBar.start();
 	var dest = this.cloneDestination() || this.cloneDestinationImplicit();
-	api.query('POST', '/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+
+	var programEventListener = function(event) {
+		if (event.event == 'credentialsRequested') self.cloningProgressBar.pause();
+		else if (event.event == 'credentialsProvided') self.cloningProgressBar.unpause();
+	};
+	this.main.programEvents.add(programEventListener);
+
+	api.query('POST', '/clone', { path: this.path, socketId: api.socketId, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+		self.main.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;
 		browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
