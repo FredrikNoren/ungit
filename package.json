@@ -42,14 +42,14 @@
     "supertest": "0.7.0",
     "grunt": "0.4.1",
     "grunt-contrib-less": "0.7.0",
-    "grunt-contrib-concat": "0.3.0",
     "grunt-contrib-watch": "0.5.1",
     "grunt-lineending": "0.2.1",
     "grunt-release": "0.5.1",
     "grunt-simple-mocha": "0.4.0",
     "grunt-plato": "0.2.1",
     "grunt-contrib-imagemin": "0.2.0",
-    "grunt-image-embed": "0.3.1"
+    "grunt-image-embed": "0.3.1",
+    "grunt-concat-sourcemap": "~0.3.0"
   },
   "engines": {
     "node": ">=0.10"

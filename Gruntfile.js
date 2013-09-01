@@ -39,9 +39,10 @@ module.exports = function(grunt) {
         }
       }
     },
-    concat: {
+    concat_sourcemap: {
       options: {
-        separator: ';'
+        separator: ';',
+        sourcesContent: true
       },
       dist: {
         src: jsSources,
@@ -127,7 +128,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-concat-sourcemap');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
@@ -137,7 +138,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-image-embed');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'concat', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'concat_sourcemap', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
   grunt.registerTask('test', ['simplemocha']);
