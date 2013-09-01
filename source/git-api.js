@@ -247,7 +247,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 						});
 					}
 				}
-			], function() {
+			], function(err) {
+				if (err) return res.json(400, err);
 				git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
 					process.stdin.end(req.body.message);
 				});
