@@ -138,7 +138,7 @@ config.users = null; // So that we don't send the users to the client
 		fs.exists(userConfigPath, function(hasConfig) {
 			if (!hasConfig) return callback(null, {});
 
-			fs.readFile(userConfigPath, function(err, content) {
+			fs.readFile(userConfigPath, { encoding: 'utf8' }, function(err, content) {
 				if (err) return callback(err);
 				else callback(null, JSON.parse(content.toString()));
 			});
