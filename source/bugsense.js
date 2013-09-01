@@ -47,7 +47,7 @@ bugsense.notify = function(exception, clientName, callback) {
 			.post('http://www.bugsense.com/api/errors')
 			.set('X-BugSense-Api-Key', '3c48046e')
 			.send(payload).end(function(err, res) {
-				if (err || !res.ok || res.body.error) winston.info('Inception error sending error to bugsense', err, res.body);
+				if (err || !res.ok || res.body.error) winston.info('Inception error sending error to bugsense', err, res ? res.body : 'no-body');
 				else winston.info('Exception sent to bugsense');
 				if (callback) callback();
 			});
