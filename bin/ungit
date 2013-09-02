@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+var startLaunchTime = Date.now();
 var forever = require('forever-monitor');
 var config = require('../source/config')();
 var open = require('open');
@@ -35,6 +36,7 @@ function startupListener(data) {
 	if (data.toString().indexOf('## Ungit started ##') >= 0) {
 		launchBrowser();
 		child.removeListener('stdout', startupListener);
+		console.log('Took ' + (Date.now() - startLaunchTime) + 'ms to start server.');
 	}
 }
 
