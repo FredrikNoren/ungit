@@ -26,7 +26,7 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
-			self.fetch();
+			self.fetch({ nodes: true, tags: true });
 			api.repositoryChanged.add(function(data) {
 				if (!data.repository || data.repository == self.repoPath) {
 					self.update();
@@ -52,8 +52,8 @@ RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
-RepositoryViewModel.prototype.clickFetch = function() { this.fetch(); }
-RepositoryViewModel.prototype.fetch = function(callback) {
+RepositoryViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
+RepositoryViewModel.prototype.fetch = function(options, callback) {
 	if (this.status() != 'inited') return;
 	var self = this;
 
@@ -63,38 +63,49 @@ RepositoryViewModel.prototype.fetch = function(callback) {
 	};
 	this.main.programEvents.add(programEventListener);
 
+	var handleApiRemoteError = function(callback, err, result) {
+		callback(err, result);
+		return !err || self._isRemoteError(err.errorCode);
+	}
+
 	this.fetchingProgressBar.start();
-	api.query('POST', '/fetch', { path: this.repoPath, socketId: api.socketId }, function(err, status) {
+	var jobs = [];
+	var remoteTags;
+	if (options.nodes) jobs.push(function(done) { api.query('POST', '/fetch', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
+			done(err, result);
+			return !err || self._isRemoteError(err.errorCode);
+		}); 
+	});
+	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath }, function(err, result) {
+			remoteTags = result;
+			done(err, result);
+			return !err || self._isRemoteError(err.errorCode);
+		});
+	});
+	async.parallel(jobs, function(err, result) {
 		self.main.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
+
 		if (err) {
-			if (err.errorCode == 'remote-timeout') {
-				self.remoteErrorPopup('Repository remote timeouted.');
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'permision-denied-publickey') {
-				self.remoteErrorPopup('Permission denied (publickey).');
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'no-supported-authentication-provided') {
-				self.main.content(new UserErrorViewModel({
-					title: 'Authentication error',
-					details: 'No supported authentication methods available. Try starting ssh-agent or pageant.'
-				}));
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'offline') {
-				self.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
-				if (callback) callback();
-				return true;
-			}
+			self.remoteErrorPopup(self._remoteErrorCodeToString[err.errorCode]);
+			return;
 		}
-		if (callback) callback();
+
+		if (options.tags) self.graph.setRemoteTags(remoteTags);
 	});
 }
+RepositoryViewModel.prototype._remoteErrorCodeToString = {
+	'remote-timeout': 'Repository remote timeouted.',
+	'permision-denied-publickey': 'Permission denied (publickey).',
+	'no-supported-authentication-provided': 'No supported authentication methods available. Try starting ssh-agent or pageant.',
+	'offline': 'Couldn\'t reach remote repository, are you offline?',
+	'proxy-authentication-required': 'Proxy error; proxy requires authentication.',
+	'no-remote-configured': 'No remote to list refs from'
+}
+RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
+	return !!this._remoteErrorCodeToString[errorCode];
+}
+
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
 	api.query('GET', '/status', { path: this.repoPath }, function(err, status){
@@ -131,7 +142,6 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.graph.hasRemotes(remotes.length != 0);
-		self.graph.loadRemoteTagsFromApi();
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {

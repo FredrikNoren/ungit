@@ -191,7 +191,7 @@ GraphActions.Push.prototype.perform = function(ref, callback) {
 		if (err) {
 			if (err.errorCode == 'non-fast-forward') {
 				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Fetching new nodes.');
-				self.graph.repository.fetch(function() {
+				self.graph.repository.fetch({ nodes: true, tags: true }, function() {
 					setTimeout(function() {
 						self.graph.repository.closeRemoteErrorPopup();
 					}, 5000);
@@ -203,6 +203,7 @@ GraphActions.Push.prototype.perform = function(ref, callback) {
 			}
 		}
 		self.graph.loadNodesFromApi();
+		self.graph.repository.fetch({ tags: true });
 		callback();
 	});
 }
@@ -254,6 +255,7 @@ GraphActions.Delete.prototype.perform = function(ref, callback) {
 	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
+		self.graph.repository.fetch({ tags: true });
 	});
 }
 

@@ -13,6 +13,7 @@ module.exports = function(grunt) {
     'public/vendor/js/moment.js',
     'public/vendor/js/md5.js',
     'public/vendor/js/underscore.js',
+    'public/vendor/js/async.js',
     'public/vendor/js/bootstrap/modal.js',
     'public/vendor/js/bootstrap/alert.js',
     'public/source/utils.js',

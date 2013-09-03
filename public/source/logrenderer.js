@@ -87,7 +87,7 @@ logRenderer.render = function(element, graph) {
 	context.lineWidth = 8;
 	context.beginPath();
 	nodes.forEach(function(node) {
-		node.parents.forEach(function(parentId) {
+		node.parents().forEach(function(parentId) {
 			var parent = nodesById[parentId];
 			if (parent)
 				logRenderer.drawLineBetweenNodes(context,
