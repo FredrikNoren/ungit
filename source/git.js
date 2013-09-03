@@ -7,6 +7,7 @@ var config = require('./config')();
 var winston = require('winston');
 
 var gitConfigNoColors = '-c color.ui=false';
+var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 
 var gitQueue = async.queue(function (task, callback) {
 
@@ -47,7 +48,7 @@ var gitQueue = async.queue(function (task, callback) {
 
 var git = function(command, repoPath, parser, callback, onStarted) {
   if (typeof(callback) != 'function') throw new Error('Callback must be function');
-  command = 'git ' + gitConfigNoColors + ' ' + command;
+  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + command;
 
   var task = {
     command: command,
