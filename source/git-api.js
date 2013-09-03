@@ -186,7 +186,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 				git('clean -fd', req.param('path'), undefined, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 			});
 		} else {
-			git('checkout -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
+			git('checkout HEAD -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
 				if (err) {
 					if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
 						fs.unlink(path.join(req.param('path'), req.body.file), function(err) {
