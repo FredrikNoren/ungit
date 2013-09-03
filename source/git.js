@@ -23,6 +23,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'remote-timeout';
         else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
           err.errorCode = 'permision-denied-publickey';
+        else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
+          err.errorCode = 'ssh-bad-file-number';
         else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
           err.errorCode = 'no-remote-configured';
         else if (err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)

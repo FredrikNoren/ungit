@@ -100,7 +100,8 @@ RepositoryViewModel.prototype._remoteErrorCodeToString = {
 	'no-supported-authentication-provided': 'No supported authentication methods available. Try starting ssh-agent or pageant.',
 	'offline': 'Couldn\'t reach remote repository, are you offline?',
 	'proxy-authentication-required': 'Proxy error; proxy requires authentication.',
-	'no-remote-configured': 'No remote to list refs from'
+	'no-remote-configured': 'No remote to list refs from.',
+	'ssh-bad-file-number': 'Got "Bad file number" error. This usually indicates that the port listed for the remote repository can\'t be reached.'
 }
 RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
 	return !!this._remoteErrorCodeToString[errorCode];
