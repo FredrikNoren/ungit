@@ -231,6 +231,7 @@ GraphActions.Checkout.prototype.perform = function(ref, callback) {
 			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, callback);
 		else
 			callback();
+		return true;
 	});
 }
 
