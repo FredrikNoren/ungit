@@ -76,7 +76,7 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 			return !err || self._isRemoteError(err.errorCode);
 		}); 
 	});
-	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath }, function(err, result) {
+	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
 			remoteTags = result;
 			done(err, result);
 			return !err || self._isRemoteError(err.errorCode);

@@ -60,13 +60,20 @@ var MainViewModel = function() {
 		}
 	});
 	api.getCredentialsHandler = function(callback) {
-		var diag = new CredentialsDialogViewModel();
+		var diag;
+		// Only show one credentials dialog if we're asked to show another one while the first one is open
+		// This happens for instance when we fetch nodes and remote tags at the same time
+		if (self.dialog() instanceof CredentialsDialogViewModel)
+			diag = self.dialog();
+		else {
+			diag = new CredentialsDialogViewModel();
+			self.showDialog(diag);
+		}
 		self.programEvents.dispatch({ event: 'credentialsRequested' });
 		diag.closed.add(function() {
 			self.programEvents.dispatch({ event: 'credentialsProvided' });
 			callback({ username: diag.username(), password: diag.password() });
 		});
-		self.showDialog(diag);
 	}
 }
 MainViewModel.prototype.template = 'main';
