@@ -163,6 +163,8 @@ config.users = null; // So that we don't send the users to the client
 
 	app.get('/api/fs/listDirectories', function(req, res) {
 		dir = req.query.term;
+                dir = dir.substring(0, dir.lastIndexOf(path.sep) + 1);
+        console.log(dir);      
 		if(dir) {
 			fs.readdir(dir, function(err, files) {
 				if(err) {
@@ -177,7 +179,7 @@ config.users = null; // So that we don't send the users to the client
 							filteredFiles.push(file);
 						}
 					});
-					res.json('["' + filteredFiles.join('","') + '"]');
+					res.json(filteredFiles);
 				}
 			});
 		}

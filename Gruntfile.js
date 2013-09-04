@@ -4,7 +4,6 @@ module.exports = function(grunt) {
     'public/vendor/js/knockout-2.2.1.js',
     'public/vendor/js/jquery-2.0.0.min.js',
     'public/vendor/js/jquery.dnd_page_scroll.js',
-    'public/vendor/js/jquery-ui.js',
     'public/vendor/js/google.ui.fastbutton.js',
     'public/vendor/js/superagent.js',
     'public/vendor/js/signals.js',
@@ -16,6 +15,7 @@ module.exports = function(grunt) {
     'public/vendor/js/underscore.js',
     'public/vendor/js/bootstrap/modal.js',
     'public/vendor/js/bootstrap/alert.js',
+    'public/vendor/js/typeahead.js',
     'public/source/utils.js',
     'public/source/api.js',
     'public/source/git-graph-actions.js',
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/vendor/css/jquery-ui.css"]
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"]
         }
       }
     },
