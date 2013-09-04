@@ -1,4 +1,10 @@
 
+var ko = require('../vendor/js/knockout-2.2.1');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
+var async = require('async');
+var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
+
 var idCounter = 0;
 var newId = function() { return idCounter++; };
 
@@ -8,7 +14,6 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.status = ko.observable('loading');
 	this.remoteErrorPopup = ko.observable();
 
-	visitedRepositories.tryAdd(repoPath);
 	this.main = main;
 	this.repoPath = repoPath;
 	this.gerritIntegration = ko.observable(null);
@@ -39,6 +44,7 @@ var RepositoryViewModel = function(main, repoPath) {
 		}
 	});
 }
+exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.update = function() {
 	this.updateStatus();
 	this.updateLog();
@@ -219,8 +225,8 @@ StagingViewModel.prototype.setFiles = function(files) {
 }
 StagingViewModel.prototype.toogleAmend = function() {
 	if (!this.amend() && !this.commitMessageTitle()) {
-		this.commitMessageTitle(this.repository.graph.HEAD().title);
-		this.commitMessageBody(this.repository.graph.HEAD().body);
+		this.commitMessageTitle(this.repository.graph.HEAD().title());
+		this.commitMessageBody(this.repository.graph.HEAD().body());
 	}
 	else if(this.amend()) {
 		this.commitMessageTitle('');

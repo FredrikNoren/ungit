@@ -1,15 +1,14 @@
 
-if (typeof exports !== 'undefined') {
-	ko = require('../vendor/js/knockout-2.2.1.js');
-	Vector2 = require('./vector2.js');
-	NodeViewModel = require('./node.js').NodeViewModel;
-	RefViewModel = require('./ref.js').RefViewModel;
-	GraphActions = require('./git-graph-actions.js');
-	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
-	CryptoJS = require('../vendor/js/md5.js').CryptoJS;
-	moment = require('moment');
-	_ = require('underscore');
-}
+
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var Vector2 = require('./vector2.js');
+var NodeViewModel = require('./node.js').NodeViewModel;
+var RefViewModel = require('./ref.js').RefViewModel;
+var GraphActions = require('./git-graph-actions.js');
+var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
+var md5 = require('blueimp-md5').md5;
+var moment = require('moment');
+var _ = require('underscore');
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
@@ -38,7 +37,7 @@ var GitGraphViewModel = function(repository) {
 		return !!self.draggingRef();
 	});
 }
-if (typeof exports !== 'undefined') exports.GitGraphViewModel = GitGraphViewModel;
+exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes().forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
@@ -158,7 +157,7 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 	}
 }
 GitGraphViewModel.colorFromHashOfString = function(string) {
-	return '#' + CryptoJS.MD5(string).toString().slice(0, 6);
+	return '#' + md5(string).toString().slice(0, 6);
 }
 
 GitGraphViewModel.randomColor = function() {

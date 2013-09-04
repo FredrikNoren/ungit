@@ -1,4 +1,5 @@
 
+var ko = require('../vendor/js/knockout-2.2.1.js');
 
 var RefViewModel = function(args) {
 	var self = this;
@@ -50,7 +51,7 @@ var RefViewModel = function(args) {
 		return self.remoteRef().node().isAncestor(self.node());
 	});
 }
-if (typeof exports !== 'undefined') exports.RefViewModel = RefViewModel;
+exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {
 	this.graph.draggingRef(this);
 }

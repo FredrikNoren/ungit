@@ -34,7 +34,11 @@
     "semver": "2.0.8",
     "forever-monitor": "1.1.0",
     "open": "0.0.4",
-    "optimist": "0.6.0"
+    "optimist": "0.6.0",
+    "crossroads": "~0.12.0",
+    "signals": "~1.0.0",
+    "hasher": "~1.1.4",
+    "blueimp-md5": "~1.0.3"
   },
   "devDependencies": {
     "mocha": "1.11.0",
@@ -49,7 +53,7 @@
     "grunt-plato": "0.2.1",
     "grunt-contrib-imagemin": "0.2.0",
     "grunt-image-embed": "0.3.1",
-    "grunt-concat-sourcemap": "~0.3.0"
+    "grunt-browserify": "~1.2.4"
   },
   "engines": {
     "node": ">=0.10"

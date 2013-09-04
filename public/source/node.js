@@ -1,4 +1,10 @@
 
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var Vector2 = require('./vector2');
+var md5 = require('blueimp-md5').md5;
+var GraphActions = require('./git-graph-actions');
+var moment = require('moment');
+
 NodeViewModel = function(graph, sha1) {
 	var self = this;
 
@@ -50,7 +56,7 @@ NodeViewModel = function(graph, sha1) {
 	this.authorDateFromNow = ko.observable();
 	this.authorName = ko.observable();
 	this.authorEmail = ko.observable();
-	this.authorGravatar = ko.computed(function() { return CryptoJS.MD5(self.authorEmail()); });
+	this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
 
 	this.index = ko.observable();
 	this.ancestorOfHEAD = ko.observable(false);
@@ -103,7 +109,7 @@ NodeViewModel = function(graph, sha1) {
 		new GraphActions.Delete(this.graph, this),
 	];
 }
-if (typeof exports !== 'undefined') exports.NodeViewModel = NodeViewModel;
+exports.NodeViewModel = NodeViewModel;
 NodeViewModel.prototype.setData = function(args) {
 	this.commitTime(moment(args.commitDate));
 	this.authorTime(moment(args.authorDate));

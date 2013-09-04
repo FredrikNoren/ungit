@@ -1,6 +1,9 @@
 
+var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
+var Vector2 = require('./vector2');
 
 var logRenderer = {};
+module.exports = logRenderer;
 
 logRenderer.origin = new Vector2(5, 200);
 

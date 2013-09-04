@@ -1,4 +1,19 @@
 
+var ko = require('../vendor/js/knockout-2.2.1');
+var $ = require('../vendor/js/jquery-2.0.0.min');
+require('../vendor/js/jquery.dnd_page_scroll');
+require('../vendor/js/bootstrap/modal');
+var hasher = require('hasher');
+var crossroads = require('crossroads');
+var Api = require('./api');
+var app = require('./app');
+var MainViewModel = app.MainViewModel;
+var CrashViewModel = app.CrashViewModel;
+var AppViewModel = app.AppViewModel;
+var PathViewModel = app.PathViewModel;
+var HomeViewModel = app.HomeViewModel;
+var logRenderer = require('./logrenderer');
+
 // Request animation frame polyfill
 (function() {
     var lastTime = 0;
@@ -207,6 +222,17 @@ var main = new MainViewModel();
 var app = new AppViewModel(main);
 
 ko.applyBindings(app);
+
+// routing
+crossroads.addRoute('/', function() {
+    main.path('');
+    main.content(new HomeViewModel());
+});
+
+crossroads.addRoute('/repository{?query}', function(query) {
+    main.path(query.path);
+    main.content(new PathViewModel(main, query.path));
+})
 
 
 //setup hasher

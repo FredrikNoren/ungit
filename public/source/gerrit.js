@@ -1,4 +1,8 @@
 
+var ko = require('../vendor/js/knockout-2.2.1');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+
+
 var GerritIntegrationViewModel = function(repository) {
 	var self = this;
 	this.repository = repository;
@@ -11,6 +15,7 @@ var GerritIntegrationViewModel = function(repository) {
 	this.updateCommitHook();
 	this.updateChanges();
 }
+exports.GerritIntegrationViewModel = GerritIntegrationViewModel;
 GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 	var self = this;
 	api.query('GET', '/gerrit/commithook', { path: this.repository.repoPath }, function(err, hook) {

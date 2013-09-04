@@ -1,11 +1,10 @@
 
-if (typeof exports !== 'undefined') {
-	ko = require('../vendor/js/knockout-2.2.1.js');
-	inherits = require('./utils').inherits;
-}
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var inherits = require('util').inherits;
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 
 var GraphActions = {};
-if (typeof module !== 'undefined') module.exports = GraphActions;
+module.exports = GraphActions;
 
 GraphActions.ActionBase = function(graph) {
 	this.graph = graph;

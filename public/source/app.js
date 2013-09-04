@@ -1,4 +1,10 @@
 
+var crossroads = require('crossroads');
+var signals = require('signals');
+var ko = require('../vendor/js/knockout-2.2.1');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var RepositoryViewModel = require('./repository').RepositoryViewModel;
+
 var AppViewModel = function(main) {
 	var self = this;
 	this.content = ko.observable(main);
@@ -6,6 +12,7 @@ var AppViewModel = function(main) {
 		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 	});
 }
+exports.AppViewModel = AppViewModel;
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
@@ -76,6 +83,7 @@ var MainViewModel = function() {
 		});
 	}
 }
+exports.MainViewModel = MainViewModel;
 MainViewModel.prototype.template = 'main';
 MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
@@ -159,10 +167,12 @@ function HomeViewModel() {
 		};
 	});
 }
+exports.HomeViewModel = HomeViewModel;
 HomeViewModel.prototype.template = 'home';
 
 var CrashViewModel = function() {
 }
+exports.CrashViewModel = CrashViewModel;
 CrashViewModel.prototype.template = 'crash';
 
 var LoginViewModel = function() {
@@ -227,6 +237,7 @@ var PathViewModel = function(main, path) {
 	this.cloneDestination = ko.observable();
 	this.repository = ko.observable();
 }
+exports.PathViewModel = PathViewModel;
 PathViewModel.prototype.template = 'path';
 PathViewModel.prototype.shown = function() {
 	this.updateStatus();
@@ -242,6 +253,7 @@ PathViewModel.prototype.updateStatus = function() {
 		if (!err) {
 			self.status('repository');
 			self.repository(new RepositoryViewModel(self.main, self.path));
+			visitedRepositories.tryAdd(self.path);
 		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
 			return true;
@@ -278,13 +290,3 @@ PathViewModel.prototype.cloneRepository = function() {
 	});
 }
 
-
-crossroads.addRoute('/', function() {
-	main.path('');
-	main.content(new HomeViewModel());
-});
-
-crossroads.addRoute('/repository{?query}', function(query) {
-	main.path(query.path);
-	main.content(new PathViewModel(main, query.path));
-})
