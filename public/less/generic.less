@@ -13,10 +13,18 @@
   src: local('Open Sans'), local('OpenSans'), url('../fonts/OpenSans.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Source Code Pro Medium'), local('SourceCodePro-Medium'), url('../fonts/SourceCodePro-Medium.woff') format('woff');
+}
+
 // -- Bootstrap styling ---
 
 @navbar-bg: #2B3844;
 @font-family-sans-serif: 'Open Sans';
+@font-family-monospace: 'Source Code Pro';
 @body-bg: #252833;
 @progress-bg: rgba(0, 0, 0, 0.2);
 @progress-bar-bg: rgba(0, 0, 0, 0.2);
@@ -166,6 +174,7 @@ hr {
 	border-radius: 3px;
 	background: rgba(255, 255, 255, 0.1);
 	font-family: @font-family-monospace;
+	font-size: 12px;
 	.fileDiffLineNumbers {
 		width: 50px;
 		text-align: center;
