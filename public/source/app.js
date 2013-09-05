@@ -4,6 +4,7 @@ var signals = require('signals');
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var RepositoryViewModel = require('./repository').RepositoryViewModel;
+var addressParser = require('../../source/address-parser');
 
 var AppViewModel = function(main) {
 	var self = this;
@@ -227,12 +228,9 @@ var PathViewModel = function(main, path) {
 	this.cloneDestinationImplicit = ko.computed(function() {
 		var defaultText = 'destination folder';
 		if (!self.cloneUrl()) return defaultText;
-		var ss = self.cloneUrl().split('/');
-		if (ss.length == 0) return defaultText;
-		var s = _.last(ss);
-		if (s.indexOf('.git') == s.length - 4) s = s.slice(0, -4);
-		if (!s) return defaultText;
-		return s;
+
+		var parsedAddress = addressParser.parseAddress(self.cloneUrl());
+		return parsedAddress.shortProject || defaultText;
 	});
 	this.cloneDestination = ko.observable();
 	this.repository = ko.observable();
