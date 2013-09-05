@@ -163,12 +163,10 @@ config.users = null; // So that we don't send the users to the client
 
 	app.get('/api/fs/listDirectories', function(req, res) {
 		dir = req.query.term.trim();
-                token = dir.substring(dir.lastIndexOf(path.sep) + 1, dir.length);
-                dir = dir.substring(0, dir.lastIndexOf(path.sep) + 1);
 
-		if(dir) {
+		if (dir) {
 			fs.readdir(dir, function(err, files) {
-				if(err) {
+				if (err) {
 					winston.error(err.stack);
 					res.json(400, err);
 				} else {
@@ -176,7 +174,7 @@ config.users = null; // So that we don't send the users to the client
 					files.forEach(function(file) {
 						absolutePath = dir + file;
 						stat = fs.statSync(absolutePath);
-						if(stat && stat.isDirectory() && file.toLowerCase().indexOf(token.toLowerCase()) > -1) {
+						if (stat && stat.isDirectory()) {
 							filteredFiles.push(absolutePath);
 						}
 					});
