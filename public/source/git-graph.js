@@ -36,16 +36,16 @@ var GitGraphViewModel = function(repository) {
 	this.showDropTargets = ko.computed(function() {
 		return !!self.draggingRef();
 	});
+	this.scrolledToEnd = _.debounce(function() {
+		self.maxNNodes = self.maxNNodes + 25;
+		self.loadNodesFromApi();
+	}, 1000, true);
 }
 exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes().forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
 	});
-}
-GitGraphViewModel.prototype.scrolledToEnd = function() {
-	this.maxNNodes = this.maxNNodes + 10;
-	this.loadNodesFromApi();
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
