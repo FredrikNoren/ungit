@@ -195,18 +195,13 @@ ko.bindingHandlers.autocomplete = {
                 url = '/#/repository?path=' + encodeURI($('#inputPath').val());
                 window.location = url;
             }
+
             return true;
         });
 
-
-$('#inputPath').typeahead([
-    {
-        remote: '/api/fs/listDirectories?term=%QUERY'
-    }
-]);
-
-
-
+        $('#inputPath').typeahead([{
+            remote: { url: '/api/fs/listDirectories?term=%QUERY' }
+        }]);
     }
 };
 
