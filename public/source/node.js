@@ -95,7 +95,7 @@ NodeViewModel = function(graph, sha1) {
 	})
 	this.branchingFormVisible = ko.observable(false);
 	this.canCreateRef = ko.computed(function() {
-		return self.newBranchName() && self.newBranchName().trim();
+		return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
 	})
 
 	this.dropareaGraphActions = [
