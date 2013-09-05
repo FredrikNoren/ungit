@@ -61,8 +61,10 @@ config.users = null; // So that we don't send the users to the client
 	app.use(noCache);
 	app.use(function(req, res, next) {
 		// The default timeout is 2 min, but since operations such as clone can take much
-		// longer than that, we increase the timeout to 2h.
-		res.setTimeout(2 * 60 * 60 * 1000);
+		// longer than that, we increase the timeout to 2h. Only available in the later node versions
+		// so check if the method is available first.
+		if (res.setTimeout)
+			res.setTimeout(2 * 60 * 60 * 1000);
 		next();
 	});
 	
