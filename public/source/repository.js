@@ -32,11 +32,6 @@ var RepositoryViewModel = function(main, repoPath) {
 		if (newValue == 'inited') {
 			self.update();
 			self.fetch({ nodes: true, tags: true });
-			api.repositoryChanged.add(function(data) {
-				if (!data.repository || data.repository == self.repoPath) {
-					self.update();
-				}
-			});
 			api.watchRepository(repoPath, function() { self.watcherReady(true); });
 			if (ungit.config.gerrit) {
 				self.gerritIntegration(new GerritIntegrationViewModel(self));

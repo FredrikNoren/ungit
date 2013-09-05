@@ -84,6 +84,10 @@ var MainViewModel = function(browseTo) {
 			callback({ username: diag.username(), password: diag.password() });
 		});
 	}
+	api.repositoryChanged.add(function(data) {
+		if (self.content() && self.content() instanceof PathViewModel && self.content().repository())
+			self.content().repository().update();
+	});
 }
 exports.MainViewModel = MainViewModel;
 MainViewModel.prototype.template = 'main';
