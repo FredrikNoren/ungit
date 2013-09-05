@@ -29,7 +29,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'no-remote-configured';
         else if (err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
           err.errorCode = 'conflict';
-        else if (err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1)
+        else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
+          (err.stderr.indexOf('Could not resolve hostname') != -1))
           err.errorCode = 'offline';
         else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
           err.errorCode = 'proxy-authentication-required';
