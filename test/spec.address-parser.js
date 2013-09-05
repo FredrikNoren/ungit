@@ -11,6 +11,7 @@ describe('git-parser addresses', function () {
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.port).to.be(undefined);
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress ssh://some.address.com:8080/my/gerrit/project', function() {
@@ -19,6 +20,7 @@ describe('git-parser addresses', function () {
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.port).to.be('8080');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress some.address.com:my/gerrit/project.git', function() {
@@ -26,6 +28,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress someuser@some.address.com:my/gerrit/project.git', function() {
@@ -34,6 +37,7 @@ describe('git-parser addresses', function () {
     expect(parsed.username).to.be('someuser');
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress some.address.com:my/gerrit/project', function() {
@@ -41,6 +45,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress someuser@some.address.com:my/gerrit/project', function() {
@@ -49,6 +54,7 @@ describe('git-parser addresses', function () {
     expect(parsed.username).to.be('someuser');
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
   it('parseAddress https://some.address.com/my/gerrit/project', function() {
@@ -56,6 +62,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('some.address.com');
     expect(parsed.project).to.be('my/gerrit/project');
+    expect(parsed.shortProject).to.be('project');
   });
 
 
@@ -64,6 +71,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('localhost');
     expect(parsed.project).to.be('somerepo');
+    expect(parsed.shortProject).to.be('somerepo');
   });
 
   it('parseAddress ~/something/somerepo', function() {
@@ -71,6 +79,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('localhost');
     expect(parsed.project).to.be('somerepo');
+    expect(parsed.shortProject).to.be('somerepo');
   });
 
   it('parseAddress C:\\something\\somerepo', function() {
@@ -78,6 +87,7 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('localhost');
     expect(parsed.project).to.be('somerepo');
+    expect(parsed.shortProject).to.be('somerepo');
   });
 
   it('parseAddress C:\\somerepo', function() {
@@ -85,6 +95,15 @@ describe('git-parser addresses', function () {
     var parsed = addressParser.parseAddress(addr);
     expect(parsed.host).to.be('localhost');
     expect(parsed.project).to.be('somerepo');
+    expect(parsed.shortProject).to.be('somerepo');
+  });
+
+  it('parseAddress C:\\something\\somerepo\\', function() {
+    var addr = 'C:\\something\\somerepo\\';
+    var parsed = addressParser.parseAddress(addr);
+    expect(parsed.host).to.be('localhost');
+    expect(parsed.project).to.be('somerepo');
+    expect(parsed.shortProject).to.be('somerepo');
   });
 
 });
