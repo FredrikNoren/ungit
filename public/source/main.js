@@ -218,7 +218,7 @@ window.onerror = function(err) {
 };
 
 api = new Api();
-var main = new MainViewModel();
+var main = new MainViewModel(browseTo);
 var app = new AppViewModel(main);
 
 ko.applyBindings(app);

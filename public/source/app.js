@@ -22,8 +22,9 @@ AppViewModel.prototype.templateChooser = function(data) {
 	return data.template;
 };
 
-var MainViewModel = function() {
+var MainViewModel = function(browseTo) {
 	var self = this;
+	this.browseTo = browseTo;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
@@ -90,7 +91,7 @@ MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
 MainViewModel.prototype.submitPath = function() {
-	browseTo('repository?path=' + encodeURIComponent(this.path()));
+	this.browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
 MainViewModel.prototype.showDialog = function(dialog) {
 	var self = this;
@@ -284,7 +285,7 @@ PathViewModel.prototype.cloneRepository = function() {
 		self.main.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;
-		browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
+		self.main.browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
 	});
 }
 
