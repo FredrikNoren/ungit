@@ -40,7 +40,7 @@ Api.prototype._initSocket = function() {
 	this.socket = io.connect();
 	this.socket.on('error', function(err) {
 		self._isConnected(function(connected) {
-			if (connected) throw new Error('Socket error: ' + JSON.stringify(err));
+			if (connected) throw err;
 			else self._onDisconnect();
 		});
 	});
