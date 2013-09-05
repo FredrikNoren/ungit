@@ -190,7 +190,22 @@ ko.bindingHandlers.modal = {
 ko.bindingHandlers.autocomplete = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         ko.utils.registerEventHandler(element, "keyup", function(event) {
-            if(event.keyCode == 13){
+
+            if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
+                api.query('GET', '/fs/listDirectories', {term: $('#inputPath').val()}, function(err, directoryList) {
+                    if(!err) {
+                        $("#inputPath").autocomplete({
+                            source: directoryList,
+                            messages: {
+                                noResults: '',
+                                results: function() {}
+                            }
+                        });
+                        $("#inputPath").autocomplete("search", $('#inputPath').val());
+                    } else {
+                    }
+                });
+            } else if(event.keyCode == 13){
                 event.preventDefault();
                 url = '/#/repository?path=' + encodeURI($('#inputPath').val());
                 window.location = url;
@@ -198,10 +213,6 @@ ko.bindingHandlers.autocomplete = {
 
             return true;
         });
-
-        $('#inputPath').typeahead([{
-            remote: { url: '/api/fs/listDirectories?term=%QUERY' }
-        }]);
     }
 };
 
