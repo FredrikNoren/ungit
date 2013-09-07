@@ -33,6 +33,8 @@ Configure
 ---------
 Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on *nix, `C:/Users/USERNAME/` on windows). Can be in either json or ini format. See source/config.js for available options.
 
+You can also override configuration variables at launch by specifying them as command line arguments; `ungit --port=8080`.
+
 Example of `~/.ungitrc` configuration file to change default port and enable bugtracking:
 
 ```json
