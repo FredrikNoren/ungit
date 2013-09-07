@@ -466,7 +466,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
 			var content = req.body.content;
 			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
-			fs.writeFileSync(req.body.file, content);
+			fs.writeFileSync(req.param('file'), content);
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){

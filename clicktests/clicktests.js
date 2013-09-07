@@ -35,7 +35,7 @@ function prependLines(pre, text) {
 function startUngitServer(options, callback) {
 	console.log('Starting ungit server...', options);
 	var hasStarted = false;
-	var ungitServer = child_process.spawn('node', ['bin/ungit', '--port=' + config.port, '--no-launchBrowser', '--dev', '--no-bugtracking', '--autoShutdownTimeout=5000', '--maxNAutoRestartOnCrash=0'].concat(options));
+	var ungitServer = child_process.spawn('node', ['bin/ungit', '--port=' + config.port, '--no-launchBrowser', '--dev', '--no-bugtracking', '--autoShutdownTimeout=10000', '--maxNAutoRestartOnCrash=0'].concat(options));
 	ungitServer.stdout.on("data", function (data) {
 		console.log(prependLines('[server] ', data));
 		
@@ -52,15 +52,6 @@ function startUngitServer(options, callback) {
 	});
 	ungitServer.stderr.on("data", function (data) {
 		console.log(prependLines('[server ERROR] ', data));
-	});
-}
-
-function createTestDirectory(page, callback) {
-	var url = 'http://localhost:' + config.port + '/api/testing/createdir';
-	page.open(url, 'POST', function(status) {
-		if (status == 'fail') return callback({ status: status, content: page.plainText });
-		var json = JSON.parse(page.plainText);
-		callback(null, json.path);
 	});
 }
 
@@ -113,7 +104,7 @@ function runTests() {
 			var timeout = setTimeout(function() {
 				console.error('Test timeouted!');
 				callback('timeout');
-			}, 3000);
+			}, 10000);
 			test.description(function(err, res) {
 				clearTimeout(timeout);
 				if (err) {
@@ -151,9 +142,11 @@ test('Open home screen', function(done) {
 var testRepoPath;
 
 test('Create test directory', function(done) {
-	createTestDirectory(page, function(err, path) {
-		if (err) return done(err);
-		testRepoPath = path;
+	var url = 'http://localhost:' + config.port + '/api/testing/createdir';
+	page.open(url, 'POST', function(status) {
+		if (status == 'fail') return done({ status: status, content: page.plainText });
+		var json = JSON.parse(page.plainText);
+		testRepoPath = json.path;
 		done();
 	});
 });
@@ -186,6 +179,41 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 	waitForElement(page, 'repository-view', function() {
 		done();
 	});
+});
+
+var testFileName = 'testfile.txt';
+
+test('Creating a file should make it show up in staging', function(done) {
+
+	var tempPage = createPage(function(err) {
+		console.error('Caught error');
+		phantom.exit(1);
+	});
+
+	var url = 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(testRepoPath + '/' + testFileName);
+	tempPage.open(url, 'POST', function(status) {
+		if (status == 'fail') return done({ status: status, content: page.plainText });
+		tempPage.close();
+		
+		waitForElement(page, 'staging-file', function() {
+			done();
+		});
+	});
+});
+
+test('Committing a file should remove it from staging and make it show up in log', function(done) {
+	click(page, 'staging-commit-title')
+	page.sendEvent('keypress', 'My commit message');
+	setTimeout(function() {
+		click(page, 'commit');
+		waitForElement(page, 'node', function() {
+			var found = page.evaluate(function(selector) {
+				return $(selector).length > 0;
+			}, taIdToSelector('staging-file'));
+			if (found) throw new Error('Staged file should have dissapeared by now.');
+			done();
+		});
+	}, 100);
 });
 
 startUngitServer([], function(err) {
