@@ -10,7 +10,7 @@
 <body>
 
 <script type="text/html" id="home">
-	<div class="container home">
+	<div class="container home" data-ta="home-page">
 		<p class="text-center">
 			<img src="images/logoLarge.png" class="logo">
 		</p>
@@ -61,7 +61,7 @@
 
 
 <script type="text/html" id="path">
-	<div class="path" data-bind="shown: shown">
+	<div class="path" data-bind="shown: shown" data-ta="path-page">
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			<!-- ko template: { name: 'progressBar', data: loadingProgressBar } --><!-- /ko -->
@@ -80,7 +80,7 @@
 					<div class="col-lg-6">
 						<div class="panel">
 							<div class="panel-heading">Create a new repository</div>
-							<button class="btn btn-primary btn-large" data-bind='click: initRepository'>Initialize a repository here!</button>
+							<button data-ta="init-repository" class="btn btn-primary btn-large" data-bind='click: initRepository'>Initialize a repository here!</button>
 						</div>
 					</div>
 					<div class="col-lg-6">
@@ -208,7 +208,7 @@
 </script>
 
 <script type="text/html" id="repository">
-	<div class="repository">
+	<div class="repository" data-ta="repository-view">
 
 		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
 			Loading...
@@ -444,12 +444,12 @@
 	<div class="navbar navbar-static-top">
 
 		<div class="container container-wide">
-			<a class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
+			<a data-ta="home-link" class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
 
 			<div class="row">
 			<form class="navbar-form pull-left" data-bind="submit: submitPath">
 				<div class="col-lg-12">
-				<input type="text" class="form-control input-lg" data-bind="value: path">
+				<input data-ta="navigation-path" type="text" class="form-control input-lg" data-bind="value: path">
 				</div>
 			</form>
 			</div>

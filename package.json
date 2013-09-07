@@ -53,7 +53,8 @@
     "grunt-plato": "0.2.1",
     "grunt-contrib-imagemin": "0.2.0",
     "grunt-image-embed": "0.3.1",
-    "grunt-browserify": "~1.2.4"
+    "grunt-browserify": "~1.2.4",
+    "phantomjs": "~1.9.1-9"
   },
   "engines": {
     "node": ">=0.10"

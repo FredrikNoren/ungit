@@ -1,3 +1,7 @@
+var childProcess = require('child_process');
+var phantomjs = require('phantomjs');
+var path = require('path');
+
 module.exports = function(grunt) {
 
   grunt.initConfig({
@@ -97,6 +101,21 @@ module.exports = function(grunt) {
     },
   });
 
+  grunt.registerTask('clicktest', 'Run clicktests.', function() {
+    var done = this.async();
+    grunt.log.writeln('Running clicktests...');
+    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'clicktests.js')]);
+    child.stdout.on('data', function(data) {
+      grunt.log.writeln(data);
+    });
+    child.stderr.on('data', function(data) {
+      grunt.log.error(data);
+    })
+    child.on('exit', function(code) {
+      done(code == 0);
+    });
+  });
+
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -111,7 +130,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
-  grunt.registerTask('test', ['simplemocha']);
+  grunt.registerTask('test', ['simplemocha', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
