@@ -20,8 +20,8 @@ var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.j
 	env: { LANG: 'en_US', LC_ALL: 'C' }
 });
 
-child.on('exit', function () {
-	console.log('ungit can\'t start, see logs for more information.');
+child.on('exit', function (res) {
+	console.log('Stopped keeping ungit alive');
 });
 
 function launchBrowser() {

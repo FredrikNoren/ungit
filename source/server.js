@@ -65,6 +65,7 @@ config.users = null; // So that we don't send the users to the client
 		var refreshAutoShutdownTimeout = function() {
 			if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
 			autoShutdownTimeout = setTimeout(function() {
+				winston.info('Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' + config.autoShutdownTimeout + 'ms)');
 				process.exit(0);
 			}, config.autoShutdownTimeout);
 		}
