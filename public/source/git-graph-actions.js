@@ -256,7 +256,7 @@ GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.perform = function(ref, callback) {
 	var self = this;
 	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
+	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote, socketId: api.socketId }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
 		self.graph.repository.fetch({ tags: true });

@@ -284,7 +284,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
 		if (req.body.remote)
-			git('push origin :"' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFail.bind(null, res));
+			git(credentialsOption(req.body.socketId) + ' push origin :"' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFail.bind(null, res));
 		else
 			git('branch -D "' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 	});
