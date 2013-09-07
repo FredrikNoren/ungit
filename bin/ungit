@@ -14,6 +14,7 @@ if (config.bugtracking)
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
 	silent: false,
 	minUptime: 2000,
+	max: config.maxNAutoRestartOnCrash,
 	cwd: path.join(process.cwd(), '..'),
 	options: process.argv.slice(2),
 	env: { LANG: 'en_US', LC_ALL: 'C' }

@@ -59,6 +59,22 @@ config.users = null; // So that we don't send the users to the client
 		next();
 	}
 	app.use(noCache);
+
+	if (config.autoShutdownTimeout) {
+		var autoShutdownTimeout;
+		var refreshAutoShutdownTimeout = function() {
+			if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
+			autoShutdownTimeout = setTimeout(function() {
+				process.exit(0);
+			}, config.autoShutdownTimeout);
+		}
+		app.use(function(req, res, next) {
+			refreshAutoShutdownTimeout();
+			next();
+		});
+		refreshAutoShutdownTimeout();
+	}
+
 	app.use(function(req, res, next) {
 		// The default timeout is 2 min, but since operations such as clone can take much
 		// longer than that, we increase the timeout to 2h. Only available in the later node versions
