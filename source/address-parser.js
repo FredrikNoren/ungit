@@ -6,7 +6,7 @@ var addressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
 var addressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
 var addressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
 var addressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
-var addressHttpsRegexp = /https:\/\/([^\/]*)\/(.*)/;
+var addressHttpsRegexp = /https:\/\/([^\/]*)\/([^.]*)(\.git)?$/;
 var addressUnixLocalRegexp = /.*\/([^\/]+)/;
 
 exports.parseAddress = function(remote) {
