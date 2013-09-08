@@ -219,8 +219,8 @@ ko.bindingHandlers.modal = {
 ko.bindingHandlers.autocomplete = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         ko.utils.registerEventHandler(element, "keyup", function(event) {
-
-            if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
+            lastChar = $(element).val().slice(-1);
+            if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
                 api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
                     if(!err) {
                         $(element).autocomplete({

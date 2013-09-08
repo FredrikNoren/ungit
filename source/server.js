@@ -191,25 +191,28 @@ config.users = null; // So that we don't send the users to the client
 
 	app.get('/api/fs/listDirectories', function(req, res) {
 		dir = req.query.term.trim();
-
-		if (dir) {
-			fs.readdir(dir, function(err, files) {
-				if (err) {
-					winston.error(err.stack);
-					res.json(400, err);
-				} else {
-					filteredFiles = [];
-					files.forEach(function(file) {
-						absolutePath = dir + file;
-						stat = fs.statSync(absolutePath);
-						if (stat && stat.isDirectory()) {
-							filteredFiles.push(absolutePath);
-						}
-					});
-					res.json(filteredFiles);
-				}
-			});
-		}
+		
+		readUserConfig(function(err, userconfig) {
+			if (err) res.json(400, err);
+			else if (dir) {
+				fs.readdir(dir, function(err, files) {
+					if (err) {
+						winston.error(err.stack);
+						res.json(400, err);
+					} else {
+						filteredFiles = [];
+						files.forEach(function(file) {
+							absolutePath = dir + file;
+							stat = fs.statSync(absolutePath);
+							if (stat && stat.isDirectory()) {
+								filteredFiles.push(absolutePath);
+							}
+						});
+						res.json(filteredFiles);
+					}
+				});
+			}
+		});
 	});
 
 	// Error handling
