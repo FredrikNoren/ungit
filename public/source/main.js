@@ -3,6 +3,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
+require('../vendor/js/jquery-ui-1.10.3.custom.js');
 var hasher = require('hasher');
 var crossroads = require('crossroads');
 var Api = require('./api');
@@ -214,6 +215,36 @@ ko.bindingHandlers.modal = {
         });
     }
 };
+
+ko.bindingHandlers.autocomplete = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        ko.utils.registerEventHandler(element, "keyup", function(event) {
+            lastChar = $(element).val().slice(-1);
+            if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
+                api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
+                    if(!err) {
+                        $(element).autocomplete({
+                            source: directoryList,
+                            messages: {
+                                noResults: '',
+                                results: function() {}
+                            }
+                        });
+                        $(element).autocomplete("search", $(element).val());
+                    } else {
+                    }
+                });
+            } else if(event.keyCode == 13){
+                event.preventDefault();
+                url = '/#/repository?path=' + encodeURI($(element).val());
+                window.location = url;
+            }
+
+            return true;
+        });
+    }
+};
+
 
 var prevTimestamp = 0;
 var updateAnimationFrame = function(timestamp) {
