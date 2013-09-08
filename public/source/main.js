@@ -221,22 +221,22 @@ ko.bindingHandlers.autocomplete = {
         ko.utils.registerEventHandler(element, "keyup", function(event) {
 
             if(event.keyCode == 191 || event.keyCode == 220){  // When "/" or "\"
-                api.query('GET', '/fs/listDirectories', {term: $('#inputPath').val()}, function(err, directoryList) {
+                api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
                     if(!err) {
-                        $("#inputPath").autocomplete({
+                        $(element).autocomplete({
                             source: directoryList,
                             messages: {
                                 noResults: '',
                                 results: function() {}
                             }
                         });
-                        $("#inputPath").autocomplete("search", $('#inputPath').val());
+                        $(element).autocomplete("search", $(element).val());
                     } else {
                     }
                 });
             } else if(event.keyCode == 13){
                 event.preventDefault();
-                url = '/#/repository?path=' + encodeURI($('#inputPath').val());
+                url = '/#/repository?path=' + encodeURI($(element).val());
                 window.location = url;
             }
 
