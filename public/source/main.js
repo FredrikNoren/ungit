@@ -3,6 +3,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
+require('../vendor/js/jquery-ui-1.10.3.custom.js');
 var hasher = require('hasher');
 var crossroads = require('crossroads');
 var Api = require('./api');

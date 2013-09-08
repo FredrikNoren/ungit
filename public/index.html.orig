@@ -449,7 +449,11 @@
 			<div class="row">
 			<form class="navbar-form pull-left" data-bind="submit: submitPath">
 				<div class="col-lg-12">
-				<input id="inputPath" data-ta="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path">
+<<<<<<< HEAD
+				<input id="inputPath" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path">
+=======
+				<input data-ta="navigation-path" type="text" class="form-control input-lg" data-bind="value: path">
+>>>>>>> upstream/master
 				</div>
 			</form>
 			</div>
