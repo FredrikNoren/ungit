@@ -13,6 +13,9 @@ var semver = require('semver');
 var path = require('path');
 var fs = require('fs');
 
+
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, {'timestamp':true});
 if (config.logDirectory)
 	winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
 

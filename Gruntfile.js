@@ -106,7 +106,7 @@ module.exports = function(grunt) {
     grunt.log.writeln('Running clicktests...');
     var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'clicktests.js')]);
     child.stdout.on('data', function(data) {
-      grunt.log.writeln(data);
+      grunt.log.write(data);
     });
     child.stderr.on('data', function(data) {
       grunt.log.error(data);

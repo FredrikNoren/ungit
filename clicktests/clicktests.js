@@ -2,10 +2,15 @@ var webpage = require('webpage');
 var child_process = require('child_process');
 var expect = require('../node_modules/expect.js/expect');
 var async = require('../node_modules/async/lib/async');
+var cliColor = require('../node_modules/ansi-color/lib/ansi-color');
 
 var config = {
 	port: 8449
 };
+
+function log(text) {
+	console.log((new Date()).toISOString(), text);
+}
 
 function createPage(onError) {
 	var page = webpage.create();
@@ -21,8 +26,19 @@ function createPage(onError) {
 		onError(msg);
 	};
 	page.onResourceError = function(resourceError) {
-	    console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
-	    console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+	    log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
+	    log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+	};
+	page.onResourceRequested = function(requestData, networkRequest) {
+	    log('Request (#' + requestData.id + '): ' + requestData.url);
+	    // Abort gravatar requests to speed up things (since they will anyway only fail)
+	    if (requestData.url.indexOf('http://www.gravatar.com/avatar/') == 0) {
+	    	networkRequest.abort();
+	    }
+	};
+	page.onResourceReceived = function(response) {
+		if (response.stage == 'end')
+	    	log('Response (#' + response.id + ', stage "' + response.stage + '")');
 	};
 	return page;
 }
@@ -33,11 +49,20 @@ function prependLines(pre, text) {
 }
 
 function startUngitServer(options, callback) {
-	console.log('Starting ungit server...', options);
+	log('Starting ungit server...', options);
 	var hasStarted = false;
-	var ungitServer = child_process.spawn('node', ['bin/ungit', '--port=' + config.port, '--no-launchBrowser', '--dev', '--no-bugtracking', '--autoShutdownTimeout=10000', '--maxNAutoRestartOnCrash=0'].concat(options));
+	options = ['bin/ungit', 
+		'--port=' + config.port, 
+		'--no-launchBrowser', 
+		'--dev', 
+		'--no-bugtracking', 
+		'--autoShutdownTimeout=10000', 
+		'--maxNAutoRestartOnCrash=0', 
+		'--logGitCommands']
+		.concat(options);
+	var ungitServer = child_process.spawn('node', options);
 	ungitServer.stdout.on("data", function (data) {
-		console.log(prependLines('[server] ', data));
+		//console.log(prependLines('[server] ', data));
 		
 		if (data.toString().indexOf('Ungit server already running') >= 0) {
 			callback('server-already-running');
@@ -46,12 +71,30 @@ function startUngitServer(options, callback) {
 		if (data.toString().indexOf('## Ungit started ##') >= 0) {
 			if (hasStarted) throw new Error('Ungit started twice, probably crashed.');
 			hasStarted = true;
-			console.log('Ungit server started.');
+			log('Ungit server started.');
 			callback();
 		}
 	});
 	ungitServer.stderr.on("data", function (data) {
 		console.log(prependLines('[server ERROR] ', data));
+	});
+	ungitServer.on('exit', function() {
+		log('UNGIT SERVER EXITED');
+	})
+}
+
+function createTestFile(filename, callback) {
+
+	var tempPage = createPage(function(err) {
+		console.error('Caught error');
+		phantom.exit(1);
+	});
+
+	var url = 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(filename);
+	tempPage.open(url, 'POST', function(status) {
+		if (status == 'fail') return callback({ status: status, content: page.plainText });
+		tempPage.close();
+		callback();
 	});
 }
 
@@ -77,11 +120,29 @@ function getClickPosition(page, id) {
 
 function waitForElement(page, id, callback) {
 	var tryFind = function() {
-		console.log('Trying to find element: ' + id);
+		log('Trying to find element: ' + id);
 		var found = page.evaluate(function(selector) {
 			return $(selector).length > 0;
 		}, taIdToSelector(id));
-		if (found) callback();
+		if (found) {
+			log('Found element: ' + id);
+			callback();
+		}
+		else setTimeout(tryFind, 500);
+	}
+	tryFind();
+}
+
+function waitForNotElement(page, id, callback) {
+	var tryFind = function() {
+		log('Trying to NOT find element: ' + id);
+		var found = page.evaluate(function(selector) {
+			return $(selector).length > 0;
+		}, taIdToSelector(id));
+		if (!found) {
+			log('Found no element matching: ' + id);
+			callback();
+		}
 		else setTimeout(tryFind, 500);
 	}
 	tryFind();
@@ -107,7 +168,7 @@ function test(name, description) {
 function runTests() {
 	async.series(tests.map(function(test) {
 		return function(callback) {
-			console.log('## Running test: ' + test.name);
+			log(cliColor.set('## Running test: ' + test.name, 'magenta'));
 			var timeout = setTimeout(function() {
 				console.error('Test timeouted!');
 				callback('timeout');
@@ -115,10 +176,10 @@ function runTests() {
 			test.description(function(err, res) {
 				clearTimeout(timeout);
 				if (err) {
-					console.log(JSON.stringify(err));
-					console.log('## Test failed: ' + test.name);
+					log(JSON.stringify(err));
+					log(cliColor.set('## Test failed: ' + test.name, 'red'));
 				}
-				else console.log('## Test ok: ' + test.name);
+				else log(cliColor.set('## Test ok: ' + test.name, 'green'));
 				callback(err, res);
 			});
 		}
@@ -169,7 +230,6 @@ test('Open path screen', function(done) {
 test('Init repository should bring you to repo page', function(done) {
 	click(page, 'init-repository');
 	waitForElement(page, 'repository-view', function() {
-		page.render('clicktest.png');
 		expectNotFindElement(page, 'remote-error-popup');
 		done();
 	});
@@ -190,20 +250,9 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 	});
 });
 
-var testFileName = 'testfile.txt';
-
 test('Creating a file should make it show up in staging', function(done) {
-
-	var tempPage = createPage(function(err) {
-		console.error('Caught error');
-		phantom.exit(1);
-	});
-
-	var url = 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(testRepoPath + '/' + testFileName);
-	tempPage.open(url, 'POST', function(status) {
-		if (status == 'fail') return done({ status: status, content: page.plainText });
-		tempPage.close();
-		
+	createTestFile(testRepoPath + '/testfile.txt', function(err) {
+		if (err) return done(err);
 		waitForElement(page, 'staging-file', function() {
 			done();
 		});
@@ -221,6 +270,19 @@ test('Committing a file should remove it from staging and make it show up in log
 		});
 	}, 100);
 });
+
+test('Should be possible to discard a created file', function(done) {
+	createTestFile(testRepoPath + '/testfile2.txt', function(err) {
+		if (err) return done(err);
+		waitForElement(page, 'staging-file', function() {
+			click(page, 'discard-file');
+			waitForNotElement(page, 'staging-file', function() {
+				done();
+			});
+		});
+	});
+});
+
 
 startUngitServer([], function(err) {
 	if (err) {

@@ -186,7 +186,7 @@
 						<span class="new" data-bind="visible: isNew">New</span>
 						<span class="deleted" data-bind="visible: removed">Removed</span>
 						<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
-						<span class="discard" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
+						<span class="discard" data-ta="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation"> discard changes</span></span>
 						<!-- ko if: showingDiffs -->
 						<div class="diffContainer" data-bind="template: { name: 'fileDiff', data: diffs }"></div>
 						<!-- /ko -->
