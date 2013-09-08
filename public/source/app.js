@@ -1,4 +1,11 @@
 
+var crossroads = require('crossroads');
+var signals = require('signals');
+var ko = require('../vendor/js/knockout-2.2.1');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var RepositoryViewModel = require('./repository').RepositoryViewModel;
+var addressParser = require('../../source/address-parser');
+
 var AppViewModel = function(main) {
 	var self = this;
 	this.content = ko.observable(main);
@@ -6,6 +13,7 @@ var AppViewModel = function(main) {
 		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 	});
 }
+exports.AppViewModel = AppViewModel;
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
@@ -14,8 +22,9 @@ AppViewModel.prototype.templateChooser = function(data) {
 	return data.template;
 };
 
-var MainViewModel = function() {
+var MainViewModel = function(browseTo) {
 	var self = this;
+	this.browseTo = browseTo;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
@@ -60,21 +69,33 @@ var MainViewModel = function() {
 		}
 	});
 	api.getCredentialsHandler = function(callback) {
-		var diag = new CredentialsDialogViewModel();
+		var diag;
+		// Only show one credentials dialog if we're asked to show another one while the first one is open
+		// This happens for instance when we fetch nodes and remote tags at the same time
+		if (self.dialog() instanceof CredentialsDialogViewModel)
+			diag = self.dialog();
+		else {
+			diag = new CredentialsDialogViewModel();
+			self.showDialog(diag);
+		}
 		self.programEvents.dispatch({ event: 'credentialsRequested' });
 		diag.closed.add(function() {
 			self.programEvents.dispatch({ event: 'credentialsProvided' });
 			callback({ username: diag.username(), password: diag.password() });
 		});
-		self.showDialog(diag);
 	}
+	api.repositoryChanged.add(function(data) {
+		if (self.content() && self.content() instanceof PathViewModel && self.content().repository())
+			self.content().repository().update();
+	});
 }
+exports.MainViewModel = MainViewModel;
 MainViewModel.prototype.template = 'main';
 MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
 MainViewModel.prototype.submitPath = function() {
-	browseTo('repository?path=' + encodeURIComponent(this.path()));
+	this.browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
 MainViewModel.prototype.showDialog = function(dialog) {
 	var self = this;
@@ -152,10 +173,12 @@ function HomeViewModel() {
 		};
 	});
 }
+exports.HomeViewModel = HomeViewModel;
 HomeViewModel.prototype.template = 'home';
 
 var CrashViewModel = function() {
 }
+exports.CrashViewModel = CrashViewModel;
 CrashViewModel.prototype.template = 'crash';
 
 var LoginViewModel = function() {
@@ -210,16 +233,14 @@ var PathViewModel = function(main, path) {
 	this.cloneDestinationImplicit = ko.computed(function() {
 		var defaultText = 'destination folder';
 		if (!self.cloneUrl()) return defaultText;
-		var ss = self.cloneUrl().split('/');
-		if (ss.length == 0) return defaultText;
-		var s = _.last(ss);
-		if (s.indexOf('.git') == s.length - 4) s = s.slice(0, -4);
-		if (!s) return defaultText;
-		return s;
+
+		var parsedAddress = addressParser.parseAddress(self.cloneUrl());
+		return parsedAddress.shortProject || defaultText;
 	});
 	this.cloneDestination = ko.observable();
 	this.repository = ko.observable();
 }
+exports.PathViewModel = PathViewModel;
 PathViewModel.prototype.template = 'path';
 PathViewModel.prototype.shown = function() {
 	this.updateStatus();
@@ -235,6 +256,7 @@ PathViewModel.prototype.updateStatus = function() {
 		if (!err) {
 			self.status('repository');
 			self.repository(new RepositoryViewModel(self.main, self.path));
+			visitedRepositories.tryAdd(self.path);
 		} else if (err.errorCode == 'not-a-repository') {
 			self.status('uninited');
 			return true;
@@ -256,20 +278,18 @@ PathViewModel.prototype.cloneRepository = function() {
 	self.status('cloning');
 	this.cloningProgressBar.start();
 	var dest = this.cloneDestination() || this.cloneDestinationImplicit();
-	api.query('POST', '/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+
+	var programEventListener = function(event) {
+		if (event.event == 'credentialsRequested') self.cloningProgressBar.pause();
+		else if (event.event == 'credentialsProvided') self.cloningProgressBar.unpause();
+	};
+	this.main.programEvents.add(programEventListener);
+
+	api.query('POST', '/clone', { path: this.path, socketId: api.socketId, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+		self.main.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;
-		browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
+		self.main.browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
 	});
 }
 
-
-crossroads.addRoute('/', function() {
-	main.path('');
-	main.content(new HomeViewModel());
-});
-
-crossroads.addRoute('/repository{?query}', function(query) {
-	main.path(query.path);
-	main.content(new PathViewModel(main, query.path));
-})

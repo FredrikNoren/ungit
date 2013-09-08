@@ -4,13 +4,14 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var temp = require('temp');
-var socketIO = require('socket.io');
-var watchr = require('watchr');
 var async=  require('async');
 var git = require('./git');
 var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
+var socketIO;
+var watchr;
+
 
 exports.pathPrefix = '';
 
@@ -23,47 +24,53 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	var gitConfigCliPager = '-c core.pager=cat';
 
 	var sockets = [];
+	var io;
 
 	if (server) {
-		var io = socketIO.listen(server, {
-			logger: {
-				debug: winston.debug.bind(winston),
-				info: winston.info.bind(winston),
-				error: winston.error.bind(winston),
-				warn: winston.warn.bind(winston)
-			}
-		});
-		io.sockets.on('connection', function (socket) {
-			sockets.push(socket);
-			socket.emit('connected', { socketId: sockets.length - 1 });
-			socket.on('disconnect', function () {
-				if (socket.watchr) {
-					socket.watchr.close();
-					socket.watchr = null;
-					winston.info('Stop watching ' + socket.watchrPath);
+		// To speed up loading times, we start this the next tick since it doesn't have to be instantly started with the server
+		process.nextTick(function() {
+			if (!socketIO) socketIO = require('socket.io');
+			if (!watchr) watchr = require('watchr');
+			io = socketIO.listen(server, {
+				logger: {
+					debug: winston.debug.bind(winston),
+					info: winston.info.bind(winston),
+					error: winston.error.bind(winston),
+					warn: winston.warn.bind(winston)
 				}
 			});
-			socket.on('watch', function (data, callback) {
-				if (socket.watchr) {
-					socket.leave(socket.watchrPath);
-					socket.watchr.close(); // only one watcher per socket
-					winston.info('Stop watching ' + socket.watchrPath);
-				}
-				socket.join(path.normalize(data.path)); // join room for this path
-				var watchOptions = {
-					path: data.path,
-					ignoreCommonPatterns: true,
-					listener: function() {
-						socket.emit('changed', { repository: data.path });
-					},
-					next: function(err, watchers) {
-						callback();
+			io.sockets.on('connection', function (socket) {
+				sockets.push(socket);
+				socket.emit('connected', { socketId: sockets.length - 1 });
+				socket.on('disconnect', function () {
+					if (socket.watchr) {
+						socket.watchr.close();
+						socket.watchr = null;
+						winston.info('Stop watching ' + socket.watchrPath);
 					}
-				};
-				if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
-				socket.watchrPath = data.path;
-				socket.watchr = watchr.watch(watchOptions);
-				winston.info('Start watching ' + socket.watchrPath);
+				});
+				socket.on('watch', function (data, callback) {
+					if (socket.watchr) {
+						socket.leave(socket.watchrPath);
+						socket.watchr.close(); // only one watcher per socket
+						winston.info('Stop watching ' + socket.watchrPath);
+					}
+					socket.join(path.normalize(data.path)); // join room for this path
+					var watchOptions = {
+						path: data.path,
+						ignoreCommonPatterns: true,
+						listener: function() {
+							socket.emit('changed', { repository: data.path });
+						},
+						next: function(err, watchers) {
+							callback();
+						}
+					};
+					if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
+					socket.watchrPath = data.path;
+					socket.watchr = watchr.watch(watchOptions);
+					winston.info('Start watching ' + socket.watchrPath);
+				});
 			});
 		});
 	}
@@ -95,6 +102,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		emitRepoChanged(repoPath);
 	}
 
+
+	function credentialsOption(socketId) {
+		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
+		return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + '" ';
+	}
+
+
 	app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.status(req.param('path'), jsonResultOrFail.bind(null, res));
 	});
@@ -106,11 +120,11 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, function(req, res) {
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-		git('clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.param('path'), undefined, jsonResultOrFail.bind(null, res));
+		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.param('path'), undefined, jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'), undefined, function(err, text) {
+		git(credentialsOption(req.body.socketId) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'), undefined, function(err, text) {
 			if (err) {
 				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
 					res.json({});
@@ -128,9 +142,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-		var credentialsOption = '-c credential.helper="' + credentialsHelperPath + ' ' + req.body.socketId + '"';
-		git(credentialsOption + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
+		git(credentialsOption(req.body.socketId) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, function(err, result) {
 				if (err && err.stderr.indexOf('non-fast-forward') != -1) err.errorCode = 'non-fast-forward';
 				jsonResultOrFailAndTriggerChange(req.param('path'), res, err, result);
@@ -174,7 +186,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 				git('clean -fd', req.param('path'), undefined, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 			});
 		} else {
-			git('checkout -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
+			git('checkout HEAD -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
 				if (err) {
 					if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
 						fs.unlink(path.join(req.param('path'), req.body.file), function(err) {
@@ -235,7 +247,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 						});
 					}
 				}
-			], function() {
+			], function(err) {
+				if (err) return res.json(400, err);
 				git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
 					process.stdin.end(req.body.message);
 				});
@@ -271,7 +284,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
 		if (req.body.remote)
-			git('push origin :"' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFail.bind(null, res));
+			git(credentialsOption(req.body.socketId) + ' push origin :"' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFail.bind(null, res));
 		else
 			git('branch -D "' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
 	});
@@ -281,7 +294,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-		git(' ls-remote --tags ', req.param('path'), gitParser.parseGitLsRemote, jsonResultOrFail.bind(null, res));
+		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ', req.param('path'), gitParser.parseGitLsRemote, jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
@@ -334,8 +347,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var process = git('commit --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
-		process.stdin.end(req.body.message);
+		git('commit --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
+			process.stdin.end(req.body.message);
+		});
 	});
 
 	app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -452,7 +466,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
 			var content = req.body.content;
 			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
-			fs.writeFileSync(req.body.file, content);
+			fs.writeFileSync(req.param('file'), content);
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){

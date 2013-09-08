@@ -7,6 +7,7 @@ var config = require('./config')();
 var winston = require('winston');
 
 var gitConfigNoColors = '-c color.ui=false';
+var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 
 var gitQueue = async.queue(function (task, callback) {
 
@@ -22,10 +23,17 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'remote-timeout';
         else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
           err.errorCode = 'permision-denied-publickey';
+        else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
+          err.errorCode = 'ssh-bad-file-number';
+        else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
+          err.errorCode = 'no-remote-configured';
         else if (err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
           err.errorCode = 'conflict';
-        else if (err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1)
+        else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
+          (err.stderr.indexOf('Could not resolve hostname') != -1))
           err.errorCode = 'offline';
+        else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
+          err.errorCode = 'proxy-authentication-required';
         else if (err.stderr.indexOf('Please tell me who you are') != -1)
           err.errorCode = 'no-git-name-email-configured';
         task.error = err;
@@ -43,7 +51,7 @@ var gitQueue = async.queue(function (task, callback) {
 
 var git = function(command, repoPath, parser, callback, onStarted) {
   if (typeof(callback) != 'function') throw new Error('Callback must be function');
-  command = 'git ' + gitConfigNoColors + ' ' + command;
+  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + command;
 
   var task = {
     command: command,

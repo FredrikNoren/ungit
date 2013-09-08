@@ -1,4 +1,10 @@
 
+var ko = require('../vendor/js/knockout-2.2.1');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
+var async = require('async');
+var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
+
 var idCounter = 0;
 var newId = function() { return idCounter++; };
 
@@ -8,13 +14,13 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.status = ko.observable('loading');
 	this.remoteErrorPopup = ko.observable();
 
-	visitedRepositories.tryAdd(repoPath);
 	this.main = main;
 	this.repoPath = repoPath;
 	this.gerritIntegration = ko.observable(null);
 	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
 	this.staging = new StagingViewModel(this);
+	this.remotes = ko.observable();
 	this.showFetchButton = ko.computed(function() {
 		return self.graph.hasRemotes();
 	});
@@ -26,19 +32,21 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
-			self.fetch();
-			api.repositoryChanged.add(function(data) {
-				if (!data.repository || data.repository == self.repoPath) {
-					self.update();
-				}
-			});
 			api.watchRepository(repoPath, function() { self.watcherReady(true); });
 			if (ungit.config.gerrit) {
 				self.gerritIntegration(new GerritIntegrationViewModel(self));
 			}
 		}
 	});
+	var hasAutoFetched = false;
+	this.remotes.subscribe(function(newValue) {
+		if (newValue.length > 0 && !hasAutoFetched) {
+			hasAutoFetched = true;
+			self.fetch({ nodes: true, tags: true });
+		}
+	})
 }
+exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.update = function() {
 	this.updateStatus();
 	this.updateLog();
@@ -52,40 +60,61 @@ RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
-RepositoryViewModel.prototype.fetch = function(callback) {
+RepositoryViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
+RepositoryViewModel.prototype.fetch = function(options, callback) {
 	if (this.status() != 'inited') return;
 	var self = this;
+
+	var programEventListener = function(event) {
+		if (event.event == 'credentialsRequested') self.fetchingProgressBar.pause();
+		else if (event.event == 'credentialsProvided') self.fetchingProgressBar.unpause();
+	};
+	this.main.programEvents.add(programEventListener);
+
+	var handleApiRemoteError = function(callback, err, result) {
+		callback(err, result);
+		return !err || self._isRemoteError(err.errorCode);
+	}
+
 	this.fetchingProgressBar.start();
-	api.query('POST', '/fetch', { path: this.repoPath }, function(err, status) {
+	var jobs = [];
+	var remoteTags;
+	if (options.nodes) jobs.push(function(done) { api.query('POST', '/fetch', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
+			done(err, result);
+			return !err || self._isRemoteError(err.errorCode);
+		}); 
+	});
+	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
+			remoteTags = result;
+			done(err, result);
+			return !err || self._isRemoteError(err.errorCode);
+		});
+	});
+	async.parallel(jobs, function(err, result) {
+		self.main.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
+
 		if (err) {
-			if (err.errorCode == 'remote-timeout') {
-				self.remoteErrorPopup('Repository remote timeouted.');
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'permision-denied-publickey') {
-				self.remoteErrorPopup('Permission denied (publickey).');
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'no-supported-authentication-provided') {
-				self.main.content(new UserErrorViewModel({
-					title: 'Authentication error',
-					details: 'No supported authentication methods available. Try starting ssh-agent or pageant.'
-				}));
-				if (callback) callback();
-				return true;
-			}
-			if (err.errorCode == 'offline') {
-				self.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
-				if (callback) callback();
-				return true;
-			}
+			self.remoteErrorPopup(self._remoteErrorCodeToString[err.errorCode]);
+			return;
 		}
-		if (callback) callback();
+
+		if (options.tags) self.graph.setRemoteTags(remoteTags);
 	});
 }
+RepositoryViewModel.prototype._remoteErrorCodeToString = {
+	'remote-timeout': 'Repository remote timeouted.',
+	'permision-denied-publickey': 'Permission denied (publickey).',
+	'no-supported-authentication-provided': 'No supported authentication methods available. Try starting ssh-agent or pageant.',
+	'offline': 'Couldn\'t reach remote repository, are you offline?',
+	'proxy-authentication-required': 'Proxy error; proxy requires authentication.',
+	'no-remote-configured': 'No remote to list refs from.',
+	'ssh-bad-file-number': 'Got "Bad file number" error. This usually indicates that the port listed for the remote repository can\'t be reached.'
+}
+RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
+	return !!this._remoteErrorCodeToString[errorCode];
+}
+
 RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
 	var self = this;
 	api.query('GET', '/status', { path: this.repoPath }, function(err, status){
@@ -121,8 +150,8 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 	api.query('GET', '/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
+		self.remotes(remotes);
 		self.graph.hasRemotes(remotes.length != 0);
-		self.graph.loadRemoteTagsFromApi();
 	});
 }
 RepositoryViewModel.prototype.toogleShowBranches = function() {
@@ -199,8 +228,8 @@ StagingViewModel.prototype.setFiles = function(files) {
 }
 StagingViewModel.prototype.toogleAmend = function() {
 	if (!this.amend() && !this.commitMessageTitle()) {
-		this.commitMessageTitle(this.repository.graph.HEAD().title);
-		this.commitMessageBody(this.repository.graph.HEAD().body);
+		this.commitMessageTitle(this.repository.graph.HEAD().title());
+		this.commitMessageBody(this.repository.graph.HEAD().body());
 	}
 	else if(this.amend()) {
 		this.commitMessageTitle('');

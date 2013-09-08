@@ -1,6 +1,7 @@
 ungit
 ======
 [![NPM version](https://badge.fury.io/js/ungit.png)](http://badge.fury.io/js/ungit)
+[![Build Status](https://travis-ci.org/FredrikNoren/ungit.png)](https://travis-ci.org/FredrikNoren/ungit)
 
 The easiest way to use git. On any platform. Anywhere.
 
@@ -28,13 +29,11 @@ Anywhere you want to start, just type:
 
 This will launch the server and open up a browser with the ui.
 
-Bugs
-----
-You can help out by enabling bugtracking in the config (set "bugtracking": true, see config section below): this will make ungit send an anonymous bugreport every time it crashes, which makes it much easier to know what problems users are experiencing.
-
 Configure
 ---------
 Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on *nix, `C:/Users/USERNAME/` on windows). Can be in either json or ini format. See source/config.js for available options.
+
+You can also override configuration variables at launch by specifying them as command line arguments; `ungit --port=8080`.
 
 Example of `~/.ungitrc` configuration file to change default port and enable bugtracking:
 

@@ -13,6 +13,9 @@ var semver = require('semver');
 var path = require('path');
 var fs = require('fs');
 
+
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, {'timestamp':true});
 if (config.logDirectory)
 	winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
 
@@ -59,6 +62,31 @@ config.users = null; // So that we don't send the users to the client
 		next();
 	}
 	app.use(noCache);
+
+	if (config.autoShutdownTimeout) {
+		var autoShutdownTimeout;
+		var refreshAutoShutdownTimeout = function() {
+			if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
+			autoShutdownTimeout = setTimeout(function() {
+				winston.info('Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' + config.autoShutdownTimeout + 'ms)');
+				process.exit(0);
+			}, config.autoShutdownTimeout);
+		}
+		app.use(function(req, res, next) {
+			refreshAutoShutdownTimeout();
+			next();
+		});
+		refreshAutoShutdownTimeout();
+	}
+
+	app.use(function(req, res, next) {
+		// The default timeout is 2 min, but since operations such as clone can take much
+		// longer than that, we increase the timeout to 2h. Only available in the later node versions
+		// so check if the method is available first.
+		if (res.setTimeout)
+			res.setTimeout(2 * 60 * 60 * 1000);
+		next();
+	});
 	
 	var ensureAuthenticated = function(req, res, next) { next(); };
 
@@ -108,13 +136,13 @@ config.users = null; // So that we don't send the users to the client
 	});
 
 	app.get('/version.js', function(req, res) {
-		version.getVersion(function(ver) {
+		version.getVersion(function(err, ver) {
 			res.send('ungit.version = \'' + ver + '\'');
 		});
 	});
 
 	app.get('/api/latestversion', function(req, res) {
-		version.getVersion(function(currentVersion) {
+		version.getVersion(function(err, currentVersion) {
 			version.getLatestVersion(function(err, latestVersion) {
 				if (err)
 					res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
@@ -138,7 +166,7 @@ config.users = null; // So that we don't send the users to the client
 		fs.exists(userConfigPath, function(hasConfig) {
 			if (!hasConfig) return callback(null, {});
 
-			fs.readFile(userConfigPath, function(err, content) {
+			fs.readFile(userConfigPath, { encoding: 'utf8' }, function(err, content) {
 				if (err) return callback(err);
 				else callback(null, JSON.parse(content.toString()));
 			});

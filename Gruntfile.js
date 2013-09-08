@@ -1,5 +1,8 @@
-module.exports = function(grunt) {
+var childProcess = require('child_process');
+var phantomjs = require('phantomjs');
+var path = require('path');
 
+<<<<<<< HEAD
   var jsSources = [
     'public/vendor/js/knockout-2.2.1.js',
     'public/vendor/js/jquery-2.0.0.min.js',
@@ -30,6 +33,9 @@ module.exports = function(grunt) {
     'public/source/app.js',
     'public/source/main.js'
   ];
+=======
+module.exports = function(grunt) {
+>>>>>>> upstream/master
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -40,20 +46,21 @@ module.exports = function(grunt) {
         }
       }
     },
-    concat: {
+    browserify: {
       options: {
-        separator: ';'
+        noParse: ['public/vendor/js/superagent.js'],
+        debug: true
       },
       dist: {
-        src: jsSources,
-        dest: 'public/js/ungit.js',
-        nonull: true
+        files: {
+          'public/js/ungit.js': ['public/source/main.js']
+        }
       }
     },
     watch: {
       scripts: {
-        files: ['public/source/*.js'],
-        tasks: ['concat'],
+        files: ['public/source/*.js', 'source/*.js'],
+        tasks: ['browserify'],
         options: {
           spawn: false,
         },
@@ -127,8 +134,23 @@ module.exports = function(grunt) {
     },
   });
 
+  grunt.registerTask('clicktest', 'Run clicktests.', function() {
+    var done = this.async();
+    grunt.log.writeln('Running clicktests...');
+    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'clicktests.js')]);
+    child.stdout.on('data', function(data) {
+      grunt.log.write(data);
+    });
+    child.stderr.on('data', function(data) {
+      grunt.log.error(data);
+    })
+    child.on('exit', function(code) {
+      done(code == 0);
+    });
+  });
+
   grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
@@ -138,10 +160,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-image-embed');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'concat', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
-  grunt.registerTask('test', ['simplemocha']);
+  grunt.registerTask('test', ['simplemocha', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);

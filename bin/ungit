@@ -1,10 +1,12 @@
 #!/usr/bin/env node
+var startLaunchTime = Date.now();
 var forever = require('forever-monitor');
 var config = require('../source/config')();
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var semver = require('semver');
+var superagent = require('superagent');
 
 if (config.bugtracking)
 	require('../source/bugsense').init('ungit-launcher');
@@ -12,37 +14,79 @@ if (config.bugtracking)
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
 	silent: false,
 	minUptime: 2000,
+	max: config.maxNAutoRestartOnCrash,
 	cwd: path.join(process.cwd(), '..'),
-	options: []
+	options: process.argv.slice(2),
+	env: { LANG: 'en_US', LC_ALL: 'C' }
 });
 
-child.on('exit', function () {
-	console.log('ungit can\'t start, see logs for more information.');
+child.on('exit', function (res) {
+	console.log('Stopped keeping ungit alive');
 });
+
+function launchBrowser() {
+	var currentUrl = 'http://localhost:' + config.port;
+	if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
+	else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+	console.log('Browse to ' + currentUrl);
+	if (config.launchBrowser)
+		open(currentUrl);
+}
 
 function startupListener(data) {
 	if (data.toString().indexOf('## Ungit started ##') >= 0) {
-		var currentUrl = 'http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(process.cwd());
-		console.log('Browse to ' + currentUrl);
-		open(currentUrl);
+		launchBrowser();
 		child.removeListener('stdout', startupListener);
+		console.log('Took ' + (Date.now() - startLaunchTime) + 'ms to start server.');
 	}
 }
 
 child.on('stdout', startupListener);
 
-child_process.exec('git --version', function(err, stdout, stderr) {
+function verifyGitVersion(callback) {
+	child_process.exec('git --version', function(err, stdout, stderr) {
 
-	if (err) {
-		console.log('Can\'t run "git --version". Is git installed and available in your path?');
-	} else {
-		var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
-		var requiredVersion = '>=1.8.x';
-		if (!semver.satisfies(version, requiredVersion)) {
-			console.log('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+		if (err) {
+			callback('Can\'t run "git --version". Is git installed and available in your path?');
 		} else {
-			child.start();
+			var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
+			var requiredVersion = '>=1.8.x';
+			if (!semver.satisfies(version, requiredVersion)) {
+				callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+			} else {
+				callback();
+			}
 		}
-	}
 
+	});
+}
+
+var http = require('http');
+function checkIfUngitIsRunning(callback) {
+	// Fastest way to find out if a port is used or not/i.e. if ungit is running
+	var net = require('net');
+	var server = net.createServer(function(c) { });
+	server.listen(config.port, function(err) {
+		server.close(function() {
+			callback(null, false);
+		});
+	});
+	server.on('error', function (e) {
+	  if (e.code == 'EADDRINUSE') {
+	    callback(null, true);
+	  }
+	});
+}
+
+checkIfUngitIsRunning(function(err1, ungitRunning) {
+	if (ungitRunning) {
+		console.log('Ungit server already running');
+		launchBrowser();
+	}
+	else {
+		verifyGitVersion(function(err) {
+			if (err) console.log(err);
+			else child.start();
+		});
+	}
 });

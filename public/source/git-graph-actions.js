@@ -1,11 +1,10 @@
 
-if (typeof exports !== 'undefined') {
-	ko = require('../vendor/js/knockout-2.2.1.js');
-	inherits = require('./utils').inherits;
-}
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var inherits = require('util').inherits;
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 
 var GraphActions = {};
-if (typeof module !== 'undefined') module.exports = GraphActions;
+module.exports = GraphActions;
 
 GraphActions.ActionBase = function(graph) {
 	this.graph = graph;
@@ -191,7 +190,7 @@ GraphActions.Push.prototype.perform = function(ref, callback) {
 		if (err) {
 			if (err.errorCode == 'non-fast-forward') {
 				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Fetching new nodes.');
-				self.graph.repository.fetch(function() {
+				self.graph.repository.fetch({ nodes: true, tags: true }, function() {
 					setTimeout(function() {
 						self.graph.repository.closeRemoteErrorPopup();
 					}, 5000);
@@ -203,6 +202,7 @@ GraphActions.Push.prototype.perform = function(ref, callback) {
 			}
 		}
 		self.graph.loadNodesFromApi();
+		self.graph.repository.fetch({ tags: true });
 		callback();
 	});
 }
@@ -227,9 +227,14 @@ GraphActions.Checkout.prototype.perform = function(ref, callback) {
 	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
 		if (err && err.errorCode != 'conflict') return;
 		if (ref.isRemoteBranch)
-			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, callback);
+			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
+				if (err && err.errorCode != 'conflict') return;
+				callback();
+				return true;
+			});
 		else
 			callback();
+		return true;
 	});
 }
 
@@ -251,9 +256,10 @@ GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.perform = function(ref, callback) {
 	var self = this;
 	var url = ref.isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote }, function(err) {
+	api.query('DELETE', url, { path: this.graph.repoPath, name: ref.displayName, remote: ref.isRemote, socketId: api.socketId }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
+		self.graph.repository.fetch({ tags: true });
 	});
 }
 

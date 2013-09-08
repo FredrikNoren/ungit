@@ -1,8 +1,5 @@
 
-if (typeof exports !== 'undefined') {
-	ko = require('../vendor/js/knockout-2.2.1.js');
-}
-
+var ko = require('../vendor/js/knockout-2.2.1.js');
 
 var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime) {
 	var self = this;
@@ -28,7 +25,7 @@ var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime
 		else if (self.predictionMs() > showTime) return 'animated fadeIn';
 	});
 }
-if (typeof exports !== 'undefined') exports.ProgressBarViewModel = ProgressBarViewModel;
+exports.ProgressBarViewModel = ProgressBarViewModel;
 ProgressBarViewModel.prototype.start = function() {
 	if (this.running()) return;
 	this.running(true);

@@ -1,7 +1,16 @@
 
-NodeViewModel = function(args) {
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var Vector2 = require('./vector2');
+var md5 = require('blueimp-md5').md5;
+var GraphActions = require('./git-graph-actions');
+var moment = require('moment');
+
+NodeViewModel = function(graph, sha1) {
 	var self = this;
-	this.graph = args.graph;
+
+	this.graph = graph;
+	this.sha1 = sha1;
+
 	this.position = ko.observable(new Vector2(0, 0));
 	this.goalPosition = ko.observable();
 	this.isAtFinalXPosition = ko.computed(function() {
@@ -36,26 +45,38 @@ NodeViewModel = function(args) {
 	this.nodeHeight = ko.computed(function() {
 		return self.radius()*2;
 	});
-	this.commitTime = moment(args.commitDate);
-	this.authorTime = moment(args.authorDate);
-	this.parents = args.parents || [];
-	var message = args.message.split('\n');
-	this.message = args.message;
-	this.title = message[0];
-	this.body = message.slice(2).join('\n');
-	this.sha1 = args.sha1;
-	this.authorDate = ko.observable(moment(args.authorDate).fromNow());
-	setInterval(function() { self.authorDate(moment(args.authorDate).fromNow()); }, 1000 * 60);
-	this.authorName = args.authorName;
-	this.authorGravatar = CryptoJS.MD5(args.authorEmail);
-	this.authorEmail = args.authorEmail;
+
+	this.commitTime = ko.observable();
+	this.authorTime = ko.observable();
+	this.parents = ko.observable([]);
+	this.message = ko.observable();
+	this.title = ko.observable();
+	this.body = ko.observable();
+	this.authorDate = ko.observable(0);
+	this.authorDateFromNow = ko.observable();
+	this.authorName = ko.observable();
+	this.authorEmail = ko.observable();
+	this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
+
 	this.index = ko.observable();
 	this.ancestorOfHEAD = ko.observable(false);
 	this.nodeIsMousehover = ko.observable(false);
 	this.logBoxVisible = ko.computed(function() {
 		return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover();
-	})
-	this.refs = ko.observable([]);
+	});
+	// These are split up like this because branches and local tags can be found in the git log,
+	// whereas remote tags needs to be fetched with another command (which is much slower)
+	this.branchesAndLocalTags = ko.observable([]);
+	this.remoteTags = ko.observable([]);
+	this.refs = ko.computed(function() {
+		var rs = self.branchesAndLocalTags().concat(self.remoteTags());
+		rs.sort(function(a, b) {
+			if (a.isLocal && !b.isLocal) return -1;
+			if (!a.isLocal && b.isLocal) return 1;
+			return a.displayName < b.displayName ? -1 : 1;
+		});
+		return rs;
+	});
 	this.branches = ko.computed(function() {
 		return self.refs().filter(function(r) { return r.isBranch; });
 	});
@@ -74,7 +95,7 @@ NodeViewModel = function(args) {
 	})
 	this.branchingFormVisible = ko.observable(false);
 	this.canCreateRef = ko.computed(function() {
-		return self.newBranchName() && self.newBranchName().trim();
+		return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
 	})
 
 	this.dropareaGraphActions = [
@@ -88,7 +109,20 @@ NodeViewModel = function(args) {
 		new GraphActions.Delete(this.graph, this),
 	];
 }
-if (typeof exports !== 'undefined') exports.NodeViewModel = NodeViewModel;
+exports.NodeViewModel = NodeViewModel;
+NodeViewModel.prototype.setData = function(args) {
+	this.commitTime(moment(args.commitDate));
+	this.authorTime(moment(args.authorDate));
+	this.parents(args.parents || []);
+	var message = args.message.split('\n');
+	this.message(args.message);
+	this.title(message[0]);
+	this.body(message.slice(2).join('\n'));
+	this.authorDate(moment(args.authorDate));
+	this.authorDateFromNow(this.authorDate().fromNow());
+	this.authorName(args.authorName);
+	this.authorEmail(args.authorEmail);
+}
 NodeViewModel.prototype.setPosition = function(position) {
 	var self = this;
 	this.prevPosition = self.position();
@@ -101,7 +135,17 @@ NodeViewModel.prototype.setRadius = function(radius) {
 	this.goalRadius(radius);
 	this.setRadiusTimestamp = Date.now();
 }
+NodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
+	this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
+	this.lastUpdatedAuthorDateFromNow += deltaT;
+	if(this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
+		this.lastUpdatedAuthorDateFromNow = 0;
+		this.authorDateFromNow(this.authorDate().fromNow());
+	}
+}
 NodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
+	this.updateLastAuthorDateFromNow(deltaT);
+
 	var totalTime = 500;
 
 	var d = this.goalPosition().sub(this.position());
@@ -154,8 +198,8 @@ NodeViewModel.prototype.createTag = function() {
 NodeViewModel.prototype.isAncestor = function(node) {
 	if (this.index() >= this.graph.maxNNodes) return false;
 	if (node == this) return true;
-	for (var v in this.parents) {
-		var n = this.graph.nodesById[this.parents[v]];
+	for (var v in this.parents()) {
+		var n = this.graph.nodesById[this.parents()[v]];
 		if (n && n.isAncestor(node)) return true;
 	}
 	return false;
@@ -165,7 +209,7 @@ NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 	var thisNode = this;
 	while (thisNode && !node.isAncestor(thisNode)) {
 		path.push(thisNode);
-		thisNode = this.graph.nodesById[thisNode.parents[0]];
+		thisNode = this.graph.nodesById[thisNode.parents()[0]];
 	}
 	if (thisNode)
 		path.push(thisNode);

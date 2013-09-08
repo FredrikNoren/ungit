@@ -1,6 +1,8 @@
 var _ = require('underscore');
 var moment = require('moment');
 
+var addressParser = require('./address-parser');
+
 exports.parseGitStatus = function(text) {
 	var result = {};
 	var lines = text.split('\n');
@@ -30,7 +32,7 @@ exports.parseGitDiff = function(text) {
     
 	while(lines.length && lines[0]) {
 		var diff = {};
-		var path = /^diff\s--git\sa\/(.+?)\sb\/(.+)$/.exec(lines.shift());
+		var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
 		diff.aPath = path[1];
 		diff.bPath = path[2];
       
@@ -115,8 +117,12 @@ exports.parseGitLog = function(data) {
 		if (row.indexOf('Author: ') == 0) {
 			var author = row.split(' ').slice(1).join(' ');
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
-			currentCommmit.authorName = capture[1].trim();
-			currentCommmit.authorEmail = capture[2].trim();
+			if (capture) {
+				currentCommmit.authorName = capture[1].trim();
+				currentCommmit.authorEmail = capture[2].trim();
+			} else {
+				currentCommmit.authorName = author;
+			}
 		} else if (row.indexOf('Commit: ') == 0) {
 			var author = row.split(' ').slice(1).join(' ');
 			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
@@ -194,36 +200,11 @@ exports.parseGitLsRemote = function(text) {
 }
 
 
-var gerritAddressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
-var gerritAddressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
-var gerritAddressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
-var gerritAddressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
-var gerritAddressHttpsRegexp = /https:\/\/([^\/]*)\/(.*)/;
-
-exports.parseRemoteAddress = function(remote) {
-  var match = gerritAddressSshWithPortRegexp.exec(remote);
-  if (match) return { address: remote, host: match[1], port: match[2], project: match[3] };
-  
-  match = gerritAddressSshWithoutPortRegexp.exec(remote);
-  if (match) return { address: remote, host: match[1], project: match[2] };
-  
-  match = gerritAddressGitWithoutPortWithUsernamePortRegexp.exec(remote);
-  if (match) return { address: remote, username: match[1], host: match[2], project: match[3] };
-
-  match = gerritAddressGitWithoutPortWithoutUsernameRegexp.exec(remote);
-  if (match) return { address: remote, host: match[1], project: match[2] };
-
-  match = gerritAddressHttpsRegexp.exec(remote);
-  if (match) return { address: remote, host: match[1], project: match[2] };
-  
-  return { address: remote };
-}
-
 
 exports.parseGitRemoteShow = function(text) {
 	var lines = text.split('\n');
 	return {
-		fetch: exports.parseRemoteAddress(lines[1].slice('  Fetch URL: '.length)),
-		push: exports.parseRemoteAddress(lines[1].slice('  Push  URL: '.length))
+		fetch: addressParser.parseAddress(lines[1].slice('  Fetch URL: '.length)),
+		push: addressParser.parseAddress(lines[1].slice('  Push  URL: '.length))
 	};
 }

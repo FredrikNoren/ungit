@@ -1,4 +1,5 @@
 var rc = require('rc');
+var optimist = require('optimist');
 
 var defaultConfig = {
 	
@@ -44,10 +45,33 @@ var defaultConfig = {
 	// Maximum number of concurrent git operations
 	maxConcurrentGitOperations: 4,
 
+	// Launch a browser window with ungit when ungit is started
+	launchBrowser: true,
+
+	// Instead of launching ungit with the current folder force a different path to be used. Can be set to null to force the home screen.
+	forcedLaunchPath: undefined,
+
+	// Closes the server after x ms of inactivity. Mainly used by the clicktesting.
+	autoShutdownTimeout: undefined,
+
+	// Maximum number of automatic restarts after a crash. Undefined == unlimited.
+	maxNAutoRestartOnCrash: undefined,
+
 	// Used for development purposes.
 	dev: false,
 };
 
 module.exports = function() {
-	return rc('ungit', defaultConfig);
+	// Works for now but should be moved to bin/ungit
+	var argv = optimist
+		.usage('ungit [-b]')
+		.alias('b', 'launchBrowser')
+		.describe('b', 'Launch a browser window with ungit when the ungit server is started')
+		.argv;
+
+	if (argv.help) {
+	    optimist.showHelp();
+	    process.exit(0);
+	}
+	return rc('ungit', defaultConfig, argv);
 }

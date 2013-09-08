@@ -1,4 +1,7 @@
 
+var signals = require('signals');
+var superagent = require('../vendor/js/superagent');
+
 var Api = function() {
 	this.connected = new signals.Signal();
 	this.disconnected = new signals.Signal();
@@ -8,6 +11,9 @@ var Api = function() {
 	this.getCredentialsHandler = function() { throw new Error("Not implemented"); }
 	this._initSocket();
 }
+
+module.exports = Api;
+
 Api.prototype._incChangeEventBlock = function() {
 	if (this._changeDispatchBlockers == 0) this._triedToDispatchWhileBlocked = false;
 	// Block change events while we're doing this
@@ -34,7 +40,7 @@ Api.prototype._initSocket = function() {
 	this.socket = io.connect();
 	this.socket.on('error', function(err) {
 		self._isConnected(function(connected) {
-			if (connected) throw new Error('Socket error: ' + JSON.stringify(err));
+			if (connected) throw err;
 			else self._onDisconnect();
 		});
 	});

@@ -1,10 +1,10 @@
 
-var Ssh2Connection = require('ssh2');
 var git = require('./git');
 var config = require('./config')();
 var os = require('os');
 var child_process = require('child_process');
 var _ = require('underscore');
+var Ssh2Connection;
 
 var getProcessUsername = function(callback) {
   child_process.exec('whoami', function(err, res) {
@@ -19,6 +19,8 @@ var getProcessUsername = function(callback) {
 };
 
 var ssh2 = function(remote, command, callback) {
+  if (!Ssh2Connection) Ssh2Connection = require('ssh2');
+
   var connection = new Ssh2Connection();
   connection.on('connect', function() {
   });

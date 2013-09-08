@@ -1,4 +1,19 @@
 
+var ko = require('../vendor/js/knockout-2.2.1');
+var $ = require('../vendor/js/jquery-2.0.0.min');
+require('../vendor/js/jquery.dnd_page_scroll');
+require('../vendor/js/bootstrap/modal');
+var hasher = require('hasher');
+var crossroads = require('crossroads');
+var Api = require('./api');
+var app = require('./app');
+var MainViewModel = app.MainViewModel;
+var CrashViewModel = app.CrashViewModel;
+var AppViewModel = app.AppViewModel;
+var PathViewModel = app.PathViewModel;
+var HomeViewModel = app.HomeViewModel;
+var logRenderer = require('./logrenderer');
+
 // Request animation frame polyfill
 (function() {
     var lastTime = 0;
@@ -158,21 +173,34 @@ ko.bindingHandlers.shown = {
     }
 };
 
-ko.bindingHandlers.scrolledToEnd = {
-    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        var checkAtEnd = function() {
-            var elementEndY = $(element).offset().top + $(element).height();
-            var windowEndY = $(document).scrollTop() + document.documentElement.clientHeight;
-            if ( windowEndY > elementEndY - document.documentElement.clientHeight / 2) {
-                var value = valueAccessor();
-                var valueUnwrapped = ko.utils.unwrapObservable(value);
-                valueUnwrapped.call(viewModel);
-            }
+
+(function scrollToEndBinding() {
+    ko.bindingHandlers.scrolledToEnd = {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            element.valueAccessor = valueAccessor;
+            element.viewModel = viewModel;
+            element.dataset.scrollToEndListener = true;
         }
-        $(window).scroll(checkAtEnd);
-        $(window).resize(checkAtEnd);
+    };
+
+    var checkAtEnd = function(element) {
+        var elementEndY = $(element).offset().top + $(element).height();
+        var windowEndY = $(document).scrollTop() + document.documentElement.clientHeight;
+        if ( windowEndY > elementEndY - document.documentElement.clientHeight / 2) {
+            var value = element.valueAccessor();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            valueUnwrapped.call(element.viewModel);
+        }
     }
-};
+    function scrollToEndCheck() {
+        var elems = document.querySelectorAll('[data-scroll-to-end-listener]');
+        for(var i=0; i < elems.length; i++)
+            checkAtEnd(elems[i]);
+    }
+
+    $(window).scroll(scrollToEndCheck);
+    $(window).resize(scrollToEndCheck);
+})();
 
 ko.bindingHandlers.modal = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -233,10 +261,21 @@ window.onerror = function(err) {
 };
 
 api = new Api();
-var main = new MainViewModel();
+var main = new MainViewModel(browseTo);
 var app = new AppViewModel(main);
 
 ko.applyBindings(app);
+
+// routing
+crossroads.addRoute('/', function() {
+    main.path('');
+    main.content(new HomeViewModel());
+});
+
+crossroads.addRoute('/repository{?query}', function(query) {
+    main.path(query.path);
+    main.content(new PathViewModel(main, query.path));
+})
 
 
 //setup hasher

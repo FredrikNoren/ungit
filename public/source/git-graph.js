@@ -1,14 +1,14 @@
 
-if (typeof exports !== 'undefined') {
-	ko = require('../vendor/js/knockout-2.2.1.js');
-	Vector2 = require('./vector2.js');
-	NodeViewModel = require('./node.js').NodeViewModel;
-	RefViewModel = require('./ref.js').RefViewModel;
-	GraphActions = require('./git-graph-actions.js');
-	ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
-	moment = require('moment');
-	_ = require('underscore');
-}
+
+var ko = require('../vendor/js/knockout-2.2.1.js');
+var Vector2 = require('./vector2.js');
+var NodeViewModel = require('./node.js').NodeViewModel;
+var RefViewModel = require('./ref.js').RefViewModel;
+var GraphActions = require('./git-graph-actions.js');
+var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
+var md5 = require('blueimp-md5').md5;
+var moment = require('moment');
+var _ = require('underscore');
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
@@ -36,16 +36,16 @@ var GitGraphViewModel = function(repository) {
 	this.showDropTargets = ko.computed(function() {
 		return !!self.draggingRef();
 	});
+	this.scrolledToEnd = _.debounce(function() {
+		self.maxNNodes = self.maxNNodes + 25;
+		self.loadNodesFromApi();
+	}, 1000, true);
 }
-if (typeof exports !== 'undefined') exports.GitGraphViewModel = GitGraphViewModel;
+exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes().forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
 	});
-}
-GitGraphViewModel.prototype.scrolledToEnd = function() {
-	this.maxNNodes = this.maxNNodes + 10;
-	this.loadNodesFromApi();
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
@@ -56,72 +56,52 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 		self.setNodesFromLog(logEntries);
 		self.isLoading(false);
 		self.nodesLoader.stop();
-		self.loadRemoteTagsFromApi();
 	});
 }
 
-GitGraphViewModel.prototype.loadRemoteTagsFromApi = function() {
-	if (!this.hasRemotes()) return;
+GitGraphViewModel.prototype.setRemoteTags = function(remoteTags) {
 	var self = this;
-	api.query('GET', '/remote/tags', { path: this.repoPath }, function(err, remoteTags) {
-		if (err) {
-			if (err.errorCode == 'remote-timeout') {
-				self.repository.remoteErrorPopup('Repository remote timeouted');
-				return true;
-			}
-			if (err.errorCode == 'permision-denied-publickey') {
-				self.repository.remoteErrorPopup('Permission denied (publickey).');
-				return true;
-			}
-			if (err.errorCode == 'offline') {
-				self.repository.remoteErrorPopup('Couldn\'t reach remote repository, are you offline?');
-				return true;
-			}
-			if (err.stderr && err.stderr.indexOf('No remote configured to list refs from.') != -1) return true;
-			return;
+	var nodeIdsToRemoteTags = {};
+	remoteTags.forEach(function(ref) {
+		if (ref.name.indexOf('^{}') != -1) {
+			var name = 'remote-tag: ' + ref.name.slice(0, ref.name.length - '^{}'.length);
+			var refViewModel = self.getRef(name);
+			var node = self.getNode(ref.sha1);
+			refViewModel.node(node);
+
+			nodeIdsToRemoteTags[ref.sha1] = nodeIdsToRemoteTags[ref.sha1] || [];
+			nodeIdsToRemoteTags[ref.sha1].push(refViewModel);
 		}
-		remoteTags.forEach(function(ref) {
-			if (ref.name.indexOf('^{}') != -1) {
-				var name = 'remote-tag: ' + ref.name.slice(0, ref.name.length - '^{}'.length);
-				var refViewModel = self.getRef(name);
-				var node = self.nodesById[ref.sha1];
-				if (node) {
-					refViewModel.node(node);
-					var refs = node.refs();
-					if (refs.indexOf(refViewModel) == -1) {
-						refs.push(refViewModel);
-						node.refs(refs);
-					}
-				}
-			}
-		});
 	});
+
+	for(var key in this.nodesById)
+		this.nodesById[key].remoteTags(nodeIdsToRemoteTags[key] || []);
 }
 
-GitGraphViewModel.prototype.setNodesFromLog = function(nodes) {
+GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
 	var self = this;
 	var nodeVMs = [];
-	nodes.forEach(function(node) {
-		node.graph = self;
-		var nodeViewModel = self.nodesById[node.sha1] || new NodeViewModel(node);
+	nodesData.forEach(function(nodeData) {
+		var nodeViewModel = self.getNode(nodeData.sha1);
+		nodeViewModel.setData(nodeData);
 		nodeVMs.push(nodeViewModel);
-		self.nodesById[node.sha1] = nodeViewModel;
-		if (node.refs) {
-			var refVMs = node.refs.map(function(ref) {
+		var refVMs = [];
+		if (nodeData.refs) {
+			var refVMs = nodeData.refs.map(function(ref) {
 				var refViewModel = self.getRef(ref);
 				refViewModel.node(nodeViewModel);
 				return refViewModel;
 			});
-			refVMs.sort(function(a, b) {
-				if (a.isLocalBranch && !b.isLocalBranch) return -1;
-				if (!a.isLocalBranch && b.isLocalBranch) return 1;
-				return a.displayName < b.displayName ? -1 : 1;
-			});
-			nodeViewModel.refs(refVMs);
+			nodeViewModel.branchesAndLocalTags(refVMs);
 		}
 	});
 	this.HEAD(GitGraphViewModel.getHEAD(nodeVMs));
 	this.setNodes(nodeVMs);
+}
+GitGraphViewModel.prototype.getNode = function(sha1) {
+	var nodeViewModel = this.nodesById[sha1];
+	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new NodeViewModel(this, sha1);
+	return nodeViewModel;
 }
 GitGraphViewModel.prototype.getRef = function(refName) {
 	var refViewModel = this.refsByRefName[refName];
@@ -139,7 +119,7 @@ GitGraphViewModel.getHEAD = function(nodes) {
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 	if (node.index() >= this.maxNNodes) return;
 	callback(node);
-	node.parents.forEach(function(parentId) {
+	node.parents().forEach(function(parentId) {
 		var parent = nodesById[parentId];
 		if (parent)
 			GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
@@ -148,7 +128,7 @@ GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
 GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) {
 	if (node.index() >= this.maxNNodes) return;
 	callback(node);
-	var parent = nodesById[node.parents[0]];
+	var parent = nodesById[node.parents()[0]];
 	if (parent)
 		GitGraphViewModel.traverseNodeLeftParents(parent, nodesById, callback);
 }
@@ -177,7 +157,7 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 	}
 }
 GitGraphViewModel.colorFromHashOfString = function(string) {
-	return '#' + CryptoJS.MD5(string).toString().slice(0, 6);
+	return '#' + md5(string).toString().slice(0, 6);
 }
 
 GitGraphViewModel.randomColor = function() {
@@ -191,7 +171,7 @@ GitGraphViewModel.randomColor = function() {
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var daySeparators = [];
-	nodes.sort(function(a, b) { return b.commitTime.unix() - a.commitTime.unix(); });
+	nodes.sort(function(a, b) { return b.commitTime().unix() - a.commitTime().unix(); });
 	nodes.forEach(function(node, i) { node.index(i); });
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
@@ -280,8 +260,8 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		node.setPosition(goalPosition);
 
 		var secondsInADay = 60 * 60 * 24;
-		if (prevNode && Math.floor(prevNode.commitTime.unix() / secondsInADay) != Math.floor(node.commitTime.unix() / secondsInADay)) {
-			daySeparators.push({ x: 0, y: goalPosition.y, date: node.commitTime.format('ll') });
+		if (prevNode && Math.floor(prevNode.commitTime().unix() / secondsInADay) != Math.floor(node.commitTime().unix() / secondsInADay)) {
+			daySeparators.push({ x: 0, y: goalPosition.y, date: node.commitTime().format('ll') });
 		}
 
 		prevNode = node;
