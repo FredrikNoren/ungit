@@ -87,6 +87,13 @@ function waitForElement(page, id, callback) {
 	tryFind();
 }
 
+function expectNotFindElement(page, id) {
+	var found = page.evaluate(function(selector) {
+		return $(selector).length > 0;
+	}, taIdToSelector(id));
+	if (found) throw new Error('Expected to not find ' + id + ' but found it.');
+}
+
 function click(page, id) {
 	var pos = getClickPosition(page, id);
 	page.sendEvent('click', pos.left, pos.top);
@@ -162,6 +169,8 @@ test('Open path screen', function(done) {
 test('Init repository should bring you to repo page', function(done) {
 	click(page, 'init-repository');
 	waitForElement(page, 'repository-view', function() {
+		page.render('clicktest.png');
+		expectNotFindElement(page, 'remote-error-popup');
 		done();
 	});
 });
@@ -207,10 +216,7 @@ test('Committing a file should remove it from staging and make it show up in log
 	setTimeout(function() {
 		click(page, 'commit');
 		waitForElement(page, 'node', function() {
-			var found = page.evaluate(function(selector) {
-				return $(selector).length > 0;
-			}, taIdToSelector('staging-file'));
-			if (found) throw new Error('Staged file should have dissapeared by now.');
+			expectNotFindElement(page, 'staging-file');
 			done();
 		});
 	}, 100);

@@ -20,6 +20,7 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
 	this.staging = new StagingViewModel(this);
+	this.remotes = ko.observable();
 	this.showFetchButton = ko.computed(function() {
 		return self.graph.hasRemotes();
 	});
@@ -31,13 +32,19 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.status.subscribe(function(newValue) {
 		if (newValue == 'inited') {
 			self.update();
-			self.fetch({ nodes: true, tags: true });
 			api.watchRepository(repoPath, function() { self.watcherReady(true); });
 			if (ungit.config.gerrit) {
 				self.gerritIntegration(new GerritIntegrationViewModel(self));
 			}
 		}
 	});
+	var hasAutoFetched = false;
+	this.remotes.subscribe(function(newValue) {
+		if (newValue.length > 0 && !hasAutoFetched) {
+			hasAutoFetched = true;
+			self.fetch({ nodes: true, tags: true });
+		}
+	})
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.update = function() {
@@ -143,6 +150,7 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 	api.query('GET', '/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
+		self.remotes(remotes);
 		self.graph.hasRemotes(remotes.length != 0);
 	});
 }
