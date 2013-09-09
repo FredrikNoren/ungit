@@ -28,7 +28,7 @@ Api.prototype._decChangeEventBlock = function() {
 		this.repositoryChanged.dispatch({ repository: null });
 	}
 }
-Api.prototype._dispatchChangeEvent = function(data) {
+Api.prototype.dispatchChangeEvent = function(data) {
 	if (this._changeDispatchBlockers > 0) {
 		this._triedToDispatchWhileBlocked = true;
 		return;
@@ -51,7 +51,7 @@ Api.prototype._initSocket = function() {
 		self.socketId = data.socketId;
 	});
 	this.socket.on('changed', function (data) {
-		self._dispatchChangeEvent(data);
+		self.dispatchChangeEvent(data);
 	});
 	this.socket.on('request-credentials', function (data) {
 		self.getCredentialsHandler(function(credentials) {

@@ -10,7 +10,6 @@ var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
 var socketIO;
-var watchr;
 
 
 exports.pathPrefix = '';
@@ -30,7 +29,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		// To speed up loading times, we start this the next tick since it doesn't have to be instantly started with the server
 		process.nextTick(function() {
 			if (!socketIO) socketIO = require('socket.io');
-			if (!watchr) watchr = require('watchr');
 			io = socketIO.listen(server, {
 				logger: {
 					debug: winston.debug.bind(winston),
@@ -43,33 +41,25 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 				sockets.push(socket);
 				socket.emit('connected', { socketId: sockets.length - 1 });
 				socket.on('disconnect', function () {
-					if (socket.watchr) {
-						socket.watchr.close();
-						socket.watchr = null;
-						winston.info('Stop watching ' + socket.watchrPath);
+					if (socket.watcher) {
+						socket.watcher.close();
+						socket.watcher = null;
+						winston.info('Stop watching ' + socket.watcherPath);
 					}
 				});
 				socket.on('watch', function (data, callback) {
-					if (socket.watchr) {
-						socket.leave(socket.watchrPath);
-						socket.watchr.close(); // only one watcher per socket
-						winston.info('Stop watching ' + socket.watchrPath);
+					if (socket.watcher) {
+						socket.leave(socket.watcherPath);
+						socket.watcher.close(); // only one watcher per socket
+						winston.info('Stop watching ' + socket.watcherPath);
 					}
 					socket.join(path.normalize(data.path)); // join room for this path
-					var watchOptions = {
-						path: data.path,
-						ignoreCommonPatterns: true,
-						listener: function() {
-							socket.emit('changed', { repository: data.path });
-						},
-						next: function(err, watchers) {
-							callback();
-						}
-					};
-					if (data.safeMode) watchOptions.preferredMethods = ['watchFile', 'watch'];
-					socket.watchrPath = data.path;
-					socket.watchr = watchr.watch(watchOptions);
-					winston.info('Start watching ' + socket.watchrPath);
+					socket.watcherPath = data.path;
+					socket.watcher = fs.watch(data.path, function() {
+						socket.emit('changed', { repository: data.path });
+					});
+					winston.info('Start watching ' + socket.watcherPath);
+					callback();
 				});
 			});
 		});
