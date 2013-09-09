@@ -1,13 +1,16 @@
 
 var signals = require('signals');
 var superagent = require('../vendor/js/superagent');
+var _ = require('underscore');
 
 var Api = function() {
+	var self = this;
 	this.connected = new signals.Signal();
 	this.disconnected = new signals.Signal();
 	this.repositoryChanged = new signals.Signal();
 	this._changeDispatchBlockers = 0;
 	this._triedToDispatchWhileBlocked = false;
+	this._throttledRepoChangedDispatch = _.throttle(function(data) { self.repositoryChanged.dispatch(data); }, 500);
 	this.getCredentialsHandler = function() { throw new Error("Not implemented"); }
 	this._initSocket();
 }
@@ -33,7 +36,7 @@ Api.prototype.dispatchChangeEvent = function(data) {
 		this._triedToDispatchWhileBlocked = true;
 		return;
 	}
-	this.repositoryChanged.dispatch(data);
+	this._throttledRepoChangedDispatch(data);
 }
 Api.prototype._initSocket = function() {
 	var self = this;
