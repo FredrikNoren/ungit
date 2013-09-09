@@ -289,7 +289,7 @@ PathViewModel.prototype.cloneRepository = function() {
 		self.main.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;
-		self.main.browseTo('repository?path=' + encodeURIComponent(self.path + '/' + dest));
+		self.main.browseTo('repository?path=' + encodeURIComponent(res.path));
 	});
 }
 

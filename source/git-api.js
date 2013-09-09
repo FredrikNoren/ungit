@@ -120,7 +120,10 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, function(req, res) {
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.body.destinationDir.trim() + '"', req.param('path'), undefined, jsonResultOrFail.bind(null, res));
+		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'), undefined, function(err, result) {
+			if (err) res.json(400, err);
+			else res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) });
+		});
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
