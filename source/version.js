@@ -7,7 +7,7 @@ var cachedVersion;
 var version = exports;
 
 version.getVersion = function(callback) {
-	if (cachedVersion) callback(cachedVersion);
+	if (cachedVersion) callback(null, cachedVersion);
 	version.getPackageJsonVersion(function(err, packageJsonVersion) {
 		if (err) return callback(err);
 		if (fs.existsSync(path.join(__dirname, '..', '.git'))){
