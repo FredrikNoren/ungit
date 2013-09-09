@@ -31,6 +31,7 @@ var StagingViewModel = function(repository) {
 	this.showNux = ko.computed(function() {
 		return self.files().length == 0 && !self.amend();
 	});
+	this.refreshingProgressBar = new ProgressBarViewModel('refreshing-' + repository.repoPath);
 	this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
 	this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
 	this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
@@ -48,6 +49,22 @@ var StagingViewModel = function(repository) {
 	});
 }
 exports.StagingViewModel = StagingViewModel;
+StagingViewModel.prototype.refresh = function() {
+	var self = this;
+	this.refreshingProgressBar.start();
+	api.query('GET', '/status', { path: this.repoPath }, function(err, status) {
+		self.refreshingProgressBar.stop();
+		if (err) return;
+		self.setFiles(status.files);
+		self.inRebase(!!status.inRebase);
+		self.inMerge(!!status.inMerge);
+		if (status.inMerge) {
+			var lines = status.commitMessage.split('\n');
+			self.commitMessageTitle(lines[0]);
+			self.commitMessageBody(lines.slice(1).join('\n'));
+		}
+	});
+}
 StagingViewModel.prototype.setFiles = function(files) {
 	var self = this;
 	var newFiles = [];

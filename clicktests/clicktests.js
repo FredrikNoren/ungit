@@ -156,6 +156,7 @@ function expectNotFindElement(page, id) {
 }
 
 function click(page, id) {
+	log('Trying to click ' + id);
 	var pos = getClickPosition(page, id);
 	page.sendEvent('click', pos.left, pos.top);
 }
@@ -207,23 +208,30 @@ test('Open home screen', function(done) {
 	});
 });
 
-var testRepoPath;
+var testRootPath;
 
-test('Create test directory', function(done) {
+test('Create test root directory', function(done) {
 	page.open('http://localhost:' + config.port + '/api/testing/createtempdir', 'POST', function(status) {
 		if (status == 'fail') return done({ status: status, content: page.plainText });
 		var json = JSON.parse(page.plainText);
-		testRepoPath = json.path + '/testrepo';
-		page.open('http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
-			if (status == 'fail') return done({ status: status, content: page.plainText });
-			done();
-		});
+		testRootPath = json.path;
+		done();
+	});
+});
+
+var testRepoPath;
+
+test('Create test directory', function(done) {
+	testRepoPath = testRootPath + '/testrepo';
+	page.open('http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
+		if (status == 'fail') return done({ status: status, content: page.plainText });
+		done();
 	});
 });
 
 test('Open path screen', function(done) {
 	page.open('http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-		waitForElement(page, 'path-page', function() {
+		waitForElement(page, 'uninited-path-page', function() {
 			done();
 		});
 	});
@@ -284,6 +292,34 @@ test('Should be possible to discard a created file', function(done) {
 		});
 	});
 });
+
+
+// ----------- CLONING -------------
+
+var testClonePath;
+
+test('Enter path to test root', function(done) {
+	click(page, 'navigation-path');
+	page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
+	page.sendEvent('keypress', testRootPath + '\n');
+	waitForElement(page, 'uninited-path-page', function() {
+		done();
+	});
+});
+
+test('Clone repository should bring you to repo page', function(done) {
+	testClonePath = testRootPath + '/testclone';
+	click(page, 'clone-url-input');
+	page.sendEvent('keypress', testRepoPath);
+	click(page, 'clone-target-input');
+	page.sendEvent('keypress', testClonePath);
+	click(page, 'clone-repository');
+	waitForElement(page, 'repository-view', function() {
+		expectNotFindElement(page, 'remote-error-popup');
+		done();
+	});
+});
+
 
 
 startUngitServer([], function(err) {

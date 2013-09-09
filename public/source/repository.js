@@ -12,7 +12,6 @@ var newId = function() { return idCounter++; };
 
 var RepositoryViewModel = function(main, repoPath) {
 	var self = this;
-	this.status = ko.observable('loading');
 	this.remoteErrorPopup = ko.observable();
 
 	this.main = main;
@@ -25,35 +24,31 @@ var RepositoryViewModel = function(main, repoPath) {
 	this.showFetchButton = ko.computed(function() {
 		return self.graph.hasRemotes();
 	});
-	this.updateStatus();
 	this.watcherReady = ko.observable(false);
 	this.showLog = ko.computed(function() {
 		return !self.staging.inRebase() && !self.staging.inMerge();
 	});
-	this.status.subscribe(function(newValue) {
-		if (newValue == 'inited') {
-			self.update();
-			api.watchRepository(repoPath, function() { self.watcherReady(true); });
-			if (ungit.config.gerrit) {
-				self.gerritIntegration(new GerritIntegrationViewModel(self));
-			}
-		}
-	});
+	api.watchRepository(repoPath, function() { self.watcherReady(true); });
+	if (ungit.config.gerrit) {
+		self.gerritIntegration(new GerritIntegrationViewModel(self));
+	}
 	var hasAutoFetched = false;
 	this.remotes.subscribe(function(newValue) {
 		if (newValue.length > 0 && !hasAutoFetched) {
 			hasAutoFetched = true;
 			self.fetch({ nodes: true, tags: true });
 		}
-	})
+	});
+
+	self.update();
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.update = function() {
-	this.updateStatus();
-	this.updateLog();
-	this.updateBranches();
-	this.updateRemotes();
+	this.staging.refresh();
 	this.staging.invalidateFilesDiffs();
+	this.graph.loadNodesFromApi();
+	this.graph.updateBranches();
+	this.updateRemotes();
 }
 RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
 	this.remoteErrorPopup(null);
@@ -63,7 +58,6 @@ RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 RepositoryViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RepositoryViewModel.prototype.fetch = function(options, callback) {
-	if (this.status() != 'inited') return;
 	var self = this;
 
 	var programEventListener = function(event) {
@@ -116,37 +110,7 @@ RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
 	return !!this._remoteErrorCodeToString[errorCode];
 }
 
-RepositoryViewModel.prototype.updateStatus = function(opt_callback) {
-	var self = this;
-	api.query('GET', '/status', { path: this.repoPath }, function(err, status){
-		if (err) return;
-		self.status('inited');
-		self.staging.setFiles(status.files);
-		self.staging.inRebase(!!status.inRebase);
-		self.staging.inMerge(!!status.inMerge);
-		if (status.inMerge) {
-			var lines = status.commitMessage.split('\n');
-			self.staging.commitMessageTitle(lines[0]);
-			self.staging.commitMessageBody(lines.slice(1).join('\n'));
-		}
-		if (opt_callback) opt_callback();
-	});
-}
-RepositoryViewModel.prototype.updateLog = function() {
-	if (this.status() != 'inited') return;
-	this.graph.loadNodesFromApi();
-}
-RepositoryViewModel.prototype.updateBranches = function() {
-	if (this.status() != 'inited') return;
-	var self = this;
-	api.query('GET', '/checkout', { path: this.repoPath }, function(err, branch) {
-		if (err && err.errorCode == 'not-a-repository') return true;
-		if (err) return;
-		self.graph.activeBranch(branch);
-	});
-}
 RepositoryViewModel.prototype.updateRemotes = function() {
-	if (this.status() != 'inited') return;
 	var self = this;
 	api.query('GET', '/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
@@ -155,12 +119,4 @@ RepositoryViewModel.prototype.updateRemotes = function() {
 		self.graph.hasRemotes(remotes.length != 0);
 	});
 }
-RepositoryViewModel.prototype.toogleShowBranches = function() {
-	this.showBranches(!this.showBranches());
-}
-RepositoryViewModel.prototype.createNewBranch = function() {
-	api.query('POST', '/branches', { path: this.repoPath, name: this.newBranchName() });
-	this.newBranchName('');
-}
-
 

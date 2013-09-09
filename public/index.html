@@ -63,16 +63,21 @@
 <script type="text/html" id="path">
 	<div class="path" data-bind="shown: shown" data-ta="path-page">
 
-		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
+		<!-- ko if: status() == 'loading' -->
+		<div class='animated fadeInLeft'>
 			<!-- ko template: { name: 'progressBar', data: loadingProgressBar } --><!-- /ko -->
 		</div>
+		<!-- /ko -->
 
-		<div class='animated fadeInLeft' data-bind="visible: status() == 'cloning'">
+		<!-- ko if: status() == 'cloning' -->
+		<div class='animated fadeInLeft'>
 			<h2>Cloning...</h2>
 			<!-- ko template: { name: 'progressBar', data: cloningProgressBar } --><!-- /ko -->
 		</div>
+		<!-- /ko -->
 		
-		<div class="uninited" data-bind="visible: status() == 'uninited'">
+		<!-- ko if: status() == 'uninited' -->
+		<div class="uninited" data-ta="uninited-path-page">
 			<div class="container">
 				<h1>Not a repository</h1>
 				<p>There is no repository at the selected path.</p>
@@ -89,13 +94,13 @@
 							<form data-bind="submit: cloneRepository">
 								<div class="form-group">
 									<label for="cloneFromInput">Clone from</label>
-									<input class="form-control" type="text" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
+									<input class="form-control" type="text" data-ta="clone-url-input" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
 								</div>
 								<div class="form-group">
 									<label for="cloneToInput">to</label>
-									<input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
+									<input class="form-control" type="text" data-ta="clone-target-input" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
 								</div>
-								<input type="submit" class="btn btn-primary btn-large" value="Clone repository!">
+								<input type="submit" class="btn btn-primary btn-large" data-ta="clone-repository" value="Clone repository!">
 							</form>
 						</div>
 					</div>
@@ -103,10 +108,13 @@
 			</div>
 			
 		</div>
+		<!-- /ko -->
 
+		<!-- ko if: status() == 'invalidpath' -->
 		<div class="invalidpath" data-bind="visible: status() == 'invalidpath'">
 			<div>"<span data-bind="text: path"></span>" is not a valid path.</div>
 		</div>
+		<!-- /ko -->
 
 		<!-- ko if: repository -->
 		<div data-bind="template: { name: 'repository', data: repository }">
@@ -122,6 +130,12 @@
 		<div class="arrowContainer arrowDown">
 			<div class="arrow"></div>
 		</div>
+		<button class="btn btn-default refresh-button" data-bind="click: refresh">
+			<span class="glyphicon glyphicon-refresh"></span>
+			<!-- ko if: refreshingProgressBar.running -->
+			<!-- ko template: { name: 'progressBar', data: refreshingProgressBar } --><!-- /ko -->
+			<!-- /ko -->
+		</button>
 		<div data-bind="visible: showNux">
 		Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
 		</div>
@@ -208,140 +222,132 @@
 </script>
 
 <script type="text/html" id="repository">
-	<div class="repository" data-ta="repository-view">
+	<div class="repository animated fadeInLeft" data-ta="repository-view">
 
-		<div class='animated fadeInLeft' data-bind="visible: status() == 'loading'">
-			Loading...
-		</div>
-		
-		<div class="inited animated fadeInLeft" data-bind="visible: status() == 'inited'">
+		<!-- ko if: gerritIntegration -->
+		<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+		<!-- /ko -->
 
-			<!-- ko if: gerritIntegration -->
-			<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+		<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
+
+			<!-- ko if: remoteErrorPopup -->
+			<div class="alert alert-danger" data-ta="remote-error-popup">
+				<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
+				<strong>Remote error!</strong>
+				<span data-bind="text: remoteErrorPopup"></span>
+			</div>
 			<!-- /ko -->
 
-			<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
+			<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 
-				<!-- ko if: remoteErrorPopup -->
-				<div class="alert alert-danger" data-ta="remote-error-popup">
-					<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
-					<strong>Remote error!</strong>
-					<span data-bind="text: remoteErrorPopup"></span>
+			<!-- ko if: staging.inRebase -->
+			<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+			<!-- /ko -->
+			<!-- ko if: staging.inMerge -->
+			<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
+			<!-- /ko -->
+
+			<!-- ko if: showLog -->
+
+			<!-- ko if: showFetchButton -->
+			<button class="fetchButton btn btn-default" data-bind="click: clickFetch, disable: fetchingProgressBar.running">
+				<span class="glyphicon glyphicon-refresh"></span>
+				Fetch remote nodes
+				<!-- ko if: fetchingProgressBar.running -->
+				<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
+				<!-- /ko -->
+			</button>
+			<!-- /ko -->
+			
+			<!-- ko with: graph -->
+			<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
+
+				<div class="daySeparators" data-bind="foreach: daySeparators">
+					<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+						<div class="dateLabel" data-bind="text: date"></div>
+					</div>
 				</div>
-				<!-- /ko -->
 
-				<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
-
-				<!-- ko if: staging.inRebase -->
-				<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
-				<!-- /ko -->
-				<!-- ko if: staging.inMerge -->
-				<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
-				<!-- /ko -->
-
-				<!-- ko if: showLog -->
-
-				<!-- ko if: showFetchButton -->
-				<button class="fetchButton btn btn-default" data-bind="click: clickFetch, disable: fetchingProgressBar.running">
-					<span class="glyphicon glyphicon-refresh"></span>
-					Fetch remote nodes
-					<!-- ko if: fetchingProgressBar.running -->
-					<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
-					<!-- /ko -->
-				</button>
-				<!-- /ko -->
+				<div class="graphLog" data-bind="graphLog: $data">
+				</div>
 				
-				<!-- ko with: graph -->
-				<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
-
-					<div class="daySeparators" data-bind="foreach: daySeparators">
-						<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
-							<div class="dateLabel" data-bind="text: date"></div>
-						</div>
-					</div>
-
-					<div class="graphLog" data-bind="graphLog: $data">
-					</div>
-					
-					<div class="nodes" data-bind="foreach: nodes">
-						<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
-							<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
-								<div class="logEntryBox panel clearfix">
-									<div class="arrowContainer arrowRight">
-										<div class="shadow"></div>
-										<div class="arrow"></div>
-									</div>
-									<img class="pull-left img-circle gravatar"
-										data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
-										onerror="this.style.display='none';">
+				<div class="nodes" data-bind="foreach: nodes">
+					<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+						<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
+							<div class="logEntryBox panel clearfix">
+								<div class="arrowContainer arrowRight">
+									<div class="shadow"></div>
+									<div class="arrow"></div>
+								</div>
+								<img class="pull-left img-circle gravatar"
+									data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
+									onerror="this.style.display='none';">
+								<div>
 									<div>
-										<div>
-											<span class="title" data-bind="text: title"></span>
-											<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
-										</div>
-										<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
-										<div class="text-muted" data-bind="text: authorDateFromNow"></div>
+										<span class="title" data-bind="text: title"></span>
+										<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
 									</div>
+									<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
+									<div class="text-muted" data-bind="text: authorDateFromNow"></div>
 								</div>
 							</div>
-
-							<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
-							</div>
-
-							<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
-								<!-- ko foreach: branches -->
-								<span class="ref branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
-									<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
-									<div class="branch-icon"></div>
-									<span class="name" data-bind="text: displayName"></span>
-								</span>
-								<!-- /ko -->
-
-								<!-- ko foreach: tags -->
-								<span class="ref tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
-									<div class="remote-icon" data-bind="visible: isRemote"></div>
-									<div class="tag-icon"></div>
-									<span class="name" data-bind="text: displayName"></span>
-								</span>
-								<!-- /ko -->
-
-								<!-- ko foreach: dropareaGraphActions -->
-								<span class="graphAction droparea" data-bind="css: style, visible: visible">
-									<span data-bind="text: text"></span>
-									<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave"></div>
-									<!-- ko if: performProgressBar.running -->
-									<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
-									<!-- /ko -->
-								</span>
-								<!-- /ko -->
-
-								<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-									<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
-									<!-- ko if: branchingFormVisible -->
-									<form class="form-inline" data-bind="submit: createBranch">
-										<input class="name form-control" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
-										<input class="btn btn-primary" type="submit" value="Branch" data-bind="enable: canCreateRef">
-										<button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
-									</form>
-									<!-- /ko -->
-								</span>
-							</div>
-
 						</div>
-					</div>
 
-					<div class="graphFooter">
-						<!-- ko if: isLoading -->
-						<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
-						<!-- /ko -->
-					</div>
+						<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+						</div>
 
+						<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
+							<!-- ko foreach: branches -->
+							<span class="ref branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+								<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
+								<div class="branch-icon"></div>
+								<span class="name" data-bind="text: displayName"></span>
+							</span>
+							<!-- /ko -->
+
+							<!-- ko foreach: tags -->
+							<span class="ref tag" data-bind="css: { current: current, remote: isRemoteTag }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+								<div class="remote-icon" data-bind="visible: isRemote"></div>
+								<div class="tag-icon"></div>
+								<span class="name" data-bind="text: displayName"></span>
+							</span>
+							<!-- /ko -->
+
+							<!-- ko foreach: dropareaGraphActions -->
+							<span class="graphAction droparea" data-bind="css: style, visible: visible">
+								<span data-bind="text: text"></span>
+								<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave"></div>
+								<!-- ko if: performProgressBar.running -->
+								<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
+								<!-- /ko -->
+							</span>
+							<!-- /ko -->
+
+							<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+								<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+								<!-- ko if: branchingFormVisible -->
+								<form class="form-inline" data-bind="submit: createBranch">
+									<input class="name form-control" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
+									<input class="btn btn-primary" type="submit" value="Branch" data-bind="enable: canCreateRef">
+									<button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+								</form>
+								<!-- /ko -->
+							</span>
+						</div>
+
+					</div>
 				</div>
-				<!-- /ko -->
 
-				<!-- /ko -->
+				<div class="graphFooter">
+					<!-- ko if: isLoading -->
+					<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
+					<!-- /ko -->
+				</div>
 
 			</div>
+			<!-- /ko -->
+
+			<!-- /ko -->
 
 		</div>
 

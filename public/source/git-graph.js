@@ -58,6 +58,14 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 		self.nodesLoader.stop();
 	});
 }
+GitGraphViewModel.prototype.updateBranches = function() {
+	var self = this;
+	api.query('GET', '/checkout', { path: this.repoPath }, function(err, branch) {
+		if (err && err.errorCode == 'not-a-repository') return true;
+		if (err) return;
+		self.activeBranch(branch);
+	});
+}
 
 GitGraphViewModel.prototype.setRemoteTags = function(remoteTags) {
 	var self = this;
