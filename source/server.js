@@ -12,6 +12,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var semver = require('semver');
 var path = require('path');
 var fs = require('fs');
+var async = require('async');
 
 
 winston.remove(winston.transports.Console);
@@ -200,15 +201,14 @@ app.get('/api/fs/listDirectories', function(req, res) {
 					winston.error(err.stack);
 					res.json(400, err);
 				} else {
-					filteredFiles = [];
-					files.forEach(function(file) {
-						absolutePath = dir + file;
-						stat = fs.statSync(absolutePath);
-						if (stat && stat.isDirectory()) {
-							filteredFiles.push(absolutePath);
-						}
+					async.filter(files, function(file, callback) {
+						absolutePath = path.join(dir, file);
+						fs.stat(absolutePath, function(err, stat) {
+							callback(!err && stat && stat.isDirectory);
+						});
+					}, function(filteredFiles) {
+						res.json(filteredFiles);
 					});
-					res.json(filteredFiles);
 				}
 			});
 		}
