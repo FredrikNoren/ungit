@@ -204,7 +204,7 @@ app.get('/api/fs/listDirectories', function(req, res) {
 					async.filter(files, function(file, callback) {
 						absolutePath = path.join(dir, file);
 						fs.stat(absolutePath, function(err, stat) {
-							callback(!err && stat && stat.isDirectory);
+							callback(!err && stat && stat.isDirectory());
 						});
 					}, function(filteredFiles) {
 						res.json(filteredFiles);
