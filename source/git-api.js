@@ -453,13 +453,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	if (config.dev) {
 
-		app.post(exports.pathPrefix + '/testing/createdir', ensureAuthenticated, function(req, res){
+		app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
 			temp.mkdir('test-temp-dir', function(err, path) {
 				res.json({ path: path });
 			});
 		});
-		app.post(exports.pathPrefix + '/testing/createsubdir', ensureAuthenticated, function(req, res){
-			fs.mkdir(req.body.dir, function() {
+		app.post(exports.pathPrefix + '/testing/createdir', ensureAuthenticated, function(req, res){
+			fs.mkdir(req.param('dir'), function() {
 				res.json({});
 			});
 		});

@@ -23,7 +23,7 @@ var req = request(app);
 describe('git-api', function () {
 
 	it('creating test dir should work', function(done) {
-		common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+		common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
 			expect(res.body.path).to.be.ok();
 			testDir = res.body.path;
 			done();
@@ -219,7 +219,7 @@ describe('git-api', function () {
 	var testSubDir = 'sub';
 
 	it('creating test sub dir should work', function(done) {
-		common.post(req, '/testing/createsubdir', { dir: path.join(testDir, testSubDir) }, done);
+		common.post(req, '/testing/createdir', { dir: path.join(testDir, testSubDir) }, done);
 	});
 
 	var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');

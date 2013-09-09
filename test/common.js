@@ -56,7 +56,7 @@ common.delete = function(req, path, payload, done, callback) {
 
 common.createEmptyRepo = function(req, done, callback) {
 	var testDir;
-	common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+	common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
 		expect(res.body.path).to.be.ok();
 		testDir = res.body.path;
 		common.post(req, '/init', { path: testDir }, done, function() {

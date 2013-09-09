@@ -210,12 +210,14 @@ test('Open home screen', function(done) {
 var testRepoPath;
 
 test('Create test directory', function(done) {
-	var url = 'http://localhost:' + config.port + '/api/testing/createdir';
-	page.open(url, 'POST', function(status) {
+	page.open('http://localhost:' + config.port + '/api/testing/createtempdir', 'POST', function(status) {
 		if (status == 'fail') return done({ status: status, content: page.plainText });
 		var json = JSON.parse(page.plainText);
-		testRepoPath = json.path;
-		done();
+		testRepoPath = json.path + '/testrepo';
+		page.open('http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
+			if (status == 'fail') return done({ status: status, content: page.plainText });
+			done();
+		});
 	});
 });
 

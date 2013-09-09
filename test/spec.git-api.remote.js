@@ -26,21 +26,21 @@ describe('git-api remote', function () {
 	it('creating test dirs should work', function(done) {
 		async.parallel([
 			function(done) {
-				common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
 					expect(res.body.path).to.be.ok();
 					testDirLocal1 = res.body.path;
 					done();
 				});
 			},
 			function(done) {
-				common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
 					expect(res.body.path).to.be.ok();
 					testDirLocal2 = res.body.path;
 					done();
 				});
 			},
 			function(done) {
-				common.post(req, '/testing/createdir', undefined, done, function(err, res) {
+				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
 					expect(res.body.path).to.be.ok();
 					testDirRemote = res.body.path;
 					done();
