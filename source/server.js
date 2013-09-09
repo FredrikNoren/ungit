@@ -201,8 +201,10 @@ app.get('/api/fs/listDirectories', function(req, res) {
 					winston.error(err.stack);
 					res.json(400, err);
 				} else {
-					async.filter(files, function(file, callback) {
-						absolutePath = path.join(dir, file);
+					var absolutePaths = files.map(function(file) {
+						return path.join(dir, file);
+					});
+					async.filter(absolutePaths, function(absolutePath, callback) {
 						fs.stat(absolutePath, function(err, stat) {
 							callback(!err && stat && stat.isDirectory());
 						});
