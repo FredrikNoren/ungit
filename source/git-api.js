@@ -55,8 +55,12 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 					}
 					socket.join(path.normalize(data.path)); // join room for this path
 					socket.watcherPath = data.path;
-					socket.watcher = fs.watch(data.path, function() {
-						socket.emit('changed', { repository: data.path });
+					socket.watcher = fs.watch(data.path, function(event, filename) {
+						// The .git dir changes on for instance 'git status', so we
+						// can't trigger a change here (since that would lead to an endless
+						// loop of the client getting the change and then requesting the new data)
+						if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
+							socket.emit('changed', { repository: data.path });
 					});
 					winston.info('Start watching ' + socket.watcherPath);
 					callback();
