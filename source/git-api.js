@@ -467,9 +467,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){
-			var content = req.body.content;
-			if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
-			fs.writeFileSync(req.body.file, content);
+			var content = req.param('content');
+			if (content === undefined) content = ('test content\n' + Math.random() + '\n');
+			fs.writeFileSync(req.param('file'), content);
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/removefile', ensureAuthenticated, function(req, res){

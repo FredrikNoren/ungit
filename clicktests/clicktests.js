@@ -84,13 +84,24 @@ function startUngitServer(options, callback) {
 }
 
 function createTestFile(filename, callback) {
-
 	var tempPage = createPage(function(err) {
 		console.error('Caught error');
 		phantom.exit(1);
 	});
-
 	var url = 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(filename);
+	tempPage.open(url, 'POST', function(status) {
+		if (status == 'fail') return callback({ status: status, content: page.plainText });
+		tempPage.close();
+		callback();
+	});
+}
+
+function changeTestFile(filename, callback) {
+	var tempPage = createPage(function(err) {
+		console.error('Caught error');
+		phantom.exit(1);
+	});
+	var url = 'http://localhost:' + config.port + '/api/testing/changefile?file=' + encodeURIComponent(filename);
 	tempPage.open(url, 'POST', function(status) {
 		if (status == 'fail') return callback({ status: status, content: page.plainText });
 		tempPage.close();
@@ -307,6 +318,22 @@ test('Should be possible to create a branch', function(done) {
 			done();
 		});
 	}, 100);
+});
+
+test('Commit changes to a file', function(done) {
+	changeTestFile(testRepoPath + '/testfile.txt', function(err) {
+		if (err) return done(err);
+		waitForElement(page, '[data-ta="staging-file"]', function() {
+			click(page, '[data-ta="staging-commit-title"]')
+			write(page, 'My commit message');
+			setTimeout(function() {
+				click(page, '[data-ta="commit"]');
+				waitForNotElement(page, '[data-ta="staging-file"]', function() {
+					done();
+				});
+			}, 100);
+		});
+	});
 });
 
 
