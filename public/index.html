@@ -298,7 +298,8 @@
 
 						<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
 							<!-- ko foreach: branches -->
-							<span class="ref branch" data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd" draggable="true">
+							<span class="ref branch" data-ta="branch" draggable="true"
+									data-bind="css: { current: current, remote: isRemoteBranch }, dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': displayName }" >
 								<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
 								<div class="branch-icon"></div>
 								<span class="name" data-bind="text: displayName"></span>
@@ -324,11 +325,11 @@
 							<!-- /ko -->
 
 							<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-								<button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+								<button class="showBranchingForm" data-ta="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
 								<!-- ko if: branchingFormVisible -->
 								<form class="form-inline" data-bind="submit: createBranch">
-									<input class="name form-control" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
-									<input class="btn btn-primary" type="submit" value="Branch" data-bind="enable: canCreateRef">
+									<input class="name form-control" data-ta="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
+									<input class="btn btn-primary" data-ta="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
 									<button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
 								</form>
 								<!-- /ko -->

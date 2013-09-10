@@ -30,7 +30,7 @@ function createPage(onError) {
 	    log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
 	};
 	page.onResourceRequested = function(requestData, networkRequest) {
-	    log('Request (#' + requestData.id + '): ' + requestData.url);
+	    log('Request (#' + requestData.id + '): ' + requestData.method + ' ' + requestData.url);
 	    // Abort gravatar requests to speed up things (since they will anyway only fail)
 	    if (requestData.url.indexOf('http://www.gravatar.com/avatar/') == 0) {
 	    	networkRequest.abort();
@@ -98,34 +98,30 @@ function createTestFile(filename, callback) {
 	});
 }
 
-function taIdToSelector(id) {
-	return '[data-ta="' + id + '"]';
-}
-
-function getElementPosition(page, id) {
+function getElementPosition(page, selector) {
 	return page.evaluate(function(selector) {
 		return $(selector).offset();
-	}, taIdToSelector(id));
+	}, selector);
 }
 
-function getClickPosition(page, id) {
+function getClickPosition(page, selector) {
 	return page.evaluate(function(selector) {
 		var el = $(selector);
 		return {
 			left: el.offset().left + el.width() / 2,
 			top: el.offset().top + el.height() / 2,
 		};
-	}, taIdToSelector(id));	
+	}, selector);	
 }
 
-function waitForElement(page, id, callback) {
+function waitForElement(page, selector, callback) {
 	var tryFind = function() {
-		log('Trying to find element: ' + id);
+		log('Trying to find element: ' + selector);
 		var found = page.evaluate(function(selector) {
 			return $(selector).length > 0;
-		}, taIdToSelector(id));
+		}, selector);
 		if (found) {
-			log('Found element: ' + id);
+			log('Found element: ' + selector);
 			callback();
 		}
 		else setTimeout(tryFind, 500);
@@ -133,14 +129,14 @@ function waitForElement(page, id, callback) {
 	tryFind();
 }
 
-function waitForNotElement(page, id, callback) {
+function waitForNotElement(page, selector, callback) {
 	var tryFind = function() {
-		log('Trying to NOT find element: ' + id);
+		log('Trying to NOT find element: ' + selector);
 		var found = page.evaluate(function(selector) {
 			return $(selector).length > 0;
-		}, taIdToSelector(id));
+		}, selector);
 		if (!found) {
-			log('Found no element matching: ' + id);
+			log('Found no element matching: ' + selector);
 			callback();
 		}
 		else setTimeout(tryFind, 500);
@@ -148,17 +144,25 @@ function waitForNotElement(page, id, callback) {
 	tryFind();
 }
 
-function expectNotFindElement(page, id) {
+function expectNotFindElement(page, selector) {
 	var found = page.evaluate(function(selector) {
 		return $(selector).length > 0;
-	}, taIdToSelector(id));
-	if (found) throw new Error('Expected to not find ' + id + ' but found it.');
+	}, selector);
+	if (found) throw new Error('Expected to not find ' + selector + ' but found it.');
 }
 
-function click(page, id) {
-	log('Trying to click ' + id);
-	var pos = getClickPosition(page, id);
+function click(page, selector) {
+	log('Trying to click ' + selector);
+	var pos = getClickPosition(page, selector);
 	page.sendEvent('click', pos.left, pos.top);
+}
+function write(page, text) {
+	log('Writing ' + text);
+	page.sendEvent('keypress', text);
+}
+function selectAll(page) {
+	log('Trying to select all in focused element (ctrl-A)');
+	page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
 }
 
 var tests = [];
@@ -202,7 +206,7 @@ var page = createPage(function(err) {
 
 test('Open home screen', function(done) {
 	page.open('http://localhost:' + config.port, function() {
-		waitForElement(page, 'home-page', function() {
+		waitForElement(page, '[data-ta="home-page"]', function() {
 			done();
 		});
 	});
@@ -231,31 +235,31 @@ test('Create test directory', function(done) {
 
 test('Open path screen', function(done) {
 	page.open('http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-		waitForElement(page, 'uninited-path-page', function() {
+		waitForElement(page, '[data-ta="uninited-path-page"]', function() {
 			done();
 		});
 	});
 });
 
 test('Init repository should bring you to repo page', function(done) {
-	click(page, 'init-repository');
-	waitForElement(page, 'repository-view', function() {
-		expectNotFindElement(page, 'remote-error-popup');
+	click(page, '[data-ta="init-repository"]');
+	waitForElement(page, '[data-ta="repository-view"]', function() {
+		expectNotFindElement(page, '[data-ta="remote-error-popup"]');
 		done();
 	});
 });
 
-test('Clicking loggo should bring you to home screen', function(done) {
-	click(page, 'home-link');
-	waitForElement(page, 'home-page', function() {
+test('Clicking logo should bring you to home screen', function(done) {
+	click(page, '[data-ta="home-link"]');
+	waitForElement(page, '[data-ta="home-page"]', function() {
 		done();
 	});
 });
 
 test('Entering a path to a repo should bring you to that repo', function(done) {
-	click(page, 'navigation-path');
-	page.sendEvent('keypress', testRepoPath + '\n');
-	waitForElement(page, 'repository-view', function() {
+	click(page, '[data-ta="navigation-path"]');
+	write(page, testRepoPath + '\n');
+	waitForElement(page, '[data-ta="repository-view"]', function() {
 		done();
 	});
 });
@@ -263,19 +267,19 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 test('Creating a file should make it show up in staging', function(done) {
 	createTestFile(testRepoPath + '/testfile.txt', function(err) {
 		if (err) return done(err);
-		waitForElement(page, 'staging-file', function() {
+		waitForElement(page, '[data-ta="staging-file"]', function() {
 			done();
 		});
 	});
 });
 
 test('Committing a file should remove it from staging and make it show up in log', function(done) {
-	click(page, 'staging-commit-title')
-	page.sendEvent('keypress', 'My commit message');
+	click(page, '[data-ta="staging-commit-title"]')
+	write(page, 'My commit message');
 	setTimeout(function() {
-		click(page, 'commit');
-		waitForElement(page, 'node', function() {
-			expectNotFindElement(page, 'staging-file');
+		click(page, '[data-ta="commit"]');
+		waitForElement(page, '[data-ta="node"]', function() {
+			expectNotFindElement(page, '[data-ta="staging-file"]');
 			done();
 		});
 	}, 100);
@@ -284,13 +288,25 @@ test('Committing a file should remove it from staging and make it show up in log
 test('Should be possible to discard a created file', function(done) {
 	createTestFile(testRepoPath + '/testfile2.txt', function(err) {
 		if (err) return done(err);
-		waitForElement(page, 'staging-file', function() {
-			click(page, 'discard-file');
-			waitForNotElement(page, 'staging-file', function() {
+		waitForElement(page, '[data-ta="staging-file"]', function() {
+			click(page, '[data-ta="discard-file"]');
+			waitForNotElement(page, '[data-ta="staging-file"]', function() {
 				done();
 			});
 		});
 	});
+});
+
+test('Should be possible to create a branch', function(done) {
+	click(page, '[data-ta="show-new-branch-form"]');
+	click(page, '[data-ta="new-branch-name"]');
+	write(page, 'testbranch');
+	setTimeout(function() {
+		click(page, '[data-ta="create-branch"]');
+		waitForElement(page, '[data-ta="branch"][data-ta-name="testbranch"]', function() {
+			done();
+		});
+	}, 100);
 });
 
 
@@ -299,23 +315,23 @@ test('Should be possible to discard a created file', function(done) {
 var testClonePath;
 
 test('Enter path to test root', function(done) {
-	click(page, 'navigation-path');
-	page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
-	page.sendEvent('keypress', testRootPath + '\n');
-	waitForElement(page, 'uninited-path-page', function() {
+	click(page, '[data-ta="navigation-path"]');
+	selectAll(page);
+	write(page, testRootPath + '\n');
+	waitForElement(page, '[data-ta="uninited-path-page"]', function() {
 		done();
 	});
 });
 
 test('Clone repository should bring you to repo page', function(done) {
 	testClonePath = testRootPath + '/testclone';
-	click(page, 'clone-url-input');
-	page.sendEvent('keypress', testRepoPath);
-	click(page, 'clone-target-input');
-	page.sendEvent('keypress', testClonePath);
-	click(page, 'clone-repository');
-	waitForElement(page, 'repository-view', function() {
-		expectNotFindElement(page, 'remote-error-popup');
+	click(page, '[data-ta="clone-url-input"]');
+	write(page, testRepoPath);
+	click(page, '[data-ta="clone-target-input"]');
+	write(page, testClonePath);
+	click(page, '[data-ta="clone-repository"]');
+	waitForElement(page, '[data-ta="repository-view"]', function() {
+		expectNotFindElement(page, '[data-ta="remote-error-popup"]');
 		done();
 	});
 });
