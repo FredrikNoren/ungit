@@ -70,12 +70,12 @@ logRenderer.render = function(element, graph) {
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 
 	var HEAD = graph.HEAD();
-
+	
 	// Rebase
 	var rebaseNodes = {}
 	var rebasePath;
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'rebase') {
-		var ref = graph.hoverGraphAction().ref();
+		var ref = graph.currentActionContext();
 		var onto = graph.hoverGraphAction().onto();
 		if (ref && onto) {
 			if (onto instanceof RefViewModel) onto = onto.node();
@@ -142,7 +142,7 @@ logRenderer.render = function(element, graph) {
 
 	// Draw push lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'push') {
-		var local = graph.hoverGraphAction().ref();
+		var local = graph.currentActionContext();
 		if (local) {
 			var remote = local.remoteRef();
 			if (remote) {
@@ -163,7 +163,7 @@ logRenderer.render = function(element, graph) {
 	context.setTransform(1, 0, 0, 1, 0, 0);
 	context.translate(logRenderer.origin.x, logRenderer.origin.y);
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'reset') {
-		var local = graph.hoverGraphAction().ref();
+		var local = graph.currentActionContext();
 		if (local) {
 			var remote = local.remoteRef();
 			context.setLineDash([]);
@@ -177,7 +177,7 @@ logRenderer.render = function(element, graph) {
 
 	// Draw rebase lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'rebase') {
-		var ref = graph.hoverGraphAction().ref();
+		var ref = graph.currentActionContext();
 		var onto = graph.hoverGraphAction().onto();
 		if (ref && onto) {
 			if (onto instanceof RefViewModel) onto = onto.node();
@@ -217,7 +217,7 @@ logRenderer.render = function(element, graph) {
 
 	// Draw merge lines
 	if (graph.hoverGraphAction() && graph.hoverGraphAction().style == 'merge') {
-		var ref = graph.hoverGraphAction().ref();
+		var ref = graph.currentActionContext();
 		var mergeWith = graph.hoverGraphAction().mergeWith();
 		if (ref && mergeWith) {
 			if (mergeWith instanceof RefViewModel) mergeWith = mergeWith.node();

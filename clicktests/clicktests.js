@@ -116,13 +116,28 @@ function getElementPosition(page, selector) {
 }
 
 function getClickPosition(page, selector) {
-	return page.evaluate(function(selector) {
+	var res = page.evaluate(function(selector) {
 		var el = $(selector);
-		return {
-			left: el.offset().left + el.width() / 2,
-			top: el.offset().top + el.height() / 2,
+		if (el.width() == 0 || el.height() == 0) return { error: 'Area of ' + selector + ' is zero.' };
+		var clickPos = {
+			left: Math.floor(el.offset().left + el.width() / 2),
+			top: Math.floor(el.offset().top + el.height() / 2),
 		};
-	}, selector);	
+		var actualElement = document.elementFromPoint(clickPos.left, clickPos.top);
+		if (!actualElement)
+			 return { error: 'Couldn\'t find any element at ' + clickPos.left + ', ' + clickPos.top + ' (looking for ' + selector + ')' };
+		var soughtElement = actualElement;
+		while (soughtElement && !$(soughtElement).is(selector))
+			soughtElement = soughtElement.parentNode;
+		if (!soughtElement)
+			 return { error: 'Expected to find ' + selector + ' at position ' + clickPos.left + ', ' + clickPos.top + ' but found ' + actualElement.outerHTML };
+		return { result: clickPos };
+	}, selector);
+	if (res.error) {
+		page.render('clicktestout/error.png');
+		throw new Error(res.error);
+	}
+	return res.result;
 }
 
 function waitForElement(page, selector, callback) {
@@ -165,7 +180,13 @@ function expectNotFindElement(page, selector) {
 function click(page, selector) {
 	log('Trying to click ' + selector);
 	var pos = getClickPosition(page, selector);
+	page.sendEvent('mousemove', pos.left, pos.top);
 	page.sendEvent('click', pos.left, pos.top);
+}
+function mousemove(page, selector) {
+	log('Moving mouse to ' + selector);
+	var pos = getClickPosition(page, selector);
+	page.sendEvent('mousemove', pos.left, pos.top);
 }
 function write(page, text) {
 	log('Writing ' + text);
@@ -308,17 +329,40 @@ test('Should be possible to discard a created file', function(done) {
 	});
 });
 
-test('Should be possible to create a branch', function(done) {
+var createBranch = function(name, callback) {
+	log('Createing branch ' + name);
 	click(page, '[data-ta="show-new-branch-form"]');
 	click(page, '[data-ta="new-branch-name"]');
-	write(page, 'testbranch');
+	write(page, name);
 	setTimeout(function() {
 		click(page, '[data-ta="create-branch"]');
-		waitForElement(page, '[data-ta="branch"][data-ta-name="testbranch"]', function() {
-			done();
+		waitForElement(page, '[data-ta="branch"][data-ta-name="' + name + '"]', function() {
+			callback();
 		});
 	}, 100);
+}
+
+test('Should be possible to create a branch', function(done) {
+	createBranch('testbranch', done);
 });
+
+/*
+test('Should be possible to create another a branch', function(done) {
+	setTimeout(function() {
+		createBranch('lol', done);
+	}, 2000);
+});
+
+test('Should be possible to create and destroy a branch', function(done) {
+	createBranch('willbedeleted', function() {
+		click(page, '[data-ta="branch"][data-ta-name="willbedeleted"]');
+		click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
+		waitForNotElement(page, '[data-ta="branch"][data-ta-name="willbedeleted"]', function() {
+			done();
+		});
+	});
+});
+*/
 
 test('Commit changes to a file', function(done) {
 	changeTestFile(testRepoPath + '/testfile.txt', function(err) {
@@ -336,6 +380,13 @@ test('Commit changes to a file', function(done) {
 	});
 });
 
+test('Checkout a branch', function(done) {
+	click(page, '[data-ta="branch"][data-ta-name="testbranch"]');
+	click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
+	waitForElement(page, '[data-ta="branch"][data-ta-name="testbranch"][data-ta-current="true"]', function() {
+		done();
+	});
+});
 
 // ----------- CLONING -------------
 

@@ -31,10 +31,10 @@ var GitGraphViewModel = function(repository) {
 	});
 	this.HEAD = ko.observable();
 	this.hoverGraphAction = ko.observable();
-	this.draggingRef = ko.observable();
+	this.currentActionContext = ko.observable();
 	this.hasRemotes = ko.observable(false);
 	this.showDropTargets = ko.computed(function() {
-		return !!self.draggingRef();
+		return !!self.currentActionContext();
 	});
 	this.scrolledToEnd = _.debounce(function() {
 		self.maxNNodes = self.maxNNodes + 25;

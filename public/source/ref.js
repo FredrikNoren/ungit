@@ -33,6 +33,20 @@ var RefViewModel = function(args) {
 	this.graph = args.graph;
 	this.remoteRef = ko.observable();
 	this.localRef = ko.observable();
+	this.isDragging = ko.observable(false);
+	this.hasFocus = ko.observable(false);
+	this.hasFocus.subscribe(function(newValue) {
+		if (newValue)
+			self.graph.currentActionContext(self);
+		else {
+			if (self.isDragging()) return;
+			// CLicking otherwise immediately destroys focus, meaning the button is never hit
+			setTimeout(function() {
+				if (self.graph.currentActionContext() == self)
+					self.graph.currentActionContext(null);
+			}, 300);
+		}
+	});
 	this.current = ko.computed(function() {
 		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
 	});
@@ -53,8 +67,11 @@ var RefViewModel = function(args) {
 }
 exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {
-	this.graph.draggingRef(this);
+	this.graph.currentActionContext(this);
+	this.isDragging(true);
+	if (document.activeElement) document.activeElement.blur();
 }
 RefViewModel.prototype.dragEnd = function() {
-	this.graph.draggingRef(null);
+	this.graph.currentActionContext(null);
+	this.isDragging(false);
 }

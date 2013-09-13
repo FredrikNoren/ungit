@@ -245,6 +245,18 @@ ko.bindingHandlers.autocomplete = {
     }
 };
 
+// For some reason the standard hasFocus binder doesn't fire events on div objects with tabIndex's
+ko.bindingHandlers.hasFocus2 = {
+    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        element.addEventListener('focus', function() {
+            valueAccessor()(true);
+        });
+        element.addEventListener('blur', function() {
+            valueAccessor()(false);
+        });
+    }
+};
+
 
 // Used to catch when a user was tabbed away and re-visits the page. 
 // If fs.watch worked better on Windows (i.e. on subdirectories) we wouldn't need this

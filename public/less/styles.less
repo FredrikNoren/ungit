@@ -284,6 +284,19 @@
 			margin-left: 5px;
 			margin-right: 15px;
 			margin-top: 9px;
+			outline: none;
+			padding: 2px 5px 2px 5px;
+			border: 3px solid transparent;
+			border-radius: 10px;
+			transition: border-color 0.5s;
+			-webkit-transition: border-color 0.5s;
+
+			&.dragging.focused {
+				border-color: transparent;
+			}
+			&.focused {
+				border-color: #fff;
+			}
 
 			&.current {
 				font-weight: bold;
@@ -300,6 +313,7 @@
 
 		.graphAction {
 			color: #fff;
+			cursor: pointer;
 			&.push {
 				background: rgba(61, 139, 255, 0.9);
 			}

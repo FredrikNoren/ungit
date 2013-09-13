@@ -24,3 +24,5 @@ report/
 .bin/
 
 /node_modules/
+
+/clicktestout/
