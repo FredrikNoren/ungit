@@ -120,6 +120,7 @@ function getElementPosition(page, selector) {
 function getClickPosition(page, selector) {
 	var res = page.evaluate(function(selector) {
 		var el = $(selector);
+		if (el.length == 0) return { error: 'Can\'t find element ' + selector };
 		if (el.width() == 0 || el.height() == 0) return { error: 'Area of ' + selector + ' is zero.' };
 		var clickPos = {
 			left: Math.floor(el.offset().left + el.width() / 2),

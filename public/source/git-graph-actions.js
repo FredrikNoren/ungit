@@ -137,7 +137,8 @@ GraphActions.Merge = function(graph, node) {
 		if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
 		return self.graph.showDropTargets() &&
 			!self.graph.currentActionContext().current() &&
-			self.graph.checkedOutRef().node() == self.node;
+			self.graph.checkedOutRef().node() == self.node &&
+			!self.node.isAncestor(self.graph.currentActionContext().node());
 	});
 }
 inherits(GraphActions.Merge, GraphActions.ActionBase);
