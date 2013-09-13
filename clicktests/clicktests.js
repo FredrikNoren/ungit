@@ -1,3 +1,5 @@
+var startTime = Date.now();
+
 var webpage = require('webpage');
 var child_process = require('child_process');
 var expect = require('../node_modules/expect.js/expect');
@@ -225,7 +227,7 @@ function runTests() {
 			console.error('Tests failed!');
 			phantom.exit(1);
 		} else {
-			console.log('All tests ok!');
+			console.log('All tests ok! Took ' + (Date.now() - startTime) / 1000 + 'sec');
 			phantom.exit(0);
 		}
 	});
@@ -305,7 +307,9 @@ var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 			setTimeout(function() {
 				click(page, '[data-ta="commit"]');
 				waitForNotElement(page, '[data-ta="staging-file"]', function() {
-					callback();
+					setTimeout(function() { // let the animation finish
+						callback();
+					}, 1000);
 				});
 			}, 100);
 		});
@@ -383,32 +387,49 @@ test('Commit changes to a file', function(done) {
 	});
 });
 
-test('Checkout a branch', function(done) {
-	click(page, '[data-ta="branch"][data-ta-name="testbranch"]');
+function checkout(page, branch, callback) {
+	click(page, '[data-ta="branch"][data-ta-name="' + branch + '"]');
 	click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
-	waitForElement(page, '[data-ta="branch"][data-ta-name="testbranch"][data-ta-current="true"]', function() {
-		done();
+	waitForElement(page, '[data-ta="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
+		callback();
 	});
+}
+
+test('Checkout a branch', function(done) {
+	checkout(page, 'testbranch', done);
 });
 
 test('Create another commit', function(done) {
-	createCommitWithNewFile('testy2.txt', 'Branch commit', function() {
-		done();
-	});
+	createCommitWithNewFile('testy2.txt', 'Branch commit', done);
 });
 
-test('Rebase', function(done) {
-	click(page, '[data-ta="branch"][data-ta-name="testbranch"]');
-	mousemove(page, '[data-ta-action="rebase"][data-ta-visible="true"]');
+function refAction(page, ref, action, callback) {
+	click(page, '[data-ta="branch"][data-ta-name="' + ref + '"]');
+	mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
 	setTimeout(function() { // Wait for next animation frame
-		page.render('clicktestout/testy1.png')
-		click(page, '[data-ta-action="rebase"][data-ta-visible="true"]');
-		page.render('clicktestout/testy1.png')
-		setTimeout(function() {
-			page.render('clicktestout/testy2.png')
-			done();
-		}, 500);
+		click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
+		waitForNotElement(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
+			setTimeout(function() {
+				callback();
+			}, 500);
+		})
 	}, 200);
+}
+
+test('Rebase', function(done) {
+	refAction(page, 'testbranch', 'rebase', done);
+});
+
+test('Checkout master again', function(done) {
+	checkout(page, 'master', done);
+});
+
+test('Create yet another commit', function(done) {
+	createCommitWithNewFile('testy3.txt', 'Branch commit', done);
+});
+
+test('Merge', function(done) {
+	refAction(page, 'testbranch', 'merge', done);
 });
 
 
