@@ -413,3 +413,33 @@
 	height: 10px;
 	display: inline-block;
 }
+
+.ui-autocomplete {
+	background: rgba(200, 210, 230, 1);
+	box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+	margin-top: 3px;
+	position: absolute;
+	display: block;
+	left: 0px;
+	top: 0px;
+	z-index: 100;
+	list-style: none;
+	padding-left: 0px;
+	margin-left: 0px;
+	padding: 3px;
+	.ui-menu-item {
+		list-style-type: none;
+		a {
+			padding: 2px;
+			padding-left: 4px;
+			border-radius: 3px;
+			display: block;
+			color: #000;
+			&.ui-state-focus, &.ui-state-active {
+				background: rgba(11, 26, 51, 1);
+				color: #fff;
+			}
+		}
+	}
+}

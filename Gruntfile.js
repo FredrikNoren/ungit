@@ -9,7 +9,7 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", 'public/vendor/css/jquery-ui-1.10.3.custom.css']
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"]
         }
       }
     },
