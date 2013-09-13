@@ -135,4 +135,7 @@ module.exports = function(grunt) {
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
 
+  // Same as publish but for minor version
+  grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
+
 };
