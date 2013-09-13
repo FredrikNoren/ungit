@@ -134,10 +134,10 @@ GraphActions.Merge = function(graph, node) {
 	this.mergeWith = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		if (!self.graph.activeRef() || !self.graph.activeRef().node()) return false;
+		if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
 		return self.graph.showDropTargets() &&
 			!self.graph.currentActionContext().current() &&
-			self.graph.activeRef().node() == self.node;
+			self.graph.checkedOutRef().node() == self.node;
 	});
 }
 inherits(GraphActions.Merge, GraphActions.ActionBase);

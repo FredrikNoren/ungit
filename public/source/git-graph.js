@@ -22,10 +22,10 @@ var GitGraphViewModel = function(repository) {
 	this.repoPath = repository.repoPath;
 	this.isLoading = ko.observable(false);
 	this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000, 400);
-	this.activeBranch = ko.observable();
-	this.activeRef = ko.computed(function() {
-		if (self.activeBranch())
-			return self.getRef('refs/heads/' + self.activeBranch());
+	this.checkedOutBranch = ko.observable();
+	this.checkedOutRef = ko.computed(function() {
+		if (self.checkedOutBranch())
+			return self.getRef('refs/heads/' + self.checkedOutBranch());
 		else
 			return null;
 	});
@@ -63,7 +63,7 @@ GitGraphViewModel.prototype.updateBranches = function() {
 	api.query('GET', '/checkout', { path: this.repoPath }, function(err, branch) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
-		self.activeBranch(branch);
+		self.checkedOutBranch(branch);
 	});
 }
 

@@ -48,7 +48,7 @@ var RefViewModel = function(args) {
 		}
 	});
 	this.current = ko.computed(function() {
-		return self.isLocalBranch && self.graph.activeBranch() == self.displayName;
+		return self.isLocalBranch && self.graph.checkedOutBranch() == self.displayName;
 	});
 	this.canBePushed = ko.computed(function() {
 		if (!self.isLocal || !self.graph.hasRemotes()) return false;

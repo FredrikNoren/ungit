@@ -66,7 +66,7 @@ GerritIntegrationViewModel.prototype.getChangeFromNode = function(node) {
 GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var self = this;
 	this.pushingProgressBar.start();
-	var branch = this.repository.graph.activeBranch();
+	var branch = this.repository.graph.checkedOutBranch();
 	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
 
