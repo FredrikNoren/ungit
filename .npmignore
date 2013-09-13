@@ -25,3 +25,6 @@ public/source/
 public/vendor/
 public/less/
 public/styles.html
+
+clicktests/
+clicktestout/
