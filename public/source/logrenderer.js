@@ -94,7 +94,7 @@ logRenderer.render = function(element, graph) {
 	nodes.forEach(function(node) {
 		node.parents().forEach(function(parentId) {
 			var parent = nodesById[parentId];
-			if (parent)
+			if (parent && parent.position().length() > 0)
 				logRenderer.drawLineBetweenNodes(context,
 					{ position: node.position(), radius: node.radius() },
 					{ position: parent.position(), radius: parent.radius() });
