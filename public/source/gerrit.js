@@ -1,6 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var _ = require('underscore');
 
 
 var GerritIntegrationViewModel = function(repository) {
@@ -58,7 +59,7 @@ GerritIntegrationViewModel.prototype.getChangeIdFromMessage = function(message) 
 	}
 }
 GerritIntegrationViewModel.prototype.getChangeFromNode = function(node) {
-	var changeId = this.getChangeIdFromMessage(node.message);
+	var changeId = this.getChangeIdFromMessage(node.message());
 	if (!changeId) return;
 	return this.getChange(changeId);
 }
