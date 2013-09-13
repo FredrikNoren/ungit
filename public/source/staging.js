@@ -1,6 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var UserErrorViewModel = require('./user-error').UserErrorViewModel;
 
 var StagingViewModel = function(repository) {
 	var self = this;

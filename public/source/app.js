@@ -4,6 +4,7 @@ var signals = require('signals');
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var RepositoryViewModel = require('./repository').RepositoryViewModel;
+var UserErrorViewModel = require('./user-error').UserErrorViewModel;
 var addressParser = require('../../source/address-parser');
 
 var AppViewModel = function(main) {
@@ -211,15 +212,6 @@ LoginViewModel.prototype.login = function() {
 	});
 }
 LoginViewModel.prototype.template = 'login';
-
-var UserErrorViewModel = function(args) {
-	if (typeof(arguments[0]) == 'string')
-		args = { title: arguments[0], details: arguments[1] };
-	args = args || {};
-	this.title = ko.observable(args.title);
-	this.details = ko.observable(args.details);
-}
-UserErrorViewModel.prototype.template = 'usererror';
 
 var PathViewModel = function(main, path) {
 	var self = this;
