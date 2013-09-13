@@ -290,8 +290,18 @@ test('Clicking logo should bring you to home screen', function(done) {
 	});
 });
 
+test('Entering an invalid path should bring you to an error screen', function(done) {
+	click(page, '[data-ta="navigation-path"]');
+	write(page, '/a/path/that/doesnt/exist\n');
+	waitForElement(page, '[data-ta="invalid-path"]', function() {
+		done();
+	});
+});
+
+
 test('Entering a path to a repo should bring you to that repo', function(done) {
 	click(page, '[data-ta="navigation-path"]');
+	selectAll(page);
 	write(page, testRepoPath + '\n');
 	waitForElement(page, '[data-ta="repository-view"]', function() {
 		done();

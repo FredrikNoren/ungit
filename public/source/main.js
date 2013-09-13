@@ -222,7 +222,10 @@ ko.bindingHandlers.autocomplete = {
             lastChar = $(element).val().slice(-1);
             if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
                 api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
-                    if(!err) {
+                    if (err) {
+                        if (err.errorCode == 'read-dir-failed') return true;
+                        else return false;
+                    } else {
                         $(element).autocomplete({
                             source: directoryList,
                             messages: {
@@ -231,7 +234,6 @@ ko.bindingHandlers.autocomplete = {
                             }
                         });
                         $(element).autocomplete("search", $(element).val());
-                    } else {
                     }
                 });
             } else if(event.keyCode == 13){

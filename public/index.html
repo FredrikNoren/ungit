@@ -111,8 +111,9 @@
 		<!-- /ko -->
 
 		<!-- ko if: status() == 'invalidpath' -->
-		<div class="invalidpath" data-bind="visible: status() == 'invalidpath'">
-			<div>"<span data-bind="text: path"></span>" is not a valid path.</div>
+		<div data-ta="invalid-path" data-bind="visible: status() == 'invalidpath'">
+			<h2>Invalid path</h2>
+			<p>"<span data-bind="text: path"></span>" doesn&#39;t seem to be a valid path.</p>
 		</div>
 		<!-- /ko -->
 

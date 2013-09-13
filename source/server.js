@@ -198,8 +198,7 @@ app.get('/api/fs/listDirectories', function(req, res) {
 		else if (dir) {
 			fs.readdir(dir, function(err, files) {
 				if (err) {
-					winston.error(err.stack);
-					res.json(400, err);
+					res.json(400, { errorCode: 'read-dir-failed', error: err });
 				} else {
 					var absolutePaths = files.map(function(file) {
 						return path.join(dir, file);
