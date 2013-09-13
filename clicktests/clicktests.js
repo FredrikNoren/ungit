@@ -296,25 +296,28 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 	});
 });
 
-test('Creating a file should make it show up in staging', function(done) {
-	createTestFile(testRepoPath + '/testfile.txt', function(err) {
+var createCommitWithNewFile = function(fileName, commitMessage, callback) {
+	createTestFile(testRepoPath + '/' + fileName, function(err) {
 		if (err) return done(err);
 		waitForElement(page, '[data-ta="staging-file"]', function() {
-			done();
+			click(page, '[data-ta="staging-commit-title"]')
+			write(page, commitMessage);
+			setTimeout(function() {
+				click(page, '[data-ta="commit"]');
+				waitForNotElement(page, '[data-ta="staging-file"]', function() {
+					callback();
+				});
+			}, 100);
 		});
 	});
-});
+}
 
-test('Committing a file should remove it from staging and make it show up in log', function(done) {
-	click(page, '[data-ta="staging-commit-title"]')
-	write(page, 'My commit message');
-	setTimeout(function() {
-		click(page, '[data-ta="commit"]');
+test('Should be possible to create and commit a file', function(done) {
+	createCommitWithNewFile('testfile.txt', 'My commit message', function() {
 		waitForElement(page, '[data-ta="node"]', function() {
-			expectNotFindElement(page, '[data-ta="staging-file"]');
 			done();
 		});
-	}, 100);
+	})
 });
 
 test('Should be possible to discard a created file', function(done) {
@@ -387,6 +390,27 @@ test('Checkout a branch', function(done) {
 		done();
 	});
 });
+
+test('Create another commit', function(done) {
+	createCommitWithNewFile('testy2.txt', 'Branch commit', function() {
+		done();
+	});
+});
+
+test('Rebase', function(done) {
+	click(page, '[data-ta="branch"][data-ta-name="testbranch"]');
+	mousemove(page, '[data-ta-action="rebase"][data-ta-visible="true"]');
+	setTimeout(function() { // Wait for next animation frame
+		page.render('clicktestout/testy1.png')
+		click(page, '[data-ta-action="rebase"][data-ta-visible="true"]');
+		page.render('clicktestout/testy1.png')
+		setTimeout(function() {
+			page.render('clicktestout/testy2.png')
+			done();
+		}, 500);
+	}, 200);
+});
+
 
 // ----------- CLONING -------------
 

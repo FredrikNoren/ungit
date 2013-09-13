@@ -1,6 +1,8 @@
 
 var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
 var Vector2 = require('./vector2');
+var RefViewModel = require('./ref.js').RefViewModel;
+var _ = require('underscore');
 
 var logRenderer = {};
 module.exports = logRenderer;
