@@ -285,5 +285,11 @@ test('Should be possible to fetch', function(done) {
 	});
 });
 
+test('Cleanup test directories', function(done) {
+	page.open('http://localhost:' + config.port + '/api/testing/cleanup', 'POST', function(status) {
+		if (status == 'fail') return done({ status: status, content: page.plainText });
+		done();
+	});
+});
 
 helpers.runTests();

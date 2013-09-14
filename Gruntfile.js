@@ -130,7 +130,8 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
-  grunt.registerTask('test', ['simplemocha', 'clicktest']);
+  grunt.registerTask('unittest', ['simplemocha']);
+  grunt.registerTask('test', ['unittest', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
