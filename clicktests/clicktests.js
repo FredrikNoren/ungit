@@ -470,6 +470,15 @@ test('Clone repository should bring you to repo page', function(done) {
 	});
 });
 
+test('Should be possible to fetch', function(done) {
+	click(page, '[data-ta="fetch"]');
+	waitForElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
+		waitForNotElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
+			done();
+		});
+	});
+});
+
 
 
 startUngitServer([], function(err) {
