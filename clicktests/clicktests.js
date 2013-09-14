@@ -1,92 +1,11 @@
-var startTime = Date.now();
 
-var webpage = require('webpage');
-var child_process = require('child_process');
 var expect = require('../node_modules/expect.js/expect');
-var async = require('../node_modules/async/lib/async');
-var cliColor = require('../node_modules/ansi-color/lib/ansi-color');
+var helpers = require('./helpers');
 
-var config = {
-	port: 8449
-};
+var config = helpers.config;
 
-function log(text) {
-	console.log((new Date()).toISOString(), text);
-}
-
-function createPage(onError) {
-	var page = webpage.create();
-	page.viewportSize = { width: 1024, height: 768 };
-	page.onConsoleMessage = function(msg, lineNum, sourceId) {
-	    console.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
-	};
-	page.onError = function(msg, trace) {
-		console.log(msg);
-		trace.forEach(function(t) {
-			console.log(t.file + ':' + t.line + ' ' + t.function);
-		});
-		onError(msg);
-	};
-	page.onResourceError = function(resourceError) {
-	    log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
-	    log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
-	};
-	page.onResourceRequested = function(requestData, networkRequest) {
-	    log('Request (#' + requestData.id + '): ' + requestData.method + ' ' + requestData.url);
-	    // Abort gravatar requests to speed up things (since they will anyway only fail)
-	    if (requestData.url.indexOf('http://www.gravatar.com/avatar/') == 0) {
-	    	networkRequest.abort();
-	    }
-	};
-	page.onResourceReceived = function(response) {
-		if (response.stage == 'end')
-	    	log('Response (#' + response.id + ', stage "' + response.stage + '")');
-	};
-	return page;
-}
-
-
-function prependLines(pre, text) {
-	return text.split('\n').filter(function(l) { return l; }).map(function(line) { return pre + line; }).join('\n');
-}
-
-function startUngitServer(options, callback) {
-	log('Starting ungit server...', options);
-	var hasStarted = false;
-	options = ['bin/ungit', 
-		'--port=' + config.port, 
-		'--no-launchBrowser', 
-		'--dev', 
-		'--no-bugtracking', 
-		'--autoShutdownTimeout=10000', 
-		'--maxNAutoRestartOnCrash=0', 
-		'--logGitCommands']
-		.concat(options);
-	var ungitServer = child_process.spawn('node', options);
-	ungitServer.stdout.on("data", function (data) {
-		//console.log(prependLines('[server] ', data));
-		
-		if (data.toString().indexOf('Ungit server already running') >= 0) {
-			callback('server-already-running');
-		}
-
-		if (data.toString().indexOf('## Ungit started ##') >= 0) {
-			if (hasStarted) throw new Error('Ungit started twice, probably crashed.');
-			hasStarted = true;
-			log('Ungit server started.');
-			callback();
-		}
-	});
-	ungitServer.stderr.on("data", function (data) {
-		console.log(prependLines('[server ERROR] ', data));
-	});
-	ungitServer.on('exit', function() {
-		log('UNGIT SERVER EXITED');
-	})
-}
-
-function createTestFile(filename, callback) {
-	var tempPage = createPage(function(err) {
+var createTestFile = function(filename, callback) {
+	var tempPage = helpers.createPage(function(err) {
 		console.error('Caught error');
 		phantom.exit(1);
 	});
@@ -98,8 +17,8 @@ function createTestFile(filename, callback) {
 	});
 }
 
-function changeTestFile(filename, callback) {
-	var tempPage = createPage(function(err) {
+var changeTestFile = function(filename, callback) {
+	var tempPage = helpers.createPage(function(err) {
 		console.error('Caught error');
 		phantom.exit(1);
 	});
@@ -111,137 +30,22 @@ function changeTestFile(filename, callback) {
 	});
 }
 
-function getElementPosition(page, selector) {
-	return page.evaluate(function(selector) {
-		return $(selector).offset();
-	}, selector);
-}
 
-function getClickPosition(page, selector) {
-	var res = page.evaluate(function(selector) {
-		var el = $(selector);
-		if (el.length == 0) return { error: 'Can\'t find element ' + selector };
-		if (el.width() == 0 || el.height() == 0) return { error: 'Area of ' + selector + ' is zero.' };
-		var clickPos = {
-			left: Math.floor(el.offset().left + el.width() / 2),
-			top: Math.floor(el.offset().top + el.height() / 2),
-		};
-		var actualElement = document.elementFromPoint(clickPos.left, clickPos.top);
-		if (!actualElement)
-			 return { error: 'Couldn\'t find any element at ' + clickPos.left + ', ' + clickPos.top + ' (looking for ' + selector + ')' };
-		var soughtElement = actualElement;
-		while (soughtElement && !$(soughtElement).is(selector))
-			soughtElement = soughtElement.parentNode;
-		if (!soughtElement)
-			 return { error: 'Expected to find ' + selector + ' at position ' + clickPos.left + ', ' + clickPos.top + ' but found ' + actualElement.outerHTML };
-		return { result: clickPos };
-	}, selector);
-	if (res.error) {
-		page.render('clicktestout/error.png');
-		throw new Error(res.error);
-	}
-	return res.result;
-}
+var test = helpers.test;
 
-function waitForElement(page, selector, callback) {
-	var tryFind = function() {
-		log('Trying to find element: ' + selector);
-		var found = page.evaluate(function(selector) {
-			return $(selector).length > 0;
-		}, selector);
-		if (found) {
-			log('Found element: ' + selector);
-			callback();
-		}
-		else setTimeout(tryFind, 500);
-	}
-	tryFind();
-}
-
-function waitForNotElement(page, selector, callback) {
-	var tryFind = function() {
-		log('Trying to NOT find element: ' + selector);
-		var found = page.evaluate(function(selector) {
-			return $(selector).length > 0;
-		}, selector);
-		if (!found) {
-			log('Found no element matching: ' + selector);
-			callback();
-		}
-		else setTimeout(tryFind, 500);
-	}
-	tryFind();
-}
-
-function expectNotFindElement(page, selector) {
-	var found = page.evaluate(function(selector) {
-		return $(selector).length > 0;
-	}, selector);
-	if (found) throw new Error('Expected to not find ' + selector + ' but found it.');
-}
-
-function click(page, selector) {
-	log('Trying to click ' + selector);
-	var pos = getClickPosition(page, selector);
-	page.sendEvent('mousemove', pos.left, pos.top);
-	page.sendEvent('click', pos.left, pos.top);
-}
-function mousemove(page, selector) {
-	log('Moving mouse to ' + selector);
-	var pos = getClickPosition(page, selector);
-	page.sendEvent('mousemove', pos.left, pos.top);
-}
-function write(page, text) {
-	log('Writing ' + text);
-	page.sendEvent('keypress', text);
-}
-function selectAll(page) {
-	log('Trying to select all in focused element (ctrl-A)');
-	page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
-}
-
-var tests = [];
-
-function test(name, description) {
-	tests.push({ name: name, description: description });
-}
-function runTests() {
-	async.series(tests.map(function(test) {
-		return function(callback) {
-			log(cliColor.set('## Running test: ' + test.name, 'magenta'));
-			var timeout = setTimeout(function() {
-				console.error('Test timeouted!');
-				callback('timeout');
-			}, 10000);
-			test.description(function(err, res) {
-				clearTimeout(timeout);
-				if (err) {
-					log(JSON.stringify(err));
-					log(cliColor.set('## Test failed: ' + test.name, 'red'));
-				}
-				else log(cliColor.set('## Test ok: ' + test.name, 'green'));
-				callback(err, res);
-			});
-		}
-	}), function(err) {
-		if (err) {
-			console.error('Tests failed!');
-			phantom.exit(1);
-		} else {
-			console.log('All tests ok! Took ' + (Date.now() - startTime) / 1000 + 'sec');
-			phantom.exit(0);
-		}
-	});
-}
-
-var page = createPage(function(err) {
+var page = helpers.createPage(function(err) {
 	console.error('Caught error');
 	phantom.exit(1);
 });
 
+
+test('Init', function(done) {
+	helpers.startUngitServer([], done);
+});
+
 test('Open home screen', function(done) {
 	page.open('http://localhost:' + config.port, function() {
-		waitForElement(page, '[data-ta="home-page"]', function() {
+		helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 			done();
 		});
 	});
@@ -270,41 +74,41 @@ test('Create test directory', function(done) {
 
 test('Open path screen', function(done) {
 	page.open('http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-		waitForElement(page, '[data-ta="uninited-path-page"]', function() {
+		helpers.waitForElement(page, '[data-ta="uninited-path-page"]', function() {
 			done();
 		});
 	});
 });
 
 test('Init repository should bring you to repo page', function(done) {
-	click(page, '[data-ta="init-repository"]');
-	waitForElement(page, '[data-ta="repository-view"]', function() {
-		expectNotFindElement(page, '[data-ta="remote-error-popup"]');
+	helpers.click(page, '[data-ta="init-repository"]');
+	helpers.waitForElement(page, '[data-ta="repository-view"]', function() {
+		helpers.expectNotFindElement(page, '[data-ta="remote-error-popup"]');
 		done();
 	});
 });
 
 test('Clicking logo should bring you to home screen', function(done) {
-	click(page, '[data-ta="home-link"]');
-	waitForElement(page, '[data-ta="home-page"]', function() {
+	helpers.click(page, '[data-ta="home-link"]');
+	helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 		done();
 	});
 });
 
 test('Entering an invalid path should bring you to an error screen', function(done) {
-	click(page, '[data-ta="navigation-path"]');
-	write(page, '/a/path/that/doesnt/exist\n');
-	waitForElement(page, '[data-ta="invalid-path"]', function() {
+	helpers.click(page, '[data-ta="navigation-path"]');
+	helpers.write(page, '/a/path/that/doesnt/exist\n');
+	helpers.waitForElement(page, '[data-ta="invalid-path"]', function() {
 		done();
 	});
 });
 
 
 test('Entering a path to a repo should bring you to that repo', function(done) {
-	click(page, '[data-ta="navigation-path"]');
-	selectAll(page);
-	write(page, testRepoPath + '\n');
-	waitForElement(page, '[data-ta="repository-view"]', function() {
+	helpers.click(page, '[data-ta="navigation-path"]');
+	helpers.selectAll(page);
+	helpers.write(page, testRepoPath + '\n');
+	helpers.waitForElement(page, '[data-ta="repository-view"]', function() {
 		done();
 	});
 });
@@ -312,12 +116,12 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 	createTestFile(testRepoPath + '/' + fileName, function(err) {
 		if (err) return done(err);
-		waitForElement(page, '[data-ta="staging-file"]', function() {
-			click(page, '[data-ta="staging-commit-title"]')
-			write(page, commitMessage);
+		helpers.waitForElement(page, '[data-ta="staging-file"]', function() {
+			helpers.click(page, '[data-ta="staging-commit-title"]')
+			helpers.write(page, commitMessage);
 			setTimeout(function() {
-				click(page, '[data-ta="commit"]');
-				waitForNotElement(page, '[data-ta="staging-file"]', function() {
+				helpers.click(page, '[data-ta="commit"]');
+				helpers.waitForNotElement(page, '[data-ta="staging-file"]', function() {
 					setTimeout(function() { // let the animation finish
 						callback();
 					}, 1000);
@@ -329,7 +133,7 @@ var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 
 test('Should be possible to create and commit a file', function(done) {
 	createCommitWithNewFile('testfile.txt', 'My commit message', function() {
-		waitForElement(page, '[data-ta="node"]', function() {
+		helpers.waitForElement(page, '[data-ta="node"]', function() {
 			done();
 		});
 	})
@@ -338,9 +142,9 @@ test('Should be possible to create and commit a file', function(done) {
 test('Should be possible to discard a created file', function(done) {
 	createTestFile(testRepoPath + '/testfile2.txt', function(err) {
 		if (err) return done(err);
-		waitForElement(page, '[data-ta="staging-file"]', function() {
-			click(page, '[data-ta="discard-file"]');
-			waitForNotElement(page, '[data-ta="staging-file"]', function() {
+		helpers.waitForElement(page, '[data-ta="staging-file"]', function() {
+			helpers.click(page, '[data-ta="discard-file"]');
+			helpers.waitForNotElement(page, '[data-ta="staging-file"]', function() {
 				done();
 			});
 		});
@@ -348,13 +152,13 @@ test('Should be possible to discard a created file', function(done) {
 });
 
 var createBranch = function(name, callback) {
-	log('Createing branch ' + name);
-	click(page, '[data-ta="show-new-branch-form"]');
-	click(page, '[data-ta="new-branch-name"]');
-	write(page, name);
+	helpers.log('Createing branch ' + name);
+	helpers.click(page, '[data-ta="show-new-branch-form"]');
+	helpers.click(page, '[data-ta="new-branch-name"]');
+	helpers.write(page, name);
 	setTimeout(function() {
-		click(page, '[data-ta="create-branch"]');
-		waitForElement(page, '[data-ta="branch"][data-ta-name="' + name + '"]', function() {
+		helpers.click(page, '[data-ta="create-branch"]');
+		helpers.waitForElement(page, '[data-ta="branch"][data-ta-name="' + name + '"]', function() {
 			callback();
 		});
 	}, 100);
@@ -385,12 +189,12 @@ test('Should be possible to create and destroy a branch', function(done) {
 test('Commit changes to a file', function(done) {
 	changeTestFile(testRepoPath + '/testfile.txt', function(err) {
 		if (err) return done(err);
-		waitForElement(page, '[data-ta="staging-file"]', function() {
-			click(page, '[data-ta="staging-commit-title"]')
-			write(page, 'My commit message');
+		helpers.waitForElement(page, '[data-ta="staging-file"]', function() {
+			helpers.click(page, '[data-ta="staging-commit-title"]')
+			helpers.write(page, 'My commit message');
 			setTimeout(function() {
-				click(page, '[data-ta="commit"]');
-				waitForNotElement(page, '[data-ta="staging-file"]', function() {
+				helpers.click(page, '[data-ta="commit"]');
+				helpers.waitForNotElement(page, '[data-ta="staging-file"]', function() {
 					done();
 				});
 			}, 100);
@@ -399,9 +203,9 @@ test('Commit changes to a file', function(done) {
 });
 
 function checkout(page, branch, callback) {
-	click(page, '[data-ta="branch"][data-ta-name="' + branch + '"]');
-	click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
-	waitForElement(page, '[data-ta="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
+	helpers.click(page, '[data-ta="branch"][data-ta-name="' + branch + '"]');
+	helpers.click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
+	helpers.waitForElement(page, '[data-ta="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
 		callback();
 	});
 }
@@ -415,11 +219,11 @@ test('Create another commit', function(done) {
 });
 
 function refAction(page, ref, action, callback) {
-	click(page, '[data-ta="branch"][data-ta-name="' + ref + '"]');
-	mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
+	helpers.click(page, '[data-ta="branch"][data-ta-name="' + ref + '"]');
+	helpers.mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
 	setTimeout(function() { // Wait for next animation frame
-		click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
-		waitForNotElement(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
+		helpers.click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
+		helpers.waitForNotElement(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
 			setTimeout(function() {
 				callback();
 			}, 500);
@@ -449,43 +253,37 @@ test('Merge', function(done) {
 var testClonePath;
 
 test('Enter path to test root', function(done) {
-	click(page, '[data-ta="navigation-path"]');
-	selectAll(page);
-	write(page, testRootPath + '\n');
-	waitForElement(page, '[data-ta="uninited-path-page"]', function() {
+	helpers.click(page, '[data-ta="navigation-path"]');
+	helpers.selectAll(page);
+	helpers.write(page, testRootPath + '\n');
+	helpers.waitForElement(page, '[data-ta="uninited-path-page"]', function() {
 		done();
 	});
 });
 
 test('Clone repository should bring you to repo page', function(done) {
 	testClonePath = testRootPath + '/testclone';
-	click(page, '[data-ta="clone-url-input"]');
-	write(page, testRepoPath);
-	click(page, '[data-ta="clone-target-input"]');
-	write(page, testClonePath);
-	click(page, '[data-ta="clone-repository"]');
-	waitForElement(page, '[data-ta="repository-view"]', function() {
-		expectNotFindElement(page, '[data-ta="remote-error-popup"]');
-		done();
+	helpers.click(page, '[data-ta="clone-url-input"]');
+	helpers.write(page, testRepoPath);
+	helpers.click(page, '[data-ta="clone-target-input"]');
+	helpers.write(page, testClonePath);
+	helpers.click(page, '[data-ta="clone-repository"]');
+	helpers.waitForElement(page, '[data-ta="repository-view"]', function() {
+		helpers.expectNotFindElement(page, '[data-ta="remote-error-popup"]');
+		setTimeout(function() { // Let animations finish
+			done();
+		}, 1000);
 	});
 });
 
 test('Should be possible to fetch', function(done) {
-	click(page, '[data-ta="fetch"]');
-	waitForElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
-		waitForNotElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
+	helpers.click(page, '[data-ta="fetch"]');
+	helpers.waitForElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
+		helpers.waitForNotElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
 			done();
 		});
 	});
 });
 
 
-
-startUngitServer([], function(err) {
-	if (err) {
-		console.error('Failed to start ungit server');
-		phantom.exit(1);
-	}
-
-	runTests();
-});
+helpers.runTests();
