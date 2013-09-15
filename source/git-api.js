@@ -11,16 +11,19 @@ var gitParser = require('./git-parser');
 var winston = require('winston');
 var socketIO;
 
-
 exports.pathPrefix = '';
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
+
+	if (config.dev)
+		temp.track();
 
 	ensureAuthenticated = ensureAuthenticated || function(req, res, next) { next(); };
 
 	app.use(express.bodyParser());
 
-	var sockets = [];
+	var sockets = {};
+	var socketIdCounter = 0;
 	var io;
 
 	if (server) {
@@ -36,14 +39,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 				}
 			});
 			io.sockets.on('connection', function (socket) {
-				sockets.push(socket);
-				socket.emit('connected', { socketId: sockets.length - 1 });
+				var socketId = socketIdCounter++;
+				sockets[socketId] = socket;
+				socket.emit('connected', { socketId: socketId });
 				socket.on('disconnect', function () {
 					if (socket.watcher) {
 						socket.watcher.close();
 						socket.watcher = null;
 						winston.info('Stop watching ' + socket.watcherPath);
 					}
+					delete sockets[socketId];
 				});
 				socket.on('watch', function (data, callback) {
 					if (socket.watcher) {
@@ -424,8 +429,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/cleanup', ensureAuthenticated, function(req, res){
-			temp.cleanup();
+			var cleaned = temp.cleanup();
+			winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+			res.json({ result: cleaned });
+		});
+		app.post(exports.pathPrefix + '/testing/shutdown', ensureAuthenticated, function(req, res){
 			res.json({ });
+			process.exit();
 		});
 	}
 

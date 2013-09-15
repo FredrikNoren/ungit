@@ -4,30 +4,28 @@ var helpers = require('./helpers');
 
 var config = helpers.config;
 
-var createTestFile = function(filename, callback) {
+var backgroundAction = function(method, url, callback) {
 	var tempPage = helpers.createPage(function(err) {
 		console.error('Caught error');
 		phantom.exit(1);
 	});
-	var url = 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(filename);
-	tempPage.open(url, 'POST', function(status) {
-		if (status == 'fail') return callback({ status: status, content: page.plainText });
+	tempPage.open(url, method, function(status) {
+		if (status == 'fail') return callback({ status: status, content: tempPage.plainText });
 		tempPage.close();
 		callback();
 	});
 }
 
+var createTestFile = function(filename, callback) {
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(filename), callback);
+}
+
 var changeTestFile = function(filename, callback) {
-	var tempPage = helpers.createPage(function(err) {
-		console.error('Caught error');
-		phantom.exit(1);
-	});
-	var url = 'http://localhost:' + config.port + '/api/testing/changefile?file=' + encodeURIComponent(filename);
-	tempPage.open(url, 'POST', function(status) {
-		if (status == 'fail') return callback({ status: status, content: page.plainText });
-		tempPage.close();
-		callback();
-	});
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/changefile?file=' + encodeURIComponent(filename), callback);
+}
+
+var shutdownServer = function(callback) {
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/shutdown', callback);
 }
 
 
@@ -285,10 +283,26 @@ test('Should be possible to fetch', function(done) {
 	});
 });
 
-test('Cleanup test directories', function(done) {
-	page.open('http://localhost:' + config.port + '/api/testing/cleanup', 'POST', function(status) {
-		if (status == 'fail') return done({ status: status, content: page.plainText });
+
+// Cleanup
+
+test('Go to home screen', function(done) {
+	helpers.click(page, '[data-ta="home-link"]');
+	helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 		done();
+	});
+});
+
+test('Cleanup test directories', function(done) {
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/cleanup', done);
+});
+
+test('Shutdown server should bring you to connection lost page', function(done) {
+	shutdownServer(function() {
+		helpers.waitForElement(page, '[data-ta="user-error-page"]', function() {
+			page.render('clicktestou/lol.png')
+			done();
+		});
 	});
 });
 
