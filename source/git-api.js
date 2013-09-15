@@ -20,8 +20,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.use(express.bodyParser());
 
-	var gitConfigCliPager = '-c core.pager=cat';
-
 	var sockets = [];
 	var io;
 
@@ -60,7 +58,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 						// can't trigger a change here (since that would lead to an endless
 						// loop of the client getting the change and then requesting the new data)
 						if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-							socket.emit('changed', { repository: data.path });
+							socket.emit('working-tree-changed', { repository: data.path });
 					});
 					winston.info('Start watching ' + socket.watcherPath);
 					callback();
@@ -78,22 +76,26 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		}
 	}
 
-	var emitRepoChanged = function(repoPath) {
+	var emitWorkingTreeChanged = function(repoPath) {
 		if (io) {
-			io.sockets.in(path.normalize(repoPath)).emit('changed', { repository: repoPath });
-			winston.info('emitting changed to sockets, manually triggered');
+			io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
+			winston.info('emitting working-tree-changed to sockets, manually triggered');
 		}
+	}
+	var emitGitDirectoryChanged = function(repoPath) {
+		if (io) {
+			io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
+			winston.info('emitting git-directory-changed to sockets, manually triggered');
+		}
+	}
+
+	var jsonFail = function(res, err) {
+		res.json(400, err);
 	}
 
 	var jsonResultOrFail = function(res, err, result) {
 		if (err) res.json(400, err);
-		else res.json(result);
-	}
-
-	var jsonResultOrFailAndTriggerChange = function(repoPath, res, err, result) {
-		if (err) return res.json(400, err);
-		res.json(result);
-		emitRepoChanged(repoPath);
+		else res.json(result || {});
 	}
 
 
@@ -104,218 +106,148 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 
 	app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.status(req.param('path'), jsonResultOrFail.bind(null, res));
+		git.status(req.param('path'))
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('init' + (req.body.bare ? ' --bare --shared' : ''), req.param('path'), undefined, jsonResultOrFail.bind(null, res));
+		git('init' + (req.body.bare ? ' --bare --shared' : ''), req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, function(req, res) {
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'), undefined, function(err, result) {
-			if (err) res.json(400, err);
-			else res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) });
-		});
+		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'))
+			.fail(jsonFail.bind(null, res))
+			.done(function(result) { res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) }); })
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git(credentialsOption(req.body.socketId) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'), undefined, function(err, text) {
-			if (err) {
-				if (err.stderr.indexOf('fatal: No remote repository specified.') == 0) {
-					res.json({});
-				} else if(err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0) {
-					err.errorCode = 'no-supported-authentication-provided';
-					res.json(400, err);
-				} else {
-					res.json(400, err);
-				}
-			} else {
-				res.json({});
-				emitRepoChanged(req.param('path'));
-			}
-		});
+		git(credentialsOption(req.body.socketId) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git(credentialsOption(req.body.socketId) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
-			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'), undefined, function(err, result) {
-				if (err && err.stderr.indexOf('non-fast-forward') != -1) err.errorCode = 'non-fast-forward';
-				jsonResultOrFailAndTriggerChange(req.param('path'), res, err, result);
-			});
+			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.stashAndPop(req.param('path'), function(done) {
-			git('reset --hard "' + req.body.to + '"', req.param('path'), undefined, done);
-		}, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git.stashAndPop(req.param('path'), git('reset --hard "' + req.body.to + '"', req.param('path'), false))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var repoPath = req.param('path');
-		git.status(repoPath, function(err, status) {
-			if (err) return res.json(400, err);
-			var file = status.files[req.query.file];
-			if (!file) {
-				if (fs.existsSync(path.join(repoPath, req.query.file))) res.json([]);
-				else res.json(400, { error: 'No such file: ' + req.query.file, errorCode: 'no-such-file' });
-			} else if (!file.isNew) {
-				git(gitConfigCliPager + ' diff HEAD -- "' + req.query.file.trim() + '"', repoPath, gitParser.parseGitDiff, jsonResultOrFail.bind(null, res));
-			} else {
-				fs.readFile(path.join(repoPath, req.query.file), { encoding: 'utf8' }, function(err, text) {
-					if (err) return res.json(400, { error: err });
-					var diffs = [];
-					var diff = { };
-					text = text.toString();
-					diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
-					diffs.push(diff);
-					res.json(diffs);
-				});
-			}
-		});
+		git.diffFile(req.param('path'), req.param('file'))
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
-		if (req.body.all) {
-			git('reset --hard HEAD', req.param('path'), null, function(err) {
-				if (err) return res.json(400, err);
-				git('clean -fd', req.param('path'), undefined, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
-			});
-		} else {
-			git('checkout HEAD -- "' + req.body.file.trim() + '"', req.param('path'), null, function(err, text) {
-				if (err) {
-					if (err.stderr.trim() == 'error: pathspec \'' + req.body.file.trim() + '\' did not match any file(s) known to git.') {
-						fs.unlink(path.join(req.param('path'), req.body.file), function(err) {
-							if (err) res.json(400, { command: 'unlink', error: err });
-							else {
-								res.json({});
-								emitRepoChanged(req.param('path'));
-							}
-						});
-						return;
-					}
-					res.json(400, err);
-					return;
-				}
-				
-				res.json({});
-				emitRepoChanged(req.param('path'));
-			});
-		}
+		var task;
+		if (req.param('all')) task = git.discardAllChanges(req.param('path'));
+		else task = git.discardChangesInFile(req.param('path'), req.param('file').trim());
+
+		task
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res){
-		if (req.body.message === undefined)
-			return res.json(400, { error: 'Must specify commit message' });
-		if ((!(req.body.files instanceof Array) || req.body.files.length == 0) && !req.body.amend)
-			return res.json(400, { error: 'Must specify files or amend to commit' });
-		git.status(req.param('path'), function(err, status) {
-			if (err) return res.json(400, err);
-			var toAdd = [];
-			var toRemove = [];
-			for(var v in req.body.files) {
-				var file = req.body.files[v];
-				var fileStatus = status.files[file] || status.files[path.relative(req.param('path'), file)];
-				if (!fileStatus) {
-					res.json(400, { error: 'No such file in staging: ' + file });
-					return;
-				}
-				if (fileStatus.removed) toRemove.push(file);
-				else toAdd.push(file);
-			}
-
-			async.series([
-				function(done) {
-					if (toAdd.length == 0) done();
-					else {
-						git('update-index --add --stdin', req.param('path'), undefined, done, function(process) {
-							var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-							process.stdin.end(filesToAdd);
-						});
-					}
-				},
-				function(done) {
-					if (toRemove.length == 0) done();
-					else {
-						git('update-index --remove --stdin', req.param('path'), undefined, done, function(process) {
-							var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-							process.stdin.end(filesToRemove);
-						});
-					}
-				}
-			], function(err) {
-				if (err) return res.json(400, err);
-				git('commit ' + (req.body.amend ? '--amend' : '') + ' --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
-					process.stdin.end(req.body.message);
-				});
-			});
-		});
+		git.commit(req.param('path'), req.param('amend'), req.param('message'), req.param('files'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
 		var limit = '';
 		if (req.query.limit) limit = '--max-count=' + req.query.limit;
-		git(gitConfigCliPager + ' log --decorate=full --pretty=fuller --all --parents ' + limit, req.param('path'), gitParser.parseGitLog, function(err, log) {
-			if (err) {
-				if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-					res.json([]);
-				else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-					res.json([]);
-				else
-					res.json(400, err);
-			} else {
-				res.json(log);
-			}
-		});
+		git('log --decorate=full --pretty=fuller --all --parents ' + limit, req.param('path'))
+			.parser(gitParser.parseGitLog)
+			.always(function(err, log) {
+				if (err) {
+					if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+						res.json([]);
+					else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+						res.json([]);
+					else
+						res.json(400, err);
+				} else {
+					res.json(log);
+				}
+			});
 	});
 
 	app.get(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-		git('branch', req.param('path'), gitParser.parseGitBranches, jsonResultOrFail.bind(null, res));
+		git('branch', req.param('path'))
+			.parser(gitParser.parseGitBranches)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
 		git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() +
-			'" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+			'" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-		if (req.body.remote)
-			git(credentialsOption(req.body.socketId) + ' push origin :"' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFail.bind(null, res));
-		else
-			git('branch -D "' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		var task;
+		if (req.body.remote) task = git(credentialsOption(req.body.socketId) + ' push origin :"' + req.body.name.trim() + '"', req.param('path'));
+		else task = git('branch -D "' + req.body.name.trim() + '"', req.param('path'));
+		task
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.get(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-		git('tag -l', req.param('path'), gitParser.parseGitTags, jsonResultOrFail.bind(null, res));
+		git('tag -l', req.param('path'))
+			.parser(gitParser.parseGitTags)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ', req.param('path'), gitParser.parseGitLsRemote, jsonResultOrFail.bind(null, res));
+		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ', req.param('path'))
+			.parser(gitParser.parseGitLsRemote)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
 		git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' +
-			req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+			req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
-	app.del(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-		if (req.body.remote)
-			git('push origin :"refs/tags/' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
-		else
-			git('tag -d "' + req.body.name.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+	app.del(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
+		var task;
+		if (req.body.remote) task = git('push origin :"refs/tags/' + req.body.name.trim() + '"', req.param('path'));
+		else task = git('tag -d "' + req.body.name.trim() + '"', req.param('path'));
+		task
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.stashAndPop(req.param('path'), function(done) {
-			git('checkout "' + req.body.name.trim() + '"', req.param('path'), undefined, done);
-		}, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git.stashAndPop(req.param('path'), git('checkout "' + req.body.name.trim() + '"', req.param('path'), false))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.stashAndPop(req.param('path'), function(done) {
-			git('cherry-pick "' + req.body.name.trim() + '"', req.param('path'), undefined, done);
-		}, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git.stashAndPop(req.param('path'), git('cherry-pick "' + req.body.name.trim() + '"', req.param('path'), false))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
@@ -332,65 +264,79 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
-		git('remote', req.param('path'), gitParser.parseGitRemotes, jsonResultOrFail.bind(null, res));
+		git('remote', req.param('path'))
+			.parser(gitParser.parseGitRemotes)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.remoteShow(req.param('path'), req.params.name, jsonResultOrFail.bind(null, res));
+		git.remoteShow(req.param('path'), req.params.name)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('merge "' + req.body.with.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('merge "' + req.body.with.trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('commit --file=- ', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res), function(process) {
-			process.stdin.end(req.body.message);
-		});
+		git('commit --file=- ', req.param('path'))
+			.started(function(process) {
+				process.stdin.end(req.param('message'));
+			})
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('merge --abort', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('merge --abort', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 
 	app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('rebase "' + req.body.onto.trim() + '"', req.param('path'), undefined, function(err) {
-			if (err) {
-				if (err.stderr.indexOf('Failed to merge in the changes.') == 0) {
-					err.errorCode = 'merge-failed';
-					res.json(400, err);
-					return true;
-				}
-				res.json(400, err);
-				return;
-			}
-			res.json({});
-			emitRepoChanged(req.param('path'));
-		});
+		git('rebase "' + req.body.onto.trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/rebase/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('rebase --continue', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('rebase --continue', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/rebase/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('rebase --abort', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('rebase --abort', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/resolveconflicts', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'), null, jsonResultOrFailAndTriggerChange.bind(null, req.param('path'), res));
+		git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
 	app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
-		git('config --list', undefined, gitParser.parseGitConfig, function(err, gitConfig) {
-			if (err) return res.json(400, err);
-			res.json(gitConfig);
-		});
+		git('config --list')
+			.parser(gitParser.parseGitConfig)
+			.always(jsonResultOrFail.bind(null, res));
 	});
 
 	// This method isn't called by the client but by credentials-helper.js
@@ -414,36 +360,37 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin', function(err, remote) {
-				if (err) return res.json(400, err);
-				if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
-				var command = 'scp -p ';
-				if (remote.fetch.port) command += ' -P ' + remote.fetch.port + ' ';
-				command += remote.fetch.host + ':hooks/commit-msg .git/hooks/';
-				var hooksPath = path.join(repoPath, '.git', 'hooks');
-				if (!fs.existsSync(hooksPath)) fs.mkdirSync(hooksPath);
-				child_process.exec(command, { cwd: repoPath },
-					function (err, stdout, stderr) {
-						if (err) return res.json(400, { error: err, stdout: stdout, stderr: stderr });
-						res.json({});
-						emitRepoChanged(req.param('path'));
-					});
-			});
+			git.remoteShow(repoPath, 'origin')
+				.fail(jsonFail.bind(null, res))
+				.done(function(remote) {
+					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
+					var command = 'scp -p ';
+					if (remote.fetch.port) command += ' -P ' + remote.fetch.port + ' ';
+					command += remote.fetch.host + ':hooks/commit-msg .git/hooks/';
+					var hooksPath = path.join(repoPath, '.git', 'hooks');
+					if (!fs.existsSync(hooksPath)) fs.mkdirSync(hooksPath);
+					child_process.exec(command, { cwd: repoPath },
+						function (err, stdout, stderr) {
+							if (err) return res.json(400, { error: err, stdout: stdout, stderr: stderr });
+							res.json({});
+						});
+				});
 		});
 
 		app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin', function(err, remote) {
-				if (err) return res.json(400, err);
-				if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
-				var command = 'query --format=JSON --current-patch-set status:open project:' + remote.fetch.project + '';
-				gerrit(remote.fetch, command, res, function(err, result) {
-					if (err) return;
-					result = result.split('\n').filter(function(r) { return r.trim(); });
-					result = result.map(function(r) { return JSON.parse(r); });
-					res.json(result);
+			git.remoteShow(repoPath, 'origin')
+				.fail(jsonFail.bind(null, res))
+				.done(function(remote) {
+					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
+					var command = 'query --format=JSON --current-patch-set status:open project:' + remote.fetch.project + '';
+					gerrit(remote.fetch, command, res, function(err, result) {
+						if (err) return;
+						result = result.split('\n').filter(function(r) { return r.trim(); });
+						result = result.map(function(r) { return JSON.parse(r); });
+						res.json(result);
+					});
 				});
-			});
 		});
 
 	}

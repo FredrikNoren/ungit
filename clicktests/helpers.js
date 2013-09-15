@@ -188,6 +188,7 @@ helpers.runTests = function() {
 		return function(callback) {
 			helpers.log(cliColor.set('## Running test: ' + test.name, 'magenta'));
 			var timeout = setTimeout(function() {
+				page.render('clicktestout/timeout.png')
 				console.error('Test timeouted!');
 				callback('timeout');
 			}, 10000);

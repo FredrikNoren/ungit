@@ -116,7 +116,7 @@ describe('git-api conflict checkout', function () {
 			.expect('Content-Type', /json/)
 			.expect(400)
 			.end(wrapErrorHandler(done, function(err, res) {
-				expect(res.body.errorCode).to.be('conflict');
+				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
 	});
@@ -169,7 +169,7 @@ describe('git-api conflict merge', function () {
 			.expect('Content-Type', /json/)
 			.expect(400)
 			.end(wrapErrorHandler(done, function(err, res) {
-				expect(res.body.errorCode).to.be('conflict');
+				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
 	});

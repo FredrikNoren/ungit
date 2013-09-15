@@ -1,5 +1,4 @@
 
-var git = require('./git');
 var config = require('./config')();
 var os = require('os');
 var child_process = require('child_process');

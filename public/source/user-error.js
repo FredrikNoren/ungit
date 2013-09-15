@@ -1,4 +1,6 @@
 
+var ko = require('../vendor/js/knockout-2.2.1.js');
+
 var UserErrorViewModel = function(args) {
 	if (typeof(arguments[0]) == 'string')
 		args = { title: arguments[0], details: arguments[1] };

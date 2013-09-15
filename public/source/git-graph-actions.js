@@ -147,7 +147,7 @@ GraphActions.Merge.prototype.style = 'merge';
 GraphActions.Merge.prototype.perform = function(callback) {
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
 		if (err) {
-			if (err.errorCode = 'conflict') {
+			if (err.errorCode = 'merge-failed') {
 				callback();
 				return true;
 			}
@@ -219,10 +219,10 @@ GraphActions.Checkout.prototype.perform = function(callback) {
 	var self = this;
 	var ref = this.graph.currentActionContext();
 	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
-		if (err && err.errorCode != 'conflict') return;
+		if (err && err.errorCode != 'merge-failed') return;
 		if (ref.isRemoteBranch)
 			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
-				if (err && err.errorCode != 'conflict') return;
+				if (err && err.errorCode != 'merge-failed') return;
 				callback();
 				return true;
 			});

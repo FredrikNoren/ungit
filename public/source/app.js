@@ -85,9 +85,13 @@ var MainViewModel = function(browseTo) {
 			callback({ username: diag.username(), password: diag.password() });
 		});
 	}
-	api.repositoryChanged.add(function(data) {
+	api.workingTreeChanged.signal.add(function(data) {
 		if (self.content() && self.content() instanceof PathViewModel && self.content().repository())
-			self.content().repository().update();
+			self.content().repository().onWorkingTreeChanged();
+	});
+	api.gitDirectoryChanged.signal.add(function(data) {
+		if (self.content() && self.content() instanceof PathViewModel && self.content().repository())
+			self.content().repository().onGitDirectoryChanged();
 	});
 }
 exports.MainViewModel = MainViewModel;

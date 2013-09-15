@@ -40,12 +40,15 @@ var RepositoryViewModel = function(main, repoPath) {
 		}
 	});
 
-	self.update();
+	self.onWorkingTreeChanged();
+	self.onGitDirectoryChanged();
 }
 exports.RepositoryViewModel = RepositoryViewModel;
-RepositoryViewModel.prototype.update = function() {
+RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
 	this.staging.refresh();
 	this.staging.invalidateFilesDiffs();
+}
+RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
 	this.graph.loadNodesFromApi();
 	this.graph.updateBranches();
 	this.updateRemotes();

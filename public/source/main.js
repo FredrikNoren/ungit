@@ -1,4 +1,5 @@
 
+var _ = require('underscore');
 var ko = require('../vendor/js/knockout-2.2.1');
 var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
@@ -218,7 +219,7 @@ ko.bindingHandlers.modal = {
 
 ko.bindingHandlers.autocomplete = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        ko.utils.registerEventHandler(element, "keyup", function(event) {
+        var handleKeyEvent = function(event) {
             lastChar = $(element).val().slice(-1);
             if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
                 api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
@@ -243,7 +244,8 @@ ko.bindingHandlers.autocomplete = {
             }
 
             return true;
-        });
+        };
+        ko.utils.registerEventHandler(element, "keyup", _.debounce(handleKeyEvent, 100));
     }
 };
 
@@ -268,7 +270,7 @@ ko.bindingHandlers.hasFocus2 = {
         // If the user didn't move for 3 sec and then moved again, it's likely it's a tab-back
         if (Date.now() - lastMoved > 3000) {
             console.log('Fire change event due to re-activity');
-            api.dispatchChangeEvent();
+            api.workingTreeChanged.dispatch();
         }
         lastMoved = Date.now();
     });
