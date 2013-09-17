@@ -2,9 +2,11 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var Vector2 = require('./vector2.js');
-var NodeViewModel = require('./node.js').NodeViewModel;
+var NodeViewModel = require('./node').NodeViewModel;
+var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var GraphActions = require('./git-graph-actions.js');
+var EdgeViewModel = require('./edge').EdgeViewModel;
 var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
@@ -40,12 +42,62 @@ var GitGraphViewModel = function(repository) {
 		self.maxNNodes = self.maxNNodes + 25;
 		self.loadNodesFromApi();
 	}, 1000, true);
+	this.graphWidth = ko.computed(function() {
+		var width = 0;
+		self.nodes().forEach(function(node) {
+			width = Math.max(width, node.x() + node.radius() + 205);
+		});
+		return width;
+	});
+	this.graphHeight = ko.computed(function() {
+		var nodes = self.nodes();
+		if (nodes.length == 0) return 200;
+		return nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 200;
+	});
+	this.edgesById = {};
+	this.edges = ko.computed(function() {
+		var edges = [];
+		self.nodes().forEach(function(node) {
+			node.parents().forEach(function(parentSha1) {
+				edges.push(self.getEdge(node.sha1, parentSha1));
+			});
+		});
+		return edges;
+	});
+	this.commitNode = new CommitNodeViewModel(this);
+	this.commitNodeEdge = new EdgeViewModel(this.commitNode);
+	this.HEAD.subscribe(function(value) { self.commitNodeEdge.nodeb(value); });
+	this.showCommitNode = ko.computed(function() { return !!self.HEAD(); });
+
+	this.resetNodes = ko.computed(function() {
+		var context = self.currentActionContext();
+		if (self.hoverGraphAction() instanceof GraphActions.Reset && context) {
+			return context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
+		}
+	});
+	this.hoverGraphActionGraphic = ko.observable();
+	this.hoverGraphActionGraphicType = ko.computed(function() {
+		return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
+	})
+	this.hoverGraphAction.subscribe(function(value) {
+		if (value) {
+			if (value.createHoverGraphic)
+				self.hoverGraphActionGraphic(value.createHoverGraphic());
+		} else {
+			if (self.hoverGraphActionGraphic())
+				self.hoverGraphActionGraphic().destroy();
+			self.hoverGraphActionGraphic(null);
+		}
+	});
 }
 exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes().forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
 	});
+	if (this.hoverGraphActionGraphic()) {
+		this.hoverGraphActionGraphic().updateAnimationFrame(deltaT);
+	}
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
@@ -108,7 +160,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
 }
 GitGraphViewModel.prototype.getNode = function(sha1) {
 	var nodeViewModel = this.nodesById[sha1];
-	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new NodeViewModel(this, sha1);
+	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
 	return nodeViewModel;
 }
 GitGraphViewModel.prototype.getRef = function(refName) {
@@ -118,6 +170,14 @@ GitGraphViewModel.prototype.getRef = function(refName) {
 		this.refs.push(refViewModel);
 	}
 	return refViewModel;
+}
+GitGraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
+	var id = nodeAsha1 + '-' + nodeBsha1;
+	var edge = this.edgesById[id];
+	if (!edge) {
+		edge = this.edgesById[id] = new EdgeViewModel(this.getNode(nodeAsha1), this.getNode(nodeBsha1));
+	}
+	return edge;
 }
 
 GitGraphViewModel.getHEAD = function(nodes) {
@@ -144,7 +204,7 @@ GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) 
 GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 	var recursivelyMarkBranch = function(e, ideologicalBranch) {
 		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
-			node.ideologicalBranch = ideologicalBranch;
+			node.ideologicalBranch(ideologicalBranch);
 		});
 	}
 	var getIdeologicalBranch = function(e) {
@@ -161,7 +221,7 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
 		recursivelyMarkBranch(e, ideologicalBranch);
 	});
 	if (master) {
-		recursivelyMarkBranch(master, master.ideologicalBranch);
+		recursivelyMarkBranch(master, master.ideologicalBranch());
 	}
 }
 GitGraphViewModel.colorFromHashOfString = function(string) {
@@ -210,7 +270,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-	nodes = nodes.filter(function(node) { return !!node.ideologicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+	nodes = nodes.filter(function(node) { return !!node.ideologicalBranch() || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
 	//var concurrentBranches = { };
 
@@ -221,7 +281,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		var node = nodes[i];
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-		var ideologicalBranch = node.ideologicalBranch;
+		var ideologicalBranch = node.ideologicalBranch();
 
 		// First occurence of the branch, find an empty slot for the branch
 		if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
@@ -278,3 +338,11 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.nodes(nodes);
 	this.daySeparators(daySeparators);
 }
+
+var CommitNodeViewModel = function(graph) {
+	this.position = ko.observable(new Vector2(30, 30));
+	this.radius = ko.observable(28);
+	this.outerRadius = ko.observable(32);
+	this.color = ko.computed(function() { return graph.HEAD() && graph.HEAD().ideologicalBranch() ? graph.HEAD().ideologicalBranch().color : '#666' });
+}
+

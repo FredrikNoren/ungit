@@ -2,6 +2,11 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var inherits = require('util').inherits;
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var NodeViewModel = require('./node').NodeViewModel;
+var RefViewModel = require('./ref.js').RefViewModel;
+var EdgeViewModel = require('./edge').EdgeViewModel;
+var Vector2 = require('./vector2');
+var _ = require('underscore');
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -54,6 +59,7 @@ GraphActions.Move.prototype.perform = function(callback) {
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
 }
 
+
 GraphActions.Reset = function(graph, node) {
 	var self = this;
 	GraphActions.ActionBase.call(this, graph);
@@ -97,11 +103,11 @@ GraphActions.Pull.prototype.perform = function(callback) {
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }
 
+
 GraphActions.Rebase = function(graph, node) {
 	var self = this;
 	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
-	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
@@ -114,6 +120,9 @@ GraphActions.Rebase = function(graph, node) {
 inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.style = 'rebase';
+GraphActions.Rebase.prototype.createHoverGraphic = function() {
+	return new RebaseHoverGraphic(this.graph.currentActionContext(), this.node);
+}
 GraphActions.Rebase.prototype.perform = function(callback) {
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
 		if (err) {
@@ -126,6 +135,46 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 		callback();
 	});
 }
+var RebaseHoverGraphic = function(ref, onto) {
+	var self = this;
+	if (onto instanceof RefViewModel) onto = onto.node();
+	
+	var rebaseNodes = {};
+	this.path = ref.node().getPathToCommonAncestor(onto);
+	this.path.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
+
+	this.nodes = this.path.slice(0, -1).map(function(node) {
+		var n = new NodeViewModel(node.position(), node.radius());
+		n.setPosition(new Vector2(
+				onto.x() + (node.x() - _.last(self.path).x()),
+				onto.y() + (node.y() - _.last(self.path).y())));
+		n.animationSpeed = 2;
+		return n;
+	});
+
+	this.edges = [];
+	var prevNode = onto;
+	this.nodes.reverse().forEach(function(node) {
+		self.edges.push(new EdgeViewModel(node, prevNode));
+		prevNode = node;
+	});
+
+	this.path.slice(0, -1).forEach(function(node) {
+		node.overrideColor('#bbbbbb');
+	});
+}
+RebaseHoverGraphic.prototype.type = 'rebase';
+RebaseHoverGraphic.prototype.destroy = function() {
+	this.path.forEach(function(node) {
+		node.overrideColor(null);
+	});
+}
+RebaseHoverGraphic.prototype.updateAnimationFrame = function(deltaT) {
+	this.nodes.forEach(function(node) {
+		node.updateAnimationFrame(deltaT);
+	});
+}
+
 
 GraphActions.Merge = function(graph, node) {
 	var self = this;
