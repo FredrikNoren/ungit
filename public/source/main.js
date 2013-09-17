@@ -181,7 +181,7 @@ ko.bindingHandlers.shown = {
         init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             element.valueAccessor = valueAccessor;
             element.viewModel = viewModel;
-            element.dataset.scrollToEndListener = true;
+            element.setAttribute('data-scroll-to-end-listener', true);
         }
     };
 
