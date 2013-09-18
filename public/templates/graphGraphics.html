@@ -30,10 +30,6 @@
 			<!-- /ko -->
 		<!-- /ko -->
 
-		<!-- ko foreach: resetNodes -->
-		<line data-bind="attr: { x1: x() - radius(), y1: y() - radius(), x2: x() + radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
-		<line data-bind="attr: { x1: x() + radius(), y1: y() - radius(), x2: x() - radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
-		<!-- /ko -->
 		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
 			<!-- ko foreach: edges -->
 			<line data-bind="attr: { x1: posA().x, y1: posA().y, x2: posB().x, y2: posB().y }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />

@@ -1,6 +1,6 @@
 
-var ko = require('../vendor/js/knockout-2.2.1.js');
-var Vector2 = require('./vector2');
+var ko = require('../../vendor/js/knockout-2.2.1.js');
+var Vector2 = require('../vector2');
 
 var NodeViewModel = function(position, radius) {
 	var self = this;
@@ -16,6 +16,7 @@ var NodeViewModel = function(position, radius) {
 	this.outerRadius = this.radius;
 	this.goalRadius = ko.observable(radius);
 	this.animationSpeed = 0.4;
+	this.color = ko.observable('#ff00ff');
 }
 exports.NodeViewModel = NodeViewModel;
 NodeViewModel.prototype.setPosition = function(position) {

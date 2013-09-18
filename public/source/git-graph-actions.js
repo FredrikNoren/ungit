@@ -2,12 +2,10 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var inherits = require('util').inherits;
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
-var NodeViewModel = require('./node').NodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
-var EdgeViewModel = require('./edge').EdgeViewModel;
 var Vector2 = require('./vector2');
 var _ = require('underscore');
-var Color = require('color');
+var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -131,7 +129,10 @@ inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.style = 'rebase';
 GraphActions.Rebase.prototype.createHoverGraphic = function() {
-	return new RebaseHoverGraphic(this.graph.currentActionContext(), this.node);
+	var onto = this.graph.currentActionContext();
+	if (onto instanceof RefViewModel) onto = onto.node();
+	var path = onto.getPathToCommonAncestor(this.node);
+	return new RebaseHoverGraphic(onto, this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
@@ -143,54 +144,6 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 			return;
 		}
 		callback();
-	});
-}
-var RebaseHoverGraphic = function(ref, onto) {
-	var self = this;
-	if (onto instanceof RefViewModel) onto = onto.node();
-	
-	var rebaseNodes = {};
-	this.path = ref.node().getPathToCommonAncestor(onto);
-	this.path.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
-
-	this.arrows = [];
-	this.nodes = this.path.slice(0, -1).map(function(node, i) {
-		i = (self.path.length - 1 - i);
-		var n = new NodeViewModel(
-			new Vector2(
-				onto.x() + (node.x() - _.last(self.path).x()),
-				onto.y() - i * (node.radius() * 2 + 20))
-			, node.radius());
-		var d = n.position().sub(node.position()).normalized();
-		var from = node.position().add(d.mul(node.radius() + 3));
-		var to = n.position().sub(d.mul(node.radius()));
-		var l = to.sub(from).length();
-		if (l > 45) to = to.sub(d.mul(45));
-		else to = from.add(d);
-		self.arrows.push({ from: from, to: to });
-		return n;
-	});
-
-	this.edges = [];
-	var prevNode = onto;
-	this.nodes.reverse().forEach(function(node) {
-		self.edges.push(new EdgeViewModel(node, prevNode));
-		prevNode = node;
-	});
-
-	this.path.slice(0, -1).forEach(function(node) {
-		node.overrideColor(Color(node.color()).alpha(0.2).rgbaString());
-	});
-}
-RebaseHoverGraphic.prototype.type = 'rebase';
-RebaseHoverGraphic.prototype.destroy = function() {
-	this.path.forEach(function(node) {
-		node.overrideColor(null);
-	});
-}
-RebaseHoverGraphic.prototype.updateAnimationFrame = function(deltaT) {
-	this.nodes.forEach(function(node) {
-		node.updateAnimationFrame(deltaT);
 	});
 }
 

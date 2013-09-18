@@ -2,20 +2,21 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var Vector2 = require('./vector2.js');
-var NodeViewModel = require('./node').NodeViewModel;
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var GraphActions = require('./git-graph-actions.js');
-var EdgeViewModel = require('./edge').EdgeViewModel;
 var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var _ = require('underscore');
+var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
+var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
 	this.maxNNodes = 25;
 	this.nodes = ko.observable([]);
+	this.edgesById = {};
 	this.refs = ko.observableArray();
 	this.daySeparators = ko.observable();
 	this.nodesById = {};
@@ -42,51 +43,31 @@ var GitGraphViewModel = function(repository) {
 		self.maxNNodes = self.maxNNodes + 25;
 		self.loadNodesFromApi();
 	}, 1000, true);
-	this.graphWidth = ko.computed(function() {
-		var width = 0;
-		self.nodes().forEach(function(node) {
-			width = Math.max(width, node.x() + node.radius() + 205);
-		});
-		return width;
+	this.graphic = new GraphViewModel();
+	this.HEAD.subscribe(function(value) {
+		self.graphic.commitNodeEdge.nodeb(value);
+		self.graphic.showCommitNode(!!value);
 	});
-	this.graphHeight = ko.computed(function() {
-		var nodes = self.nodes();
-		if (nodes.length == 0) return 200;
-		return nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 200;
-	});
-	this.edgesById = {};
-	this.edges = ko.computed(function() {
+
+	this.nodes.subscribe(function(nodes) {
 		var edges = [];
-		self.nodes().forEach(function(node) {
+		nodes.forEach(function(node) {
 			node.parents().forEach(function(parentSha1) {
 				edges.push(self.getEdge(node.sha1, parentSha1));
 			});
 		});
-		return edges;
+		self.graphic.nodes(nodes);
+		self.graphic.edges(edges);
 	});
-	this.commitNode = new CommitNodeViewModel(this);
-	this.commitNodeEdge = new EdgeViewModel(this.commitNode);
-	this.HEAD.subscribe(function(value) { self.commitNodeEdge.nodeb(value); });
-	this.showCommitNode = ko.computed(function() { return !!self.HEAD(); });
 
-	this.resetNodes = ko.computed(function() {
-		var context = self.currentActionContext();
-		if (self.hoverGraphAction() instanceof GraphActions.Reset && context) {
-			return context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
-		}
-	});
-	this.hoverGraphActionGraphic = ko.observable();
-	this.hoverGraphActionGraphicType = ko.computed(function() {
-		return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
-	})
 	this.hoverGraphAction.subscribe(function(value) {
 		if (value) {
 			if (value.createHoverGraphic)
-				self.hoverGraphActionGraphic(value.createHoverGraphic());
+				self.graphic.hoverGraphActionGraphic(value.createHoverGraphic());
 		} else {
-			if (self.hoverGraphActionGraphic())
-				self.hoverGraphActionGraphic().destroy();
-			self.hoverGraphActionGraphic(null);
+			if (self.graphic.hoverGraphActionGraphic())
+				self.graphic.hoverGraphActionGraphic().destroy();
+			self.graphic.hoverGraphActionGraphic(null);
 		}
 	});
 }
@@ -95,9 +76,7 @@ GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes().forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
 	});
-	if (this.hoverGraphActionGraphic()) {
-		this.hoverGraphActionGraphic().updateAnimationFrame(deltaT);
-	}
+	this.graphic.updateAnimationFrame(deltaT);
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
@@ -339,10 +318,4 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.daySeparators(daySeparators);
 }
 
-var CommitNodeViewModel = function(graph) {
-	this.position = ko.observable(new Vector2(30, 30));
-	this.radius = ko.observable(28);
-	this.outerRadius = ko.observable(32);
-	this.color = ko.computed(function() { return graph.HEAD() && graph.HEAD().ideologicalBranch() ? graph.HEAD().ideologicalBranch().color : '#666' });
-}
 

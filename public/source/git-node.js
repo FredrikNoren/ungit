@@ -5,7 +5,7 @@ var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var inherits = require('util').inherits;
 var GraphActions = require('./git-graph-actions');
-var NodeViewModel = require('./node').NodeViewModel;
+var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 
 var GitNodeViewModel = function(graph, sha1) {
 	NodeViewModel.call(this);
