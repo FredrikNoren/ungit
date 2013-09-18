@@ -1,0 +1,46 @@
+
+<svg class="graphLog" xmlns="http://www.w3.org/2000/svg" version="1.1" data-bind="attr: { width: graphWidth, height: graphHeight }">
+	<defs>
+		<marker id="arrowEnd"
+			viewBox="0 0 10 10" refX="0" refY="5" 
+			markerUnits="strokeWidth"
+			markerWidth="4" markerHeight="3"
+			orient="auto">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#22252E" />
+		</marker>
+	</defs>
+	<g  transform="translate(5, 200)">
+		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: arrows -->
+			<line data-bind="attr: { x1: from.x, y1: from.y, x2: to.x, y2: to.y }" stroke="#22252E" stroke-width="15" marker-end="url(#arrowEnd)" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+		<!-- ko foreach: edges -->
+		<line data-bind="attr: { x1: posA().x, y1: posA().y, x2: posB().x, y2: posB().y }" stroke="#4A4A4A" stroke-width="8" />
+		<!-- /ko -->
+		<!-- ko foreach: nodes -->
+		<circle data-bind="attr: { cx: x(), cy: y(), r: radius(), fill: color() }" />
+		<!-- /ko -->
+		<!-- ko if: showCommitNode -->
+			<!-- ko with: commitNodeEdge -->
+			<line data-bind="attr: { x1: posA().x, y1: posA().y, x2: posB().x, y2: posB().y }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko with: commitNode -->
+			<circle data-bind="attr: { cx: position().x, cy: position().y, r: radius(), stroke: color() }" stroke-width="8" fill="transparent" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+		<!-- /ko -->
+
+		<!-- ko foreach: resetNodes -->
+		<line data-bind="attr: { x1: x() - radius(), y1: y() - radius(), x2: x() + radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+		<line data-bind="attr: { x1: x() + radius(), y1: y() - radius(), x2: x() - radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+		<!-- /ko -->
+		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: edges -->
+			<line data-bind="attr: { x1: posA().x, y1: posA().y, x2: posB().x, y2: posB().y }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko foreach: nodes -->
+			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+	</g>
+</svg>

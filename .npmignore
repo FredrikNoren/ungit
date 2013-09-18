@@ -24,6 +24,7 @@ report/
 public/source/
 public/vendor/
 public/less/
+public/templates/
 public/styles.html
 
 clicktests/

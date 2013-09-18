@@ -1,0 +1,13 @@
+
+<div data-bind="visible: status() == 'loading'">
+</div>
+
+<div class='login' data-bind="visible: status() == 'login'">
+	<h1>Login</h1>
+	<div class="loginError" data-bind="text: loginError"></div>
+	<form data-bind="submit: login">
+		<div>Username: <input type="text" data-bind="value: username"></div>
+		<div>Password: <input type="password" data-bind="value: password"></div>
+		<input type="submit" class="btn btn-primary" value="Login">
+	</form>
+</div>
