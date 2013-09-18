@@ -6,7 +6,7 @@ var EdgeViewModel = require('./edge').EdgeViewModel;
 var Color = require('color');
 var _ = require('underscore');
 
-var RebaseHoverGraphic = function(ref, onto, nodesThatWillMove) {
+var RebaseHoverGraphic = function(onto, nodesThatWillMove) {
 	var self = this;
 	
 	var rebaseNodes = {};
@@ -39,7 +39,7 @@ var RebaseHoverGraphic = function(ref, onto, nodesThatWillMove) {
 	});
 
 	this.path.slice(0, -1).forEach(function(node) {
-		node.overrideColor(Color(node.color()).alpha(0.2).rgbaString());
+		node.color(Color(node.color()).alpha(0.2).rgbaString());
 	});
 }
 exports.RebaseHoverGraphic = RebaseHoverGraphic;

@@ -44,6 +44,7 @@ var GitGraphViewModel = function(repository) {
 		self.loadNodesFromApi();
 	}, 1000, true);
 	this.graphic = new GraphViewModel();
+	this.graphic.offset(new Vector2(5, 200));
 	this.HEAD.subscribe(function(value) {
 		self.graphic.commitNodeEdge.nodeb(value);
 		self.graphic.showCommitNode(!!value);

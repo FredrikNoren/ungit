@@ -9,17 +9,20 @@ var GraphViewModel = function() {
 	this.nodes = ko.observable([]);
 	this.commitNode = new CommitNodeViewModel(this);
 	this.commitNodeEdge = new EdgeViewModel(this.commitNode);
+	this.offset = ko.observable(new Vector2(0, 0));
 	this.graphWidth = ko.computed(function() {
 		var width = 0;
 		self.nodes().forEach(function(node) {
-			width = Math.max(width, node.x() + node.radius() + 205);
+			width = Math.max(width, node.x() + node.radius() + self.offset().x + 200);
 		});
 		return width;
 	});
 	this.graphHeight = ko.computed(function() {
-		var nodes = self.nodes();
-		if (nodes.length == 0) return 200;
-		return nodes[nodes.length - 1].y() + nodes[nodes.length - 1].radius() + 200;
+		var height = 0;
+		self.nodes().forEach(function(node) {
+			height = Math.max(height, node.y() + node.radius() + self.offset().y + 5);
+		});
+		return height;
 	});
 	this.edges = ko.observable();
 	this.showCommitNode = ko.observable();

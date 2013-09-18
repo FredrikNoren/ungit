@@ -132,7 +132,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 	var onto = this.graph.currentActionContext();
 	if (onto instanceof RefViewModel) onto = onto.node();
 	var path = onto.getPathToCommonAncestor(this.node);
-	return new RebaseHoverGraphic(onto, this.node, path);
+	return new RebaseHoverGraphic(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {

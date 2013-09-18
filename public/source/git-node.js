@@ -54,10 +54,8 @@ var GitNodeViewModel = function(graph, sha1) {
 
 	this.index = ko.observable();
 	this.ideologicalBranch = ko.observable();
-	this.overrideColor = ko.observable();
-	this.color = ko.computed(function() {
-		if (self.overrideColor()) return self.overrideColor();
-		return self.ideologicalBranch() ? self.ideologicalBranch().color : '#666';
+	self.ideologicalBranch.subscribe(function(value) {
+		self.color(value ? value.color : '#666');
 	});
 	this.ancestorOfHEAD = ko.observable(false);
 	this.nodeIsMousehover = ko.observable(false);
