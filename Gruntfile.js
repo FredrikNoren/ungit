@@ -21,7 +21,8 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'public/js/ungit.js': ['public/source/main.js']
+          'public/js/ungit.js': ['public/source/main.js'],
+          'public/js/devStyling.js': ['public/source/devStyling.js']
         }
       }
     },
@@ -139,7 +140,7 @@ module.exports = function(grunt) {
       fs.writeFileSync(outFilename, newTemplate);
     }
     compileTemplate('public/templates/index.html', 'public/index.html')
-    compileTemplate('public/templates/styles.html', 'public/styles.html')
+    compileTemplate('public/templates/devStyling.html', 'public/devStyling.html')
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');

@@ -25,7 +25,8 @@ public/source/
 public/vendor/
 public/less/
 public/templates/
-public/styles.html
+public/devStyling.html
+public/js/devStyling.js
 
 clicktests/
 clicktestout/
