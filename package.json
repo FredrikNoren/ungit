@@ -37,7 +37,8 @@
     "crossroads": "~0.12.0",
     "signals": "~1.0.0",
     "hasher": "~1.1.4",
-    "blueimp-md5": "~1.0.3"
+    "blueimp-md5": "~1.0.3",
+    "color": "~0.4.4"
   },
   "devDependencies": {
     "mocha": "1.11.0",

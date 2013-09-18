@@ -7,13 +7,23 @@ var RefViewModel = require('./ref.js').RefViewModel;
 var EdgeViewModel = require('./edge').EdgeViewModel;
 var Vector2 = require('./vector2');
 var _ = require('underscore');
+var Color = require('color');
 
 var GraphActions = {};
 module.exports = GraphActions;
 
 GraphActions.ActionBase = function(graph) {
+	var self = this;
 	this.graph = graph;
 	this.performProgressBar = new ProgressBarViewModel('action-' + this.style + '-' + graph.repoPath, 1000);
+	this.isHighlighted = ko.computed(function() {
+		return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
+	});
+	this.cssClasses = ko.computed(function() {
+		var c = self.style;
+		if (!self.isHighlighted()) c += ' dimmed';
+		return c;
+	})
 }
 GraphActions.ActionBase.prototype.doPerform = function() {
 	var self = this;
@@ -143,12 +153,21 @@ var RebaseHoverGraphic = function(ref, onto) {
 	this.path = ref.node().getPathToCommonAncestor(onto);
 	this.path.slice(0, -1).forEach(function(node) { rebaseNodes[node.sha1] = true; });
 
-	this.nodes = this.path.slice(0, -1).map(function(node) {
-		var n = new NodeViewModel(node.position(), node.radius());
-		n.setPosition(new Vector2(
+	this.arrows = [];
+	this.nodes = this.path.slice(0, -1).map(function(node, i) {
+		i = (self.path.length - 1 - i);
+		var n = new NodeViewModel(
+			new Vector2(
 				onto.x() + (node.x() - _.last(self.path).x()),
-				onto.y() + (node.y() - _.last(self.path).y())));
-		n.animationSpeed = 2;
+				onto.y() - i * (node.radius() * 2 + 20))
+			, node.radius());
+		var d = n.position().sub(node.position()).normalized();
+		var from = node.position().add(d.mul(node.radius() + 3));
+		var to = n.position().sub(d.mul(node.radius()));
+		var l = to.sub(from).length();
+		if (l > 45) to = to.sub(d.mul(45));
+		else to = from.add(d);
+		self.arrows.push({ from: from, to: to });
 		return n;
 	});
 
@@ -160,7 +179,7 @@ var RebaseHoverGraphic = function(ref, onto) {
 	});
 
 	this.path.slice(0, -1).forEach(function(node) {
-		node.overrideColor('#bbbbbb');
+		node.overrideColor(Color(node.color()).alpha(0.2).rgbaString());
 	});
 }
 RebaseHoverGraphic.prototype.type = 'rebase';

@@ -83,6 +83,9 @@ var GitNodeViewModel = function(graph, sha1) {
 	this.tags = ko.computed(function() {
 		return self.refs().filter(function(r) { return r.isTag; });
 	});
+	this.showNewRefAction = ko.computed(function() {
+		return !graph.currentActionContext();
+	})
 	this.newBranchName = ko.observable();
 	this.newBranchNameHasFocus = ko.observable(true);
 	this.newBranchNameHasFocus.subscribe(function(newValue) {
