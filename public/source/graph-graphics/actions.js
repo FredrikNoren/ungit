@@ -7,13 +7,15 @@ var Color = require('color');
 var _ = require('underscore');
 
 
-var MergeViewModel = function(headNode, node) {
+var MergeViewModel = function(graph, headNode, node) {
 	var self = this;
+
+	this.graph = graph;
 
 	var newNode = {
 		position: new Vector2(
-			headNode.x() + headNode.radius() + ((node.x() + node.radius()) - (headNode.x() + headNode.radius())) / 2,
-			Math.min(headNode.y(), node.y())),
+			headNode.x(),
+			headNode.y() - 35),
 		radius: Math.max(headNode.radius(), node.radius())
 	};
 	newNode.position.y -= newNode.radius*2;
@@ -23,9 +25,13 @@ var MergeViewModel = function(headNode, node) {
 		new EdgeViewModel(headNode, this.newNode),
 		new EdgeViewModel(node, this.newNode)
 	];
+	graph.dimCommit(true)
 }
 exports.MergeViewModel = MergeViewModel;
 MergeViewModel.prototype.type = 'merge';
+MergeViewModel.prototype.destroy = function() {
+	this.graph.dimCommit(false)
+}
 
 
 var RebaseViewModel = function(onto, nodesThatWillMove) {

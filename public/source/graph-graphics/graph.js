@@ -10,6 +10,10 @@ var GraphViewModel = function() {
 	this.commitNode = new CommitNodeViewModel(this);
 	this.commitNodeEdge = new EdgeViewModel(this.commitNode);
 	this.offset = ko.observable(new Vector2(0, 0));
+	this.edges = ko.observable([]);
+	this.showCommitNode = ko.observable();
+	this.dimCommit = ko.observable(false);
+	this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
 	this.graphWidth = ko.computed(function() {
 		var width = 0;
 		self.nodes().forEach(function(node) {
@@ -24,8 +28,6 @@ var GraphViewModel = function() {
 		});
 		return height;
 	});
-	this.edges = ko.observable([]);
-	this.showCommitNode = ko.observable();
 
 	this.hoverGraphActionGraphic = ko.observable();
 	var prevHoverGraphic;

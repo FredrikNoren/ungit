@@ -29,12 +29,14 @@
 		<circle data-bind="attr: { cx: x(), cy: y(), r: radius(), fill: color() }" />
 		<!-- /ko -->
 		<!-- ko if: showCommitNode -->
+			<g data-bind="attr: { opacity: commitOpacity }">
 			<!-- ko with: commitNodeEdge -->
 			<line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
 			<!-- /ko -->
 			<!-- ko with: commitNode -->
 			<circle data-bind="attr: { cx: position().x, cy: position().y, r: radius(), stroke: color() }" stroke-width="8" fill="transparent" stroke-dasharray="10, 5" />
 			<!-- /ko -->
+			</g>
 		<!-- /ko -->
 
 		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->

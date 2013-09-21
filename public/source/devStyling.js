@@ -41,17 +41,20 @@ function rebase() {
 
 function merge() {
 	var graph = new GraphViewModel();
+	graph.showCommitNode(true);
 	graph.offset(new Vector2(0, 100));
 	graph.nodes([
-		new NodeViewModel(new Vector2(50, 50), 30),
-		new NodeViewModel(new Vector2(50, 150), 30),
-		new NodeViewModel(new Vector2(150, 50), 15),
+		new NodeViewModel(new Vector2(30, 150), 30),
+		new NodeViewModel(new Vector2(30, 250), 30),
+		new NodeViewModel(new Vector2(150, 150), 15),
 	]);
 	graph.edges([
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1]),
 		new EdgeViewModel(graph.nodes()[1], graph.nodes()[2])
 	]);
-	graph.hoverGraphActionGraphic(new graphGraphicsActions.MergeViewModel(graph.nodes()[0], graph.nodes()[2]))
+	graph.commitNodeEdge.nodeb(graph.nodes()[0]);
+	graph.commitNodeEdge.updateAnimationFrame()
+	graph.hoverGraphActionGraphic(new graphGraphicsActions.MergeViewModel(graph, graph.nodes()[0], graph.nodes()[2]))
 	return graph;
 }
 

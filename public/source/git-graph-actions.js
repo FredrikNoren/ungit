@@ -180,7 +180,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 	var node = this.graph.currentActionContext();
 	if (!node) return null;
 	if (node instanceof RefViewModel) node = node.node();
-	return new MergeViewModel(this.node, node);
+	return new MergeViewModel(this.graph.graphic, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
