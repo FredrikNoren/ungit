@@ -7,26 +7,23 @@ var EdgeViewModel = function(nodea, nodeb) {
 	this.nodea = ko.observable(nodea);
 	this.nodeb = ko.observable(nodeb);
 
-	this.nodeAPosition = ko.computed(function() {
-		if (self.nodea() && self.nodea().position()) {
-			return self.nodea().position();
+	var getNodePosition = function(node, fallbackNode) {
+		if (node && node.position()) {
+			return node.position();
 		} else {
-			if (self.nodeb() && self.nodeb().position()) return self.nodeb().position().add(new Vector2(0, 10000));
+			if (fallbackNode && fallbackNode.position()) return fallbackNode.position().add(new Vector2(0, 10000));
 			else return new Vector2(0, 0);
 		}
-	});
+	}
+	var getNodeRadius = function(node) {
+		return (node ? node.outerRadius() : null) || 30;
+	}
 
-	this.nodeBPosition = ko.computed(function() {
-		if (self.nodeb() && self.nodeb().position()) {
-			return self.nodeb().position();
-		} else {
-			if (self.nodea() && self.nodea().position()) return self.nodea().position().add(new Vector2(0, 10000));
-			else return new Vector2(0, 0);
-		}
-	});
+	this.nodeAPosition = ko.computed(function() { return getNodePosition(self.nodea(), self.nodeb()); });
+	this.nodeBPosition = ko.computed(function() { return getNodePosition(self.nodeb(), self.nodea()); });
 
-	this.nodeARadius = ko.computed(function() { return self.nodea() ? self.nodea().outerRadius() : 30; })
-	this.nodeBRadius = ko.computed(function() { return self.nodeb() ? self.nodeb().outerRadius() : 30; })
+	this.nodeARadius = ko.computed(function() { return getNodeRadius(self.nodea()); })
+	this.nodeBRadius = ko.computed(function() { return getNodeRadius(self.nodeb()); })
 	
 	this.delta = ko.computed(function() {
 		return self.nodeBPosition().sub(self.nodeAPosition()).normalized();
