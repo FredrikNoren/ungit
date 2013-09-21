@@ -237,10 +237,12 @@ git.discardAllChanges = function(repoPath) {
 git.discardChangesInFile = function(repoPath, filename) {
   var task = new GitTask();
 
-  git('checkout HEAD -- "' + filename.trim() + '"', repoPath)
+  var filePath = path.join(repoPath, filename);
+
+  var discardTask = git('checkout HEAD -- "' + filename.trim() + '"', repoPath, false)
     .fail(function(err) {
       if (err.stderr.trim() == 'error: pathspec \'' + filename.trim() + '\' did not match any file(s) known to git.') {
-        fs.unlink(path.join(repoPath, filename), function(err) {
+        fs.unlink(filePath, function(err) {
           if (err) task.setResult({ command: 'unlink', error: err });
           else task.setResult();
         });
@@ -249,6 +251,22 @@ git.discardChangesInFile = function(repoPath, filename) {
       }
     })
     .done(task.setResult.bind(null, null));
+
+  fs.exists(filePath, function(exists) {
+    if (exists) {
+      git.queueTask(discardTask);
+    } else {
+      git('reset HEAD "' + filename + '"', repoPath)
+        .always(function(err) {
+          if (err && err.stdout.indexOf('Unstaged changes after reset:') != -1) {
+            task.setResult(err);
+            return;
+          }
+          git.queueTask(discardTask);
+        });
+    }
+
+  });
 
   return task;
 }
