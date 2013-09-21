@@ -38,5 +38,14 @@
 			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
 			<!-- /ko -->
 		<!-- /ko --><!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'merge' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: edges -->
+			<line data-bind="attr: { x1: posA().x, y1: posA().y, x2: posB().x, y2: posB().y }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko with: newNode -->
+			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
 	</g>
 </svg>

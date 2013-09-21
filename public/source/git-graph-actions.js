@@ -6,6 +6,7 @@ var RefViewModel = require('./ref.js').RefViewModel;
 var Vector2 = require('./vector2');
 var _ = require('underscore');
 var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
+var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -165,6 +166,11 @@ GraphActions.Merge = function(graph, node) {
 inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.style = 'merge';
+GraphActions.Merge.prototype.createHoverGraphic = function() {
+	var node = this.graph.currentActionContext();
+	if (node instanceof RefViewModel) node = node.node();
+	return new MergeViewModel(this.node, node);
+}
 GraphActions.Merge.prototype.perform = function(callback) {
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
 		if (err) {

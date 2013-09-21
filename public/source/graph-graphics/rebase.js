@@ -39,6 +39,7 @@ var RebaseHoverGraphic = function(onto, nodesThatWillMove) {
 	});
 
 	this.path.slice(0, -1).forEach(function(node) {
+		node.savedColor = node.color();
 		node.color(Color(node.color()).alpha(0.2).rgbaString());
 	});
 }
@@ -46,7 +47,7 @@ exports.RebaseHoverGraphic = RebaseHoverGraphic;
 RebaseHoverGraphic.prototype.type = 'rebase';
 RebaseHoverGraphic.prototype.destroy = function() {
 	this.path.forEach(function(node) {
-		node.overrideColor(null);
+		node.color(node.savedColor);
 	});
 }
 RebaseHoverGraphic.prototype.updateAnimationFrame = function(deltaT) {
