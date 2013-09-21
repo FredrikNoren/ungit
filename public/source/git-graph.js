@@ -160,13 +160,13 @@ GitGraphViewModel.getHEAD = function(nodes) {
 }
 
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
-	if (node.index() >= this.maxNNodes) return;
-	callback(node);
-	node.parents().forEach(function(parentId) {
-		var parent = nodesById[parentId];
+	if (node.index() >= this.maxNNodes) return false;
+	if (!callback(node)) return false;
+	for (var i=0; i < node.parents().length; i++) {
+		var parent = nodesById[node.parents()[i]];
 		if (parent)
 			GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
-	});
+	}
 }
 GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) {
 	if (node.index() >= this.maxNNodes) return;
@@ -176,28 +176,31 @@ GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) 
 		GitGraphViewModel.traverseNodeLeftParents(parent, nodesById, callback);
 }
 
-GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
-	var recursivelyMarkBranch = function(e, ideologicalBranch) {
-		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
-			node.ideologicalBranch(ideologicalBranch);
-		});
-	}
-	var getIdeologicalBranch = function(e) {
-		var ref = _.find(e.refs(), function(ref) { return ref.isBranch; });
-		if (ref && ref.isRemote && ref.localRef()) ref = ref.localRef();
-		return ref;
-	}
-	var master;
-	nodes.forEach(function(e) {
-		var i = 0;
-		var ideologicalBranch = getIdeologicalBranch(e);
-		if (!ideologicalBranch) return;
-		if (ideologicalBranch.name == 'refs/heads/master') master = e;
-		recursivelyMarkBranch(e, ideologicalBranch);
+GitGraphViewModel._markIdeologicalStamp = 0;
+GitGraphViewModel.markNodesIdeologicalBranches = function(refs, nodes, nodesById) {
+	refs = refs.filter(function(r) { return !!r.node(); });
+	refs = refs.sort(function(a, b) {
+		if (a.isLocal && !b.isLocal) return -1;
+		if (b.isLocal && !a.isLocal) return 1;
+		if (a.isBranch && !b.isBranch) return -1;
+		if (b.isBranch && !a.isBranch) return 1;
+		if (a.isHead && !b.isHead) return 1;
+		if (!a.isHead && b.isHead) return -1;
+		if (a.isStash && !b.isStash) return 1;
+		if (b.isStash && !a.isStash) return -1;
+		if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
+			return a.node().commitTime().unix() - b.node().commitTime().unix();
+		return a.displayName < b.displayName ? -1 : 1;
 	});
-	if (master) {
-		recursivelyMarkBranch(master, master.ideologicalBranch());
-	}
+	var stamp = GitGraphViewModel._markIdeologicalStamp++;
+	refs.forEach(function(ref) {
+		GitGraphViewModel.traverseNodeParents(ref.node(), nodesById, function(node) {
+			if (node.stamp == stamp) return false;
+			node.stamp = stamp;
+			node.ideologicalBranch(ref);
+			return true;
+		});
+	});
 }
 GitGraphViewModel.colorFromHashOfString = function(string) {
 	return '#' + md5(string).toString().slice(0, 6);
@@ -233,7 +236,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		}
 	}
 
-	GitGraphViewModel.markNodesIdeologicalBranches(nodes, this.nodesById);
+	GitGraphViewModel.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
 
 	var updateTimeStamp = moment().valueOf();
 
@@ -245,7 +248,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-	nodes = nodes.filter(function(node) { return !!node.ideologicalBranch() || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+	nodes = nodes.filter(function(node) { return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
 	//var concurrentBranches = { };
 

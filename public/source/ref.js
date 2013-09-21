@@ -21,6 +21,7 @@ var RefViewModel = function(args) {
 	this.isRemoteHEAD = this.name == 'refs/remotes/origin/HEAD';
 	this.isLocalBranch = this.name.indexOf('refs/heads/') == 0;
 	this.isRemoteBranch = this.name.indexOf('refs/remotes/origin/') == 0 && !this.isRemoteHEAD;
+	this.isStash = this.name.indexOf('refs/stash') == 0;
 	this.isHEAD = this.isLocalHEAD || this.isRemoteHEAD;
 	this.isBranch = this.isLocalBranch || this.isRemoteBranch;
 	this.isRemote = this.isRemoteBranch || this.isRemoteTag;
@@ -56,14 +57,6 @@ var RefViewModel = function(args) {
 		else return true;
 	});
 	this.color = args.color;
-	this.remoteIsAncestor = ko.computed(function() {
-		if (!self.remoteRef()) return false;
-		return self.node() && self.node().isAncestor(self.remoteRef().node());
-	});
-	this.remoteIsOffspring = ko.computed(function() {
-		if (!self.remoteRef()) return false;
-		return self.remoteRef().node().isAncestor(self.node());
-	});
 }
 exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {

@@ -83,7 +83,7 @@ GraphActions.Reset = function(graph, node) {
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().remoteRef() &&
 			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			!self.graph.currentActionContext().remoteIsOffspring();;
+			self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Reset, GraphActions.ActionBase);
@@ -110,7 +110,7 @@ GraphActions.Pull = function(graph, node) {
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().remoteRef() &&
 			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			self.graph.currentActionContext().remoteIsOffspring();;
+			self.graph.currentActionContext().remoteRef().node().commitTime().unix() >= self.graph.currentActionContext().node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Pull, GraphActions.ActionBase);
@@ -200,7 +200,8 @@ GraphActions.Push = function(graph, node) {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().canBePushed();
+			self.graph.currentActionContext().canBePushed() &&
+			self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
