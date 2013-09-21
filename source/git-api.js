@@ -280,7 +280,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('merge "' + req.body.with.trim() + '"', req.param('path'))
+		var noFF = '';
+		if (config.noFFMerge) noFF = '--no-ff';
+		git('merge ' + noFF +' "' + req.body.with.trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));

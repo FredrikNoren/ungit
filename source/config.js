@@ -57,6 +57,9 @@ var defaultConfig = {
 	// Maximum number of automatic restarts after a crash. Undefined == unlimited.
 	maxNAutoRestartOnCrash: undefined,
 
+	// Don't fast forward git mergers. See git merge --no-ff documentation
+	noFFMerge: true,
+
 	// Used for development purposes.
 	dev: false,
 };
