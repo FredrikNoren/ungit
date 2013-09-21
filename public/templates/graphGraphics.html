@@ -47,5 +47,13 @@
 			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
 			<!-- /ko -->
 		<!-- /ko --><!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'reset' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: nodes -->
+			<line data-bind="attr: { x1: x() - radius(), y1: y() - radius(), x2: x() + radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+			<line data-bind="attr: { x1: x() + radius(), y1: y() - radius(), x2: x() - radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+
 	</g>
 </svg>

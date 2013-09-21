@@ -7,6 +7,7 @@ var Vector2 = require('./vector2');
 var _ = require('underscore');
 var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
 var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
+var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -86,6 +87,11 @@ GraphActions.Reset = function(graph, node) {
 inherits(GraphActions.Reset, GraphActions.ActionBase);
 GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.style = 'reset';
+GraphActions.Reset.prototype.createHoverGraphic = function() {
+	var context = this.graph.currentActionContext();
+	var nodes = context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
+	return new ResetViewModel(nodes);
+}
 GraphActions.Reset.prototype.perform = function(callback) {
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }

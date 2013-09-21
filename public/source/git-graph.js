@@ -66,8 +66,6 @@ var GitGraphViewModel = function(repository) {
 			if (value.createHoverGraphic)
 				self.graphic.hoverGraphActionGraphic(value.createHoverGraphic());
 		} else {
-			if (self.graphic.hoverGraphActionGraphic())
-				self.graphic.hoverGraphActionGraphic().destroy();
 			self.graphic.hoverGraphActionGraphic(null);
 		}
 	});

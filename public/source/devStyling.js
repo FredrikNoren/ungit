@@ -7,6 +7,7 @@ var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 var Vector2 = require('./vector2');
 var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
 var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
+var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
 
 var viewModel = {};
 
@@ -56,9 +57,23 @@ function merge() {
 	return graph;
 }
 
+function reset() {
+	var graph = new GraphViewModel();
+	graph.nodes([
+		new NodeViewModel(new Vector2(50, 50), 30),
+		new NodeViewModel(new Vector2(50, 150), 30)
+	]);
+	graph.edges([
+		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1])
+	]);
+	graph.hoverGraphActionGraphic(new ResetViewModel([graph.nodes()[0]]))
+	return graph;
+}
+
 viewModel.graphGraphicsSamples = {};
 viewModel.graphGraphicsSamples.normal = normal();
 viewModel.graphGraphicsSamples.rebase = rebase();
 viewModel.graphGraphicsSamples.merge = merge();
+viewModel.graphGraphicsSamples.reset = reset();
 
 ko.applyBindings(viewModel);

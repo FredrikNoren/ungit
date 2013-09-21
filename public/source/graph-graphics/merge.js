@@ -23,7 +23,3 @@ var MergeViewModel = function(headNode, node) {
 }
 exports.MergeViewModel = MergeViewModel;
 MergeViewModel.prototype.type = 'merge';
-MergeViewModel.prototype.destroy = function() {
-}
-MergeViewModel.prototype.updateAnimationFrame = function(deltaT) {
-}

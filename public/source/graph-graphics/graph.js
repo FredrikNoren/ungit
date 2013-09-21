@@ -28,13 +28,21 @@ var GraphViewModel = function() {
 	this.showCommitNode = ko.observable();
 
 	this.hoverGraphActionGraphic = ko.observable();
+	var prevHoverGraphic;
+	this.hoverGraphActionGraphic.subscribe(function(value) {
+		prevHoverGraphic = value;
+	}, null, 'beforeChange');
+	this.hoverGraphActionGraphic.subscribe(function(newValue) {
+		if (newValue != prevHoverGraphic && prevHoverGraphic && prevHoverGraphic.destroy)
+			prevHoverGraphic.destroy();
+	});
 	this.hoverGraphActionGraphicType = ko.computed(function() {
 		return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
 	})
 }
 exports.GraphViewModel = GraphViewModel;
 GraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
-	if (this.hoverGraphActionGraphic()) {
+	if (this.hoverGraphActionGraphic() && this.hoverGraphActionGraphic().updateAnimationFrame) {
 		this.hoverGraphActionGraphic().updateAnimationFrame(deltaT);
 	}
 }
