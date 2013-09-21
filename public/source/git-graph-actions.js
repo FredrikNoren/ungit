@@ -204,7 +204,8 @@ GraphActions.Push = function(graph, node) {
 		return self.graph.showDropTargets() && 
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().canBePushed() &&
-			self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix();
+			(!self.graph.currentActionContext().remoteRef() ||
+			 self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix());
 	});
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
