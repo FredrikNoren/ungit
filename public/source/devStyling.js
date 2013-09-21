@@ -1,4 +1,4 @@
-// Used for styles.html (development styling file)
+// Used for devStyling.html (development styling file)
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
