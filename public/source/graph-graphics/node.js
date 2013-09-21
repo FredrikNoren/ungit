@@ -45,7 +45,7 @@ NodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
 		if (distanceLeft < lengthToMove) {
 			this.position(this.goalPosition());
 		} else {
-			d = d.normalized().mul(lengthToMove);
+			d = d.normalize().mul(lengthToMove);
 
 			var pos = (this.position() || new Vector2(0, 0)).add(d);
 			this.position(pos);

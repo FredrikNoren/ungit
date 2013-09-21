@@ -27,7 +27,7 @@ EdgeViewModel.prototype._getNodeRadius = function(node) {
 EdgeViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	var a = this._getNodePosition(this.nodea(), this.nodeb());
 	var b = this._getNodePosition(this.nodeb(), this.nodea());
-	var d = b.sub(a).normalized();
+	var d = b.sub(a).normalize();
 	var p1 = a.add(d.mul(this._getNodeRadius(this.nodea()) + 2));
 	var p2 = b.sub(d.mul(this._getNodeRadius(this.nodeb()) + 2));
 	this.x1(p1.x);
