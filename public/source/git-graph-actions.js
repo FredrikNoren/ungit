@@ -8,6 +8,7 @@ var _ = require('underscore');
 var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
 var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
 var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
+var PushViewModel = require('./graph-graphics/push').PushViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -204,6 +205,10 @@ GraphActions.Push = function(graph, node) {
 inherits(GraphActions.Push, GraphActions.ActionBase);
 GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
+GraphActions.Push.prototype.createHoverGraphic = function() {
+	var context = this.graph.currentActionContext();
+	return new PushViewModel(context.remoteRef().node(), context.node());
+}
 GraphActions.Push.prototype.perform = function( callback) {
 	var self = this;
 	var programEventListener = function(event) {

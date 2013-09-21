@@ -8,6 +8,7 @@ var Vector2 = require('./vector2');
 var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
 var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
 var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
+var PushViewModel = require('./graph-graphics/push').PushViewModel;
 
 var viewModel = {};
 
@@ -70,10 +71,24 @@ function reset() {
 	return graph;
 }
 
+function push() {
+	var graph = new GraphViewModel();
+	graph.nodes([
+		new NodeViewModel(new Vector2(50, 50), 30),
+		new NodeViewModel(new Vector2(50, 150), 30)
+	]);
+	graph.edges([
+		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1])
+	]);
+	graph.hoverGraphActionGraphic(new PushViewModel(graph.nodes()[1], graph.nodes()[0]))
+	return graph;
+}
+
 viewModel.graphGraphicsSamples = {};
 viewModel.graphGraphicsSamples.normal = normal();
 viewModel.graphGraphicsSamples.rebase = rebase();
 viewModel.graphGraphicsSamples.merge = merge();
 viewModel.graphGraphicsSamples.reset = reset();
+viewModel.graphGraphicsSamples.push = push();
 
 ko.applyBindings(viewModel);
