@@ -24,7 +24,7 @@ var GraphViewModel = function() {
 		});
 		return height;
 	});
-	this.edges = ko.observable();
+	this.edges = ko.observable([]);
 	this.showCommitNode = ko.observable();
 
 	this.hoverGraphActionGraphic = ko.observable();
@@ -45,6 +45,13 @@ GraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.hoverGraphActionGraphic() && this.hoverGraphActionGraphic().updateAnimationFrame) {
 		this.hoverGraphActionGraphic().updateAnimationFrame(deltaT);
 	}
+	this.nodes().forEach(function(node) {
+		node.updateAnimationFrame(deltaT);
+	});
+	this.edges().forEach(function(edge) {
+		edge.updateAnimationFrame(deltaT);
+	});
+	this.commitNodeEdge.updateAnimationFrame(deltaT);
 }
 
 var CommitNodeViewModel = function(graph) {

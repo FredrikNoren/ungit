@@ -72,9 +72,6 @@ var GitGraphViewModel = function(repository) {
 }
 exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
-	this.nodes().forEach(function(node) {
-		node.updateAnimationFrame(deltaT);
-	});
 	this.graphic.updateAnimationFrame(deltaT);
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
