@@ -91,6 +91,7 @@ GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.style = 'reset';
 GraphActions.Reset.prototype.createHoverGraphic = function() {
 	var context = this.graph.currentActionContext();
+	if (!context) return null;
 	var nodes = context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
 	return new ResetViewModel(nodes);
 }
@@ -139,6 +140,7 @@ GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.style = 'rebase';
 GraphActions.Rebase.prototype.createHoverGraphic = function() {
 	var onto = this.graph.currentActionContext();
+	if (!onto) return;
 	if (onto instanceof RefViewModel) onto = onto.node();
 	var path = onto.getPathToCommonAncestor(this.node);
 	return new RebaseViewModel(this.node, path);
@@ -176,6 +178,7 @@ GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.style = 'merge';
 GraphActions.Merge.prototype.createHoverGraphic = function() {
 	var node = this.graph.currentActionContext();
+	if (!node) return null;
 	if (node instanceof RefViewModel) node = node.node();
 	return new MergeViewModel(this.node, node);
 }
@@ -209,6 +212,7 @@ GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
 GraphActions.Push.prototype.createHoverGraphic = function() {
 	var context = this.graph.currentActionContext();
+	if (!context) return null;
 	return new PushViewModel(context.remoteRef().node(), context.node());
 }
 GraphActions.Push.prototype.perform = function( callback) {
