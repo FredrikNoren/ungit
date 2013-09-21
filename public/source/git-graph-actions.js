@@ -5,10 +5,11 @@ var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var Vector2 = require('./vector2');
 var _ = require('underscore');
-var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
-var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
-var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
-var PushViewModel = require('./graph-graphics/push').PushViewModel;
+var graphGraphicsActions = require('./graph-graphics/actions');
+var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
+var MergeViewModel = graphGraphicsActions.MergeViewModel;
+var ResetViewModel = graphGraphicsActions.ResetViewModel;
+var PushViewModel = graphGraphicsActions.PushViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -140,7 +141,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 	var onto = this.graph.currentActionContext();
 	if (onto instanceof RefViewModel) onto = onto.node();
 	var path = onto.getPathToCommonAncestor(this.node);
-	return new RebaseHoverGraphic(this.node, path);
+	return new RebaseViewModel(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {

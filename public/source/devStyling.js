@@ -5,10 +5,7 @@ var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 var Vector2 = require('./vector2');
-var RebaseHoverGraphic = require('./graph-graphics/rebase').RebaseHoverGraphic;
-var MergeViewModel = require('./graph-graphics/merge').MergeViewModel;
-var ResetViewModel = require('./graph-graphics/reset').ResetViewModel;
-var PushViewModel = require('./graph-graphics/push').PushViewModel;
+var graphGraphicsActions = require('./graph-graphics/actions');
 
 var viewModel = {};
 
@@ -38,7 +35,7 @@ function rebase() {
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1]),
 		new EdgeViewModel(graph.nodes()[1], graph.nodes()[2])
 	]);
-	graph.hoverGraphActionGraphic(new RebaseHoverGraphic(graph.nodes()[2], [graph.nodes()[0], graph.nodes()[1]]))
+	graph.hoverGraphActionGraphic(new graphGraphicsActions.RebaseViewModel(graph.nodes()[2], [graph.nodes()[0], graph.nodes()[1]]))
 	return graph;
 }
 
@@ -54,7 +51,7 @@ function merge() {
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1]),
 		new EdgeViewModel(graph.nodes()[1], graph.nodes()[2])
 	]);
-	graph.hoverGraphActionGraphic(new MergeViewModel(graph.nodes()[0], graph.nodes()[2]))
+	graph.hoverGraphActionGraphic(new graphGraphicsActions.MergeViewModel(graph.nodes()[0], graph.nodes()[2]))
 	return graph;
 }
 
@@ -67,7 +64,7 @@ function reset() {
 	graph.edges([
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1])
 	]);
-	graph.hoverGraphActionGraphic(new ResetViewModel([graph.nodes()[0]]))
+	graph.hoverGraphActionGraphic(new graphGraphicsActions.ResetViewModel([graph.nodes()[0]]))
 	return graph;
 }
 
@@ -80,7 +77,7 @@ function push() {
 	graph.edges([
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1])
 	]);
-	graph.hoverGraphActionGraphic(new PushViewModel(graph.nodes()[1], graph.nodes()[0]))
+	graph.hoverGraphActionGraphic(new graphGraphicsActions.PushViewModel(graph.nodes()[1], graph.nodes()[0]))
 	return graph;
 }
 

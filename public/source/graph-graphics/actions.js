@@ -6,7 +6,29 @@ var EdgeViewModel = require('./edge').EdgeViewModel;
 var Color = require('color');
 var _ = require('underscore');
 
-var RebaseHoverGraphic = function(onto, nodesThatWillMove) {
+
+var MergeViewModel = function(headNode, node) {
+	var self = this;
+
+	var newNode = {
+		position: new Vector2(
+			headNode.x() + headNode.radius() + ((node.x() + node.radius()) - (headNode.x() + headNode.radius())) / 2,
+			Math.min(headNode.y(), node.y())),
+		radius: Math.max(headNode.radius(), node.radius())
+	};
+	newNode.position.y -= newNode.radius*2;
+
+	this.newNode = new NodeViewModel(newNode.position, newNode.radius);
+	this.edges = [
+		new EdgeViewModel(headNode, this.newNode),
+		new EdgeViewModel(node, this.newNode)
+	];
+}
+exports.MergeViewModel = MergeViewModel;
+MergeViewModel.prototype.type = 'merge';
+
+
+var RebaseViewModel = function(onto, nodesThatWillMove) {
 	var self = this;
 	
 	var rebaseNodes = {};
@@ -43,15 +65,30 @@ var RebaseHoverGraphic = function(onto, nodesThatWillMove) {
 		node.color(Color(node.color()).alpha(0.2).rgbaString());
 	});
 }
-exports.RebaseHoverGraphic = RebaseHoverGraphic;
-RebaseHoverGraphic.prototype.type = 'rebase';
-RebaseHoverGraphic.prototype.destroy = function() {
+exports.RebaseViewModel = RebaseViewModel;
+RebaseViewModel.prototype.type = 'rebase';
+RebaseViewModel.prototype.destroy = function() {
 	this.path.forEach(function(node) {
 		node.color(node.savedColor);
 	});
 }
-RebaseHoverGraphic.prototype.updateAnimationFrame = function(deltaT) {
+RebaseViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.nodes.forEach(function(node) {
 		node.updateAnimationFrame(deltaT);
 	});
 }
+
+
+var ResetViewModel = function(nodes) {
+	this.nodes = nodes;
+}
+exports.ResetViewModel = ResetViewModel;
+ResetViewModel.prototype.type = 'reset';
+
+
+PushViewModel = function(fromNode, toNode) {
+	this.fromNode = fromNode;
+	this.toNode = toNode;
+}
+exports.PushViewModel = PushViewModel;
+PushViewModel.prototype.type = 'push';
