@@ -2,18 +2,21 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var Vector2 = require('./vector2.js');
-var NodeViewModel = require('./node.js').NodeViewModel;
+var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var GraphActions = require('./git-graph-actions.js');
 var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var _ = require('underscore');
+var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
+var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
 	this.maxNNodes = 25;
 	this.nodes = ko.observable([]);
+	this.edgesById = {};
 	this.refs = ko.observableArray();
 	this.daySeparators = ko.observable();
 	this.nodesById = {};
@@ -40,12 +43,37 @@ var GitGraphViewModel = function(repository) {
 		self.maxNNodes = self.maxNNodes + 25;
 		self.loadNodesFromApi();
 	}, 1000, true);
+	this.graphic = new GraphViewModel();
+	this.graphic.offset(new Vector2(5, 200));
+	this.HEAD.subscribe(function(value) {
+		self.graphic.commitNodeEdge.nodeb(value);
+		self.graphic.showCommitNode(!!value);
+		self.graphic.commitNode.color(value.color());
+	});
+
+	this.nodes.subscribe(function(nodes) {
+		var edges = [];
+		nodes.forEach(function(node) {
+			node.parents().forEach(function(parentSha1) {
+				edges.push(self.getEdge(node.sha1, parentSha1));
+			});
+		});
+		self.graphic.nodes(nodes);
+		self.graphic.edges(edges);
+	});
+
+	this.hoverGraphAction.subscribe(function(value) {
+		if (value) {
+			if (value.createHoverGraphic)
+				self.graphic.hoverGraphActionGraphic(value.createHoverGraphic());
+		} else {
+			self.graphic.hoverGraphActionGraphic(null);
+		}
+	});
 }
 exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
-	this.nodes().forEach(function(node) {
-		node.updateAnimationFrame(deltaT);
-	});
+	this.graphic.updateAnimationFrame(deltaT);
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
@@ -108,7 +136,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
 }
 GitGraphViewModel.prototype.getNode = function(sha1) {
 	var nodeViewModel = this.nodesById[sha1];
-	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new NodeViewModel(this, sha1);
+	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
 	return nodeViewModel;
 }
 GitGraphViewModel.prototype.getRef = function(refName) {
@@ -119,19 +147,27 @@ GitGraphViewModel.prototype.getRef = function(refName) {
 	}
 	return refViewModel;
 }
+GitGraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
+	var id = nodeAsha1 + '-' + nodeBsha1;
+	var edge = this.edgesById[id];
+	if (!edge) {
+		edge = this.edgesById[id] = new EdgeViewModel(this.getNode(nodeAsha1), this.getNode(nodeBsha1));
+	}
+	return edge;
+}
 
 GitGraphViewModel.getHEAD = function(nodes) {
 	return _.find(nodes, function(node) { return _.find(node.refs(), function(r) { return r.isLocalHEAD; }); });
 }
 
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
-	if (node.index() >= this.maxNNodes) return;
-	callback(node);
-	node.parents().forEach(function(parentId) {
-		var parent = nodesById[parentId];
+	if (node.index() >= this.maxNNodes) return false;
+	if (!callback(node)) return false;
+	for (var i=0; i < node.parents().length; i++) {
+		var parent = nodesById[node.parents()[i]];
 		if (parent)
 			GitGraphViewModel.traverseNodeParents(parent, nodesById, callback);
-	});
+	}
 }
 GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) {
 	if (node.index() >= this.maxNNodes) return;
@@ -141,28 +177,31 @@ GitGraphViewModel.traverseNodeLeftParents = function(node, nodesById, callback) 
 		GitGraphViewModel.traverseNodeLeftParents(parent, nodesById, callback);
 }
 
-GitGraphViewModel.markNodesIdeologicalBranches = function(nodes, nodesById) {
-	var recursivelyMarkBranch = function(e, ideologicalBranch) {
-		GitGraphViewModel.traverseNodeParents(e, nodesById, function(node) {
-			node.ideologicalBranch = ideologicalBranch;
-		});
-	}
-	var getIdeologicalBranch = function(e) {
-		var ref = _.find(e.refs(), function(ref) { return ref.isBranch; });
-		if (ref && ref.isRemote && ref.localRef()) ref = ref.localRef();
-		return ref;
-	}
-	var master;
-	nodes.forEach(function(e) {
-		var i = 0;
-		var ideologicalBranch = getIdeologicalBranch(e);
-		if (!ideologicalBranch) return;
-		if (ideologicalBranch.name == 'refs/heads/master') master = e;
-		recursivelyMarkBranch(e, ideologicalBranch);
+GitGraphViewModel._markIdeologicalStamp = 0;
+GitGraphViewModel.markNodesIdeologicalBranches = function(refs, nodes, nodesById) {
+	refs = refs.filter(function(r) { return !!r.node(); });
+	refs = refs.sort(function(a, b) {
+		if (a.isLocal && !b.isLocal) return -1;
+		if (b.isLocal && !a.isLocal) return 1;
+		if (a.isBranch && !b.isBranch) return -1;
+		if (b.isBranch && !a.isBranch) return 1;
+		if (a.isHead && !b.isHead) return 1;
+		if (!a.isHead && b.isHead) return -1;
+		if (a.isStash && !b.isStash) return 1;
+		if (b.isStash && !a.isStash) return -1;
+		if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
+			return a.node().commitTime().unix() - b.node().commitTime().unix();
+		return a.displayName < b.displayName ? -1 : 1;
 	});
-	if (master) {
-		recursivelyMarkBranch(master, master.ideologicalBranch);
-	}
+	var stamp = GitGraphViewModel._markIdeologicalStamp++;
+	refs.forEach(function(ref) {
+		GitGraphViewModel.traverseNodeParents(ref.node(), nodesById, function(node) {
+			if (node.stamp == stamp) return false;
+			node.stamp = stamp;
+			node.ideologicalBranch(ref);
+			return true;
+		});
+	});
 }
 GitGraphViewModel.colorFromHashOfString = function(string) {
 	return '#' + md5(string).toString().slice(0, 6);
@@ -198,7 +237,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 		}
 	}
 
-	GitGraphViewModel.markNodesIdeologicalBranches(nodes, this.nodesById);
+	GitGraphViewModel.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
 
 	var updateTimeStamp = moment().valueOf();
 
@@ -210,7 +249,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	}
 
 	// Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-	nodes = nodes.filter(function(node) { return !!node.ideologicalBranch || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+	nodes = nodes.filter(function(node) { return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
 	//var concurrentBranches = { };
 
@@ -221,7 +260,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		var node = nodes[i];
 		if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-		var ideologicalBranch = node.ideologicalBranch;
+		var ideologicalBranch = node.ideologicalBranch();
 
 		// First occurence of the branch, find an empty slot for the branch
 		if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
@@ -278,3 +317,5 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.nodes(nodes);
 	this.daySeparators(daySeparators);
 }
+
+

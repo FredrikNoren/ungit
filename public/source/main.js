@@ -14,7 +14,6 @@ var CrashViewModel = app.CrashViewModel;
 var AppViewModel = app.AppViewModel;
 var PathViewModel = app.PathViewModel;
 var HomeViewModel = app.HomeViewModel;
-var logRenderer = require('./logrenderer');
 
 // Request animation frame polyfill
 (function() {
@@ -150,22 +149,6 @@ ko.bindingHandlers.drop = {
         });
     }
 }
-
-ko.bindingHandlers.graphLog = {
-    init: function(element, valueAccessor) {
-        var canvas = $('<canvas width="200" height="500">');
-        $(element).append(canvas);
-
-        var prevTimestamp = 0;
-        var updateAnimationFrame = function(timestamp) {
-            var graph = ko.utils.unwrapObservable(valueAccessor());
-            logRenderer.render(canvas.get(0), graph);
-            if ($.contains(document.body, canvas.get(0))) // While the element is in the document
-                window.requestAnimationFrame(updateAnimationFrame);
-        }
-        window.requestAnimationFrame(updateAnimationFrame);
-    },
-};
 
 ko.bindingHandlers.shown = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {

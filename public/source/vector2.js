@@ -6,7 +6,7 @@ var Vector2 = function(x, y) {
 Vector2.prototype.length = function() {
 	return Math.sqrt(this.x * this.x + this.y * this.y);
 }
-Vector2.prototype.normalized = function() {
+Vector2.prototype.normalize = function() {
 	var length = this.length();
 	return new Vector2(this.x / length, this.y / length);
 }

@@ -24,7 +24,9 @@ report/
 public/source/
 public/vendor/
 public/less/
-public/styles.html
+public/templates/
+public/devStyling.html
+public/js/devStyling.js
 
 clicktests/
 clicktestout/

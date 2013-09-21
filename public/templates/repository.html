@@ -1,0 +1,135 @@
+
+<div class="repository animated fadeInLeft" data-ta="repository-view">
+
+	<!-- ko if: gerritIntegration -->
+	<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+	<!-- /ko -->
+
+	<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
+
+		<!-- ko if: remoteErrorPopup -->
+		<div class="alert alert-danger" data-ta="remote-error-popup">
+			<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
+			<strong>Remote error!</strong>
+			<span data-bind="text: remoteErrorPopup"></span>
+		</div>
+		<!-- /ko -->
+
+		<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
+
+		<!-- ko if: staging.inRebase -->
+		<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+		<!-- /ko -->
+		<!-- ko if: staging.inMerge -->
+		<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
+		<!-- /ko -->
+
+		<!-- ko if: showLog -->
+
+		<!-- ko if: showFetchButton -->
+		<button class="fetchButton btn btn-default" data-ta="fetch" data-bind="click: clickFetch, disable: fetchingProgressBar.running">
+			<span class="glyphicon glyphicon-refresh"></span>
+			Fetch remote nodes
+			<!-- ko if: fetchingProgressBar.running -->
+			<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
+			<!-- /ko -->
+		</button>
+		<!-- /ko -->
+		
+		<!-- ko with: graph -->
+		<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
+
+			<div class="daySeparators" data-bind="foreach: daySeparators">
+				<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+					<div class="dateLabel" data-bind="text: date"></div>
+				</div>
+			</div>
+
+			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
+
+			<div class="nodes" data-bind="foreach: nodes">
+				<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+					<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
+						<div class="logEntryBox panel clearfix">
+							<div class="arrowContainer arrowRight">
+								<div class="shadow"></div>
+								<div class="arrow"></div>
+							</div>
+							<img class="pull-left img-circle gravatar"
+								data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
+								onerror="this.style.display='none';">
+							<div>
+								<div>
+									<span class="title" data-bind="text: title"></span>
+									<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+								</div>
+								<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
+								<div class="text-muted" data-bind="text: authorDateFromNow"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+					</div>
+
+					<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
+						<!-- ko foreach: branches -->
+						<span class="ref branch" data-ta="branch" draggable="true" tabIndex="-1" 
+								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: hasFocus }, 
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': displayName, 'data-ta-current': current }, hasFocus2: hasFocus" >
+							<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
+							<div class="branch-icon"></div>
+							<span class="name" data-bind="text: displayName"></span>
+						</span>
+						<!-- /ko -->
+
+						<!-- ko foreach: tags -->
+						<span class="ref tag" draggable="true" tabIndex="0" 
+								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: hasFocus }, dragStart: dragStart, dragEnd: dragEnd, hasFocus2: hasFocus">
+							<div class="remote-icon" data-bind="visible: isRemote"></div>
+							<div class="tag-icon"></div>
+							<span class="name" data-bind="text: displayName"></span>
+						</span>
+						<!-- /ko -->
+
+						<!-- ko foreach: dropareaGraphActions -->
+						<span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
+							<span data-bind="text: text"></span>
+							<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
+							<!-- ko if: performProgressBar.running -->
+							<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
+							<!-- /ko -->
+						</span>
+						<!-- /ko -->
+
+						<!-- ko if: showNewRefAction -->
+						<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+							<button class="showBranchingForm" data-ta="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+							<!-- ko if: branchingFormVisible -->
+							<form class="form-inline" data-bind="submit: createBranch">
+								<input class="name form-control" data-ta="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
+								<input class="btn btn-primary" data-ta="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
+								<button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+							</form>
+							<!-- /ko -->
+						</span>
+						<!-- /ko -->
+					</div>
+
+				</div>
+			</div>
+
+			<div class="graphFooter">
+				<!-- ko if: isLoading -->
+				<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
+				<!-- /ko -->
+			</div>
+
+		</div>
+		<!-- /ko -->
+
+		<!-- /ko -->
+
+	</div>
+
+</div>

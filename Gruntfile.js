@@ -1,6 +1,7 @@
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 var path = require('path');
+var fs = require('fs');
 
 module.exports = function(grunt) {
 
@@ -20,13 +21,14 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'public/js/ungit.js': ['public/source/main.js']
+          'public/js/ungit.js': ['public/source/main.js'],
+          'public/js/devStyling.js': ['public/source/devStyling.js']
         }
       }
     },
     watch: {
       scripts: {
-        files: ['public/source/*.js', 'source/*.js'],
+        files: ['public/source/**/*.js', 'source/*.js'],
         tasks: ['browserify'],
         options: {
           spawn: false,
@@ -35,6 +37,13 @@ module.exports = function(grunt) {
       less: {
         files: ['public/less/*.less', 'public/styles/*.less'],
         tasks: ['less:production'],
+        options: {
+          spawn: false,
+        },
+      },
+      templates: {
+        files: ['public/templates/*'],
+        tasks: ['templates'],
         options: {
           spawn: false,
         },
@@ -116,6 +125,24 @@ module.exports = function(grunt) {
     });
   });
 
+  var templateIncludeRegexp = /<!-- ungit-import-template: "([^"^.]*).html" -->/gm;
+  grunt.registerTask('templates', 'Compiling templates', function() {
+    function compileTemplate(inFilename, outFilename) {
+      var template = fs.readFileSync(inFilename, 'utf8');
+      var newTemplate = template.replace(templateIncludeRegexp, function(match, templateName) {
+        var templateFilename = path.join(path.dirname(inFilename), templateName + '.html');
+        var res = 
+          '<script type="text/html" id="' + templateName + '">\n' +
+          fs.readFileSync(templateFilename, 'utf8') + '\n' +
+          '</script>';
+        return res;
+      });
+      fs.writeFileSync(outFilename, newTemplate);
+    }
+    compileTemplate('public/templates/index.html', 'public/index.html')
+    compileTemplate('public/templates/devStyling.html', 'public/devStyling.html')
+  });
+
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -127,7 +154,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-image-embed');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);
 
   // Run tests
   grunt.registerTask('unittest', ['simplemocha']);

@@ -2,13 +2,30 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var inherits = require('util').inherits;
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var RefViewModel = require('./ref.js').RefViewModel;
+var Vector2 = require('./vector2');
+var _ = require('underscore');
+var graphGraphicsActions = require('./graph-graphics/actions');
+var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
+var MergeViewModel = graphGraphicsActions.MergeViewModel;
+var ResetViewModel = graphGraphicsActions.ResetViewModel;
+var PushViewModel = graphGraphicsActions.PushViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
 
 GraphActions.ActionBase = function(graph) {
+	var self = this;
 	this.graph = graph;
 	this.performProgressBar = new ProgressBarViewModel('action-' + this.style + '-' + graph.repoPath, 1000);
+	this.isHighlighted = ko.computed(function() {
+		return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
+	});
+	this.cssClasses = ko.computed(function() {
+		var c = self.style;
+		if (!self.isHighlighted()) c += ' dimmed';
+		return c;
+	})
 }
 GraphActions.ActionBase.prototype.doPerform = function() {
 	var self = this;
@@ -54,6 +71,7 @@ GraphActions.Move.prototype.perform = function(callback) {
 		api.query('POST', '/branches', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
 }
 
+
 GraphActions.Reset = function(graph, node) {
 	var self = this;
 	GraphActions.ActionBase.call(this, graph);
@@ -65,12 +83,18 @@ GraphActions.Reset = function(graph, node) {
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().remoteRef() &&
 			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			!self.graph.currentActionContext().remoteIsOffspring();;
+			self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Reset, GraphActions.ActionBase);
 GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.style = 'reset';
+GraphActions.Reset.prototype.createHoverGraphic = function() {
+	var context = this.graph.currentActionContext();
+	if (!context) return null;
+	var nodes = context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
+	return new ResetViewModel(nodes);
+}
 GraphActions.Reset.prototype.perform = function(callback) {
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }
@@ -87,7 +111,7 @@ GraphActions.Pull = function(graph, node) {
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().remoteRef() &&
 			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			self.graph.currentActionContext().remoteIsOffspring();;
+			self.graph.currentActionContext().remoteRef().node().commitTime().unix() >= self.graph.currentActionContext().node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Pull, GraphActions.ActionBase);
@@ -97,11 +121,11 @@ GraphActions.Pull.prototype.perform = function(callback) {
 	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }
 
+
 GraphActions.Rebase = function(graph, node) {
 	var self = this;
 	GraphActions.ActionBase.call(this, graph);
 	this.node = node;
-	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
@@ -114,6 +138,13 @@ GraphActions.Rebase = function(graph, node) {
 inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.style = 'rebase';
+GraphActions.Rebase.prototype.createHoverGraphic = function() {
+	var onto = this.graph.currentActionContext();
+	if (!onto) return;
+	if (onto instanceof RefViewModel) onto = onto.node();
+	var path = onto.getPathToCommonAncestor(this.node);
+	return new RebaseViewModel(this.node, path);
+}
 GraphActions.Rebase.prototype.perform = function(callback) {
 	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
 		if (err) {
@@ -126,6 +157,7 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 		callback();
 	});
 }
+
 
 GraphActions.Merge = function(graph, node) {
 	var self = this;
@@ -144,6 +176,12 @@ GraphActions.Merge = function(graph, node) {
 inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.style = 'merge';
+GraphActions.Merge.prototype.createHoverGraphic = function() {
+	var node = this.graph.currentActionContext();
+	if (!node) return null;
+	if (node instanceof RefViewModel) node = node.node();
+	return new MergeViewModel(this.graph.graphic, this.node, node);
+}
 GraphActions.Merge.prototype.perform = function(callback) {
 	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
 		if (err) {
@@ -165,12 +203,19 @@ GraphActions.Push = function(graph, node) {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().canBePushed();
+			self.graph.currentActionContext().canBePushed() &&
+			(!self.graph.currentActionContext().remoteRef() ||
+			 self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix());
 	});
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
 GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
+GraphActions.Push.prototype.createHoverGraphic = function() {
+	var context = this.graph.currentActionContext();
+	if (!context) return null;
+	return new PushViewModel(context.remoteRef().node(), context.node());
+}
 GraphActions.Push.prototype.perform = function( callback) {
 	var self = this;
 	var programEventListener = function(event) {

@@ -2,25 +2,19 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var Vector2 = require('./vector2');
 var md5 = require('blueimp-md5').md5;
-var GraphActions = require('./git-graph-actions');
 var moment = require('moment');
+var inherits = require('util').inherits;
+var GraphActions = require('./git-graph-actions');
+var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 
-NodeViewModel = function(graph, sha1) {
+var GitNodeViewModel = function(graph, sha1) {
+	NodeViewModel.call(this);
 	var self = this;
 
 	this.graph = graph;
 	this.sha1 = sha1;
 
-	this.position = ko.observable(new Vector2(0, 0));
-	this.goalPosition = ko.observable();
-	this.isAtFinalXPosition = ko.computed(function() {
-		if (!self.goalPosition()) return true;
-		return self.position().x == self.goalPosition().x;
-	});
-	this.x = ko.computed(function() { return self.position().x; });
-	this.y = ko.computed(function() { return self.position().y; });
-	this.radius = ko.observable(30);
-	this.goalRadius = ko.observable();
+	
 	this.boxDisplayX = ko.computed(function() {
 		return self.x();
 	});
@@ -59,6 +53,10 @@ NodeViewModel = function(graph, sha1) {
 	this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
 
 	this.index = ko.observable();
+	this.ideologicalBranch = ko.observable();
+	self.ideologicalBranch.subscribe(function(value) {
+		self.color(value ? value.color : '#666');
+	});
 	this.ancestorOfHEAD = ko.observable(false);
 	this.nodeIsMousehover = ko.observable(false);
 	this.logBoxVisible = ko.computed(function() {
@@ -83,6 +81,9 @@ NodeViewModel = function(graph, sha1) {
 	this.tags = ko.computed(function() {
 		return self.refs().filter(function(r) { return r.isTag; });
 	});
+	this.showNewRefAction = ko.computed(function() {
+		return !graph.currentActionContext();
+	})
 	this.newBranchName = ko.observable();
 	this.newBranchNameHasFocus = ko.observable(true);
 	this.newBranchNameHasFocus.subscribe(function(newValue) {
@@ -109,8 +110,9 @@ NodeViewModel = function(graph, sha1) {
 		new GraphActions.Delete(this.graph, this),
 	];
 }
-exports.NodeViewModel = NodeViewModel;
-NodeViewModel.prototype.setData = function(args) {
+inherits(GitNodeViewModel, NodeViewModel);
+exports.GitNodeViewModel = GitNodeViewModel;
+GitNodeViewModel.prototype.setData = function(args) {
 	this.commitTime(moment(args.commitDate));
 	this.authorTime(moment(args.authorDate));
 	this.parents(args.parents || []);
@@ -123,19 +125,7 @@ NodeViewModel.prototype.setData = function(args) {
 	this.authorName(args.authorName);
 	this.authorEmail(args.authorEmail);
 }
-NodeViewModel.prototype.setPosition = function(position) {
-	var self = this;
-	this.prevPosition = self.position();
-	if (!self.goalPosition()) self.position(position);
-	self.goalPosition(position);
-}
-NodeViewModel.prototype.setRadius = function(radius) {
-	this.prevRadius = this.radius();
-	if (!this.goalRadius()) this.radius(radius);
-	this.goalRadius(radius);
-	this.setRadiusTimestamp = Date.now();
-}
-NodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
+GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
 	this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
 	this.lastUpdatedAuthorDateFromNow += deltaT;
 	if(this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
@@ -143,59 +133,27 @@ NodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
 		this.authorDateFromNow(this.authorDate().fromNow());
 	}
 }
-NodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
+GitNodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.updateLastAuthorDateFromNow(deltaT);
-
-	var totalTime = 500;
-
-	var d = this.goalPosition().sub(this.position());
-	var distanceLeft = d.length();
-	if (distanceLeft != 0) {
-
-		d = this.goalPosition().sub(this.prevPosition);
-
-		var totalLength = d.length();
-		var lengthToMove = deltaT * 0.4;
-		if (distanceLeft < lengthToMove) {
-			this.position(this.goalPosition());
-		} else {
-			d = d.normalized().mul(lengthToMove);
-
-			var pos = this.position().add(d);
-			this.position(pos);
-		}
-	}
-
-	var radiusLeft = this.goalRadius() - this.radius();
-	if (radiusLeft != 0) {
-		var sign = radiusLeft ? radiusLeft < 0 ? -1 : 1 : 0;
-		radiusLeft = Math.abs(radiusLeft);
-		var totalRadiusDiff = Math.abs(this.goalRadius() - this.prevRadius);
-		var radiusToChange = totalRadiusDiff * deltaT / totalTime;
-		if (radiusLeft < radiusToChange) {
-			this.radius(this.goalRadius());
-		} else {
-			this.radius(this.radius() + sign * radiusToChange);
-		}
-	}
+	GitNodeViewModel.super_.prototype.updateAnimationFrame.call(this, deltaT);
 }
-NodeViewModel.prototype.showBranchingForm = function() {
+GitNodeViewModel.prototype.showBranchingForm = function() {
 	this.branchingFormVisible(true);
 	this.newBranchNameHasFocus(true);
 }
-NodeViewModel.prototype.createBranch = function() {
+GitNodeViewModel.prototype.createBranch = function() {
 	if (!this.canCreateRef()) return;
 	api.query('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 	this.branchingFormVisible(false);
 	this.newBranchName('');
 }
-NodeViewModel.prototype.createTag = function() {
+GitNodeViewModel.prototype.createTag = function() {
 	if (!this.canCreateRef()) return;
 	api.query('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
 	this.branchingFormVisible(false);
 	this.newBranchName('');
 }
-NodeViewModel.prototype.isAncestor = function(node) {
+GitNodeViewModel.prototype.isAncestor = function(node) {
 	if (this.index() >= this.graph.maxNNodes) return false;
 	if (node == this) return true;
 	for (var v in this.parents()) {
@@ -204,7 +162,7 @@ NodeViewModel.prototype.isAncestor = function(node) {
 	}
 	return false;
 }
-NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
+GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 	var path = [];
 	var thisNode = this;
 	while (thisNode && !node.isAncestor(thisNode)) {
@@ -215,10 +173,10 @@ NodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 		path.push(thisNode);
 	return path;
 }
-NodeViewModel.prototype.nodeMouseover = function() {
+GitNodeViewModel.prototype.nodeMouseover = function() {
 	this.nodeIsMousehover(true);
 }
-NodeViewModel.prototype.nodeMouseout = function() {
+GitNodeViewModel.prototype.nodeMouseout = function() {
 	this.nodeIsMousehover(false);
 }
 

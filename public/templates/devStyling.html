@@ -71,11 +71,11 @@
 	</div>
 
 	<h3>Alert</h3>
-	<div class="alert alert-info" data-bind="visible: newVersionAvailable">
+	<div class="alert alert-info">
 		A new version of ungit is available, run 'something something' to get the newest version.
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 	</div>
-	<div class="alert alert-danger" data-bind="visible: newVersionAvailable">
+	<div class="alert alert-danger">
 		<strong>Remote error!</strong>
 		Something bad happend remotely.
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -132,10 +132,18 @@
 			</div>
 		</div>
 	</div>
+
+	<h3>Graph graphics</h3>
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.normal } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.rebase } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.merge } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.reset } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.push } --><!-- /ko -->
 </div>
 
-<script type="text/javascript" src="/vendor/js/jquery-2.0.0.min.js"></script>
-<script type="text/javascript" src="/vendor/js/bootstrap/modal.js"></script>
+<!-- ungit-import-template: "graphGraphics.html" -->
+
+<script type="text/javascript" src="/js/devStyling.js"></script>
 
 </body>
 </html>
