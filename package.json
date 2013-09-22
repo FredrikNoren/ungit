@@ -12,7 +12,8 @@
     "url": "https://github.com/FredrikNoren/ungit.git"
   },
   "bin": {
-    "ungit": "./bin/ungit"
+    "ungit": "./bin/ungit",
+    "0ungit-credentials-helper": "./bin/credentials-helper"
   },
   "main": "./source/server",
   "dependencies": {
