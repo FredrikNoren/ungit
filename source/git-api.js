@@ -340,6 +340,21 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
+	app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
+		fs.exists(req.param('path'), function(exists) {
+			if (!exists) {
+				res.json('no-such-path');
+				return;
+			}
+
+			git('rev-parse --is-inside-work-tree', req.param('path'))
+				.always(function(err, result) {
+					if (err || result.indexOf('true') == -1) res.json('uninited');
+					else res.json('inited');
+				});
+		})
+	});
+
 	app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
 		git('config --list')
 			.parser(gitParser.parseGitConfig)

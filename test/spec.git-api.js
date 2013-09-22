@@ -54,6 +54,13 @@ describe('git-api', function () {
 			}));
 	});
 
+	it('quickstatus should say uninited in uninited directory', function(done) {
+		common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
+			expect(res.body).to.be('uninited');
+			done();
+		});
+	});
+
 	it('status should fail in non-existing directory', function(done) {
 		req
 			.get(restGit.pathPrefix + '/status')
@@ -67,12 +74,26 @@ describe('git-api', function () {
 			}));
 	});
 
+	it('quickstatus should say false in non-existing directory', function(done) {
+		common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') }, function(err, res) {
+			expect(res.body).to.be('no-such-path');
+			done();
+		});
+	});
+
 	it('init should succeed in uninited directory', function(done) {
 		common.post(req, '/init', { path: testDir }, done);
 	});
 
 	it('status should succeed in inited directory', function(done) {
 		common.get(req, '/status', { path: testDir }, done);
+	});
+
+	it('quickstatus should say inited in inited directory', function(done) {
+		common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
+			expect(res.body).to.be('inited');
+			done();
+		});
 	});
 
 	it('commit should fail on when there\'s no files to commit', function(done) {

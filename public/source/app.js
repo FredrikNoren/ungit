@@ -247,18 +247,17 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
 	var self = this;
-	api.query('GET', '/status', { path: this.path }, function(err, status){
+	api.query('GET', '/quickstatus', { path: this.path }, function(err, status){
 		self.loadingProgressBar.stop();
-		if (!err) {
+		if (err) return;
+		if (status == 'inited') {
 			self.status('repository');
 			self.repository(new RepositoryViewModel(self.main, self.path));
 			visitedRepositories.tryAdd(self.path);
-		} else if (err.errorCode == 'not-a-repository') {
+		} else if (status == 'uninited') {
 			self.status('uninited');
-			return true;
-		} else if (err.errorCode == 'no-such-path') {
+		} else if (status == 'no-such-path') {
 			self.status('invalidpath');
-			return true;
 		}
 	});
 }
