@@ -8,6 +8,7 @@ var common = exports;
 common.wrapErrorHandler = function(done, callback) {
 	return function(err, res) {
 		if (err) {
+			console.log(res.req.method + ' ' + res.req.path);
 			console.dir(err);
 			console.dir(res.body);
 			done(err, res);

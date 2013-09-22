@@ -17,8 +17,8 @@ exports.parseGitStatus = function(text) {
 			filename = filename.slice(1, filename.length - 1);
 		var file = {};
 		file.staged = status[0] == 'A' || status[0] == 'M';
-		file.isNew = status[0] == '?' || status[0] == 'A';
 		file.removed = status[1] == 'D';
+		file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
 		file.conflict = status[0] == 'U' || status[1] == 'U';
 		result.files[filename] = file;
 	});

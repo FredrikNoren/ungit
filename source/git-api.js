@@ -427,12 +427,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/removefile', ensureAuthenticated, function(req, res){
-			fs.unlinkSync(req.body.file);
+			fs.unlinkSync(req.param('file'));
 			res.json({ });
+		});
+		app.post(exports.pathPrefix + '/testing/git', ensureAuthenticated, function(req, res){
+			git(req.param('command'), req.param('repo'))
+				.always(jsonResultOrFail.bind(null, res));
 		});
 		app.post(exports.pathPrefix + '/testing/cleanup', ensureAuthenticated, function(req, res){
 			var cleaned = temp.cleanup();
-			winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+			//winston.info('Cleaned up: ' + JSON.stringify(cleaned));
 			res.json({ result: cleaned });
 		});
 		app.post(exports.pathPrefix + '/testing/shutdown', ensureAuthenticated, function(req, res){

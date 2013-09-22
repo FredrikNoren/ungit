@@ -135,9 +135,9 @@ git.queueTask = function(task) {
   gitQueue.push(task);
 }
 
-git.status = function(repoPath) {
+git.status = function(repoPath, file) {
   var task = new GitTask();
-  git('status -s -b -u', repoPath)
+  git('status -s -b -u "' + (file || '') + '"', repoPath)
     .parser(gitParser.parseGitStatus)
     .started(task.setStarted)
     .fail(task.setResult)
@@ -239,34 +239,27 @@ git.discardChangesInFile = function(repoPath, filename) {
 
   var filePath = path.join(repoPath, filename);
 
-  var discardTask = git('checkout HEAD -- "' + filename.trim() + '"', repoPath, false)
-    .fail(function(err) {
-      if (err.stderr.trim() == 'error: pathspec \'' + filename.trim() + '\' did not match any file(s) known to git.') {
-        fs.unlink(filePath, function(err) {
-          if (err) task.setResult({ command: 'unlink', error: err });
-          else task.setResult();
-        });
+  git.status(repoPath, filename)
+    .fail(task.setResult)
+    .done(function(status) {
+      var fileStatus = status.files[filename];
+
+      if (!fileStatus.staged) {
+        // If it's just a new file, remove it
+        if (fileStatus.isNew) {
+          fs.unlink(filePath, function(err) {
+            if (err) task.setResult({ command: 'unlink', error: err });
+            else task.setResult();
+          });
+        // If it's a changed file, reset the changes
+        } else {
+          git('checkout HEAD -- "' + filename.trim() + '"', repoPath)
+            .always(task.setResult);
+        }
       } else {
-        task.setResult(err);
+        git('rm -f "' + filename + '"', repoPath).always(task.setResult);
       }
-    })
-    .done(task.setResult.bind(null, null));
-
-  fs.exists(filePath, function(exists) {
-    if (exists) {
-      git.queueTask(discardTask);
-    } else {
-      git('reset HEAD "' + filename + '"', repoPath)
-        .always(function(err) {
-          if (err && err.stdout.indexOf('Unstaged changes after reset:') != -1) {
-            task.setResult(err);
-            return;
-          }
-          git.queueTask(discardTask);
-        });
-    }
-
-  });
+    });
 
   return task;
 }
