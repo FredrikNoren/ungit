@@ -11,6 +11,6 @@ var getKeen = function() {
 	return keen;
 }
 
-exports.addEvent = function(event, data) {
-	getKeen().addEvent(event, data);
+exports.addEvent = function(event, data, callback) {
+	getKeen().addEvent(event, data, callback);
 }

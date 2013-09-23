@@ -7,14 +7,21 @@ var path = require('path');
 var child_process = require('child_process');
 var semver = require('semver');
 var superagent = require('superagent');
+var async = require('async');
 var version = require('../source/version');
 
-var bugsense;
+if (config.bugtracking) var bugsense = require('../source/bugsense');
+if (config.sendUsageStatistics) var usageStatistics = require('../source/usage-statistics');
 
-if (config.bugtracking) {
-	var bugsense = require('../source/bugsense');
-	bugsense.init('ungit-launcher', true);
-}
+process.on('uncaughtException', function(err) {
+	console.error(err.stack.toString());
+	var tasks = [];
+	if (bugsense) tasks.push(function(done) { bugsense.notify(err, 'ungit-launcher', done); });
+	if (usageStatistics) tasks.push(function(done) { usageStatistics.addEvent('launcher-exception', { version: version.currentVersion }, done); })
+	async.parallel(tasks, function() {
+		process.exit();
+	});
+});
 
 version.getVersion(function(err, ungitVersion) {
 
@@ -50,8 +57,8 @@ version.getVersion(function(err, ungitVersion) {
 			child.removeListener('stdout', startupListener);
 			var launchTime = (Date.now() - startLaunchTime);
 			console.log('Took ' + launchTime + 'ms to start server.');
-			if (config.sendUsageStatistics)
-				require('../source/usage-statistics').addEvent('server-start', { version: ungitVersion, launchTimeMs: launchTime });
+			if (usageStatistics)
+				usageStatistics.addEvent('server-start', { version: ungitVersion, launchTimeMs: launchTime });
 		}
 	}
 

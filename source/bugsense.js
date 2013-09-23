@@ -1,7 +1,6 @@
 
 
 var winston = require('winston');
-var version = require('./version');
 
 var os;
 var superagent;
@@ -62,18 +61,4 @@ bugsense.notify = function(exception, clientName, callback) {
 bugsense.setVersion = function(version) {
 	bugsense.appVersion = version;
 	winston.info('Bugsense set version: ' + bugsense.appVersion);
-}
-
-bugsense.init = function(clientName, skipFindVersion) {
-	process.on('uncaughtException', function(err) {
-		winston.error(err.stack.toString());
-		bugsense.notify(err, clientName, function() {
-			process.exit();
-		});
-	});
-	if (!skipFindVersion) {
-		version.getVersion(function(err, ver) {
-			bugsense.setVersion(ver);
-		});
-	}
 }

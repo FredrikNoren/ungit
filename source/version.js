@@ -2,12 +2,12 @@ var fs = require('fs');
 var child_process = require('child_process');
 var path = require('path');
 
-var cachedVersion;
-
 var version = exports;
 
+version.currentVersion;
+
 version.getVersion = function(callback) {
-	if (cachedVersion) callback(null, cachedVersion);
+	if (version.currentVersion) callback(null, version.currentVersion);
 	version.getPackageJsonVersion(function(err, packageJsonVersion) {
 		if (err) return callback(err);
 		if (fs.existsSync(path.join(__dirname, '..', '.git'))){
@@ -15,12 +15,12 @@ version.getVersion = function(callback) {
 				revision.replace('\n', ' ');
 				revision = revision.trim();
 
-				cachedVersion = 'dev-' + packageJsonVersion + '-' + revision;
-				callback(null, cachedVersion);
+				version.currentVersion = 'dev-' + packageJsonVersion + '-' + revision;
+				callback(null, version.currentVersion);
 			});
 		} else {
-			cachedVersion = packageJsonVersion;
-			callback(null, cachedVersion);
+			version.currentVersion = packageJsonVersion;
+			callback(null, version.currentVersion);
 		}
 	});
 }
