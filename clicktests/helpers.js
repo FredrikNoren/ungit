@@ -6,7 +6,9 @@ var async = require('../node_modules/async/lib/async');
 var cliColor = require('../node_modules/ansi-color/lib/ansi-color');
 
 var config = {
-	port: 8449
+	port: 8449,
+	testTimeout: 10000,
+	serverTimeout: 10000
 };
 
 var helpers = exports;
@@ -60,8 +62,9 @@ helpers.startUngitServer = function(options, callback) {
 		'--port=' + config.port, 
 		'--no-launchBrowser', 
 		'--dev', 
-		'--no-bugtracking', 
-		'--autoShutdownTimeout=10000', 
+		'--no-bugtracking',
+		'--no-sendUsageStatistics',
+		'--autoShutdownTimeout=' + config.serverTimeout, 
 		'--maxNAutoRestartOnCrash=0', 
 		'--logGitCommands']
 		.concat(options);
@@ -191,7 +194,7 @@ helpers.runTests = function() {
 				page.render('clicktestout/timeout.png')
 				console.error('Test timeouted!');
 				callback('timeout');
-			}, 10000);
+			}, config.testTimeout);
 			test.description(function(err, res) {
 				clearTimeout(timeout);
 				if (err) {
