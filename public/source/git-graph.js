@@ -131,7 +131,6 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
 			nodeViewModel.branchesAndLocalTags(refVMs);
 		}
 	});
-	this.HEAD(GitGraphViewModel.getHEAD(nodeVMs));
 	this.setNodes(nodeVMs);
 }
 GitGraphViewModel.prototype.getNode = function(sha1) {
@@ -222,8 +221,6 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	nodes.forEach(function(node, i) { node.index(i); });
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
-	var HEAD = this.HEAD();
-
 	// Make sure refs know their "remote"
 	for(var refName in this.refsByRefName) {
 		var ref = this.refsByRefName[refName];
@@ -238,6 +235,8 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	}
 
 	GitGraphViewModel.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
+	this.HEAD(GitGraphViewModel.getHEAD(nodes));
+	var HEAD = this.HEAD();
 
 	var updateTimeStamp = moment().valueOf();
 
