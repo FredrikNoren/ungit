@@ -269,10 +269,10 @@ var updateAnimationFrame = function(timestamp) {
 }
 window.requestAnimationFrame(updateAnimationFrame);
 
+var oldWindowOnError = window.onerror;
 window.onerror = function(err) {
-    if (ungit.config.bugtracking)
-        window.bugsense.onerror.apply(window.bugsense, arguments);
     app.content(new CrashViewModel());
+    if (oldWindowOnError) oldWindowOnError(err);
 };
 
 api = new Api();

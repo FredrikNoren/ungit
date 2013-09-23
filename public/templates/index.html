@@ -99,6 +99,12 @@
 			writeKey: 'da0303fb058149813443f1321a139f23420323887b6a4940e82d47d02df451a4a132b938d2e8200a17914e06aa2767dc1a6fa0891db41942918db91a8daa61784d7af2495b934a05111605e4aa4e5c3d92b0b7f8be4d146e05586701894dc35d619443ae234dbc608a36de9ee97e0e1a'
 		});
 		Keen.addEvent('ui-start', { version: ungit.version });
+
+		var prevWindowOnError = window.onerror;
+		window.onerror = function(err) {
+			if (prevWindowOnError) prevWindowOnError(err);
+			Keen.addEvent('ui-exception', { version: ungit.version });
+		};
 		console.log('Keen.io inited');
 	}
 </script>
