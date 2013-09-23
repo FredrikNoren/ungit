@@ -64,8 +64,12 @@ var ssh2 = function(remote, command, callback) {
 gerrit = function(remote, command, res, callback) {
   command = 'gerrit ' + command;
   ssh2(remote, command, function(error, result) {
+    var errorCode = 'unknown'
+    if (result && result.indexOf('gerrit: command not found') != -1) {
+      errorCode = error = 'not-a-gerrit-remote';
+    }
     if (error) {
-      var err = { errorCode: 'unknown', command: command, error: error.toString() };
+      var err = { errorCode: errorCode, command: command, error: error.toString() };
       if (!callback || !callback(err, result)) {
         res.json(400, err);
       }
