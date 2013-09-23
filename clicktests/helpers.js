@@ -99,34 +99,63 @@ helpers.getElementPosition = function(page, selector) {
 }
 
 helpers.getClickPosition = function(page, selector) {
-	var res = page.evaluate(function(args) {
-		var selector = args.selector;
-		var viewportSize = args.viewportSize;
-		var el = $(selector);
-		if (el.length == 0) return { error: 'Can\'t find element ' + selector };
-		if (el.width() == 0 || el.height() == 0) return { error: 'Area of ' + selector + ' is zero.' };
-		var clickPos = {
-			left: Math.floor(el.offset().left + el.width() / 2),
-			top: Math.floor(el.offset().top + el.height() / 2),
-		};
-		if (clickPos.left >= viewportSize.width || clickPos.top >= viewportSize.height)
-			return { error: 'Trying to get a click position (' + clickPos.left + ', ' + clickPos.top + ') that is outside the viewport (' + viewportSize.width + ', ' + viewportSize.height + ')' };
-		var actualElement = document.elementFromPoint(clickPos.left, clickPos.top);
-		if (!actualElement)
-			 return { error: 'Couldn\'t find any element at ' + clickPos.left + ', ' + clickPos.top + ' (looking for ' + selector + ')' };
-		var soughtElement = actualElement;
-		while (soughtElement && !$(soughtElement).is(selector))
-			soughtElement = soughtElement.parentNode;
-		if (!soughtElement)
-			 return { error: 'Expected to find ' + selector + ' at position ' + clickPos.left + ', ' + clickPos.top + ' but found ' + actualElement.outerHTML };
-		return { result: clickPos };
-	}, { selector: selector, viewportSize: config.viewportSize });
+	var items = helpers.getAllClickPositions(page, selector, false);
+	if (items.length == 0) throw new Error('Can\'t find element ' + selector);
+	var res = items[0];
 	if (res.error) {
 		page.render('clicktestout/error.png');
 		throw new Error(res.error);
 	}
-	return res.result;
+	return res.clickPosition;
 }
+
+helpers.getAllClickPositions = function(page, selector, all) {
+	if (all === undefined) all = true;
+	return page.evaluate(function(args) {
+		var selector = args.selector;
+		var viewportSize = args.viewportSize;
+		var items = [];
+		var addItem = function(element, index) {
+			var item = { index: index };
+			var el = $(element);
+			items.push(item);
+			if (el.width() == 0 || el.height() == 0) {
+				item.error = 'Area is zero of ' + element.outerHTML;
+				return;
+			}
+			if (!el.offset()) {
+				item.error = 'Item doesn\'t have an offset: ' + element.outerHTML;
+				return;
+			}
+			item.clickPosition = {
+				left: Math.floor(el.offset().left + el.width() / 2),
+				top: Math.floor(el.offset().top + el.height() / 2),
+			};
+			if (item.clickPosition.left >= viewportSize.width || item.clickPosition.top >= viewportSize.height) {
+				item.error = 'Trying to get a click position (' + item.clickPosition.left + ', ' + item.clickPosition.top + ') that is outside the viewport (' + viewportSize.width + ', ' + viewportSize.height + ')';
+				return;
+			}
+			var actualElement = document.elementFromPoint(item.clickPosition.left, item.clickPosition.top);
+			if (!actualElement) {
+				item.error = 'Couldn\'t find any element at ' + item.clickPosition.left + ', ' + item.clickPosition.top + ' (looking for ' + selector + ')';
+				return;
+			}
+			var soughtElement = actualElement;
+			while (soughtElement && !$(soughtElement).is(selector))
+				soughtElement = soughtElement.parentNode;
+			if (!soughtElement) {
+				item.error = 'Expected to find ' + selector + ' at position ' + item.clickPosition.left + ', ' + item.clickPosition.top + ' but found ' + actualElement.outerHTML;
+				return;
+			}
+		}
+		if (args.all)
+			$(selector).each(function(index) { console.log(index, '=', this); addItem(this, index) });
+		else if ($(selector).length > 0)
+			addItem($(selector)[0], 0);
+		return items;
+	}, { selector: selector, viewportSize: config.viewportSize, all: all });
+}
+
 
 helpers.waitForElement = function(page, selector, callback) {
 	var tryFind = function() {
@@ -180,7 +209,7 @@ helpers.write = function(page, text) {
 	helpers.log('Writing ' + text);
 	page.sendEvent('keypress', text);
 }
-helpers.selectAll = function(page) {
+helpers.selectAllText = function(page) {
 	helpers.log('Trying to select all in focused element (ctrl-A)');
 	page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
 }

@@ -105,7 +105,7 @@ test('Entering an invalid path should bring you to an error screen', function(do
 
 test('Entering a path to a repo should bring you to that repo', function(done) {
 	helpers.click(page, '[data-ta="navigation-path"]');
-	helpers.selectAll(page);
+	helpers.selectAllText(page);
 	helpers.write(page, testRepoPath + '\n');
 	helpers.waitForElement(page, '[data-ta="repository-view"]', function() {
 		done();
@@ -253,7 +253,7 @@ var testClonePath;
 
 test('Enter path to test root', function(done) {
 	helpers.click(page, '[data-ta="navigation-path"]');
-	helpers.selectAll(page);
+	helpers.selectAllText(page);
 	helpers.write(page, testRootPath + '\n');
 	helpers.waitForElement(page, '[data-ta="uninited-path-page"]', function() {
 		done();
