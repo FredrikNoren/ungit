@@ -205,10 +205,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-		var task;
-		if (req.param('remote') == 'true') task = git(credentialsOption(req.param('socketId')) + ' push origin :"' + req.param('name').trim() + '"', req.param('path'));
-		else task = git('branch -D "' + req.param('name').trim() + '"', req.param('path'));
-		task
+		git('branch -D "' + req.param('name').trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
+	});
+
+	app.del(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, function(req, res){
+		git(credentialsOption(req.param('socketId')) + ' push origin :"' + req.param('name').trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
@@ -233,10 +236,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.del(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var task;
-		if (req.param('remote') == 'true') task = git('push origin :"refs/tags/' + req.param('name').trim() + '"', req.param('path'));
-		else task = git('tag -d "' + req.param('name').trim() + '"', req.param('path'));
-		task
+		git('tag -d "' + req.param('name').trim() + '"', req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
+	});
+	
+	app.del(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
+		git('push origin :"refs/tags/' + req.param('name').trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});

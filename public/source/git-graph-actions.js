@@ -294,7 +294,8 @@ GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.perform = function(callback) {
 	var self = this;
 	var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
-	api.query('DELETE', url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, remote: this.graph.currentActionContext().isRemote, socketId: api.socketId }, function(err) {
+	if (this.graph.currentActionContext().isRemote) url = '/remote' + url;
+	api.query('DELETE', url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, socketId: api.socketId }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
 		self.graph.repository.fetch({ tags: true });
