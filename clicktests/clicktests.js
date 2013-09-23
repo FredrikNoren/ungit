@@ -43,6 +43,7 @@ test('Init', function(done) {
 
 test('Open home screen', function(done) {
 	page.open('http://localhost:' + config.port, function() {
+		console.log('OPEN DONE')
 		helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 			done();
 		});
@@ -283,6 +284,12 @@ test('Should be possible to fetch', function(done) {
 	});
 });
 
+test('Should be possible to create and push a branch', function(done) {
+	createBranch('branchinclone', function() {
+		refAction(page, 'branchinclone', 'push', done);
+	});
+});
+
 
 // Cleanup
 
@@ -300,7 +307,6 @@ test('Cleanup test directories', function(done) {
 test('Shutdown server should bring you to connection lost page', function(done) {
 	shutdownServer(function() {
 		helpers.waitForElement(page, '[data-ta="user-error-page"]', function() {
-			page.render('clicktestou/lol.png')
 			done();
 		});
 	});

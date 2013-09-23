@@ -213,7 +213,7 @@ GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
 GraphActions.Push.prototype.createHoverGraphic = function() {
 	var context = this.graph.currentActionContext();
-	if (!context) return null;
+	if (!context || !context.remoteRef()) return null;
 	return new PushViewModel(context.remoteRef().node(), context.node());
 }
 GraphActions.Push.prototype.perform = function( callback) {
