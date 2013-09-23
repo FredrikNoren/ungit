@@ -244,7 +244,7 @@ helpers.runTests = function() {
 			console.error('Tests failed!');
 			phantom.exit(1);
 		} else {
-			console.log('All tests ok! Took ' + (Date.now() - startTime) / 1000 + 'sec');
+			console.log('All tests ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + tests.length + ' tests)');
 			phantom.exit(0);
 		}
 	});
