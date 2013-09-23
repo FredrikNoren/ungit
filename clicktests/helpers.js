@@ -8,7 +8,8 @@ var cliColor = require('../node_modules/ansi-color/lib/ansi-color');
 var config = {
 	port: 8449,
 	testTimeout: 10000,
-	serverTimeout: 10000
+	serverTimeout: 10000,
+	viewportSize: { width: 2000, height: 2000 }
 };
 
 var helpers = exports;
@@ -21,7 +22,7 @@ helpers.log = function(text) {
 
 helpers.createPage = function(onError) {
 	var page = webpage.create();
-	page.viewportSize = { width: 1024, height: 768 };
+	page.viewportSize = config.viewportSize;
 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
 	    console.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
 	};
@@ -98,7 +99,9 @@ helpers.getElementPosition = function(page, selector) {
 }
 
 helpers.getClickPosition = function(page, selector) {
-	var res = page.evaluate(function(selector) {
+	var res = page.evaluate(function(args) {
+		var selector = args.selector;
+		var viewportSize = args.viewportSize;
 		var el = $(selector);
 		if (el.length == 0) return { error: 'Can\'t find element ' + selector };
 		if (el.width() == 0 || el.height() == 0) return { error: 'Area of ' + selector + ' is zero.' };
@@ -106,6 +109,8 @@ helpers.getClickPosition = function(page, selector) {
 			left: Math.floor(el.offset().left + el.width() / 2),
 			top: Math.floor(el.offset().top + el.height() / 2),
 		};
+		if (clickPos.left >= viewportSize.width || clickPos.top >= viewportSize.height)
+			return { error: 'Trying to get a click position (' + clickPos.left + ', ' + clickPos.top + ') that is outside the viewport (' + viewportSize.width + ', ' + viewportSize.height + ')' };
 		var actualElement = document.elementFromPoint(clickPos.left, clickPos.top);
 		if (!actualElement)
 			 return { error: 'Couldn\'t find any element at ' + clickPos.left + ', ' + clickPos.top + ' (looking for ' + selector + ')' };
@@ -115,7 +120,7 @@ helpers.getClickPosition = function(page, selector) {
 		if (!soughtElement)
 			 return { error: 'Expected to find ' + selector + ' at position ' + clickPos.left + ', ' + clickPos.top + ' but found ' + actualElement.outerHTML };
 		return { result: clickPos };
-	}, selector);
+	}, { selector: selector, viewportSize: config.viewportSize });
 	if (res.error) {
 		page.render('clicktestout/error.png');
 		throw new Error(res.error);
