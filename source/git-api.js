@@ -370,10 +370,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	// This method isn't called by the client but by credentials-helper.js
 	app.get(exports.pathPrefix + '/credentials', ensureAuthenticated, function(req, res) {
 		var socket = sockets[req.query.socketId];
-		socket.once('credentials', function(data) {
-			res.json(data);
-		});
-		socket.emit('request-credentials');
+		if (!socket) {
+			// We're using the socket to display an authentication dialog in the ui,
+			// so if the socket is closed/unavailable we pretty much can't get the username/password.
+			res.json(400, { errorCode: 'socket-unavailable' });
+		} else {
+			socket.once('credentials', function(data) {
+				res.json(data);
+			});
+			socket.emit('request-credentials');
+		}
 	});
 
 
