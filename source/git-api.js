@@ -234,8 +234,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.del(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
 		var task;
-		if (req.body.remote) task = git('push origin :"refs/tags/' + req.body.name.trim() + '"', req.param('path'));
-		else task = git('tag -d "' + req.body.name.trim() + '"', req.param('path'));
+		if (req.param('remote') == 'true') task = git('push origin :"refs/tags/' + req.param('name').trim() + '"', req.param('path'));
+		else task = git('tag -d "' + req.param('name').trim() + '"', req.param('path'));
 		task
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));

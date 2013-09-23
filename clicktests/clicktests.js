@@ -150,17 +150,23 @@ test('Should be possible to discard a created file', function(done) {
 	});
 });
 
-var createBranch = function(name, callback) {
+var createRef = function(name, type, callback) {
 	helpers.log('Createing branch ' + name);
 	helpers.click(page, '[data-ta="show-new-branch-form"]');
 	helpers.click(page, '[data-ta="new-branch-name"]');
 	helpers.write(page, name);
 	setTimeout(function() {
-		helpers.click(page, '[data-ta="create-branch"]');
-		helpers.waitForElement(page, '[data-ta="branch"][data-ta-name="' + name + '"]', function() {
+		helpers.click(page, '[data-ta="create-' + type + '"]');
+		helpers.waitForElement(page, '[data-ta="' + type + '"][data-ta-name="' + name + '"]', function() {
 			callback();
 		});
 	}, 100);
+}
+var createBranch = function(name, callback) {
+	createRef(name, 'branch', callback);
+}
+var createTag = function(name, callback) {
+	createRef(name, 'tag', callback);
 }
 
 test('Should be possible to create a branch', function(done) {
@@ -178,6 +184,16 @@ test('Should be possible to create and destroy a branch', function(done) {
 	});
 });
 
+test('Should be possible to create and destroy a tag', function(done) {
+	createTag('tagwillbedeleted', function() {
+		page.render('clicktestout/testy.png');
+		helpers.click(page, '[data-ta="tag"][data-ta-name="tagwillbedeleted"]');
+		helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
+		helpers.waitForNotElement(page, '[data-ta="tag"][data-ta-name="tagwillbedeleted"]', function() {
+			done();
+		});
+	});
+});
 
 test('Commit changes to a file', function(done) {
 	changeTestFile(testRepoPath + '/testfile.txt', function(err) {
