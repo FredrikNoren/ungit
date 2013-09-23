@@ -39,7 +39,8 @@
     "signals": "~1.0.0",
     "hasher": "~1.1.4",
     "blueimp-md5": "~1.0.3",
-    "color": "~0.4.4"
+    "color": "~0.4.4",
+    "keen.io": "0.0.3"
   },
   "devDependencies": {
     "mocha": "1.11.0",

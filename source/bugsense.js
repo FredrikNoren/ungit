@@ -59,6 +59,11 @@ bugsense.notify = function(exception, clientName, callback) {
 	});
 };
 
+bugsense.setVersion = function(version) {
+	bugsense.appVersion = version;
+	winston.info('Bugsense set version: ' + bugsense.appVersion);
+}
+
 bugsense.init = function(clientName, skipFindVersion) {
 	process.on('uncaughtException', function(err) {
 		winston.error(err.stack.toString());
@@ -68,8 +73,7 @@ bugsense.init = function(clientName, skipFindVersion) {
 	});
 	if (!skipFindVersion) {
 		version.getVersion(function(err, ver) {
-			bugsense.appVersion = ver;
-			winston.info('App version: ' + bugsense.appVersion);
+			bugsense.setVersion(ver);
 		});
 	}
 }
