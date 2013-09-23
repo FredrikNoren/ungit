@@ -167,23 +167,17 @@ test('Should be possible to create a branch', function(done) {
 	createBranch('testbranch', done);
 });
 
-/*
-test('Should be possible to create another a branch', function(done) {
-	setTimeout(function() {
-		createBranch('lol', done);
-	}, 2000);
-});
 
 test('Should be possible to create and destroy a branch', function(done) {
 	createBranch('willbedeleted', function() {
-		click(page, '[data-ta="branch"][data-ta-name="willbedeleted"]');
-		click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
-		waitForNotElement(page, '[data-ta="branch"][data-ta-name="willbedeleted"]', function() {
+		helpers.click(page, '[data-ta="branch"][data-ta-name="willbedeleted"]');
+		helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
+		helpers.waitForNotElement(page, '[data-ta="branch"][data-ta-name="willbedeleted"]', function() {
 			done();
 		});
 	});
 });
-*/
+
 
 test('Commit changes to a file', function(done) {
 	changeTestFile(testRepoPath + '/testfile.txt', function(err) {

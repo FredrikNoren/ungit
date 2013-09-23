@@ -89,10 +89,9 @@ Api.prototype._onDisconnect = function() {
 Api.prototype.query = function(method, path, body, callback) {
 	var self = this;
 	var q = superagent(method, '/api' + path);
-	if (method == 'GET')
-		q.query(body);
-	else {
-		q.send(body);
+	if (method == 'GET' || method == 'DELETE') q.query(body);
+	else q.send(body);
+	if (method != 'GET') {
 		this.workingTreeChanged.incBlock();
 		this.gitDirectoryChanged.incBlock();
 	}

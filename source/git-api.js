@@ -206,8 +206,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.del(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
 		var task;
-		if (req.body.remote) task = git(credentialsOption(req.body.socketId) + ' push origin :"' + req.body.name.trim() + '"', req.param('path'));
-		else task = git('branch -D "' + req.body.name.trim() + '"', req.param('path'));
+		if (req.param('remote') == 'true') task = git(credentialsOption(req.param('socketId')) + ' push origin :"' + req.param('name').trim() + '"', req.param('path'));
+		else task = git('branch -D "' + req.param('name').trim() + '"', req.param('path'));
 		task
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
