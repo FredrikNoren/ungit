@@ -1,15 +1,29 @@
 
 
 var winston = require('winston');
+var version = require('./version');
+var config = require('./config');
 
 var os;
 var superagent;
 var uuid;
-var bugsense = exports;
 
-bugsense.appVersion = 'unknown';
+function BugTracker() {
+	if (!config.bugtracking) return;
 
-bugsense.notify = function(exception, clientName, callback) {
+	var self = this;
+	this.appVersion = 'unknown';
+	version.getVersion(function(err, ungitVersion) {
+		self.appVersion = ungitVersion;
+		winston.info('BugTracker set version: ' + self.appVersion);
+	});
+}
+module.exports = BugTracker;
+
+BugTracker.prototype.notify = function(exception, clientName, callback) {
+	if (!config.bugtracking) return;
+
+	var self = this;
 	if (!os) os = require('os');
 	if (!superagent) superagent = require('superagent');
 	if (!uuid) uuid = require('uuid');
@@ -39,7 +53,7 @@ bugsense.notify = function(exception, clientName, callback) {
 			},
 			"application_environment": {
 				"phone": "PC",
-				"appver": bugsense.appVersion,
+				"appver": self.appVersion,
 				"appname": "ungit",
 				"osver": os.type(),
 				"uid": uuid.v1()
@@ -57,8 +71,3 @@ bugsense.notify = function(exception, clientName, callback) {
 	
 	});
 };
-
-bugsense.setVersion = function(version) {
-	bugsense.appVersion = version;
-	winston.info('Bugsense set version: ' + bugsense.appVersion);
-}

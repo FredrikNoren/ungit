@@ -1,5 +1,7 @@
 var config = require('./config')();
-if (config.bugtracking) var bugsense = require('./bugsense');
+var BugTracker = require('./bugtracker');
+var bugtracker = new BugTracker();
+
 if (config.sendUsageStatistics) var usageStatistics = require('./usage-statistics');
 var express = require('express');
 var gitApi = require('./git-api');
@@ -16,7 +18,7 @@ var version = require('./version');
 process.on('uncaughtException', function(err) {
 	winston.error(err.stack.toString());
 	var tasks = [];
-	if (bugsense) tasks.push(function(done) { bugsense.notify(err, 'ungit-server', done); });
+	tasks.push(function(done) { bugtracker.notify(err, 'ungit-server', done); });
 	if (usageStatistics) tasks.push(function(done) { version.getVersion(function(err, ver) { usageStatistics.addEvent('server-exception', { version: ver }, done); }); })
 	async.parallel(tasks, function() {
 		process.exit();
@@ -30,11 +32,6 @@ if (config.logDirectory)
 
 var users = config.users;
 config.users = null; // So that we don't send the users to the client
-
-if (bugsense) 
-	version.getVersion(function(err, ungitVersion) {
-		bugsense.setVersion(ungitVersion);
-	});
 
 if (config.authentication) {
 
@@ -230,8 +227,7 @@ app.get('/api/fs/listDirectories', function(req, res) {
 
 // Error handling
 app.use(function(err, req, res, next) {
-	if (config.bugtracking)
-		bugsense.notify(err, 'ungit-node');
+	bugtracker.notify(err, 'ungit-node');
 	if (usageStatistics)
 		usageStatistics.addEvent('server-exception', { version: version.getVersion.value });
 	winston.error(err.stack);
