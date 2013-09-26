@@ -1,8 +1,8 @@
 var config = require('./config')();
 var BugTracker = require('./bugtracker');
 var bugtracker = new BugTracker();
-
-if (config.sendUsageStatistics) var usageStatistics = require('./usage-statistics');
+var UsageStatistics = require('./usage-statistics');
+usageStatistics = new UsageStatistics();
 var express = require('express');
 var gitApi = require('./git-api');
 var winston = require('winston');
@@ -17,10 +17,10 @@ var version = require('./version');
 
 process.on('uncaughtException', function(err) {
 	winston.error(err.stack.toString());
-	var tasks = [];
-	tasks.push(function(done) { bugtracker.notify(err, 'ungit-server', done); });
-	if (usageStatistics) tasks.push(function(done) { version.getVersion(function(err, ver) { usageStatistics.addEvent('server-exception', { version: ver }, done); }); })
-	async.parallel(tasks, function() {
+	async.parallel([
+		bugtracker.notify.bind(bugtracker, err, 'ungit-server'),
+		usageStatistics.addEvent.bind(usageStatistics, 'server-exception')
+	], function() {
 		process.exit();
 	});
 });
@@ -228,8 +228,7 @@ app.get('/api/fs/listDirectories', function(req, res) {
 // Error handling
 app.use(function(err, req, res, next) {
 	bugtracker.notify(err, 'ungit-node');
-	if (usageStatistics)
-		usageStatistics.addEvent('server-exception', { version: version.getVersion.value });
+	usageStatistics.addEvent('server-exception');
 	winston.error(err.stack);
 	res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
 });
