@@ -17,7 +17,7 @@ process.on('uncaughtException', function(err) {
 	console.error(err.stack.toString());
 	var tasks = [];
 	if (bugsense) tasks.push(function(done) { bugsense.notify(err, 'ungit-launcher', done); });
-	if (usageStatistics) tasks.push(function(done) { usageStatistics.addEvent('launcher-exception', { version: version.currentVersion }, done); })
+	if (usageStatistics) tasks.push(function(done) { version.getVersion(function(err, ver) { usageStatistics.addEvent('launcher-exception', { version: ver }, done); }); })
 	async.parallel(tasks, function() {
 		process.exit();
 	});
