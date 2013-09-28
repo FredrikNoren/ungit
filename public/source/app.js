@@ -7,23 +7,20 @@ var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var UserErrorViewModel = require('./user-error').UserErrorViewModel;
 var addressParser = require('../../source/address-parser');
 
-var AppViewModel = function(main) {
+var CrashHandlerViewModel = function(app) {
 	var self = this;
-	this.content = ko.observable(main);
+	this.content = ko.observable(app);
 	api.disconnected.add(function() {
 		self.content(new UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 	});
 }
-exports.AppViewModel = AppViewModel;
-AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
-	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
-}
-AppViewModel.prototype.templateChooser = function(data) {
+exports.CrashHandlerViewModel = CrashHandlerViewModel;
+CrashHandlerViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
 	return data.template;
 };
 
-var MainViewModel = function(browseTo) {
+var AppViewModel = function(browseTo) {
 	var self = this;
 	this.browseTo = browseTo;
 	this.path = ko.observable();
@@ -94,22 +91,22 @@ var MainViewModel = function(browseTo) {
 			self.content().repository().onGitDirectoryChanged();
 	});
 }
-exports.MainViewModel = MainViewModel;
-MainViewModel.prototype.template = 'main';
-MainViewModel.prototype.updateAnimationFrame = function(deltaT) {
+exports.AppViewModel = AppViewModel;
+AppViewModel.prototype.template = 'app';
+AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
-MainViewModel.prototype.submitPath = function() {
+AppViewModel.prototype.submitPath = function() {
 	this.browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
-MainViewModel.prototype.showDialog = function(dialog) {
+AppViewModel.prototype.showDialog = function(dialog) {
 	var self = this;
 	dialog.closed.add(function() {
 		self.dialog(null);
 	})
 	this.dialog(dialog);
 }
-MainViewModel.prototype.enableBugtrackingAndStatistics = function() {
+AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
 	var self = this;
 	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
@@ -121,7 +118,7 @@ MainViewModel.prototype.enableBugtrackingAndStatistics = function() {
 		});
 	});
 }
-MainViewModel.prototype.enableBugtracking = function() {
+AppViewModel.prototype.enableBugtracking = function() {
 	var self = this;
 	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
@@ -132,11 +129,11 @@ MainViewModel.prototype.enableBugtracking = function() {
 		});
 	});
 }
-MainViewModel.prototype.dismissBugtrackingNagscreen = function() {
+AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
 	this.showBugtrackingNagscreen(false);
 	localStorage.setItem('bugtrackingNagscreenDismissed', true);
 }
-MainViewModel.prototype.templateChooser = function(data) {
+AppViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
 	return data.template;
 };
@@ -217,9 +214,9 @@ LoginViewModel.prototype.login = function() {
 }
 LoginViewModel.prototype.template = 'login';
 
-var PathViewModel = function(main, path) {
+var PathViewModel = function(app, path) {
 	var self = this;
-	this.main = main;
+	this.app = app;
 	this.path = path;
 	this.status = ko.observable('loading');
 	this.loadingProgressBar = new ProgressBarViewModel('path-loading-' + path);
@@ -252,7 +249,7 @@ PathViewModel.prototype.updateStatus = function() {
 		if (err) return;
 		if (status == 'inited') {
 			self.status('repository');
-			self.repository(new RepositoryViewModel(self.main, self.path));
+			self.repository(new RepositoryViewModel(self.app, self.path));
 			visitedRepositories.tryAdd(self.path);
 		} else if (status == 'uninited') {
 			self.status('uninited');
@@ -278,13 +275,13 @@ PathViewModel.prototype.cloneRepository = function() {
 		if (event.event == 'credentialsRequested') self.cloningProgressBar.pause();
 		else if (event.event == 'credentialsProvided') self.cloningProgressBar.unpause();
 	};
-	this.main.programEvents.add(programEventListener);
+	this.app.programEvents.add(programEventListener);
 
 	api.query('POST', '/clone', { path: this.path, socketId: api.socketId, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
-		self.main.programEvents.remove(programEventListener);
+		self.app.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;
-		self.main.browseTo('repository?path=' + encodeURIComponent(res.path));
+		self.app.browseTo('repository?path=' + encodeURIComponent(res.path));
 	});
 }
 

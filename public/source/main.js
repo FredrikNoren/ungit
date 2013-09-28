@@ -9,9 +9,9 @@ var hasher = require('hasher');
 var crossroads = require('crossroads');
 var Api = require('./api');
 var app = require('./app');
-var MainViewModel = app.MainViewModel;
-var CrashViewModel = app.CrashViewModel;
 var AppViewModel = app.AppViewModel;
+var CrashViewModel = app.CrashViewModel;
+var CrashHandlerViewModel = app.CrashHandlerViewModel;
 var PathViewModel = app.PathViewModel;
 var HomeViewModel = app.HomeViewModel;
 
@@ -271,25 +271,25 @@ window.requestAnimationFrame(updateAnimationFrame);
 
 var oldWindowOnError = window.onerror;
 window.onerror = function(err) {
-    app.content(new CrashViewModel());
+    crashHandler.content(new CrashViewModel());
     if (oldWindowOnError) oldWindowOnError(err);
 };
 
 api = new Api();
-var main = new MainViewModel(browseTo);
-var app = new AppViewModel(main);
+var app = new AppViewModel(browseTo);
+var crashHandler = new CrashHandlerViewModel(app);
 
-ko.applyBindings(app);
+ko.applyBindings(crashHandler);
 
 // routing
 crossroads.addRoute('/', function() {
-    main.path('');
-    main.content(new HomeViewModel());
+    app.path('');
+    app.content(new HomeViewModel());
 });
 
 crossroads.addRoute('/repository{?query}', function(query) {
-    main.path(query.path);
-    main.content(new PathViewModel(main, query.path));
+    app.path(query.path);
+    app.content(new PathViewModel(app, query.path));
 })
 
 

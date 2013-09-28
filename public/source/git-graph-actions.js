@@ -222,11 +222,11 @@ GraphActions.Push.prototype.perform = function( callback) {
 		if (event.event == 'credentialsRequested') self.performProgressBar.pause();
 		else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
 	};
-	this.graph.repository.main.programEvents.add(programEventListener);
+	this.graph.repository.app.programEvents.add(programEventListener);
 	var remoteBranch = this.graph.currentActionContext();
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, 
 			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
-		self.graph.repository.main.programEvents.remove(programEventListener);
+		self.graph.repository.app.programEvents.remove(programEventListener);
 		if (err) {
 			if (err.errorCode == 'non-fast-forward') {
 				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Try fetching new nodes.');

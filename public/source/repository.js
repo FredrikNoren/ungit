@@ -10,11 +10,11 @@ var idCounter = 0;
 var newId = function() { return idCounter++; };
 
 
-var RepositoryViewModel = function(main, repoPath) {
+var RepositoryViewModel = function(app, repoPath) {
 	var self = this;
 	this.remoteErrorPopup = ko.observable();
 
-	this.main = main;
+	this.app = app;
 	this.repoPath = repoPath;
 	this.gerritIntegration = ko.observable(null);
 	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
@@ -67,7 +67,7 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 		if (event.event == 'credentialsRequested') self.fetchingProgressBar.pause();
 		else if (event.event == 'credentialsProvided') self.fetchingProgressBar.unpause();
 	};
-	this.main.programEvents.add(programEventListener);
+	this.app.programEvents.add(programEventListener);
 
 	var handleApiRemoteError = function(callback, err, result) {
 		callback(err, result);
@@ -89,7 +89,7 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 		});
 	});
 	async.parallel(jobs, function(err, result) {
-		self.main.programEvents.remove(programEventListener);
+		self.app.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
 
 		if (err) {
