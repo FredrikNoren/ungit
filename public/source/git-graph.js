@@ -1,7 +1,7 @@
 
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
-var Vector2 = require('./vector2.js');
+var Vector2 = require('../../source/utils/vector2.js');
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var GraphActions = require('./git-graph-actions.js');

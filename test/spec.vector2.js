@@ -1,6 +1,6 @@
 
 var expect = require('expect.js');
-var Vector2 = require('../public/source/vector2.js');
+var Vector2 = require('../source/utils/vector2.js');
 
 describe('Vector2', function() {
 	it('should be addable', function() {

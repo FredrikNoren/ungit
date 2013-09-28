@@ -1,7 +1,7 @@
 var fs = require('fs');
 var child_process = require('child_process');
 var path = require('path');
-var cache = require('./cache');
+var cache = require('./utils/cache');
 
 var version = exports;
 

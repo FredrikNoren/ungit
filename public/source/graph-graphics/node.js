@@ -1,6 +1,6 @@
 
 var ko = require('../../vendor/js/knockout-2.2.1.js');
-var Vector2 = require('../vector2');
+var Vector2 = require('../../../source/utils/vector2');
 
 var NodeViewModel = function(position, radius) {
 	var self = this;

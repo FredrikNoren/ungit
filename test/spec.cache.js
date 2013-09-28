@@ -1,7 +1,7 @@
 
 var expect = require('expect.js');
 var async = require('async');
-var cache = require('../source/cache');
+var cache = require('../source/utils/cache');
 
 describe('cache', function () {
 

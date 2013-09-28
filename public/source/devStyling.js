@@ -4,7 +4,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
-var Vector2 = require('./vector2');
+var Vector2 = require('../../source/utils/vector2');
 var graphGraphicsActions = require('./graph-graphics/actions');
 
 var viewModel = {};

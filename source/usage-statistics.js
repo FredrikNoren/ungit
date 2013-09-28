@@ -1,6 +1,6 @@
 
 var config = require('./config')();
-var cache = require('./cache');
+var cache = require('./utils/cache');
 var version = require('./version');
 var getmac = require('getmac');
 var async = require('async');
