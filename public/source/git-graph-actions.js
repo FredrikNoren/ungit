@@ -223,17 +223,16 @@ GraphActions.Push.prototype.perform = function( callback) {
 		else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
 	};
 	this.graph.repository.main.programEvents.add(programEventListener);
+	var remoteBranch = this.graph.currentActionContext();
 	api.query('POST', '/push', { path: this.graph.repoPath, socketId: api.socketId, 
-			localBranch: this.graph.currentActionContext().displayName, remoteBranch: this.graph.currentActionContext().displayName }, function(err, res) {
+			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
 		self.graph.repository.main.programEvents.remove(programEventListener);
 		if (err) {
 			if (err.errorCode == 'non-fast-forward') {
-				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Fetching new nodes.');
-				self.graph.repository.fetch({ nodes: true, tags: true }, function() {
-					setTimeout(function() {
-						self.graph.repository.closeRemoteErrorPopup();
-					}, 5000);
-				});
+				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Try fetching new nodes.');
+				setTimeout(function() {
+					self.graph.repository.closeRemoteErrorPopup();
+				}, 5000);
 				callback();
 				return true;
 			} else {
@@ -241,7 +240,8 @@ GraphActions.Push.prototype.perform = function( callback) {
 			}
 		}
 		self.graph.loadNodesFromApi();
-		self.graph.repository.fetch({ tags: true });
+		if (remoteBranch.isTag)
+			self.graph.repository.fetch({ tags: true });
 		callback();
 	});
 }
@@ -298,7 +298,8 @@ GraphActions.Delete.prototype.perform = function(callback) {
 	api.query('DELETE', url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, socketId: api.socketId }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
-		self.graph.repository.fetch({ tags: true });
+		if (url == '/remote/tags')
+			self.graph.repository.fetch({ tags: true });
 	});
 }
 
