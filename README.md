@@ -47,9 +47,12 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 Developing
 ----------
 
-If you decide to install by cloning the repo, make sure to run `npm install` then  `grunt` after cloning (to fetch dependencies, build concatenated files and compile less). If you haven't already, you can install grunt by running `npm install -g grunt-cli`.
+To get started developing on ungit:
 
-Once you've done that, you can start ungit by running `npm start`. Run the tests with `npm test`.
+ 1. Clone the repository to a local directory.
+ 2. Run `npm install` to install dependencies.
+ 3. Run `grunt` to build (compile templates, css and js). If you haven't installed grunt already type `npm install -g grunt-cli` first.
+ 4. Type `npm start` to start ungit, or `npm test` to run tests.
 
 License (MIT)
 -------------
