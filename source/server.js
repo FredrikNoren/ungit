@@ -14,6 +14,8 @@ var path = require('path');
 var fs = require('fs');
 var async = require('async');
 var version = require('./version');
+var getmac = require('getmac');
+var md5 = require('blueimp-md5').md5;
 
 process.on('uncaughtException', function(err) {
 	winston.error(err.stack.toString());
@@ -141,13 +143,19 @@ if (config.authentication) {
 app.use(express.static(__dirname + '/../public'));
 gitApi.registerApi(app, server, ensureAuthenticated, config);
 
-app.get('/config.js', function(req, res) {
-	res.send('ungit.config = ' + JSON.stringify(config));
-});
-
-app.get('/version.js', function(req, res) {
-	version.getVersion(function(err, ver) {
-		res.send('ungit.version = \'' + ver + '\'');
+app.get('/serverdata.js', function(req, res) {
+	async.parallel({
+		userHash: function(done) {
+			getmac.getMac(function(err, addr) {
+				done(err, md5(addr));
+			});
+		},
+		version: version.getVersion.bind(version)
+	}, function(err, data) {
+		var text = 'ungit.config = ' + JSON.stringify(config) + ';\n';
+		text += 'ungit.userHash = "' + data.userHash + '";\n';
+		text += 'ungit.version = "' + data.version + '";\n';
+		res.send(text);
 	});
 });
 
