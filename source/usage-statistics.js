@@ -1,7 +1,11 @@
 
-var config = require('./config');
+var config = require('./config')();
 var cache = require('./cache');
 var version = require('./version');
+var getmac = require('getmac');
+var async = require('async');
+var md5 = require('blueimp-md5').md5;
+var winston = require('winston');
 
 function UsageStatistics() {
 	if (!config.sendUsageStatistics) return;
@@ -9,13 +13,37 @@ function UsageStatistics() {
 		projectId: '5240b1d436bf5a753800000c',
 		writeKey: 'da0303fb058149813443f1321a139f23420323887b6a4940e82d47d02df451a4a132b938d2e8200a17914e06aa2767dc1a6fa0891db41942918db91a8daa61784d7af2495b934a05111605e4aa4e5c3d92b0b7f8be4d146e05586701894dc35d619443ae234dbc608a36de9ee97e0e1a'
 	});
+
+	this.getDefaultData = cache(function(callback) {
+		async.parallel({
+			userHash: function(done) {
+				getmac.getMac(function(err, addr) {
+					done(err, md5(addr));
+				});
+			},
+			version: version.getVersion.bind(version)
+		}, function(err, data) {
+			callback(err, data);
+		});
+	});
+
 }
 module.exports = UsageStatistics;
+
+UsageStatistics.prototype._mergeDataWithDefaultData = function(data, callback) {
+	this.getDefaultData(function(err, defaultData) {
+		data = data || {};
+		for(var k in defaultData)
+			data[k] = defaultData[k];
+		callback(data);
+	});
+}
+
 UsageStatistics.prototype.addEvent = function(event, data, callback) {
 	if (!config.sendUsageStatistics) return;
-	data = data || {};
-	version.getVersion(function(err, ver) {
-		data.version = ver;
-		this.keen.addEvent(event, data, callback);
+	var self = this;
+	this._mergeDataWithDefaultData(data, function(data) {
+		winston.info('Sending to keen.io: ' + event + ' ' + JSON.stringify(data));
+		self.keen.addEvent(event, data, callback);	
 	});
 }

@@ -40,7 +40,8 @@
     "hasher": "~1.1.4",
     "blueimp-md5": "~1.0.3",
     "color": "~0.4.4",
-    "keen.io": "0.0.3"
+    "keen.io": "0.0.3",
+    "getmac": "~1.0.5"
   },
   "devDependencies": {
     "mocha": "1.11.0",
