@@ -81,6 +81,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		}
 	}
 
+	var ensureValidSocketId = function(req, res, next) {
+		var socketId = req.param('socketId');
+		var socket = sockets[socketId];
+		if (!socket) {
+			res.json(400, { error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });
+		} else {
+			next();
+		}
+	}
+
 	var emitWorkingTreeChanged = function(repoPath) {
 		if (io) {
 			io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
@@ -121,23 +131,23 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
-	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, function(req, res) {
+	app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
 		var url = req.body.url.trim();
 		if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-		git(credentialsOption(req.body.socketId) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'))
+		git(credentialsOption(req.param('socketId')) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'))
 			.fail(jsonFail.bind(null, res))
 			.done(function(result) { res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) }); })
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
-	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git(credentialsOption(req.body.socketId) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'))
+	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
+		git(credentialsOption(req.param('socketId')) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
-	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git(credentialsOption(req.body.socketId) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
+	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
+		git(credentialsOption(req.param('socketId')) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
@@ -210,7 +220,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
-	app.del(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, function(req, res){
+	app.del(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
 		git(credentialsOption(req.param('socketId')) + ' push origin :"' + req.param('name').trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
@@ -222,7 +232,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(jsonResultOrFail.bind(null, res));
 	});
 
-	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res){
+	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
 		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ', req.param('path'))
 			.parser(gitParser.parseGitLsRemote)
 			.always(jsonResultOrFail.bind(null, res));
@@ -369,7 +379,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	// This method isn't called by the client but by credentials-helper.js
 	app.get(exports.pathPrefix + '/credentials', ensureAuthenticated, function(req, res) {
-		var socket = sockets[req.query.socketId];
+		var socket = sockets[req.param('socketId')];
 		if (!socket) {
 			// We're using the socket to display an authentication dialog in the ui,
 			// so if the socket is closed/unavailable we pretty much can't get the username/password.
