@@ -252,7 +252,7 @@ ko.bindingHandlers.hasFocus2 = {
         // If the user didn't move for 3 sec and then moved again, it's likely it's a tab-back
         if (Date.now() - lastMoved > 3000) {
             console.log('Fire change event due to re-activity');
-            api.workingTreeChanged.dispatch();
+            app.workingTreeChanged();
         }
         lastMoved = Date.now();
     });
@@ -275,14 +275,14 @@ window.onerror = function(err) {
 };
 
 
-var CrashHandlerViewModel = function(app) {
+var CrashHandlerViewModel = function() {
     var self = this;
-    this.content = ko.observable(app);
-    api.disconnected.add(function() {
-        self.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
-    });
+    this.content = ko.observable();
 }
 exports.CrashHandlerViewModel = CrashHandlerViewModel;
+CrashHandlerViewModel.prototype.userError = function(head, text) {
+    this.content(new screens.UserErrorViewModel(head, text));
+}
 CrashHandlerViewModel.prototype.templateChooser = function(data) {
     if (!data) return '';
     return data.template;
@@ -290,8 +290,10 @@ CrashHandlerViewModel.prototype.templateChooser = function(data) {
 
 
 api = new Api();
-var app = new AppViewModel(browseTo);
-var crashHandler = new CrashHandlerViewModel(app);
+var crashHandler = new CrashHandlerViewModel();
+var app = new AppViewModel(crashHandler, browseTo);
+api.app = app;
+crashHandler.content(app);
 
 ko.applyBindings(crashHandler);
 

@@ -28,7 +28,7 @@ var RepositoryViewModel = function(app, repoPath) {
 	this.showLog = ko.computed(function() {
 		return !self.staging.inRebase() && !self.staging.inMerge();
 	});
-	api.watchRepository(repoPath, function() { self.watcherReady(true); });
+	app.watchRepository(repoPath, function() { self.watcherReady(true); });
 	if (ungit.config.gerrit) {
 		self.gerritIntegration(new GerritIntegrationViewModel(self));
 	}

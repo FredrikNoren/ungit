@@ -5,10 +5,13 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var dialogs = require('./dialogs');
 var screens = require('./screens');
+var blockable = require('../../source/utils/blockable');
+var _ = require('underscore');
 
 
-var AppViewModel = function(browseTo) {
+var AppViewModel = function(crashHandler, browseTo) {
 	var self = this;
+	this.crashHandler = crashHandler;
 	this.browseTo = browseTo;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
@@ -64,33 +67,79 @@ var AppViewModel = function(browseTo) {
 		}
 	});
 
-	api.getCredentialsHandler = function(callback) {
-		var diag;
-		// Only show one credentials dialog if we're asked to show another one while the first one is open
-		// This happens for instance when we fetch nodes and remote tags at the same time
-		if (self.dialog() instanceof dialogs.CredentialsDialogViewModel)
-			diag = self.dialog();
-		else {
-			diag = new dialogs.CredentialsDialogViewModel();
-			self.showDialog(diag);
-		}
-		self.programEvents.dispatch({ event: 'credentialsRequested' });
-		diag.closed.add(function() {
-			self.programEvents.dispatch({ event: 'credentialsProvided' });
-			callback({ username: diag.username(), password: diag.password() });
-		});
-	}
-	api.workingTreeChanged.signal.add(function(data) {
+	this.workingTreeChanged = blockable(_.throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onWorkingTreeChanged();
-	});
-	api.gitDirectoryChanged.signal.add(function(data) {
+	}, 500));
+	this.gitDirectoryChanged = blockable(_.throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onGitDirectoryChanged();
-	});
+	}, 500));
+	this._initSocket();
 }
 module.exports = AppViewModel;
 AppViewModel.prototype.template = 'app';
+AppViewModel.prototype._initSocket = function() {
+	var self = this;
+	this.socket = io.connect();
+	this.socket.on('error', function(err) {
+		self._isConnected(function(connected) {
+			if (connected) throw err;
+			else self._onDisconnect();
+		});
+	});
+	this.socket.on('disconnect', function(data) {
+		self._onDisconnect();
+	});
+	this.socket.on('connected', function (data) {
+		self.socketId = data.socketId;
+	});
+	this.socket.on('working-tree-changed', function () {
+		self.workingTreeChanged();
+	});
+	this.socket.on('git-directory-changed', function () {
+		self.gitDirectoryChanged();
+	});
+	this.socket.on('request-credentials', function (data) {
+		self._getCredentials(function(credentials) {
+			self.socket.emit('credentials', credentials);
+		});
+	});
+}
+// Check if the server is still alive
+AppViewModel.prototype._isConnected = function(callback) {
+	superagent('GET', '/api/ping')
+		.set('Accept', 'application/json')
+		.end(function(error, res) {
+			callback(!error && res && res.ok);
+		});
+}
+AppViewModel.prototype._onDisconnect = function() {
+	if (this.isDisconnected) return;
+	this.isDisconnected = true;
+	this.crashHandler.userError('Connection lost', 'Refresh the page to try to reconnect');
+}
+AppViewModel.prototype._getCredentials = function(callback) {
+	var self = this;
+	var diag;
+	// Only show one credentials dialog if we're asked to show another one while the first one is open
+	// This happens for instance when we fetch nodes and remote tags at the same time
+	if (self.dialog() instanceof dialogs.CredentialsDialogViewModel)
+		diag = self.dialog();
+	else {
+		diag = new dialogs.CredentialsDialogViewModel();
+		self.showDialog(diag);
+	}
+	self.programEvents.dispatch({ event: 'credentialsRequested' });
+	diag.closed.add(function() {
+		self.programEvents.dispatch({ event: 'credentialsProvided' });
+		callback({ username: diag.username(), password: diag.password() });
+	});
+}
+AppViewModel.prototype.watchRepository = function(repositoryPath, callback) {
+	this.socket.emit('watch', { path: repositoryPath }, callback);
+};
+
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
