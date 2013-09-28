@@ -96,7 +96,7 @@ PathViewModel.prototype.cloneRepository = function() {
 	};
 	this.app.programEvents.add(programEventListener);
 
-	api.query('POST', '/clone', { path: this.path, socketId: api.socketId, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+	api.query('POST', '/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
 		self.app.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;

@@ -77,12 +77,12 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 	this.fetchingProgressBar.start();
 	var jobs = [];
 	var remoteTags;
-	if (options.nodes) jobs.push(function(done) { api.query('POST', '/fetch', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
+	if (options.nodes) jobs.push(function(done) { api.query('POST', '/fetch', { path: self.repoPath }, function(err, result) {
 			done(err, result);
 			return !err || self._isRemoteError(err.errorCode);
 		}); 
 	});
-	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath, socketId: api.socketId }, function(err, result) {
+	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath }, function(err, result) {
 			remoteTags = result;
 			done(err, result);
 			return !err || self._isRemoteError(err.errorCode);

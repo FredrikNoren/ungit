@@ -12,6 +12,7 @@ module.exports = Api;
 
 Api.prototype.query = function(method, path, body, callback) {
 	var self = this;
+	if (body) body.socketId = app.socketId;
 	var q = superagent(method, '/api' + path);
 	if (method == 'GET' || method == 'DELETE') q.query(body);
 	else q.send(body);
