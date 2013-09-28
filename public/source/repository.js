@@ -94,7 +94,7 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 
 		if (err) {
 			self.remoteErrorPopup(self._remoteErrorCodeToString[err.errorCode]);
-			return;
+			return true;
 		}
 
 		if (options.tags) self.graph.setRemoteTags(remoteTags);
