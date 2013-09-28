@@ -1,7 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
-var UserErrorViewModel = require('./user-error').UserErrorViewModel;
+var screens = require('./screens');
 
 var StagingViewModel = function(repository) {
 	var self = this;
@@ -107,7 +107,7 @@ StagingViewModel.prototype.commit = function() {
 	api.query('POST', '/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
 		if (err) {
 			if (err.errorCode == 'no-git-name-email-configured') {
-				self.repository.app.content(new UserErrorViewModel({
+				self.repository.app.content(new screens.UserErrorViewModel({
 					title: 'Git email and/or name not configured',
 					details: 'You need to configure your git email and username to commit files.<br> Run <code>git config --global user.name "your name"</code> and <code>git config --global user.email "your@email.com"</code>'
 				}));

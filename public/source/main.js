@@ -8,12 +8,11 @@ require('../vendor/js/jquery-ui-1.10.3.custom.js');
 var hasher = require('hasher');
 var crossroads = require('crossroads');
 var Api = require('./api');
-var app = require('./app');
-var AppViewModel = app.AppViewModel;
-var CrashViewModel = app.CrashViewModel;
-var CrashHandlerViewModel = app.CrashHandlerViewModel;
-var PathViewModel = app.PathViewModel;
-var HomeViewModel = app.HomeViewModel;
+var AppViewModel = require('./app');
+var screens = require('./screens');
+var CrashViewModel = screens.CrashViewModel;
+var PathViewModel = screens.PathViewModel;
+var HomeViewModel = screens.HomeViewModel;
 
 // Request animation frame polyfill
 (function() {
@@ -275,6 +274,21 @@ window.onerror = function(err) {
     if (oldWindowOnError) oldWindowOnError(err);
 };
 
+
+var CrashHandlerViewModel = function(app) {
+    var self = this;
+    this.content = ko.observable(app);
+    api.disconnected.add(function() {
+        self.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+    });
+}
+exports.CrashHandlerViewModel = CrashHandlerViewModel;
+CrashHandlerViewModel.prototype.templateChooser = function(data) {
+    if (!data) return '';
+    return data.template;
+};
+
+
 api = new Api();
 var app = new AppViewModel(browseTo);
 var crashHandler = new CrashHandlerViewModel(app);
@@ -284,7 +298,7 @@ ko.applyBindings(crashHandler);
 // routing
 crossroads.addRoute('/', function() {
     app.path('');
-    app.content(new HomeViewModel());
+    app.content(new HomeViewModel(app));
 });
 
 crossroads.addRoute('/repository{?query}', function(query) {
