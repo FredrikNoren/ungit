@@ -119,7 +119,7 @@ AppViewModel.prototype._isConnected = function(callback) {
 		});
 }
 AppViewModel.prototype._onDisconnect = function() {
-	self.connectionState('disconnected');
+	this.connectionState('disconnected');
 }
 AppViewModel.prototype._getCredentials = function(callback) {
 	var self = this;

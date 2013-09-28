@@ -83,6 +83,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	var ensureValidSocketId = function(req, res, next) {
 		var socketId = req.param('socketId');
+		if (socketId == 'ignore') return next(); // Used in unit tests
 		var socket = sockets[socketId];
 		if (!socket) {
 			res.json(400, { error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });

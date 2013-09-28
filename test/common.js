@@ -23,8 +23,10 @@ common.wrapErrorHandler = function(done, callback) {
 common.get = function(req, path, payload, done, callback) {
 	var r = req
 		.get(restGit.pathPrefix + path);
-	if (payload !== undefined)
+	if (payload !== undefined) {
+		payload.socketId = 'ignore';
 		r.query(payload);
+	}
 	r
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
@@ -35,8 +37,10 @@ common.get = function(req, path, payload, done, callback) {
 common.post = function(req, path, payload, done, callback) {
 	var r = req
 		.post(restGit.pathPrefix + path);
-	if (payload !== undefined)
+	if (payload !== undefined) {
+		payload.socketId = 'ignore';
 		r.send(payload);
+	}
 	r
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
@@ -46,8 +50,10 @@ common.post = function(req, path, payload, done, callback) {
 common.delete = function(req, path, payload, done, callback) {
 	var r = req
 		.del(restGit.pathPrefix + path);
-	if (payload !== undefined)
+	if (payload !== undefined) {
+		payload.socketId = 'ignore';
 		r.send(payload);
+	}
 	r
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
