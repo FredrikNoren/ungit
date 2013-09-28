@@ -60,6 +60,9 @@ var defaultConfig = {
 	// Don't fast forward git mergers. See git merge --no-ff documentation
 	noFFMerge: true,
 
+	// Automatically fetch from remote when entering a repository using ungit
+	autoFetch: true,
+
 	// Used for development purposes.
 	dev: false,
 };

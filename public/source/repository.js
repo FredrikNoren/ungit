@@ -34,7 +34,7 @@ var RepositoryViewModel = function(main, repoPath) {
 	}
 	var hasAutoFetched = false;
 	this.remotes.subscribe(function(newValue) {
-		if (newValue.length > 0 && !hasAutoFetched) {
+		if (newValue.length > 0 && !hasAutoFetched && ungit.config.autoFetch) {
 			hasAutoFetched = true;
 			self.fetch({ nodes: true, tags: true });
 		}
