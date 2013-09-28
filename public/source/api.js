@@ -3,16 +3,15 @@ var signals = require('signals');
 var superagent = require('../vendor/js/superagent');
 
 
-var Api = function(app) {
+var Api = function() {
 	var self = this;
-	this.app = app;
 }
 
 module.exports = Api;
 
 Api.prototype.query = function(method, path, body, callback) {
 	var self = this;
-	if (body) body.socketId = app.socketId;
+	if (body && this.app) body.socketId = this.app.socketId;
 	var q = superagent(method, '/api' + path);
 	if (method == 'GET' || method == 'DELETE') q.query(body);
 	else q.send(body);

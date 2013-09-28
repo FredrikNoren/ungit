@@ -280,9 +280,6 @@ var CrashHandlerViewModel = function() {
     this.content = ko.observable();
 }
 exports.CrashHandlerViewModel = CrashHandlerViewModel;
-CrashHandlerViewModel.prototype.userError = function(head, text) {
-    this.content(new screens.UserErrorViewModel(head, text));
-}
 CrashHandlerViewModel.prototype.templateChooser = function(data) {
     if (!data) return '';
     return data.template;

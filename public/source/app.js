@@ -16,6 +16,7 @@ var AppViewModel = function(crashHandler, browseTo) {
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
+	this.connectionState = ko.observable('connecting');
 
 	this.visitedRepositories = ko.computed({
 		read: function() {
@@ -62,6 +63,8 @@ var AppViewModel = function(crashHandler, browseTo) {
 			self.realContent(value);
 		},
 		read: function() {
+			if (self.connectionState() == 'disconnected') return new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect');
+			if (self.connectionState() == 'connecting') return null;
 			if (self.isAuthenticated()) return self.realContent();
 			else return self.authenticationScreen;
 		}
@@ -93,6 +96,7 @@ AppViewModel.prototype._initSocket = function() {
 	});
 	this.socket.on('connected', function (data) {
 		self.socketId = data.socketId;
+		self.connectionState('connected');
 	});
 	this.socket.on('working-tree-changed', function () {
 		self.workingTreeChanged();
@@ -115,9 +119,7 @@ AppViewModel.prototype._isConnected = function(callback) {
 		});
 }
 AppViewModel.prototype._onDisconnect = function() {
-	if (this.isDisconnected) return;
-	this.isDisconnected = true;
-	this.crashHandler.userError('Connection lost', 'Refresh the page to try to reconnect');
+	self.connectionState('disconnected');
 }
 AppViewModel.prototype._getCredentials = function(callback) {
 	var self = this;
