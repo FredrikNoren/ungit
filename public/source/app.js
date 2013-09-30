@@ -7,6 +7,7 @@ var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
 var _ = require('underscore');
+var superagent = require('../vendor/js/superagent');
 
 
 var AppViewModel = function(crashHandler, browseTo) {
@@ -39,7 +40,7 @@ var AppViewModel = function(crashHandler, browseTo) {
 		// but is only used for changing around the configuration. We need to check this here
 		// since ungit may have crashed without the server crashing since we enabled bugtracking,
 		// and we don't want to show the nagscreen twice in that case.
-		api.query('GET', '/userconfig', undefined, function(err, userConfig) {
+		this.get('/userconfig', undefined, function(err, userConfig) {
 			self.showBugtrackingNagscreen(!userConfig.bugtracking);
 		});
 	}
@@ -47,7 +48,7 @@ var AppViewModel = function(crashHandler, browseTo) {
 	this.programEvents.add(function(event) {
 		console.log('Event:', event);
 	});
-	api.query('GET', '/latestversion', undefined, function(err, version) {
+	this.get('/latestversion', undefined, function(err, version) {
 		self.currentVersion(version.currentVersion);
 		self.latestVersion(version.latestVersion);
 		self.newVersionAvailable(version.outdated);
@@ -157,11 +158,11 @@ AppViewModel.prototype.showDialog = function(dialog) {
 }
 AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
 	var self = this;
-	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
+	this.get('/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
 		userConfig.bugtracking = true;
 		userConfig.sendUsageStatistics = true;
-		api.query('POST', '/userconfig', userConfig, function(err) {
+		self.post('/userconfig', userConfig, function(err) {
 			if (err) return;
 			self.showBugtrackingNagscreen(false);
 		});
@@ -169,10 +170,10 @@ AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
 }
 AppViewModel.prototype.enableBugtracking = function() {
 	var self = this;
-	api.query('GET', '/userconfig', undefined, function(err, userConfig) {
+	this.get('/userconfig', undefined, function(err, userConfig) {
 		if (err) return;
 		userConfig.bugtracking = true;
-		api.query('POST', '/userconfig', userConfig, function(err) {
+		self.post('/userconfig', userConfig, function(err) {
 			if (err) return;
 			self.showBugtrackingNagscreen(false);
 		});
@@ -194,4 +195,61 @@ AppViewModel.prototype.addVisitedRepository = function(repoPath) {
 
 	repos.unshift(repoPath);
 	this.visitedRepositories(repos);
+}
+AppViewModel.prototype.get = function(path, query, callback) {
+	this.query('GET', path, query, callback);
+}
+AppViewModel.prototype.post = function(path, body, callback) {
+	this.query('POST', path, body, callback);
+}
+AppViewModel.prototype.del = function(path, query, callback) {
+	this.query('DELETE', path, query, callback);
+}
+AppViewModel.prototype.query = function(method, path, body, callback) {
+	var self = this;
+	if (body) body.socketId = this.socketId;
+	var q = superagent(method, '/api' + path);
+	if (method == 'GET' || method == 'DELETE') q.query(body);
+	else q.send(body);
+	if (method != 'GET') {
+		self.workingTreeChanged.block();
+		self.gitDirectoryChanged.block();
+	}
+	q.set('Accept', 'application/json');
+	q.end(function(error, res) {
+		if (method != 'GET') {
+			self.workingTreeChanged.unblock();
+			self.gitDirectoryChanged.unblock();
+		}
+		if (error || !res.ok) {
+			// superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
+			if (error && error.crossDomain) {
+				self._onDisconnect();
+				return;
+			}
+			var errorSummary = 'unknown';
+			if (res) {
+				if (res.body) {
+					if (res.body.errorCode && res.body.errorCode != 'unknown') errorSummary = res.body.errorCode;
+					else if (typeof(res.body.error) == 'string') errorSummary = res.body.error.split('\n')[0];
+					else errorSummary = JSON.stringify(res.body.error);
+				}
+				else errorSummary = res.xhr.statusText + ' ' + res.xhr.status;
+			}
+			var err = { errorSummary: errorSummary, error: error, path: path, res: res, errorCode: res && res.body ? res.body.errorCode : 'unknown' };
+			if (callback && callback(err)) return;
+			else self._onUnhandledBadBackendResponse(err);
+		}
+		else if (callback)
+			callback(null, res.body);
+	});
+};
+AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
+	if (ungit.config.bugtracking) {
+		bugsense.addExtraData('data', JSON.stringify(err.res.body));
+		bugsense.notify(new Error('Backend: ' + err.path + ', ' + err.errorSummary));
+	}
+	if (ungit.config.sendUsageStatistics) {
+		Keen.addEvent('unhandled-backend-error', { version: ungit.version, userHash: ungit.userHash });
+	}
 }

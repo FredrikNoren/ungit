@@ -17,6 +17,7 @@ module.exports = GraphActions;
 GraphActions.ActionBase = function(graph) {
 	var self = this;
 	this.graph = graph;
+	this.app = graph.repository.app;
 	this.performProgressBar = new ProgressBarViewModel('action-' + this.style + '-' + graph.repoPath, 1000);
 	this.isHighlighted = ko.computed(function() {
 		return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
@@ -64,11 +65,11 @@ GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.style = 'move';
 GraphActions.Move.prototype.perform = function(callback) {
 	if (this.graph.currentActionContext().current())
-		api.query('POST', '/reset', { path: this.graph.repoPath, to: this.node.sha1 }, callback);
+		this.app.post('/reset', { path: this.graph.repoPath, to: this.node.sha1 }, callback);
 	else if (this.graph.currentActionContext().isTag)
-		api.query('POST', '/tags', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
+		this.app.post('/tags', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
 	else
-		api.query('POST', '/branches', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
+		this.app.post('/branches', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
 }
 
 
@@ -96,7 +97,7 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
 	return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
+	this.app.post('/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }
 
 
@@ -118,7 +119,7 @@ inherits(GraphActions.Pull, GraphActions.ActionBase);
 GraphActions.Pull.prototype.text = 'Pull';
 GraphActions.Pull.prototype.style = 'pull';
 GraphActions.Pull.prototype.perform = function(callback) {
-	api.query('POST', '/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
+	this.app.post('/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
 }
 
 
@@ -146,7 +147,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 	return new RebaseViewModel(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
-	api.query('POST', '/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
+	this.app.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
 		if (err) {
 			if (err.errorCode = 'merge-failed') {
 				callback();
@@ -183,7 +184,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 	return new MergeViewModel(this.graph.graphic, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
-	api.query('POST', '/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
+	this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
 		if (err) {
 			if (err.errorCode = 'merge-failed') {
 				callback();
@@ -224,7 +225,7 @@ GraphActions.Push.prototype.perform = function( callback) {
 	};
 	this.graph.repository.app.programEvents.add(programEventListener);
 	var remoteBranch = this.graph.currentActionContext();
-	api.query('POST', '/push', { path: this.graph.repoPath, 
+	this.app.post('/push', { path: this.graph.repoPath, 
 			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
 		self.graph.repository.app.programEvents.remove(programEventListener);
 		if (err) {
@@ -263,10 +264,10 @@ GraphActions.Checkout.prototype.style = 'checkout';
 GraphActions.Checkout.prototype.perform = function(callback) {
 	var self = this;
 	var ref = this.graph.currentActionContext();
-	api.query('POST', '/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
+	this.app.post('/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
 		if (err && err.errorCode != 'merge-failed') return;
 		if (ref.isRemoteBranch)
-			api.query('POST', '/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
+			self.app.post('/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
 				if (err && err.errorCode != 'merge-failed') return;
 				callback();
 				return true;
@@ -295,7 +296,7 @@ GraphActions.Delete.prototype.perform = function(callback) {
 	var self = this;
 	var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
 	if (this.graph.currentActionContext().isRemote) url = '/remote' + url;
-	api.query('DELETE', url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName }, function(err) {
+	this.app.del(url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
 		if (url == '/remote/tags')

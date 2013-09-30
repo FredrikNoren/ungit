@@ -77,12 +77,12 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 	this.fetchingProgressBar.start();
 	var jobs = [];
 	var remoteTags;
-	if (options.nodes) jobs.push(function(done) { api.query('POST', '/fetch', { path: self.repoPath }, function(err, result) {
+	if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath }, function(err, result) {
 			done(err, result);
 			return !err || self._isRemoteError(err.errorCode);
 		}); 
 	});
-	if (options.tags) jobs.push(function(done) { api.query('GET', '/remote/tags', { path: self.repoPath }, function(err, result) {
+	if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath }, function(err, result) {
 			remoteTags = result;
 			done(err, result);
 			return !err || self._isRemoteError(err.errorCode);
@@ -115,7 +115,7 @@ RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
 
 RepositoryViewModel.prototype.updateRemotes = function() {
 	var self = this;
-	api.query('GET', '/remotes', { path: this.repoPath }, function(err, remotes) {
+	this.app.get('/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.remotes(remotes);
