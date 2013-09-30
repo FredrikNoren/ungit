@@ -181,6 +181,9 @@ FileViewModel.prototype.toogleStaged = function() {
 FileViewModel.prototype.discardChanges = function() {
 	api.query('POST', '/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
+FileViewModel.prototype.ignoreFile = function() {
+	api.query('POST', '/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
+}
 FileViewModel.prototype.resolveConflict = function() {
 	api.query('POST', '/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
