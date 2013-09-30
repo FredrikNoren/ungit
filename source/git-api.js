@@ -179,12 +179,15 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.post(exports.pathPrefix + '/ignorefile', ensureAuthenticated, ensurePathExists, function(req, res){
 		var gitIgnoreFile = req.param('path').trim() + '/.gitignore';
 		var ignoreFile = req.param('file').trim();
+		var socket = sockets[req.param('socketId')];
 
 		fs.readFile(gitIgnoreFile, function(err, data) { 
 			if(data.toString().indexOf(ignoreFile) < 0 ) {
 				fs.appendFile(gitIgnoreFile, '\n' + ignoreFile, function(err) {
 					if(err) {
 						return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
+					} else {
+						socket.emit('refresh-staging');
 					}
 				}); 
 			}
