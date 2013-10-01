@@ -1,4 +1,3 @@
-
 <div class="repository animated fadeInLeft" data-ta="repository-view">
 
 	<!-- ko if: gerritIntegration -->
@@ -64,7 +63,7 @@
 									<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
 								</div>
 								<div class="body" data-bind="text: body, visible: nodeIsMousehover"></div>
-								<div class="text-muted" data-bind="text: authorDateFromNow"></div>
+								<div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
 							</div>
 						</div>
 					</div>
