@@ -176,6 +176,26 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
+	app.post(exports.pathPrefix + '/ignorefile', ensureAuthenticated, ensurePathExists, function(req, res){
+		var currentPath = req.param('path').trim();
+		var gitIgnoreFile = currentPath + '/.gitignore';
+		var ignoreFile = req.param('file').trim();
+		var socket = sockets[req.param('socketId')];
+
+		fs.readFile(gitIgnoreFile, function(err, data) { 
+			if(data.toString().indexOf(ignoreFile) < 0 ) {
+				fs.appendFile(gitIgnoreFile, '\n' + ignoreFile, function(err) {
+					if(err) {
+						return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
+					} else {
+						socket.emit('working-tree-changed', { repository: currentPath });
+						return res.json({});
+					}
+				}); 
+			}
+		});
+	});
+
 	app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res){
 		git.commit(req.param('path'), req.param('amend'), req.param('message'), req.param('files'))
 			.always(jsonResultOrFail.bind(null, res))
