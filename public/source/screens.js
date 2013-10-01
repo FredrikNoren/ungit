@@ -63,7 +63,7 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
 	var self = this;
-	api.query('GET', '/quickstatus', { path: this.path }, function(err, status){
+	this.app.get('/quickstatus', { path: this.path }, function(err, status){
 		self.loadingProgressBar.stop();
 		if (err) return;
 		if (status == 'inited') {
@@ -79,7 +79,7 @@ PathViewModel.prototype.updateStatus = function() {
 }
 PathViewModel.prototype.initRepository = function() {
 	var self = this;
-	api.query('POST', '/init', { path: this.path }, function(err, res) {
+	this.app.post('/init', { path: this.path }, function(err, res) {
 		if (err) return;
 		self.updateStatus();
 	});
@@ -96,7 +96,7 @@ PathViewModel.prototype.cloneRepository = function() {
 	};
 	this.app.programEvents.add(programEventListener);
 
-	api.query('POST', '/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+	this.app.post('/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
 		self.app.programEvents.remove(programEventListener);
 		self.cloningProgressBar.stop();
 		if (err) return;

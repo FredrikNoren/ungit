@@ -14,6 +14,8 @@ var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 
 var GitGraphViewModel = function(repository) {
 	var self = this;
+	this.repository = repository;
+	this.app = repository.app;
 	this.maxNNodes = 25;
 	this.nodes = ko.observable([]);
 	this.edgesById = {};
@@ -21,7 +23,6 @@ var GitGraphViewModel = function(repository) {
 	this.daySeparators = ko.observable();
 	this.nodesById = {};
 	this.refsByRefName = {};
-	this.repository = repository;
 	this.repoPath = repository.repoPath;
 	this.isLoading = ko.observable(false);
 	this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000, 400);
@@ -79,7 +80,7 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 	var self = this;
 	this.isLoading(true);
 	this.nodesLoader.start();
-	api.query('GET', '/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
+	this.app.get('/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
 		if (err) { self.nodesLoader.stop(); return; }
 		self.setNodesFromLog(logEntries);
 		self.isLoading(false);
@@ -88,7 +89,7 @@ GitGraphViewModel.prototype.loadNodesFromApi = function() {
 }
 GitGraphViewModel.prototype.updateBranches = function() {
 	var self = this;
-	api.query('GET', '/checkout', { path: this.repoPath }, function(err, branch) {
+	this.app.get('/checkout', { path: this.repoPath }, function(err, branch) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
 		self.checkedOutBranch(branch);

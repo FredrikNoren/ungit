@@ -6,6 +6,7 @@ var screens = require('./screens');
 var StagingViewModel = function(repository) {
 	var self = this;
 	this.repository = repository;
+	this.app =repository.app;
 	this.repoPath = this.repository.repoPath;
 	this.filesByPath = {};
 	this.files = ko.observable([]);
@@ -53,7 +54,7 @@ exports.StagingViewModel = StagingViewModel;
 StagingViewModel.prototype.refresh = function() {
 	var self = this;
 	this.refreshingProgressBar.start();
-	api.query('GET', '/status', { path: this.repoPath }, function(err, status) {
+	this.app.get('/status', { path: this.repoPath }, function(err, status) {
 		self.refreshingProgressBar.stop();
 		if (err) return;
 		self.setFiles(status.files);
@@ -104,7 +105,7 @@ StagingViewModel.prototype.commit = function() {
 	});
 	var commitMessage = this.commitMessageTitle();
 	if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-	api.query('POST', '/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
+	this.app.post('/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
 		if (err) {
 			if (err.errorCode == 'no-git-name-email-configured') {
 				self.repository.app.content(new screens.UserErrorViewModel({
@@ -125,14 +126,14 @@ StagingViewModel.prototype.commit = function() {
 StagingViewModel.prototype.rebaseContinue = function() {
 	var self = this;
 	this.rebaseContinueProgressBar.start();
-	api.query('POST', '/rebase/continue', { path: this.repository.repoPath }, function(err, res) {
+	this.app.post('/rebase/continue', { path: this.repository.repoPath }, function(err, res) {
 		self.rebaseContinueProgressBar.stop();
 	});
 }
 StagingViewModel.prototype.rebaseAbort = function() {
 	var self = this;
 	this.rebaseAbortProgressBar.start();
-	api.query('POST', '/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
+	this.app.post('/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
 		self.rebaseAbortProgressBar.stop();
 	});
 }
@@ -141,14 +142,14 @@ StagingViewModel.prototype.mergeContinue = function() {
 	this.mergeContinueProgressBar.start();
 	var commitMessage = this.commitMessageTitle();
 	if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-	api.query('POST', '/merge/continue', { path: this.repository.repoPath, message: commitMessage }, function(err, res) {
+	this.app.post('/merge/continue', { path: this.repository.repoPath, message: commitMessage }, function(err, res) {
 		self.mergeContinueProgressBar.stop();
 	});
 }
 StagingViewModel.prototype.mergeAbort = function() {
 	var self = this;
 	this.mergeAbortProgressBar.start();
-	api.query('POST', '/merge/abort', { path: this.repository.repoPath }, function(err, res) {
+	this.app.post('/merge/abort', { path: this.repository.repoPath }, function(err, res) {
 		self.mergeAbortProgressBar.stop();
 	});
 }
@@ -158,13 +159,14 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
-	api.query('POST', '/discardchanges', { path: this.repository.repoPath, all: true });
+	this.app.post('/discardchanges', { path: this.repository.repoPath, all: true });
 }
 
 
 var FileViewModel = function(staging) {
 	var self = this;
 	this.staging = staging;
+	this.app = staging.app;
 
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
@@ -179,13 +181,13 @@ FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-	api.query('POST', '/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
+	this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.ignoreFile = function() {
 	api.query('POST', '/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.resolveConflict = function() {
-	api.query('POST', '/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
+	this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
@@ -199,7 +201,7 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this;
 	if (this.showingDiffs()) {
 		if (drawProgressBar) this.diffsProgressBar.start();
-		api.query('GET', '/diff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
+		this.app.get('/diff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
 			if (drawProgressBar) self.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];

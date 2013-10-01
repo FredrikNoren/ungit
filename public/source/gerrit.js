@@ -7,6 +7,7 @@ var _ = require('underscore');
 var GerritIntegrationViewModel = function(repository) {
 	var self = this;
 	this.repository = repository;
+	this.app = repository.app;
 	this.showInitCommmitHook = ko.observable(false);
 	this.status = ko.observable('loading');
 	this.initGerritHookProgressBar = new ProgressBarViewModel('gerrit-init-hook-' + repository.repoPath, 4000);
@@ -19,7 +20,7 @@ var GerritIntegrationViewModel = function(repository) {
 exports.GerritIntegrationViewModel = GerritIntegrationViewModel;
 GerritIntegrationViewModel.prototype.updateCommitHook = function() {
 	var self = this;
-	api.query('GET', '/gerrit/commithook', { path: this.repository.repoPath }, function(err, hook) {
+	this.app.get('/gerrit/commithook', { path: this.repository.repoPath }, function(err, hook) {
 		self.showInitCommmitHook(!hook.exists);
 	});
 }
@@ -27,7 +28,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 	var self = this;
 	self.status('loading');
 	this.changesLoader.start();
-	api.query('GET', '/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
+	this.app.get('/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
 		self.changesLoader.stop();
 		if (err) {
 			self.status('failed');
@@ -44,7 +45,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	var self = this;
 	this.initGerritHookProgressBar.start();
-	api.query('POST', '/gerrit/commithook', { path: this.repository.repoPath }, function(err) {
+	this.app.post('/gerrit/commithook', { path: this.repository.repoPath }, function(err) {
 		self.updateCommitHook();
 		self.initGerritHookProgressBar.stop();
 	});
@@ -70,7 +71,7 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 	var change = this.getChangeFromNode(this.repository.graph.HEAD());
 	if (change) branch = change.data.branch;
 
-	api.query('POST', '/push', { path: this.repository.graph.repoPath, remoteBranch: 'refs/for/' + branch }, function(err, res) {
+	this.app.post('/push', { path: this.repository.graph.repoPath, remoteBranch: 'refs/for/' + branch }, function(err, res) {
 		self.updateChanges();
 		self.pushingProgressBar.stop();
 	});
@@ -78,6 +79,7 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 
 var GerritChangeViewModel = function(gerritIntegration, args) {
 	this.gerritIntegration = gerritIntegration;
+	this.app = gerritIntegration.app;
 	this.subject = args.subject;
 	this.ownerName = args.owner.name;
 	this.sha1 = args.sha1;
@@ -89,8 +91,8 @@ var GerritChangeViewModel = function(gerritIntegration, args) {
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;
 	this.checkingOutProgressBar.start();
-	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
-		api.query('POST', '/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
+	this.app.post('/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
+		self.app.post('/checkout', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
 			self.checkingOutProgressBar.stop();
 		});
 	});
@@ -98,8 +100,8 @@ GerritChangeViewModel.prototype.checkout = function() {
 GerritChangeViewModel.prototype.cherryPick = function() {
 	var self = this;
 	this.cherryPickingProgressBar.start();
-	api.query('POST', '/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
-		api.query('POST', '/cherrypick', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
+	this.app.post('/fetch', { path: this.gerritIntegration.repository.repoPath, ref: this.data.currentPatchSet.ref }, function(err) {
+		self.app.post('/cherrypick', { path: self.gerritIntegration.repository.repoPath, name: 'FETCH_HEAD' }, function(err) {
 			self.cherryPickingProgressBar.stop();
 		});
 	});

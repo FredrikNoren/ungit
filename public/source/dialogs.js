@@ -17,14 +17,15 @@ CredentialsDialogViewModel.prototype.onclose = function() {
 }
 
 
-var LoginViewModel = function() {
+var LoginViewModel = function(app) {
 	var self = this;
+	this.app = app;
 	this.loggedIn = new signals.Signal();
 	this.status = ko.observable('loading');
 	this.username = ko.observable();
 	this.password = ko.observable();
 	this.loginError = ko.observable();
-	api.query('GET', '/loggedin', undefined, function(err, status) {
+	this.app.get('/loggedin', undefined, function(err, status) {
 		if (status.loggedIn) {
 			self.loggedIn.dispatch();
 			self.status('loggedIn');
@@ -35,7 +36,7 @@ var LoginViewModel = function() {
 exports.LoginViewModel = LoginViewModel;
 LoginViewModel.prototype.login = function() {
 	var self = this;
-	api.query('POST', '/login',  { username: this.username(), password: this.password() }, function(err, res) {
+	this.app.post('/login',  { username: this.username(), password: this.password() }, function(err, res) {
 		if (err) {
 			if (err.res.body.error) {
 				self.loginError(err.res.body.error);

@@ -7,7 +7,6 @@ require('../vendor/js/bootstrap/modal');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
 var hasher = require('hasher');
 var crossroads = require('crossroads');
-var Api = require('./api');
 var AppViewModel = require('./app');
 var screens = require('./screens');
 var CrashViewModel = screens.CrashViewModel;
@@ -204,7 +203,7 @@ ko.bindingHandlers.autocomplete = {
         var handleKeyEvent = function(event) {
             lastChar = $(element).val().slice(-1);
             if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
-                api.query('GET', '/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
+                app.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
                     if (err) {
                         if (err.errorCode == 'read-dir-failed') return true;
                         else return false;
@@ -286,10 +285,8 @@ CrashHandlerViewModel.prototype.templateChooser = function(data) {
 };
 
 
-api = new Api();
 var crashHandler = new CrashHandlerViewModel();
 var app = new AppViewModel(crashHandler, browseTo);
-api.app = app;
 crashHandler.content(app);
 
 ko.applyBindings(crashHandler);
