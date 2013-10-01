@@ -79,9 +79,6 @@ var AppViewModel = function(crashHandler, browseTo) {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onGitDirectoryChanged();
 	}, 500));
-	this.refreshStaging = blockable(_.throttle(function() {
-		self.content().repository().staging.refresh();
-	}, 500));
 	this._initSocket();
 }
 module.exports = AppViewModel;
@@ -112,9 +109,6 @@ AppViewModel.prototype._initSocket = function() {
 		self._getCredentials(function(credentials) {
 			self.socket.emit('credentials', credentials);
 		});
-	});
-	this.socket.on('refresh-staging', function () {
-		self.refreshStaging();
 	});
 }
 // Check if the server is still alive

@@ -177,7 +177,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/ignorefile', ensureAuthenticated, ensurePathExists, function(req, res){
-		var gitIgnoreFile = req.param('path').trim() + '/.gitignore';
+		var currentPath = req.param('path').trim();
+		var gitIgnoreFile = currentPath + '/.gitignore';
 		var ignoreFile = req.param('file').trim();
 		var socket = sockets[req.param('socketId')];
 
@@ -187,7 +188,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 					if(err) {
 						return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
 					} else {
-						socket.emit('refresh-staging');
+						socket.emit('working-tree-changed', { repository: currentPath });
+						return res.json({});
 					}
 				}); 
 			}

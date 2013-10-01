@@ -184,7 +184,7 @@ FileViewModel.prototype.discardChanges = function() {
 	this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.ignoreFile = function() {
-	api.query('POST', '/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
+	this.app.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.resolveConflict = function() {
 	this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
