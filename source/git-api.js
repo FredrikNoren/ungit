@@ -127,7 +127,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('init' + (req.body.bare ? ' --bare --shared' : ''), req.param('path'))
+		git('init' + (req.param('bare') ? ' --bare --shared' : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
@@ -142,13 +142,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
-		git(credentialsOption(req.param('socketId')) + ' fetch ' + (req.body.ref ? 'origin ' + req.body.ref : ''), req.param('path'))
+		git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' + (req.param('ref') ? req.param('ref') : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
-		git(credentialsOption(req.param('socketId')) + ' push origin ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
+		git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
@@ -242,7 +242,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.del(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-		git(credentialsOption(req.param('socketId')) + ' push origin :"' + req.param('name').trim() + '"', req.param('path'))
+		git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' :"' + req.param('name').trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
@@ -254,7 +254,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ', req.param('path'))
+		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ' + req.param('remote'), req.param('path'))
 			.parser(gitParser.parseGitLsRemote)
 			.always(jsonResultOrFail.bind(null, res));
 	});
@@ -273,7 +273,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 	
 	app.del(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('push origin :"refs/tags/' + req.param('name').trim() + '"', req.param('path'))
+		git('push ' + req.param('remote') + ' :"refs/tags/' + req.param('name').trim() + '"', req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));
 	});
@@ -313,6 +313,11 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
 		git.remoteShow(req.param('path'), req.params.name)
+			.always(jsonResultOrFail.bind(null, res));
+	});
+
+	app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
+		git('remote add ' + req.param('name') + ' ' + req.param('url'), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res));
 	});
 
@@ -425,7 +430,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin')
+			git.remoteShow(repoPath, req.param('remote'))
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
 					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
@@ -444,7 +449,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin')
+			git.remoteShow(repoPath, req.param('remote'))
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
 					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);

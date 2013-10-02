@@ -186,7 +186,6 @@ test('Should be possible to create and destroy a branch', function(done) {
 
 test('Should be possible to create and destroy a tag', function(done) {
 	createTag('tagwillbedeleted', function() {
-		page.render('clicktestout/testy.png');
 		helpers.click(page, '[data-ta="tag"][data-ta-name="tagwillbedeleted"]');
 		helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
 		helpers.waitForNotElement(page, '[data-ta="tag"][data-ta-name="tagwillbedeleted"]', function() {
@@ -256,6 +255,37 @@ test('Merge', function(done) {
 	refAction(page, 'testbranch', 'merge', done);
 });
 
+// --- Adding remotes ---
+
+var bareRepoPath;
+
+test('Create a bare repo (not in ui)', function(done) {
+	bareRepoPath = testRootPath + '/barerepo';
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(bareRepoPath), function() {
+		backgroundAction('POST', 'http://localhost:' + config.port + '/api/init?bare=true&path=' + encodeURIComponent(bareRepoPath), done);
+	});
+});
+
+test('Adding a remote', function(done) {
+	helpers.click(page, '[data-ta="remotes-menu"]');
+	helpers.click(page, '[data-ta="show-add-remote-dialog"]');
+	helpers.waitForElement(page, '[data-ta-dialog="add-remote"]', function() {
+		helpers.click(page, '[data-ta-dialog="add-remote"] [data-ta="name"]');
+		helpers.write(page, 'myremote');
+		helpers.click(page, '[data-ta-dialog="add-remote"] [data-ta="url"]');
+		helpers.write(page, bareRepoPath);
+		helpers.click(page, '[data-ta-dialog="add-remote"] [data-ta="submit"]');
+		helpers.waitForElement(page, '[data-ta-remote="myremote"]', function() {
+			done();
+		});
+	});
+});
+
+test('Fetch from newly added remote', function(done) {
+	fetch(function() {
+		done();
+	});
+});
 
 // ----------- CLONING -------------
 
@@ -285,13 +315,17 @@ test('Clone repository should bring you to repo page', function(done) {
 	});
 });
 
-test('Should be possible to fetch', function(done) {
+var fetch = function(callback) {
 	helpers.click(page, '[data-ta="fetch"]');
 	helpers.waitForElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
 		helpers.waitForNotElement(page, '[data-ta="fetch"] [data-ta="progress-bar"]', function() {
-			done();
+			callback();
 		});
 	});
+}
+
+test('Should be possible to fetch', function(done) {
+	fetch(done);
 });
 
 test('Should be possible to create and push a branch', function(done) {

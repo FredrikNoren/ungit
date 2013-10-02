@@ -101,7 +101,7 @@ describe('git-api remote', function () {
 	});
 
 	it('pushing form "local1" to "remote" should work', function(done) {
-		common.post(req, '/push', { path: testDirLocal1 }, done);
+		common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }, done);
 	});
 
 	it('cloning "remote" to "local2" should work', function(done) {
@@ -127,12 +127,12 @@ describe('git-api remote', function () {
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
 			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [testFile] }, done); },
-			function(done) { common.post(req, '/push', { path: testDirLocal1 }, done); }
+			function(done) { common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }, done); }
 		], done);
 	});
 
 	it('fetching in "local2" should work', function(done) {
-		common.post(req, '/fetch', { path: testDirLocal2 }, done);
+		common.post(req, '/fetch', { path: testDirLocal2, remote: 'origin' }, done);
 	});
 
 	it('log in "local2" should show the branch as one behind', function(done) {
@@ -210,7 +210,7 @@ describe('git-api remote', function () {
 	});
 
 	it('should be possible to push a tag from "local2"', function(done) {
-		common.post(req, '/push', { path: testDirLocal2, localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
+		common.post(req, '/push', { path: testDirLocal2, remote: 'origin', localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
 	});
 
 	it('log in "local2" should show the local tag', function(done) {
@@ -222,7 +222,7 @@ describe('git-api remote', function () {
 	});
 
 	it('remote tags in "local2" should show the remote tag', function(done) {
-		common.get(req, '/remote/tags', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' }, done, function(err, res) {
 			expect(res.body.map(function(tag) { return tag.name; })).to.contain('refs/tags/v1.0^{}');
 			done();
 		});

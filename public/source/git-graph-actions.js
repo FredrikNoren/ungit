@@ -225,7 +225,7 @@ GraphActions.Push.prototype.perform = function( callback) {
 	};
 	this.graph.repository.app.programEvents.add(programEventListener);
 	var remoteBranch = this.graph.currentActionContext();
-	this.app.post('/push', { path: this.graph.repoPath, 
+	this.app.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
 			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
 		self.graph.repository.app.programEvents.remove(programEventListener);
 		if (!err) {
@@ -286,7 +286,7 @@ GraphActions.Delete.prototype.perform = function(callback) {
 	var self = this;
 	var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
 	if (this.graph.currentActionContext().isRemote) url = '/remote' + url;
-	this.app.del(url, { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName }, function(err) {
+	this.app.del(url, { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(), name: this.graph.currentActionContext().displayName }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
 		if (url == '/remote/tags')

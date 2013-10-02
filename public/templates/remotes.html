@@ -1,0 +1,19 @@
+<div class="btn-group fetchButton">
+	<button type="button" class="btn btn-default" data-ta="fetch" data-bind="click: clickFetch, enable: fetchEnabled">
+		<span class="glyphicon glyphicon-refresh"></span>
+		<span data-bind="text: fetchLabel"></span>
+		<!-- ko if: fetchingProgressBar.running -->
+		<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
+		<!-- /ko -->
+	</button>
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta="remotes-menu">
+		<span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu">
+		<!-- ko foreach: remotes -->
+		<li><a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-remote': name }"></a></li>
+		<!-- /ko -->
+		<li class="divider"></li>
+		<li><a href="#" data-bind="click: showAddRemoteDialog" data-ta="show-add-remote-dialog">Add a new remote</a></li>
+	</ul>
+</div>

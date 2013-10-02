@@ -5,6 +5,7 @@ var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
 var async = require('async');
 var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
 var StagingViewModel = require('./staging').StagingViewModel;
+var dialogs = require('./dialogs');
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
@@ -16,13 +17,9 @@ var RepositoryViewModel = function(app, repoPath) {
 	this.app = app;
 	this.repoPath = repoPath;
 	this.gerritIntegration = ko.observable(null);
-	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 	this.graph = new GitGraphViewModel(this);
+	this.remotes = new RemotesViewModel(this);
 	this.staging = new StagingViewModel(this);
-	this.remotes = ko.observable();
-	this.showFetchButton = ko.computed(function() {
-		return self.graph.hasRemotes();
-	});
 	this.watcherReady = ko.observable(false);
 	this.showLog = ko.computed(function() {
 		return !self.staging.inRebase() && !self.staging.inMerge();
@@ -31,13 +28,6 @@ var RepositoryViewModel = function(app, repoPath) {
 	if (ungit.config.gerrit) {
 		self.gerritIntegration(new GerritIntegrationViewModel(self));
 	}
-	var hasAutoFetched = false;
-	this.remotes.subscribe(function(newValue) {
-		if (newValue.length > 0 && !hasAutoFetched && ungit.config.autoFetch) {
-			hasAutoFetched = true;
-			self.fetch({ nodes: true, tags: true });
-		}
-	});
 
 	self.onWorkingTreeChanged();
 	self.onGitDirectoryChanged();
@@ -50,13 +40,36 @@ RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
 RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
 	this.graph.loadNodesFromApi();
 	this.graph.updateBranches();
-	this.updateRemotes();
+	this.remotes.updateRemotes();
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
-RepositoryViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
-RepositoryViewModel.prototype.fetch = function(options, callback) {
+
+
+
+function RemotesViewModel(repository) {
+	var self = this;
+	this.repository = repository;
+	this.repoPath = repository.repoPath;
+	this.app = repository.app;
+	this.remotes = ko.observable([]);
+	this.currentRemote = ko.observable(null);
+	this.fetchLabel = ko.computed(function() {
+		if (self.currentRemote()) return 'Fetch nodes from ' + self.currentRemote();
+		else return 'No remotes specified';
+	})
+
+	this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
+
+	this.fetchEnabled = ko.computed(function() {
+		return self.remotes().length > 0 && !self.fetchingProgressBar.running();
+	});
+
+	this.shouldAutoFetch = ungit.config.autoFetch;
+}
+RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
+RemotesViewModel.prototype.fetch = function(options, callback) {
 	var self = this;
 
 	var programEventListener = function(event) {
@@ -67,23 +80,48 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 
 	this.fetchingProgressBar.start();
 	var jobs = [];
-	if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath }, done); });
-	if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath }, done);  });
+	if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath, remote: self.currentRemote() }, done); });
+	if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath, remote: self.currentRemote() }, done);  });
 	async.parallel(jobs, function(err, result) {
 		self.app.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
 
-		if (!err && options.tags) self.graph.setRemoteTags(result[0]);
+		if (!err && options.tags) self.repository.graph.setRemoteTags(result[0]);
 	});
 }
 
-RepositoryViewModel.prototype.updateRemotes = function() {
+RemotesViewModel.prototype.updateRemotes = function() {
 	var self = this;
 	this.app.get('/remotes', { path: this.repoPath }, function(err, remotes) {
 		if (err && err.errorCode == 'not-a-repository') return true;
 		if (err) return;
+		remotes = remotes.map(function(remote) {
+			return {
+				name: remote,
+				changeRemote: function() { self.currentRemote(remote) }
+			}
+		});
 		self.remotes(remotes);
-		self.graph.hasRemotes(remotes.length != 0);
+		self.repository.graph.hasRemotes(remotes.length != 0);
+		if (!self.currentRemote() && remotes.length > 0) {
+			self.currentRemote(remotes[0].name);
+			if (self.shouldAutoFetch) {
+				self.fetch({ nodes: true, tags: true });
+			}
+		}
+		self.shouldAutoFetch = false;
 	});
 }
-
+RemotesViewModel.prototype.showAddRemoteDialog = function() {
+	var self = this;
+	var diag = new dialogs.AddRemoteDialogViewModel();
+	diag.closed.add(function() {
+		if (diag.isSubmitted()) {
+			self.app.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {
+				if (err) return;
+				self.updateRemotes();
+			})
+		}
+	});
+	this.app.showDialog(diag);
+}

@@ -17,15 +17,7 @@
 
 		<!-- ko if: showLog -->
 
-		<!-- ko if: showFetchButton -->
-		<button class="fetchButton btn btn-default" data-ta="fetch" data-bind="click: clickFetch, disable: fetchingProgressBar.running">
-			<span class="glyphicon glyphicon-refresh"></span>
-			Fetch remote nodes
-			<!-- ko if: fetchingProgressBar.running -->
-			<!-- ko template: { name: 'progressBar', data: fetchingProgressBar } --><!-- /ko -->
-			<!-- /ko -->
-		</button>
-		<!-- /ko -->
+		<!-- ko template: { name: 'remotes', data: remotes } --><!-- /ko -->
 		
 		<!-- ko with: graph -->
 		<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">

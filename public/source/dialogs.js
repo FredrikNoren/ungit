@@ -1,51 +1,53 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var signals = require('signals');
+var inherits = require('util').inherits;
 
-function CredentialsDialogViewModel() {
-	this.username = ko.observable();
-	this.password = ko.observable();
+function FormDialogViewModel() {
 	this.closed = new signals.Signal();
+	this.items = ko.observable([]);
+	this.title = ko.observable();
+	this.isSubmitted = ko.observable(false);
+	this.taDialogName = ko.observable('');
 }
-exports.CredentialsDialogViewModel = CredentialsDialogViewModel;
-CredentialsDialogViewModel.prototype.template = 'credentialsDialog';
-CredentialsDialogViewModel.prototype.setCloser = function(closer) {
+FormDialogViewModel.prototype.template = 'formDialog';
+FormDialogViewModel.prototype.setCloser = function(closer) {
 	this.close = closer;
 }
-CredentialsDialogViewModel.prototype.onclose = function() {
+FormDialogViewModel.prototype.onclose = function() {
 	this.closed.dispatch();
 }
+FormDialogViewModel.prototype.submit = function() {
+	this.isSubmitted(true);
+	this.close();
+}
 
 
-var LoginViewModel = function(app) {
-	var self = this;
-	this.app = app;
-	this.loggedIn = new signals.Signal();
-	this.status = ko.observable('loading');
+function CredentialsDialogViewModel() {
+	FormDialogViewModel.call(this);
+	this.title('Remote requires authentication');
+	this.taDialogName('credentials-dialog');
 	this.username = ko.observable();
 	this.password = ko.observable();
-	this.loginError = ko.observable();
-	this.app.get('/loggedin', undefined, function(err, status) {
-		if (status.loggedIn) {
-			self.loggedIn.dispatch();
-			self.status('loggedIn');
-		}
-		else self.status('login');
-	});
+	this.items([
+		{ name: 'Username', value: this.username, placeholder: 'Username', autofocus: true, taName: 'username' },
+		{ name: 'Password', value: this.password, placeholder: 'Password', autofocus: false, taName: 'password' }
+	]);
 }
-exports.LoginViewModel = LoginViewModel;
-LoginViewModel.prototype.login = function() {
-	var self = this;
-	this.app.post('/login',  { username: this.username(), password: this.password() }, function(err, res) {
-		if (err) {
-			if (err.res.body.error) {
-				self.loginError(err.res.body.error);
-				return true;
-			}
-		} else {
-			self.loggedIn.dispatch();
-			self.status('loggedIn');
-		}
-	});
+inherits(CredentialsDialogViewModel, FormDialogViewModel);
+exports.CredentialsDialogViewModel = CredentialsDialogViewModel;
+
+
+function AddRemoteDialogViewModel() {
+	FormDialogViewModel.call(this);
+	this.title('Add new remote');
+	this.taDialogName('add-remote');
+	this.name = ko.observable();
+	this.url = ko.observable();
+	this.items([
+		{ name: 'Name', value: this.name, placeholder: 'Name', autofocus: true, taName: 'name' },
+		{ name: 'Url', value: this.url, placeholder: 'Url', autofocus: false, taName: 'url' }
+	]);
 }
-LoginViewModel.prototype.template = 'login';
+inherits(AddRemoteDialogViewModel, FormDialogViewModel);
+exports.AddRemoteDialogViewModel = AddRemoteDialogViewModel;

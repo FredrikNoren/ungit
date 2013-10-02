@@ -104,3 +104,36 @@ PathViewModel.prototype.cloneRepository = function() {
 	});
 }
 
+
+var LoginViewModel = function(app) {
+	var self = this;
+	this.app = app;
+	this.loggedIn = new signals.Signal();
+	this.status = ko.observable('loading');
+	this.username = ko.observable();
+	this.password = ko.observable();
+	this.loginError = ko.observable();
+	this.app.get('/loggedin', undefined, function(err, status) {
+		if (status.loggedIn) {
+			self.loggedIn.dispatch();
+			self.status('loggedIn');
+		}
+		else self.status('login');
+	});
+}
+exports.LoginViewModel = LoginViewModel;
+LoginViewModel.prototype.login = function() {
+	var self = this;
+	this.app.post('/login',  { username: this.username(), password: this.password() }, function(err, res) {
+		if (err) {
+			if (err.res.body.error) {
+				self.loginError(err.res.body.error);
+				return true;
+			}
+		} else {
+			self.loggedIn.dispatch();
+			self.status('loggedIn');
+		}
+	});
+}
+LoginViewModel.prototype.template = 'login';

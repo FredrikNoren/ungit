@@ -273,7 +273,7 @@ AppViewModel.prototype._backendErrorCodeToTip = {
 AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 	var self = this;
 	// Show a error screen for git errors (so that people have a chance to debug them)
-	if (err.res.body.isGitError) {
+	if (err.res.body && err.res.body.isGitError) {
 		// Skip report is used for "user errors"; i.e. it's something ungit can't really do anything about.
 		// It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
 		var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
@@ -285,6 +285,7 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
 			}
+			console.log('git-error', err); // Used by the clicktests
 		}
 		var gitErrors = this.gitErrors();
 		gitErrors.push({
