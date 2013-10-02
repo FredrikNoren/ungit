@@ -8,6 +8,7 @@ function FormDialogViewModel() {
 	this.items = ko.observable([]);
 	this.title = ko.observable();
 	this.isSubmitted = ko.observable(false);
+	this.showCancel = ko.observable(true);
 	this.taDialogName = ko.observable('');
 }
 FormDialogViewModel.prototype.template = 'formDialog';
@@ -27,11 +28,12 @@ function CredentialsDialogViewModel() {
 	FormDialogViewModel.call(this);
 	this.title('Remote requires authentication');
 	this.taDialogName('credentials-dialog');
+	this.showCancel(false);
 	this.username = ko.observable();
 	this.password = ko.observable();
 	this.items([
-		{ name: 'Username', value: this.username, placeholder: 'Username', autofocus: true, taName: 'username' },
-		{ name: 'Password', value: this.password, placeholder: 'Password', autofocus: false, taName: 'password' }
+		{ name: 'Username', value: this.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
+		{ name: 'Password', value: this.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
 	]);
 }
 inherits(CredentialsDialogViewModel, FormDialogViewModel);
@@ -45,8 +47,8 @@ function AddRemoteDialogViewModel() {
 	this.name = ko.observable();
 	this.url = ko.observable();
 	this.items([
-		{ name: 'Name', value: this.name, placeholder: 'Name', autofocus: true, taName: 'name' },
-		{ name: 'Url', value: this.url, placeholder: 'Url', autofocus: false, taName: 'url' }
+		{ name: 'Name', value: this.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
+		{ name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
 	]);
 }
 inherits(AddRemoteDialogViewModel, FormDialogViewModel);
