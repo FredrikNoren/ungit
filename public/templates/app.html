@@ -26,14 +26,34 @@
 	<div class="alert alert-info clearfix" data-bind="visible: showBugtrackingNagscreen">
 		<button type="button" class="close" data-bind="click: dismissBugtrackingNagscreen">&times;</button>
 		<p><strong>Help make ungit better with the press of a button!</strong></p>
-		<p>Enable bugtracking to automatically send anonymous bug reports when ungit crashes.
-		Enable usage statistics to send anonymous statistics on how ungit is used, which is used to figure out how to best improve ungit.
-		Enable both for maximum win!</p>
 
-		<button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button>
-		<button class="btn btn-primary" data-bind="click: enableBugtracking">Enable bugtracking</button>
+		<button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable automatic bug reports + anonymous usage statistics</button>
+		<button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button>
 		<button class="btn btn-default" data-bind="click: dismissBugtrackingNagscreen">Naah, I&#39;ll skip that</button>
 	</div>
+
+	<!-- ko foreach: gitErrors -->
+	<div class="alert alert-danger">
+		<button type="button" class="close" data-bind="click: dismiss">&times;</button>
+		<h3><span class="glyphicon glyphicon-warning-sign"></span> Unhandled git error!</h3>
+		<p>
+			Ungit tried to run a git command that resulted in an unhandled error. <span data-bind="visible: bugReportWasSent">An automatic bug report was sent.</span>
+		</p>
+		<p data-bind="visible: tip, text: tip"></p>
+		<p data-bind="visible: showEnableBugtracking">
+			<button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button> or 
+			<button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button> to automatically report bugs, and/or <a href="https://github.com/FredrikNoren/ungit/issues" target="_blank">file an issue on the ungit issue tracker</a>.
+		</p>
+		<h4>Command</h4>
+		<pre data-bind="text: command"></pre>
+		<h4>Error</h4>
+		<pre data-bind="text: error"></pre>
+		<h4>Stderr</h4>
+		<pre data-bind="text: stderr"></pre>
+		<h4>Stdout</h4>
+		<pre data-bind="text: stdout"></pre>
+	</div>
+	<!-- /ko -->
 </div>
 
 <!-- ko if: content -->

@@ -6,14 +6,6 @@
 
 	<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
 
-		<!-- ko if: remoteErrorPopup -->
-		<div class="alert alert-danger" data-ta="remote-error-popup">
-			<button type="button" class="close" data-bind="click: closeRemoteErrorPopup" aria-hidden="true">&times;</button>
-			<strong>Remote error!</strong>
-			<span data-bind="text: remoteErrorPopup"></span>
-		</div>
-		<!-- /ko -->
-
 		<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 
 		<!-- ko if: staging.inRebase -->

@@ -18,6 +18,7 @@ var AppViewModel = function(crashHandler, browseTo) {
 	this.dialog = ko.observable(null);
 	this.isAuthenticated = ko.observable(!ungit.config.authentication);
 	this.connectionState = ko.observable('connecting');
+	this.gitErrors = ko.observable([]);
 
 	this.visitedRepositories = ko.computed({
 		read: function() {
@@ -32,18 +33,25 @@ var AppViewModel = function(crashHandler, browseTo) {
 	this.currentVersion = ko.observable();
 	this.latestVersion = ko.observable();
 	this.newVersionAvailable = ko.observable();
-	this.showBugtrackingNagscreen = ko.observable(false);
+	this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
 	// The ungit.config variable collections configuration from all different paths and only updates when
 	// ungit is restarted
-	if(!ungit.config.bugtracking && !localStorage.getItem('bugtrackingNagscreenDismissed')) {
+	if(!ungit.config.bugtracking) {
 		// Whereas the userconfig only reflects what's in the ~/.ungitrc and updates directly,
 		// but is only used for changing around the configuration. We need to check this here
 		// since ungit may have crashed without the server crashing since we enabled bugtracking,
 		// and we don't want to show the nagscreen twice in that case.
 		this.get('/userconfig', undefined, function(err, userConfig) {
-			self.showBugtrackingNagscreen(!userConfig.bugtracking);
+			self.bugtrackingEnabled(userConfig.bugtracking);
 		});
 	}
+	this.bugtrackingNagscreenDismissed = ko.computed({
+		read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
+		write: function(value) { localStorage.setItem('bugtrackingNagscreenDismissed', value); }
+	})
+	this.showBugtrackingNagscreen = ko.computed(function() {
+		return !self.bugtrackingEnabled() && !self.bugtrackingNagscreenDismissed();
+	});
 	this.programEvents = new signals.Signal();
 	this.programEvents.add(function(event) {
 		console.log('Event:', event);
@@ -164,7 +172,7 @@ AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
 		userConfig.sendUsageStatistics = true;
 		self.post('/userconfig', userConfig, function(err) {
 			if (err) return;
-			self.showBugtrackingNagscreen(false);
+			self.bugtrackingEnabled(true);
 		});
 	});
 }
@@ -175,13 +183,12 @@ AppViewModel.prototype.enableBugtracking = function() {
 		userConfig.bugtracking = true;
 		self.post('/userconfig', userConfig, function(err) {
 			if (err) return;
-			self.showBugtrackingNagscreen(false);
+			self.bugtrackingEnabled(true);
 		});
 	});
 }
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
-	this.showBugtrackingNagscreen(false);
-	localStorage.setItem('bugtrackingNagscreenDismissed', true);
+	this.bugtrackingNagscreenDismissed(true);
 }
 AppViewModel.prototype.templateChooser = function(data) {
 	if (!data) return '';
@@ -244,12 +251,63 @@ AppViewModel.prototype.query = function(method, path, body, callback) {
 			callback(null, res.body);
 	});
 };
+
+AppViewModel.prototype._skipReportErrorCodes = [
+	'remote-timeout',
+	'permision-denied-publickey',
+	'no-supported-authentication-provided',
+	'offline',
+	'proxy-authentication-required',
+	'no-remote-configured',
+	'ssh-bad-file-number'
+];
+AppViewModel.prototype._backendErrorCodeToTip = {
+	'remote-timeout': 'Repository remote timeouted.',
+	'no-supported-authentication-provided': 'No supported authentication methods available. Try starting ssh-agent or pageant.',
+	'offline': 'Couldn\'t reach remote repository, are you offline?',
+	'proxy-authentication-required': 'Proxy error; proxy requires authentication.',
+	'no-remote-configured': 'No remote to list refs from.',
+	'ssh-bad-file-number': 'Got "Bad file number" error. This usually indicates that the port listed for the remote repository can\'t be reached.',
+	'non-fast-forward': 'Couldn\'t push, things have changed on the server. Try fetching new nodes.'
+};
 AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
-	if (ungit.config.bugtracking) {
-		bugsense.addExtraData('data', JSON.stringify(err.res.body));
-		bugsense.notify(new Error('Backend: ' + err.path + ', ' + err.errorSummary));
-	}
-	if (ungit.config.sendUsageStatistics) {
-		Keen.addEvent('unhandled-backend-error', { version: ungit.version, userHash: ungit.userHash });
+	var self = this;
+	// Show a error screen for git errors (so that people have a chance to debug them)
+	if (err.res.body.isGitError) {
+		// Skip report is used for "user errors"; i.e. it's something ungit can't really do anything about.
+		// It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
+		var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
+		if (!shouldSkipReport) {
+			if (ungit.config.bugtracking) {
+				bugsense.addExtraData('data', JSON.stringify(err.res.body));
+				bugsense.notify(new Error('Backend: ' + err.path + ', ' + err.errorSummary));
+			}
+			if (ungit.config.sendUsageStatistics) {
+				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
+			}
+		}
+		var gitErrors = this.gitErrors();
+		gitErrors.push({
+			tip: self._backendErrorCodeToTip[err.errorCode],
+			command: err.res.body.command,
+			error: err.res.body.error,
+			stdout: err.res.body.stdout,
+			stderr: err.res.body.stderr,
+			showEnableBugtracking: ko.computed(function() { return !self.bugtrackingEnabled() && !shouldSkipReport; }),
+			bugReportWasSent: ungit.config.bugtracking,
+			enableBugtrackingAndStatistics: self.enableBugtrackingAndStatistics.bind(self),
+			enableBugtracking: self.enableBugtracking.bind(self),
+			dismiss: function() {
+				var t = this;
+				var gitErrors = self.gitErrors();
+				gitErrors = gitErrors.filter(function(e) { return e != t; });
+				self.gitErrors(gitErrors);
+			}
+		});
+		this.gitErrors(gitErrors);
+	} 
+	// Everything else is just thrown
+	else {
+		throw new Error(err.errorSummary);
 	}
 }

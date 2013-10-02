@@ -228,21 +228,11 @@ GraphActions.Push.prototype.perform = function( callback) {
 	this.app.post('/push', { path: this.graph.repoPath, 
 			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
 		self.graph.repository.app.programEvents.remove(programEventListener);
-		if (err) {
-			if (err.errorCode == 'non-fast-forward') {
-				self.graph.repository.remoteErrorPopup('Couldn\'t push, things have changed on the server. Try fetching new nodes.');
-				setTimeout(function() {
-					self.graph.repository.closeRemoteErrorPopup();
-				}, 5000);
-				callback();
-				return true;
-			} else {
-				return;
-			}
+		if (!err) {
+			self.graph.loadNodesFromApi();
+			if (remoteBranch.isTag)
+				self.graph.repository.fetch({ tags: true });
 		}
-		self.graph.loadNodesFromApi();
-		if (remoteBranch.isTag)
-			self.graph.repository.fetch({ tags: true });
 		callback();
 	});
 }

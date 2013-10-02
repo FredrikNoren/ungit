@@ -12,7 +12,6 @@ var newId = function() { return idCounter++; };
 
 var RepositoryViewModel = function(app, repoPath) {
 	var self = this;
-	this.remoteErrorPopup = ko.observable();
 
 	this.app = app;
 	this.repoPath = repoPath;
@@ -53,9 +52,6 @@ RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
 	this.graph.updateBranches();
 	this.updateRemotes();
 }
-RepositoryViewModel.prototype.closeRemoteErrorPopup = function() {
-	this.remoteErrorPopup(null);
-}
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 	this.graph.updateAnimationFrame(deltaT);
 }
@@ -69,48 +65,16 @@ RepositoryViewModel.prototype.fetch = function(options, callback) {
 	};
 	this.app.programEvents.add(programEventListener);
 
-	var handleApiRemoteError = function(callback, err, result) {
-		callback(err, result);
-		return !err || self._isRemoteError(err.errorCode);
-	}
-
 	this.fetchingProgressBar.start();
 	var jobs = [];
-	var remoteTags;
-	if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath }, function(err, result) {
-			done(err, result);
-			return !err || self._isRemoteError(err.errorCode);
-		}); 
-	});
-	if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath }, function(err, result) {
-			remoteTags = result;
-			done(err, result);
-			return !err || self._isRemoteError(err.errorCode);
-		});
-	});
+	if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath }, done); });
+	if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath }, done);  });
 	async.parallel(jobs, function(err, result) {
 		self.app.programEvents.remove(programEventListener);
 		self.fetchingProgressBar.stop();
 
-		if (err) {
-			self.remoteErrorPopup(self._remoteErrorCodeToString[err.errorCode]);
-			return true;
-		}
-
-		if (options.tags) self.graph.setRemoteTags(remoteTags);
+		if (!err && options.tags) self.graph.setRemoteTags(result[0]);
 	});
-}
-RepositoryViewModel.prototype._remoteErrorCodeToString = {
-	'remote-timeout': 'Repository remote timeouted.',
-	'permision-denied-publickey': 'Permission denied (publickey).',
-	'no-supported-authentication-provided': 'No supported authentication methods available. Try starting ssh-agent or pageant.',
-	'offline': 'Couldn\'t reach remote repository, are you offline?',
-	'proxy-authentication-required': 'Proxy error; proxy requires authentication.',
-	'no-remote-configured': 'No remote to list refs from.',
-	'ssh-bad-file-number': 'Got "Bad file number" error. This usually indicates that the port listed for the remote repository can\'t be reached.'
-}
-RepositoryViewModel.prototype._isRemoteError = function(errorCode) {
-	return !!this._remoteErrorCodeToString[errorCode];
 }
 
 RepositoryViewModel.prototype.updateRemotes = function() {

@@ -83,7 +83,7 @@ var gitQueue = async.queue(function (task, callback) {
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
-        var err = { errorCode: 'unknown', command: task.command, error: error.toString(), stderr: stderr, stdout: stdout };
+        var err = { errorCode: 'unknown', isGitError: true, command: task.command, error: error.toString(), stderr: stderr, stdout: stdout };
         if (stderr.indexOf('Not a git repository') >= 0)
           err.errorCode = 'not-a-repository';
         else if (err.stderr.indexOf('Connection timed out') != -1)

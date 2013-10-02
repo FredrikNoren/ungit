@@ -32,11 +32,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 		self.changesLoader.stop();
 		if (err) {
 			self.status('failed');
-			if (err.errorCode == 'permision-denied-publickey') {
-				self.repository.remoteErrorPopup('Permission denied (publickey).');
-				return true;
-			}
-			return true;
+			return;
 		}
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 		self.status('loaded');
