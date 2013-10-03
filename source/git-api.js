@@ -430,7 +430,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, req.param('remote'))
+			git.remoteShow(repoPath, 'origin')
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
 					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
@@ -449,7 +449,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, req.param('remote'))
+			git.remoteShow(repoPath, 'origin')
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
 					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);

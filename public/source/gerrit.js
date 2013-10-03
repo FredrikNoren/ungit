@@ -28,7 +28,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 	var self = this;
 	self.status('loading');
 	this.changesLoader.start();
-	this.app.get('/gerrit/changes', { path: this.repository.repoPath, remote: this.repository.remotes.currentRemote() }, function(err, changes) {
+	this.app.get('/gerrit/changes', { path: this.repository.repoPath }, function(err, changes) {
 		self.changesLoader.stop();
 		if (err) {
 			self.status('failed');
@@ -41,7 +41,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	var self = this;
 	this.initGerritHookProgressBar.start();
-	this.app.post('/gerrit/commithook', { path: this.repository.repoPath, remote: this.repository.remotes.currentRemote() }, function(err) {
+	this.app.post('/gerrit/commithook', { path: this.repository.repoPath }, function(err) {
 		self.updateCommitHook();
 		self.initGerritHookProgressBar.stop();
 	});
