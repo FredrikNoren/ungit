@@ -280,7 +280,7 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 		if (!shouldSkipReport) {
 			if (ungit.config.bugtracking) {
 				bugsense.addExtraData('data', JSON.stringify(err.res.body));
-				bugsense.notify(new Error('Backend: ' + err.path + ', ' + err.errorSummary));
+				bugsense.notify(new Error('GitError: ' + err.path + ', ' + err.errorSummary));
 			}
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
