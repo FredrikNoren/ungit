@@ -189,6 +189,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		var ignoreFile = req.param('file').trim();
 		var socket = sockets[req.param('socketId')];
 
+		if (!fs.existsSync(gitIgnoreFile)) fs.writeFileSync(gitIgnoreFile, '');
+
 		fs.readFile(gitIgnoreFile, function(err, data) { 
 			if(data.toString().indexOf(ignoreFile) < 0 ) {
 				fs.appendFile(gitIgnoreFile, '\n' + ignoreFile, function(err) {
