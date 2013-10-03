@@ -242,7 +242,8 @@ git.discardChangesInFile = function(repoPath, filename) {
   git.status(repoPath, filename)
     .fail(task.setResult)
     .done(function(status) {
-      var fileStatus = status.files[filename];
+      if (Object.keys(status.files).length == 0) throw new Error('No files in status in discard, filename: ' + filename);
+      var fileStatus = status.files[Object.keys(status.files)[0]];
 
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
