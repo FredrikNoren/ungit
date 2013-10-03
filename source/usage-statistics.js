@@ -28,7 +28,6 @@ function UsageStatistics() {
 	});
 
 }
-module.exports = UsageStatistics;
 
 UsageStatistics.prototype._mergeDataWithDefaultData = function(data, callback) {
 	this.getDefaultData(function(err, defaultData) {
@@ -47,3 +46,5 @@ UsageStatistics.prototype.addEvent = function(event, data, callback) {
 		self.keen.addEvent(event, data, callback);	
 	});
 }
+
+module.exports = new UsageStatistics();

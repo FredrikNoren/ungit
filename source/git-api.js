@@ -9,6 +9,7 @@ var git = require('./git');
 var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
+var usageStatistics = require('./usage-statistics');
 var socketIO;
 
 exports.pathPrefix = '';
@@ -58,14 +59,20 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 					}
 					socket.join(path.normalize(data.path)); // join room for this path
 					socket.watcherPath = data.path;
-					socket.watcher = fs.watch(data.path, function(event, filename) {
-						// The .git dir changes on for instance 'git status', so we
-						// can't trigger a change here (since that would lead to an endless
-						// loop of the client getting the change and then requesting the new data)
-						if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-							socket.emit('working-tree-changed', { repository: data.path });
-					});
-					winston.info('Start watching ' + socket.watcherPath);
+					try {
+						socket.watcher = fs.watch(data.path, function(event, filename) {
+							// The .git dir changes on for instance 'git status', so we
+							// can't trigger a change here (since that would lead to an endless
+							// loop of the client getting the change and then requesting the new data)
+							if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
+								socket.emit('working-tree-changed', { repository: data.path });
+						});
+						winston.info('Start watching ' + socket.watcherPath);
+					} catch(err) {
+						// Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
+						// which is pretty weird, but hard to do anything about, so we just log them here.
+						usageStatistics.addEvent('fs-watch-exception');
+					}
 					callback();
 				});
 			});
