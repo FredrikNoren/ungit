@@ -67,6 +67,7 @@ helpers.startUngitServer = function(options, callback) {
 	helpers.log('Starting ungit server...', options);
 	var hasStarted = false;
 	options = ['bin/ungit', 
+		'--cliconfigonly',
 		'--port=' + config.port, 
 		'--no-launchBrowser', 
 		'--dev', 

@@ -8,13 +8,11 @@ var _ = require('underscore');
 var superagent = require('../vendor/js/superagent');
 
 
-var AppViewModel = function(crashHandler, browseTo) {
+var AppViewModel = function(browseTo) {
 	var self = this;
-	this.crashHandler = crashHandler;
 	this.browseTo = browseTo;
 	this.path = ko.observable();
 	this.dialog = ko.observable(null);
-	this.isAuthenticated = ko.observable(!ungit.config.authentication);
 	this.connectionState = ko.observable('connecting');
 	this.gitErrors = ko.observable([]);
 
@@ -27,22 +25,12 @@ var AppViewModel = function(crashHandler, browseTo) {
 		}
 	});
 
-	this.realContent = ko.observable(new screens.HomeViewModel(this));
+	this.content = ko.observable(new screens.HomeViewModel(this));
 	this.currentVersion = ko.observable();
 	this.latestVersion = ko.observable();
 	this.newVersionAvailable = ko.observable();
 	this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
-	// The ungit.config variable collections configuration from all different paths and only updates when
-	// ungit is restarted
-	if(!ungit.config.bugtracking) {
-		// Whereas the userconfig only reflects what's in the ~/.ungitrc and updates directly,
-		// but is only used for changing around the configuration. We need to check this here
-		// since ungit may have crashed without the server crashing since we enabled bugtracking,
-		// and we don't want to show the nagscreen twice in that case.
-		this.get('/userconfig', undefined, function(err, userConfig) {
-			self.bugtrackingEnabled(userConfig.bugtracking);
-		});
-	}
+
 	this.bugtrackingNagscreenDismissed = ko.computed({
 		read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
 		write: function(value) { localStorage.setItem('bugtrackingNagscreenDismissed', value); }
@@ -54,28 +42,6 @@ var AppViewModel = function(crashHandler, browseTo) {
 	this.programEvents.add(function(event) {
 		console.log('Event:', event);
 	});
-	this.get('/latestversion', undefined, function(err, version) {
-		self.currentVersion(version.currentVersion);
-		self.latestVersion(version.latestVersion);
-		self.newVersionAvailable(version.outdated);
-	});
-	if (ungit.config.authentication) {
-		this.authenticationScreen = new screens.LoginViewModel();
-		this.authenticationScreen.loggedIn.add(function() {
-			self.isAuthenticated(true);
-		});
-	}
-	this.content = ko.computed({
-		write: function(value) {
-			self.realContent(value);
-		},
-		read: function() {
-			if (self.connectionState() == 'disconnected') return new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect');
-			if (self.connectionState() == 'connecting') return null;
-			if (self.isAuthenticated()) return self.realContent();
-			else return self.authenticationScreen;
-		}
-	});
 
 	this.workingTreeChanged = blockable(_.throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
@@ -85,11 +51,30 @@ var AppViewModel = function(crashHandler, browseTo) {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onGitDirectoryChanged();
 	}, 500));
-	this._initSocket();
 }
 module.exports = AppViewModel;
 AppViewModel.prototype.template = 'app';
-AppViewModel.prototype._initSocket = function() {
+AppViewModel.prototype.shown = function() {
+	var self = this;
+	// The ungit.config variable collections configuration from all different paths and only updates when
+	// ungit is restarted
+	if(!ungit.config.bugtracking) {
+		// Whereas the userconfig only reflects what's in the ~/.ungitrc and updates directly,
+		// but is only used for changing around the configuration. We need to check this here
+		// since ungit may have crashed without the server crashing since we enabled bugtracking,
+		// and we don't want to show the nagscreen twice in that case.
+		this.get('/userconfig', undefined, function(err, userConfig) {
+			self.bugtrackingEnabled(userConfig.bugtracking);
+		});
+	}
+
+	this.get('/latestversion', undefined, function(err, version) {
+		self.currentVersion(version.currentVersion);
+		self.latestVersion(version.latestVersion);
+		self.newVersionAvailable(version.outdated);
+	});
+}
+AppViewModel.prototype.initSocket = function(callback) {
 	var self = this;
 	this.socket = io.connect();
 	this.socket.on('error', function(err) {
@@ -104,6 +89,7 @@ AppViewModel.prototype._initSocket = function() {
 	this.socket.on('connected', function (data) {
 		self.socketId = data.socketId;
 		self.connectionState('connected');
+		callback();
 	});
 	this.socket.on('working-tree-changed', function () {
 		self.workingTreeChanged();

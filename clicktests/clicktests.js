@@ -43,7 +43,6 @@ test('Init', function(done) {
 
 test('Open home screen', function(done) {
 	page.open('http://localhost:' + config.port, function() {
-		console.log('OPEN DONE')
 		helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 			done();
 		});
@@ -102,14 +101,17 @@ test('Entering an invalid path should bring you to an error screen', function(do
 	});
 });
 
-
-test('Entering a path to a repo should bring you to that repo', function(done) {
+var enterRepoByTypingPath = function(path, callback) {
 	helpers.click(page, '[data-ta="navigation-path"]');
 	helpers.selectAllText(page);
-	helpers.write(page, testRepoPath + '\n');
+	helpers.write(page, path + '\n');
 	helpers.waitForElement(page, '[data-ta="repository-view"]', function() {
-		done();
+		callback();
 	});
+}
+
+test('Entering a path to a repo should bring you to that repo', function(done) {
+	enterRepoByTypingPath(testRepoPath, done);
 });
 
 var createCommitWithNewFile = function(fileName, commitMessage, callback) {
@@ -335,17 +337,13 @@ test('Should be possible to create and push a branch', function(done) {
 });
 
 
-// Cleanup
+// Shutdown
 
 test('Go to home screen', function(done) {
 	helpers.click(page, '[data-ta="home-link"]');
 	helpers.waitForElement(page, '[data-ta="home-page"]', function() {
 		done();
 	});
-});
-
-test('Cleanup test directories', function(done) {
-	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/cleanup', done);
 });
 
 test('Shutdown server should bring you to connection lost page', function(done) {
@@ -355,5 +353,43 @@ test('Shutdown server should bring you to connection lost page', function(done) 
 		});
 	});
 });
+
+// Test authentication
+
+var testuser = { username: 'testuser', password: 'testpassword' }
+
+test('Start with authentication', function(done) {
+	helpers.startUngitServer(['--authentication', '--users.' + testuser.username + '=' + testuser.password], done);
+});
+
+test('Open home screen should show authentication dialog', function(done) {
+	page.open('http://localhost:' + config.port, function() {
+		helpers.waitForElement(page, '[data-ta="login-page"]', function() {
+			done();
+		});
+	});
+});
+
+test('Filling out the authentication should bring you to the home screen', function(done) {
+	helpers.click(page, '[data-ta="login-page"] [data-ta="input-username"]');
+	helpers.write(page, testuser.username);
+	helpers.click(page, '[data-ta="login-page"] [data-ta="input-password"]');
+	helpers.write(page, testuser.password);
+	helpers.click(page, '[data-ta="login-page"] [data-ta="submit"]');
+	helpers.waitForElement(page, '[data-ta="home-page"]', function() {
+		done();
+	});
+});
+
+test('Cleanup and shutdown server', function(done) {
+	backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/cleanup', function() {
+		shutdownServer(function() {
+			helpers.waitForElement(page, '[data-ta="user-error-page"]', function() {
+				done();
+			});
+		});
+	});
+});
+
 
 helpers.runTests(page);

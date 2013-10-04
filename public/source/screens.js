@@ -125,7 +125,7 @@ var LoginViewModel = function(app) {
 exports.LoginViewModel = LoginViewModel;
 LoginViewModel.prototype.login = function() {
 	var self = this;
-	this.app.post('/login',  { username: this.username(), password: this.password() }, function(err, res) {
+	this.app.post('/login', { username: this.username(), password: this.password() }, function(err, res) {
 		if (err) {
 			if (err.res.body.error) {
 				self.loginError(err.res.body.error);

@@ -61,8 +61,9 @@
 <!-- ungit-import-template: "login.html" -->
 <!-- ungit-import-template: "remotes.html" -->
 
-<div data-bind="template: { name: templateChooser, data: content }">
-</div>
+<!-- ko if: content -->
+<div data-bind="template: { name: templateChooser, data: content }"></div>
+<!-- /ko -->
 
 <script type="text/javascript">ungit = {}</script>
 <script type="text/javascript" src="/serverdata.js"></script>

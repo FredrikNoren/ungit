@@ -70,14 +70,22 @@ var defaultConfig = {
 module.exports = function() {
 	// Works for now but should be moved to bin/ungit
 	var argv = optimist
-		.usage('ungit [-b]')
+		.usage('ungit [-b] [--cliconfigonly]')
 		.alias('b', 'launchBrowser')
 		.describe('b', 'Launch a browser window with ungit when the ungit server is started')
+		.describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
 		.argv;
 
 	if (argv.help) {
 	    optimist.showHelp();
 	    process.exit(0);
+	} else if (argv.cliconfigonly) {
+		var deepExtend = require('deep-extend');
+		return deepExtend.apply(null, [
+    		defaultConfig,
+    		argv
+    	]);
+	} else {
+		return rc('ungit', defaultConfig, argv);
 	}
-	return rc('ungit', defaultConfig, argv);
 }

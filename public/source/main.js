@@ -260,27 +260,42 @@ window.requestAnimationFrame(updateAnimationFrame);
 
 var oldWindowOnError = window.onerror;
 window.onerror = function(err) {
-    crashHandler.content(new CrashViewModel());
+    appContainer.content(new CrashViewModel());
     if (oldWindowOnError) oldWindowOnError(err);
 };
 
 
-var CrashHandlerViewModel = function() {
+var AppContainerViewModel = function() {
     var self = this;
     this.content = ko.observable();
 }
-exports.CrashHandlerViewModel = CrashHandlerViewModel;
-CrashHandlerViewModel.prototype.templateChooser = function(data) {
+exports.AppContainerViewModel = AppContainerViewModel;
+AppContainerViewModel.prototype.templateChooser = function(data) {
     if (!data) return '';
     return data.template;
 };
 
 
-var crashHandler = new CrashHandlerViewModel();
-var app = new AppViewModel(crashHandler, browseTo);
-crashHandler.content(app);
+var appContainer = new AppContainerViewModel();
+var app = new AppViewModel(browseTo);
+app.connectionState.subscribe(function(value) {
+    if (value == 'disconnected') appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+})
+if (ungit.config.authentication) {
+    var authenticationScreen = new screens.LoginViewModel(app);
+    appContainer.content(authenticationScreen);
+    authenticationScreen.loggedIn.add(function() {
+        app.initSocket(function() {
+            appContainer.content(app);
+        });
+    });
+} else {
+    app.initSocket(function() {
+        appContainer.content(app);
+    });
+}
 
-ko.applyBindings(crashHandler);
+ko.applyBindings(appContainer);
 
 // routing
 crossroads.addRoute('/', function() {
