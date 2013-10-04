@@ -5,7 +5,6 @@ var _ = require('underscore');
 
 
 var GerritIntegrationViewModel = function(repository) {
-	var self = this;
 	this.repository = repository;
 	this.app = repository.app;
 	this.showInitCommmitHook = ko.observable(false);

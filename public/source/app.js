@@ -1,8 +1,6 @@
 
-var crossroads = require('crossroads');
 var signals = require('signals');
 var ko = require('../vendor/js/knockout-2.2.1');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
@@ -100,7 +98,7 @@ AppViewModel.prototype._initSocket = function() {
 			else self._onDisconnect();
 		});
 	});
-	this.socket.on('disconnect', function(data) {
+	this.socket.on('disconnect', function() {
 		self._onDisconnect();
 	});
 	this.socket.on('connected', function (data) {
@@ -113,7 +111,7 @@ AppViewModel.prototype._initSocket = function() {
 	this.socket.on('git-directory-changed', function () {
 		self.gitDirectoryChanged();
 	});
-	this.socket.on('request-credentials', function (data) {
+	this.socket.on('request-credentials', function () {
 		self._getCredentials(function(credentials) {
 			self.socket.emit('credentials', credentials);
 		});

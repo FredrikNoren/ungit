@@ -1,6 +1,5 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
-var Vector2 = require('../../source/utils/vector2');
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var inherits = require('util').inherits;
