@@ -60,12 +60,15 @@ exports.parseGitDiff = function(text) {
 			diff.aMode= /^deleted file mode (.+)$/.exec(lines.shift())[1];
 			diff.bMode = null;
 			diff.deletedFile = true;
-		} else if(m = /^similarity index (\d+)\%/.exec(lines[0])) {
-			diff.simIndex = m[1].to_i();
-			diff.renamedFile = true;
-			//shift away the 2 `rename from/to ...` lines
-			lines.shift();
-			lines.shift();
+		} else {
+			m = /^similarity index (\d+)\%/.exec(lines[0]);
+			if(m) {
+				diff.simIndex = m[1].to_i();
+				diff.renamedFile = true;
+				//shift away the 2 `rename from/to ...` lines
+				lines.shift();
+				lines.shift();
+			}
 		}
       	      	
       	// Shift away index, ---, +++ and @@ stuff
@@ -114,9 +117,10 @@ exports.parseGitLog = function(data) {
 		parser = parseHeaderLine;
 	}
 	var parseHeaderLine = function(row) {
+		var author, capture;
 		if (row.indexOf('Author: ') == 0) {
-			var author = row.split(' ').slice(1).join(' ');
-			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
+			author = row.split(' ').slice(1).join(' ');
+			capture = (/([^<]+)<([^>]+)>/g).exec(author);
 			if (capture) {
 				currentCommmit.authorName = capture[1].trim();
 				currentCommmit.authorEmail = capture[2].trim();
@@ -124,8 +128,8 @@ exports.parseGitLog = function(data) {
 				currentCommmit.authorName = author;
 			}
 		} else if (row.indexOf('Commit: ') == 0) {
-			var author = row.split(' ').slice(1).join(' ');
-			var capture = (/([^<]+)<([^>]+)>/g).exec(author);
+			author = row.split(' ').slice(1).join(' ');
+			capture = (/([^<]+)<([^>]+)>/g).exec(author);
 			currentCommmit.committerName = capture[1].trim();
 			currentCommmit.committerEmail = capture[2].trim();
 		} else if (row.indexOf('AuthorDate: ') == 0) {

@@ -30,7 +30,7 @@ BugTracker.prototype.notify = function(exception, clientName, callback) {
 	
 	winston.info('Sending exception to bugsense');
 
-	winston.query({ from: new Date - 1 * 60 * 60 * 1000, until: new Date }, function (err, logData) {
+	winston.query({ from: new Date() - 1 * 60 * 60 * 1000, until: new Date() }, function (err, logData) {
 		if (err) {
 			logData = { error: 'Error querying logdata', details: err };
 		}

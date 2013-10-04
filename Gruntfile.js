@@ -108,6 +108,23 @@ module.exports = function(grunt) {
         }
       }
     },
+    jshint: {
+      options: {
+        '-W033': true, // ignore Missing semicolon
+        '-W099': true, // ignore Mixed spaces and tabs
+        '-W041': true, // ignore Use '===' to compare with '0'
+        '-W065': true, // ignore Missing radix parameter
+        '-W069': true, // ignore ['HEAD'] is better written in dot notation
+      },
+      default: [
+        'Gruntfile.js',
+        'bin/*',
+        'public/source/**/*.js',
+        'source/**/*.js',
+        'test/**/*.js',
+        'clicktests/**/*.js'
+      ]
+    }
   });
 
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
@@ -152,6 +169,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-plato');
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);

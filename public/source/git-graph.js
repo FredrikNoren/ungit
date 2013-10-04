@@ -122,7 +122,6 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
 		var nodeViewModel = self.getNode(nodeData.sha1);
 		nodeViewModel.setData(nodeData);
 		nodeVMs.push(nodeViewModel);
-		var refVMs = [];
 		if (nodeData.refs) {
 			var refVMs = nodeData.refs.map(function(ref) {
 				var refViewModel = self.getRef(ref);
@@ -142,7 +141,7 @@ GitGraphViewModel.prototype.getNode = function(sha1) {
 GitGraphViewModel.prototype.getRef = function(refName) {
 	var refViewModel = this.refsByRefName[refName];
 	if (!refViewModel) {
-		var refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.colorFromHashOfString(refName) });
+		refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.colorFromHashOfString(refName) });
 		this.refs.push(refViewModel);
 	}
 	return refViewModel;

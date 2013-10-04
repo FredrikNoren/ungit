@@ -149,7 +149,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 GraphActions.Rebase.prototype.perform = function(callback) {
 	this.app.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
 		if (err) {
-			if (err.errorCode = 'merge-failed') {
+			if (err.errorCode == 'merge-failed') {
 				callback();
 				return true;
 			}
@@ -186,7 +186,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 GraphActions.Merge.prototype.perform = function(callback) {
 	this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
 		if (err) {
-			if (err.errorCode = 'merge-failed') {
+			if (err.errorCode == 'merge-failed') {
 				callback();
 				return true;
 			}

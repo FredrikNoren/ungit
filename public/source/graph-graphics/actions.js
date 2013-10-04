@@ -47,8 +47,8 @@ var RebaseViewModel = function(onto, nodesThatWillMove) {
 		var n = new NodeViewModel(
 			new Vector2(
 				onto.x() + (node.x() - _.last(self.path).x()),
-				onto.y() - i * (node.radius() * 2 + 20))
-			, node.radius());
+				onto.y() - i * (node.radius() * 2 + 20)),
+			node.radius());
 		var d = n.position().sub(node.position()).normalize();
 		var from = node.position().add(d.mul(node.radius() + 3));
 		var to = n.position().sub(d.mul(node.radius()));

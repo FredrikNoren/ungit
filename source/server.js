@@ -45,7 +45,7 @@ if (config.authentication) {
 	});
 
 	passport.use(new LocalStrategy(function(username, password, done) {
-	  	var password = users[username];
+	  	password = users[username];
 	  	if (users[username] && password == users[username])
 	  		done(null, username);
 	  	else
