@@ -62,7 +62,7 @@ var AppViewModel = function(crashHandler, browseTo) {
 		self.newVersionAvailable(version.outdated);
 	});
 	if (ungit.config.authentication) {
-		this.authenticationScreen = new LoginViewModel();
+		this.authenticationScreen = new screens.LoginViewModel();
 		this.authenticationScreen.loggedIn.add(function() {
 			self.isAuthenticated(true);
 		});

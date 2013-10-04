@@ -227,7 +227,7 @@ var tests = [];
 helpers.test = function(name, description) {
 	tests.push({ name: name, description: description });
 }
-helpers.runTests = function() {
+helpers.runTests = function(page) {
 	async.series(tests.map(function(test) {
 		return function(callback) {
 			helpers.log(cliColor.set('## Running test: ' + test.name, 'magenta'));

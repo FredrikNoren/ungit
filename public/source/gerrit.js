@@ -75,14 +75,15 @@ GerritIntegrationViewModel.prototype.pushForReview = function() {
 
 var GerritChangeViewModel = function(gerritIntegration, args) {
 	this.gerritIntegration = gerritIntegration;
+	this.repository = gerritIntegration.repository;
 	this.app = gerritIntegration.app;
 	this.subject = args.subject;
 	this.ownerName = args.owner.name;
 	this.sha1 = args.sha1;
 	this.data = args;
 	this.gerritUrl = this.data.url;
-	this.checkingOutProgressBar = new ProgressBarViewModel('gerrit-checkout-' + repository.repoPath, 4000);
-	this.cherryPickingProgressBar = new ProgressBarViewModel('gerrit-cherry-pick-' + repository.repoPath, 4000);
+	this.checkingOutProgressBar = new ProgressBarViewModel('gerrit-checkout-' + this.repository.repoPath, 4000);
+	this.cherryPickingProgressBar = new ProgressBarViewModel('gerrit-cherry-pick-' + this.repository.repoPath, 4000);
 };
 GerritChangeViewModel.prototype.checkout = function() {
 	var self = this;

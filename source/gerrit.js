@@ -61,7 +61,7 @@ var ssh2 = function(remote, command, callback) {
   });
 };
 
-gerrit = function(remote, command, res, callback) {
+var gerrit = function(remote, command, res, callback) {
   command = 'gerrit ' + command;
   ssh2(remote, command, function(error, result) {
     var errorCode = 'unknown'

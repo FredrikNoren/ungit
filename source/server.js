@@ -207,7 +207,7 @@ app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
 });
 
 app.get('/api/fs/listDirectories', function(req, res) {
-	dir = req.query.term.trim();
+	var dir = req.query.term.trim();
 	
 	readUserConfig(function(err, userconfig) {
 		if (err) res.json(400, err);

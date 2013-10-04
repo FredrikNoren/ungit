@@ -114,7 +114,7 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
 
 var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 	createTestFile(testRepoPath + '/' + fileName, function(err) {
-		if (err) return done(err);
+		if (err) return callback(err);
 		helpers.waitForElement(page, '[data-ta="staging-file"]', function() {
 			helpers.click(page, '[data-ta="staging-commit-title"]')
 			helpers.write(page, commitMessage);
@@ -356,4 +356,4 @@ test('Shutdown server should bring you to connection lost page', function(done) 
 	});
 });
 
-helpers.runTests();
+helpers.runTests(page);

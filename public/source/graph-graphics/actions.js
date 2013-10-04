@@ -7,7 +7,7 @@ var Color = require('color');
 var _ = require('underscore');
 
 
-var MergeViewModel = function(graph, headNode, node) {
+function MergeViewModel(graph, headNode, node) {
 	var self = this;
 
 	this.graph = graph;
@@ -34,7 +34,7 @@ MergeViewModel.prototype.destroy = function() {
 }
 
 
-var RebaseViewModel = function(onto, nodesThatWillMove) {
+function RebaseViewModel(onto, nodesThatWillMove) {
 	var self = this;
 	
 	var rebaseNodes = {};
@@ -85,14 +85,14 @@ RebaseViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 
 
-var ResetViewModel = function(nodes) {
+function ResetViewModel(nodes) {
 	this.nodes = nodes;
 }
 exports.ResetViewModel = ResetViewModel;
 ResetViewModel.prototype.type = 'reset';
 
 
-PushViewModel = function(fromNode, toNode) {
+function PushViewModel(fromNode, toNode) {
 	this.fromNode = fromNode;
 	this.toNode = toNode;
 }

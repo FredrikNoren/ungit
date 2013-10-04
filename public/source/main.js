@@ -54,16 +54,6 @@ ko.bindingHandlers.debug = {
     }
 };
 
-ko.bindingHandlers.fastClick = {
-    init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    	var value = valueAccessor();
-    	new google.ui.FastButton(element, function() {
-    		var valueUnwrapped = ko.utils.unwrapObservable(value);
-        	valueUnwrapped.call(viewModel);
-    	});
-    }
-};
-
 ko.bindingHandlers.editableText = {
     init: function(element, valueAccessor) {
         $(element).on('blur', function() {
@@ -202,7 +192,7 @@ ko.bindingHandlers.modal = {
 ko.bindingHandlers.autocomplete = {
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         var handleKeyEvent = function(event) {
-            lastChar = $(element).val().slice(-1);
+            var lastChar = $(element).val().slice(-1);
             if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
                 app.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
                     if (err) {
@@ -221,7 +211,7 @@ ko.bindingHandlers.autocomplete = {
                 });
             } else if(event.keyCode == 13){
                 event.preventDefault();
-                url = '/#/repository?path=' + encodeURI($(element).val());
+                var url = '/#/repository?path=' + encodeURI($(element).val());
                 window.location = url;
             }
 
