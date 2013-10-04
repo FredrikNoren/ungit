@@ -6,19 +6,6 @@ var _ = require('underscore');
 
 module.exports = function(grunt) {
 
-  var jsHintCommonGlobals = {
-    'setTimeout': true,
-    'clearTimeout': true,
-    'console': true,
-  }
-  var jsHintNodeGlobals = _.extend(jsHintCommonGlobals, {
-    'process': true,
-    '__dirname': true,
-    'exports': true,
-    'module': true,
-    'require': true,
-  });
-
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     less: {
@@ -124,42 +111,39 @@ module.exports = function(grunt) {
     },
     jshint: {
       options: {
-        undef:true, // check for usage of undefined variables
+        undef: true, // check for usage of undefined variables
         '-W033': true, // ignore Missing semicolon
         '-W099': true, // ignore Mixed spaces and tabs
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation
-        globals: {
-        }
+        '-W069': true, // ignore ['HEAD'] is better written in dot notation        
       },
       web: {
         options: {
-          globals: _.extend(jsHintNodeGlobals, {
-            'window': true,
-            'document': true,
-            'localStorage': true,
+          node: true,
+          browser: true,
+          globals: {
             'ungit': true,
             'io': true,
             'bugsense': true,
             'Keen': true
-          })
+          }
         },
         src: ['public/source/**/*.js']
       },
       phantomjs: {
         options: {
-          globals: _.extend(jsHintCommonGlobals, {
-            'phantom': true,
+          phantom: true,
+          browser: true,
+          globals: {
             '$': true,
-          })
+          }
         },
         src: ['clicktests/**/*.js']
       },
       node: {
         options: {
-          globals: _.extend(jsHintNodeGlobals, {
-          })
+          node: true
         },
         src: [
           'Gruntfile.js',
@@ -169,13 +153,16 @@ module.exports = function(grunt) {
       },
       mocha: {
         options: {
-          globals: _.extend(jsHintNodeGlobals, {
+          node: true,
+          globals: {
             'it': true,
             'describe': true,
             'before': true,
             'after': true,
-            'navigator': true,
-          })
+            'window': true,
+            'document': true,
+            'navigator': true
+          }
         },
         src: [
           'test/**/*.js',
@@ -229,7 +216,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);
 
   // Run tests
   grunt.registerTask('unittest', ['simplemocha']);
