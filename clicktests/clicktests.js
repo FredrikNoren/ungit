@@ -133,7 +133,7 @@ var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 }
 
 test('Should be possible to create and commit a file', function(done) {
-	createCommitWithNewFile('testfile.txt', 'My commit message', function() {
+	createCommitWithNewFile('testfile.txt', 'Init', function() {
 		helpers.waitForElement(page, '[data-ta="node"]', function() {
 			done();
 		});
@@ -257,6 +257,29 @@ test('Merge', function(done) {
 	refAction(page, 'testbranch', 'merge', done);
 });
 
+function moveRef(page, ref, targetNodeCommitTitle, callback) {
+	helpers.click(page, '[data-ta="branch"][data-ta-name="' + ref + '"]');
+	helpers.mousemove(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
+	setTimeout(function() { // Wait for next animation frame
+		helpers.click(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
+		helpers.waitForNotElement(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
+			setTimeout(function() {
+				callback();
+			}, 500);
+		})
+	}, 200);
+}
+
+test('Should be possible to move a branch', function(done) {
+	createBranch('movebranch', function() {
+		page.render('clicktestout/a.png')
+		moveRef(page, 'movebranch', 'Init', function() {
+			page.render('clicktestout/b.png')
+			done();
+		});
+	});
+});
+
 // --- Adding remotes ---
 
 var bareRepoPath;
@@ -335,7 +358,6 @@ test('Should be possible to create and push a branch', function(done) {
 		refAction(page, 'branchinclone', 'push', done);
 	});
 });
-
 
 // Shutdown
 

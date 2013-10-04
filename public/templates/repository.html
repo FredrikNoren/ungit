@@ -31,7 +31,7 @@
 			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
 
 			<div class="nodes" data-bind="foreach: nodes">
-				<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }">
+				<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
 					<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
 						<div class="logEntryBox panel clearfix">
 							<div class="arrowContainer arrowRight">
