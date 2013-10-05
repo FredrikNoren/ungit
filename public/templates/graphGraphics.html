@@ -65,9 +65,7 @@
 		<!-- /ko --><!-- /ko -->
 
 		<!-- ko if: hoverGraphActionGraphicType() == 'push' --><!-- ko with: hoverGraphActionGraphic -->
-			<g transform="translate(100, 0)">
-				<line data-bind="attr: { x1: fromNode.x(), y1: fromNode.y() - 10, x2: toNode.x(), y2: toNode.y() + 65 }" stroke="rgb(61, 139, 255)" stroke-width="15" stroke-dasharray="10, 5" marker-end="url(#pushArrowEnd)" />
-			</g>
+			<line data-bind="attr: { x1: fromPosition.x, y1: fromPosition.y, x2: toPosition.x, y2: toPosition.y }" stroke="rgb(61, 139, 255)" stroke-width="15" stroke-dasharray="10, 5" marker-end="url(#pushArrowEnd)" />
 		<!-- /ko --><!-- /ko -->
 
 	</g>

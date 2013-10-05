@@ -3,6 +3,9 @@ var Vector2 = function(x, y) {
 	this.x = x;
 	this.y = y;
 }
+Vector2.prototype.clone = function() {
+	return new Vector2(this.x, this.y);
+}
 Vector2.prototype.length = function() {
 	return Math.sqrt(this.x * this.x + this.y * this.y);
 }
