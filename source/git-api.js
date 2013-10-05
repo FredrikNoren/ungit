@@ -1,5 +1,4 @@
 var child_process = require('child_process');
-var _ = require('underscore');
 var express = require('express');
 var fs = require('fs');
 var path = require('path');

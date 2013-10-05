@@ -2,7 +2,6 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var _ = require('underscore');
 var async = require('async');
 var fs = require('fs');
 var path = require('path');

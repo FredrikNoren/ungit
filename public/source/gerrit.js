@@ -1,7 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
-var _ = require('underscore');
+var find = require('lodash.find');
 
 
 var GerritIntegrationViewModel = function(repository) {
@@ -46,10 +46,10 @@ GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	});
 }
 GerritIntegrationViewModel.prototype.getChange = function(changeId) {
-	return _.find(this.changes(), function(change) { return change.data.id == changeId; });
+	return find(this.changes(), { data: { id: changeId } });
 }
 GerritIntegrationViewModel.prototype.getChangeIdFromMessage = function(message) {
-	var changeId = _.last(message.split('\n')).trim();
+	var changeId = message.split('\n').pop().trim();
 	if (changeId && changeId.indexOf('Change-Id: ') == 0) {
 		return changeId.slice('Change-Id: '.length).trim();
 	}
