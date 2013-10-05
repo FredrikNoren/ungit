@@ -154,7 +154,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
-		git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' ' + (req.body.localBranch ? req.body.localBranch : 'HEAD') +
+		git(credentialsOption(req.param('socketId')) + ' push ' + (req.param('force') ? ' -f ' : '') + req.param('remote') + ' ' + (req.body.refSpec ? req.body.refSpec : 'HEAD') +
 			(req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')));

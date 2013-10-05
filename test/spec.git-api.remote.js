@@ -209,7 +209,7 @@ describe('git-api remote', function () {
 	});
 
 	it('should be possible to push a tag from "local2"', function(done) {
-		common.post(req, '/push', { path: testDirLocal2, remote: 'origin', localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
+		common.post(req, '/push', { path: testDirLocal2, remote: 'origin', refSpec: 'v1.0', remoteBranch: 'v1.0' }, done);
 	});
 
 	it('log in "local2" should show the local tag', function(done) {

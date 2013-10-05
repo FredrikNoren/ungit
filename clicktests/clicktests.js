@@ -228,8 +228,8 @@ test('Create another commit', function(done) {
 	createCommitWithNewFile('testy2.txt', 'Branch commit', done);
 });
 
-function refAction(page, ref, action, callback) {
-	helpers.click(page, '[data-ta="branch"][data-ta-name="' + ref + '"]');
+function refAction(page, ref, local, action, callback) {
+	helpers.click(page, '[data-ta="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]');
 	helpers.mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
 	setTimeout(function() { // Wait for next animation frame
 		helpers.click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
@@ -242,7 +242,7 @@ function refAction(page, ref, action, callback) {
 }
 
 test('Rebase', function(done) {
-	refAction(page, 'testbranch', 'rebase', done);
+	refAction(page, 'testbranch', true, 'rebase', done);
 });
 
 test('Checkout master again', function(done) {
@@ -254,7 +254,7 @@ test('Create yet another commit', function(done) {
 });
 
 test('Merge', function(done) {
-	refAction(page, 'testbranch', 'merge', done);
+	refAction(page, 'testbranch', true, 'merge', done);
 });
 
 function moveRef(page, ref, targetNodeCommitTitle, callback) {
@@ -272,11 +272,7 @@ function moveRef(page, ref, targetNodeCommitTitle, callback) {
 
 test('Should be possible to move a branch', function(done) {
 	createBranch('movebranch', function() {
-		page.render('clicktestout/a.png')
-		moveRef(page, 'movebranch', 'Init', function() {
-			page.render('clicktestout/b.png')
-			done();
-		});
+		moveRef(page, 'movebranch', 'Init', done);
 	});
 });
 
@@ -355,9 +351,28 @@ test('Should be possible to fetch', function(done) {
 
 test('Should be possible to create and push a branch', function(done) {
 	createBranch('branchinclone', function() {
-		refAction(page, 'branchinclone', 'push', done);
+		refAction(page, 'branchinclone', true, 'push', done);
 	});
 });
+
+test('Should be possible to force push a branch', function(done) {
+	moveRef(page, 'branchinclone', 'Init', function() {
+		helpers.click(page, '[data-ta="branch"][data-ta-name="branchinclone"][data-ta-local="true"]');
+		helpers.mousemove(page, '[data-ta-action="push"][data-ta-visible="true"]');
+		setTimeout(function() { // Wait for next animation frame
+			helpers.click(page, '[data-ta-action="push"][data-ta-visible="true"]');
+			helpers.waitForElement(page, '[data-ta="yes-no-dialog"]', function() {
+				helpers.click(page, '[data-ta="yes"]');
+				helpers.waitForNotElement(page, '[data-ta-action="push"][data-ta-visible="true"]', function() {
+					setTimeout(function() {
+						done();
+					}, 500);
+				})
+			});
+		}, 200);
+	});
+});
+
 
 // Shutdown
 

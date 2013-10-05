@@ -62,12 +62,7 @@ inherits(GraphActions.Move, GraphActions.ActionBase);
 GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.style = 'move';
 GraphActions.Move.prototype.perform = function(callback) {
-	if (this.graph.currentActionContext().current())
-		this.app.post('/reset', { path: this.graph.repoPath, to: this.node.sha1 }, callback);
-	else if (this.graph.currentActionContext().isTag)
-		this.app.post('/tags', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
-	else
-		this.app.post('/branches', { path: this.graph.repoPath, name: this.graph.currentActionContext().displayName, startPoint: this.node.sha1, force: true }, callback);
+	this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
 
 
@@ -99,26 +94,6 @@ GraphActions.Reset.prototype.perform = function(callback) {
 }
 
 
-GraphActions.Pull = function(graph, node) {
-	var self = this;
-	GraphActions.ActionBase.call(this, graph);
-	this.node = node;
-	this.onto = ko.observable(this.node);
-	this.visible = ko.computed(function() {
-		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
-			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().remoteRef() &&
-			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			self.graph.currentActionContext().remoteRef().node().commitTime().unix() >= self.graph.currentActionContext().node().commitTime().unix();
-	});
-}
-inherits(GraphActions.Pull, GraphActions.ActionBase);
-GraphActions.Pull.prototype.text = 'Pull';
-GraphActions.Pull.prototype.style = 'pull';
-GraphActions.Pull.prototype.perform = function(callback) {
-	this.app.post('/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
-}
 
 
 GraphActions.Rebase = function(graph, node) {
@@ -202,9 +177,7 @@ GraphActions.Push = function(graph, node) {
 		if (self.performProgressBar.running()) return true;
 		return self.graph.showDropTargets() && 
 			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().canBePushed() &&
-			(!self.graph.currentActionContext().remoteRef() ||
-			 self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix());
+			self.graph.currentActionContext().canBePushed();
 	});
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
@@ -222,17 +195,18 @@ GraphActions.Push.prototype.perform = function( callback) {
 		else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
 	};
 	this.graph.repository.app.programEvents.add(programEventListener);
-	var remoteBranch = this.graph.currentActionContext();
-	this.app.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
-			localBranch: remoteBranch.displayName, remoteBranch: remoteBranch.displayName }, function(err, res) {
+	var ref = this.graph.currentActionContext();
+	var onDone = function(err) {
 		self.graph.repository.app.programEvents.remove(programEventListener);
 		if (!err) {
 			self.graph.loadNodesFromApi();
-			if (remoteBranch.isTag)
+			if (ref.isTag)
 				self.graph.repository.fetch({ tags: true });
 		}
 		callback();
-	});
+	}
+	if (ref.remoteRef()) ref.remoteRef().moveTo(ref.displayName, onDone);
+	else ref.createRemoteRef(onDone);
 }
 
 GraphActions.Checkout = function(graph, node) {

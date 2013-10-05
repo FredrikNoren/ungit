@@ -105,7 +105,6 @@ var GitNodeViewModel = function(graph, sha1) {
 		new GraphActions.Merge(this.graph, this),
 		new GraphActions.Push(this.graph, this),
 		new GraphActions.Reset(this.graph, this),
-		new GraphActions.Pull(this.graph, this),
 		new GraphActions.Checkout(this.graph, this),
 		new GraphActions.Delete(this.graph, this),
 	];

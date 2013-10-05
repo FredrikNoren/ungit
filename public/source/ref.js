@@ -1,5 +1,6 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
+var dialogs = require('./dialogs');
 
 var RefViewModel = function(args) {
 	var self = this;
@@ -32,6 +33,7 @@ var RefViewModel = function(args) {
 	if (this.isRemoteTag) this.displayName = this.name.slice('remote-tag: refs/tags/'.length);
 	this.show = true;
 	this.graph = args.graph;
+	this.app = this.graph.app;
 	this.remoteRef = ko.observable();
 	this.localRef = ko.observable();
 	this.isDragging = ko.observable(false);
@@ -67,4 +69,40 @@ RefViewModel.prototype.dragStart = function() {
 RefViewModel.prototype.dragEnd = function() {
 	this.graph.currentActionContext(null);
 	this.isDragging(false);
+}
+RefViewModel.prototype.moveTo = function(target, callback) {
+	var self = this;
+	if (this.isLocal) {
+		if (this.current())
+			this.app.post('/reset', { path: this.graph.repoPath, to: target }, callback);
+		else if (this.isTag)
+			this.app.post('/tags', { path: this.graph.repoPath, name: this.displayName, startPoint: target, force: true }, callback);
+		else
+			this.app.post('/branches', { path: this.graph.repoPath, name: this.displayName, startPoint: target, force: true }, callback);
+	} else {
+		var pushReq = { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
+			refSpec: target, remoteBranch: this.displayName };
+		this.app.post('/push', pushReq, function(err, res) {
+				if (err) {
+					if (err.errorCode == 'non-fast-forward') {
+						var forcePushDialog = new dialogs.YesNoDialogViewModel('Force push?', 'The remote branch can\'t be fast-forwarded.');
+						forcePushDialog.closed.add(function() {
+							if (!forcePushDialog.result()) return callback();
+							pushReq.force = true;
+							self.app.post('/push', pushReq, callback);
+						});
+						self.app.showDialog(forcePushDialog);
+						return true;
+					} else {
+						callback(err, res);
+					}
+				} else {
+					callback();
+				}
+			});
+	}
+}
+RefViewModel.prototype.createRemoteRef = function(callback) {
+	this.app.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
+			refSpec: this.displayName, remoteBranch: this.displayName }, callback);
 }
