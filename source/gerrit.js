@@ -2,7 +2,6 @@
 var config = require('./config')();
 var os = require('os');
 var child_process = require('child_process');
-var _ = require('underscore');
 var Ssh2Connection;
 
 var getProcessUsername = function(callback) {
@@ -10,7 +9,7 @@ var getProcessUsername = function(callback) {
     if (err) callback(err);
     else {
       res = res.split('\n')[0];
-      if (res.indexOf('/') != -1) res = _.last(res.split('/'));
+      if (res.indexOf('/') != -1) res = res.split('/').pop();
       res = res.trim();
       callback(null, res);
     }

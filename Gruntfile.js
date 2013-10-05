@@ -2,7 +2,6 @@ var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 var path = require('path');
 var fs = require('fs');
-var _ = require('underscore');
 
 module.exports = function(grunt) {
 

@@ -4,7 +4,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
-var _ = require('underscore');
+var throttle = require('lodash.throttle');
 var superagent = require('../vendor/js/superagent');
 
 
@@ -43,11 +43,11 @@ var AppViewModel = function(browseTo) {
 		console.log('Event:', event);
 	});
 
-	this.workingTreeChanged = blockable(_.throttle(function() {
+	this.workingTreeChanged = blockable(throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onWorkingTreeChanged();
 	}, 500));
-	this.gitDirectoryChanged = blockable(_.throttle(function() {
+	this.gitDirectoryChanged = blockable(throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onGitDirectoryChanged();
 	}, 500));

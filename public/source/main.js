@@ -1,5 +1,5 @@
 
-var _ = require('underscore');
+var debounce = require('lodash.debounce');
 var ko = require('../vendor/js/knockout-2.2.1');
 var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
@@ -217,7 +217,7 @@ ko.bindingHandlers.autocomplete = {
 
             return true;
         };
-        ko.utils.registerEventHandler(element, "keyup", _.debounce(handleKeyEvent, 100));
+        ko.utils.registerEventHandler(element, "keyup", debounce(handleKeyEvent, 100));
     }
 };
 

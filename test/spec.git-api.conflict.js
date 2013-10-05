@@ -1,11 +1,9 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var _ = require('underscore');
 var async = require('async');
 var fs = require('fs');
 var path = require('path');
-var child_process = require('child_process');
 var restGit = require('../source/git-api');
 var common = require('./common.js');
 var wrapErrorHandler = common.wrapErrorHandler;
@@ -29,7 +27,7 @@ describe('git-api conflict rebase', function () {
 	before(function(done) {
 		common.createEmptyRepo(req, done, function(dir) {
 			testDir = dir;
-			
+
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
 				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); },
