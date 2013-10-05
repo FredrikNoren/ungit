@@ -1,4 +1,3 @@
-var _ = require('underscore');
 var moment = require('moment');
 
 var addressParser = require('./address-parser');
@@ -6,14 +5,14 @@ var addressParser = require('./address-parser');
 exports.parseGitStatus = function(text) {
 	var result = {};
 	var lines = text.split('\n');
-	result.branch = _.last(lines[0].split(' '));
+	result.branch = lines[0].split(' ').pop();
 	result.inited = true;
 	result.files = {};
 	lines.slice(1).forEach(function(line) {
 		if (line == '') return;
 		var status = line.slice(0, 2);
 		var filename = line.slice(3).trim();
-		if (filename[0] == '"' && _.last(filename) == '"')
+		if (filename[0] == '"' && filename[filename.length - 1] == '"')
 			filename = filename.slice(1, filename.length - 1);
 		var file = {};
 		file.staged = status[0] == 'A' || status[0] == 'M';
@@ -26,26 +25,26 @@ exports.parseGitStatus = function(text) {
 };
 
 exports.parseGitDiff = function(text) {
-	
+
 	var lines = text.split("\n");
 	var diffs = [];
-    
+
 	while(lines.length && lines[0]) {
 		var diff = {};
 		var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
 		diff.aPath = path[1];
 		diff.bPath = path[2];
-      
+
 		if(/^old mode/.test(lines[0])) {
 			diff.aMode = /^old mode (\d+)/.exec(lines.shift());
 			diff.bMode = /^new mode (\d+)/.exec(lines.shift());
 		}
-      
+
 		if(!lines.length || /^diff --git/.test(lines[0])) {
 			diffs.push(diff);
 			continue;
 		}
-      
+
 		diff.simIndex = 0;
 		diff.newFile = false;
 		diff.deletedFile = false;
@@ -70,7 +69,7 @@ exports.parseGitDiff = function(text) {
 				lines.shift();
 			}
 		}
-      	      	
+
       	// Shift away index, ---, +++ and @@ stuff
       	if (lines.shift().indexOf('index ') == 0) lines.shift();
       	lines.shift();

@@ -1,12 +1,9 @@
 
 var expect = require('expect.js');
 var request = require('supertest');
-var _ = require('underscore');
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
-var async = require('async');
-var child_process = require('child_process');
 var async = require('async');
 var restGit = require('../source/git-api');
 var common = require('./common.js');

@@ -4,7 +4,6 @@ var Vector2 = require('../../../source/utils/vector2');
 var NodeViewModel = require('./node').NodeViewModel;
 var EdgeViewModel = require('./edge').EdgeViewModel;
 var Color = require('color');
-var _ = require('underscore');
 
 
 function MergeViewModel(graph, headNode, node) {
@@ -46,7 +45,7 @@ function RebaseViewModel(onto, nodesThatWillMove) {
 		i = (self.path.length - 1 - i);
 		var n = new NodeViewModel(
 			new Vector2(
-				onto.x() + (node.x() - _.last(self.path).x()),
+				onto.x() + (node.x() - self.path[self.path.length - 1].x()),
 				onto.y() - i * (node.radius() * 2 + 20)),
 			node.radius());
 		var d = n.position().sub(node.position()).normalize();
