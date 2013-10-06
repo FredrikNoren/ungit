@@ -1,11 +1,10 @@
 
 var expect = require('expect.js');
 var request = require('supertest');
-var _ = require('underscore');
+var find = require('lodash.find');
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
-var child_process = require('child_process');
 var async = require('async');
 var restGit = require('../source/git-api');
 var common = require('./common.js');
@@ -139,8 +138,8 @@ describe('git-api remote', function () {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			var init = find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.contain('HEAD');
@@ -159,8 +158,8 @@ describe('git-api remote', function () {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			var init = find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.eql([]);
@@ -187,8 +186,8 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the branch as in sync', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
 			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			var init = find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init.refs).to.eql([]);
 			expect(commit2.refs).to.contain('HEAD');
 			expect(commit2.refs).to.contain('refs/heads/master');
@@ -210,12 +209,12 @@ describe('git-api remote', function () {
 	});
 
 	it('should be possible to push a tag from "local2"', function(done) {
-		common.post(req, '/push', { path: testDirLocal2, remote: 'origin', localBranch: 'v1.0', remoteBranch: 'v1.0' }, done);
+		common.post(req, '/push', { path: testDirLocal2, remote: 'origin', refSpec: 'v1.0', remoteBranch: 'v1.0' }, done);
 	});
 
 	it('log in "local2" should show the local tag', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			var commit2 = find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
 			done();
 		});
@@ -227,7 +226,7 @@ describe('git-api remote', function () {
 			done();
 		});
 	});
-	
+
 	it('cleaning up test dir should work', function(done) {
 		req
 			.post(restGit.pathPrefix + '/testing/cleanup')

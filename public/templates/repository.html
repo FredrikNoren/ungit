@@ -59,7 +59,7 @@
 						<!-- ko foreach: branches -->
 						<span class="ref branch" data-ta="branch" draggable="true" tabIndex="-1" 
 								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: hasFocus }, 
-									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': displayName, 'data-ta-current': current }, hasFocus2: hasFocus" >
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': displayName, 'data-ta-current': current, 'data-ta-local': isLocal }, hasFocus2: hasFocus" >
 							<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
 							<div class="branch-icon"></div>
 							<span class="name" data-bind="text: displayName"></span>

@@ -90,15 +90,6 @@ if (config.autoShutdownTimeout) {
 	refreshAutoShutdownTimeout();
 }
 
-app.use(function(req, res, next) {
-	// The default timeout is 2 min, but since operations such as clone can take much
-	// longer than that, we increase the timeout to 2h. Only available in the later node versions
-	// so check if the method is available first.
-	if (res.setTimeout)
-		res.setTimeout(2 * 60 * 60 * 1000);
-	next();
-});
-
 var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {

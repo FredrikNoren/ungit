@@ -3,21 +3,26 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var signals = require('signals');
 var inherits = require('util').inherits;
 
-function FormDialogViewModel() {
+function DialogViewModel(title) {
 	this.closed = new signals.Signal();
-	this.items = ko.observable([]);
-	this.title = ko.observable();
-	this.isSubmitted = ko.observable(false);
-	this.showCancel = ko.observable(true);
+	this.title = ko.observable(title);
 	this.taDialogName = ko.observable('');
 }
-FormDialogViewModel.prototype.template = 'formDialog';
-FormDialogViewModel.prototype.setCloser = function(closer) {
+DialogViewModel.prototype.setCloser = function(closer) {
 	this.close = closer;
 }
-FormDialogViewModel.prototype.onclose = function() {
+DialogViewModel.prototype.onclose = function() {
 	this.closed.dispatch();
 }
+
+function FormDialogViewModel(title) {
+	DialogViewModel.call(this, title);
+	this.items = ko.observable([]);
+	this.isSubmitted = ko.observable(false);
+	this.showCancel = ko.observable(true);
+}
+inherits(FormDialogViewModel, DialogViewModel);
+FormDialogViewModel.prototype.template = 'formDialog';
 FormDialogViewModel.prototype.submit = function() {
 	this.isSubmitted(true);
 	this.close();
@@ -53,3 +58,26 @@ function AddRemoteDialogViewModel() {
 }
 inherits(AddRemoteDialogViewModel, FormDialogViewModel);
 exports.AddRemoteDialogViewModel = AddRemoteDialogViewModel;
+
+
+function PromptDialogViewModel(title, details) {
+	DialogViewModel.call(this, title);
+	this.alternatives = ko.observable();
+	this.details = ko.observable(details);
+}
+inherits(PromptDialogViewModel, DialogViewModel);
+PromptDialogViewModel.prototype.template = 'prompt';
+exports.PromptDialogViewModel = PromptDialogViewModel;
+
+function YesNoDialogViewModel(title, details) {
+	PromptDialogViewModel.call(this, title, details);
+	var self = this;
+	this.taDialogName('yes-no-dialog');
+	this.result = ko.observable(false);
+	this.alternatives([
+		{ label: 'Yes', primary: true, taId: 'yes', click: function() { self.result(true); self.close(); } },
+		{ label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } },
+	])
+}
+inherits(YesNoDialogViewModel, PromptDialogViewModel);
+exports.YesNoDialogViewModel = YesNoDialogViewModel;

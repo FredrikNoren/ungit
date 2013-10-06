@@ -4,7 +4,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
-var _ = require('underscore');
+var throttle = require('lodash.throttle');
 var superagent = require('../vendor/js/superagent');
 
 
@@ -43,11 +43,11 @@ var AppViewModel = function(browseTo) {
 		console.log('Event:', event);
 	});
 
-	this.workingTreeChanged = blockable(_.throttle(function() {
+	this.workingTreeChanged = blockable(throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onWorkingTreeChanged();
 	}, 500));
-	this.gitDirectoryChanged = blockable(_.throttle(function() {
+	this.gitDirectoryChanged = blockable(throttle(function() {
 		if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
 			self.content().repository().onGitDirectoryChanged();
 	}, 500));
@@ -263,8 +263,24 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 		var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
 		if (!shouldSkipReport) {
 			if (ungit.config.bugtracking) {
-				bugsense.addExtraData('data', JSON.stringify(err.res.body));
-				bugsense.notify(new Error('GitError: ' + err.path + ', ' + err.errorSummary));
+
+				bugsense.addExtraData('stdout', err.res.body.stdout);
+				bugsense.addExtraData('stderr', err.res.body.stderr);
+				bugsense.addExtraData('error', err.res.body.error);
+				bugsense.addExtraData('path', err.path);
+				bugsense.addExtraData('summary', err.errorSummary);
+				bugsense.addExtraData('stacktrace', err.res.body.stackAtCall);
+				bugsense.addExtraData('command', err.res.body.command);
+
+				var error = {
+					name: err.res.body.name,
+					message: err.res.body.message,
+					stack: err.res.body.stackAtCall,
+					lineNumber: err.res.body.lineAtCall,
+					toString: function() { return 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary }
+				}
+
+				bugsense.notify(error);
 			}
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
