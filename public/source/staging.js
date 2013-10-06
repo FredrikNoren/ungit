@@ -2,6 +2,7 @@
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var screens = require('./screens');
+var dialogs = require('./dialogs');
 
 var StagingViewModel = function(repository) {
 	var self = this;
@@ -159,7 +160,12 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
-	this.app.post('/discardchanges', { path: this.repository.repoPath, all: true });
+	var self = this;
+	var diag = new dialogs.YesNoDialogViewModel('Are you sure you want to discard all changes?', 'This operation cannot be undone.');
+	diag.closed.add(function() {
+		if (diag.result()) self.app.post('/discardchanges', { path: self.repository.repoPath, all: true });
+	});
+	this.app.showDialog(diag);
 }
 
 
