@@ -270,6 +270,7 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 				bugsense.addExtraData('path', err.path);
 				bugsense.addExtraData('summary', err.errorSummary);
 				bugsense.addExtraData('stacktrace', err.res.body.stackAtCall);
+				bugsense.addExtraData('command', err.res.body.command);
 
 				function GitError() {
 					this.name = err.res.body.name;
