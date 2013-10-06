@@ -272,15 +272,15 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 				bugsense.addExtraData('stacktrace', err.res.body.stackAtCall);
 				bugsense.addExtraData('command', err.res.body.command);
 
-				function GitError() {
-					this.name = err.res.body.name;
-					this.message = err.res.body.message;
-					this.stack = err.res.body.stackAtCall;
-					this.lineNumber = err.res.body.lineAtCall;
-					this.toString = function() { return 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary }
+				var error = {
+					name: err.res.body.name,
+					message: err.res.body.message,
+					stack: err.res.body.stackAtCall,
+					lineNumber: err.res.body.lineAtCall,
+					toString: function() { return 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary }
 				}
 
-				bugsense.notify(new GitError());
+				bugsense.notify(error);
 			}
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
