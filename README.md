@@ -14,7 +14,7 @@ The easiest way to use git. On any platform. Anywhere.
 Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
 
 ### Launch and play with your own private instance
-[![Launch with Cloudify](http://rantav.github.io/cloudify-widget-pages/img/gh-button.png)](http://rantav.github.io/cloudify-widget-pages/rethinkdb.html)
+[![Launch with Cloudify](http://rantav.github.io/cloudify-widget-pages/img/gh-button.png)](http://rantav.github.io/cloudify-widget-pages/ungit.html)
 
 ### Screenshots
 
