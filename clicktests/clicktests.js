@@ -407,10 +407,24 @@ test('Open home screen should show authentication dialog', function(done) {
 	});
 });
 
-test('Filling out the authentication should bring you to the home screen', function(done) {
+test('Filling out the authentication with wrong details should result in an error', function(done) {
 	helpers.click(page, '[data-ta="login-page"] [data-ta="input-username"]');
 	helpers.write(page, testuser.username);
 	helpers.click(page, '[data-ta="login-page"] [data-ta="input-password"]');
+	helpers.write(page, 'notthepassword');
+	helpers.click(page, '[data-ta="login-page"] [data-ta="submit"]');
+	helpers.waitForElement(page, '[data-ta="login-error"]', function() {
+		helpers.expectNotFindElement(page, '[data-ta="home-page"]')
+		done();
+	});
+});
+
+test('Filling out the authentication should bring you to the home screen', function(done) {
+	helpers.click(page, '[data-ta="login-page"] [data-ta="input-username"]');
+	helpers.selectAllText(page);
+	helpers.write(page, testuser.username);
+	helpers.click(page, '[data-ta="login-page"] [data-ta="input-password"]');
+	helpers.selectAllText(page);
 	helpers.write(page, testuser.password);
 	helpers.click(page, '[data-ta="login-page"] [data-ta="submit"]');
 	helpers.waitForElement(page, '[data-ta="home-page"]', function() {
