@@ -2,11 +2,16 @@ var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 var path = require('path');
 var fs = require('fs');
+var npm = require('npm');
+var semver = require('semver');
+var async = require('async');
 
 module.exports = function(grunt) {
 
+  var packageJson = grunt.file.readJSON('package.json');
+
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: packageJson,
     less: {
       production: {
         files: {
@@ -201,6 +206,45 @@ module.exports = function(grunt) {
     }
     compileTemplate('public/templates/index.html', 'public/index.html')
     compileTemplate('public/templates/devStyling.html', 'public/devStyling.html')
+  });
+
+  function bumpDependency(packageJson, dependencyType, packageName, callback) {
+    var currentVersion = packageJson[dependencyType][packageName];
+    if (currentVersion[0] == '~') currentVersion = currentVersion.slice(1);
+    npm.commands.show([packageName, 'versions'], true, function(err, data) {
+      if(err) return callback(err);
+      var versions = data[Object.keys(data)[0]].versions;
+      var latestVersion = versions[versions.length - 1];
+      if (semver.gt(latestVersion, currentVersion)) {
+        packageJson[dependencyType][packageName] = '~' + latestVersion;
+      }
+      callback();
+    });
+  }
+
+  grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
+    var done = this.async();
+    grunt.log.writeln('Bumping dependencies...');
+    npm.load(function() {
+      var tempPackageJson = JSON.parse(JSON.stringify(packageJson));
+
+      async.parallel([
+        async.map.bind(null, Object.keys(tempPackageJson.dependencies), function(dep, callback) {
+          // Keep forever-monitor at 1.1.0 until https://github.com/nodejitsu/forever-monitor/issues/38 is fixed
+          if (dep == 'forever-monitor') return callback();
+
+          bumpDependency(tempPackageJson, 'dependencies', dep, callback);
+        }),
+        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
+          bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
+        })
+      ], function() {
+        fs.writeFileSync('package.json', JSON.stringify(tempPackageJson, null, 2) + '\n');
+        grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
+        done();
+      });
+      
+    });
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
