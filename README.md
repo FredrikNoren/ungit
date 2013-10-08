@@ -53,6 +53,9 @@ Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in t
 Developing
 ----------
 
+[![Dependency Status](https://david-dm.org/FredrikNoren/ungit.png)](https://david-dm.org/FredrikNoren/ungit)
+[![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.png)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)
+
 To get started developing on ungit:
 
  1. Clone the repository to a local directory.
