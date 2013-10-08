@@ -140,6 +140,24 @@ test('Should be possible to create and commit a file', function(done) {
 	})
 });
 
+test('Should be able to add a new file to .gitignore', function(done) {
+	createTestFile(testRepoPath + '/addMeToIgnore.txt', function(err) {
+		if (err) return done(err);
+                helpers.waitForElement(page, '[data-ta="staging-file"]', function() {
+			// add "addMeToIgnore.txt" to .gitignore
+			helpers.click(page, '[data-ta="ignore-file"]');
+			// add ".gitignore" to .gitignore
+			//TODO I'm not sure what is the best way to detect page refresh, so currently wait for 1 sec and then click ignore-file. 
+			setTimeout(function() {
+                        	helpers.click(page, '[data-ta="ignore-file"]');
+                	        helpers.waitForNotElement(page, '[data-ta="staging-file"]', function() {
+        	                        done();
+	                        });
+			}, 1000);
+		});
+	});
+});
+
 test('Should be possible to discard a created file', function(done) {
 	createTestFile(testRepoPath + '/testfile2.txt', function(err) {
 		if (err) return done(err);
