@@ -9,6 +9,7 @@ var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
+var os = require('os');
 var socketIO;
 
 exports.pathPrefix = '';
@@ -200,16 +201,25 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		if (!fs.existsSync(gitIgnoreFile)) fs.writeFileSync(gitIgnoreFile, '');
 
 		fs.readFile(gitIgnoreFile, function(err, data) { 
-			if(data.toString().indexOf(ignoreFile) < 0 ) {
-				fs.appendFile(gitIgnoreFile, '\n' + ignoreFile, function(err) {
-					if(err) {
-						return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
-					} else {
-						socket.emit('working-tree-changed', { repository: currentPath });
-						return res.json({});
+
+			var arrayOfLines = data.toString().match(/[^\r\n]+/g);
+			if(arrayOfLines != null){
+				for (var n = 0; n < arrayOfLines.length; n++) {
+					if (arrayOfLines[n].trim() == ignoreFile) {
+						return res.json(400, { errorCode: 'error-appending-ignore', error: ignoreFile + ' already exist in .gitignore' });
 					}
-				}); 
+				}
 			}
+
+			fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile, function(err) {
+				if(err) {
+					return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
+				} else {
+					if(socket)
+						socket.emit('working-tree-changed', { repository: currentPath });
+					return res.json({});
+				}
+			}); 
 		});
 	});
 
