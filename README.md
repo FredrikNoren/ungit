@@ -21,11 +21,9 @@ Requires [node.js](http://nodejs.org) (≥ 0.10), [npm](https://npmjs.org/) (≥
 
 	npm install -g ungit
 
-NOTE:
------
-If your system requires root access to install global npm packages, make sure you use the -H flag:
+NOTE: If your system requires root access to install global npm packages, make sure you use the -H flag:
 
-	$ sudo -H npm install -g ungit
+	sudo -H npm install -g ungit
 
 Using
 -----
