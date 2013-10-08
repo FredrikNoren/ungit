@@ -45,8 +45,7 @@ if (config.authentication) {
 	});
 
 	passport.use(new LocalStrategy(function(username, password, done) {
-	  	password = users[username];
-	  	if (users[username] && password == users[username])
+	  	if (users[username] !== undefined && password === users[username])
 	  		done(null, username);
 	  	else
 	  		done(null, false, { message: 'No such username/password' });

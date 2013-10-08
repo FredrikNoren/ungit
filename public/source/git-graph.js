@@ -49,7 +49,8 @@ var GitGraphViewModel = function(repository) {
 	this.HEAD.subscribe(function(value) {
 		self.graphic.commitNodeEdge.nodeb(value);
 		self.graphic.showCommitNode(!!value);
-		self.graphic.commitNode.color(value.color());
+		if (value)
+			self.graphic.commitNode.color(value.color());
 	});
 
 	this.nodes.subscribe(function(nodes) {

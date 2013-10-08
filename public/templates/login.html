@@ -5,7 +5,9 @@
 
 	<div class='login col-lg-6' data-bind="visible: status() == 'login'" data-ta="login-page">
 		<h1>Login</h1>
-		<div class="loginError" data-bind="text: loginError"></div>
+		<!-- ko if: loginError -->
+		<div class="loginError" data-ta="login-error" data-bind="text: loginError"></div>
+		<!-- /ko -->
 		<form data-bind="submit: login" role="form">
 
 			<div class="form-group">

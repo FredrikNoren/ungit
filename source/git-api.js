@@ -430,11 +430,19 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	// This method isn't called by the client but by credentials-helper.js
-	app.get(exports.pathPrefix + '/credentials', ensureAuthenticated, function(req, res) {
+	app.get(exports.pathPrefix + '/credentials', function(req, res) {
+		// this endpoint can only be invoked from localhost, since the crednetials-helper is always
+		// on the same machine that we're running ungit on
+		if (req.ip != '127.0.0.1') {
+			winston.info('Trying to get credentials from unathorized ip: ' + req.ip);
+			res.json(400, { errorCode: 'request-from-unathorized-location' });
+			return;
+		}
 		var socket = sockets[req.param('socketId')];
 		if (!socket) {
 			// We're using the socket to display an authentication dialog in the ui,
 			// so if the socket is closed/unavailable we pretty much can't get the username/password.
+			winston.info('Trying to get credentials from unavailable socket: ' + req.param('socketId'));
 			res.json(400, { errorCode: 'socket-unavailable' });
 		} else {
 			socket.once('credentials', function(data) {

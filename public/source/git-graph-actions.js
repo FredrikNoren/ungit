@@ -201,7 +201,7 @@ GraphActions.Push.prototype.perform = function( callback) {
 		if (!err) {
 			self.graph.loadNodesFromApi();
 			if (ref.isTag)
-				self.graph.repository.fetch({ tags: true });
+				self.graph.repository.remotes.fetch({ tags: true });
 		}
 		callback();
 	}
@@ -262,7 +262,7 @@ GraphActions.Delete.prototype.perform = function(callback) {
 		callback();
 		self.graph.loadNodesFromApi();
 		if (url == '/remote/tags')
-			self.graph.repository.fetch({ tags: true });
+			self.graph.repository.remotes.fetch({ tags: true });
 	});
 }
 
