@@ -2,7 +2,6 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var _ = require('underscore');
 var async = require('async');
 var fs = require('fs');
 var path = require('path');
@@ -19,6 +18,10 @@ describe('git-api: test ignorefile call', function() {
 	it('Add a file to .gitignore file through api call', function(done) {
 		common.createSmallRepo(req, done, function(dir) {
 			var testFile = 'test.txt';
+
+			// Create .gitignore file prior to append
+			fs.writeFileSync(dir + '.gitignore', 'test git ignore file...');
+
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
 				function(done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
@@ -40,11 +43,8 @@ describe('git-api: test ignorefile call', function() {
 	it('Add a file to .gitignore file through api call when .gitignore is missing', function(done) {
 		common.createSmallRepo(req, done, function(dir) {
                         var testFile = 'test.txt';
-	
-			// Ensure .gitignore is deleted
-			fs.unlink(dir + '/.gitignore', function (err, data) {
-			});
 
+			// Missing .gitignore file prior to append
                         async.series([
                                 function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
                                 function(done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
@@ -67,7 +67,7 @@ describe('git-api: test ignorefile call', function() {
                 common.createSmallRepo(req, done, function(dir) {
                         var testFile = 'test.txt';
 
-                        // Ensure .gitignore is deleted
+                        // Add file to .gitignore
                         fs.appendFileSync(dir + '/.gitignore', testFile);
 
                         async.series([
@@ -76,7 +76,7 @@ describe('git-api: test ignorefile call', function() {
 					if(err) {
 						done();
 					} else {
-						throw('Did not errored when already existing file has been added');
+						throw('Did not errored when existing file has been added');
 					}
 }); }
                         ], done);
@@ -87,10 +87,9 @@ describe('git-api: test ignorefile call', function() {
                 common.createSmallRepo(req, done, function(dir) {
                         var testFile = 'test.txt';
 
-                        // Ensure .gitignore is deleted
-                        fs.appendFile(dir + '/.gitignore', testFile.split('.')[0], function () {
+                        // add part of file name to gitignore
+                        fs.appendFileSync(dir + '/.gitignore', testFile.split('.')[0]);
 
-                        });
 			async.series([
                                 function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
                                 function(done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
