@@ -210,6 +210,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 
 git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
+  var fullFilePath = path.join(repoPath, filename);
 
   git.status(repoPath)
     .started(task.setStarted)
@@ -217,19 +218,25 @@ git.diffFile = function(repoPath, filename) {
     .done(function(status) {
       var file = status.files[filename];
       if (!file) {
-        if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
+        if (fs.existsSync(fullFilePath)) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
         git('diff HEAD -- "' + filename.trim() + '"', repoPath)
           .parser(gitParser.parseGitDiff)
           .always(task.setResult);
       } else {
-        fs.readFile(path.join(repoPath, filename), { encoding: 'utf8' }, function(err, text) {
+        fs.readFile(fullFilePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
           var diffs = [];
           var diff = { };
           text = text.toString();
-          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          if (isImageFile(fullFilePath)) {
+            diff.type = 'html';
+            diff.lines = [[null, 0, '+<img src="#" />']];
+          } else {
+            diff.type = 'text';
+            diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          }
           diffs.push(diff);
           task.setResult(null, diffs);
         });
@@ -237,6 +244,17 @@ git.diffFile = function(repoPath, filename) {
     });
 
   return task;
+}
+
+var isImageFile = function(file) {
+  file = file.split('.');
+  file = file[file.length - 1].toUpperCase();
+  var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG', 'RAW'];
+  if (imageFileTypes.indexOf(file) > -1) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 git.discardAllChanges = function(repoPath) {
