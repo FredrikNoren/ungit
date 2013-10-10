@@ -15,8 +15,8 @@ var RefViewModel = function(args) {
 	});
 	this.name = args.name;
 	this.displayName = this.name;
-	this.isLocalTag = this.name.indexOf('tag: refs/tags/') == 0;
-	this.isRemoteTag = this.name.indexOf('remote-tag: refs/tags/') == 0;
+	this.isRemoteTag = this.name.indexOf('remote-tag: ') == 0;
+	this.isLocalTag = this.name.indexOf('tag: ') == 0;
 	this.isTag = this.isLocalTag || this.isRemoteTag;
 	var isRemoteBranchOrHEAD = this.name.indexOf('refs/remotes/') == 0;
 	this.isLocalHEAD = this.name == 'HEAD';
@@ -31,7 +31,7 @@ var RefViewModel = function(args) {
 	if (this.isLocalBranch) this.displayName = this.name.slice('refs/heads/'.length);
 	if (this.isRemoteBranch) this.displayName = this.name.slice('refs/remotes/'.length);
 	if (this.isLocalTag) this.displayName = this.name.slice('tag: refs/tags/'.length);
-	if (this.isRemoteTag) this.displayName = this.name.slice('remote-tag: refs/tags/'.length);
+	if (this.isRemoteTag) this.displayName = this.name.slice('remote-tag: '.length);
 	this.show = true;
 	this.graph = args.graph;
 	this.app = this.graph.app;

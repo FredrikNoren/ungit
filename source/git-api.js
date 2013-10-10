@@ -283,7 +283,11 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
 		git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ' + req.param('remote'), req.param('path'))
 			.parser(gitParser.parseGitLsRemote)
-			.always(jsonResultOrFail.bind(null, res));
+			.always(function(err, result) {
+				if (err) return res.json(400, err);
+				result.forEach(function(r) { r.remote = req.param('remote'); });
+				res.json(result);
+			});
 	});
 
 	app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
