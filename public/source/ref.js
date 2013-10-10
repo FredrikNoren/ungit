@@ -94,7 +94,7 @@ RefViewModel.prototype.getRemoteRef = function(remote) {
 RefViewModel.prototype.getRemoteRefFullName = function(remote) {
 	if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
 	if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
-	throw new Error('Trying to construct remote-name of unsupported ref');
+	return null;
 }
 RefViewModel.prototype.moveTo = function(target, callback) {
 	var self = this;
