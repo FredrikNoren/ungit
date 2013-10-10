@@ -5,7 +5,6 @@ var Vector2 = require('../../source/utils/vector2.js');
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
-var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var debounce = require('lodash.debounce');
 var find = require('lodash.find');
@@ -140,10 +139,11 @@ GitGraphViewModel.prototype.getNode = function(sha1) {
 	if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
 	return nodeViewModel;
 }
-GitGraphViewModel.prototype.getRef = function(refName) {
-	var refViewModel = this.refsByRefName[refName];
-	if (!refViewModel) {
-		refViewModel = this.refsByRefName[refName] = new RefViewModel({ name: refName, graph: this, color: GitGraphViewModel.colorFromHashOfString(refName) });
+GitGraphViewModel.prototype.getRef = function(fullRefName, constructIfUnavailable) {
+	if (constructIfUnavailable === undefined) constructIfUnavailable = true;
+	var refViewModel = this.refsByRefName[fullRefName];
+	if (!refViewModel && constructIfUnavailable) {
+		refViewModel = this.refsByRefName[fullRefName] = new RefViewModel({ name: fullRefName, graph: this });
 		this.refs.push(refViewModel);
 	}
 	return refViewModel;
@@ -204,9 +204,6 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(refs, nodes, nodesById
 		});
 	});
 }
-GitGraphViewModel.colorFromHashOfString = function(string) {
-	return '#' + md5(string).toString().slice(0, 6);
-}
 
 GitGraphViewModel.randomColor = function() {
 	var randomHex = function() {
@@ -217,24 +214,12 @@ GitGraphViewModel.randomColor = function() {
 	return '#' + randomHex() + randomHex() + randomHex();
 }
 
+
 GitGraphViewModel.prototype.setNodes = function(nodes) {
 	var daySeparators = [];
 	nodes.sort(function(a, b) { return b.commitTime().unix() - a.commitTime().unix(); });
 	nodes.forEach(function(node, i) { node.index(i); });
 	nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
-
-	// Make sure refs know their "remote"
-	for(var refName in this.refsByRefName) {
-		var ref = this.refsByRefName[refName];
-		if (ref.isLocalBranch) {
-			var remote = this.refsByRefName['refs/remotes/origin/' + ref.refName];
-			if (remote) {
-				ref.remoteRef(remote);
-				remote.localRef(ref);
-				remote.color = ref.color;
-			}
-		}
-	}
 
 	GitGraphViewModel.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
 	this.HEAD(GitGraphViewModel.getHEAD(nodes));

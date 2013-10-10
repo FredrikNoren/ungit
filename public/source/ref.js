@@ -1,6 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var dialogs = require('./dialogs');
+var md5 = require('blueimp-md5').md5;
 
 var RefViewModel = function(args) {
 	var self = this;
@@ -48,7 +49,6 @@ var RefViewModel = function(args) {
 	this.show = true;
 	this.graph = args.graph;
 	this.app = this.graph.app;
-	this.remoteRef = ko.observable();
 	this.localRef = ko.observable();
 	this.isDragging = ko.observable(false);
 	this.hasFocus = ko.observable(false);
@@ -67,12 +67,10 @@ var RefViewModel = function(args) {
 	this.current = ko.computed(function() {
 		return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;
 	});
-	this.canBePushed = ko.computed(function() {
-		if (!self.isLocal || !self.graph.hasRemotes()) return false;
-		if (self.remoteRef()) return self.node() != self.remoteRef().node();
-		else return true;
-	});
-	this.color = args.color;
+	this.color = args.color || this._colorFromHashOfString(this.refName);
+}
+RefViewModel.prototype._colorFromHashOfString = function(string) {
+	return '#' + md5(string).toString().slice(0, 6);
 }
 exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {
@@ -83,6 +81,20 @@ RefViewModel.prototype.dragStart = function() {
 RefViewModel.prototype.dragEnd = function() {
 	this.graph.currentActionContext(null);
 	this.isDragging(false);
+}
+RefViewModel.prototype.canBePushed = function(remote) {
+	if (!this.isLocal) return false;
+	var remoteRef = this.getRemoteRef(remote);
+	if (!remoteRef) return true;
+	return this.node() != remoteRef.node();
+}
+RefViewModel.prototype.getRemoteRef = function(remote) {
+	return this.graph.getRef(this.getRemoteRefFullName(remote), false);
+}
+RefViewModel.prototype.getRemoteRefFullName = function(remote) {
+	if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
+	if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
+	throw new Error('Trying to construct remote-name of unsupported ref');
 }
 RefViewModel.prototype.moveTo = function(target, callback) {
 	var self = this;
