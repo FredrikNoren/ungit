@@ -15,6 +15,7 @@ module.exports = GraphActions;
 GraphActions.ActionBase = function(graph) {
 	var self = this;
 	this.graph = graph;
+	this.repository = graph.repository;
 	this.app = graph.repository.app;
 	this.performProgressBar = new ProgressBarViewModel('action-' + this.style + '-' + graph.repoPath, 1000);
 	this.isHighlighted = ko.computed(function() {
@@ -73,11 +74,13 @@ GraphActions.Reset = function(graph, node) {
 	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
-			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().remoteRef() &&
-			self.graph.currentActionContext().remoteRef().node() != self.graph.currentActionContext().node() &&
-			self.graph.currentActionContext().remoteRef().node().commitTime().unix() < self.graph.currentActionContext().node().commitTime().unix();
+		if (!self.graph.showDropTargets()) return false;
+		var context = self.graph.currentActionContext();
+		if (context.node() != self.node) return false;
+		var remoteRef = context.getRemoteRef(self.repository.remotes.currentRemote());
+		return remoteRef &&
+			remoteRef.node() != context.node() &&
+			remoteRef.node().commitTime().unix() < context.node().commitTime().unix();
 	});
 }
 inherits(GraphActions.Reset, GraphActions.ActionBase);
@@ -86,11 +89,13 @@ GraphActions.Reset.prototype.style = 'reset';
 GraphActions.Reset.prototype.createHoverGraphic = function() {
 	var context = this.graph.currentActionContext();
 	if (!context) return null;
-	var nodes = context.node().getPathToCommonAncestor(context.remoteRef().node()).slice(0, -1);
+	var remoteRef = context.getRemoteRef(this.repository.remotes.currentRemote());
+	var nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
 	return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-	this.app.post('/reset', { path: this.graph.repoPath, to: this.graph.currentActionContext().remoteRef().name }, callback);
+	var remoteRef = this.graph.currentActionContext().getRemoteRef(this.repository.remotes.currentRemote());
+	this.app.post('/reset', { path: this.graph.repoPath, to: remoteRef.name }, callback);
 }
 
 
@@ -175,9 +180,9 @@ GraphActions.Push = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
+		return self.graph.showDropTargets() &&
 			self.graph.currentActionContext().node() == self.node &&
-			self.graph.currentActionContext().canBePushed();
+			self.graph.currentActionContext().canBePushed(self.repository.remotes.currentRemote());
 	});
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
@@ -185,8 +190,10 @@ GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
 GraphActions.Push.prototype.createHoverGraphic = function() {
 	var context = this.graph.currentActionContext();
-	if (!context || !context.remoteRef()) return null;
-	return new PushViewModel(context.remoteRef().node(), context.node());
+	if (!context) return null;
+	var remoteRef = context.getRemoteRef(this.repository.remotes.currentRemote());
+	if (!remoteRef) return null;
+	return new PushViewModel(remoteRef.node(), context.node());
 }
 GraphActions.Push.prototype.perform = function( callback) {
 	var self = this;
@@ -205,7 +212,8 @@ GraphActions.Push.prototype.perform = function( callback) {
 		}
 		callback();
 	}
-	if (ref.remoteRef()) ref.remoteRef().moveTo(ref.refName, onDone);
+	var remoteRef = ref.getRemoteRef(this.repository.remotes.currentRemote());
+	if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
 	else ref.createRemoteRef(onDone);
 }
 
