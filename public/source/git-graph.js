@@ -192,7 +192,7 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(refs, nodes, nodesById
 		if (b.isStash && !a.isStash) return -1;
 		if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
 			return a.node().commitTime().unix() - b.node().commitTime().unix();
-		return a.displayName < b.displayName ? -1 : 1;
+		return a.refName < b.refName ? -1 : 1;
 	});
 	var stamp = GitGraphViewModel._markIdeologicalStamp++;
 	refs.forEach(function(ref) {
@@ -227,7 +227,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	for(var refName in this.refsByRefName) {
 		var ref = this.refsByRefName[refName];
 		if (ref.isLocalBranch) {
-			var remote = this.refsByRefName['refs/remotes/origin/' + ref.displayName];
+			var remote = this.refsByRefName['refs/remotes/origin/' + ref.refName];
 			if (remote) {
 				ref.remoteRef(remote);
 				remote.localRef(ref);
