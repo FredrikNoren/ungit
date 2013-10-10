@@ -71,7 +71,7 @@ var GitNodeViewModel = function(graph, sha1) {
 		rs.sort(function(a, b) {
 			if (a.isLocal && !b.isLocal) return -1;
 			if (!a.isLocal && b.isLocal) return 1;
-			return a.displayName < b.displayName ? -1 : 1;
+			return a.refName < b.refName ? -1 : 1;
 		});
 		return rs;
 	});

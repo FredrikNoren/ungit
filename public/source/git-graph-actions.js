@@ -157,7 +157,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 	return new MergeViewModel(this.graph.graphic, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
-	this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().displayName }, function(err) {
+	this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().refName }, function(err) {
 		if (err) {
 			if (err.errorCode == 'merge-failed') {
 				callback();
@@ -205,7 +205,7 @@ GraphActions.Push.prototype.perform = function( callback) {
 		}
 		callback();
 	}
-	if (ref.remoteRef()) ref.remoteRef().moveTo(ref.displayName, onDone);
+	if (ref.remoteRef()) ref.remoteRef().moveTo(ref.refName, onDone);
 	else ref.createRemoteRef(onDone);
 }
 
@@ -226,7 +226,7 @@ GraphActions.Checkout.prototype.style = 'checkout';
 GraphActions.Checkout.prototype.perform = function(callback) {
 	var self = this;
 	var ref = this.graph.currentActionContext();
-	this.app.post('/checkout', { path: this.graph.repoPath, name: ref.displayName }, function(err) {
+	this.app.post('/checkout', { path: this.graph.repoPath, name: ref.refName }, function(err) {
 		if (err && err.errorCode != 'merge-failed') return;
 		if (ref.isRemoteBranch)
 			self.app.post('/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
@@ -258,7 +258,7 @@ GraphActions.Delete.prototype.perform = function(callback) {
 	var self = this;
 	var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
 	if (this.graph.currentActionContext().isRemote) url = '/remote' + url;
-	this.app.del(url, { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(), name: this.graph.currentActionContext().displayName }, function(err) {
+	this.app.del(url, { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(), name: this.graph.currentActionContext().refName }, function(err) {
 		callback();
 		self.graph.loadNodesFromApi();
 		if (url == '/remote/tags')
