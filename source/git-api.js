@@ -178,8 +178,17 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.diffFile(req.param('path'), req.param('file'))
+		git.diffFile(req.param('path'), req.param('file'), req.headers.host)
 			.always(jsonResultOrFail.bind(null, res));
+	});
+
+	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+		if (req.query.version == 'previous') {
+			var task = git.previousImage(req.query.path, req.query.filename)
+					.always(jsonResultOrFail.bind(null, res));
+		} else {
+			res.sendfile(path.join(req.query.path, req.query.filename));
+		}
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){

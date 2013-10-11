@@ -208,31 +208,57 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.diffFile = function(repoPath, filename) {
+git.previousImage = function(repoPath, filename) {
   var task = new GitTask();
-  var fullFilePath = path.join(repoPath, filename);
 
   git.status(repoPath)
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
       var file = status.files[filename];
+
+      if (!file) {
+        git('show HEAD:' + filename, repoPath).always(task.setResult);
+      }
+    });
+
+  return task;
+}
+
+git.diffFile = function(repoPath, filename, host) {
+  var task = new GitTask();
+  var fullFilePath = path.join(repoPath, filename);
+  var isImage = isImageFile(fullFilePath);
+
+  git.status(repoPath)
+    .started(task.setStarted)
+    .fail(task.setResult)
+    .done(function(status) {
+      var file = status.files[filename];
+      var diffs = [];
+      var diff = { };
+
       if (!file) {
         if (fs.existsSync(fullFilePath)) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
-        git('diff HEAD -- "' + filename.trim() + '"', repoPath)
-          .parser(gitParser.parseGitDiff)
-          .always(task.setResult);
+        if (isImage) {
+          diff.type = 'html';
+          diff.lines = [[null, 0, getImageElement('-', host, repoPath, filename)], [null, 0, getImageElement('+', host, repoPath, filename)]];
+          diffs.push(diff);
+          task.setResult(null, diffs);
+        } else {
+          git('diff HEAD -- "' + filename.trim() + '"', repoPath)
+            .parser(gitParser.parseGitDiff)
+            .always(task.setResult);
+        }
       } else {
         fs.readFile(fullFilePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
-          var diffs = [];
-          var diff = { };
           text = text.toString();
-          if (isImageFile(fullFilePath)) {
+          if (isImage) {
             diff.type = 'html';
-            diff.lines = [[null, 0, '+<img src="#" />']];
+            diff.lines = [[null, 0, getImageElement('+', host, repoPath, filename)]];
           } else {
             diff.type = 'text';
             diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
@@ -244,6 +270,18 @@ git.diffFile = function(repoPath, filename) {
     });
 
   return task;
+}
+
+var getImageElement = function(firstChar, host, repoPath, filename) {
+  var element = firstChar + '<img class="diffImage" src="' + host + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
+  if (firstChar == '-') {
+    element += 'previous'; 
+  } else {
+    element += 'current';
+  }
+  element += '" />';
+
+  return element;
 }
 
 var isImageFile = function(file) {
