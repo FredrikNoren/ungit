@@ -178,7 +178,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.diffFile(req.param('path'), req.param('file'), req.headers.host)
+		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
 	});
 

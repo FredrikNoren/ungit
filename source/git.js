@@ -225,7 +225,7 @@ git.previousImage = function(repoPath, filename) {
   return task;
 }
 
-git.diffFile = function(repoPath, filename, host) {
+git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isImage = isImageFile(fullFilePath);
@@ -244,7 +244,7 @@ git.diffFile = function(repoPath, filename, host) {
       } else if (!file.isNew) {
         if (isImage) {
           diff.type = 'html';
-          diff.lines = [[null, 0, getImageElement('-', host, repoPath, filename)], [null, 0, getImageElement('+', host, repoPath, filename)]];
+          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, getImageElement('+', repoPath, filename)]];
           diffs.push(diff);
           task.setResult(null, diffs);
         } else {
@@ -258,7 +258,7 @@ git.diffFile = function(repoPath, filename, host) {
           text = text.toString();
           if (isImage) {
             diff.type = 'html';
-            diff.lines = [[null, 0, getImageElement('+', host, repoPath, filename)]];
+            diff.lines = [[null, 0, getImageElement('+', repoPath, filename)]];
           } else {
             diff.type = 'text';
             diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
@@ -272,8 +272,8 @@ git.diffFile = function(repoPath, filename, host) {
   return task;
 }
 
-var getImageElement = function(firstChar, host, repoPath, filename) {
-  var element = firstChar + '<img class="diffImage" src="' + host + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
+var getImageElement = function(firstChar, repoPath, filename) {
+  var element = firstChar + '<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
   if (firstChar == '-') {
     element += 'previous'; 
   } else {
