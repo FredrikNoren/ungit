@@ -73,7 +73,7 @@ function RebaseViewModel(onto, nodesThatWillMove) {
 exports.RebaseViewModel = RebaseViewModel;
 RebaseViewModel.prototype.type = 'rebase';
 RebaseViewModel.prototype.destroy = function() {
-	this.path.forEach(function(node) {
+	this.path.slice(0, -1).forEach(function(node) {
 		node.color(node.savedColor);
 	});
 }
