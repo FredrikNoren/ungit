@@ -401,7 +401,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/resolveconflicts', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git('add ' + req.body.files.map(function(file) { return '"' + file + '"'; }).join(' '), req.param('path'))
+		git.resolveConflicts(req.param('path'), req.body.files)
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
