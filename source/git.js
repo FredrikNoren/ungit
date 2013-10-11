@@ -29,6 +29,7 @@ var GitTask = function() {
   var self = this;
   this._completed = false;
   this._started = false;
+  this.encoding = 'utf8';
   this.onDone = new signals.Signal();
   this.onFail = new signals.Signal();
   this.onStarted = new signals.Signal();
@@ -90,9 +91,9 @@ GitExecutionTask.prototype.parser = function(parser) {
 }
 
 var gitQueue = async.queue(function (task, callback) {
-
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10 },
+  //TODO Process might need to set proper timeout options as for big image file will take longer to load...
+  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
@@ -140,9 +141,21 @@ var gitQueue = async.queue(function (task, callback) {
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
 
-var git = function(command, repoPath, sendToQueue) {
+var git = function(command, repoPath, encoding, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+
   var task = new GitExecutionTask(command, repoPath);
+  
+  if (encoding === true || encoding === false) {
+    sendToQueue = encoding;
+    encoding = 'utf8';
+  } else {
+    if (!encoding) {
+      encoding = 'utf8';
+    }
+  }
+
+  task.encoding = encoding;
 
   if (sendToQueue !== false) git.queueTask(task);
 
@@ -215,11 +228,8 @@ git.previousImage = function(repoPath, filename) {
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
-      var file = status.files[filename];
-
-      if (!file) {
-        git('show HEAD:' + filename, repoPath).always(task.setResult);
-      }
+        git('show HEAD:' + filename, repoPath, 'binary')
+          .always(task.setResult);
     });
 
   return task;
@@ -273,7 +283,7 @@ git.diffFile = function(repoPath, filename) {
 }
 
 var getImageElement = function(firstChar, repoPath, filename) {
-  var element = firstChar + '<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
+  var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
   if (firstChar == '-') {
     element += 'previous'; 
   } else {
