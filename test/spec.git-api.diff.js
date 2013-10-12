@@ -30,7 +30,7 @@ describe('git-api diff', function () {
 	var testImageFile = 'anImageFile.txt';
 
 	var getTestImageElement = function (testDir, filename, version) {
-		return '+&nbsp;<img class="diffImage" src="/api/diff/image?path=' + encodeURIComponent(testDir) + '&filename=' + filename + '&version=' + version + ' />';
+		return '+&nbsp;<img class="diffImage" src="/api/diff/image?path=' + encodeURIComponent(testDir) + '&filename=' + filename + '&version=' + version + '" />';
 	}
 
 	it('diff on non existing file should fail', function(done) {
