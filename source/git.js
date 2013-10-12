@@ -411,4 +411,36 @@ git.commit = function(repoPath, amend, message, files) {
   return task;
 }
 
+git.resolveConflicts = function(repoPath, files) {
+  var task = new GitTask();
+
+  var toAdd = [], toRemove = [];
+  async.map(files, function(file, callback) {
+    fs.exists(file, function(exists) {
+      if (exists) toAdd.push(file);
+      else toRemove.push(file);
+      callback();
+    })
+  }, function() {
+
+    async.parallel([
+      function(done) {
+        if (toAdd.length == 0) return done();
+        git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          .always(done);
+      },
+      function(done) {
+        if (toRemove.length == 0) return done();
+        git('rm ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          .always(done);
+      },
+    ], function(err) {
+      task.setResult(err);
+    });
+
+  });
+
+  return task;
+}
+
 module.exports = git;

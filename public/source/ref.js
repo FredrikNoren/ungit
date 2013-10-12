@@ -67,7 +67,7 @@ var RefViewModel = function(args) {
 	this.current = ko.computed(function() {
 		return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;
 	});
-	this.color = args.color || this._colorFromHashOfString(this.refName);
+	this.color = args.color || this._colorFromHashOfString(this.name);
 }
 RefViewModel.prototype._colorFromHashOfString = function(string) {
 	return '#' + md5(string).toString().slice(0, 6);
