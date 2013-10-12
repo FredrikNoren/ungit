@@ -242,8 +242,9 @@ git.previousImage = function(repoPath, filename) {
 git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
-  var isFile = fs.existsSync(fullFilePath);
-  var isImage = isFile ? isImageFile(fullFilePath) : false;
+  var isExist = fs.existsSync(fullFilePath);
+  var stat = isExist ? fs.statSync(fullFilePath) : false;
+  var isImage = isExist && !stat.isDirectory() ? isImageFile(fullFilePath) : false;
 
   git.status(repoPath)
     .started(task.setStarted)
@@ -254,12 +255,12 @@ git.diffFile = function(repoPath, filename) {
       var diff = { };
 
       if (!file) {
-        if (isFile) task.setResult(null, []);
+        if (isExist) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
         if (isImage) {
           diff.type = 'html';
-          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isFile ? getImageElement('+', repoPath, filename) : '+ [removed image]' ]];
+          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isExist ? getImageElement('+', repoPath, filename) : '+ [image removed...]' ]];
           diffs.push(diff);
           task.setResult(null, diffs);
         } else {
@@ -294,17 +295,17 @@ var getImageElement = function(firstChar, repoPath, filename) {
   } else {
     element += 'current';
   }
-  element += '" />';
+  element += ' />';
 
   return element;
 }
 
-var isImageFile = function(file) {
-  var firstLine = fs.readFileSync(file).toString().split(os.EOL)[0];
-  for(n in imageFileTypes) {
+var isImageFile = function(fullFilePath) {
+  var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
+  for (var n in imageFileTypes) {
     if (firstLine.indexOf(imageFileTypes[n]) > -1) {
       return true;
-    } 
+    }
   }
   return false;
 }
