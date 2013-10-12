@@ -13,9 +13,7 @@ var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 
-
-var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG', 'RAW'];
-
+var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
 
 function GitError() {
   Error.call(this);
@@ -295,7 +293,7 @@ var getImageElement = function(firstChar, repoPath, filename) {
   } else {
     element += 'current';
   }
-  element += ' />';
+  element += '" />';
 
   return element;
 }
