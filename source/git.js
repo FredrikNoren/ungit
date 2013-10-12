@@ -7,11 +7,13 @@ var config = require('./config')();
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
+var os = require('os');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 
+var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
 
 function GitError() {
   Error.call(this);
@@ -29,6 +31,7 @@ var GitTask = function() {
   var self = this;
   this._completed = false;
   this._started = false;
+  this.encoding = 'utf8';
   this.onDone = new signals.Signal();
   this.onFail = new signals.Signal();
   this.onStarted = new signals.Signal();
@@ -90,9 +93,9 @@ GitExecutionTask.prototype.parser = function(parser) {
 }
 
 var gitQueue = async.queue(function (task, callback) {
-
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10 },
+  //TODO Process might need to set proper timeout options as for big image file will take longer to load...
+  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
@@ -140,9 +143,21 @@ var gitQueue = async.queue(function (task, callback) {
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
 
-var git = function(command, repoPath, sendToQueue) {
+var git = function(command, repoPath, encoding, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+
   var task = new GitExecutionTask(command, repoPath);
+  
+  if (encoding === true || encoding === false) {
+    sendToQueue = encoding;
+    encoding = 'utf8';
+  } else {
+    if (!encoding) {
+      encoding = 'utf8';
+    }
+  }
+
+  task.encoding = encoding;
 
   if (sendToQueue !== false) git.queueTask(task);
 
@@ -208,28 +223,60 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.diffFile = function(repoPath, filename) {
+git.previousImage = function(repoPath, filename) {
   var task = new GitTask();
 
   git.status(repoPath)
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
+        git('show HEAD:' + filename, repoPath, 'binary')
+          .always(task.setResult);
+    });
+
+  return task;
+}
+
+git.diffFile = function(repoPath, filename) {
+  var task = new GitTask();
+  var fullFilePath = path.join(repoPath, filename);
+  var isExist = fs.existsSync(fullFilePath);
+  var stat = isExist ? fs.statSync(fullFilePath) : false;
+  var isImage = isExist && !stat.isDirectory() ? isImageFile(fullFilePath) : false;
+
+  git.status(repoPath)
+    .started(task.setStarted)
+    .fail(task.setResult)
+    .done(function(status) {
       var file = status.files[filename];
+      var diffs = [];
+      var diff = { };
+
       if (!file) {
-        if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
+        if (isExist) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
-        git('diff HEAD -- "' + filename.trim() + '"', repoPath)
-          .parser(gitParser.parseGitDiff)
-          .always(task.setResult);
+        if (isImage) {
+          diff.type = 'html';
+          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isExist ? getImageElement('+', repoPath, filename) : '+ [image removed...]' ]];
+          diffs.push(diff);
+          task.setResult(null, diffs);
+        } else {
+          git('diff HEAD -- "' + filename.trim() + '"', repoPath)
+            .parser(gitParser.parseGitDiff)
+            .always(task.setResult);
+        }
       } else {
-        fs.readFile(path.join(repoPath, filename), { encoding: 'utf8' }, function(err, text) {
+        fs.readFile(fullFilePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
-          var diffs = [];
-          var diff = { };
           text = text.toString();
-          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          if (isImage) {
+            diff.type = 'html';
+            diff.lines = [[null, 0, getImageElement('+', repoPath, filename)]];
+          } else {
+            diff.type = 'text';
+            diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          }
           diffs.push(diff);
           task.setResult(null, diffs);
         });
@@ -237,6 +284,28 @@ git.diffFile = function(repoPath, filename) {
     });
 
   return task;
+}
+
+var getImageElement = function(firstChar, repoPath, filename) {
+  var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
+  if (firstChar == '-') {
+    element += 'previous'; 
+  } else {
+    element += 'current';
+  }
+  element += '" />';
+
+  return element;
+}
+
+var isImageFile = function(fullFilePath) {
+  var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
+  for (var n in imageFileTypes) {
+    if (firstLine.indexOf(imageFileTypes[n]) > -1) {
+      return true;
+    }
+  }
+  return false;
 }
 
 git.discardAllChanges = function(repoPath) {

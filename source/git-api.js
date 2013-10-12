@@ -121,6 +121,12 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		else res.json(result || {});
 	}
 
+	var fileResultOrFail = function(res, err, result) {
+		res.type('png');
+		if (err) res.json(400, err); 
+		else res.send(new Buffer(result, 'binary'));
+	}
+
 
 	function credentialsOption(socketId) {
 		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
@@ -180,6 +186,15 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
+	});
+
+	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+		if (req.query.version == 'previous') {
+			git.previousImage(req.query.path, req.query.filename)
+				.always(fileResultOrFail.bind(null, res));
+		} else {
+			res.sendfile(path.join(req.query.path, req.query.filename));
+		}
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
