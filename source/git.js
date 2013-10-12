@@ -7,10 +7,14 @@ var config = require('./config')();
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
+var os = require('os');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
+
+
+var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG', 'RAW'];
 
 
 function GitError() {
@@ -238,7 +242,8 @@ git.previousImage = function(repoPath, filename) {
 git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
-  var isImage = isImageFile(fullFilePath);
+  var isFile = fs.existsSync(fullFilePath);
+  var isImage = isFile ? isImageFile(fullFilePath) : false;
 
   git.status(repoPath)
     .started(task.setStarted)
@@ -249,12 +254,12 @@ git.diffFile = function(repoPath, filename) {
       var diff = { };
 
       if (!file) {
-        if (fs.existsSync(fullFilePath)) task.setResult(null, []);
+        if (isFile) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
         if (isImage) {
           diff.type = 'html';
-          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, fs.existsSync(fullFilePath) ? getImageElement('+', repoPath, filename) : '+ [removed image]' ]];
+          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isFile ? getImageElement('+', repoPath, filename) : '+ [removed image]' ]];
           diffs.push(diff);
           task.setResult(null, diffs);
         } else {
@@ -295,14 +300,13 @@ var getImageElement = function(firstChar, repoPath, filename) {
 }
 
 var isImageFile = function(file) {
-  file = file.split('.');
-  file = file[file.length - 1].toUpperCase();
-  var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG', 'RAW'];
-  if (imageFileTypes.indexOf(file) > -1) {
-    return true;
-  } else {
-    return false;
+  var firstLine = fs.readFileSync(file).toString().split(os.EOL)[0];
+  for(n in imageFileTypes) {
+    if (firstLine.indexOf(imageFileTypes[n]) > -1) {
+      return true;
+    } 
   }
+  return false;
 }
 
 git.discardAllChanges = function(repoPath) {
