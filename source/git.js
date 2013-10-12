@@ -254,7 +254,7 @@ git.diffFile = function(repoPath, filename) {
       } else if (!file.isNew) {
         if (isImage) {
           diff.type = 'html';
-          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, getImageElement('+', repoPath, filename)]];
+          diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, fs.existsSync(fullFilePath) ? getImageElement('+', repoPath, filename) : '+ [removed image]' ]];
           diffs.push(diff);
           task.setResult(null, diffs);
         } else {
