@@ -15,6 +15,7 @@ var StagingViewModel = function(repository) {
 	this.commitMessageBody = ko.observable();
 	this.inRebase = ko.observable(false);
 	this.inMerge = ko.observable(false);
+	this.allStageFlag = false;
 	this.commitButtonVisible = ko.computed(function() {
 		return !self.inRebase() && !self.inMerge();
 	});
@@ -167,7 +168,13 @@ StagingViewModel.prototype.discardAllChanges = function() {
 	});
 	this.app.showDialog(diag);
 }
-
+StagingViewModel.prototype.toogleAllStages = function() {
+	var self = this;
+	for (var n in self.files()){
+		self.files()[n].setStaged(self.allStageFlag);
+	}
+	self.allStageFlag = !self.allStageFlag
+}
 
 var FileViewModel = function(staging) {
 	var self = this;
@@ -185,6 +192,9 @@ var FileViewModel = function(staging) {
 }
 FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
+}
+FileViewModel.prototype.setStaged = function(staged) {
+	this.staged(staged);
 }
 FileViewModel.prototype.discardChanges = function() {
 	this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
