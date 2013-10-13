@@ -190,7 +190,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
 		if (req.query.version == 'previous') {
-			git.previousImage(req.query.path, req.query.filename)
+			git.binaryFileContentAtHead(req.query.path, req.query.filename)
 				.always(fileResultOrFail.bind(null, res));
 		} else {
 			res.sendfile(path.join(req.query.path, req.query.filename));

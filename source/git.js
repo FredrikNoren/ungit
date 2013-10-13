@@ -223,7 +223,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.previousImage = function(repoPath, filename) {
+git.binaryFileContentAtHead = function(repoPath, filename) {
   var task = new GitTask();
 
   git.status(repoPath)
