@@ -251,7 +251,7 @@ git.diffFile = function(repoPath, filename) {
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
         if (isImage) {
-          diff.type = 'html';
+          diff.type = 'image';
           diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isExist ? getImageElement('+', repoPath, filename) : '+ [image removed...]' ]];
           diffs.push(diff);
           task.setResult(null, diffs);
@@ -265,7 +265,7 @@ git.diffFile = function(repoPath, filename) {
           if (err) return task.setResult({ error: err });
           text = text.toString();
           if (isImage) {
-            diff.type = 'html';
+            diff.type = 'image';
             diff.lines = [[null, 0, getImageElement('+', repoPath, filename)]];
           } else {
             diff.type = 'text';

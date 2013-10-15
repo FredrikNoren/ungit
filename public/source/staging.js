@@ -190,8 +190,8 @@ var FileViewModel = function(staging) {
 	this.showingDiffs = ko.observable(false);
 	this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
 	this.renderType = ko.observable("textFileDiff");
-	this.renderHtml = function() {
-		this.renderType("htmlFileDiff");
+	this.renderImage = function() {
+		this.renderType("imageFileDiff");
 	};
 	this.renderText = function() {
 		this.renderType("textFileDiff");
@@ -227,8 +227,8 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 			var newDiffs = [];
 			diffs.forEach(function(diff) {
 				diff.lines.forEach(function(line) {
-					if(diff.type == 'html') {
-						self.renderHtml();
+					if(diff.type == 'image') {
+						self.renderImage();
 					} else {
 						self.renderText();
 					}
