@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="css/styles.css" />
+</head>
+<body>
+
+<div class="container">
+	<p class="text-center" style="padding-top: 20px;"><img src="images/logoLarge.png"></p>
+	<p><em>Launching ungit</em></p>
+	<p id="output"></p>
+</div>
+
+<script type="text/javascript">
+setTimeout(function() {
+	var s = require('../source/server');
+	s.started.add(function() {
+		window.location = "http://localhost:8448";
+	})
+	/*var childProcess = require('child_process');
+	var p = childProcess.exec('node bin/ungit --no-launchBrowser');
+	p.stdout.on('data', function(data) {
+		document.getElementById('output').innerHTML += data + '<br>';
+		if (data.toString().indexOf('Browse to ') >= 0) {
+			window.location = "http://localhost:8448";
+		}
+	});*/
+}, 1);
+</script>
+
+</body>
+</html>
