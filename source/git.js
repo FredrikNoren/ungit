@@ -31,7 +31,6 @@ var GitTask = function() {
   var self = this;
   this._completed = false;
   this._started = false;
-  this.encoding = 'utf8';
   this.onDone = new signals.Signal();
   this.onFail = new signals.Signal();
   this.onStarted = new signals.Signal();
@@ -84,11 +83,16 @@ var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
+  this.encoding = 'utf8';
   this.potentialError = new GitError(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
 GitExecutionTask.prototype.parser = function(parser) {
   this._parser = parser;
+  return this;
+}
+GitExecutionTask.prototype.setEncoding = function(encoding) {
+  this.encoding = encoding;
   return this;
 }
 
@@ -143,23 +147,12 @@ var gitQueue = async.queue(function (task, callback) {
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
 
-var git = function(command, repoPath, encoding, sendToQueue) {
+var git = function(command, repoPath, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
 
   var task = new GitExecutionTask(command, repoPath);
-  
-  if (encoding === true || encoding === false) {
-    sendToQueue = encoding;
-    encoding = 'utf8';
-  } else {
-    if (!encoding) {
-      encoding = 'utf8';
-    }
-  }
 
-  task.encoding = encoding;
-
-  if (sendToQueue !== false) git.queueTask(task);
+  if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
   return task;
 }
@@ -230,7 +223,8 @@ git.binaryFileContentAtHead = function(repoPath, filename) {
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
-        git('show HEAD:' + filename, repoPath, 'binary')
+        git('show HEAD:' + filename, repoPath)
+          .setEncoding('binary')
           .always(task.setResult);
     });
 
