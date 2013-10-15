@@ -124,7 +124,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	var fileResultOrFail = function(res, err, result) {
 		res.type('png');
 		if (err) res.json(400, err); 
-		else res.send(new Buffer(result, 'binary'));
+		else res.send(result);
 	}
 
 
