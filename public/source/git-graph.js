@@ -6,8 +6,7 @@ var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
 var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
 var moment = require('moment');
-var debounce = require('lodash.debounce');
-var find = require('lodash.find');
+var _ = require('lodash');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 
@@ -39,7 +38,7 @@ var GitGraphViewModel = function(repository) {
 	this.showDropTargets = ko.computed(function() {
 		return !!self.currentActionContext();
 	});
-	this.scrolledToEnd = debounce(function() {
+	this.scrolledToEnd = _.debounce(function() {
 		self.maxNNodes = self.maxNNodes + 25;
 		self.loadNodesFromApi();
 	}, 1000, true);
@@ -158,7 +157,7 @@ GitGraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
 }
 
 GitGraphViewModel.getHEAD = function(nodes) {
-	return find(nodes, function(node) { return find(node.refs(), 'isLocalHEAD'); });
+	return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
 }
 
 GitGraphViewModel.traverseNodeParents = function(node, nodesById, callback) {
