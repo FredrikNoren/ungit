@@ -1,7 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
-var find = require('lodash.find');
+var _ = require('lodash');
 
 
 var GerritIntegrationViewModel = function(repository) {
@@ -46,7 +46,7 @@ GerritIntegrationViewModel.prototype.initCommitHook = function() {
 	});
 }
 GerritIntegrationViewModel.prototype.getChange = function(changeId) {
-	return find(this.changes(), { data: { id: changeId } });
+	return _.find(this.changes(), { data: { id: changeId } });
 }
 GerritIntegrationViewModel.prototype.getChangeIdFromMessage = function(message) {
 	var changeId = message.split('\n').pop().trim();
