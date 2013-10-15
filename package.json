@@ -19,9 +19,7 @@
   "dependencies": {
     "express": "~3.4.0",
     "superagent": "~0.15.4",
-    "lodash.debounce": "~2.2.1",
-    "lodash.find": "~2.2.1",
-    "lodash.throttle": "~2.2.1",
+    "lodash": "~2.2.1",
     "temp": "0.6.0",
     "socket.io": "0.9.16",
     "moment": "~2.3.0",
