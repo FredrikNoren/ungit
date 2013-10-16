@@ -32,10 +32,12 @@ exports.parseGitStatus = function(repoPath, text) {
 };
 
 var fileType = function(fullFilePath) {
-  var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
-  for (var n in imageFileTypes) {
-    if (firstLine.indexOf(imageFileTypes[n]) > -1) {
-      return 'image';
+  if(fs.existsSync(fullFilePath) && !fs.statSync(fullFilePath).isDirectory()){
+    var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
+    for (var n in imageFileTypes) {
+      if (firstLine.indexOf(imageFileTypes[n]) > -1) {
+        return 'image';
+      }
     }
   }
   return 'text';
