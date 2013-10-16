@@ -184,13 +184,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/filediff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.diffFile(req.param('path'), req.param('file'))
+		git.fileDiff(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
 	});
 
-        app.get(exports.pathPrefix + '/imagediff', ensureAuthenticated, ensurePathExists, function(req, res) {
-                git.diffImage(req.param('path'), req.param('file'))
-                        .always(jsonResultOrFail.bind(null, res));
+	app.get(exports.pathPrefix + '/imagediff', ensureAuthenticated, ensurePathExists, function(req, res) {
+		git.imageDiff(req.param('path'), req.param('file'))
+			.always(jsonResultOrFail.bind(null, res));
         });
 
 

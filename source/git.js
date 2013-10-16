@@ -7,13 +7,11 @@ var config = require('./config')();
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
-var os = require('os');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 
-var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
 
 function GitError() {
   Error.call(this);
@@ -231,7 +229,7 @@ git.binaryFileContentAtHead = function(repoPath, filename) {
   return task;
 }
 
-git.diffFile = function(repoPath, filename) {
+git.fileDiff = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isExist = fs.existsSync(fullFilePath);
@@ -266,7 +264,7 @@ git.diffFile = function(repoPath, filename) {
   return task;
 }
 
-git.diffImage = function(repoPath, filename) {
+git.imageDiff = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isExist = fs.existsSync(fullFilePath);
@@ -307,16 +305,6 @@ var getImageElement = function(firstChar, repoPath, filename) {
   element += '" />';
 
   return element;
-}
-
-var isImageFile = function(fullFilePath) {
-  var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
-  for (var n in imageFileTypes) {
-    if (firstLine.indexOf(imageFileTypes[n]) > -1) {
-      return true;
-    }
-  }
-  return false;
 }
 
 git.discardAllChanges = function(repoPath) {

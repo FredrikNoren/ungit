@@ -77,10 +77,11 @@ StagingViewModel.prototype.setFiles = function(files) {
 		var diffViewModel = this.filesByPath[file];
 		if (!diffViewModel) {
 			if(files[file].type == 'text') {
-				this.filesByPath[file] = diffViewModel = new FileViewModel(self);
+				diffViewModel = new FileViewModel(self);
 			} else {
-				this.filesByPath[file] = diffViewModel = new ImageViewModel(self);
+ 				diffViewModel = new ImageViewModel(self);
 			}
+			this.filesByPath[file] = diffViewModel;
 			diffViewModel.name(file);
 		}
 		diffViewModel.isNew(files[file].isNew);
@@ -236,10 +237,10 @@ DiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 							text: line[2]
 						});
 					} else {
-                                                newDiffs.push({
-                                                        added: line[2][0] == '+',
-                                                        removed: line[2][0] == '-' || line[2][0] == '\\',
-                                                        text: line[2]
+						newDiffs.push({
+							added: line[2][0] == '+',
+							removed: line[2][0] == '-' || line[2][0] == '\\',
+							text: line[2]
                                                 });
 					}
 				});
