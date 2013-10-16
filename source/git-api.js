@@ -183,12 +183,18 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
-	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
+	app.get(exports.pathPrefix + '/filediff', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
 	});
 
-	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+        app.get(exports.pathPrefix + '/imagediff', ensureAuthenticated, ensurePathExists, function(req, res) {
+                git.diffImage(req.param('path'), req.param('file'))
+                        .always(jsonResultOrFail.bind(null, res));
+        });
+
+
+	app.get(exports.pathPrefix + '/imagediff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
 		if (req.query.version == 'previous') {
 			git.binaryFileContentAtHead(req.query.path, req.query.filename)
 				.always(fileResultOrFail.bind(null, res));
