@@ -6,7 +6,7 @@ var async = require('async');
 var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
 var StagingViewModel = require('./staging').StagingViewModel;
 var dialogs = require('./dialogs');
-var find = require('lodash.find');
+var _ = require('lodash');
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
@@ -105,7 +105,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
 		self.remotes(remotes);
 		self.repository.graph.hasRemotes(remotes.length != 0);
 		if (!self.currentRemote() && remotes.length > 0) {
-			if (find(remotes, function(r) { return r.name == 'origin' })) // default to origin if it exists
+			if (_.find(remotes, { 'name': 'origin' })) // default to origin if it exists
 				self.currentRemote('origin');
 			else // otherwise take the first one
 				self.currentRemote(remotes[0].name);
