@@ -52,13 +52,15 @@ describe('git-api submodule', function () {
 				isNew: true,
 				staged: true,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			expect(res.body.files['.gitmodules']).to.eql({
 				isNew: true,
 				staged: true,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -88,14 +90,15 @@ describe('git-api submodule', function () {
 				isNew: false,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
 	});
 
 	it('diff on submodule should work', function(done) {
-		common.get(req, '/diff', { path: testDirMain, file: submodulePath }, done, function(err, res) {
+		common.get(req, '/filediff', { path: testDirMain, file: submodulePath }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
 			expect(res.body[0].lines).to.be.an('array');

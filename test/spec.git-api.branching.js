@@ -151,7 +151,8 @@ describe('git-api branching', function () {
 				isNew: false,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
