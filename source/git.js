@@ -295,7 +295,7 @@ git.imageDiff = function(repoPath, filename) {
 }
 
 var getImageElement = function(firstChar, repoPath, filename) {
-  var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/imagediff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
+  var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
   if (firstChar == '-') {
     element += 'previous'; 
   } else {

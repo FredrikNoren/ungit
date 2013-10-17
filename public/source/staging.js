@@ -225,7 +225,7 @@ LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	if (self.ancestor.showingDiffs()) {
 		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
 		var isTextType = self.ancestor.type == 'text' ? true : false;
-		self.ancestor.app.get('/filediff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath }, function(err, diffs) {
+		self.ancestor.app.get('/diff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath, type: self.ancestor.type }, function(err, diffs) {
 			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
@@ -255,7 +255,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	if (self.ancestor.showingDiffs()) {
 		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
 		var isTextType = self.ancestor.type == 'text' ? true : false;
-		self.ancestor.app.get('/imagediff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath }, function(err, diffs) {
+		self.ancestor.app.get('/diff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath, type: self.ancestor.type }, function(err, diffs) {
 			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
