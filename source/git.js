@@ -268,7 +268,6 @@ git.imageDiff = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isExist = fs.existsSync(fullFilePath);
-  var stat = isExist ? fs.statSync(fullFilePath) : false;
 
   git.status(repoPath)
     .started(task.setStarted)
