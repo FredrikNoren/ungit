@@ -30,12 +30,12 @@ describe('git-api diff', function () {
 	var testImageFile = 'anImageFile.txt';
 
 	var getTestImageElement = function (testDir, filename, version) {
-		return '+&nbsp;<img class="diffImage" src="/api/imagediff/image?path=' + encodeURIComponent(testDir) + '&filename=' + filename + '&version=' + version + '" />';
+		return '+&nbsp;<img class="diffImage" src="/api/diff/image?path=' + encodeURIComponent(testDir) + '&filename=' + filename + '&version=' + version + '" />';
 	}
 
 	it('diff on non existing file should fail', function(done) {
 		req
-			.get(restGit.pathPrefix + '/filediff')
+			.get(restGit.pathPrefix + '/diff')
 			.query({ path: testDir, file: testFile })
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
@@ -57,7 +57,7 @@ describe('git-api diff', function () {
         });
 
 	it('diff on created file should work', function(done) {
-		common.get(req, '/filediff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
@@ -72,7 +72,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on created image file should work', function(done) {
-                common.get(req, '/imagediff', { path: testDir, file: testImageFile }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be(1);
                         expect(res.body[0].lines).to.be.an('array');
@@ -91,7 +91,7 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on commited file should work', function(done) {
-		common.get(req, '/filediff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(0);
 			done();
@@ -109,7 +109,7 @@ describe('git-api diff', function () {
         });
 
 	it('diff on modified file should work', function(done) {
-		common.get(req, '/filediff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
@@ -127,7 +127,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on modified image file should work', function(done) {
-                common.get(req, '/imagediff', { path: testDir, file: testImageFile }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be(1);
                         expect(res.body[0].lines).to.be.an('array');
@@ -147,7 +147,7 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on removed file should work', function(done) {
-		common.get(req, '/filediff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
 			expect(res.body[0].lines).to.be.an('array');
@@ -157,7 +157,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on removed image file should work', function(done) {
-                common.get(req, '/imagediff', { path: testDir, file: testImageFile }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be.greaterThan(0);
                         expect(res.body[0].lines).to.be.an('array');
