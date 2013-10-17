@@ -76,7 +76,6 @@ StagingViewModel.prototype.setFiles = function(files) {
 	for(var file in files) {
 		var fileViewModel = this.filesByPath[file];
 		if (!fileViewModel) {
-console.log(files[file].type);
 			this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
 			fileViewModel.name(file);
 		}
@@ -183,8 +182,7 @@ var FileViewModel = function(staging, type) {
 	this.staging = staging;
 	this.app = staging.app;
 	this.type = type;
-	console.log(type);
-	this.diff = type == 'text' ? new LineByLineDiffViewModel(self) : new ImageDiffViewModel(self);
+	this.diff = type == 'image' ? new ImageDiffViewModel(self) : new LineByLineDiffViewModel(self);
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
