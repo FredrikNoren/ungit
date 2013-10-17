@@ -162,7 +162,7 @@ git.queueTask = function(task) {
 git.status = function(repoPath, file) {
   var task = new GitTask();
   git('status -s -b -u "' + (file || '') + '"', repoPath)
-    .parser(gitParser.parseGitStatus.bind(null, repoPath))
+    .parser(gitParser.parseGitStatus)
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
@@ -229,7 +229,15 @@ git.binaryFileContentAtHead = function(repoPath, filename) {
   return task;
 }
 
-git.fileDiff = function(repoPath, filename) {
+git.diff = function(repoPath, filename, type) {
+  if(type == 'image') {
+    return imageDiff(repoPath, filename);
+  } else {
+    return fileDiff(repoPath, filename);
+  }
+}
+
+var fileDiff = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isExist = fs.existsSync(fullFilePath);
@@ -264,7 +272,7 @@ git.fileDiff = function(repoPath, filename) {
   return task;
 }
 
-git.imageDiff = function(repoPath, filename) {
+var imageDiff = function(repoPath, filename) {
   var task = new GitTask();
   var fullFilePath = path.join(repoPath, filename);
   var isExist = fs.existsSync(fullFilePath);

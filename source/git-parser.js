@@ -1,13 +1,6 @@
-var moment = require('moment');
-var fs = require('fs');
-var path = require('path');
-var os = require('os');
 var addressParser = require('./address-parser');
 
-var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
-
-
-exports.parseGitStatus = function(repoPath, text) {
+exports.parseGitStatus = function(text) {
 	var result = {};
 	var lines = text.split('\n');
 	result.branch = lines[0].split(' ').pop();
@@ -24,24 +17,11 @@ exports.parseGitStatus = function(repoPath, text) {
 		file.removed = status[0] == 'D' || status[1] == 'D';
 		file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
 		file.conflict = status[0] == 'U' || status[1] == 'U';
-		file.type = fileType(path.join(repoPath, filename))
 
 		result.files[filename] = file;
 	});
 	return result;
 };
-
-var fileType = function(fullFilePath) {
-  if(fs.existsSync(fullFilePath) && !fs.statSync(fullFilePath).isDirectory()){
-    var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
-    for (var n in imageFileTypes) {
-      if (firstLine.indexOf(imageFileTypes[n]) > -1) {
-        return 'image';
-      }
-    }
-  }
-  return 'text';
-}
 
 exports.parseGitDiff = function(text) {
 

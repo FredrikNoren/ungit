@@ -12,6 +12,9 @@ var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var socketIO;
 
+var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
+
+
 exports.pathPrefix = '';
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
@@ -127,6 +130,19 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		else res.send(result);
 	}
 
+	var fileType = function(fullFilePath) {
+		if(fs.existsSync(fullFilePath) && !fs.statSync(fullFilePath).isDirectory()){
+			var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
+			for (var n in imageFileTypes) {
+				if (firstLine.indexOf(imageFileTypes[n]) > -1) {
+					return 'image';
+				}
+			}
+		}
+		return 'text';
+	}
+
+
 
 	function credentialsOption(socketId) {
 		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
@@ -135,8 +151,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 
 	app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.status(req.param('path'))
-			.always(jsonResultOrFail.bind(null, res));
+		var repoPath = req.param('path');
+		git.status(repoPath)
+			.always(function(err, result) {
+				if(result) {
+					for(var file in result.files) {
+						result.files[file].type = fileType(path.join(repoPath, file));
+					}
+				}
+				jsonResultOrFail(res, err, result);
+			});
 	});
 
 	app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -184,13 +208,8 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		if (req.param('type') == 'image') {
-                        git.imageDiff(req.param('path'), req.param('file'))
-                                .always(jsonResultOrFail.bind(null, res));
-		} else {
-                        git.fileDiff(req.param('path'), req.param('file'))
-                               .always(jsonResultOrFail.bind(null, res));
-		}
+		git.diff(req.param('path'), req.param('file'), req.param('type'))
+			.always(jsonResultOrFail.bind(null, res));
         });
 
 
