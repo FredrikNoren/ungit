@@ -74,21 +74,17 @@ StagingViewModel.prototype.setFiles = function(files) {
 	var self = this;
 	var newFiles = [];
 	for(var file in files) {
-		var diffViewModel = this.filesByPath[file];
-		if (!diffViewModel) {
-			if(files[file].type == 'text') {
-				diffViewModel = new FileViewModel(self);
-			} else {
- 				diffViewModel = new ImageViewModel(self);
-			}
-			this.filesByPath[file] = diffViewModel;
-			diffViewModel.name(file);
+		var fileViewModel = this.filesByPath[file];
+		if (!fileViewModel) {
+console.log(files[file].type);
+			this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
+			fileViewModel.name(file);
 		}
-		diffViewModel.isNew(files[file].isNew);
-		diffViewModel.removed(files[file].removed);
-		diffViewModel.conflict(files[file].conflict);
-		diffViewModel.invalidateDiff();
-		newFiles.push(diffViewModel);
+		fileViewModel.isNew(files[file].isNew);
+		fileViewModel.removed(files[file].removed);
+		fileViewModel.conflict(files[file].conflict);
+		fileViewModel.diff.invalidateDiff();
+		newFiles.push(fileViewModel);
 	}
 	this.files(newFiles);
 }
@@ -163,7 +159,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
-		file.invalidateDiff(false);
+		file.diff.invalidateDiff(false);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -182,12 +178,13 @@ StagingViewModel.prototype.toogleAllStages = function() {
 	self.allStageFlag = !self.allStageFlag
 }
 
-var DiffViewModel = function(staging) {
+var FileViewModel = function(staging, type) {
 	var self = this;
 	this.staging = staging;
 	this.app = staging.app;
-	this.type = 'text';
-
+	this.type = type;
+	console.log(type);
+	this.diff = type == 'text' ? new LineByLineDiffViewModel(self) : new ImageDiffViewModel(self);
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
@@ -197,69 +194,82 @@ var DiffViewModel = function(staging) {
 	this.showingDiffs = ko.observable(false);
 	this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
 }
-DiffViewModel.prototype.toogleStaged = function() {
+FileViewModel.prototype.toogleStaged = function() {
 	this.staged(!this.staged());
 }
-DiffViewModel.prototype.discardChanges = function() {
+FileViewModel.prototype.discardChanges = function() {
 	this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
-DiffViewModel.prototype.ignoreFile = function() {
+FileViewModel.prototype.ignoreFile = function() {
 	this.app.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
 }
-DiffViewModel.prototype.resolveConflict = function() {
+FileViewModel.prototype.resolveConflict = function() {
 	this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
-DiffViewModel.prototype.toogleDiffs = function() {
+FileViewModel.prototype.toogleDiffs = function() {
 	var self = this;
 	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
 		this.showingDiffs(true);
-		this.invalidateDiff(true);
+		this.diff.invalidateDiff(true);
 	}
 }
-DiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+
+
+var LineByLineDiffViewModel = function(ancestor) {
+	this.ancestor = ancestor;
+	this.templateName = 'textFileDiff';
+}
+LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this;
-	if (this.showingDiffs()) {
-		if (drawProgressBar) this.diffsProgressBar.start();
-		var isTextType = this.type == 'text' ? true : false;
-		this.app.get(isTextType ? '/filediff' : '/imagediff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
-			if (drawProgressBar) self.diffsProgressBar.stop();
+	if (self.ancestor.showingDiffs()) {
+		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
+		var isTextType = self.ancestor.type == 'text' ? true : false;
+		self.ancestor.app.get('/filediff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath }, function(err, diffs) {
+			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
 			diffs.forEach(function(diff) {
 				diff.lines.forEach(function(line) {
-					if (isTextType) {
-						newDiffs.push({
-							oldLineNumber: line[0],
-							newLineNumber: line[1],
-							added: line[2][0] == '+',
-							removed: line[2][0] == '-' || line[2][0] == '\\',
-							text: line[2]
-						});
-					} else {
-						newDiffs.push({
-							added: line[2][0] == '+',
-							removed: line[2][0] == '-' || line[2][0] == '\\',
-							text: line[2]
-                                                });
-					}
+					newDiffs.push({
+						oldLineNumber: line[0],
+						newLineNumber: line[1],
+						added: line[2][0] == '+',
+						removed: line[2][0] == '-' || line[2][0] == '\\',
+						text: line[2]
+					});
 				});
 			});
-			self.diffs(newDiffs);
+			self.ancestor.diffs(newDiffs);
 		});
 	}
 }
 
-var FileViewModel = function (staging) {
-	DiffViewModel.call(this, staging);
-	this.type = 'text';
-	this.templateName = 'textFileDiff';
-}
-inherits(FileViewModel, DiffViewModel);
 
-var ImageViewModel = function(staging) {
-	DiffViewModel.call(this, staging);
-	this.type = 'html';
+var ImageDiffViewModel = function(ancestor) {
+	this.ancestor = ancestor;
 	this.templateName = 'imageFileDiff';
 }
-inherits(ImageViewModel, DiffViewModel);
+ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+	var self = this;
+	if (self.ancestor.showingDiffs()) {
+		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
+		var isTextType = self.ancestor.type == 'text' ? true : false;
+		self.ancestor.app.get('/imagediff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath }, function(err, diffs) {
+			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
+			if (err) return;
+			var newDiffs = [];
+			diffs.forEach(function(diff) {
+				diff.lines.forEach(function(line) {
+					newDiffs.push({
+						added: line[2][0] == '+',
+						removed: line[2][0] == '-' || line[2][0] == '\\',
+						text: line[2]
+					});
+				});
+			});
+			self.ancestor.diffs(newDiffs);
+		});
+	}
+}
+
