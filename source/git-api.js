@@ -436,7 +436,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	// This method isn't called by the client but by credentials-helper.js
 	app.get(exports.pathPrefix + '/credentials', function(req, res) {
-		// this endpoint can only be invoked from localhost, since the crednetials-helper is always
+		// this endpoint can only be invoked from localhost, since the credentials-helper is always
 		// on the same machine that we're running ungit on
 		if (req.ip != '127.0.0.1') {
 			winston.info('Trying to get credentials from unathorized ip: ' + req.ip);
