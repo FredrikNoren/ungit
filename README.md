@@ -11,6 +11,8 @@ The easiest way to use git. On any platform. Anywhere.
  * Works well with GitHub.
  * [Gerrit](https://code.google.com/p/gerrit/) integration (view, checkout and push changes from/to gerrit).
 
+[Follow @ungitui on twitter](https://twitter.com/ungitui)
+
 Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
 
 [![Screenshot](/screenshot.png)](http://youtu.be/hkBVAi3oKvo)
