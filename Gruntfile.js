@@ -5,6 +5,8 @@ var fs = require('fs');
 var npm = require('npm');
 var semver = require('semver');
 var async = require('async');
+var nodeWebkitBuilds = require('node-webkit-builds');
+var unzip = require('unzip');
 
 module.exports = function(grunt) {
 
@@ -172,7 +174,54 @@ module.exports = function(grunt) {
           'test/**/*.js',
         ]
       }
+    },
+    clean: {
+      nwpackage: ['build/desktop']
+    },
+    copy: {
+      nwpackage: {
+        files: [
+          {
+            src: [
+              'package.json',
+              'assets/dev/icon.png',
+              'public/**/*',
+              'source/**/*',
+              'bin/credentials-helper',
+              ].concat(
+              Object.keys(packageJson.dependencies).map(function(dep) { return 'node_modules/' + dep + '/**/*'; })
+            ),
+            dest: 'build/desktop/'
+          },
+          {
+            expand: true,
+            cwd: 'build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32/',
+            src: [
+              '*.dll',
+              'nw.*',
+              ],
+            dest: 'build/desktop/',
+            rename: function(dest, src) {
+              if (src.indexOf('nw.exe') != -1) return dest + 'ungit.exe';
+              else return dest + src;
+            }
+          }
+        ]
+      }
+    },
+    curl: {
+      nodewebkitbinaries: {
+        src: nodeWebkitBuilds.builds.win32,
+        dest: 'build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32.zip'
+      }
     }
+  });
+
+  grunt.registerTask('unzipnodewebkit', function() {
+    var done = this.async();
+    fs.createReadStream('build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32.zip')
+      .pipe(unzip.Extract({ path: 'build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32' }))
+      .on('finish', function() { done(); });
   });
 
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
@@ -257,6 +306,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-curl');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);
@@ -264,6 +316,10 @@ module.exports = function(grunt) {
   // Run tests
   grunt.registerTask('unittest', ['simplemocha']);
   grunt.registerTask('test', ['unittest', 'clicktest']);
+
+  // Create desktop (node-webkit) release
+  grunt.registerTask('buildinit', ['curl:nodewebkitbinaries', 'unzipnodewebkit']);
+  grunt.registerTask('builddesktop', ['clean:nwpackage', 'copy:nwpackage']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
