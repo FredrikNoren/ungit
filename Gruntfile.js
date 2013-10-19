@@ -176,15 +176,15 @@ module.exports = function(grunt) {
       }
     },
     clean: {
-      nwpackage: ['build/desktop']
+      nodewebkitpackage: ['build/desktop']
     },
     copy: {
-      nwpackage: {
+      nodewebkitpackage: {
         files: [
           {
             src: [
               'package.json',
-              'assets/dev/icon.png',
+              'icon.png',
               'public/**/*',
               'source/**/*',
               'bin/credentials-helper',
@@ -207,6 +207,12 @@ module.exports = function(grunt) {
             }
           }
         ]
+      },
+      nodewebkitdevelopment: {
+        expand: true,
+        flatten: true,
+        src: ['build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32/*.dll', 'build/nodewebkitbinaries/' + nodeWebkitBuilds.version + '/win32/nw.*',],
+        dest: '.'
       }
     },
     curl: {
@@ -318,8 +324,8 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['unittest', 'clicktest']);
 
   // Create desktop (node-webkit) release
-  grunt.registerTask('buildinit', ['curl:nodewebkitbinaries', 'unzipnodewebkit']);
-  grunt.registerTask('builddesktop', ['clean:nwpackage', 'copy:nwpackage']);
+  grunt.registerTask('buildinit', ['curl:nodewebkitbinaries', 'unzipnodewebkit', 'copy:nodewebkitdevelopment']);
+  grunt.registerTask('builddesktop', ['clean:nodewebkitpackage', 'copy:nodewebkitpackage']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
