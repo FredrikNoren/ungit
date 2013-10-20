@@ -125,7 +125,7 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'no-remote-specified';
         else if (err.stderr.indexOf('non-fast-forward') != -1)
           err.errorCode = 'non-fast-forward';
-        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
+        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
           err.errorCode = 'merge-failed';
         task.setResult(err);
         callback(err);

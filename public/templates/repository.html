@@ -52,7 +52,8 @@
 						</div>
 					</div>
 
-					<div class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+					<div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, 
+						style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }, hasFocus2: hasFocus">
 					</div>
 
 					<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">

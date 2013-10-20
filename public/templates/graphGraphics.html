@@ -27,6 +27,9 @@
 		<!-- /ko -->
 		<!-- ko foreach: nodes -->
 		<circle data-bind="attr: { cx: x(), cy: y(), r: radius(), fill: color() }" />
+		<!-- ko if: selected -->
+			<circle data-bind="attr: { cx: x(), cy: y(), r: radius() - 4 }" stroke="#252833" stroke-width="4" fill="transparent" />
+		<!-- /ko -->
 		<!-- /ko -->
 		<!-- ko if: showCommitNode -->
 			<g data-bind="attr: { opacity: commitOpacity }">

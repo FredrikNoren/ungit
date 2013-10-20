@@ -317,7 +317,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.stashAndPop(req.param('path'), git('cherry-pick "' + req.body.name.trim() + '"', req.param('path'), false))
+		git.stashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path'), false))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));

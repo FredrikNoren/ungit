@@ -17,6 +17,7 @@ var NodeViewModel = function(position, radius) {
 	this.goalRadius = ko.observable(radius);
 	this.animationSpeed = 0.4;
 	this.color = ko.observable('#ff00ff');
+	this.selected = ko.observable(false);
 }
 exports.NodeViewModel = NodeViewModel;
 NodeViewModel.prototype.setPosition = function(position) {
