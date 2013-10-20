@@ -18,7 +18,8 @@ describe('git-api discardchanges', function() {
 
 
 	it('should be able to discard a new file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(err, dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },
@@ -33,7 +34,8 @@ describe('git-api discardchanges', function() {
 	});
 
 	it('should be able to discard a changed file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(err, dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },
@@ -50,7 +52,8 @@ describe('git-api discardchanges', function() {
 	});
 
 	it('should be able to discard a removed file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(err, dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },
@@ -67,7 +70,8 @@ describe('git-api discardchanges', function() {
 	});
 
 	it('should be able to discard a new and staged file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(err, dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },
@@ -83,7 +87,8 @@ describe('git-api discardchanges', function() {
 	});
 
 	it('should be able to discard a staged and removed file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(err, dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },
@@ -101,7 +106,8 @@ describe('git-api discardchanges', function() {
 
 	// Need to make discardchanges even more powerful to handle this
 	/*it('should be able to discard a commited, staged and removed file', function(done) {
-		common.createSmallRepo(req, done, function(dir) {
+		common.createSmallRepo(req, function(dir) {
+			if (err) return done(err);
 			var testFile1 = 'test.txt';
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) }, done); },

@@ -21,7 +21,8 @@ var req = request(app);
 describe('git-api', function () {
 
 	it('creating test dir should work', function(done) {
-		common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
+		common.post(req, '/testing/createtempdir', undefined, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.path).to.be.ok();
 			testDir = res.body.path;
 			done();
@@ -29,7 +30,8 @@ describe('git-api', function () {
 	});
 
 	it('gitconfig should return config data', function(done) {
-		common.get(req, '/gitconfig', { path: testDir }, done, function(err, res) {
+		common.get(req, '/gitconfig', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('object');
 			expect(res.body['user.name']).to.be.ok();
 			expect(res.body['user.email']).to.be.ok();
@@ -54,6 +56,7 @@ describe('git-api', function () {
 
 	it('quickstatus should say uninited in uninited directory', function(done) {
 		common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be('uninited');
 			done();
 		});
@@ -74,6 +77,7 @@ describe('git-api', function () {
 
 	it('quickstatus should say false in non-existing directory', function(done) {
 		common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be('no-such-path');
 			done();
 		});
@@ -89,6 +93,7 @@ describe('git-api', function () {
 
 	it('quickstatus should say inited in inited directory', function(done) {
 		common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be('inited');
 			done();
 		});
@@ -107,7 +112,8 @@ describe('git-api', function () {
 	var testFile = 'somefile';
 
 	it('log should be empty before first commit', function(done) {
-		common.get(req, '/log', { path: testDir }, done, function(err, res) {
+		common.get(req, '/log', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(0);
 			done();
@@ -129,7 +135,8 @@ describe('git-api', function () {
 	});
 
 	it('status should list untracked file', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile]).to.eql({
 				isNew: true,
@@ -159,7 +166,8 @@ describe('git-api', function () {
 	});
 
 	it('log should show latest commit', function(done) {
-		common.get(req, '/log', { path: testDir }, done, function(err, res) {
+		common.get(req, '/log', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
@@ -174,7 +182,8 @@ describe('git-api', function () {
 	});
 
 	it('modified file should show up in status', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile]).to.eql({
 				isNew: false,
@@ -213,7 +222,8 @@ describe('git-api', function () {
 	});
 
 	it('status should list the new file', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile2]).to.eql({
 				isNew: true,
@@ -248,7 +258,8 @@ describe('git-api', function () {
 	});
 
 	it('status should list the new file', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile3]).to.eql({
 				isNew: true,
@@ -267,7 +278,8 @@ describe('git-api', function () {
 	});
 
 	it('log should show last commit', function(done) {
-		common.get(req, '/log', { path: testDir }, done, function(err, res) {
+		common.get(req, '/log', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var HEAD = res.body[0];
@@ -309,7 +321,8 @@ describe('git-api', function () {
 	});
 
 	it('status should list nothing', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(0);
 			done();
 		});
@@ -317,7 +330,8 @@ describe('git-api', function () {
 
 
 	it('log with limit should only return specified number of items', function(done) {
-		common.get(req, '/log', { path: testDir, limit: 1 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDir, limit: 1 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			done();

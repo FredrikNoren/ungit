@@ -22,9 +22,11 @@ describe('git-api branching', function () {
 	this.timeout(8000);
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
-			common.get(req, '/gitconfig', { path: testDir }, done, function(err, res) {
+			common.get(req, '/gitconfig', { path: testDir }, function(err, res) {
+				if (err) return done(err);
 				gitConfig = res.body;
 				done();
 			});
@@ -43,7 +45,8 @@ describe('git-api branching', function () {
 	});
 
 	it('listing branches should work', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
+		common.get(req, '/branches', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].name).to.be('master');
 			expect(res.body[0].current).to.be(true);
@@ -58,7 +61,8 @@ describe('git-api branching', function () {
 	});
 
 	it('listing branches should show the new branch', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
+		common.get(req, '/branches', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(2);
 			expect(res.body[0].name).to.be('master');
 			expect(res.body[0].current).to.be(true);
@@ -73,7 +77,8 @@ describe('git-api branching', function () {
 	});
 
 	it('listing branches should show the new branch as current', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
+		common.get(req, '/branches', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(2);
 			expect(res.body[0].name).to.be('master');
 			expect(res.body[0].current).to.be(undefined);
@@ -84,7 +89,8 @@ describe('git-api branching', function () {
 	});
 
 	it('get branch should show the new branch as current', function(done) {
-		common.get(req, '/checkout', { path: testDir }, done, function(err, res) {
+		common.get(req, '/checkout', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be(testBranch);
 			done();
 		});
@@ -101,7 +107,8 @@ describe('git-api branching', function () {
 	});
 
 	it('log should show both branches and all commits', function(done) {
-		common.get(req, '/log', { path: testDir }, done, function(err, res) {
+		common.get(req, '/log', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var objs = {};
@@ -145,7 +152,8 @@ describe('git-api branching', function () {
 	});
 
 	it('status should list the changed file', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
 				isNew: false,
@@ -163,7 +171,8 @@ describe('git-api branching', function () {
 	});
 
 	it('should be possible to list tag', function(done) {
-		common.get(req, '/tags', { path: testDir }, done, function(err, res) {
+		common.get(req, '/tags', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(1);
 			done();
 		});
@@ -174,7 +183,8 @@ describe('git-api branching', function () {
 	});
 
 	it('tag should be removed', function(done) {
-		common.get(req, '/tags', { path: testDir }, done, function(err, res) {
+		common.get(req, '/tags', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(0);
 			done();
 		});
@@ -185,7 +195,8 @@ describe('git-api branching', function () {
 	});
 
 	it('branch should be removed', function(done) {
-		common.get(req, '/branches', { path: testDir }, done, function(err, res) {
+		common.get(req, '/branches', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(1);
 			done();
 		});

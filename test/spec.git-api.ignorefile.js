@@ -16,8 +16,10 @@ restGit.registerApi(app, null, null, {
 var req = request(app);
 
 describe('git-api: test ignorefile call', function () {
+
   it('Add a file to .gitignore file through api call', function (done) {
-    common.createSmallRepo(req, done, function (dir) {
+    common.createSmallRepo(req, function (err, dir) {
+      if (err) return done(err);
       var testFile = 'test.txt';
 
       // Create .gitignore file prior to append
@@ -25,28 +27,17 @@ describe('git-api: test ignorefile call', function () {
 
       async.series([
 
+        function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
+        function (done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
         function (done) {
-          common.post(req, '/testing/createfile', {
-            file: path.join(dir, testFile)
-          }, done);
-        },
-        function (done) {
-          common.post(req, '/ignorefile', {
-            path: dir,
-            file: testFile
-          }, done);
-        },
-        function (done) {
-          common.get(req, '/status', {
-            path: dir
-          }, function (err, res) {
+          common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
             fs.readFile(dir + '/.gitignore', function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
-                throw ('Test file is not added to the .gitignore file.');
+                throw new Error('Test file is not added to the .gitignore file.');
               }
             });
           });
@@ -56,34 +47,24 @@ describe('git-api: test ignorefile call', function () {
   });
 
   it('Add a file to .gitignore file through api call when .gitignore is missing', function (done) {
-    common.createSmallRepo(req, done, function (dir) {
+    common.createSmallRepo(req, function (err, dir) {
+      if (err) return done(err);
       var testFile = 'test.txt';
 
       // Missing .gitignore file prior to append
       async.series([
 
+        function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
+        function (done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
         function (done) {
-          common.post(req, '/testing/createfile', {
-            file: path.join(dir, testFile)
-          }, done);
-        },
-        function (done) {
-          common.post(req, '/ignorefile', {
-            path: dir,
-            file: testFile
-          }, done);
-        },
-        function (done) {
-          common.get(req, '/status', {
-            path: dir
-          }, function (err, res) {
+          common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
             fs.readFile(dir + '/.gitignore', function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
-                throw ('Test file is not added to the .gitignore file.');
+                throw new Error('Test file is not added to the .gitignore file.');
               }
             });
           });
@@ -93,7 +74,8 @@ describe('git-api: test ignorefile call', function () {
   });
 
   it('Attempt to add existing file to .gitignore through api call', function (done) {
-    common.createSmallRepo(req, done, function (dir) {
+    common.createSmallRepo(req, function (err, dir) {
+      if (err) return done(err);
       var testFile = 'test.txt';
 
       // Add file to .gitignore
@@ -101,20 +83,13 @@ describe('git-api: test ignorefile call', function () {
 
       async.series([
 
-        function (done) {
-          common.post(req, '/testing/createfile', {
-            file: path.join(dir, testFile)
-          }, done);
-        },
-        function (done) {
-          common.post(req, '/ignorefile', {
-            path: dir,
-            file: testFile
-          }, function (err, res) {
+        function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
+        function (done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, function (err, res) {
             if (err) {
               done();
+              return true;
             } else {
-              throw ('Did not errored when existing file has been added');
+              throw new Error('Did not errored when existing file has been added');
             }
           });
         }
@@ -123,7 +98,8 @@ describe('git-api: test ignorefile call', function () {
   });
 
   it('Attempt to add a file where similar name alread exist in .gitignore through api call', function (done) {
-    common.createSmallRepo(req, done, function (dir) {
+    common.createSmallRepo(req, function (err, dir) {
+      if (err) return done(err);
       var testFile = 'test.txt';
 
       // add part of file name to gitignore
@@ -131,28 +107,17 @@ describe('git-api: test ignorefile call', function () {
 
       async.series([
 
+        function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
+        function (done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, done); },
         function (done) {
-          common.post(req, '/testing/createfile', {
-            file: path.join(dir, testFile)
-          }, done);
-        },
-        function (done) {
-          common.post(req, '/ignorefile', {
-            path: dir,
-            file: testFile
-          }, done);
-        },
-        function (done) {
-          common.get(req, '/status', {
-            path: dir
-          }, function (err, res) {
+          common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
             fs.readFile(dir + '/.gitignore', function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
-                throw ('Test file is not added to the .gitignore file.');
+                throw new Error('Test file is not added to the .gitignore file.');
               }
             });
           });

@@ -25,7 +25,8 @@ describe('git-api conflict rebase', function () {
 	var testBranch = 'testBranch';
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
 
 			async.series([
@@ -55,7 +56,8 @@ describe('git-api conflict rebase', function () {
 	});
 
 	it('status should list files in conflict', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.inRebase).to.be(true);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
@@ -90,7 +92,8 @@ describe('git-api conflict checkout', function () {
 	var testFile1 = "testfile1.txt";
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
@@ -120,7 +123,8 @@ describe('git-api conflict checkout', function () {
 	});
 
 	it('status should list files in conflict', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.inRebase).to.be(false);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
@@ -144,7 +148,8 @@ describe('git-api conflict merge', function () {
 	var testFile1 = "testfile1.txt";
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
@@ -173,7 +178,8 @@ describe('git-api conflict merge', function () {
 	});
 
 	it('status should list files in conflict', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.inMerge).to.be(true);
 			expect(res.body.commitMessage).to.be.ok();
 			expect(Object.keys(res.body.files).length).to.be(1);
@@ -211,7 +217,8 @@ describe('git-api conflict solve by deleting', function () {
 	var testBranch = 'testBranch';
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
 
 			async.series([
@@ -241,7 +248,8 @@ describe('git-api conflict solve by deleting', function () {
 	});
 
 	it('status should list files in conflict', function(done) {
-		common.get(req, '/status', { path: testDir }, done, function(err, res) {
+		common.get(req, '/status', { path: testDir }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.inRebase).to.be(true);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({

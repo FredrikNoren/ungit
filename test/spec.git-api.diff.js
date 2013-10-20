@@ -20,7 +20,8 @@ describe('git-api diff', function () {
 	var testDir;
 
 	before(function(done) {
-		common.createEmptyRepo(req, done, function(dir) {
+		common.createEmptyRepo(req, function(err, dir) {
+			if (err) return done(err);
 			testDir = dir;
 			done();
 		});
@@ -46,7 +47,8 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on created file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
@@ -65,7 +67,8 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on commited file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(0);
 			done();
@@ -78,7 +81,8 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on modified file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
@@ -104,7 +108,8 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on removed file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
 			expect(res.body[0].lines).to.be.an('array');
