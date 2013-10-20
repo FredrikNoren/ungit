@@ -178,7 +178,7 @@ describe('git-api remote', function () {
 	});
 
 	it('resetting local master to remote master should work in "local2"', function(done) {
-		common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master' }, done);
+		common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master', mode: 'hard' }, done);
 	});
 
 	it('log in "local2" should show the branch as in sync', function(done) {

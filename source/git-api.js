@@ -171,7 +171,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.stashAndPop(req.param('path'), git('reset --hard "' + req.body.to + '"', req.param('path'), false))
+		git.stashAndPop(req.param('path'), git('reset --' + req.param('mode') + ' "' + req.body.to + '"', req.param('path'), false))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));

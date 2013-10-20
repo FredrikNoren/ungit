@@ -100,7 +100,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
 	var self = this;
 	if (this.isLocal) {
 		if (this.current())
-			this.app.post('/reset', { path: this.graph.repoPath, to: target }, callback);
+			this.app.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callback);
 		else if (this.isTag)
 			this.app.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
 		else
