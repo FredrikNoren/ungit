@@ -350,7 +350,7 @@ git.resolveConflicts = function(repoPath, files) {
 
   var toAdd = [], toRemove = [];
   async.map(files, function(file, callback) {
-    fs.exists(file, function(exists) {
+    fs.exists(path.join(repoPath, file), function(exists) {
       if (exists) toAdd.push(file);
       else toRemove.push(file);
       callback();
