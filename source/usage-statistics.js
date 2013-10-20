@@ -1,5 +1,5 @@
 
-var config = require('./config')();
+var config = require('./config');
 var cache = require('./utils/cache');
 var version = require('./version');
 var getmac = require('getmac');

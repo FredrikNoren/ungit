@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var startLaunchTime = Date.now();
 var forever = require('forever-monitor');
-var config = require('../source/config')();
+var config = require('../source/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');

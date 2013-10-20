@@ -1,4 +1,4 @@
-var config = require('./config')();
+var config = require('./config');
 var BugTracker = require('./bugtracker');
 var bugtracker = new BugTracker();
 var usageStatistics = require('./usage-statistics');
