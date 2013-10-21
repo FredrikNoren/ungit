@@ -96,12 +96,8 @@ GitExecutionTask.prototype.setEncoding = function(encoding) {
 
 var gitQueue = async.queue(function (task, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
-<<<<<<< HEAD
   //TODO Process might need to set proper timeout options as for big image file will take longer to load...
   var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
-=======
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 40 },
->>>>>>> upstream/master
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
