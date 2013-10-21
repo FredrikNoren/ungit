@@ -221,9 +221,7 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 			if (drawProgressBar) self.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
-			diffs.forEach(function(diff) {
-				diff.lines.forEach(function(line){self.diff.pushDiffLine(newDiffs, line, self.staging.repoPath);});
-			});
+			diffs.forEach(function(diff) {self.diff.pushDiff(newDiffs, diff, self.staging.repoPath);});
 			self.diffs(newDiffs);
 		});
 	}
@@ -237,21 +235,27 @@ var ImageDiffViewModel = function() {
 	this.templateName = 'imageFileDiff';
 }
 
-LineByLineDiffViewModel.prototype.pushDiffLine = function(newDiffs, line, repoPath) {
-	newDiffs.push({
-		oldLineNumber: line[0],
-		newLineNumber: line[1],
-		added: line[2][0] == '+',
-		removed: line[2][0] == '-' || line[2][0] == '\\',
-		text: line[2]
+LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
+	diff.lines.forEach(
+		function(line) {
+			newDiffs.push({
+			oldLineNumber: line[0],
+			newLineNumber: line[1],
+			added: line[2][0] == '+',
+			removed: line[2][0] == '-' || line[2][0] == '\\',
+			text: line[2]
+		});
 	});
 }
 
-ImageDiffViewModel.prototype.pushDiffLine = function(newDiffs, line, repoPath) {
-	newDiffs.push({
-		added: line[2][0] == '+',
-		removed: line[2][0] == '-' || line[2][0] == '\\',
-		text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], repoPath)
+ImageDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
+	 diff.lines.forEach(
+		function(line) {
+			newDiffs.push({
+			added: line[2][0] == '+',
+			removed: line[2][0] == '-' || line[2][0] == '\\',
+			text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], repoPath)
+		});
 	});
 }
 

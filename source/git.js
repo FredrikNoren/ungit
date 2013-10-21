@@ -279,10 +279,10 @@ var imageDiff = function(repoPath, filename, isNew) {
     else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
   } else if (!isNew) {
     diff.type = 'image';
-    diff.lines = [[null, 0, '-' + filename], [null, 0, isExist ? '+' + filename : '\\' + '[image removed...]' ]];
+    diff.lines = [['-' + filename], [isExist ? '+' + filename : '\\' + '[image removed...]' ]];
   } else {
     diff.type = 'image';
-    diff.lines = [[null, 0, '+' +  filename]];
+    diff.lines = [['+' +  filename]];
   }
   diffs.push(diff);
   task.setResult(null, diffs);
