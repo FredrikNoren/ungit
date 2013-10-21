@@ -239,29 +239,39 @@ LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) 
 	diff.lines.forEach(
 		function(line) {
 			newDiffs.push({
-			oldLineNumber: line[0],
-			newLineNumber: line[1],
-			added: line[2][0] == '+',
-			removed: line[2][0] == '-' || line[2][0] == '\\',
-			text: line[2]
-		});
-	});
+				oldLineNumber: line[0],
+				newLineNumber: line[1],
+				added: line[2][0] == '+',
+				removed: line[2][0] == '-' || line[2][0] == '\\',
+				text: line[2]
+			});
+		}
+	);
 }
 
 ImageDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
-	 diff.lines.forEach(
-		function(line) {
-			newDiffs.push({
-			added: line[2][0] == '+',
-			removed: line[2][0] == '-' || line[2][0] == '\\',
-			text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], repoPath)
-		});
+
+	var firstImage, secondImage;
+	if (diff.lines[1] == null) {
+		firstImage = '[no image...]';
+		secondImage = getImageElement(diff.lines[0][0], repoPath);
+	} else {
+		firstImage = getImageElement(diff.lines[0][0], repoPath);
+		secondImage = getImageElement(diff.lines[1][0], repoPath);
+	}
+
+	newDiffs.push({
+		firstImage: firstImage,
+		secondImage: secondImage
 	});
 }
 
 var getImageElement = function(line, repoPath) {
 	var firstChar = line.substring(0, 1);
 	var imageFile = line.substring(1, line.length);
+
+        if (firstChar == '\\') return imageFile;
+
 	var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
 	if (firstChar == '-') {
 		element += 'previous';
