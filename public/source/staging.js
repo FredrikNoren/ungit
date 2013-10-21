@@ -82,7 +82,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
 		fileViewModel.conflict(files[file].conflict);
-		fileViewModel.diff.invalidateDiff();
+		fileViewModel.invalidateDiff();
 		newFiles.push(fileViewModel);
 	}
 	this.files(newFiles);
@@ -158,7 +158,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
-		file.diff.invalidateDiff(false);
+		file.invalidateDiff(false);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -182,7 +182,7 @@ var FileViewModel = function(staging, type) {
 	this.staging = staging;
 	this.app = staging.app;
 	this.type = type;
-	this.diff = type == 'image' ? new ImageDiffViewModel(self) : new LineByLineDiffViewModel(self);
+	this.diff = type == 'image' ? new ImageDiffViewModel() : new LineByLineDiffViewModel();
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
@@ -209,66 +209,50 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
 		this.showingDiffs(true);
-		this.diff.invalidateDiff(true);
+		this.invalidateDiff(true);
+	}
+}
+FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+	var self = this;
+	if (self.showingDiffs()) {
+		if (drawProgressBar) self.diffsProgressBar.start();
+		var isTextType = self.type == 'text' ? true : false;
+		self.app.get('/diff', { file: self.name(), path: self.staging.repository.repoPath, type: self.type, isNew: self.isNew() }, function(err, diffs) {
+			if (drawProgressBar) self.diffsProgressBar.stop();
+			if (err) return;
+			var newDiffs = [];
+			diffs.forEach(function(diff) {
+				diff.lines.forEach(function(line){self.diff.pushDiffLine(newDiffs, line, self.staging.repoPath);});
+			});
+			self.diffs(newDiffs);
+		});
 	}
 }
 
-
-var LineByLineDiffViewModel = function(ancestor) {
-	this.ancestor = ancestor;
+var LineByLineDiffViewModel = function() {
 	this.templateName = 'textFileDiff';
 }
-LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this;
-	if (self.ancestor.showingDiffs()) {
-		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
-		var isTextType = self.ancestor.type == 'text' ? true : false;
-		self.ancestor.app.get('/diff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath, type: self.ancestor.type }, function(err, diffs) {
-			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
-			if (err) return;
-			var newDiffs = [];
-			diffs.forEach(function(diff) {
-				diff.lines.forEach(function(line) {
-					newDiffs.push({
-						oldLineNumber: line[0],
-						newLineNumber: line[1],
-						added: line[2][0] == '+',
-						removed: line[2][0] == '-' || line[2][0] == '\\',
-						text: line[2]
-					});
-				});
-			});
-			self.ancestor.diffs(newDiffs);
-		});
-	}
-}
 
-
-var ImageDiffViewModel = function(ancestor) {
-	this.ancestor = ancestor;
+var ImageDiffViewModel = function() {
 	this.templateName = 'imageFileDiff';
 }
-ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this;
-	if (self.ancestor.showingDiffs()) {
-		if (drawProgressBar) self.ancestor.diffsProgressBar.start();
-		var isTextType = self.ancestor.type == 'text' ? true : false;
-		self.ancestor.app.get('/diff', { file: self.ancestor.name(), path: self.ancestor.staging.repository.repoPath, type: self.ancestor.type }, function(err, diffs) {
-			if (drawProgressBar) self.ancestor.diffsProgressBar.stop();
-			if (err) return;
-			var newDiffs = [];
-			diffs.forEach(function(diff) {
-				diff.lines.forEach(function(line) {
-					newDiffs.push({
-						added: line[2][0] == '+',
-						removed: line[2][0] == '-' || line[2][0] == '\\',
-						text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], self.ancestor.staging.repository.repoPath)
-					});
-				});
-			});
-			self.ancestor.diffs(newDiffs);
-		});
-	}
+
+LineByLineDiffViewModel.prototype.pushDiffLine = function(newDiffs, line, repoPath) {
+	newDiffs.push({
+		oldLineNumber: line[0],
+		newLineNumber: line[1],
+		added: line[2][0] == '+',
+		removed: line[2][0] == '-' || line[2][0] == '\\',
+		text: line[2]
+	});
+}
+
+ImageDiffViewModel.prototype.pushDiffLine = function(newDiffs, line, repoPath) {
+	newDiffs.push({
+		added: line[2][0] == '+',
+		removed: line[2][0] == '-' || line[2][0] == '\\',
+		text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], repoPath)
+	});
 }
 
 var getImageElement = function(line, repoPath) {

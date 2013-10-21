@@ -127,7 +127,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	var fileResultOrFail = function(res, err, result) {
 		res.type('png');
 		if (err) res.json(400, err); 
-		else res.send(result);
+		else res.send(new Buffer(result, 'binary'));
 	}
 
 	var fileType = function(fullFilePath) {
@@ -208,7 +208,14 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.diff(req.param('path'), req.param('file'), req.param('type'))
+		var isNew = null;
+		if(req.param('isNew') == 'false'){
+			isNew = false;
+		} else if (req.param('isNew') == 'true') {
+			isNew = true;
+		} 
+
+		git.diff(req.param('path'), req.param('file'), req.param('type'), isNew)
 			.always(jsonResultOrFail.bind(null, res));
         });
 
