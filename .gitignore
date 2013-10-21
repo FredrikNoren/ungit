@@ -29,3 +29,7 @@ report/
 /node_modules/
 
 /clicktestout/
+/build
+/*.dll
+/nw.exe
+/nw.pak

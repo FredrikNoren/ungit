@@ -35,9 +35,6 @@ var GitGraphViewModel = function(repository) {
 	this.hoverGraphAction = ko.observable();
 	this.currentActionContext = ko.observable();
 	this.hasRemotes = ko.observable(false);
-	this.showDropTargets = ko.computed(function() {
-		return !!self.currentActionContext();
-	});
 	this.scrolledToEnd = _.debounce(function() {
 		self.maxNNodes = self.maxNNodes + 25;
 		self.loadNodesFromApi();

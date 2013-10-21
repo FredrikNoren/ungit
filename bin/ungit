@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var startLaunchTime = Date.now();
 var forever = require('forever-monitor');
-var config = require('../source/config')();
+var config = require('../source/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
@@ -39,7 +39,7 @@ child.on('exit', function (res) {
 });
 
 function launchBrowser() {
-	var currentUrl = 'http://localhost:' + config.port;
+	var currentUrl = config.urlBase + ':' + config.port;
 	if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
 	else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
 	console.log('Browse to ' + currentUrl);

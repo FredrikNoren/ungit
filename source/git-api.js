@@ -201,7 +201,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.stashAndPop(req.param('path'), git('reset --hard "' + req.body.to + '"', req.param('path'), false))
+		git.stashAndPop(req.param('path'), git('reset --' + req.param('mode') + ' "' + req.body.to + '"', req.param('path'), false))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
@@ -357,7 +357,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.stashAndPop(req.param('path'), git('cherry-pick "' + req.body.name.trim() + '"', req.param('path'), false))
+		git.stashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path'), false))
 			.always(jsonResultOrFail.bind(null, res))
 			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
@@ -476,7 +476,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	// This method isn't called by the client but by credentials-helper.js
 	app.get(exports.pathPrefix + '/credentials', function(req, res) {
-		// this endpoint can only be invoked from localhost, since the crednetials-helper is always
+		// this endpoint can only be invoked from localhost, since the credentials-helper is always
 		// on the same machine that we're running ungit on
 		if (req.ip != '127.0.0.1') {
 			winston.info('Trying to get credentials from unathorized ip: ' + req.ip);

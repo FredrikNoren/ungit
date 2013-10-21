@@ -16,6 +16,7 @@ function normal() {
 		new NodeViewModel(new Vector2(50, 150), 30),
 		new NodeViewModel(new Vector2(50, 250), 30),
 	]);
+	graph.nodes()[0].selected(true);
 	graph.edges([
 		new EdgeViewModel(graph.nodes()[0], graph.nodes()[1]),
 		new EdgeViewModel(graph.nodes()[1], graph.nodes()[2])

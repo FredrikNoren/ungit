@@ -24,19 +24,14 @@ describe('git-api submodule', function () {
 	before(function(done) {
 		// Set up two directories and init them and add some content
 		async.parallel([
-			function(done) {
-				common.createSmallRepo(req, done, function(dir) {
-					testDirMain = dir;
-					done();
-				});
-			},
-			function(done) {
-				common.createSmallRepo(req, done, function(dir) {
-					testDirSecondary = dir;
-					done();
-				});
-			}
-		], done);
+			common.createSmallRepo.bind(null, req),
+			common.createSmallRepo.bind(null, req),
+		], function(err, res) {
+			if (err) return done(err);
+			testDirMain = res[0];
+			testDirSecondary = res[1];
+			done();
+		});
 	});
 
 	var submodulePath = 'sub';
@@ -46,7 +41,8 @@ describe('git-api submodule', function () {
 	});
 
 	it('submodule should show up in status', function(done) {
-		common.get(req, '/status', { path: testDirMain }, done, function(err, res) {
+		common.get(req, '/status', { path: testDirMain }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(2);
 			expect(res.body.files[submodulePath]).to.eql({
 				isNew: true,
@@ -71,7 +67,8 @@ describe('git-api submodule', function () {
 	});
 
 	it('status should be empty after commit', function(done) {
-		common.get(req, '/status', { path: testDirMain }, done, function(err, res) {
+		common.get(req, '/status', { path: testDirMain }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(0);
 			done();
 		});
@@ -84,7 +81,8 @@ describe('git-api submodule', function () {
 	});
 
 	it('submodule should show up in status when it\'s dirty', function(done) {
-		common.get(req, '/status', { path: testDirMain }, done, function(err, res) {
+		common.get(req, '/status', { path: testDirMain }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[submodulePath]).to.eql({
 				isNew: false,
@@ -98,7 +96,8 @@ describe('git-api submodule', function () {
 	});
 
 	it('diff on submodule should work', function(done) {
-		common.get(req, '/diff', { path: testDirMain, file: submodulePath }, done, function(err, res) {
+		common.get(req, '/diff', { path: testDirMain, file: submodulePath }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
 			expect(res.body[0].lines).to.be.an('array');

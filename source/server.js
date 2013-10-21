@@ -1,4 +1,4 @@
-var config = require('./config')();
+var config = require('./config');
 var BugTracker = require('./bugtracker');
 var bugtracker = new BugTracker();
 var usageStatistics = require('./usage-statistics');
@@ -15,6 +15,7 @@ var async = require('async');
 var version = require('./version');
 var getmac = require('getmac');
 var md5 = require('blueimp-md5').md5;
+var signals = require('signals');
 
 process.on('uncaughtException', function(err) {
 	winston.error(err.stack.toString());
@@ -230,7 +231,10 @@ app.use(function(err, req, res, next) {
 	res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
 });
 
+exports.started = new signals.Signal();
+
 server.listen(config.port, function() {
 	winston.info('Listening on port ' + config.port);
 	console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
+	exports.started.dispatch();
 });

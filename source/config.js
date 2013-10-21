@@ -6,6 +6,9 @@ var defaultConfig = {
 	// The port ungit is exposed on.
 	port: 8448,
 
+	// The base URL ungit will be accessible from.
+	urlBase: "http://localhost",
+
 	// Enables gerrit integration.
 	gerrit: false,
 
@@ -67,25 +70,23 @@ var defaultConfig = {
 	dev: false,
 };
 
-module.exports = function() {
-	// Works for now but should be moved to bin/ungit
-	var argv = optimist
-		.usage('ungit [-b] [--cliconfigonly]')
-		.alias('b', 'launchBrowser')
-		.describe('b', 'Launch a browser window with ungit when the ungit server is started')
-		.describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
-		.argv;
+// Works for now but should be moved to bin/ungit
+var argv = optimist
+	.usage('ungit [-b] [--cliconfigonly]')
+	.alias('b', 'launchBrowser')
+	.describe('b', 'Launch a browser window with ungit when the ungit server is started')
+	.describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
+	.argv;
 
-	if (argv.help) {
-	    optimist.showHelp();
-	    process.exit(0);
-	} else if (argv.cliconfigonly) {
-		var deepExtend = require('deep-extend');
-		return deepExtend.apply(null, [
-    		defaultConfig,
-    		argv
-    	]);
-	} else {
-		return rc('ungit', defaultConfig, argv);
-	}
+if (argv.help) {
+    optimist.showHelp();
+    process.exit(0);
+} else if (argv.cliconfigonly) {
+	var deepExtend = require('deep-extend');
+	module.exports = deepExtend.apply(null, [
+		defaultConfig,
+		argv
+	]);
+} else {
+	module.exports = rc('ungit', defaultConfig, argv);
 }

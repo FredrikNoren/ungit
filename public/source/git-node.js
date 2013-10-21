@@ -97,7 +97,22 @@ var GitNodeViewModel = function(graph, sha1) {
 	this.branchingFormVisible = ko.observable(false);
 	this.canCreateRef = ko.computed(function() {
 		return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
-	})
+	});
+
+	this.hasFocus = ko.observable(false);
+	this.hasFocus.subscribe(function(newValue) {
+		if (newValue) {
+			self.graph.currentActionContext(self);
+			self.selected(true);
+		} else {
+			self.selected(false);
+			// CLicking otherwise immediately destroys focus, meaning the button is never hit
+			setTimeout(function() {
+				if (self.graph.currentActionContext() == self)
+					self.graph.currentActionContext(null);
+			}, 300);
+		}
+	});
 
 	this.dropareaGraphActions = [
 		new GraphActions.Move(this.graph, this),
@@ -107,6 +122,8 @@ var GitNodeViewModel = function(graph, sha1) {
 		new GraphActions.Reset(this.graph, this),
 		new GraphActions.Checkout(this.graph, this),
 		new GraphActions.Delete(this.graph, this),
+		new GraphActions.CherryPick(this.graph, this),
+		new GraphActions.Uncommit(this.graph, this)
 	];
 }
 inherits(GitNodeViewModel, NodeViewModel);

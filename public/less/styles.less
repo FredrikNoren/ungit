@@ -9,9 +9,14 @@
 // -- Application specific layout ----
 // Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
 
+body {
+	padding-top: 85px;
+}
+
 .navbar {
 	padding-top: 15px;
 	z-index: 5;
+	box-shadow: 0px 15px 15px #252833;
 
 	.navbar-brand {
 		width: 140px;
@@ -21,6 +26,7 @@
 	}
 	.row {
 		margin-left: 130px;
+		margin-right: 60px;
 		.navbar-form {
 			width: 100%;
 			.form-control {
@@ -40,7 +46,7 @@
 	.version {
 		position: absolute;
 		right: 5px;
-		top: 2px;
+		bottom: 2px;
 		font-size: 12px;
 		color: rgba(0, 0, 0, 0.5);
 	}
@@ -296,6 +302,7 @@
 		.node {
 			position: absolute;
 			margin-left: (@logWidth + 130px);
+			outline: none;
 		}
 
 		.rightSideContainer {
@@ -372,6 +379,12 @@
 			}
 			&.delete {
 				background: rgba(214, 77, 56, 0.9);
+			}
+			&.cherry-pick {
+				background: rgba(110, 156, 110, 0.9);
+			}
+			&.uncommit {
+				background: rgba(158, 53, 20, 0.9);
 			}
 		}
 

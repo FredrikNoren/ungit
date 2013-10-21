@@ -56,7 +56,8 @@ GraphActions.Move = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && self.graph.currentActionContext().node() != self.node;
+		return self.graph.currentActionContext() instanceof RefViewModel &&
+			self.graph.currentActionContext().node() != self.node;
 	});
 }
 inherits(GraphActions.Move, GraphActions.ActionBase);
@@ -74,7 +75,7 @@ GraphActions.Reset = function(graph, node) {
 	this.onto = ko.observable(this.node);
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		if (!self.graph.showDropTargets()) return false;
+		if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
 		var context = self.graph.currentActionContext();
 		if (context.node() != self.node) return false;
 		var remoteRef = context.getRemoteRef(self.repository.remotes.currentRemote());
@@ -95,7 +96,7 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
 }
 GraphActions.Reset.prototype.perform = function(callback) {
 	var remoteRef = this.graph.currentActionContext().getRemoteRef(this.repository.remotes.currentRemote());
-	this.app.post('/reset', { path: this.graph.repoPath, to: remoteRef.name }, callback);
+	this.app.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
 }
 
 
@@ -107,7 +108,7 @@ GraphActions.Rebase = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
+		return self.graph.currentActionContext() instanceof RefViewModel &&
 			(!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
 			!self.node.isAncestor(self.graph.currentActionContext().node()) &&
 			!self.graph.currentActionContext().node().isAncestor(self.node) &&
@@ -146,7 +147,7 @@ GraphActions.Merge = function(graph, node) {
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
 		if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
-		return self.graph.showDropTargets() &&
+		return self.graph.currentActionContext() instanceof RefViewModel &&
 			!self.graph.currentActionContext().current() &&
 			self.graph.checkedOutRef().node() == self.node &&
 			!self.node.isAncestor(self.graph.currentActionContext().node());
@@ -180,7 +181,7 @@ GraphActions.Push = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() &&
+		return self.graph.currentActionContext() instanceof RefViewModel &&
 			self.graph.currentActionContext().node() == self.node &&
 			self.graph.currentActionContext().canBePushed(self.repository.remotes.currentRemote());
 	});
@@ -223,7 +224,7 @@ GraphActions.Checkout = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
+		return self.graph.currentActionContext() instanceof RefViewModel && 
 			self.graph.currentActionContext().node() == self.node &&
 			!self.graph.currentActionContext().current();
 	});
@@ -237,7 +238,7 @@ GraphActions.Checkout.prototype.perform = function(callback) {
 	this.app.post('/checkout', { path: this.graph.repoPath, name: ref.refName }, function(err) {
 		if (err && err.errorCode != 'merge-failed') return;
 		if (ref.isRemoteBranch)
-			self.app.post('/reset', { path: self.graph.repoPath, to: ref.name }, function(err, res) {
+			self.app.post('/reset', { path: self.graph.repoPath, to: ref.name, mode: 'hard' }, function(err, res) {
 				if (err && err.errorCode != 'merge-failed') return;
 				callback();
 				return true;
@@ -254,7 +255,7 @@ GraphActions.Delete = function(graph, node) {
 	this.node = node;
 	this.visible = ko.computed(function() {
 		if (self.performProgressBar.running()) return true;
-		return self.graph.showDropTargets() && 
+		return self.graph.currentActionContext() instanceof RefViewModel && 
 			self.graph.currentActionContext().node() == self.node &&
 			!self.graph.currentActionContext().current();
 	});
@@ -274,3 +275,44 @@ GraphActions.Delete.prototype.perform = function(callback) {
 	});
 }
 
+
+GraphActions.CherryPick = function(graph, node) {
+	var self = this;
+	GraphActions.ActionBase.call(this, graph);
+	this.node = node;
+	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
+		return self.graph.currentActionContext() == self.node
+	});
+}
+inherits(GraphActions.CherryPick, GraphActions.ActionBase);
+GraphActions.CherryPick.prototype.text = 'Cherry pick';
+GraphActions.CherryPick.prototype.style = 'cherry-pick';
+GraphActions.CherryPick.prototype.perform = function(callback) {
+	var self = this;
+	this.app.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
+		if (err && err.errorCode == 'merge-failed') {
+			callback();
+			return true;
+		}
+		callback(err);
+	});
+}
+
+GraphActions.Uncommit = function(graph, node) {
+	var self = this;
+	GraphActions.ActionBase.call(this, graph);
+	this.node = node;
+	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
+		return self.graph.currentActionContext() == self.node &&
+			self.graph.HEAD() == self.node;
+	});
+}
+inherits(GraphActions.Uncommit, GraphActions.ActionBase);
+GraphActions.Uncommit.prototype.text = 'Uncommit';
+GraphActions.Uncommit.prototype.style = 'uncommit';
+GraphActions.Uncommit.prototype.perform = function(callback) {
+	var self = this;
+	this.app.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
+}

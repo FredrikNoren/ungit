@@ -1,5 +1,5 @@
 
-var config = require('./config')();
+var config = require('./config');
 var os = require('os');
 var child_process = require('child_process');
 var Ssh2Connection;

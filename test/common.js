@@ -5,25 +5,21 @@ var restGit = require('../source/git-api');
 
 var common = exports;
 
-common.wrapErrorHandler = function(done, callback) {
+common.wrapErrorHandler = function(callback) {
 	return function(err, res) {
-		if (err) {
+		var r = callback(err, res);
+		if (err && !r) {
 			console.log(res.req.method + ' ' + res.req.path);
 			console.dir(err);
 			console.dir(res.body);
-			done(err, res);
-		} else if (callback) {
-			callback(err, res);
-		} else {
-			done(err, res);
 		}
 	}
 }
 
-common.get = function(req, path, payload, done, callback) {
+common.get = function(req, path, payload, callback) {
 	var r = req
 		.get(restGit.pathPrefix + path);
-	if (payload !== undefined) {
+	if (payload) {
 		payload.socketId = 'ignore';
 		r.query(payload);
 	}
@@ -31,13 +27,13 @@ common.get = function(req, path, payload, done, callback) {
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
 		.expect(200)
-		.end(common.wrapErrorHandler(done, callback || done));
+		.end(common.wrapErrorHandler(callback));
 }
 
-common.post = function(req, path, payload, done, callback) {
+common.post = function(req, path, payload, callback) {
 	var r = req
 		.post(restGit.pathPrefix + path);
-	if (payload !== undefined) {
+	if (payload) {
 		payload.socketId = 'ignore';
 		r.send(payload);
 	}
@@ -45,12 +41,12 @@ common.post = function(req, path, payload, done, callback) {
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
 		.expect(200)
-		.end(common.wrapErrorHandler(done, callback || done));
+		.end(common.wrapErrorHandler(callback));
 }
-common.delete = function(req, path, payload, done, callback) {
+common.delete = function(req, path, payload, callback) {
 	var r = req
 		.del(restGit.pathPrefix + path);
-	if (payload !== undefined) {
+	if (payload) {
 		payload.socketId = 'ignore';
 		r.send(payload);
 	}
@@ -58,28 +54,31 @@ common.delete = function(req, path, payload, done, callback) {
 		.set('Accept', 'application/json')
 		.expect('Content-Type', /json/)
 		.expect(200)
-		.end(common.wrapErrorHandler(done, callback || done));
+		.end(common.wrapErrorHandler(callback));
 }
 
-common.createEmptyRepo = function(req, done, callback) {
+common.createEmptyRepo = function(req, callback) {
 	var testDir;
-	common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
+	common.post(req, '/testing/createtempdir', undefined, function(err, res) {
+		if (err) return callback(err);
 		expect(res.body.path).to.be.ok();
 		testDir = res.body.path;
-		common.post(req, '/init', { path: testDir }, done, function() {
-			callback(testDir);
+		common.post(req, '/init', { path: testDir }, function(err) {
+			callback(err, testDir);
 		});
 	});
 }
-common.createSmallRepo = function(req, done, callback) {
-	common.createEmptyRepo(req, done, function(dir) {
+
+common.createSmallRepo = function(req, callback) {
+	common.createEmptyRepo(req, function(err, dir) {
+		if (err) return callback(err);
 		var testFile = 'smalltestfile.txt';
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
-			function(done) { common.post(req, '/commit', { path: dir, message: 'Init', files: [testFile] }, function() {
-				callback(dir);
-			}); }
-		], done);
+			function(done) { common.post(req, '/commit', { path: dir, message: 'Init', files: [testFile] }, done); }
+		], function(err, res) {
+			callback(err, dir);
+		});
 	});
 }
 

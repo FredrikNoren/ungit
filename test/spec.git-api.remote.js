@@ -24,28 +24,19 @@ describe('git-api remote', function () {
 
 	it('creating test dirs should work', function(done) {
 		async.parallel([
-			function(done) {
-				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
-					expect(res.body.path).to.be.ok();
-					testDirLocal1 = res.body.path;
-					done();
-				});
-			},
-			function(done) {
-				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
-					expect(res.body.path).to.be.ok();
-					testDirLocal2 = res.body.path;
-					done();
-				});
-			},
-			function(done) {
-				common.post(req, '/testing/createtempdir', undefined, done, function(err, res) {
-					expect(res.body.path).to.be.ok();
-					testDirRemote = res.body.path;
-					done();
-				});
-			},
-		], done);
+			common.post.bind(null, req, '/testing/createtempdir', null),
+			common.post.bind(null, req, '/testing/createtempdir', null),
+			common.post.bind(null, req, '/testing/createtempdir', null)
+		], function(err, res) {
+			if (err) return done(err);
+			expect(res[0].body.path).to.be.ok();
+			expect(res[1].body.path).to.be.ok();
+			expect(res[2].body.path).to.be.ok();
+			testDirLocal1 = res[0].body.path;
+			testDirLocal2 = res[1].body.path;
+			testDirRemote = res[2].body.path;
+			done();
+		});
 	});
 
 	it('init a bare "remote" test dir should work', function(done) {
@@ -53,7 +44,8 @@ describe('git-api remote', function () {
 	});
 
 	it('remotes in no-remotes-repo should be zero', function(done) {
-		common.get(req, '/remotes', { path: testDirRemote }, done, function(err, res) {
+		common.get(req, '/remotes', { path: testDirRemote }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(0);
 			done();
 		});
@@ -64,7 +56,8 @@ describe('git-api remote', function () {
 	});
 
 	it('remotes in cloned-repo should be one', function(done) {
-		common.get(req, '/remotes', { path: testDirLocal1 }, done, function(err, res) {
+		common.get(req, '/remotes', { path: testDirLocal1 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(1);
 			expect(res.body[0]).to.be('origin');
 			done();
@@ -72,7 +65,8 @@ describe('git-api remote', function () {
 	});
 
 	it('remote/origin in cloned-repo should work', function(done) {
-		common.get(req, '/remotes/origin', { path: testDirLocal1 }, done, function(err, res) {
+		common.get(req, '/remotes/origin', { path: testDirLocal1 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.fetch.address).to.be(testDirRemote);
 			expect(res.body.push.address).to.be(testDirRemote);
 			done();
@@ -88,7 +82,8 @@ describe('git-api remote', function () {
 	});
 
 	it('log in "local1" should show the init commit', function(done) {
-		common.get(req, '/log', { path: testDirLocal1 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal1 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			var init = res.body[0];
@@ -108,7 +103,8 @@ describe('git-api remote', function () {
 	});
 
 	it('log in "local2" should show the init commit', function(done) {
-		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(1);
 			var init = res.body[0];
@@ -135,7 +131,8 @@ describe('git-api remote', function () {
 	});
 
 	it('log in "local2" should show the branch as one behind', function(done) {
-		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
@@ -155,7 +152,8 @@ describe('git-api remote', function () {
 	});
 
 	it('log in "local2" should show the branch as in sync', function(done) {
-		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body).to.be.a('array');
 			expect(res.body.length).to.be(2);
 			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
@@ -180,11 +178,12 @@ describe('git-api remote', function () {
 	});
 
 	it('resetting local master to remote master should work in "local2"', function(done) {
-		common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master' }, done);
+		common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master', mode: 'hard' }, done);
 	});
 
 	it('log in "local2" should show the branch as in sync', function(done) {
-		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.length).to.be(2);
 			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
 			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
@@ -198,7 +197,8 @@ describe('git-api remote', function () {
 	});
 
 	it('status should show nothing', function(done) {
-		common.get(req, '/status', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/status', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(0);
 			done();
 		});
@@ -213,7 +213,8 @@ describe('git-api remote', function () {
 	});
 
 	it('log in "local2" should show the local tag', function(done) {
-		common.get(req, '/log', { path: testDirLocal2 }, done, function(err, res) {
+		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
+			if (err) return done(err);
 			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
 			done();
@@ -221,7 +222,8 @@ describe('git-api remote', function () {
 	});
 
 	it('remote tags in "local2" should show the remote tag', function(done) {
-		common.get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' }, done, function(err, res) {
+		common.get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' }, function(err, res) {
+			if (err) return done(err);
 			expect(res.body.map(function(tag) { return tag.name; })).to.contain('refs/tags/v1.0^{}');
 			done();
 		});

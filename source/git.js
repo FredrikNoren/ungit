@@ -3,7 +3,7 @@ var gitParser = require('./git-parser');
 var async = require('async');
 var path = require('path');
 var fs = require('fs');
-var config = require('./config')();
+var config = require('./config');
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
@@ -96,8 +96,12 @@ GitExecutionTask.prototype.setEncoding = function(encoding) {
 
 var gitQueue = async.queue(function (task, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
+<<<<<<< HEAD
   //TODO Process might need to set proper timeout options as for big image file will take longer to load...
   var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
+=======
+  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 40 },
+>>>>>>> upstream/master
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
@@ -130,7 +134,7 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'no-remote-specified';
         else if (err.stderr.indexOf('non-fast-forward') != -1)
           err.errorCode = 'non-fast-forward';
-        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1)
+        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
           err.errorCode = 'merge-failed';
         task.setResult(err);
         callback(err);
@@ -413,7 +417,7 @@ git.resolveConflicts = function(repoPath, files) {
 
   var toAdd = [], toRemove = [];
   async.map(files, function(file, callback) {
-    fs.exists(file, function(exists) {
+    fs.exists(path.join(repoPath, file), function(exists) {
       if (exists) toAdd.push(file);
       else toRemove.push(file);
       callback();
