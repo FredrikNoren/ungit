@@ -290,28 +290,16 @@ var imageDiff = function(repoPath, filename) {
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
       } else if (!file.isNew) {
         diff.type = 'image';
-        diff.lines = [[null, 0, getImageElement('-', repoPath, filename)], [null, 0, isExist ? getImageElement('+', repoPath, filename) : '+ [image removed...]' ]];
+        diff.lines = [[null, 0, '-' + filename], [null, 0, isExist ? '+' + filename : '\\' + '[image removed...]' ]];
       } else {
         diff.type = 'image';
-        diff.lines = [[null, 0, getImageElement('+', repoPath, filename)]];
+        diff.lines = [[null, 0, '+' +  filename]];
       }
       diffs.push(diff);
       task.setResult(null, diffs);
     });
 
   return task;
-}
-
-var getImageElement = function(firstChar, repoPath, filename) {
-  var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + filename + '&version=';
-  if (firstChar == '-') {
-    element += 'previous'; 
-  } else {
-    element += 'current';
-  }
-  element += '" />';
-
-  return element;
 }
 
 git.discardAllChanges = function(repoPath) {

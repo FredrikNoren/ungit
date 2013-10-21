@@ -262,7 +262,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 					newDiffs.push({
 						added: line[2][0] == '+',
 						removed: line[2][0] == '-' || line[2][0] == '\\',
-						text: line[2]
+						text: line[2][0] == '\\' ? line[2] : getImageElement(line[2], self.ancestor.staging.repository.repoPath)
 					});
 				});
 			});
@@ -271,3 +271,16 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	}
 }
 
+var getImageElement = function(line, repoPath) {
+	var firstChar = line.substring(0, 1);
+	var imageFile = line.substring(1, line.length);
+	var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
+	if (firstChar == '-') {
+		element += 'previous';
+	} else {
+		element += 'current';
+	}
+	element += '" />';
+
+	return element;
+}
