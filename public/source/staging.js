@@ -272,7 +272,7 @@ var getImageElement = function(line, repoPath) {
 
         if (firstChar == '\\') return imageFile;
 
-	var element = firstChar + '&nbsp;<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
+	var element = '<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
 	if (firstChar == '-') {
 		element += 'previous';
 	} else {
