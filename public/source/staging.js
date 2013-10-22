@@ -3,6 +3,7 @@ var ko = require('../vendor/js/knockout-2.2.1');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var screens = require('./screens');
 var dialogs = require('./dialogs');
+var inherits = require('util').inherits;
 
 var StagingViewModel = function(repository) {
 	var self = this;
@@ -75,7 +76,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 	for(var file in files) {
 		var fileViewModel = this.filesByPath[file];
 		if (!fileViewModel) {
-			this.filesByPath[file] = fileViewModel = new FileViewModel(self);
+			this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
 			fileViewModel.name(file);
 		}
 		fileViewModel.isNew(files[file].isNew);
@@ -176,11 +177,12 @@ StagingViewModel.prototype.toogleAllStages = function() {
 	self.allStageFlag = !self.allStageFlag
 }
 
-var FileViewModel = function(staging) {
+var FileViewModel = function(staging, type) {
 	var self = this;
 	this.staging = staging;
 	this.app = staging.app;
-
+	this.type = type;
+	this.diff = type == 'image' ? new ImageDiffViewModel() : new LineByLineDiffViewModel();
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
@@ -212,26 +214,71 @@ FileViewModel.prototype.toogleDiffs = function() {
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this;
-	if (this.showingDiffs()) {
-		if (drawProgressBar) this.diffsProgressBar.start();
-		this.app.get('/diff', { file: this.name(), path: this.staging.repository.repoPath }, function(err, diffs) {
+	if (self.showingDiffs()) {
+		if (drawProgressBar) self.diffsProgressBar.start();
+		var isTextType = self.type == 'text' ? true : false;
+		self.app.get('/diff', { file: self.name(), path: self.staging.repository.repoPath, type: self.type, isNew: self.isNew() }, function(err, diffs) {
 			if (drawProgressBar) self.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
-			diffs.forEach(function(diff) {
-				diff.lines.forEach(function(line) {
-					newDiffs.push({
-						oldLineNumber: line[0],
-						newLineNumber: line[1],
-						added: line[2][0] == '+',
-						removed: line[2][0] == '-' || line[2][0] == '\\',
-						text: line[2]
-					});
-				});
-			});
+			diffs.forEach(function(diff) {self.diff.pushDiff(newDiffs, diff, self.staging.repoPath);});
 			self.diffs(newDiffs);
 		});
 	}
 }
 
+var LineByLineDiffViewModel = function() {
+	this.templateName = 'textFileDiff';
+}
 
+var ImageDiffViewModel = function() {
+	this.templateName = 'imageFileDiff';
+}
+
+LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
+	diff.lines.forEach(
+		function(line) {
+			newDiffs.push({
+				oldLineNumber: line[0],
+				newLineNumber: line[1],
+				added: line[2][0] == '+',
+				removed: line[2][0] == '-' || line[2][0] == '\\',
+				text: line[2]
+			});
+		}
+	);
+}
+
+ImageDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
+
+	var firstImage, secondImage;
+	if (diff.lines[1] == null) {
+		firstImage = '[no image...]';
+		secondImage = getImageElement(diff.lines[0][0], repoPath);
+	} else {
+		firstImage = getImageElement(diff.lines[0][0], repoPath);
+		secondImage = getImageElement(diff.lines[1][0], repoPath);
+	}
+
+	newDiffs.push({
+		firstImage: firstImage,
+		secondImage: secondImage
+	});
+}
+
+var getImageElement = function(line, repoPath) {
+	var firstChar = line.substring(0, 1);
+	var imageFile = line.substring(1, line.length);
+
+        if (firstChar == '\\') return imageFile;
+
+	var element = '<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
+	if (firstChar == '-') {
+		element += 'previous';
+	} else {
+		element += 'current';
+	}
+	element += '" />';
+
+	return element;
+}

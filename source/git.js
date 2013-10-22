@@ -81,6 +81,7 @@ var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
+  this.encoding = 'utf8';
   this.potentialError = new GitError(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
@@ -88,11 +89,15 @@ GitExecutionTask.prototype.parser = function(parser) {
   this._parser = parser;
   return this;
 }
+GitExecutionTask.prototype.setEncoding = function(encoding) {
+  this.encoding = encoding;
+  return this;
+}
 
 var gitQueue = async.queue(function (task, callback) {
-
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 40 },
+  //TODO Process might need to set proper timeout options as for big image file will take longer to load...
+  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
@@ -142,9 +147,10 @@ var gitQueue = async.queue(function (task, callback) {
 
 var git = function(command, repoPath, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+
   var task = new GitExecutionTask(command, repoPath);
 
-  if (sendToQueue !== false) git.queueTask(task);
+  if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
   return task;
 }
@@ -208,33 +214,78 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.diffFile = function(repoPath, filename) {
+git.binaryFileContentAtHead = function(repoPath, filename) {
   var task = new GitTask();
 
   git.status(repoPath)
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
-      var file = status.files[filename];
-      if (!file) {
-        if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
-        else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
-      } else if (!file.isNew) {
-        git('diff HEAD -- "' + filename.trim() + '"', repoPath)
-          .parser(gitParser.parseGitDiff)
+        git('show HEAD:' + filename, repoPath)
+          .setEncoding('binary')
           .always(task.setResult);
-      } else {
-        fs.readFile(path.join(repoPath, filename), { encoding: 'utf8' }, function(err, text) {
-          if (err) return task.setResult({ error: err });
-          var diffs = [];
-          var diff = { };
-          text = text.toString();
-          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
-          diffs.push(diff);
-          task.setResult(null, diffs);
-        });
-      }
     });
+
+  return task;
+}
+
+git.diff = function(repoPath, filename, type, isNew) {
+  if(type == 'image') {
+    return imageDiff(repoPath, filename, isNew);
+  } else {
+    return fileDiff(repoPath, filename, isNew);
+  }
+}
+
+var fileDiff = function(repoPath, filename, isNew) {
+  var task = new GitTask();
+  var fullFilePath = path.join(repoPath, filename);
+  var isExist = fs.existsSync(fullFilePath);
+
+  var diffs = [];
+  var diff = { };
+
+  if (typeof isNew == 'undefined' || isNew == null) {
+    if (isExist) task.setResult(null, []);
+    else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
+  } else if (!isNew) {
+    git('diff HEAD -- "' + filename.trim() + '"', repoPath)
+      .parser(gitParser.parseGitDiff)
+      .always(task.setResult);
+  } else {
+    fs.readFile(fullFilePath, { encoding: 'utf8' }, function(err, text) {
+      if (err) return task.setResult({ error: err });
+      text = text.toString();
+      diff.type = 'text';
+      diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+      diffs.push(diff);
+      task.setResult(null, diffs);
+    });
+  }
+
+  return task;
+}
+
+var imageDiff = function(repoPath, filename, isNew) {
+  var task = new GitTask();
+  var fullFilePath = path.join(repoPath, filename);
+  var isExist = fs.existsSync(fullFilePath);
+
+  var diffs = [];
+  var diff = {};
+
+  if (typeof isNew == 'undefined') {
+   if (isExist) task.setResult(null, []);
+    else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
+  } else if (!isNew) {
+    diff.type = 'image';
+    diff.lines = [['-' + filename], [isExist ? '+' + filename : '\\' + '[image removed...]' ]];
+  } else {
+    diff.type = 'image';
+    diff.lines = [['+' +  filename]];
+  }
+  diffs.push(diff);
+  task.setResult(null, diffs);
 
   return task;
 }

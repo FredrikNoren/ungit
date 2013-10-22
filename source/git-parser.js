@@ -1,5 +1,3 @@
-var moment = require('moment');
-
 var addressParser = require('./address-parser');
 
 exports.parseGitStatus = function(text) {
@@ -19,6 +17,7 @@ exports.parseGitStatus = function(text) {
 		file.removed = status[0] == 'D' || status[1] == 'D';
 		file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
 		file.conflict = status[0] == 'U' || status[1] == 'U';
+
 		result.files[filename] = file;
 	});
 	return result;
@@ -93,6 +92,7 @@ exports.parseGitDiff = function(text) {
 			}
 		}
 		diff.lines = diff_lines;
+		diff.type = 'text';
 
 		diffs.push(diff);
 	}
