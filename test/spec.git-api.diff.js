@@ -58,7 +58,7 @@ describe('git-api diff', function () {
         });
 
 	it('diff on created file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: true }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
@@ -74,7 +74,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on created image file should work', function(done) {
-                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: true}, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be(1);
                         expect(res.body[0].lines).to.be.an('array');
@@ -112,7 +112,7 @@ describe('git-api diff', function () {
         });
 
 	it('diff on modified file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: false }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
@@ -131,7 +131,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on modified image file should work', function(done) {
-                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: false }, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be(1);
                         expect(res.body[0].lines).to.be.an('array');
@@ -151,7 +151,7 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on removed file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: false }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
@@ -162,7 +162,7 @@ describe('git-api diff', function () {
 	});
 
         it('diff on removed image file should work', function(done) {
-                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image' }, done, function(err, res) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: false }, done, function(err, res) {
                         expect(res.body).to.be.an('array');
                         expect(res.body.length).to.be.greaterThan(0);
                         expect(res.body[0].lines).to.be.an('array');

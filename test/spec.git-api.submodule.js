@@ -96,7 +96,7 @@ describe('git-api submodule', function () {
 	});
 
 	it('diff on submodule should work', function(done) {
-		common.get(req, '/diff', { path: testDirMain, file: submodulePath }, function(err, res) {
+		common.get(req, '/diff', { path: testDirMain, file: submodulePath, isNew: false }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
