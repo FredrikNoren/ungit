@@ -28,6 +28,11 @@ describe('git-api diff', function () {
 	});
 
 	var testFile = 'afile.txt';
+	var testImageFile = 'anImageFile.txt';
+
+	var getTestImageElement = function (testDir, filename, version) {
+		return '+&nbsp;<img class="diffImage" src="/api/diff/image?path=' + encodeURIComponent(testDir) + '&filename=' + filename + '&version=' + version + '" />';
+	}
 
 	it('diff on non existing file should fail', function(done) {
 		req
@@ -40,14 +45,20 @@ describe('git-api diff', function () {
 	});
 
 	var content;
+	var imageContent;
 
 	it('should be possible to create a file', function(done) {
 		content = ['A', 'few', 'lines', 'of', 'content', ''];
 		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
 	});
 
+        it('should be possible to create an image file', function(done) {
+                imageContent = ['PNG', 'create', 'fake', 'image', 'file', ''];
+                common.post(req, '/testing/createfile', { file: path.join(testDir, testImageFile), content: imageContent.join('\n') }, done);
+        });
+
 	it('diff on created file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: true }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
@@ -61,6 +72,21 @@ describe('git-api diff', function () {
 			done();
 		});
 	});
+
+        it('diff on created image file should work', function(done) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: true}, done, function(err, res) {
+                        expect(res.body).to.be.an('array');
+                        expect(res.body.length).to.be(1);
+                        expect(res.body[0].lines).to.be.an('array');
+                        expect(res.body[0].lines.length).to.be(1);
+                        for(var i = 0; i < res.body[0].lines.length; i++) {
+                                var contentLine = getTestImageElement(testDir, testImageFile, 'current');
+                                var diffLine = res.body[0].lines[i];
+                                expect(diffLine).to.eql([null, i, contentLine]);
+                        }
+                        done();
+                });
+        });
 
 	it('should be possible to commit a file', function(done) {
 		common.post(req, '/commit', { path: testDir, message: "Init", files: [testFile] }, done);
@@ -80,8 +106,13 @@ describe('git-api diff', function () {
 		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
 	});
 
+        it('should be possible to modify an image file', function(done) {
+                imageContent.splice(2, 0, 'more');
+                common.post(req, '/testing/changefile', { file: path.join(testDir, testImageFile), content: imageContent.join('\n') }, done);
+        });
+
 	it('diff on modified file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: false }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
@@ -99,6 +130,18 @@ describe('git-api diff', function () {
 		});
 	});
 
+        it('diff on modified image file should work', function(done) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: false }, done, function(err, res) {
+                        expect(res.body).to.be.an('array');
+                        expect(res.body.length).to.be(1);
+                        expect(res.body[0].lines).to.be.an('array');
+                        expect(res.body[0].lines).to.eql([
+                                [ null, 0, getTestImageElement(testDir, testImageFile, 'current') ],
+                        ]);
+                        done();
+                });
+        });
+
 	it('should be possible to commit a file', function(done) {
 		common.post(req, '/commit', { path: testDir, message: "Init", files: [testFile] }, done);
 	});
@@ -108,7 +151,7 @@ describe('git-api diff', function () {
 	});
 
 	it('diff on removed file should work', function(done) {
-		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
+		common.get(req, '/diff', { path: testDir, file: testFile, isNew: false }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be.greaterThan(0);
@@ -118,6 +161,15 @@ describe('git-api diff', function () {
 		});
 	});
 
+        it('diff on removed image file should work', function(done) {
+                common.get(req, '/diff', { path: testDir, file: testImageFile, type: 'image', isNew: false }, done, function(err, res) {
+                        expect(res.body).to.be.an('array');
+                        expect(res.body.length).to.be.greaterThan(0);
+                        expect(res.body[0].lines).to.be.an('array');
+                        expect(res.body[0].lines.length).to.be.greaterThan(0);
+                        done();
+                });
+        });
 
 	after(function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);
