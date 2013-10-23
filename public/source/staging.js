@@ -233,6 +233,8 @@ var LineByLineDiffViewModel = function() {
 
 var ImageDiffViewModel = function() {
 	this.templateName = 'imageFileDiff';
+	this.isFirstElementImage = ko.observable(true);
+	this.isSecondElementImage = ko.observable(true);
 }
 
 LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
@@ -251,18 +253,24 @@ LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) 
 
 ImageDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
 
-	var firstImage, secondImage;
+	var firstElement, secondElement;
 	if (diff.lines[1] == null) {
-		firstImage = '[no image...]';
-		secondImage = getImageElement(diff.lines[0][0], repoPath);
+		firstElement = '[no image...]';
+		this.isFirstElementImage(false);
+		secondElement = getImageElement(diff.lines[0][0], repoPath);
+		this.isSecondElementImage(true);
 	} else {
-		firstImage = getImageElement(diff.lines[0][0], repoPath);
-		secondImage = getImageElement(diff.lines[1][0], repoPath);
+		firstElement = getImageElement(diff.lines[0][0], repoPath);
+		this.isFirstElementImage(true);
+		secondElement = getImageElement(diff.lines[1][0], repoPath);
+		this.isSecondElementImage(secondElement[0] == '\\' ? false : true);
 	}
 
 	newDiffs.push({
-		firstImage: firstImage,
-		secondImage: secondImage
+		firstElement: firstElement,
+		isFirstElementImage: this.isFirstElementImage,
+		secondElement: secondElement,
+		isSecondElementImage: this.isSecondElementImage
 	});
 }
 
@@ -272,13 +280,12 @@ var getImageElement = function(line, repoPath) {
 
         if (firstChar == '\\') return imageFile;
 
-	var element = '<img class="diffImage" src="' + '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
+	var element = '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
 	if (firstChar == '-') {
 		element += 'previous';
 	} else {
 		element += 'current';
 	}
-	element += '" />';
 
 	return element;
 }
