@@ -62,8 +62,14 @@ var GitNodeViewModel = function(graph, sha1) {
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
   this.logBoxVisible = ko.computed(function() {
-    return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover();
+    return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover() || self.selected();
   });
+  this.highlighted = ko.computed(function() {
+    return self.nodeIsMousehover() || self.selected();
+  });
+  this.showBody = ko.computed(function() {
+    return self.nodeIsMousehover() || self.selected();
+  })
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
