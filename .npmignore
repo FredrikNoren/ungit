@@ -18,7 +18,7 @@ node_modules/
 .ungitrc
 Gruntfile.js
 
-media/
+assets/
 test/
 report/
 public/source/
@@ -32,3 +32,8 @@ clicktests/
 clicktestout/
 
 teststabilitytester.js
+
+build/
+*.dll
+nw.exe
+nw.pak
