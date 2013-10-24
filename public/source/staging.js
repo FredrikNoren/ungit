@@ -82,7 +82,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
 		fileViewModel.conflict(files[file].conflict);
-		fileViewModel.invalidateDiff();
+		fileViewModel.diff.invalidateDiff();
 		newFiles.push(fileViewModel);
 	}
 	this.files(newFiles);
@@ -158,7 +158,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
-		file.invalidateDiff(false);
+		file.diff.invalidateDiff(false);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -182,7 +182,7 @@ var FileViewModel = function(staging, type) {
 	this.staging = staging;
 	this.app = staging.app;
 	this.type = type;
-	this.diff = type == 'image' ? new ImageDiffViewModel() : new LineByLineDiffViewModel();
+	this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
@@ -209,83 +209,85 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
 		this.showingDiffs(true);
-		this.invalidateDiff(true);
+		this.diff.invalidateDiff(true);
 	}
 }
-FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this;
+
+var LineByLineDiffViewModel = function(ancestor) {
+	this.ancestor = ancestor;
+	this.templateName = 'textFileDiff';
+}
+LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+	var self = this.ancestor;
 	if (self.showingDiffs()) {
 		if (drawProgressBar) self.diffsProgressBar.start();
 		var isTextType = self.type == 'text' ? true : false;
-		self.app.get('/diff', { file: self.name(), path: self.staging.repository.repoPath, type: self.type, isNew: self.isNew() }, function(err, diffs) {
+		self.app.get('/diff', { file: self.name(), path: self.staging.repository.repoPath}, function(err, diffs) {
 			if (drawProgressBar) self.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
-			diffs.forEach(function(diff) {self.diff.pushDiff(newDiffs, diff, self.staging.repoPath);});
+			diffs.forEach(function(diff) {
+				diff.lines.forEach(
+						function(line) {
+							newDiffs.push({
+								oldLineNumber: line[0],
+								newLineNumber: line[1],
+								added: line[2][0] == '+',
+								removed: line[2][0] == '-' || line[2][0] == '\\',
+								text: line[2]
+							});
+						}
+					);
+			});
 			self.diffs(newDiffs);
 		});
 	}
 }
 
-var LineByLineDiffViewModel = function() {
-	this.templateName = 'textFileDiff';
-}
-
-var ImageDiffViewModel = function() {
+var ImageDiffViewModel = function(ancestor) {
+	this.ancestor = ancestor;
 	this.templateName = 'imageFileDiff';
-	this.isFirstElementImage = ko.observable(true);
-	this.isSecondElementImage = ko.observable(true);
 }
+ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+	var self = this.ancestor;
+	if (self.showingDiffs()) {
+		if (drawProgressBar) self.diffsProgressBar.start();
+		var isTextType = self.type == 'text' ? true : false;
+		var firstElement, secondElement, isFirstElementImage, isSecondElementImage;
+		var newDiffs = [];
 
-LineByLineDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
-	diff.lines.forEach(
-		function(line) {
-			newDiffs.push({
-				oldLineNumber: line[0],
-				newLineNumber: line[1],
-				added: line[2][0] == '+',
-				removed: line[2][0] == '-' || line[2][0] == '\\',
-				text: line[2]
-			});
+		if (drawProgressBar) self.diffsProgressBar.stop();
+		
+		if(self.isNew) {
+			firstElement = '[no image...]';
+			isFirstElementImage = false;
+			secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
+			isSecondElementImage = true;
+		} else {
+			firstElement = getImageElement(self.name(), self.staging.repository.repoPath, 'previous');
+			isFirstElementImage = true;
+
+			if(self.removed){
+				secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
+				isSecondElementImage = true;
+			} else {
+				secondElement = '[image removed...]'
+				isSecondElementImage = false;
+			}
 		}
-	);
-}
 
-ImageDiffViewModel.prototype.pushDiff = function(newDiffs, diff, repoPath) {
+        newDiffs.push({
+                firstElement: firstElement,
+                isFirstElementImage: isFirstElementImage,
+                secondElement: secondElement,
+                isSecondElementImage: isSecondElementImage
+        });
+        self.diffs(newDiffs);
 
-	var firstElement, secondElement;
-	if (diff.lines[1] == null) {
-		firstElement = '[no image...]';
-		this.isFirstElementImage(false);
-		secondElement = getImageElement(diff.lines[0][0], repoPath);
-		this.isSecondElementImage(true);
-	} else {
-		firstElement = getImageElement(diff.lines[0][0], repoPath);
-		this.isFirstElementImage(true);
-		secondElement = getImageElement(diff.lines[1][0], repoPath);
-		this.isSecondElementImage(secondElement[0] == '\\' ? false : true);
 	}
-
-	newDiffs.push({
-		firstElement: firstElement,
-		isFirstElementImage: this.isFirstElementImage,
-		secondElement: secondElement,
-		isSecondElementImage: this.isSecondElementImage
-	});
 }
 
-var getImageElement = function(line, repoPath) {
-	var firstChar = line.substring(0, 1);
-	var imageFile = line.substring(1, line.length);
-
-        if (firstChar == '\\') return imageFile;
-
-	var element = '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=';
-	if (firstChar == '-') {
-		element += 'previous';
-	} else {
-		element += 'current';
-	}
-
-	return element;
+var getImageElement = function(imageFile, repoPath, version) {
+	return '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=' + version;
 }
+ 

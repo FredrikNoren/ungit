@@ -229,63 +229,34 @@ git.binaryFileContentAtHead = function(repoPath, filename) {
   return task;
 }
 
-git.diff = function(repoPath, filename, type, isNew) {
-  if(type == 'image') {
-    return imageDiff(repoPath, filename, isNew);
-  } else {
-    return fileDiff(repoPath, filename, isNew);
-  }
-}
 
-var fileDiff = function(repoPath, filename, isNew) {
+git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
-  var fullFilePath = path.join(repoPath, filename);
-  var isExist = fs.existsSync(fullFilePath);
 
-  var diffs = [];
-  var diff = { };
-
-  if (typeof isNew == 'undefined' || isNew == null) {
-    if (isExist) task.setResult(null, []);
-    else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
-  } else if (!isNew) {
-    git('diff HEAD -- "' + filename.trim() + '"', repoPath)
-      .parser(gitParser.parseGitDiff)
-      .always(task.setResult);
-  } else {
-    fs.readFile(fullFilePath, { encoding: 'utf8' }, function(err, text) {
-      if (err) return task.setResult({ error: err });
-      text = text.toString();
-      diff.type = 'text';
-      diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
-      diffs.push(diff);
-      task.setResult(null, diffs);
+  git.status(repoPath)
+    .started(task.setStarted)
+    .fail(task.setResult)
+    .done(function(status) {
+      var file = status.files[filename];
+      if (!file) {
+        if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
+        else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
+      } else if (!file.isNew) {
+        git('diff HEAD -- "' + filename.trim() + '"', repoPath)
+          .parser(gitParser.parseGitDiff)
+          .always(task.setResult);
+      } else {
+        fs.readFile(path.join(repoPath, filename), { encoding: 'utf8' }, function(err, text) {
+          if (err) return task.setResult({ error: err });
+          var diffs = [];
+          var diff = { };
+          text = text.toString();
+          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          diffs.push(diff);
+          task.setResult(null, diffs);
+        });
+      }
     });
-  }
-
-  return task;
-}
-
-var imageDiff = function(repoPath, filename, isNew) {
-  var task = new GitTask();
-  var fullFilePath = path.join(repoPath, filename);
-  var isExist = fs.existsSync(fullFilePath);
-
-  var diffs = [];
-  var diff = {};
-
-  if (typeof isNew == 'undefined') {
-   if (isExist) task.setResult(null, []);
-    else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
-  } else if (!isNew) {
-    diff.type = 'image';
-    diff.lines = [['-' + filename], [isExist ? '+' + filename : '\\' + '[image removed...]' ]];
-  } else {
-    diff.type = 'image';
-    diff.lines = [['+' +  filename]];
-  }
-  diffs.push(diff);
-  task.setResult(null, diffs);
 
   return task;
 }

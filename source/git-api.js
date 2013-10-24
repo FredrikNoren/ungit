@@ -208,14 +208,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-		var isNew = null;
-		if(req.param('isNew') == 'false'){
-			isNew = false;
-		} else if (req.param('isNew') == 'true') {
-			isNew = true;
-		} 
-
-		git.diff(req.param('path'), req.param('file'), req.param('type'), isNew)
+		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
         });
 

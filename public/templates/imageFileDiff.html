@@ -3,12 +3,12 @@
 	<tr>
 		<td class="imageDiffContent fileDiffRemoved">
 			<img class="diffImage" data-bind="visible: isFirstElementImage, attr:{src: firstElement}" />  
-			<span data-bind="visible: !isFirstElementImage(), text: firstElement"/>
+			<span data-bind="visible: !isFirstElementImage, text: firstElement"/>
 		</td>
 		<td class="imageDiffContent" style="width: 40px;">=&#62;</td>
 		<td class="imageDiffContent fileDiffAdded">
 			<img class="diffImage" data-bind="visible: isSecondElementImage, attr:{src: secondElement}" />
-			<span data-bind="visible: !isSecondElementImage(), text: secondElement"/> 
+			<span data-bind="visible: !isSecondElementImage, text: secondElement"/> 
 		</td>
 	</tr>
 </table>
