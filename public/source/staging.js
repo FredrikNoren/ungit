@@ -250,6 +250,7 @@ var ImageDiffViewModel = function(ancestor) {
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this.ancestor;
+
 	if (self.showingDiffs()) {
 		if (drawProgressBar) self.diffsProgressBar.start();
 		var isTextType = self.type == 'text' ? true : false;
@@ -258,7 +259,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 
 		if (drawProgressBar) self.diffsProgressBar.stop();
 		
-		if(self.isNew) {
+		if(self.isNew()) {
 			firstElement = '[no image...]';
 			isFirstElementImage = false;
 			secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
@@ -267,23 +268,22 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 			firstElement = getImageElement(self.name(), self.staging.repository.repoPath, 'previous');
 			isFirstElementImage = true;
 
-			if(self.removed){
-				secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
-				isSecondElementImage = true;
-			} else {
+			if(self.removed()){
 				secondElement = '[image removed...]'
 				isSecondElementImage = false;
+			} else {
+				secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
+				isSecondElementImage = true;
 			}
 		}
-
         newDiffs.push({
                 firstElement: firstElement,
                 isFirstElementImage: isFirstElementImage,
                 secondElement: secondElement,
                 isSecondElementImage: isSecondElementImage
         });
-        self.diffs(newDiffs);
 
+        self.diffs(newDiffs);
 	}
 }
 
