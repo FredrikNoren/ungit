@@ -12,6 +12,9 @@ var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var socketIO;
 
+var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
+
+
 exports.pathPrefix = '';
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
@@ -121,6 +124,25 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		else res.json(result || {});
 	}
 
+	var fileResultOrFail = function(res, err, result) {
+		res.type('png');
+		if (err) res.json(400, err); 
+		else res.send(new Buffer(result, 'binary'));
+	}
+
+	var fileType = function(fullFilePath) {
+		if(fs.existsSync(fullFilePath) && !fs.statSync(fullFilePath).isDirectory()){
+			var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
+			for (var n in imageFileTypes) {
+				if (firstLine.indexOf(imageFileTypes[n]) > -1) {
+					return 'image';
+				}
+			}
+		}
+		return 'text';
+	}
+
+
 
 	function credentialsOption(socketId) {
 		var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
@@ -129,8 +151,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 
 	app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
-		git.status(req.param('path'))
-			.always(jsonResultOrFail.bind(null, res));
+		var repoPath = req.param('path');
+		git.status(repoPath)
+			.always(function(err, result) {
+				if(result) {
+					for(var file in result.files) {
+						result.files[file].type = fileType(path.join(repoPath, file));
+					}
+				}
+				jsonResultOrFail(res, err, result);
+			});
 	});
 
 	app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -180,6 +210,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
+        });
+
+
+	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+		if (req.query.version == 'previous') {
+			git.binaryFileContentAtHead(req.query.path, req.query.filename)
+				.always(fileResultOrFail.bind(null, res));
+		} else {
+			res.sendfile(path.join(req.query.path, req.query.filename));
+		}
 	});
 
 	app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){

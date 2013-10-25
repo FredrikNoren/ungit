@@ -1,0 +1,22 @@
+
+<table class="fileDiff" data-bind="foreach: $data">
+	<tr>
+		<td class="imageDiffContent fileDiffRemoved">
+			<div data-bind="if: isFirstElementImage">
+				<img class="diffImage" data-bind="attr:{src: firstElement}" />  
+			</div>
+			<div data-bind="ifnot: isFirstElementImage">
+				<span data-bind="text: firstElement"/>
+			</div>
+		</td>
+		<td class="imageDiffContent" style="width: 40px;">=&#62;</td>
+		<td class="imageDiffContent fileDiffAdded">
+			<div data-bind="if: isSecondElementImage">
+				<img class="diffImage" data-bind="attr:{src: secondElement}" />
+			</div>
+			<div data-bind="ifnot: isSecondElementImage">
+				<span data-bind="text: secondElement"/> 
+			</div>
+		</td>
+	</tr>
+</table>
