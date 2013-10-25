@@ -28,6 +28,7 @@ describe('git-api diff', function () {
 	});
 
 	var testFile = 'afile.txt';
+	var testImage = 'image.png'
 
 	it('diff on non existing file should fail', function(done) {
 		req
@@ -39,11 +40,16 @@ describe('git-api diff', function () {
 			.end(wrapErrorHandler(done));
 	});
 
-	var content;
+	var content, imgContent;
 
 	it('should be possible to create a file', function(done) {
 		content = ['A', 'few', 'lines', 'of', 'content', ''];
 		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile), content: content.join('\n') }, done);
+	});
+
+	it('should be possible to create a file', function(done) {
+		imgContent = ['PNG', 'few', 'lines', 'of', 'content', ''];
+		common.post(req, '/testing/createfile', { file: path.join(testDir, testImage), content: content.join('\n') }, done);
 	});
 
 	it('diff on created file should work', function(done) {
@@ -61,6 +67,18 @@ describe('git-api diff', function () {
 			done();
 		});
 	});
+
+	// Causes weird "cannot find req of undefined".  
+	// API call is called correctly and I have no idea where this is triggered so I'm not sure how I can test get image functionality.
+	// it('diff on image file should work', function(done) {
+	// 	common.get(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' }, function(err, res) 	{	
+	// 		console.log(1);
+	// 		if (err) return done(err);
+	// 		expect(res.body).to.be.an('array');
+	// 		expect(res.body.length).to.be(1);
+	// 		done();
+	// 	});
+	// });
 
 	it('should be possible to commit a file', function(done) {
 		common.post(req, '/commit', { path: testDir, message: "Init", files: [testFile] }, done);
