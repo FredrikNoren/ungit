@@ -218,12 +218,12 @@ var LineByLineDiffViewModel = function(ancestor) {
 	this.templateName = 'textFileDiff';
 }
 LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this.ancestor;
-	if (self.showingDiffs()) {
-		if (drawProgressBar) self.diffsProgressBar.start();
-		var isTextType = self.type == 'text' ? true : false;
-		self.app.get('/diff', { file: self.name(), path: self.staging.repository.repoPath}, function(err, diffs) {
-			if (drawProgressBar) self.diffsProgressBar.stop();
+	var ancestor = this.ancestor;
+	if (ancestor.showingDiffs()) {
+		if (drawProgressBar) ancestor.diffsProgressBar.start();
+		var isTextType = ancestor.type == 'text' ? true : false;
+		ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
+			if (drawProgressBar) ancestor.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
 			diffs.forEach(function(diff) {
@@ -239,7 +239,7 @@ LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 						}
 					);
 			});
-			self.diffs(newDiffs);
+			ancestor.diffs(newDiffs);
 		});
 	}
 }
@@ -249,30 +249,30 @@ var ImageDiffViewModel = function(ancestor) {
 	this.templateName = 'imageFileDiff';
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this.ancestor;
+	var ancestor = this.ancestor;
 
-	if (self.showingDiffs()) {
-		if (drawProgressBar) self.diffsProgressBar.start();
-		var isTextType = self.type == 'text' ? true : false;
+	if (ancestor.showingDiffs()) {
+		if (drawProgressBar) ancestor.diffsProgressBar.start();
+		var isTextType = ancestor.type == 'text' ? true : false;
 		var firstElement, secondElement, isFirstElementImage, isSecondElementImage;
 		var newDiffs = [];
 
-		if (drawProgressBar) self.diffsProgressBar.stop();
+		if (drawProgressBar) ancestor.diffsProgressBar.stop();
 		
-		if(self.isNew()) {
+		if(ancestor.isNew()) {
 			firstElement = '[no image...]';
 			isFirstElementImage = false;
-			secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
+			secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
 			isSecondElementImage = true;
 		} else {
-			firstElement = getImageElement(self.name(), self.staging.repository.repoPath, 'previous');
+			firstElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous');
 			isFirstElementImage = true;
 
-			if(self.removed()){
+			if(ancestor.removed()){
 				secondElement = '[image removed...]'
 				isSecondElementImage = false;
 			} else {
-				secondElement = getImageElement(self.name(), self.staging.repository.repoPath, 'current');
+				secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
 				isSecondElementImage = true;
 			}
 		}
@@ -283,7 +283,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
                 isSecondElementImage: isSecondElementImage
         });
 
-        self.diffs(newDiffs);
+        ancestor.diffs(newDiffs);
 	}
 }
 
