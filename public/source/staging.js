@@ -82,7 +82,7 @@ StagingViewModel.prototype.setFiles = function(files) {
 		fileViewModel.isNew(files[file].isNew);
 		fileViewModel.removed(files[file].removed);
 		fileViewModel.conflict(files[file].conflict);
-		fileViewModel.diff.invalidateDiff();
+		fileViewModel.invalidateDiff();
 		newFiles.push(fileViewModel);
 	}
 	this.files(newFiles);
@@ -158,7 +158,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
-		file.diff.invalidateDiff(false);
+		file.invalidateDiff(false);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -182,7 +182,8 @@ var FileViewModel = function(staging, type) {
 	this.staging = staging;
 	this.app = staging.app;
 	this.type = type;
-	this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
+	this.imageDiff = new ImageDiffViewModel(this);
+	this.fileDiff = new LineByLineDiffViewModel(this);
 	this.staged = ko.observable(true);
 	this.name = ko.observable();
 	this.isNew = ko.observable(false);
@@ -209,7 +210,21 @@ FileViewModel.prototype.toogleDiffs = function() {
 	if (this.showingDiffs()) this.showingDiffs(false);
 	else {
 		this.showingDiffs(true);
-		this.diff.invalidateDiff(true);
+		this.invalidateDiff(true);
+	}
+}
+FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+	if (this.type == 'image') {
+		this.imageDiff.invalidateDiff(drawProgressBar);
+	} else {
+		this.fileDiff.invalidateDiff(drawProgressBar);
+	}
+}
+FileViewModel.prototype.getDiffTypeObject = function() {
+	if (this.type == 'image') {
+		return this.imageDiff;
+	} else {
+		return this.fileDiff;
 	}
 }
 
@@ -219,10 +234,16 @@ var LineByLineDiffViewModel = function(ancestor) {
 }
 LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var ancestor = this.ancestor;
+
 	if (ancestor.showingDiffs()) {
 		if (drawProgressBar) ancestor.diffsProgressBar.start();
 		var isTextType = ancestor.type == 'text' ? true : false;
 		ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
+			if (diffs && diffs.length > 0 && diffs[0].type == 'image') {
+				ancestor.type = 'image';
+				ancestor.imageDiff.invalidateDiff(drawProgressBar);
+				return;
+			}
 			if (drawProgressBar) ancestor.diffsProgressBar.stop();
 			if (err) return;
 			var newDiffs = [];
