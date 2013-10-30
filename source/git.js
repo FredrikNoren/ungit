@@ -81,6 +81,7 @@ var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
+  this.encoding = 'utf8';
   this.potentialError = new GitError(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
@@ -88,11 +89,15 @@ GitExecutionTask.prototype.parser = function(parser) {
   this._parser = parser;
   return this;
 }
+GitExecutionTask.prototype.setEncoding = function(encoding) {
+  this.encoding = encoding;
+  return this;
+}
 
 var gitQueue = async.queue(function (task, callback) {
-
   if (config.logGitCommands) winston.info('git executing: ' + task.command);
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 40 },
+  //TODO Process might need to set proper timeout options as for big image file will take longer to load...
+  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
@@ -142,9 +147,10 @@ var gitQueue = async.queue(function (task, callback) {
 
 var git = function(command, repoPath, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+
   var task = new GitExecutionTask(command, repoPath);
 
-  if (sendToQueue !== false) git.queueTask(task);
+  if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
   return task;
 }
@@ -207,6 +213,22 @@ git.stashAndPop = function(repoPath, wrappedTask) {
     });
   return task;
 }
+
+git.binaryFileContentAtHead = function(repoPath, filename) {
+  var task = new GitTask();
+
+  git.status(repoPath)
+    .started(task.setStarted)
+    .fail(task.setResult)
+    .done(function(status) {
+        git('show HEAD:' + filename, repoPath)
+          .setEncoding('binary')
+          .always(task.setResult);
+    });
+
+  return task;
+}
+
 
 git.diffFile = function(repoPath, filename) {
   var task = new GitTask();
