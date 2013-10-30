@@ -281,7 +281,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 		if (drawProgressBar) ancestor.diffsProgressBar.stop();
 		
 		if(ancestor.isNew()) {
-			firstElement = '[no image...]';
+			firstElement = '#';
 			isFirstElementImage = false;
 			secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
 			isSecondElementImage = true;
@@ -290,7 +290,7 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 			isFirstElementImage = true;
 
 			if(ancestor.removed()){
-				secondElement = '[image removed...]'
+				secondElement = '#'
 				isSecondElementImage = false;
 			} else {
 				secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
