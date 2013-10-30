@@ -220,7 +220,7 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 		this.fileDiff.invalidateDiff(drawProgressBar);
 	}
 }
-FileViewModel.prototype.getDiffTypeObject = function() {
+FileViewModel.prototype.getDiffObject = function() {
 	if (this.type == 'image') {
 		return this.imageDiff;
 	} else {
