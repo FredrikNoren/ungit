@@ -562,6 +562,14 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			fs.writeFileSync(req.param('file'), content);
 			res.json({ });
 		});
+		app.post(exports.pathPrefix + '/testing/createimagefile', ensureAuthenticated, function(req, res){
+			fs.writeFile(req.param('file'), 'png');
+			res.json({ });
+		});
+		app.post(exports.pathPrefix + '/testing/changeimagefile', ensureAuthenticated, function(req, res){
+			fs.writeFile(req.param('file'), 'png ~~');
+			res.json({ });
+		});
 		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){
 			var content = req.param('content');
 			if (content === undefined) content = ('test content\n' + Math.random() + '\n');
