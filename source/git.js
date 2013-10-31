@@ -12,19 +12,6 @@ var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 
-
-function GitError() {
-  Error.call(this);
-  Error.captureStackTrace(this, this.constructor);
-
-  this.name = this.constructor.name;
-  this.isGitError = true;
-  this.errorCode = 'unknown';
-  this.stackAtCall = this.stack;
-  this.lineAtCall = this.lineNumber;
-}
-inherits(GitError, Error);
-
 var GitTask = function() {
   var self = this;
   this._completed = false;
@@ -81,7 +68,7 @@ var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
-  this.potentialError = new GitError(); // caputers the stack trace here so that we can use it if the command fail later on
+  this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
 GitExecutionTask.prototype.parser = function(parser) {
@@ -96,7 +83,11 @@ var gitQueue = async.queue(function (task, callback) {
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (error !== null) {
-        var err = task.potentialError;
+        var err = {};
+        err.isGitError = true;
+        err.errorCode = 'unknown';
+        err.stackAtCall = task.potentialError.stack;
+        err.lineAtCall = task.potentialError.lineNumber;
         err.command = task.command;
         err.error = error.toString();
         err.message = err.error.split('\n')[0];

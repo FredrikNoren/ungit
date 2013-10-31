@@ -131,8 +131,8 @@ module.exports = function(grunt) {
           globals: {
             'ungit': true,
             'io': true,
-            'bugsense': true,
-            'Keen': true
+            'Keen': true,
+            'Raven': true
           }
         },
         src: ['public/source/**/*.js']

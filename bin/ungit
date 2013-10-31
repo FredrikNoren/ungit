@@ -8,7 +8,6 @@ var child_process = require('child_process');
 var semver = require('semver');
 var superagent = require('superagent');
 var async = require('async');
-var version = require('../source/version');
 
 var BugTracker = require('../source/bugtracker');
 var bugtracker = new BugTracker();

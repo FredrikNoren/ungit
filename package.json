@@ -41,7 +41,8 @@
     "color": "~0.4.4",
     "keen.io": "0.0.3",
     "getmac": "~1.0.5",
-    "deep-extend": "~0.2.6"
+    "deep-extend": "~0.2.6",
+    "raven": "~0.5.4"
   },
   "devDependencies": {
     "mocha": "~1.13.0",

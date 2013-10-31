@@ -68,16 +68,23 @@
 
 <script type="text/javascript">ungit = {}</script>
 <script type="text/javascript" src="/serverdata.js"></script>
-<script type="text/javascript" src="/js/bugsense.js"></script>
+<script type="text/javascript" src="/js/raven.min.js"></script>
 <script type="text/javascript">
 	console.log('App version: ' + ungit.version);
 	if (ungit.config.bugtracking) {
 		console.log('Initing bugtracking');
-    	var bugsense = new Bugsense( { apiKey: '3c48046e', appversion: ungit.version } );
 
-		window.onerror = function(err) {
-		    bugsense.onerror.apply(window.bugsense, arguments);
-		};
+    	Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
+			logger: 'root',
+			tags: {
+				version: ungit.version
+			}
+		}).install();
+
+		Raven.setUser({
+			id: ungit.userHash
+		});
+
     }
 </script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -102,11 +109,9 @@
 		});
 		Keen.addEvent('ui-start', { version: ungit.version, userHash: ungit.userHash });
 
-		var prevWindowOnError = window.onerror;
-		window.onerror = function(err) {
-			if (prevWindowOnError) prevWindowOnError(err);
+		Raven.TraceKit.report.subscribe(function(err) {
 			Keen.addEvent('ui-exception', { version: ungit.version, userHash: ungit.userHash });
-		};
+		});
 		console.log('Keen.io inited');
 	}
 </script>
