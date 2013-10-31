@@ -562,11 +562,11 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/createimagefile', ensureAuthenticated, function(req, res){
-			fs.writeFile(req.param('file'), 'png');
+			fs.writeFile(req.param('file'), 'png', {encoding: 'binary'});
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changeimagefile', ensureAuthenticated, function(req, res){
-			fs.writeFile(req.param('file'), 'png ~~');
+			fs.writeFile(req.param('file'), 'png ~~', {encoding: 'binary'});
 			res.json({ });
 		});
 		app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){
