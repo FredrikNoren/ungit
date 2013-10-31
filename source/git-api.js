@@ -230,6 +230,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
 	});
 
+	app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
+		git('revert ' + req.param('commit'), req.param('path'))
+			.always(jsonResultOrFail.bind(null, res))
+			.always(emitGitDirectoryChanged.bind(null, req.param('path')))
+			.always(emitWorkingTreeChanged.bind(null, req.param('path')));
+	});
+
 	app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
 		var limit = '';
 		if (req.query.limit) limit = '--max-count=' + req.query.limit;
