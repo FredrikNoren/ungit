@@ -12,7 +12,7 @@ var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var socketIO;
 
-var imageFileTypes = ['PNG', 'JFIF', 'BMP', 'GIF'];
+var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF'];
 
 
 exports.pathPrefix = '';
@@ -132,12 +132,10 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 	var fileType = function(file) {
 		var splited = file.split(".");
-		var ext = splited[splited.length - 1];
+		var ext = splited[splited.length - 1].toUpperCase();
 
-		for (var n in imageFileTypes) {
-			if (ext.indexOf(imageFileTypes[n]) > -1) {
-				return 'image';
-			}
+		if (imageFileTypes.indexOf(ext) > -1) {
+			return 'image';
 		}
 
 		return 'text';
