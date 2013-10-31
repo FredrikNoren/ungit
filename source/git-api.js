@@ -130,15 +130,16 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 		else res.send(new Buffer(result, 'binary'));
 	}
 
-	var fileType = function(fullFilePath) {
-		if(fs.existsSync(fullFilePath) && !fs.statSync(fullFilePath).isDirectory()){
-			var firstLine = fs.readFileSync(fullFilePath, {start: 0, end : 20}).toString().split(os.EOL)[0];
-			for (var n in imageFileTypes) {
-				if (firstLine.indexOf(imageFileTypes[n]) > -1) {
-					return 'image';
-				}
+	var fileType = function(file) {
+		var splited = file.split(".");
+		var ext = splited[splited.length - 1];
+
+		for (var n in imageFileTypes) {
+			if (ext.indexOf(imageFileTypes[n]) > -1) {
+				return 'image';
 			}
 		}
+
 		return 'text';
 	}
 
@@ -156,7 +157,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			.always(function(err, result) {
 				if(result) {
 					for(var file in result.files) {
-						result.files[file].type = fileType(path.join(repoPath, file));
+						result.files[file].type = fileType(file);
 					}
 				}
 				jsonResultOrFail(res, err, result);
