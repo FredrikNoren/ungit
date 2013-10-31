@@ -1,7 +1,7 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var _ = require('lodash');
 
-Selectable = function(graph) {
+var Selectable = function(graph) {
     this.selected = ko.computed({
         read: function() {
             return graph.currentActionContext() == this;
