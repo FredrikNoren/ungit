@@ -284,7 +284,7 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 
 				var name = 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary;
 
-				Raven.captureException(name, { extra: extra });
+				Raven.captureException(name, { extra: extra, tags: { subsystem: 'git' } });
 			}
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });

@@ -8,13 +8,15 @@ var os;
 var superagent;
 var uuid;
 
-function BugTracker() {
+function BugTracker(subsystem) {
 	if (!config.bugtracking) return;
 
 	var self = this;
 
 	this.raven = require('raven');
 	this.client = new this.raven.Client('https://58f16d6f010d4c77900bb1de9c02185f:84b7432f56674fbc8522bc84cc7b30f4@app.getsentry.com/12434');
+
+	this.subsystem = subsystem;
 
 	this.appVersion = 'unknown';
 	sysinfo.getUngitVersion(function(err, ungitVersion) {
@@ -40,7 +42,10 @@ BugTracker.prototype.notify = function(exception, clientName, callback) {
 
 	var options = {
 		user: { id: this.userHash },
-		tags: { version: this.appVersion }
+		tags: {
+			version: this.appVersion,
+			subsystem: this.subsystem
+		}
 	}
 
 	this.client.captureException(exception, options);

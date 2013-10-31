@@ -1,6 +1,6 @@
 var config = require('./config');
 var BugTracker = require('./bugtracker');
-var bugtracker = new BugTracker();
+var bugtracker = new BugTracker('server');
 var usageStatistics = require('./usage-statistics');
 var express = require('express');
 var gitApi = require('./git-api');

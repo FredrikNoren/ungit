@@ -10,7 +10,7 @@ var superagent = require('superagent');
 var async = require('async');
 
 var BugTracker = require('../source/bugtracker');
-var bugtracker = new BugTracker();
+var bugtracker = new BugTracker('launcher');
 var usageStatistics = require('../source/usage-statistics');
 
 process.on('uncaughtException', function(err) {
