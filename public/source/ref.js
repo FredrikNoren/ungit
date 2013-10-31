@@ -2,8 +2,10 @@
 var ko = require('../vendor/js/knockout-2.2.1.js');
 var dialogs = require('./dialogs');
 var md5 = require('blueimp-md5').md5;
+var Selectable = require('./git-selectable').Selectable;
 
 var RefViewModel = function(args) {
+	Selectable.call(this, args.graph);
 	var self = this;
 	this.node = ko.observable();
 	this.boxDisplayX = ko.computed(function() {
@@ -51,19 +53,6 @@ var RefViewModel = function(args) {
 	this.app = this.graph.app;
 	this.localRef = ko.observable();
 	this.isDragging = ko.observable(false);
-	this.hasFocus = ko.observable(false);
-	this.hasFocus.subscribe(function(newValue) {
-		if (newValue)
-			self.graph.currentActionContext(self);
-		else {
-			if (self.isDragging()) return;
-			// CLicking otherwise immediately destroys focus, meaning the button is never hit
-			setTimeout(function() {
-				if (self.graph.currentActionContext() == self)
-					self.graph.currentActionContext(null);
-			}, 300);
-		}
-	});
 	this.current = ko.computed(function() {
 		return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;
 	});

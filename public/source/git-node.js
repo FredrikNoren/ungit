@@ -3,11 +3,13 @@ var ko = require('../vendor/js/knockout-2.2.1.js');
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
 var inherits = require('util').inherits;
+var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 
 var GitNodeViewModel = function(graph, sha1) {
 	NodeViewModel.call(this);
+	Selectable.call(this, graph);
 	var self = this;
 
 	this.graph = graph;
@@ -99,21 +101,6 @@ var GitNodeViewModel = function(graph, sha1) {
 		return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
 	});
 
-	this.hasFocus = ko.observable(false);
-	this.hasFocus.subscribe(function(newValue) {
-		if (newValue) {
-			self.graph.currentActionContext(self);
-			self.selected(true);
-		} else {
-			self.selected(false);
-			// CLicking otherwise immediately destroys focus, meaning the button is never hit
-			setTimeout(function() {
-				if (self.graph.currentActionContext() == self)
-					self.graph.currentActionContext(null);
-			}, 300);
-		}
-	});
-
 	this.dropareaGraphActions = [
 		new GraphActions.Move(this.graph, this),
 		new GraphActions.Rebase(this.graph, this),
@@ -195,4 +182,3 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
 	this.nodeIsMousehover(false);
 }
-
