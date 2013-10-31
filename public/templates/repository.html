@@ -52,15 +52,17 @@
 						</div>
 					</div>
 
-					<div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, 
-						style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }, hasFocus2: hasFocus">
+					<div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
+						click: select,
+						style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
 					</div>
 
 					<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
 						<!-- ko foreach: branches -->
 						<span class="ref branch" data-ta="branch" draggable="true" tabIndex="-1" 
-								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: hasFocus }, 
-									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }, hasFocus2: hasFocus" >
+								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected }, 
+									click: select,
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
 							<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
 							<div class="branch-icon"></div>
 							<span class="name" data-bind="text: localRefName"></span>
@@ -69,8 +71,9 @@
 
 						<!-- ko foreach: tags -->
 						<span class="ref tag" data-ta="tag" draggable="true" tabIndex="0" 
-								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: hasFocus }, 
-									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }, hasFocus2: hasFocus">
+								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected }, 
+									click: select,
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
 							<div class="remote-icon" data-bind="visible: isRemote"></div>
 							<div class="tag-icon"></div>
 							<span class="name" data-bind="text: localRefName"></span>
