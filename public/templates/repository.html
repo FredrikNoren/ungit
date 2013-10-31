@@ -53,7 +53,7 @@
 					</div>
 
 					<div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
-						click: select,
+						click: selected,
 						style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
 					</div>
 
@@ -61,7 +61,7 @@
 						<!-- ko foreach: branches -->
 						<span class="ref branch" data-ta="branch" draggable="true" tabIndex="-1" 
 								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected }, 
-									click: select,
+									click: selected,
 									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
 							<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
 							<div class="branch-icon"></div>
@@ -72,7 +72,7 @@
 						<!-- ko foreach: tags -->
 						<span class="ref tag" data-ta="tag" draggable="true" tabIndex="0" 
 								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected }, 
-									click: select,
+									click: selected,
 									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
 							<div class="remote-icon" data-bind="visible: isRemote"></div>
 							<div class="tag-icon"></div>
