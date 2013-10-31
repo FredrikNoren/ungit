@@ -93,12 +93,6 @@ exports.parseGitDiff = function(text) {
 		}
 		diff.lines = diff_lines;
 
-		if (diff.lines.length == 0) {
-			diff.type = 'image';
-		} else {
-			diff.type = 'text';	
-		}
-
 		diffs.push(diff);
 	}
 	return diffs;
