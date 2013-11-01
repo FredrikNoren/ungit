@@ -1,4 +1,4 @@
-<div class="repository animated fadeInLeft" data-ta="repository-view", data-bind="click: handleBubbledClick">
+<div class="repository animated fadeInLeft" data-ta-container="repository-view", data-bind="click: handleBubbledClick">
 
 	<!-- ko if: gerritIntegration -->
 	<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
@@ -31,7 +31,7 @@
 			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
 
 			<div class="nodes" data-bind="foreach: nodes">
-				<div class="nodeContainer" data-ta="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
+				<div class="nodeContainer" data-ta-container="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
 					<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { hover: nodeIsMousehover }">
 						<div class="logEntryBox panel clearfix">
 							<div class="arrowContainer arrowRight">
@@ -59,7 +59,7 @@
 
 					<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
 						<!-- ko foreach: branches -->
-						<span class="ref branch" data-ta="branch" draggable="true" tabIndex="-1" 
+						<span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1" 
 								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected }, 
 									click: selected,
 									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
@@ -70,7 +70,7 @@
 						<!-- /ko -->
 
 						<!-- ko foreach: tags -->
-						<span class="ref tag" data-ta="tag" draggable="true" tabIndex="0" 
+						<span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0" 
 								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected }, 
 									click: selected,
 									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
@@ -92,12 +92,12 @@
 
 						<!-- ko if: showNewRefAction -->
 						<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-							<button class="showBranchingForm" data-ta="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+							<button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
 							<!-- ko if: branchingFormVisible -->
 							<form class="form-inline" data-bind="submit: createBranch">
-								<input class="name form-control" data-ta="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
-								<input class="btn btn-primary" data-ta="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
-								<button class="btn btn-default" data-ta="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+								<input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
+								<input class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
+								<button class="btn btn-default" data-ta-clickable="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
 							</form>
 							<!-- /ko -->
 						</span>

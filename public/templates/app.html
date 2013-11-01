@@ -2,12 +2,12 @@
 <div class="navbar navbar-fixed-top" data-bind="shown: shown">
 
 	<div class="container container-wide">
-		<a data-ta="home-link" class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
+		<a data-ta-clickable="home-link" class="navbar-brand" href="/#/"><img src="images/logo.png"></a>
 
 		<div class="row">
 		<form class="navbar-form pull-left path-input-form" data-bind="submit: submitPath">
 			<div class="col-lg-12">
-			<input data-ta="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path">
+			<input data-ta-input="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path">
 			</div>
 		</form>
 		</div>
