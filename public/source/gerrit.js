@@ -31,7 +31,7 @@ GerritIntegrationViewModel.prototype.updateChanges = function() {
 		self.changesLoader.stop();
 		if (err) {
 			self.status('failed');
-			return;
+			return true;
 		}
 		self.changes(changes.slice(0, changes.length - 1).map(function(c) { return new GerritChangeViewModel(self, c); }));
 		self.status('loaded');
