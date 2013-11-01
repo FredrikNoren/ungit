@@ -253,6 +253,10 @@ var ImageDiffViewModel = function(ancestor) {
 	this.ancestor = ancestor;
 	this.templateName = 'imageFileDiff';
 	this.diffs = ko.observable();
+	this.firstElement = ko.observable();
+	this.isFirstElementImage = ko.observable();
+	this.secondElement = ko.observable();
+	this.isSecondElementImage = ko.observable();
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 	var self = this;
@@ -260,34 +264,32 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 
 	if (ancestor.showingDiffs()) {
 		if (drawProgressBar) ancestor.diffsProgressBar.start();
-		var isTextType = ancestor.type == 'text' ? true : false;
-		var firstElement, secondElement, isFirstElementImage, isSecondElementImage;
 		var newDiffs = [];
 
 		if (drawProgressBar) ancestor.diffsProgressBar.stop();
 		
 		if(ancestor.isNew()) {
-			firstElement = '#';
-			isFirstElementImage = false;
-			secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
-			isSecondElementImage = true;
+			this.firstElement = '#';
+			this.isFirstElementImage = false;
+			this.secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
+			this.isSecondElementImage = true;
 		} else {
-			firstElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous');
-			isFirstElementImage = true;
+			this.firstElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous');
+			this.isFirstElementImage = true;
 
 			if(ancestor.removed()){
-				secondElement = '#'
-				isSecondElementImage = false;
+				this.secondElement = '#'
+				this.isSecondElementImage = false;
 			} else {
-				secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
-				isSecondElementImage = true;
+				this.secondElement = getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current');
+				this.isSecondElementImage = true;
 			}
 		}
         newDiffs.push({
-                firstElement: firstElement,
-                isFirstElementImage: isFirstElementImage,
-                secondElement: secondElement,
-                isSecondElementImage: isSecondElementImage
+                firstElement: this.firstElement,
+                isFirstElementImage: this.isFirstElementImage,
+                secondElement: this.secondElement,
+                isSecondElementImage: this.isSecondElementImage
         });
 
         self.diffs(newDiffs);
