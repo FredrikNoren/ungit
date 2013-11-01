@@ -1,10 +1,9 @@
 
 var config = require('./config');
 var cache = require('./utils/cache');
-var version = require('./version');
+var sysinfo = require('./sysinfo');
 var getmac = require('getmac');
 var async = require('async');
-var md5 = require('blueimp-md5').md5;
 var winston = require('winston');
 
 function UsageStatistics() {
@@ -16,12 +15,8 @@ function UsageStatistics() {
 
 	this.getDefaultData = cache(function(callback) {
 		async.parallel({
-			userHash: function(done) {
-				getmac.getMac(function(err, addr) {
-					done(err, md5(addr));
-				});
-			},
-			version: version.getVersion.bind(version)
+			userHash: sysinfo.getUserHash.bind(sysinfo),
+			version: sysinfo.getUngitVersion.bind(sysinfo)
 		}, function(err, data) {
 			callback(err, data);
 		});

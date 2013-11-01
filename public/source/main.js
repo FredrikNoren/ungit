@@ -267,12 +267,9 @@ var updateAnimationFrame = function(timestamp) {
 }
 window.requestAnimationFrame(updateAnimationFrame);
 
-var oldWindowOnError = window.onerror;
-window.onerror = function(err) {
+Raven.TraceKit.report.subscribe(function(err) {
     appContainer.content(new CrashViewModel());
-    if (oldWindowOnError) oldWindowOnError(err);
-};
-
+});
 
 var AppContainerViewModel = function() {
     var self = this;

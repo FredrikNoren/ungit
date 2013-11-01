@@ -1,20 +1,17 @@
 var config = require('./config');
 var BugTracker = require('./bugtracker');
-var bugtracker = new BugTracker();
+var bugtracker = new BugTracker('server');
 var usageStatistics = require('./usage-statistics');
 var express = require('express');
 var gitApi = require('./git-api');
 var winston = require('winston');
-var version = require('./version');
+var sysinfo = require('./sysinfo');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var semver = require('semver');
 var path = require('path');
 var fs = require('fs');
 var async = require('async');
-var version = require('./version');
-var getmac = require('getmac');
-var md5 = require('blueimp-md5').md5;
 var signals = require('signals');
 
 process.on('uncaughtException', function(err) {
@@ -26,6 +23,7 @@ process.on('uncaughtException', function(err) {
 		process.exit();
 	});
 });
+
 
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {'timestamp':true});
@@ -135,12 +133,8 @@ gitApi.registerApi(app, server, ensureAuthenticated, config);
 
 app.get('/serverdata.js', function(req, res) {
 	async.parallel({
-		userHash: function(done) {
-			getmac.getMac(function(err, addr) {
-				done(err, md5(addr));
-			});
-		},
-		version: version.getVersion.bind(version)
+		userHash: sysinfo.getUserHash.bind(sysinfo),
+		version: sysinfo.getUngitVersion.bind(sysinfo)
 	}, function(err, data) {
 		var text = 'ungit.config = ' + JSON.stringify(config) + ';\n';
 		text += 'ungit.userHash = "' + data.userHash + '";\n';
@@ -150,8 +144,8 @@ app.get('/serverdata.js', function(req, res) {
 });
 
 app.get('/api/latestversion', function(req, res) {
-	version.getVersion(function(err, currentVersion) {
-		version.getLatestVersion(function(err, latestVersion) {
+	sysinfo.getUngitVersion(function(err, currentVersion) {
+		sysinfo.getUngitLatestVersion(function(err, latestVersion) {
 			if (err)
 				res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
 			else if (!semver.valid(currentVersion))

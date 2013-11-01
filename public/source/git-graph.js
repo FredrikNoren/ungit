@@ -299,5 +299,3 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 	this.nodes(nodes);
 	this.daySeparators(daySeparators);
 }
-
-

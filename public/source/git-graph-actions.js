@@ -316,3 +316,20 @@ GraphActions.Uncommit.prototype.perform = function(callback) {
 	var self = this;
 	this.app.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
 }
+
+GraphActions.Revert = function(graph, node) {
+	var self = this;
+	GraphActions.ActionBase.call(this, graph);
+	this.node = node;
+	this.visible = ko.computed(function() {
+		if (self.performProgressBar.running()) return true;
+		return self.graph.currentActionContext() == self.node;
+	});
+}
+inherits(GraphActions.Revert, GraphActions.ActionBase);
+GraphActions.Revert.prototype.text = 'Revert';
+GraphActions.Revert.prototype.style = 'revert';
+GraphActions.Revert.prototype.perform = function(callback) {
+	var self = this;
+	this.app.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
+}

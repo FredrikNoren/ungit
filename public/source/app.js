@@ -272,23 +272,19 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
 		if (!shouldSkipReport) {
 			if (ungit.config.bugtracking) {
 
-				bugsense.addExtraData('stdout', err.res.body.stdout);
-				bugsense.addExtraData('stderr', err.res.body.stderr);
-				bugsense.addExtraData('error', err.res.body.error);
-				bugsense.addExtraData('path', err.path);
-				bugsense.addExtraData('summary', err.errorSummary);
-				bugsense.addExtraData('stacktrace', err.res.body.stackAtCall);
-				bugsense.addExtraData('command', err.res.body.command);
-
-				var error = {
-					name: err.res.body.name,
-					message: err.res.body.message,
-					stack: err.res.body.stackAtCall,
+				var extra = {
+					stdout: err.res.body.stdout.slice(0, 100),
+					stderr: err.res.body.stderr.slice(0, 100),
+					path: err.path,
+					summary: err.errorSummary,
+					stacktrace: err.res.body.stackAtCall.slice(0, 300),
 					lineNumber: err.res.body.lineAtCall,
-					toString: function() { return 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary }
+					command: err.res.body.command
 				}
 
-				bugsense.notify(error);
+				var name = 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary;
+
+				Raven.captureException(name, { extra: extra, tags: { subsystem: 'git' } });
 			}
 			if (ungit.config.sendUsageStatistics) {
 				Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });

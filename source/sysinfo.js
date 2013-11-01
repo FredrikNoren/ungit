@@ -2,11 +2,13 @@ var fs = require('fs');
 var child_process = require('child_process');
 var path = require('path');
 var cache = require('./utils/cache');
+var getmac = require('getmac');
+var md5 = require('blueimp-md5').md5;
 
-var version = exports;
+var sysinfo = exports;
 
-version.getVersion = cache(function(callback) {
-	version.getPackageJsonVersion(function(err, packageJsonVersion) {
+sysinfo.getUngitVersion = cache(function(callback) {
+	sysinfo.getUngitPackageJsonVersion(function(err, packageJsonVersion) {
 		if (err) return callback(err);
 		if (fs.existsSync(path.join(__dirname, '..', '.git'))){
 			child_process.exec('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') }, function(err, revision) {
@@ -22,12 +24,12 @@ version.getVersion = cache(function(callback) {
 	});
 });
 
-version.getPackageJsonVersion = function(callback) {
+sysinfo.getUngitPackageJsonVersion = function(callback) {
 	callback(null, require('../package.json').version);
 };
 
 var npm;
-version.getLatestVersion = function(callback) {
+sysinfo.getUngitLatestVersion = function(callback) {
 	if (!npm) npm = require('npm');
 	var packageName = 'ungit';
 	npm.load(function() {
@@ -36,5 +38,11 @@ version.getLatestVersion = function(callback) {
 			var versions = data[Object.keys(data)[0]].versions;
 			callback(null, versions[versions.length - 1]);
 		});
+	});
+}
+
+sysinfo.getUserHash = function(callback) {
+	getmac.getMac(function(err, addr) {
+		callback(err, md5(addr));
 	});
 }
