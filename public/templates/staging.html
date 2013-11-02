@@ -14,7 +14,7 @@
 	</div>
 	<div class="row" data-bind="visible: !showNux()">
 		<div class="col-lg-3">
-			<input class="form-control" data-ta="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+			<input class="form-control" data-ta-input="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
 			<textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
 			<div>
 				<span class="amend" data-bind="visible: canAmend">
@@ -23,7 +23,7 @@
                 </span>
 			</div>
 			
-			<button class="btn btn-primary btn-large" data-ta="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+			<button class="btn btn-primary btn-large" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
 				Commit
 				<!-- ko if: committingProgressBar.running -->
 				<!-- ko template: { name: 'progressBar', data: committingProgressBar } --><!-- /ko -->
@@ -62,7 +62,7 @@
                 - <a href="#" data-bind="click: discardAllChanges">Discard all</a>
 			</div>
 			<div class="files" data-bind="foreach: files">
-				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta="staging-file">
+				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
 					<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
 						&#10003;
 					</div>
@@ -75,8 +75,8 @@
 					<span class="new" data-bind="visible: isNew">New</span>
 					<span class="deleted" data-bind="visible: removed">Removed</span>
 					<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
-					<span class="ignore" data-ta="ignore-file" data-bind="click: ignoreFile">i<span class="explanation">&nbsp;Add to .gitignore</span></span>
-					<span class="discard" data-ta="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation">&nbsp;Discard changes</span></span>
+					<span class="ignore" data-ta-clickable="ignore-file" data-bind="click: ignoreFile">i<span class="explanation">&nbsp;Add to .gitignore</span></span>
+					<span class="discard" data-ta-clickable="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation">&nbsp;Discard changes</span></span>
 					<!-- ko if: showingDiffs -->
 					<div class="diffContainer" data-bind="template: { name: templateName, data: diffs }"></div>
 					<!-- /ko -->

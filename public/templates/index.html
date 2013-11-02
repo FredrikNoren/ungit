@@ -10,7 +10,7 @@
 <body>
 
 <script type="text/html" id="home">
-	<div class="container home" data-ta="home-page">
+	<div class="container home" data-ta-container="home-page">
 		<p class="text-center">
 			<img src="images/logoLarge.png" class="logo">
 		</p>
@@ -35,7 +35,7 @@
 </script>
 
 <script type="text/html" id="usererror">
-	<div class="container" data-ta="user-error-page">
+	<div class="container" data-ta-container="user-error-page">
 		<div class="panel crash">
 			<h1 data-bind="text: title"></h1>
 			<span data-bind="html: details"></span>
@@ -44,7 +44,7 @@
 </script>
 
 <script type="text/html" id="progressBar">
-	<div class="progress" data-bind="visible: show, style: style" data-ta="progress-bar">
+	<div class="progress" data-bind="visible: show, style: style" data-ta-element="progress-bar">
 		<!--span data-bind="text: predictionMs"></span-->
 		<div class="progress-bar" data-bind="style: { width: (progress() * 100) + '%' }"></div>
 	</div>
