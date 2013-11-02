@@ -21,6 +21,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
   ensureAuthenticated = ensureAuthenticated || function(req, res, next) { next(); };
 
+  app.use(express.json());
+  app.use(express.urlencoded());
+
   var sockets = {};
   var socketIdCounter = 0;
   var io;
