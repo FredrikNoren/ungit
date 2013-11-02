@@ -71,6 +71,9 @@ var noCache = function(req, res, next) {
 }
 app.use(noCache);
 
+app.use(express.json());
+app.use(express.urlencoded());
+
 if (config.autoShutdownTimeout) {
   var autoShutdownTimeout;
   var refreshAutoShutdownTimeout = function() {
@@ -91,7 +94,6 @@ var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {
   app.use(express.cookieParser());
-  app.use(express.bodyParser());
   app.use(express.session({ secret: 'ungit' }));
   app.use(passport.initialize());
   app.use(passport.session());
