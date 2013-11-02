@@ -120,7 +120,6 @@ module.exports = function(grunt) {
         undef: true, // check for usage of undefined variables
         indent: 2,
         '-W033': true, // ignore Missing semicolon
-        '-W099': true, // ignore Mixed spaces and tabs
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
         '-W069': true, // ignore ['HEAD'] is better written in dot notation        
