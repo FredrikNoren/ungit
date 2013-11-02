@@ -104,6 +104,7 @@ win.on('unmaximize', function() {
 document.addEventListener('keydown', function(event) {
 	if (event.keyIdentifier == 'F12') win.showDevTools();
 });
+require('../source/config').desktopMode = true;
 setTimeout(function() {
 	var s = require('../source/server');
 	s.started.add(function() {

@@ -44,7 +44,8 @@ BugTracker.prototype.notify = function(exception, clientName, callback) {
     user: { id: this.userHash },
     tags: {
       version: this.appVersion,
-      subsystem: this.subsystem
+      subsystem: this.subsystem,
+      deployment: config.desktopMode ? 'desktop' : 'web'
     }
   }
 

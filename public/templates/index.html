@@ -78,7 +78,8 @@
 			logger: 'root',
 			tags: {
 				version: ungit.version,
-				subsystem: 'ui'
+				subsystem: 'ui',
+      			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
 			}
 		}).install();
 
