@@ -10,24 +10,45 @@
 // Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
 
 body {
-	padding-top: 85px;
+	padding-top: 105px;
 }
 
 .navbar {
-	padding-top: 15px;
+	padding-top: 23px;
 	z-index: 5;
 	box-shadow: 0px 15px 15px #252833;
+	height: 83px;
 
-	.navbar-brand {
-		width: 140px;
-		max-width: 140px;
-		position: relative;
-		top: -5px;
+	.backlink {
+		margin-left: 9px;
+		position: absolute;
+		color: #686868;
+		&:hover {
+			text-decoration: none;
+			color: #A5A5A5;
+		}
+		.glyphicon-arrow-left {
+			margin-right: 18px;
+			border: 5px solid #686868;
+			border-radius: 100%;
+			width: 121px;
+			padding-bottom: 4px;
+			padding-top: 6px;
+			padding-right: 7px;
+			padding-left: 7px;
+			-webkit-transition: opacity 0.5s ease-in-out;
+			-moz-transition: opacity 0.5s ease-in-out;
+			transition: opacity 0.5s ease-in-out;
+			opacity: 0;
+			&.glyph-shown {
+				opacity: 1;
+			}
+		}
 	}
-	.row {
-		margin-left: 130px;
-		margin-right: 60px;
-		.navbar-form {
+	.form-container {
+		margin-left: 180px;
+		margin-right: 107px;
+		.path-input-form {
 			width: 100%;
 			.form-control {
 				font-size: 1.7em;
@@ -50,10 +71,6 @@ body {
 		font-size: 12px;
 		color: rgba(0, 0, 0, 0.5);
 	}
-}
-
-.path {
-	padding-top: 20px;
 }
 
 .home {

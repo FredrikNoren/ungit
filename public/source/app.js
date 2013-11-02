@@ -30,6 +30,9 @@ var AppViewModel = function(browseTo) {
   this.latestVersion = ko.observable();
   this.newVersionAvailable = ko.observable();
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
+  this.showBackButton = ko.computed(function() {
+    return !(self.content() instanceof screens.HomeViewModel);
+  })
 
   this.bugtrackingNagscreenDismissed = ko.computed({
     read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
