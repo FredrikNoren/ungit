@@ -126,7 +126,7 @@ var gitQueue = async.queue(function (task, callback) {
         task.setResult(null, result);
         callback();
       }
-  });
+    });
 
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
@@ -237,7 +237,7 @@ git.discardAllChanges = function(repoPath) {
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function() {
-        git('clean -fd', repoPath).always(task.setResult);
+      git('clean -fd', repoPath).always(task.setResult);
     });
 
   return task;

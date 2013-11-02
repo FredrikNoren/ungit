@@ -84,7 +84,8 @@ describe('git-api: test ignorefile call', function () {
       async.series([
 
         function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
-        function (done) { common.post(req, '/ignorefile', { path: dir, file: testFile }, function (err, res) {
+        function (done) {
+          common.post(req, '/ignorefile', { path: dir, file: testFile }, function (err, res) {
             if (err) {
               done();
               return true;

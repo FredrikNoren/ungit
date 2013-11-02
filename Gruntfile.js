@@ -118,6 +118,7 @@ module.exports = function(grunt) {
     jshint: {
       options: {
         undef: true, // check for usage of undefined variables
+        indent: 2,
         '-W033': true, // ignore Missing semicolon
         '-W099': true, // ignore Mixed spaces and tabs
         '-W041': true, // ignore Use '===' to compare with '0'
@@ -188,7 +189,7 @@ module.exports = function(grunt) {
               'public/**/*',
               'source/**/*',
               'bin/credentials-helper',
-              ].concat(
+            ].concat(
               Object.keys(packageJson.dependencies).map(function(dep) { return 'node_modules/' + dep + '/**/*'; })
             ),
             dest: 'build/desktop/'
@@ -199,7 +200,7 @@ module.exports = function(grunt) {
             src: [
               '*.dll',
               'nw.*',
-              ],
+            ],
             dest: 'build/desktop/',
             rename: function(dest, src) {
               if (src.indexOf('nw.exe') != -1) return dest + 'ungit.exe';

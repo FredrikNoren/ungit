@@ -52,12 +52,12 @@ var ssh2 = function(remote, command, callback) {
   var doConnect = function() { connection.connect(connectConfig); };
   if (connectConfig.username) doConnect();
   else getProcessUsername(function(err, username) {
-    if (err) callback(err);
-    else {
-      connectConfig.username = username;
-      doConnect();
-    }
-  });
+      if (err) callback(err);
+      else {
+        connectConfig.username = username;
+        doConnect();
+      }
+    });
 };
 
 var gerrit = function(remote, command, res, callback) {
