@@ -160,6 +160,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
 	this.files().forEach(function(file) {
 		file.invalidateDiff(false);
+		console.log(2);
 	});
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -216,10 +217,11 @@ FileViewModel.prototype.toogleDiffs = function() {
 	else {
 		this.showingDiffs(true);
 		this.invalidateDiff(true);
+		console.log(3);
 	}
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	this.diff.invalidateDiff(drawProgressBar);
+	if (drawProgressBar || this.type != 'image') this.diff.invalidateDiff(drawProgressBar);
 }
 
 
