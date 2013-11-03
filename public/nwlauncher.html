@@ -93,13 +93,35 @@ document.getElementById('close-button').onclick = function() {
 	win.close();
 	return false;
 }
+function getStoredWindowState() {
+	var state;
+	try {
+		state = JSON.parse(localStorage.getItem('windowState') || '{}');
+	} catch(ex) {}
+	return state || {};
+}
+var windowMode = getStoredWindowState().mode || 'normal';
 win.on('maximize', function() {
 	document.getElementById('unmaximize-button').style.display = 'inline-block';
 	document.getElementById('maximize-button').style.display = 'none';
+	windowMode = 'maximized';
 });
 win.on('unmaximize', function() {
 	document.getElementById('unmaximize-button').style.display = 'none';
 	document.getElementById('maximize-button').style.display = 'inline-block';
+	windowMode = 'normal';
+});
+win.on('close', function () {
+	var state = getStoredWindowState();
+	state.mode = windowMode;
+	if (windowMode == 'normal') {
+		state.x = win.x;
+		state.y = win.y;
+		state.width = win.width;
+		state.height = win.height;
+	}
+	localStorage.setItem('windowState', JSON.stringify(state));
+    this.close(true);
 });
 document.addEventListener('keydown', function(event) {
 	if (event.keyIdentifier == 'F12') win.showDevTools();
@@ -111,6 +133,16 @@ setTimeout(function() {
 		content.src = 'http://localhost:8448';
 	});
 }, 1);
+
+if (windowMode == 'maximized') {
+	win.maximize();
+} else {
+	var state = getStoredWindowState();
+	if (state && state.width) {
+        win.resizeTo(state.width, state.height);
+        win.moveTo(state.x, state.y);
+	}
+}
 win.show();
 </script>
 

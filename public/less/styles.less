@@ -310,13 +310,13 @@ body {
 		
 		.log {
 			position: absolute;
+			top: -43px;
 			margin-left: 100px;
-			&.hover {
+			&.highlighted {
 				z-index: 2;
 				.logEntryBox {
 					box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
 					background: #4B5766;
-					top: -43px;
 					left: -5px;
 					.arrowRight {
 						.shadow {
@@ -328,12 +328,15 @@ body {
 					}
 				}
 			}
+			&.hover {
+				z-index: 3;
+			}
 
 			.logEntryBox {
 				position: relative;
-				top: -43px;
 				
 				padding: 10px;
+				margin-bottom: 0px;
 				width: @logWidth;
 				min-height: 85px;
 				.arrowRight {
