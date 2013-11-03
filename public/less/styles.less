@@ -52,9 +52,20 @@ body {
 		margin-right: 107px;
 		.path-input-form {
 			width: 100%;
+			position: relative;
 			.form-control {
 				font-size: 1.7em;
 				width: 100%;
+			}
+			.add-to-repolist {
+				position: absolute;
+				right: 0px;
+				top: 0px;
+				background: transparent;
+				opacity: 0.3;
+				&:hover {
+					opacity: 0.8;
+				}
 			}
 		}
 	}
@@ -76,6 +87,13 @@ body {
 }
 
 .home {
+	.nux {
+		text-align: center;
+		.logo-large {
+			margin-top: 20px;
+			margin-bottom: 50px;
+		}	
+	}
 	.repository {
 		position: relative;
 		padding-left: 66px;
@@ -93,6 +111,16 @@ body {
 		}
 		&:hover .glyphicon {
 			color: #A5A5A5;
+		}
+		.remove-repository {
+			position: absolute;
+			right: 0px;
+			top: 0px;
+			background: transparent;
+			opacity: 0.3;
+			&:hover {
+				opacity: 1;
+			}
 		}
 	}
 }

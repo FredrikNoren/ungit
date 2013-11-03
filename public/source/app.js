@@ -6,6 +6,7 @@ var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
 var _ = require('lodash');
 var superagent = require('../vendor/js/superagent');
+var async = require('async');
 
 
 var AppViewModel = function(browseTo) {
@@ -16,13 +17,10 @@ var AppViewModel = function(browseTo) {
   this.connectionState = ko.observable('connecting');
   this.gitErrors = ko.observable([]);
 
-  this.visitedRepositories = ko.computed({
-    read: function() {
-      return JSON.parse(localStorage.getItem('visitedRepositories') || '[]');
-    },
-    write: function(value) {
-      localStorage.setItem('visitedRepositories', JSON.stringify(value));
-    }
+  this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
+  this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
+  this.showAddToRepoListButton = ko.computed(function() {
+    return self.path() && self.repoList().indexOf(self.path()) == -1;
   });
 
   this.content = ko.observable(new screens.HomeViewModel(this));
@@ -32,7 +30,7 @@ var AppViewModel = function(browseTo) {
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
   this.showBackButton = ko.computed(function() {
     return !(self.content() instanceof screens.HomeViewModel);
-  })
+  });
 
   this.bugtrackingNagscreenDismissed = ko.computed({
     read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
@@ -137,7 +135,6 @@ AppViewModel.prototype._getCredentials = function(callback) {
 AppViewModel.prototype.watchRepository = function(repositoryPath, callback) {
   this.socket.emit('watch', { path: repositoryPath }, callback);
 };
-
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
@@ -181,14 +178,13 @@ AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
   return data.template;
 };
-AppViewModel.prototype.addVisitedRepository = function(repoPath) {
-  var repos = this.visitedRepositories();
-  var i;
-  while((i = repos.indexOf(repoPath)) != -1)
-    repos.splice(i, 1);
-
-  repos.unshift(repoPath);
-  this.visitedRepositories(repos);
+AppViewModel.prototype.addCurrentPathToRepoList = function() {
+  var repoPath = this.path();
+  var repos = this.repoList();
+  if (repos.indexOf(repoPath) != -1) return;
+  repos.push(repoPath);
+  this.repoList(repos);
+  return true;
 }
 AppViewModel.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);

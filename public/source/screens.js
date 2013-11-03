@@ -5,34 +5,59 @@ var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var addressParser = require('../../source/address-parser');
 var signals = require('signals');
 
-function HomeRepositoryViewModel(app, path) {
-  var self = this;
+function HomeRepositoryViewModel(home, path) {
+  this.home = home;
+  this.app = home.app;
+  this.path = path;
   this.title = path;
   this.link = '/#/repository?path=' + encodeURIComponent(path);
   this.pathRemoved = ko.observable(false);
   this.remote = ko.observable('...');
-  app.get('/fs/exists?path=' + encodeURIComponent(path), undefined, function(err, exists) {
+  this.updateState();
+}
+HomeRepositoryViewModel.prototype.updateState = function() {
+  var self = this;
+  this.app.get('/fs/exists?path=' + encodeURIComponent(this.path), undefined, function(err, exists) {
     self.pathRemoved(!exists);
   });
-  app.get('/remotes/origin?path=' + encodeURIComponent(path), undefined, function(err, remote) {
+  this.app.get('/remotes/origin?path=' + encodeURIComponent(this.path), undefined, function(err, remote) {
     if (err) {
-      self.remote(' ');
+      self.remote('');
       return true;
     }
     self.remote(remote.address);
   });
 }
+HomeRepositoryViewModel.prototype.remove = function() {
+  var repos = this.app.repoList();
+  var i;
+  while((i = repos.indexOf(this.path)) != -1)
+    repos.splice(i, 1);
+  this.app.repoList(repos);
+  this.home.update();
+}
 
 function HomeViewModel(app) {
+  var self = this;
   this.app = app;
-  this.repos = ko.observable();
+  this.repos = ko.observable([]);
+  this.showNux = ko.computed(function() {
+    return self.repos().length == 0;
+  });
 }
 exports.HomeViewModel = HomeViewModel;
 HomeViewModel.prototype.template = 'home';
 HomeViewModel.prototype.shown = function() {
+  this.update();
+}
+HomeViewModel.prototype.update = function() {
   var self = this;
-  this.repos(this.app.visitedRepositories().map(function(path) {
-    return new HomeRepositoryViewModel(self.app, path);
+  var reposByPath = {};
+  this.repos().forEach(function(repo) { reposByPath[repo.path] = repo; });
+  this.repos(this.app.repoList().sort().map(function(path) {
+    if (!reposByPath[path])
+      reposByPath[path] = new HomeRepositoryViewModel(self, path);
+    return reposByPath[path];
   }));
 }
 
@@ -90,7 +115,6 @@ PathViewModel.prototype.updateStatus = function() {
     if (status == 'inited') {
       self.status('repository');
       self.repository(new RepositoryViewModel(self.app, self.path));
-      self.app.addVisitedRepository(self.path);
     } else if (status == 'uninited') {
       self.status('uninited');
     } else if (status == 'no-such-path') {

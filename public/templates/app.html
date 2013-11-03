@@ -8,7 +8,10 @@
 
 	<div class="form-container">
 		<form class="path-input-form" data-bind="submit: submitPath">
-			<input data-ta-input="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path">
+			<input data-ta-input="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path" placeholder="Enter path to repository">
+			<button type="button" class="add-to-repolist btn btn-default" data-bind="visible: showAddToRepoListButton, click: addCurrentPathToRepoList">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
 		</form>
 	</div>
 
