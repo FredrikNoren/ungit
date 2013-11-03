@@ -127,14 +127,8 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
   this.app.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
-    if (err) {
-      if (err.errorCode == 'merge-failed') {
-        callback();
-        return true;
-      }
-      return;
-    }
     callback();
+    if (err && err.errorCode == 'merge-failed') return true;
   });
 }
 
@@ -164,14 +158,8 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 }
 GraphActions.Merge.prototype.perform = function(callback) {
   this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().refName }, function(err) {
-    if (err) {
-      if (err.errorCode == 'merge-failed') {
-        callback();
-        return true;
-      }
-      return;
-    }
     callback();
+    if (err && err.errorCode == 'merge-failed') return true;
   });
 }
 
@@ -206,12 +194,12 @@ GraphActions.Push.prototype.perform = function( callback) {
   var ref = this.graph.currentActionContext();
   var onDone = function(err) {
     self.graph.repository.app.programEvents.remove(programEventListener);
+    callback();
     if (!err) {
       self.graph.loadNodesFromApi();
       if (ref.isTag)
         self.graph.repository.remotes.fetch({ tags: true });
     }
-    callback();
   }
   var remoteRef = ref.getRemoteRef(this.repository.remotes.currentRemote());
   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
@@ -236,11 +224,14 @@ GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var ref = this.graph.currentActionContext();
   this.app.post('/checkout', { path: this.graph.repoPath, name: ref.refName }, function(err) {
-    if (err && err.errorCode != 'merge-failed') return;
+    if (err && err.errorCode != 'merge-failed') {
+      callback();
+      return;
+    }
     if (ref.isRemoteBranch)
       self.app.post('/reset', { path: self.graph.repoPath, to: ref.name, mode: 'hard' }, function(err, res) {
-        if (err && err.errorCode != 'merge-failed') return;
         callback();
+        if (err && err.errorCode != 'merge-failed') return;
         return true;
       });
     else
@@ -291,11 +282,8 @@ GraphActions.CherryPick.prototype.style = 'cherry-pick';
 GraphActions.CherryPick.prototype.perform = function(callback) {
   var self = this;
   this.app.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
-    if (err && err.errorCode == 'merge-failed') {
-      callback();
-      return true;
-    }
-    callback(err);
+    callback();
+    if (err && err.errorCode == 'merge-failed') return true;
   });
 }
 
