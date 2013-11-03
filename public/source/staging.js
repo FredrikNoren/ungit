@@ -232,8 +232,8 @@ LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 
   if (ancestor.showingDiffs()) {
     if (drawProgressBar) ancestor.diffsProgressBar.start();
-      var isTextType = ancestor.type == 'text' ? true : false;
-      ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
+    var isTextType = ancestor.type == 'text' ? true : false;
+    ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
       if (drawProgressBar) ancestor.diffsProgressBar.stop();
       if (err) return;
       var newDiffs = [];
@@ -278,11 +278,11 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
       ancestor.isFirstElementImage(true);
 
       if(ancestor.removed()){
-      	ancestor.secondElement('#');
-      	ancestor.isSecondElementImage(false);
+        ancestor.secondElement('#');
+        ancestor.isSecondElementImage(false);
       } else {
-      	ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
-      	ancestor.isSecondElementImage(true);
+        ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
+        ancestor.isSecondElementImage(true);
       }
     }
     newDiffs.push({
