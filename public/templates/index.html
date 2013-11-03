@@ -10,18 +10,14 @@
 <body>
 
 <script type="text/html" id="home">
-	<div class="container home" data-ta-container="home-page">
-		<p class="text-center">
-			<img src="images/logoLarge.png" class="logo">
-		</p>
-		
-		<div class="panel">
-			<h2>Recent repositories</h2>
-			<div class="list-group" data-bind="foreach: repos">
-				<a class="list-group-item" data-bind="text: title, attr: { href: link }"></a>
-			</div>
+	<div class="container home animated fadeInLeft" data-ta-container="home-page" data-bind="shown: shown">
+		<div class="list-group" data-bind="foreach: repos">
+			<a class="list-group-item repository" data-bind="attr: { href: link }, css: { 'path-removed': pathRemoved }">
+				<span class="glyphicon glyphicon-arrow-right glyphicon-circled"></span>
+				<h4 class="list-group-item-heading" data-bind="text: title">D:\GitHub\ungit</h4>
+				<p class="list-group-item-text" data-bind="text: remote"></p>
+			</a>
 		</div>
-		
 	</div>
 </script>
 

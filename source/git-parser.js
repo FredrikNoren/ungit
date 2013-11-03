@@ -1,7 +1,5 @@
 var moment = require('moment');
 
-var addressParser = require('./address-parser');
-
 exports.parseGitStatus = function(text) {
   var result = {};
   var lines = text.split('\n');
@@ -200,14 +198,4 @@ exports.parseGitLsRemote = function(text) {
     var name = line.slice(41).trim();
     return { sha1: sha1, name: name };
   });
-}
-
-
-
-exports.parseGitRemoteShow = function(text) {
-  var lines = text.split('\n');
-  return {
-    fetch: addressParser.parseAddress(lines[1].slice('  Fetch URL: '.length)),
-    push: addressParser.parseAddress(lines[1].slice('  Push  URL: '.length))
-  };
 }

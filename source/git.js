@@ -7,6 +7,7 @@ var config = require('./config');
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
+var addressParser = require('./address-parser');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
@@ -78,7 +79,7 @@ GitExecutionTask.prototype.parser = function(parser) {
 
 var gitQueue = async.queue(function (task, callback) {
 
-  if (config.logGitCommands) winston.info('git executing: ' + task.command);
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
   var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 40 },
     function (error, stdout, stderr) {
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
@@ -89,6 +90,7 @@ var gitQueue = async.queue(function (task, callback) {
         err.stackAtCall = task.potentialError.stack;
         err.lineAtCall = task.potentialError.lineNumber;
         err.command = task.command;
+        err.workingDirectory = task.repoPath;
         err.error = error.toString();
         err.message = err.error.split('\n')[0];
         err.stderr = stderr;
@@ -166,8 +168,9 @@ git.status = function(repoPath, file) {
   return task;
 }
 
-git.remoteShow = function(repoPath, remoteName) {
-  return git('remote show ' + remoteName, repoPath).parser(gitParser.parseGitRemoteShow);
+git.getRemoteAddress = function(repoPath, remoteName) {
+  return git('config --get remote.' + remoteName + '.url', repoPath)
+    .parser(addressParser.parseAddress);
 }
 
 git.stashAndPop = function(repoPath, wrappedTask) {

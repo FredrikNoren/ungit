@@ -13,6 +13,16 @@ body {
 	padding-top: 105px;
 }
 
+.glyphicon-circled {
+	margin-right: 18px;
+	border: 5px solid #686868;
+	border-radius: 100%;
+	padding-bottom: 4px;
+	padding-top: 6px;
+	padding-right: 7px;
+	padding-left: 7px;
+}
+
 .navbar {
 	padding-top: 23px;
 	z-index: 5;
@@ -28,14 +38,6 @@ body {
 			color: #A5A5A5;
 		}
 		.glyphicon-arrow-left {
-			margin-right: 18px;
-			border: 5px solid #686868;
-			border-radius: 100%;
-			width: 121px;
-			padding-bottom: 4px;
-			padding-top: 6px;
-			padding-right: 7px;
-			padding-left: 7px;
 			-webkit-transition: opacity 0.5s ease-in-out;
 			-moz-transition: opacity 0.5s ease-in-out;
 			transition: opacity 0.5s ease-in-out;
@@ -74,9 +76,24 @@ body {
 }
 
 .home {
-	.logo {
-		margin-top: 60px;
-		margin-bottom: 90px;
+	.repository {
+		position: relative;
+		padding-left: 66px;
+		min-height: 62px;
+		&.path-removed {
+			.list-group-item-heading {
+				color: #CF5353;
+			}
+		}
+		.glyphicon {
+			position: absolute;
+			left: 13px;
+			top: 11px;
+			color: #686868;
+		}
+		&:hover .glyphicon {
+			color: #A5A5A5;
+		}
 	}
 }
 
@@ -224,7 +241,7 @@ body {
 }
 
 
-.repository {
+.repository-view {
 	position: relative;
 	height: auto;
 	margin-bottom: 1px;
@@ -246,7 +263,7 @@ body {
 	}
 }
 
-.repository .graph {
+.repository-view .graph {
 
 	position: relative;
 	margin-top: 30px;

@@ -5,16 +5,36 @@ var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var addressParser = require('../../source/address-parser');
 var signals = require('signals');
 
-function HomeViewModel(app) {
-  this.repos = app.visitedRepositories().map(function(path) {
-    return {
-      title: path,
-      link: '/#/repository?path=' + encodeURIComponent(path)
-    };
+function HomeRepositoryViewModel(app, path) {
+  var self = this;
+  this.title = path;
+  this.link = '/#/repository?path=' + encodeURIComponent(path);
+  this.pathRemoved = ko.observable(false);
+  this.remote = ko.observable('...');
+  app.get('/fs/exists?path=' + encodeURIComponent(path), undefined, function(err, exists) {
+    self.pathRemoved(!exists);
   });
+  app.get('/remotes/origin?path=' + encodeURIComponent(path), undefined, function(err, remote) {
+    if (err) {
+      self.remote(' ');
+      return true;
+    }
+    self.remote(remote.address);
+  });
+}
+
+function HomeViewModel(app) {
+  this.app = app;
+  this.repos = ko.observable();
 }
 exports.HomeViewModel = HomeViewModel;
 HomeViewModel.prototype.template = 'home';
+HomeViewModel.prototype.shown = function() {
+  var self = this;
+  this.repos(this.app.visitedRepositories().map(function(path) {
+    return new HomeRepositoryViewModel(self.app, path);
+  }));
+}
 
 
 var CrashViewModel = function() {
