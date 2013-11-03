@@ -397,6 +397,10 @@ test('Should be possible to force push a branch', function(done) {
 test('Go to home screen', function(done) {
   helpers.click(page, '[data-ta-clickable="home-link"]');
   helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
+    // Clear local storage so that we don't end up with ever growing local storage
+    page.evaluate(function() {
+      localStorage.clear()
+    });
     done();
   });
 });
