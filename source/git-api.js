@@ -18,7 +18,6 @@ var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF'];
 exports.pathPrefix = '';
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
-
 	if (config.dev)
 		temp.track();
 
@@ -209,7 +208,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
 		git.diffFile(req.param('path'), req.param('file'))
 			.always(jsonResultOrFail.bind(null, res));
-        });
+	});
 
 
 	app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -389,7 +388,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 	});
 
 	app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-		git.remoteShow(req.param('path'), req.params.name)
+		git.getRemoteAddress(req.param('path'), req.params.name)
 			.always(jsonResultOrFail.bind(null, res));
 	});
 
@@ -515,13 +514,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin')
+			git.getRemoteAddress(repoPath, 'origin')
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
-					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
+					if (!remote.host) throw new Error("Failed to parse host from: " + remote.address);
 					var command = 'scp -p ';
-					if (remote.fetch.port) command += ' -P ' + remote.fetch.port + ' ';
-					command += remote.fetch.host + ':hooks/commit-msg .git/hooks/';
+					if (remote.port) command += ' -P ' + remote.port + ' ';
+					command += remote.host + ':hooks/commit-msg .git/hooks/';
 					var hooksPath = path.join(repoPath, '.git', 'hooks');
 					if (!fs.existsSync(hooksPath)) fs.mkdirSync(hooksPath);
 					child_process.exec(command, { cwd: repoPath },
@@ -534,12 +533,12 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
 		app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, ensurePathExists, function(req, res) {
 			var repoPath = req.param('path');
-			git.remoteShow(repoPath, 'origin')
+			git.getRemoteAddress(repoPath, 'origin')
 				.fail(jsonFail.bind(null, res))
 				.done(function(remote) {
-					if (!remote.fetch.host) throw new Error("Failed to parse host from: " + remote.fetch.address);
-					var command = 'query --format=JSON --current-patch-set status:open project:' + remote.fetch.project + '';
-					gerrit(remote.fetch, command, res, function(err, result) {
+					if (!remote.host) throw new Error("Failed to parse host from: " + remote.address);
+					var command = 'query --format=JSON --current-patch-set status:open project:' + remote.project + '';
+					gerrit(remote, command, res, function(err, result) {
 						if (err) return;
 						result = result.split('\n').filter(function(r) { return r.trim(); });
 						result = result.map(function(r) { return JSON.parse(r); });
@@ -600,5 +599,4 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 			process.exit();
 		});
 	}
-
 };

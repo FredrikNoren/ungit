@@ -34,10 +34,11 @@
 		-webkit-app-region: no-drag;
 	}
 	#controls a {
-		color: rgba(0, 0, 0, 0.3);
+		color: rgba(255, 255, 255, 0.3);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 	}
 	#controls a:hover {
-		color: rgba(0, 0, 0, 0.7);
+		color: rgba(255, 255, 255, 0.7);
 		text-decoration: none;
 	}
 	</style>
@@ -100,6 +101,10 @@ win.on('unmaximize', function() {
 	document.getElementById('unmaximize-button').style.display = 'none';
 	document.getElementById('maximize-button').style.display = 'inline-block';
 });
+document.addEventListener('keydown', function(event) {
+	if (event.keyIdentifier == 'F12') win.showDevTools();
+});
+require('../source/config').desktopMode = true;
 setTimeout(function() {
 	var s = require('../source/server');
 	s.started.add(function() {

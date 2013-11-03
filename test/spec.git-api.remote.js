@@ -67,8 +67,7 @@ describe('git-api remote', function () {
 	it('remote/origin in cloned-repo should work', function(done) {
 		common.get(req, '/remotes/origin', { path: testDirLocal1 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body.fetch.address).to.be(testDirRemote);
-			expect(res.body.push.address).to.be(testDirRemote);
+			expect(res.body.address).to.be(testDirRemote);
 			done();
 		});
 	});

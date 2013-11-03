@@ -7,6 +7,7 @@ var config = require('./config');
 var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
+var addressParser = require('./address-parser');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
@@ -81,7 +82,7 @@ GitExecutionTask.prototype.setEncoding = function(encoding) {
 }
 
 var gitQueue = async.queue(function (task, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + task.command);
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command + ' ' + task.encoding);
   //TODO Process might need to set proper timeout options as for big image file will take longer to load...
   var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
     function (error, stdout, stderr) {
@@ -93,6 +94,7 @@ var gitQueue = async.queue(function (task, callback) {
         err.stackAtCall = task.potentialError.stack;
         err.lineAtCall = task.potentialError.lineNumber;
         err.command = task.command;
+        err.workingDirectory = task.repoPath;
         err.error = error.toString();
         err.message = err.error.split('\n')[0];
         err.stderr = stderr;
@@ -130,7 +132,7 @@ var gitQueue = async.queue(function (task, callback) {
         task.setResult(null, result);
         callback();
       }
-  });
+    });
 
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
@@ -171,8 +173,11 @@ git.status = function(repoPath, file) {
   return task;
 }
 
-git.remoteShow = function(repoPath, remoteName) {
-  return git('remote show ' + remoteName, repoPath).parser(gitParser.parseGitRemoteShow);
+git.getRemoteAddress = function(repoPath, remoteName) {
+  return git('config --get remote.' + remoteName + '.url', repoPath)
+    .parser(function(text) {
+      return addressParser.parseAddress(text.split('\n')[0]);
+    });
 }
 
 git.stashAndPop = function(repoPath, wrappedTask) {
@@ -211,9 +216,9 @@ git.binaryFileContentAtHead = function(repoPath, filename) {
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function(status) {
-        git('show HEAD:' + filename, repoPath)
-          .setEncoding('binary')
-          .always(task.setResult);
+      git('show HEAD:' + filename, repoPath)
+        .setEncoding('binary')
+        .always(task.setResult);
     });
 
   return task;
@@ -258,7 +263,7 @@ git.discardAllChanges = function(repoPath) {
     .started(task.setStarted)
     .fail(task.setResult)
     .done(function() {
-        git('clean -fd', repoPath).always(task.setResult);
+      git('clean -fd', repoPath).always(task.setResult);
     });
 
   return task;

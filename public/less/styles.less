@@ -10,28 +10,62 @@
 // Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
 
 body {
-	padding-top: 85px;
+	padding-top: 105px;
+}
+
+.glyphicon-circled {
+	margin-right: 18px;
+	border: 5px solid #686868;
+	border-radius: 100%;
+	padding-bottom: 4px;
+	padding-top: 6px;
+	padding-right: 7px;
+	padding-left: 7px;
 }
 
 .navbar {
-	padding-top: 15px;
+	padding-top: 23px;
 	z-index: 5;
 	box-shadow: 0px 15px 15px #252833;
+	height: 83px;
 
-	.navbar-brand {
-		width: 140px;
-		max-width: 140px;
-		position: relative;
-		top: -5px;
+	.backlink {
+		margin-left: 9px;
+		position: absolute;
+		color: #686868;
+		&:hover {
+			text-decoration: none;
+			color: #A5A5A5;
+		}
+		.glyphicon-arrow-left {
+			-webkit-transition: opacity 0.5s ease-in-out;
+			-moz-transition: opacity 0.5s ease-in-out;
+			transition: opacity 0.5s ease-in-out;
+			opacity: 0;
+			&.glyph-shown {
+				opacity: 1;
+			}
+		}
 	}
-	.row {
-		margin-left: 130px;
-		margin-right: 60px;
-		.navbar-form {
+	.form-container {
+		margin-left: 180px;
+		margin-right: 107px;
+		.path-input-form {
 			width: 100%;
+			position: relative;
 			.form-control {
 				font-size: 1.7em;
 				width: 100%;
+			}
+			.add-to-repolist {
+				position: absolute;
+				right: 0px;
+				top: 0px;
+				background: transparent;
+				opacity: 0.3;
+				&:hover {
+					opacity: 0.8;
+				}
 			}
 		}
 	}
@@ -52,14 +86,42 @@ body {
 	}
 }
 
-.path {
-	padding-top: 20px;
-}
-
 .home {
-	.logo {
-		margin-top: 60px;
-		margin-bottom: 90px;
+	.nux {
+		text-align: center;
+		.logo-large {
+			margin-top: 20px;
+			margin-bottom: 50px;
+		}	
+	}
+	.repository {
+		position: relative;
+		padding-left: 66px;
+		min-height: 62px;
+		&.path-removed {
+			.list-group-item-heading {
+				color: #CF5353;
+			}
+		}
+		.glyphicon {
+			position: absolute;
+			left: 13px;
+			top: 11px;
+			color: #686868;
+		}
+		&:hover .glyphicon {
+			color: #A5A5A5;
+		}
+		.remove-repository {
+			position: absolute;
+			right: 0px;
+			top: 0px;
+			background: transparent;
+			opacity: 0.3;
+			&:hover {
+				opacity: 1;
+			}
+		}
 	}
 }
 
@@ -207,7 +269,7 @@ body {
 }
 
 
-.repository {
+.repository-view {
 	position: relative;
 	height: auto;
 	margin-bottom: 1px;
@@ -229,7 +291,7 @@ body {
 	}
 }
 
-.repository .graph {
+.repository-view .graph {
 
 	position: relative;
 	margin-top: 30px;
