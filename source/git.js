@@ -170,7 +170,9 @@ git.status = function(repoPath, file) {
 
 git.getRemoteAddress = function(repoPath, remoteName) {
   return git('config --get remote.' + remoteName + '.url', repoPath)
-    .parser(addressParser.parseAddress);
+    .parser(function(text) {
+      return addressParser.parseAddress(text.split('\n')[0]);
+    });
 }
 
 git.stashAndPop = function(repoPath, wrappedTask) {
