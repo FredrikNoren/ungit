@@ -192,7 +192,12 @@ app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
   })
 });
 
-app.get('/api/fs/listDirectories', function(req, res) {
+
+app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
+  res.json(fs.existsSync(req.param('path')));
+});
+
+app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
   var dir = req.query.term.trim();
   
   readUserConfig(function(err, userconfig) {
