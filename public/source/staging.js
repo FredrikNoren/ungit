@@ -72,21 +72,21 @@ StagingViewModel.prototype.refresh = function() {
   });
 }
 StagingViewModel.prototype.setFiles = function(files) {
-	var self = this;
-	var newFiles = [];
-	for(var file in files) {
-		var fileViewModel = this.filesByPath[file];
-		if (!fileViewModel) {
-			this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
-			fileViewModel.name(file);
-		}
-		fileViewModel.isNew(files[file].isNew);
-		fileViewModel.removed(files[file].removed);
-		fileViewModel.conflict(files[file].conflict);
-		fileViewModel.invalidateDiff();
-		newFiles.push(fileViewModel);
-	}
-	this.files(newFiles);
+  var self = this;
+  var newFiles = [];
+  for(var file in files) {
+    var fileViewModel = this.filesByPath[file];
+    if (!fileViewModel) {
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
+      fileViewModel.name(file);
+    }
+    fileViewModel.isNew(files[file].isNew);
+    fileViewModel.removed(files[file].removed);
+    fileViewModel.conflict(files[file].conflict);
+    fileViewModel.invalidateDiff();
+    newFiles.push(fileViewModel);
+  }
+  this.files(newFiles);
 }
 StagingViewModel.prototype.toogleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
@@ -158,9 +158,9 @@ StagingViewModel.prototype.mergeAbort = function() {
   });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
-	this.files().forEach(function(file) {
-		file.invalidateDiff(false);
-	});
+  this.files().forEach(function(file) {
+    file.invalidateDiff(false);
+  });
 }
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
@@ -179,24 +179,24 @@ StagingViewModel.prototype.toogleAllStages = function() {
 }
 
 var FileViewModel = function(staging, type) {
-	var self = this;
-	this.staging = staging;
-	this.app = staging.app;
-	this.type = type;
-	this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
-	this.templateName = type == 'image' ? 'imageFileDiff' : 'textFileDiff';
-	this.staged = ko.observable(true);
-	this.name = ko.observable();
-	this.isNew = ko.observable(false);
-	this.removed = ko.observable(false);
-	this.conflict = ko.observable(false);
-	this.showingDiffs = ko.observable(false);
-	this.diffs = ko.observable();
-	this.firstElement = ko.observable();
-	this.isFirstElementImage = ko.observable();
-	this.secondElement = ko.observable();
-	this.isSecondElementImage = ko.observable();
-	this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
+  var self = this;
+  this.staging = staging;
+  this.app = staging.app;
+  this.type = type;
+  this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
+  this.templateName = type == 'image' ? 'imageFileDiff' : 'textFileDiff';
+  this.staged = ko.observable(true);
+  this.name = ko.observable();
+  this.isNew = ko.observable(false);
+  this.removed = ko.observable(false);
+  this.conflict = ko.observable(false);
+  this.showingDiffs = ko.observable(false);
+  this.diffs = ko.observable();
+  this.firstElement = ko.observable();
+  this.isFirstElementImage = ko.observable();
+  this.secondElement = ko.observable();
+  this.isSecondElementImage = ko.observable();
+  this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
@@ -211,81 +211,80 @@ FileViewModel.prototype.resolveConflict = function() {
   this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toogleDiffs = function() {
-	var self = this;
-	if (this.showingDiffs()) this.showingDiffs(false);
-	else {
-		this.showingDiffs(true);
-		this.invalidateDiff(true);
-		console.log(3);
-	}
+  var self = this;
+  if (this.showingDiffs()) this.showingDiffs(false);
+  else {
+    this.showingDiffs(true);
+    this.invalidateDiff(true);
+    console.log(3);
+  }
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	if (drawProgressBar || this.type != 'image') this.diff.invalidateDiff(drawProgressBar);
+  if (drawProgressBar || this.type != 'image') this.diff.invalidateDiff(drawProgressBar);
 }
-
 
 var LineByLineDiffViewModel = function(ancestor) {
-	this.ancestor = ancestor;
+  this.ancestor = ancestor;
 }
 LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this;
-	var ancestor = self.ancestor;
+  var self = this;
+  var ancestor = self.ancestor;
 
-	if (ancestor.showingDiffs()) {
-		if (drawProgressBar) ancestor.diffsProgressBar.start();
-		var isTextType = ancestor.type == 'text' ? true : false;
-		ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
-			if (drawProgressBar) ancestor.diffsProgressBar.stop();
-			if (err) return;
-			var newDiffs = [];
-			diffs.forEach(function(diff) {
-				diff.lines.forEach(
-						function(line) {
-							newDiffs.push({
-								oldLineNumber: line[0],
-								newLineNumber: line[1],
-								added: line[2][0] == '+',
-								removed: line[2][0] == '-' || line[2][0] == '\\',
-								text: line[2]
-							});
-						}
-					);
-			});
-			ancestor.diffs(newDiffs);
-		});
-	}
+  if (ancestor.showingDiffs()) {
+    if (drawProgressBar) ancestor.diffsProgressBar.start();
+      var isTextType = ancestor.type == 'text' ? true : false;
+      ancestor.app.get('/diff', { file: ancestor.name(), path: ancestor.staging.repository.repoPath}, function(err, diffs) {
+      if (drawProgressBar) ancestor.diffsProgressBar.stop();
+      if (err) return;
+      var newDiffs = [];
+      diffs.forEach(function(diff) {
+        diff.lines.forEach(
+          function(line) {
+            newDiffs.push({
+              oldLineNumber: line[0],
+              newLineNumber: line[1],
+              added: line[2][0] == '+',
+              removed: line[2][0] == '-' || line[2][0] == '\\',
+              text: line[2]
+            });
+          }
+        );
+      });
+      ancestor.diffs(newDiffs);
+    });
+  }
 }
 
 var ImageDiffViewModel = function(ancestor) {
-	this.ancestor = ancestor;
+  this.ancestor = ancestor;
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-	var self = this;
-	var ancestor = self.ancestor;
+  var self = this;
+  var ancestor = self.ancestor;
 
-	if (ancestor.showingDiffs()) {
-		if (drawProgressBar) ancestor.diffsProgressBar.start();
-		var newDiffs = [];
+  if (ancestor.showingDiffs()) {
+    if (drawProgressBar) ancestor.diffsProgressBar.start();
+    var newDiffs = [];
 
-		if (drawProgressBar) ancestor.diffsProgressBar.stop();
-		
-		if(ancestor.isNew()) {
-			ancestor.firstElement('#');
-			ancestor.isFirstElementImage(false);
-			ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
-			ancestor.isSecondElementImage(true);
-		} else {
-			ancestor.firstElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous'));
-			ancestor.isFirstElementImage(true);
+    if (drawProgressBar) ancestor.diffsProgressBar.stop();
 
-			if(ancestor.removed()){
-				ancestor.secondElement('#');
-				ancestor.isSecondElementImage(false);
-			} else {
-				ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
-				ancestor.isSecondElementImage(true);
-			}
-		}
+    if(ancestor.isNew()) {
+      ancestor.firstElement('#');
+      ancestor.isFirstElementImage(false);
+      ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
+      ancestor.isSecondElementImage(true);
+    } else {
+      ancestor.firstElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous'));
+      ancestor.isFirstElementImage(true);
+
+      if(ancestor.removed()){
+      	ancestor.secondElement('#');
+      	ancestor.isSecondElementImage(false);
+      } else {
+      	ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
+      	ancestor.isSecondElementImage(true);
+      }
+    }
     newDiffs.push({
       firstElement: ancestor.firstElement(),
       isFirstElementImage: ancestor.isFirstElementImage(),
@@ -294,10 +293,10 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
     });
 
     ancestor.diffs(newDiffs);
-	}
+  }
 }
 
 var getImageElement = function(imageFile, repoPath, version) {
-	return '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=' + version;
+  return '/api/diff/image?path=' + encodeURIComponent(repoPath) + '&filename=' + imageFile + '&version=' + version;
 }
  
