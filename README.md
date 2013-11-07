@@ -65,6 +65,11 @@ To get started developing on ungit:
  3. Run `grunt` to build (compile templates, css and js). If you haven't installed grunt already type `npm install -g grunt-cli` first.
  4. Type `npm start` to start ungit, or `npm test` to run tests.
 
+Known issues
+------------
+
+* If you're running MacOSX Mavericks and Ungit crashes after a few seconds; try updating npm and node. See #259 and #249 for details.
+
 License (MIT)
 -------------
 
