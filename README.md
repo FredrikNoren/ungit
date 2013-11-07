@@ -68,7 +68,7 @@ To get started developing on ungit:
 Known issues
 ------------
 
-* If you're running MacOSX Mavericks and Ungit crashes after a few seconds; try updating npm and node. See #259 and #249 for details.
+* If you're running MacOSX Mavericks and Ungit crashes after a few seconds; try updating npm and node. See [#259](https://github.com/FredrikNoren/ungit/issues/259) and [#249](https://github.com/FredrikNoren/ungit/issues/249) for details.
 
 License (MIT)
 -------------
