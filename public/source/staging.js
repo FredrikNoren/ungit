@@ -192,10 +192,6 @@ var FileViewModel = function(staging, type) {
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffs = ko.observable();
-  this.firstElement = ko.observable();
-  this.isFirstElementImage = ko.observable();
-  this.secondElement = ko.observable();
-  this.isSecondElementImage = ko.observable();
   this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
 }
 FileViewModel.prototype.toogleStaged = function() {
@@ -257,6 +253,10 @@ LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 
 var ImageDiffViewModel = function(ancestor) {
   this.ancestor = ancestor;
+  this.firstElement = ko.observable();
+  this.isFirstElementImage = ko.observable();
+  this.secondElement = ko.observable();
+  this.isSecondElementImage = ko.observable();
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   var self = this;
@@ -269,27 +269,27 @@ ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
     if (drawProgressBar) ancestor.diffsProgressBar.stop();
 
     if(ancestor.isNew()) {
-      ancestor.firstElement('#');
-      ancestor.isFirstElementImage(false);
-      ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
-      ancestor.isSecondElementImage(true);
+      this.firstElement('#');
+      this.isFirstElementImage(false);
+      this.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
+      this.isSecondElementImage(true);
     } else {
-      ancestor.firstElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous'));
-      ancestor.isFirstElementImage(true);
+      this.firstElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'previous'));
+      this.isFirstElementImage(true);
 
       if(ancestor.removed()){
-        ancestor.secondElement('#');
-        ancestor.isSecondElementImage(false);
+        this.secondElement('#');
+        this.isSecondElementImage(false);
       } else {
-        ancestor.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
-        ancestor.isSecondElementImage(true);
+        this.secondElement(getImageElement(ancestor.name(), ancestor.staging.repository.repoPath, 'current'));
+        this.isSecondElementImage(true);
       }
     }
     newDiffs.push({
-      firstElement: ancestor.firstElement(),
-      isFirstElementImage: ancestor.isFirstElementImage(),
-      secondElement: ancestor.secondElement(),
-      isSecondElementImage: ancestor.isSecondElementImage()
+      firstElement: this.firstElement(),
+      isFirstElementImage: this.isFirstElementImage(),
+      secondElement: this.secondElement(),
+      isSecondElementImage: this.isSecondElementImage()
     });
 
     ancestor.diffs(newDiffs);
