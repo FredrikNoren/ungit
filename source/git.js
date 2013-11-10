@@ -211,8 +211,6 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 git.binaryFileContentAtHead = function(repoPath, filename) {
   return git('show HEAD:' + filename, repoPath)
         .setEncoding('binary');
-
-  return task;
 }
 
 
