@@ -1,5 +1,5 @@
 
-<table class="fileDiff" data-bind="foreach: $data">
+<table class="fileDiff" data-bind="foreach: diffs">
 	<tr data-bind="css: { fileDiffAdded: added, fileDiffRemoved: removed }">
 		<td class="fileDiffLineNumbers" data-bind="text: oldLineNumber"></td>
 		<td class="fileDiffLineNumbers" data-bind="text: newLineNumber"></td>

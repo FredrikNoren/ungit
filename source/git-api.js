@@ -13,7 +13,7 @@ var os = require('os');
 var socketIO;
 
 exports.pathPrefix = '';
-var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF'];
+var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
@@ -123,21 +123,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     else res.json(result || {});
   }
 
-  var fileResultOrFail = function(res, err, result) {
-    res.type('png');
-    if (err) res.json(400, err); 
-    else res.send(new Buffer(result, 'binary'));
-  }
-
-  var fileType = function(file) {
-    var splited = file.split(".");
-    var ext = splited[splited.length - 1].toUpperCase();
-    if (imageFileTypes.indexOf(ext) > -1) {
-      return 'image';
-    }
-    return 'text';
-  }
-
   function credentialsOption(socketId) {
     var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
     return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + '" ';
@@ -149,7 +134,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       .always(function(err, result) {
         if(result) {
           for(var file in result.files) {
-            result.files[file].type = fileType(file);
+            result.files[file].type = imageFileExtensions.indexOf(path.extname(file).toUpperCase()) != -1 ? 'image' : 'text';
           }
         }
         jsonResultOrFail(res, err, result);
@@ -208,7 +193,11 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
     if (req.query.version == 'previous') {
       git.binaryFileContentAtHead(req.query.path, req.query.filename)
-        .always(fileResultOrFail.bind(null, res));
+        .always(function(err, result) {
+          res.type(path.extname(req.query.filename));
+          if (err) res.json(400, err); 
+          else res.send(new Buffer(result, 'binary'));
+        });
     } else {
       res.sendfile(path.join(req.query.path, req.query.filename));
     }

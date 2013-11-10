@@ -1,14 +1,22 @@
 
-<table class="fileDiff" data-bind="foreach: $data">
-	<tr>
-		<td class="imageDiffContent fileDiffRemoved" data-bind="visible: isFirstElementImage">
-			<img class="diffImage" data-bind="attr:{src: firstElement}" />  
-		</td>
-
-		<td class="imageDiffContent" style="width: 35px;" data-bind="visible: isFirstElementImage && isSecondElementImage"><span class="glyphicon glyphicon-arrow-right"></span>
-
-		<td class="imageDiffContent fileDiffAdded" data-bind="visible: isSecondElementImage">
-			<img class="diffImage" data-bind="attr:{src: secondElement}" />
-		</td>
-	</tr>
-</table>
+<div class="imageDiff">
+<!-- ko if: state() == 'new' -->
+<img data-bind="attr: { src: newImageSrc }" class="img-responsive">
+<!-- /ko -->
+<!-- ko if: state() == 'removed' -->
+<img data-bind="attr: { src: oldImageSrc }" class="img-responsive">
+<!-- /ko -->
+<!-- ko if: state() == 'changed' -->
+<div class="row">
+	<div class="col-lg-5">
+		<img data-bind="attr: { src: oldImageSrc }" class="img-responsive">
+	</div>
+	<div class="col-lg-2">
+		<span class="glyphicon glyphicon-arrow-right"></span>
+	</div>
+	<div class="col-lg-5">
+		<img data-bind="attr: { src: newImageSrc }" class="img-responsive">
+	</div>
+</div>
+<!-- /ko -->
+</div>
