@@ -142,7 +142,8 @@ describe('git-api', function () {
 				isNew: true,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -189,7 +190,8 @@ describe('git-api', function () {
 				isNew: false,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -229,7 +231,8 @@ describe('git-api', function () {
 				isNew: true,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -265,7 +268,8 @@ describe('git-api', function () {
 				isNew: true,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -308,7 +312,8 @@ describe('git-api', function () {
 				isNew: false,
 				staged: false,
 				removed: true,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});

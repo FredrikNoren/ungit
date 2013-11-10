@@ -48,13 +48,15 @@ describe('git-api submodule', function () {
 				isNew: true,
 				staged: true,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			expect(res.body.files['.gitmodules']).to.eql({
 				isNew: true,
 				staged: true,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});
@@ -86,7 +88,8 @@ describe('git-api submodule', function () {
 				isNew: false,
 				staged: false,
 				removed: false,
-				conflict: false
+				conflict: false,
+				type: 'text'
 			});
 			done();
 		});

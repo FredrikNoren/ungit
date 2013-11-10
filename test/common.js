@@ -30,6 +30,20 @@ common.get = function(req, path, payload, callback) {
 		.end(common.wrapErrorHandler(callback));
 }
 
+common.getPng = function(req, path, payload, callback) {
+	var r = req
+		.get(restGit.pathPrefix + path);
+	if (payload) {
+		payload.socketId = 'ignore';
+		r.query(payload);
+	}
+	r
+		.set('Accept', 'application/json')
+		.expect('Content-Type', 'image/png')
+		.expect(200)
+		.end(common.wrapErrorHandler(callback));
+}
+
 common.post = function(req, path, payload, callback) {
 	var r = req
 		.post(restGit.pathPrefix + path);

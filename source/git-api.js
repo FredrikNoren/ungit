@@ -13,6 +13,7 @@ var os = require('os');
 var socketIO;
 
 exports.pathPrefix = '';
+var imageFileTypes = ['PNG', 'JPG', 'BMP', 'GIF'];
 
 exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
@@ -122,16 +123,37 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     else res.json(result || {});
   }
 
+  var fileResultOrFail = function(res, err, result) {
+    res.type('png');
+    if (err) res.json(400, err); 
+    else res.send(new Buffer(result, 'binary'));
+  }
+
+  var fileType = function(file) {
+    var splited = file.split(".");
+    var ext = splited[splited.length - 1].toUpperCase();
+    if (imageFileTypes.indexOf(ext) > -1) {
+      return 'image';
+    }
+    return 'text';
+  }
 
   function credentialsOption(socketId) {
     var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
     return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + '" ';
   }
 
-
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.status(req.param('path'))
-      .always(jsonResultOrFail.bind(null, res));
+    var repoPath = req.param('path');
+    git.status(repoPath)
+      .always(function(err, result) {
+        if(result) {
+          for(var file in result.files) {
+            result.files[file].type = fileType(file);
+          }
+        }
+        jsonResultOrFail(res, err, result);
+      });
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -181,6 +203,15 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
     git.diffFile(req.param('path'), req.param('file'))
       .always(jsonResultOrFail.bind(null, res));
+  });
+
+  app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+    if (req.query.version == 'previous') {
+      git.binaryFileContentAtHead(req.query.path, req.query.filename)
+        .always(fileResultOrFail.bind(null, res));
+    } else {
+      res.sendfile(path.join(req.query.path, req.query.filename));
+    }
   });
 
   app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
@@ -534,6 +565,14 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       var content = req.param('content');
       if (content === undefined) content = ('test content\n' + Math.random() + '\n');
       fs.writeFileSync(req.param('file'), content);
+      res.json({ });
+    });
+    app.post(exports.pathPrefix + '/testing/createimagefile', ensureAuthenticated, function(req, res){
+      fs.writeFile(req.param('file'), 'png', {encoding: 'binary'});
+      res.json({ });
+    });
+    app.post(exports.pathPrefix + '/testing/changeimagefile', ensureAuthenticated, function(req, res){
+      fs.writeFile(req.param('file'), 'png ~~', {encoding: 'binary'});
       res.json({ });
     });
     app.post(exports.pathPrefix + '/testing/removefile', ensureAuthenticated, function(req, res){
