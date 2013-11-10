@@ -235,7 +235,15 @@ LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   var isTextType = self.fileViewModel.type == 'text' ? true : false;
   self.fileViewModel.app.get('/diff', { file: self.fileViewModel.name(), path: self.fileViewModel.staging.repository.repoPath}, function(err, diffs) {
     if (drawProgressBar) self.fileViewModel.diffsProgressBar.stop();
-    if (err) return;
+    if (err) {
+      if (err.errorCode == 'no-such-file') {
+        // The file existed before but has been removed, but we're trying to get a diff for it
+        // Most likely it will just disappear with the next refresh of the staging area
+        // so we just ignore the error here
+        return true;
+      }
+      return;
+    }
     var newDiffs = [];
     diffs.forEach(function(diff) {
       diff.lines.forEach(
