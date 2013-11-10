@@ -309,7 +309,12 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
       }
     });
     this.gitErrors(gitErrors);
-  } 
+  }
+  // Handle not-such-path errors (for instance if the user removes the whole repo directory)
+  else if (err.res.body && err.res.body.errorCode == 'no-such-path') {
+    this.content(new screens.PathViewModel(this, this.path()));
+    return;
+  }
   // Everything else is just thrown
   else {
     throw new Error(err.errorSummary);
