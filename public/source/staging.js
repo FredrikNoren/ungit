@@ -199,7 +199,14 @@ FileViewModel.prototype.discardChanges = function() {
   this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.ignoreFile = function() {
-  this.app.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() });
+  var self = this;
+  this.app.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() }, function(err) {
+    if (err && err.errorCode == 'file-already-git-ignored') {
+      // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
+      self.app.workingTreeChanged();
+      return true;
+    } 
+  });
 }
 FileViewModel.prototype.resolveConflict = function() {
   this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });

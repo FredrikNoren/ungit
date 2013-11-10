@@ -227,7 +227,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       if(arrayOfLines != null){
         for (var n = 0; n < arrayOfLines.length; n++) {
           if (arrayOfLines[n].trim() == ignoreFile) {
-            return res.json(400, { errorCode: 'error-appending-ignore', error: ignoreFile + ' already exist in .gitignore' });
+            return res.json(400, { errorCode: 'file-already-git-ignored', error: ignoreFile + ' already exist in .gitignore' });
           }
         }
       }
