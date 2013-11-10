@@ -6,7 +6,6 @@ var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var semver = require('semver');
-var superagent = require('superagent');
 var async = require('async');
 
 var BugTracker = require('../source/bugtracker');
@@ -76,7 +75,6 @@ function verifyGitVersion(callback) {
   });
 }
 
-var http = require('http');
 function checkIfUngitIsRunning(callback) {
   // Fastest way to find out if a port is used or not/i.e. if ungit is running
   var net = require('net');
