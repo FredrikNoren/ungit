@@ -4,7 +4,8 @@
 @import "generic.less";
 
 // -- Application specific variables ----
-@logWidth: 450px;
+@log-width-small: 250px;
+@log-width-large: 450px;
 
 // -- Application specific layout ----
 // Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
@@ -145,7 +146,7 @@ body {
 
 	.arrowDown {
 		position: absolute;
-		left: (@logWidth + 60px - 15px + 100px);
+		left: (@log-width-small + 45px);
 		bottom: 0px;
 		.arrow {
 			background: url('../images/stagingArrowDown.png');
@@ -203,27 +204,27 @@ body {
 		}
 	}
 
-        .ignore {
-                background: transparent;
-                color: rgba(255, 255, 255, 0.3);
-                border-radius: 3px;
-                padding: 3px;
-                padding-left: 5px;
-                padding-right: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                .explanation {
-                        display: none;
-                }
-                &:hover {
-                        background: #55f;
-                        color: rgba(255, 255, 255, 0.9);
-                        font-weight: normal;
-                        .explanation {
-                                display: inline-block;
-                        }
-                }
-        }
+	.ignore {
+		background: transparent;
+		color: rgba(255, 255, 255, 0.3);
+		border-radius: 3px;
+		padding: 3px;
+		padding-left: 5px;
+		padding-right: 5px;
+		cursor: pointer;
+		font-weight: bold;
+		.explanation {
+			display: none;
+		}
+		&:hover {
+			background: #55f;
+			color: rgba(255, 255, 255, 0.9);
+			font-weight: normal;
+			.explanation {
+				display: inline-block;
+			}
+		}
+	}
 
 
 	.files {
@@ -312,7 +313,7 @@ body {
 		position: relative;
 		display: inline-block;
 		top: -200px;
-		left: (@logWidth + 125px);
+		left: (@log-width-small + 25px);
 	}
 
 	.nodeContainer {
@@ -321,7 +322,6 @@ body {
 		.log {
 			position: absolute;
 			top: -43px;
-			margin-left: 100px;
 			&.highlighted {
 				z-index: 2;
 				.logEntryBox {
@@ -347,7 +347,7 @@ body {
 				
 				padding: 10px;
 				margin-bottom: 0px;
-				width: @logWidth;
+				width: @log-width-small;
 				min-height: 85px;
 				.arrowRight {
 					position: absolute;
@@ -359,6 +359,7 @@ body {
 				}
 
 				.gravatar {
+					display: none;
 					margin-right: 10px;
 				}
 
@@ -376,13 +377,13 @@ body {
 
 		.node {
 			position: absolute;
-			margin-left: (@logWidth + 130px);
+			margin-left: (@log-width-small + 30px);
 			outline: none;
 		}
 
 		.rightSideContainer {
 			position: absolute;
-			margin-left: (@logWidth + 140px);
+			margin-left: (@log-width-small + 40px);
 			top: -21px;
 			width: 900px;
 			height: 40px;
@@ -495,6 +496,7 @@ body {
 	}
 
 	.daySeparators {
+		display: none;
 		position: absolute;
 		top: -15px;
 		left: 0px;
@@ -513,7 +515,7 @@ body {
 		.progressBar {
 			position: relative;
 			top: -150px;
-			margin-left: (@logWidth);
+			margin-left: (@log-width-small);
 		}
 	}
 
@@ -568,6 +570,51 @@ body {
 				background: rgba(11, 26, 51, 1);
 				color: #fff;
 			}
+		}
+	}
+}
+
+@media (min-width: @screen-medium) {
+	.repository-view .graph {
+		.nodeContainer {
+			.log {
+				.logEntryBox {
+					width: @log-width-large;
+					.gravatar {
+						display: block;
+					}
+				}
+			}
+			.rightSideContainer {
+				margin-left: (@log-width-large + 40px);
+			}
+		}
+		.graphLog {
+			left: (@log-width-large + 25px);
+		}
+	}
+	.staging {
+		.arrowDown {
+			left: (@log-width-large + 45px);
+		}
+	}
+}
+
+@media (min-width: @screen-large) {
+	.repository-view .graph {
+		.daySeparators {
+			display: block;
+		}
+		.nodeContainer {
+			margin-left: 100px;
+		}
+		.graphLog {
+			left: (@log-width-large + 125px);
+		}
+	}
+	.staging {
+		.arrowDown {
+			left: (@log-width-large + 145px);
 		}
 	}
 }
