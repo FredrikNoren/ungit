@@ -3,12 +3,6 @@
 	<div class="arrowContainer arrowDown">
 		<div class="arrow"></div>
 	</div>
-	<button class="btn btn-default refresh-button" data-bind="click: refresh">
-		<span class="glyphicon glyphicon-refresh"></span>
-		<!-- ko if: refreshingProgressBar.running -->
-		<!-- ko template: { name: 'progressBar', data: refreshingProgressBar } --><!-- /ko -->
-		<!-- /ko -->
-	</button>
 	<div data-bind="visible: showNux">
 	Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
 	</div>
@@ -55,7 +49,13 @@
 			</button>
 			<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 		</div>
-		<div class="col-lg-9">
+		<div class="col-lg-9 file-area">
+			<button class="btn btn-default refresh-button" data-bind="click: refresh">
+				<span class="glyphicon glyphicon-refresh"></span>
+				<!-- ko if: refreshingProgressBar.running -->
+				<!-- ko template: { name: 'progressBar', data: refreshingProgressBar } --><!-- /ko -->
+				<!-- /ko -->
+			</button>
 			<div class="commands"> 
 				<span data-bind="text: stats"></span>
                 - <a href="#" data-bind="click: toogleAllStages">Toggle all</a>
