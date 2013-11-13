@@ -8,6 +8,7 @@ var winston = require('winston');
 var signals = require('signals');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
+var os = require('os');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
@@ -175,7 +176,7 @@ git.status = function(repoPath, file) {
 git.getRemoteAddress = function(repoPath, remoteName) {
   return git('config --get remote.' + remoteName + '.url', repoPath)
     .parser(function(text) {
-      return addressParser.parseAddress(text.split('\n')[0]);
+      return addressParser.parseAddress(text.split(os.EOL)[0]);
     });
 }
 
@@ -235,7 +236,7 @@ git.diffFile = function(repoPath, filename) {
           var diffs = [];
           var diff = { };
           text = text.toString();
-          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          diff.lines = text.split(os.EOL).map(function(line, i) { return [null, i, '+' + line]; });
           diffs.push(diff);
           task.setResult(null, diffs);
         });
@@ -321,7 +322,7 @@ git.commit = function(repoPath, amend, message, files) {
             git('update-index --add --stdin', repoPath)
               .always(done)
               .started(function(process) {
-                var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+                var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join(os.EOL);
                 process.stdin.end(filesToAdd);
               });
           }
@@ -332,7 +333,7 @@ git.commit = function(repoPath, amend, message, files) {
             git('update-index --remove --stdin', repoPath)
               .always(done)
               .started(function(process) {
-                var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+                var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join(os.EOL);
                 process.stdin.end(filesToRemove);
               });
           }
