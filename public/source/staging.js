@@ -4,6 +4,7 @@ var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var screens = require('./screens');
 var dialogs = require('./dialogs');
 var inherits = require('util').inherits;
+var $ = require('../vendor/js/jquery-2.0.0.min');
 
 var StagingViewModel = function(repository) {
   var self = this;
@@ -169,12 +170,18 @@ StagingViewModel.prototype.discardAllChanges = function() {
   });
   this.app.showDialog(diag);
 }
-StagingViewModel.prototype.toogleAllStages = function() {
+StagingViewModel.prototype.toogleAllStages = function(element) {
   var self = this;
   for (var n in self.files()){
     self.files()[n].staged(self.allStageFlag);
   }
   self.allStageFlag = !self.allStageFlag
+
+  if (self.allStageFlag) {
+    $('#toogleAllStages').removeClass('glyphicon-unchecked').addClass('glyphicon-check');
+  } else {
+    $('#toogleAllStages').removeClass('glyphicon-check').addClass('glyphicon-unchecked');
+  }
 }
 
 var FileViewModel = function(staging, type) {

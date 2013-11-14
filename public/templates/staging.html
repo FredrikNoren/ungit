@@ -58,8 +58,8 @@
 			</button>
 			<div class="commands"> 
 				<span data-bind="text: stats"></span>
-                - <a href="#" data-bind="click: toogleAllStages">Toggle all</a>
-                - <a href="#" data-bind="click: discardAllChanges">Discard all</a>
+                - <span id="toogleAllStages" class="stageIcon glyphicon glyphicon-unchecked" data-bind="click: toogleAllStages" alt="Toggle all stage's check marks."></span>
+                - <span class="stageIcon glyphicon glyphicon-trash" data-bind="click: discardAllChanges" alt="Discard all changes."></span>
 			</div>
 			<div class="files" data-bind="foreach: files">
 				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
