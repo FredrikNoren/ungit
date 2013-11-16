@@ -1,9 +1,8 @@
 var moment = require('moment');
-var os = require('os');
 
 exports.parseGitStatus = function(text) {
   var result = {};
-  var lines = text.split(os.EOL);
+  var lines = text.split('\n');
   result.branch = lines[0].split(' ').pop();
   result.inited = true;
   result.files = {};
@@ -25,7 +24,7 @@ exports.parseGitStatus = function(text) {
 
 exports.parseGitDiff = function(text) {
 
-  var lines = text.split(os.EOL);
+  var lines = text.split("\n");
   var diffs = [];
 
   while(lines.length && lines[0]) {
@@ -150,7 +149,7 @@ exports.parseGitLog = function(data) {
     currentCommmit.message += row.trim();
   }
   var parser = parseCommitLine;
-  var rows = data.split(os.EOL);
+  var rows = data.split('\n');
   rows.forEach(function(row, index) {
     parser(row, index);
   });
@@ -161,7 +160,7 @@ exports.parseGitLog = function(data) {
 
 exports.parseGitConfig = function(text) {
   var conf = {};
-  text.split(os.EOL).forEach(function(row) {
+  text.split('\n').forEach(function(row) {
     var ss = row.split('=');
     conf[ss[0]] = ss[1];
   });
@@ -170,7 +169,7 @@ exports.parseGitConfig = function(text) {
 
 exports.parseGitBranches = function(text) {
   var branches = [];
-  text.split(os.EOL).forEach(function(row) {
+  text.split('\n').forEach(function(row) {
     if (row.trim() == '') return;
     var branch = { name: row.slice(2) };
     if(row[0] == '*') branch.current = true;
@@ -180,19 +179,19 @@ exports.parseGitBranches = function(text) {
 }
 
 exports.parseGitTags = function(text) {
-  return text.split(os.EOL).filter(function(tag) {
+  return text.split('\n').filter(function(tag) {
     return tag != '';
   });
 }
 
 exports.parseGitRemotes = function(text) {
-  return text.split(os.EOL).filter(function(remote) {
+  return text.split('\n').filter(function(remote) {
     return remote != '';
   });
 }
 
 exports.parseGitLsRemote = function(text) {
-  return text.split(os.EOL).filter(function(item) {
+  return text.split('\n').filter(function(item) {
     return item && item.indexOf('From ') != 0;
   }).map(function(line) {
     var sha1 = line.slice(0, 40);

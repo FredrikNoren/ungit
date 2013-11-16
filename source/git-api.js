@@ -223,7 +223,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
     fs.readFile(gitIgnoreFile, function(err, data) { 
 
-      var arrayOfLines = data.toString().split(os.EOL);
+      var arrayOfLines = data.toString().match(/[^\r\n]+/g);
       if(arrayOfLines != null){
         for (var n = 0; n < arrayOfLines.length; n++) {
           if (arrayOfLines[n].trim() == ignoreFile) {
@@ -358,7 +358,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
       if (err) res.json(400, err);
       text = text.toString();
-      var rows = text.split(os.EOL);
+      var rows = text.split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
       res.json(branch);
     });
@@ -523,7 +523,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
           var command = 'query --format=JSON --current-patch-set status:open project:' + remote.project + '';
           gerrit(remote, command, res, function(err, result) {
             if (err) return;
-            result = result.split(os.EOL).filter(function(r) { return r.trim(); });
+            result = result.split('\n').filter(function(r) { return r.trim(); });
             result = result.map(function(r) { return JSON.parse(r); });
             res.json(result);
           });
