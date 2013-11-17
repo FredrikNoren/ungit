@@ -97,10 +97,49 @@ exports.parseGitDiff = function(text) {
   return diffs;
 }
 
+var authorRegexp = /([^<]+)<([^>]+)>/;
+var gitLogHeaders = {
+  'Author': function(currentCommmit, author) {
+    var capture = authorRegexp.exec(author);
+    if (capture) {
+      currentCommmit.authorName = capture[1].trim();
+      currentCommmit.authorEmail = capture[2].trim();
+    } else {
+      currentCommmit.authorName = author;
+    }
+  },
+  'Commit': function(currentCommmit, author) {
+    var capture = authorRegexp.exec(author);
+    if (capture) {
+      currentCommmit.committerName = capture[1].trim();
+      currentCommmit.committerEmail = capture[2].trim();
+    } else {
+      currentCommmit.committerName = author;
+    }
+  },
+  'AuthorDate': function(currentCommmit, date) {
+    currentCommmit.authorDate = date;
+  },
+  'CommitDate': function(currentCommmit, date) {
+    currentCommmit.commitDate = date;
+  },
+  'Reflog': function(currentCommmit, data) {
+    currentCommmit.reflogName = data.substring(0, data.indexOf(' '));
+    var author = data.substring(data.indexOf(' ') + 2, data.length - 1);
+    var capture = authorRegexp.exec(author);
+    if (capture) {
+      currentCommmit.reflogAuthorName = capture[1].trim();
+      currentCommmit.reflogAuthorEmail = capture[2].trim();
+    } else {
+      currentCommmit.reflogAuthorName = author;
+    }
+  },
+};
 exports.parseGitLog = function(data) {
   var commits = [];
   var currentCommmit;
   var parseCommitLine = function(row) {
+    if (!row.trim()) return;
     currentCommmit = { refs: [] };
     var ss = row.split('(');
     var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
@@ -114,29 +153,15 @@ exports.parseGitLog = function(data) {
     parser = parseHeaderLine;
   }
   var parseHeaderLine = function(row) {
-    var author, capture;
-    if (row.indexOf('Author: ') == 0) {
-      author = row.split(' ').slice(1).join(' ');
-      capture = (/([^<]+)<([^>]+)>/g).exec(author);
-      if (capture) {
-        currentCommmit.authorName = capture[1].trim();
-        currentCommmit.authorEmail = capture[2].trim();
-      } else {
-        currentCommmit.authorName = author;
-      }
-    } else if (row.indexOf('Commit: ') == 0) {
-      author = row.split(' ').slice(1).join(' ');
-      capture = (/([^<]+)<([^>]+)>/g).exec(author);
-      currentCommmit.committerName = capture[1].trim();
-      currentCommmit.committerEmail = capture[2].trim();
-    } else if (row.indexOf('AuthorDate: ') == 0) {
-      currentCommmit.authorDate = row.slice('AuthorDate: '.length).trim();
-    } else if (row.indexOf('CommitDate: ') == 0) {
-      currentCommmit.commitDate = row.slice('CommitDate: '.length).trim();
-    } else if (row.trim() == '') {
+    if (row.trim() == '') {
       parser = parseCommitMessage;
     } else {
-      // Ignore other headers
+      for (var key in gitLogHeaders) {
+        if (row.indexOf(key + ': ') == 0) {
+          gitLogHeaders[key](currentCommmit, row.slice((key + ': ').length).trim());
+          return;
+        }
+      }
     }
   }
   var parseCommitMessage = function(row, index) {
@@ -197,5 +222,17 @@ exports.parseGitLsRemote = function(text) {
     var sha1 = line.slice(0, 40);
     var name = line.slice(41).trim();
     return { sha1: sha1, name: name };
+  });
+}
+
+exports.parseGitStashShow = function(text) {
+  var lines = text.split('\n').filter(function(item) {
+    return item;
+  });
+  return lines.slice(0, lines.length - 1).map(function(line) {
+    var split = line.indexOf('|');
+    return {
+      filename: line.substring(0, split).trim()
+    }
   });
 }

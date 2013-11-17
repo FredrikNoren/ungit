@@ -60,6 +60,7 @@
 				<span data-bind="text: stats"></span>
                 - <a href="#" data-bind="click: toogleAllStages">Toggle all</a>
                 - <a href="#" data-bind="click: discardAllChanges">Discard all</a>
+                - <a href="#" data-bind="click: stashAll, css: { disabled: !canStashAll() }">Stash all</a>
 			</div>
 			<div class="files" data-bind="foreach: files">
 				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">

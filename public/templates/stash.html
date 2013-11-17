@@ -1,0 +1,10 @@
+
+<div class="panel stash">
+  <h4>Stashed changes</h4>
+  <div class="list-group" data-bind="foreach: stashedChanges">
+    <div class="list-group-item">
+      <a href="#" data-bind="text: title, click: pop"></a>
+      <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop">&#x2716;</button>
+    </div>
+  </div>
+</div>

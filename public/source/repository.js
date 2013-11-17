@@ -7,6 +7,7 @@ var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
 var StagingViewModel = require('./staging').StagingViewModel;
 var dialogs = require('./dialogs');
 var _ = require('lodash');
+var StashViewModel = require('./stash');
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
@@ -20,6 +21,7 @@ var RepositoryViewModel = function(app, repoPath) {
   this.gerritIntegration = ko.observable(null);
   this.graph = new GitGraphViewModel(this);
   this.remotes = new RemotesViewModel(this);
+  this.stash = new StashViewModel(this);
   this.staging = new StagingViewModel(this);
   this.watcherReady = ko.observable(false);
   this.showLog = ko.computed(function() {
@@ -39,6 +41,7 @@ RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
   this.staging.invalidateFilesDiffs();
 }
 RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
+  this.stash.refresh();
   this.graph.loadNodesFromApi();
   this.graph.updateBranches();
   this.remotes.updateRemotes();

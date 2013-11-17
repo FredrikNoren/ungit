@@ -84,6 +84,14 @@
 	border: 0px;
 	margin-bottom: 3px;
 }
+div.list-group-item {
+	&:hover {
+		background: @list-group-hover-bg;
+	}
+	a:hover {
+		text-decoration: none;
+	}
+}
 
 // -- New generic classes ----
 
@@ -100,6 +108,11 @@ hr {
 	height: 0px;
 }
 
+a.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
 .checkmark {
 	color: #fff;
 	display: inline-block;
@@ -110,6 +123,16 @@ hr {
 	}
 }
 
+.list-group-item .list-item-remove {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	background: transparent;
+	opacity: 0.3;
+	&:hover {
+		opacity: 1;
+	}
+}
 
 .arrowContainer {
 	position: relative;
