@@ -283,7 +283,7 @@ AppContainerViewModel.prototype.templateChooser = function(data) {
 
 
 var appContainer = new AppContainerViewModel();
-var app = new AppViewModel(browseTo);
+var app = new AppViewModel(appContainer, browseTo);
 app.connectionState.subscribe(function(value) {
   if (value == 'disconnected') appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
 })
