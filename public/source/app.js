@@ -9,8 +9,9 @@ var superagent = require('../vendor/js/superagent');
 var async = require('async');
 
 
-var AppViewModel = function(browseTo) {
+var AppViewModel = function(appContainer, browseTo) {
   var self = this;
+  this.appContainer = appContainer;
   this.browseTo = browseTo;
   this.path = ko.observable();
   this.dialog = ko.observable(null);
@@ -206,6 +207,7 @@ AppViewModel.prototype.query = function(method, path, body, callback) {
     self.gitDirectoryChanged.block();
   }
   q.set('Accept', 'application/json');
+  var precreatedError = new Error(); // Capture stack-trace
   q.end(function(error, res) {
     if (method != 'GET') {
       self.workingTreeChanged.unblock();
@@ -228,7 +230,7 @@ AppViewModel.prototype.query = function(method, path, body, callback) {
       }
       var err = { errorSummary: errorSummary, error: error, path: path, res: res, errorCode: res && res.body ? res.body.errorCode : 'unknown' };
       if (callback && callback(err)) return;
-      else self._onUnhandledBadBackendResponse(err);
+      else self._onUnhandledBadBackendResponse(err, precreatedError);
     }
     else if (callback)
       callback(null, res.body);
@@ -253,7 +255,7 @@ AppViewModel.prototype._backendErrorCodeToTip = {
   'ssh-bad-file-number': 'Got "Bad file number" error. This usually indicates that the port listed for the remote repository can\'t be reached.',
   'non-fast-forward': 'Couldn\'t push, things have changed on the server. Try fetching new nodes.'
 };
-AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
+AppViewModel.prototype._onUnhandledBadBackendResponse = function(err, precreatedError) {
   var self = this;
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res.body && err.res.body.isGitError) {
@@ -310,13 +312,12 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err) {
     });
     this.gitErrors(gitErrors);
   }
-  // Handle not-such-path errors (for instance if the user removes the whole repo directory)
-  else if (err.res.body && err.res.body.errorCode == 'no-such-path') {
-    this.content(new screens.PathViewModel(this, this.path()));
-    return;
-  }
-  // Everything else is just thrown
+  // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
   else {
-    throw new Error(err.errorSummary);
+    precreatedError.message = 'Backend error: ' + err.errorSummary;
+    console.error(err.errorSummary);
+    console.log(precreatedError.stack);
+    Raven.captureException(precreatedError);
+    this.appContainer.content(new screens.CrashViewModel());
   }
 }
