@@ -481,12 +481,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       .always(emitWorkingTreeChanged.bind(null, req.param('path')));
   });
 
-  app.get(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('stash show stash@{' + req.param('id') + '}' , req.param('path'))
-      .parser(gitParser.parseGitStashShow)
-      .always(jsonResultOrFail.bind(null, res));
-  });
-
   app.del(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
     var type = 'drop';
     if (req.query.pop === 'true') type = 'pop';
