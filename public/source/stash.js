@@ -1,6 +1,7 @@
 
 var ko = require('../vendor/js/knockout-2.2.1');
 var moment = require('moment');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 
 function StashItemViewModel(stash, data) {
   this.stash = stash;
@@ -8,12 +9,21 @@ function StashItemViewModel(stash, data) {
   this.id = data.id;
   this.title = data.name + ' ' + moment(data.date).fromNow();
   this.body = data.title;
+  this.stashPopProgressBar = new ProgressBarViewModel('stash-pop');
 }
 StashItemViewModel.prototype.pop = function() {
-  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath, pop: true });
+  var self = this;
+  this.stashPopProgressBar.start();
+  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath, pop: true }, function(err, res) {
+    self.stashPopProgressBar.stop();
+  });
 }
 StashItemViewModel.prototype.drop = function() {
-  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath });
+  var self = this;
+  this.stashPopProgressBar.start();
+  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath }, function(err, res) {
+    self.stashPopProgressBar.stop();
+  });
 }
 
 function StashViewModel(repository) {

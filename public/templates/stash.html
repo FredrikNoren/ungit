@@ -9,6 +9,9 @@
         <p class="list-group-item-text" data-bind="text: body"></p>
       </a>
       <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop">&#x2716;</button>
+      <!-- ko if: stashPopProgressBar.running -->
+      <!-- ko template: { name: 'progressBar', data: stashPopProgressBar } --><!-- /ko -->
+      <!-- /ko -->
     </div>
   </div>
 </div>

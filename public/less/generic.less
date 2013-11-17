@@ -47,8 +47,19 @@
 
 .btn {
 	border: 0px;
+	.glyphicon {
+		font-size: 0.8em;
+		margin-right: 0.1em;
+	}
+	&.btn-large {
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+}
+
+.btn, .list-group-item {
 	position: relative;
-	.progress {
+	& > .progress {
 		position: absolute;
 		left: 0px;
 		top: 0px;
@@ -59,14 +70,6 @@
 		.progress-bar {
 			pointer-events:none;
 		}
-	}
-	.glyphicon {
-		font-size: 0.8em;
-		margin-right: 0.1em;
-	}
-	&.btn-large {
-		padding-top: 10px;
-		padding-bottom: 10px;
 	}
 }
 
