@@ -4,7 +4,6 @@ var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var screens = require('./screens');
 var dialogs = require('./dialogs');
 var inherits = require('util').inherits;
-var $ = require('../vendor/js/jquery-2.0.0.min');
 
 var StagingViewModel = function(repository) {
   var self = this;
@@ -53,6 +52,7 @@ var StagingViewModel = function(repository) {
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
     return "";
   });
+  this.glyphClass = ko.observable('glyphicon-unchecked');
 }
 exports.StagingViewModel = StagingViewModel;
 StagingViewModel.prototype.refresh = function() {
@@ -155,7 +155,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   this.mergeAbortProgressBar.start();
   this.app.post('/merge/abort', { path: this.repository.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
-  });
+  }); 
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -170,18 +170,18 @@ StagingViewModel.prototype.discardAllChanges = function() {
   });
   this.app.showDialog(diag);
 }
-StagingViewModel.prototype.toogleAllStages = function(element) {
+StagingViewModel.prototype.toogleAllStages = function() {
   var self = this;
   for (var n in self.files()){
     self.files()[n].staged(self.allStageFlag);
   }
-  self.allStageFlag = !self.allStageFlag
 
-  if (self.allStageFlag) {
-    $('#toogleAllStages').removeClass('glyphicon-unchecked').addClass('glyphicon-check');
+  if (self.glyphClass() == 'glyphicon-unchecked') {
+    self.glyphClass('glyphicon-check');
   } else {
-    $('#toogleAllStages').removeClass('glyphicon-check').addClass('glyphicon-unchecked');
+    self.glyphClass('glyphicon-unchecked');
   }
+  self.allStageFlag = !self.allStageFlag;
 }
 
 var FileViewModel = function(staging, type) {
