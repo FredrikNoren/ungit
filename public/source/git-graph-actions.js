@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1.js');
+var ko = require('knockout');
 var inherits = require('util').inherits;
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;

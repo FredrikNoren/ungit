@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var signals = require('signals');
 var inherits = require('util').inherits;
 

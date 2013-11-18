@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var addressParser = require('../../source/address-parser');

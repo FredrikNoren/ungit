@@ -1,6 +1,6 @@
 // Used for devStyling.html (development styling file)
 
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;

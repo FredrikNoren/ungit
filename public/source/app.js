@@ -1,6 +1,6 @@
 
 var signals = require('signals');
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');

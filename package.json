@@ -42,7 +42,8 @@
     "keen.io": "0.0.3",
     "getmac": "~1.0.6",
     "deep-extend": "~0.2.6",
-    "raven": "~0.6.0"
+    "raven": "~0.6.0",
+    "knockout": "~3.0.0"
   },
   "devDependencies": {
     "mocha": "~1.14.0",

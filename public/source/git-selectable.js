@@ -1,4 +1,4 @@
-var ko = require('../vendor/js/knockout-2.2.1.js');
+var ko = require('knockout');
 var _ = require('lodash');
 
 var Selectable = function(graph) {
