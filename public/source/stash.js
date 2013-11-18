@@ -36,6 +36,7 @@ function StashViewModel(repository) {
 StashViewModel.prototype.refresh = function() {
   var self = this;
   this.app.get('/stashes', { path: this.repository.repoPath }, function(err, stashes) {
+    if (err) return;
     self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
   });
 }
