@@ -16,7 +16,7 @@ var StagingViewModel = function(repository) {
   this.commitMessageBody = ko.observable();
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
-  this.allStageFlag = false;
+  this.allStageFlag = ko.observable(false);
   this.commitButtonVisible = ko.computed(function() {
     return !self.inRebase() && !self.inMerge();
   });
@@ -55,7 +55,10 @@ var StagingViewModel = function(repository) {
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
     return "";
   });
-  this.glyphClass = ko.observable('glyphicon-unchecked');
+  this.toggleSelectAllGlyphClass = ko.computed(function() {
+    if (self.allStageFlag()) return 'glyphicon-unchecked';
+    else return 'glyphicon-check';
+  });
 }
 exports.StagingViewModel = StagingViewModel;
 StagingViewModel.prototype.refresh = function() {
@@ -180,15 +183,10 @@ StagingViewModel.prototype.stashAll = function() {
 StagingViewModel.prototype.toogleAllStages = function() {
   var self = this;
   for (var n in self.files()){
-    self.files()[n].staged(self.allStageFlag);
+    self.files()[n].staged(self.allStageFlag());
   }
 
-  if (self.glyphClass() == 'glyphicon-unchecked') {
-    self.glyphClass('glyphicon-check');
-  } else {
-    self.glyphClass('glyphicon-unchecked');
-  }
-  self.allStageFlag = !self.allStageFlag;
+  self.allStageFlag(!self.allStageFlag());
 }
 
 var FileViewModel = function(staging, type) {
