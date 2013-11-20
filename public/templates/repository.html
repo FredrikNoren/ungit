@@ -6,6 +6,8 @@
 
 	<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
 
+		<!-- ko template: { if: stash.visible, name: 'stash', data: stash } --><!-- /ko -->
+
 		<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
 
 		<!-- ko if: staging.inRebase -->

@@ -97,7 +97,6 @@ body {
 	}
 	.repository {
 		position: relative;
-		padding-left: 66px;
 		min-height: 62px;
 		&.path-removed {
 			.list-group-item-heading {
@@ -105,23 +104,10 @@ body {
 			}
 		}
 		.glyphicon {
-			position: absolute;
-			left: 13px;
-			top: 11px;
 			color: #686868;
 		}
 		&:hover .glyphicon {
 			color: #A5A5A5;
-		}
-		.remove-repository {
-			position: absolute;
-			right: 0px;
-			top: 0px;
-			background: transparent;
-			opacity: 0.3;
-			&:hover {
-				opacity: 1;
-			}
 		}
 	}
 }
@@ -138,8 +124,18 @@ body {
 }
 
 // -- Application specific styling ----
+.stash {
+	z-index: 4;
+	position: relative;
+	margin-left: 20px;
+	margin-right: 20px;
+	top: 30px;
+	background: #55323C;
+}
+
 .staging {
 	background: #643A44;
+	box-shadow: 0px -1px 15px #252833;
 	color: #B8A5A5;
 	z-index: 5;
 	position: relative;

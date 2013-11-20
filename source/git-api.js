@@ -456,6 +456,39 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     })
   });
 
+  app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('stash list --decorate=full --pretty=fuller', req.param('path'))
+      .parser(gitParser.parseGitLog)
+      .always(function(err, items) {
+        if (err) return res.json(400, err);
+        res.json(items.map(function(item, index) {
+          return {
+            id: index,
+            name: item.reflogName.slice('refs/'.length),
+            title: item.message,
+            date: item.commitDate
+          }
+        }));
+      });
+  });
+
+  app.post(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
+    var message = '';
+    if (req.param('message')) message = req.param('message');
+    git('stash save --include-untracked ' + message, req.param('path'))
+      .always(jsonResultOrFail.bind(null, res))
+      .always(emitGitDirectoryChanged.bind(null, req.param('path')))
+      .always(emitWorkingTreeChanged.bind(null, req.param('path')));
+  });
+
+  app.del(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
+    var type = 'drop';
+    if (req.query.pop === 'true') type = 'pop';
+    git('stash ' + type +' stash@{' + req.param('id') + '}' , req.param('path'))
+      .always(jsonResultOrFail.bind(null, res))
+      .always(emitGitDirectoryChanged.bind(null, req.param('path')));
+  });
+
   app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
     git('config --list')
       .parser(gitParser.parseGitConfig)

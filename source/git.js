@@ -289,14 +289,8 @@ git.discardChangesInFile = function(repoPath, filename) {
   return task;
 }
 
-git.commit = function(repoPath, amend, message, files) {
+git.updateIndexFromFileList = function(repoPath, files) {
   var task = new GitTask();
-
-  if (message === undefined)
-    return task.setResult({ error: 'Must specify commit message' });
-
-  if ((!(files instanceof Array) || files.length == 0) && !amend)
-    return task.setResult({ error: 'Must specify files or amend to commit' });
 
   git.status(repoPath)
     .fail(task.setResult)
@@ -339,13 +333,31 @@ git.commit = function(repoPath, amend, message, files) {
         }
       ], function(err) {
         if (err) return task.setResult(err);
-        git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
-          .always(task.setResult)
-          .started(function(process) {
-            process.stdin.end(message);
-          });
+        task.setResult();
       });
 
+    });
+
+  return task;
+}
+
+git.commit = function(repoPath, amend, message, files) {
+  var task = new GitTask();
+
+  if (message === undefined)
+    return task.setResult({ error: 'Must specify commit message' });
+
+  if ((!(files instanceof Array) || files.length == 0) && !amend)
+    return task.setResult({ error: 'Must specify files or amend to commit' });
+
+  git.updateIndexFromFileList(repoPath, files)
+    .fail(task.setResult)
+    .done(function() {
+      git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
+        .always(task.setResult)
+        .started(function(process) {
+          process.stdin.end(message);
+        });
     });
 
   return task;

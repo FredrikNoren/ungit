@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1.js');
+var ko = require('knockout');
 
 var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime) {
   var self = this;

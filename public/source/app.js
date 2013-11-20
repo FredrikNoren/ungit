@@ -1,6 +1,6 @@
 
 var signals = require('signals');
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var dialogs = require('./dialogs');
 var screens = require('./screens');
 var blockable = require('../../source/utils/blockable');
@@ -259,13 +259,6 @@ AppViewModel.prototype._onUnhandledBadBackendResponse = function(err, precreated
   var self = this;
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res.body && err.res.body.isGitError) {
-
-    // Handle not-a-repository errors (for instance if the user removes the .git directory)
-    if (err.res.body.errorCode == 'not-a-repository') {
-      this.content(new screens.PathViewModel(this, this.path()));
-      return;
-    }
-
 
     // Skip report is used for "user errors"; i.e. it's something ungit can't really do anything about.
     // It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways

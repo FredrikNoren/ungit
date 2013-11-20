@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1.js');
+var ko = require('knockout');
 var dialogs = require('./dialogs');
 var md5 = require('blueimp-md5').md5;
 var Selectable = require('./git-selectable').Selectable;

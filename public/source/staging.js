@@ -1,5 +1,5 @@
 
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var screens = require('./screens');
 var dialogs = require('./dialogs');
@@ -32,6 +32,9 @@ var StagingViewModel = function(repository) {
   this.amend = ko.observable(false);
   this.canAmend = ko.computed(function() {
     return self.repository.graph.HEAD() && !self.inRebase() && !self.inMerge();
+  });
+  this.canStashAll = ko.computed(function() {
+    return !self.amend();
   });
   this.showNux = ko.computed(function() {
     return self.files().length == 0 && !self.amend();
@@ -169,6 +172,10 @@ StagingViewModel.prototype.discardAllChanges = function() {
     if (diag.result()) self.app.post('/discardchanges', { path: self.repository.repoPath, all: true });
   });
   this.app.showDialog(diag);
+}
+StagingViewModel.prototype.stashAll = function() {
+  var self = this;
+  this.app.post('/stashes', { path: this.repository.repoPath, message: this.commitMessageTitle() });
 }
 StagingViewModel.prototype.toogleAllStages = function() {
   var self = this;

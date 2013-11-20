@@ -1,6 +1,6 @@
 
 var _ = require('lodash');
-var ko = require('../vendor/js/knockout-2.2.1');
+var ko = require('knockout');
 var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
