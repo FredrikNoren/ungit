@@ -60,7 +60,7 @@
 				<span data-bind="text: stats"></span>
                 - <span id="toogleAllStages" class="stageIcon glyphicon" data-bind="click: toogleAllStages, css: glyphClass">&nbsp;Toggle all</span>
                 - <span class="stageIcon glyphicon glyphicon-trash" data-bind="click: discardAllChanges">&nbsp;Discard all</span>
-                - <a href="#" data-bind="click: stashAll, css: { disabled: !canStashAll() }">Stash all</a>
+                - <span class="stageIcon glyphicon glyphicon-paperclip" data-bind="click: stashAll, css: { disabled: !canStashAll() }">&nbsp;Stash all</span>
 
 			</div>
 			<div class="files" data-bind="foreach: files">
