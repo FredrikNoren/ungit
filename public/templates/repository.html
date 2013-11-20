@@ -86,9 +86,7 @@
 						<span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
 							<span data-bind="text: text"></span>
 							<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
-							<!-- ko if: performProgressBar.running -->
-							<!-- ko template: { name: 'progressBar', data: performProgressBar } --><!-- /ko -->
-							<!-- /ko -->
+							<!-- ko template: { name: 'temporaryProgressBar', data: performProgressBar } --><!-- /ko -->
 						</span>
 						
 						<!-- /ko -->

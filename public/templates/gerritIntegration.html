@@ -5,18 +5,14 @@
 	<p>
 		<button class="btn btn-primary" data-bind="visible: showInitCommmitHook, click: initCommitHook">
 			Init commit hook
-			<!-- ko if: initGerritHookProgressBar.running -->
-			<!-- ko template: { name: 'progressBar', data: initGerritHookProgressBar } --><!-- /ko -->
-			<!-- /ko -->
+			<!-- ko template: { name: 'temporaryProgressBar', data: initGerritHookProgressBar } --><!-- /ko -->
 		</button>
 	</p>
 
 	<p>
 		<button class="btn btn-primary" data-bind="click: pushForReview">
 			Push changes for review
-			<!-- ko if: pushingProgressBar.running -->
-			<!-- ko template: { name: 'progressBar', data: pushingProgressBar } --><!-- /ko -->
-			<!-- /ko -->
+			<!-- ko template: { name: 'temporaryProgressBar', data: pushingProgressBar } --><!-- /ko -->
 		</button>
 	</p>
 
@@ -34,15 +30,11 @@
 					<h4><a href="#" data-bind="text: subject, attr: { href: gerritUrl }" target="_blank"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
 					<button class="btn btn-primary" data-bind="click: checkout">
 						Checkout
-						<!-- ko if: checkingOutProgressBar.running -->
-						<!-- ko template: { name: 'progressBar', data: checkingOutProgressBar } --><!-- /ko -->
-						<!-- /ko -->
+						<!-- ko template: { name: 'temporaryProgressBar', data: checkingOutProgressBar } --><!-- /ko -->
 					</button>
 					<button class="btn btn-default" data-bind="click: cherryPick">
 						Cherry pick
-						<!-- ko if: cherryPickingProgressBar.running -->
-						<!-- ko template: { name: 'progressBar', data: cherryPickingProgressBar } --><!-- /ko -->
-						<!-- /ko -->
+						<!-- ko template: { name: 'temporaryProgressBar', data: cherryPickingProgressBar } --><!-- /ko -->
 					</button>
 				</p>
 			</div>
