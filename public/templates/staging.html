@@ -58,9 +58,10 @@
 			</button>
 			<div class="commands"> 
 				<span data-bind="text: stats"></span>
-                - <a href="#" data-bind="click: toogleAllStages">Toggle all</a>
-                - <a href="#" data-bind="click: discardAllChanges">Discard all</a>
-                - <a href="#" data-bind="click: stashAll, css: { disabled: !canStashAll() }">Stash all</a>
+                - <span id="toogleAllStages" class="stageIcon glyphicon" data-bind="click: toogleAllStages, css: glyphClass">&nbsp;Toggle all</span>
+                - <span class="stageIcon glyphicon glyphicon-trash" data-bind="click: discardAllChanges">&nbsp;Discard all</span>
+                - <span class="stageIcon glyphicon glyphicon-paperclip" data-bind="click: stashAll, css: { disabled: !canStashAll() }">&nbsp;Stash all</span>
+
 			</div>
 			<div class="files" data-bind="foreach: files">
 				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">

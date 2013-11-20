@@ -55,6 +55,7 @@ var StagingViewModel = function(repository) {
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
     return "";
   });
+  this.glyphClass = ko.observable('glyphicon-unchecked');
 }
 exports.StagingViewModel = StagingViewModel;
 StagingViewModel.prototype.refresh = function() {
@@ -157,7 +158,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   this.mergeAbortProgressBar.start();
   this.app.post('/merge/abort', { path: this.repository.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
-  });
+  }); 
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -181,7 +182,13 @@ StagingViewModel.prototype.toogleAllStages = function() {
   for (var n in self.files()){
     self.files()[n].staged(self.allStageFlag);
   }
-  self.allStageFlag = !self.allStageFlag
+
+  if (self.glyphClass() == 'glyphicon-unchecked') {
+    self.glyphClass('glyphicon-check');
+  } else {
+    self.glyphClass('glyphicon-unchecked');
+  }
+  self.allStageFlag = !self.allStageFlag;
 }
 
 var FileViewModel = function(staging, type) {
