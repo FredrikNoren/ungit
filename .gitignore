@@ -33,3 +33,5 @@ report/
 /*.dll
 /nw.exe
 /nw.pak
+
+*.swp
