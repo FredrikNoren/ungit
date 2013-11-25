@@ -55,15 +55,7 @@ Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in t
 Developing
 ----------
 
-[![Dependency Status](https://david-dm.org/FredrikNoren/ungit.png)](https://david-dm.org/FredrikNoren/ungit)
-[![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.png)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)
-
-To get started developing on ungit:
-
- 1. Clone the repository to a local directory.
- 2. Run `npm install` to install dependencies.
- 3. Run `grunt` to build (compile templates, css and js). If you haven't installed grunt already type `npm install -g grunt-cli` first.
- 4. Type `npm start` to start ungit, or `npm test` to run tests.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Known issues
 ------------
@@ -80,3 +72,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[![Dependency Status](https://david-dm.org/FredrikNoren/ungit.png)](https://david-dm.org/FredrikNoren/ungit)
+[![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.png)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)
