@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="shortcut icon" href="/favicon.ico" >
+	<title>ungit</title>
+</head>
+<body>
+
+<script type="text/html" id="home">
+	<div class="container home animated fadeInLeft" data-ta-container="home-page" data-bind="shown: shown">
+		<div class="nux" data-bind="visible: showNux">
+			<img src="images/logoLarge.png" class="logo-large">
+			<div class="alert alert-info">
+				<h4>Enter a path to a repository to get started!</h4>
+				Then press the <span class="glyphicon glyphicon-plus"></span> symbol to make it show up here.
+			</div>
+		</div>
+		<div class="list-group" data-bind="foreach: repos">
+			<a class="list-group-item repository" data-bind="attr: { href: link }, css: { 'path-removed': pathRemoved }">
+				<span class="glyphicon glyphicon-arrow-right glyphicon-circled pull-left"></span>
+				<h4 class="list-group-item-heading" data-bind="text: title"></h4>
+				<p class="list-group-item-text" data-bind="text: remote"></p>
+				<button type="button" class="btn btn-default list-item-remove" data-bind="click: remove">&#x2716;</button>
+			</a>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="crash">
+	<div class="container">
+		<div class="panel crash">
+			<h1>Whooops</h1>
+			Something went wrong, reload the page to start over.
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="usererror">
+	<div class="container" data-ta-container="user-error-page">
+		<div class="panel crash">
+			<h1 data-bind="text: title"></h1>
+			<span data-bind="html: details"></span>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="progressBar">
+	<div class="progress" data-bind="visible: show, style: style" data-ta-element="progress-bar">
+		<!--span data-bind="text: predictionMs"></span-->
+		<div class="progress-bar" data-bind="style: { width: (progress() * 100) + '%' }"></div>
+	</div>
+</script>
+
+<!-- Only visible while it's running -->
+<script type="text/html" id="temporaryProgressBar">
+	<!-- ko if: running -->
+	<!-- ko template: { name: 'progressBar', data: $data } --><!-- /ko -->
+	<!-- /ko -->
+</script>
+
+<script type="text/html" id="app">
+
+<div class="navbar navbar-fixed-top" data-bind="shown: shown">
+
+	<a data-ta-clickable="home-link" class="backlink" href="/#/">
+		<span class="glyphicon glyphicon-arrow-left glyphicon-circled" data-bind="css: { 'glyph-shown': showBackButton }"></span>
+		<img src="images/logo.png">
+	</a>
+
+	<div class="form-container">
+		<form class="path-input-form" data-bind="submit: submitPath">
+			<input data-ta-input="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path" placeholder="Enter path to repository">
+			<button type="button" class="add-to-repolist btn btn-default" data-bind="visible: showAddToRepoListButton, click: addCurrentPathToRepoList">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+		</form>
+	</div>
+
+	<div class="arrowUp"></div>
+	<div class="version" data-bind="text: currentVersion"></div>
+</div>
+
+<div class="container">
+	<div class="alert alert-info" data-bind="visible: newVersionAvailable">
+		A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	</div>
+
+	<div class="alert alert-info clearfix" data-bind="visible: showBugtrackingNagscreen">
+		<button type="button" class="close" data-bind="click: dismissBugtrackingNagscreen">&times;</button>
+		<p><strong>Help make ungit better with the press of a button!</strong></p>
+
+		<button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable automatic bug reports + anonymous usage statistics</button>
+		<button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button>
+		<button class="btn btn-default" data-bind="click: dismissBugtrackingNagscreen">Naah, I&#39;ll skip that</button>
+	</div>
+
+	<!-- ko foreach: gitErrors -->
+	<div class="alert alert-danger">
+		<button type="button" class="close" data-bind="click: dismiss">&times;</button>
+		<h3><span class="glyphicon glyphicon-warning-sign"></span> Unhandled git error!</h3>
+		<p>
+			Ungit tried to run a git command that resulted in an unhandled error. <span data-bind="visible: bugReportWasSent">An automatic bug report was sent.</span>
+		</p>
+		<p data-bind="visible: tip, text: tip"></p>
+		<p data-bind="visible: showEnableBugtracking">
+			<button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button> or 
+			<button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button> to automatically report bugs, and/or <a href="https://github.com/FredrikNoren/ungit/issues" target="_blank">file an issue on the ungit issue tracker</a>.
+		</p>
+		<h4>Command</h4>
+		<pre data-bind="text: command"></pre>
+		<h4>Error</h4>
+		<pre data-bind="text: error"></pre>
+		<h4>Stderr</h4>
+		<pre data-bind="text: stderr"></pre>
+		<h4>Stdout</h4>
+		<pre data-bind="text: stdout"></pre>
+	</div>
+	<!-- /ko -->
+</div>
+
+<!-- ko if: content -->
+<div class="container container-wide" data-bind="template: { name: templateChooser, data: content }"></div>
+<!-- /ko -->
+
+
+<!-- ko if: dialog -->
+<!-- ko template: { name: templateChooser, data: dialog } --><!-- /ko -->
+<!-- /ko -->
+</script>
+<script type="text/html" id="path">
+
+<div class="path" data-bind="shown: shown" data-ta-container="path-page">
+
+	<!-- ko if: status() == 'loading' -->
+	<div class='animated fadeInLeft'>
+		<!-- ko template: { name: 'progressBar', data: loadingProgressBar } --><!-- /ko -->
+	</div>
+	<!-- /ko -->
+
+	<!-- ko if: status() == 'cloning' -->
+	<div class='animated fadeInLeft'>
+		<h2>Cloning...</h2>
+		<!-- ko template: { name: 'progressBar', data: cloningProgressBar } --><!-- /ko -->
+	</div>
+	<!-- /ko -->
+	
+	<!-- ko if: status() == 'uninited' -->
+	<div class="uninited" data-ta-container="uninited-path-page">
+		<div class="container">
+			<h1>Not a repository</h1>
+			<p>There is no repository at the selected path.</p>
+			<div class="row">
+				<div class="col-lg-6">
+					<div class="panel">
+						<div class="panel-heading">Create a new repository</div>
+						<button data-ta-clickable="init-repository" class="btn btn-primary btn-large" data-bind='click: initRepository'>Initialize a repository here!</button>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div class="panel">
+						<div class="panel-heading">Clone a repository</div>
+						<form data-bind="submit: cloneRepository">
+							<div class="form-group">
+								<label for="cloneFromInput">Clone from</label>
+								<input class="form-control" type="text" data-ta-input="clone-url" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
+							</div>
+							<div class="form-group">
+								<label for="cloneToInput">to</label>
+								<input class="form-control" type="text" data-ta-input="clone-target" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
+							</div>
+							<input type="submit" class="btn btn-primary btn-large" data-ta-clickable="clone-repository" value="Clone repository!">
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+	<!-- /ko -->
+
+	<!-- ko if: status() == 'invalidpath' -->
+	<div data-ta-container="invalid-path" data-bind="visible: status() == 'invalidpath'">
+		<h2>Invalid path</h2>
+		<p>"<span data-bind="text: path"></span>" doesn&#39;t seem to be a valid path.</p>
+	</div>
+	<!-- /ko -->
+
+	<!-- ko if: repository -->
+	<div data-bind="template: { name: 'repository', data: repository }">
+	</div>
+	<!-- /ko -->
+
+</div>
+</script>
+<script type="text/html" id="stash">
+
+<div class="panel stash">
+  <h4>Stashed changes</h4>
+  <div class="list-group" data-bind="foreach: stashedChanges">
+    <div class="list-group-item">
+      <a href="#" data-bind="click: pop">
+        <span class="glyphicon glyphicon-pencil glyphicon-circled pull-left"></span>
+        <h4 class="list-group-item-heading" data-bind="text: title"></h4>
+        <p class="list-group-item-text" data-bind="text: body"></p>
+      </a>
+      <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop">&#x2716;</button>
+      <!-- ko template: { name: 'temporaryProgressBar', data: stashPopProgressBar } --><!-- /ko -->
+    </div>
+  </div>
+</div>
+
+</script>
+<script type="text/html" id="staging">
+
+<div class="staging panel" data-bind="css: { commitValidationError: commitValidationError }">
+	<div class="arrowContainer arrowDown">
+		<div class="arrow"></div>
+	</div>
+	<div data-bind="visible: showNux" class="nux">
+		<!-- There's both a refresh button here and futher down, because on small screens we want the refresh button to be below the commit-message thing when there's changes -->
+		<button class="btn btn-default refresh-button" data-bind="click: refresh">
+			<span class="glyphicon glyphicon-refresh"></span>
+			<!-- ko template: { name: 'temporaryProgressBar', data: refreshingProgressBar } --><!-- /ko -->
+		</button>
+		Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
+	</div>
+	<div class="row" data-bind="visible: !showNux()">
+		<div class="col-lg-3">
+			<input class="form-control" data-ta-input="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+			<textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
+			<div>
+				<span class="amend" data-bind="visible: canAmend">
+                        <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+                        <a href="#" data-bind="click: toogleAmend">Amend last commit</a>
+                </span>
+			</div>
+			
+			<button class="btn btn-primary btn-large" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+				Commit
+				<!-- ko template: { name: 'temporaryProgressBar', data: committingProgressBar } --><!-- /ko -->
+			</button>
+			<button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+				Continue rebase
+				<!-- ko template: { name: 'temporaryProgressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
+			</button>
+			<button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
+				Abort rebase
+				<!-- ko template: { name: 'temporaryProgressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+			</button>
+			<button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
+				Continue merge
+				<!-- ko template: { name: 'temporaryProgressBar', data: mergeContinueProgressBar } --><!-- /ko -->
+			</button>
+			<button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
+				Abort merge
+				<!-- ko template: { name: 'temporaryProgressBar', data: mergeAbortProgressBar } --><!-- /ko -->
+			</button>
+			<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+		</div>
+		<div class="col-lg-9 file-area">
+			<button class="btn btn-default refresh-button pull-right" data-bind="click: refresh">
+				<span class="glyphicon glyphicon-refresh"></span>
+				<!-- ko template: { name: 'temporaryProgressBar', data: refreshingProgressBar } --><!-- /ko -->
+			</button>
+			<div class="commands"> 
+				<span data-bind="text: stats"></span>
+                - <span id="toogleAllStages" class="stageIcon glyphicon" data-bind="click: toogleAllStages, css: toggleSelectAllGlyphClass">&nbsp;Toggle all</span>
+                - <span class="stageIcon glyphicon glyphicon-trash" data-bind="click: discardAllChanges">&nbsp;Discard all</span>
+                - <span class="stageIcon glyphicon glyphicon-paperclip" data-bind="click: stashAll, css: { disabled: !canStashAll() }">&nbsp;Stash all</span>
+
+			</div>
+			<div class="files" data-bind="foreach: files">
+				<div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
+					<div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
+						&#10003;
+					</div>
+					<button class="name btn btn-default" data-bind="click: toogleDiffs">
+						<span data-bind="text: name"></span>
+						<!-- ko template: { name: 'temporaryProgressBar', data: diffsProgressBar } --><!-- /ko -->
+					</button>
+					<span class="new" data-bind="visible: isNew">New</span>
+					<span class="deleted" data-bind="visible: removed">Removed</span>
+					<span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
+					<span class="ignore" data-ta-clickable="ignore-file" data-bind="click: ignoreFile">i<span class="explanation">&nbsp;Add to .gitignore</span></span>
+					<span class="discard" data-ta-clickable="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation">&nbsp;Discard changes</span></span>
+					<!-- ko if: showingDiffs -->
+					<div class="diffContainer" data-bind="template: { name: templateName, data: diff }"></div>
+					<!-- /ko -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</script>
+<script type="text/html" id="graphGraphics">
+
+<svg class="graphLog" xmlns="http://www.w3.org/2000/svg" version="1.1" data-bind="attr: { width: graphWidth, height: graphHeight }">
+	<defs>
+		<marker id="rebaseArrowEnd"
+			viewBox="0 0 10 10" refX="0" refY="5" 
+			markerUnits="strokeWidth"
+			markerWidth="4" markerHeight="3"
+			orient="auto">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="#22252E" />
+		</marker>
+		<marker id="pushArrowEnd"
+			viewBox="0 0 10 10" refX="0" refY="5" 
+			markerUnits="strokeWidth"
+			markerWidth="4" markerHeight="3"
+			orient="auto">
+			<path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(61, 139, 255)" />
+		</marker>
+	</defs>
+	<g data-bind="attr: { transform: 'translate(' + offset().x + ', ' + offset().y + ')' }" >
+		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: arrows -->
+			<line data-bind="attr: { x1: from.x, y1: from.y, x2: to.x, y2: to.y }" stroke="#22252E" stroke-width="15" marker-end="url(#rebaseArrowEnd)" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+		<!-- ko foreach: edges -->
+		<line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" />
+		<!-- /ko -->
+		<!-- ko foreach: nodes -->
+		<circle data-bind="attr: { cx: x(), cy: y(), r: radius(), fill: color() }" />
+		<!-- ko if: selected -->
+			<circle data-bind="attr: { cx: x(), cy: y(), r: radius() - 4 }" stroke="#252833" stroke-width="4" fill="transparent" />
+		<!-- /ko -->
+		<!-- /ko -->
+		<!-- ko if: showCommitNode -->
+			<g data-bind="attr: { opacity: commitOpacity }">
+			<!-- ko with: commitNodeEdge -->
+			<line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko with: commitNode -->
+			<circle data-bind="attr: { cx: position().x, cy: position().y, r: radius(), stroke: color() }" stroke-width="8" fill="transparent" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			</g>
+		<!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: edges -->
+			<line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko foreach: nodes -->
+			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'merge' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: edges -->
+			<line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+			<!-- ko with: newNode -->
+			<circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'reset' --><!-- ko with: hoverGraphActionGraphic -->
+			<!-- ko foreach: nodes -->
+			<line data-bind="attr: { x1: x() - radius(), y1: y() - radius(), x2: x() + radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+			<line data-bind="attr: { x1: x() + radius(), y1: y() - radius(), x2: x() - radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+			<!-- /ko -->
+		<!-- /ko --><!-- /ko -->
+
+		<!-- ko if: hoverGraphActionGraphicType() == 'push' --><!-- ko with: hoverGraphActionGraphic -->
+			<line data-bind="attr: { x1: fromPosition.x, y1: fromPosition.y, x2: toPosition.x, y2: toPosition.y }" stroke="rgb(61, 139, 255)" stroke-width="15" stroke-dasharray="10, 5" marker-end="url(#pushArrowEnd)" />
+		<!-- /ko --><!-- /ko -->
+
+	</g>
+</svg>
+
+</script>
+<script type="text/html" id="repository">
+<div class="repository-view animated fadeInLeft" data-ta-container="repository-view", data-bind="click: handleBubbledClick">
+
+
+
+	<!-- ko if: gerritIntegration -->
+	<div data-bind="template: { name: 'gerritIntegration', data: gerritIntegration }"></div>
+	<!-- /ko -->
+
+	<div class="repositoryMain" data-bind="css: { sidebarExtended: gerritIntegration }">
+
+		<!-- ko template: { if: stash.visible, name: 'stash', data: stash } --><!-- /ko -->
+
+		<!-- ko template: { name: 'staging', data: staging } --><!-- /ko -->
+
+		<!-- ko if: staging.inRebase -->
+		<h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+		<!-- /ko -->
+		<!-- ko if: staging.inMerge -->
+		<h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
+		<!-- /ko -->
+
+    <select id="list-branch" data-bind="options: branches"></select><button data-bind="click: checkoutBranch">Checkout</button>
+
+		<!-- ko if: showLog -->
+
+		<!-- ko template: { name: 'remotes', data: remotes } --><!-- /ko -->
+		
+		<!-- ko with: graph -->
+		<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
+
+			<div class="daySeparators" data-bind="foreach: daySeparators">
+				<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
+					<div class="dateLabel" data-bind="text: date"></div>
+				</div>
+			</div>
+
+			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
+
+			<div class="nodes" data-bind="foreach: nodes">
+				<div class="nodeContainer" data-ta-container="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
+					<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { highlighted: highlighted, hover: nodeIsMousehover }">
+						<div class="logEntryBox panel clearfix">
+							<div class="arrowContainer arrowRight">
+								<div class="shadow"></div>
+								<div class="arrow"></div>
+							</div>
+							<img class="pull-left img-circle gravatar"
+								data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
+								onerror="this.style.display='none';">
+							<div>
+								<div>
+									<span class="title" data-bind="text: title"></span>
+									<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+								</div>
+								<div class="body" data-bind="text: body, visible: showBody"></div>
+								<div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
+							</div>
+						</div>
+					</div>
+
+					<div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
+						click: selected,
+						style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+					</div>
+
+					<div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
+						<!-- ko foreach: branches -->
+						<span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1" 
+								data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected }, 
+									click: selected,
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
+							<div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
+							<div class="branch-icon"></div>
+							<span class="name" data-bind="text: localRefName"></span>
+						</span>
+						<!-- /ko -->
+
+						<!-- ko foreach: tags -->
+						<span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0" 
+								data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected }, 
+									click: selected,
+									dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
+							<div class="remote-icon" data-bind="visible: isRemote"></div>
+							<div class="tag-icon"></div>
+							<span class="name" data-bind="text: localRefName"></span>
+						</span>
+						<!-- /ko -->
+
+						<!-- ko foreach: dropareaGraphActions -->
+						<span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
+							<span data-bind="text: text"></span>
+							<div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
+							<!-- ko template: { name: 'temporaryProgressBar', data: performProgressBar } --><!-- /ko -->
+						</span>
+						
+						<!-- /ko -->
+
+						<!-- ko if: showNewRefAction -->
+						<span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+							<button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+							<!-- ko if: branchingFormVisible -->
+							<form class="form-inline" data-bind="submit: createBranch">
+								<input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
+								<input class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
+								<button class="btn btn-default" data-ta-clickable="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+							</form>
+							<!-- /ko -->
+						</span>
+						<!-- /ko -->
+					</div>
+
+				</div>
+			</div>
+
+			<div class="graphFooter">
+				<!-- ko if: isLoading -->
+				<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
+				<!-- /ko -->
+			</div>
+
+		</div>
+		<!-- /ko -->
+
+		<!-- /ko -->
+
+	</div>
+
+</div>
+
+</script>
+<script type="text/html" id="gerritIntegration">
+
+<div class="gerritIntegration panel">
+	<div class="panel-heading"><h1>Gerrit</h1></div>
+
+	<p>
+		<button class="btn btn-primary" data-bind="visible: showInitCommmitHook, click: initCommitHook">
+			Init commit hook
+			<!-- ko template: { name: 'temporaryProgressBar', data: initGerritHookProgressBar } --><!-- /ko -->
+		</button>
+	</p>
+
+	<p>
+		<button class="btn btn-primary" data-bind="click: pushForReview">
+			Push changes for review
+			<!-- ko template: { name: 'temporaryProgressBar', data: pushingProgressBar } --><!-- /ko -->
+		</button>
+	</p>
+
+	<div class="changes">
+		<!-- ko if: status() == 'loading' -->
+		<div class="loading">
+		<!-- ko template: { name: 'progressBar', data: changesLoader } --><!-- /ko -->
+		</div>
+		<!-- /ko -->
+		<div data-bind="visible: status() == 'failed'">Failed to load changes</div>
+		<div data-bind="visible: status() == 'loaded'" class="animated fadeInLeft">
+			<div data-bind="foreach: changes">
+				<p>
+					<hr>
+					<h4><a href="#" data-bind="text: subject, attr: { href: gerritUrl }" target="_blank"></a> <small> by <span data-bind="text: ownerName"></span></small></h4>
+					<button class="btn btn-primary" data-bind="click: checkout">
+						Checkout
+						<!-- ko template: { name: 'temporaryProgressBar', data: checkingOutProgressBar } --><!-- /ko -->
+					</button>
+					<button class="btn btn-default" data-bind="click: cherryPick">
+						Cherry pick
+						<!-- ko template: { name: 'temporaryProgressBar', data: cherryPickingProgressBar } --><!-- /ko -->
+					</button>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+<script type="text/html" id="formDialog">
+
+<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }, attr: { 'data-ta-container': taDialogName }">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" data-bind="text: title"></h4>
+			</div>
+			<form class="form-horizontal" data-bind="submit: submit">
+				<div class="modal-body" data-bind="foreach: items">
+					<div class="form-group">
+						<label data-bind="text: name, attr: { for: name }" class="col-lg-2 control-label"></label>
+						<div class="col-lg-10">
+							<input class="form-control" id="inputName"
+								data-bind="value: value, attr: { id: name, placeholder: placeholder, type: type, autofocus: autofocus, 'data-ta-input': taName }">
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="submit" class="btn btn-primary" value="Submit" data-ta-clickable="submit">
+					<button class="btn btn-default" data-bind="click: close, visible: showCancel">Cancel</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+</script>
+<script type="text/html" id="login">
+
+<div class="container">
+	<div data-bind="visible: status() == 'loading'">
+	</div>
+
+	<div class='login col-lg-6' data-bind="visible: status() == 'login'" data-ta-container="login-page">
+		<h1>Login</h1>
+		<!-- ko if: loginError -->
+		<div class="loginError" data-ta-element="login-error" data-bind="text: loginError"></div>
+		<!-- /ko -->
+		<form data-bind="submit: login" role="form">
+
+			<div class="form-group">
+				<label for="inputUsername">Username</label>
+				<input type="text" class="form-control" id="inputUsername" placeholder="Username" data-bind="value: username" data-ta-input="username">
+			</div>
+
+			<div class="form-group">
+				<label for="inputPassword">Password</label>
+				<input type="password" class="form-control" id="inputPassword" placeholder="Password" data-bind="value: password" data-ta-input="password">
+			</div>
+
+			<input type="submit" class="btn btn-primary" value="Login" data-ta-clickable="submit">
+		</form>
+	</div>
+</div>
+
+</script>
+<script type="text/html" id="remotes">
+<div class="btn-group fetchButton">
+	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="click: clickFetch, enable: fetchEnabled">
+		<span class="glyphicon glyphicon-refresh"></span>
+		<span data-bind="text: fetchLabel"></span>
+		<!-- ko template: { name: 'temporaryProgressBar', data: fetchingProgressBar } --><!-- /ko -->
+	</button>
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="remotes-menu">
+		<span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu" data-ta-container="remotes">
+		<!-- ko foreach: remotes -->
+		<li><a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a></li>
+		<!-- /ko -->
+		<li class="divider"></li>
+		<li><a href="#" data-bind="click: showAddRemoteDialog" data-ta-clickable="show-add-remote-dialog">Add a new remote</a></li>
+	</ul>
+</div>
+</script>
+<script type="text/html" id="prompt">
+
+<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }, attr: { 'data-ta-container': taDialogName }">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" data-bind="text: title"></h4>
+			</div>
+			<div class="modal-body">
+				<p data-bind="text: details"></p>
+			</div>
+			<div class="modal-footer">
+				<!-- ko foreach: alternatives -->
+				<button type="button" class="btn btn-default" data-bind="css: { 'btn-primary': primary }, text: label, click: click, attr: { 'data-ta-clickable': taId }"></button>
+				<!-- /ko -->
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+<script type="text/html" id="imageFileDiff">
+
+<div class="imageDiff">
+<!-- ko if: state() == 'new' -->
+<img data-bind="attr: { src: newImageSrc }" class="img-responsive">
+<!-- /ko -->
+<!-- ko if: state() == 'removed' -->
+<img data-bind="attr: { src: oldImageSrc }" class="img-responsive">
+<!-- /ko -->
+<!-- ko if: state() == 'changed' -->
+<div class="row">
+	<div class="col-lg-5">
+		<img data-bind="attr: { src: oldImageSrc }" class="img-responsive">
+	</div>
+	<div class="col-lg-2">
+		<span class="glyphicon glyphicon-arrow-right"></span>
+	</div>
+	<div class="col-lg-5">
+		<img data-bind="attr: { src: newImageSrc }" class="img-responsive">
+	</div>
+</div>
+<!-- /ko -->
+</div>
+</script>
+<script type="text/html" id="textFileDiff">
+
+<table class="fileDiff" data-bind="foreach: diffs">
+	<tr data-bind="css: { fileDiffAdded: added, fileDiffRemoved: removed }">
+		<td class="fileDiffLineNumbers" data-bind="text: oldLineNumber"></td>
+		<td class="fileDiffLineNumbers" data-bind="text: newLineNumber"></td>
+		<td class="fileDiffContent" data-bind="text: text"></td>
+	</tr>
+</table>
+
+</script>
+
+<!-- ko if: content -->
+<div data-bind="template: { name: templateChooser, data: content }"></div>
+<!-- /ko -->
+
+<script type="text/javascript">ungit = {}</script>
+<script type="text/javascript" src="/serverdata.js"></script>
+<script type="text/javascript" src="/js/raven.min.js"></script>
+<script type="text/javascript">
+	console.log('App version: ' + ungit.version);
+	if (ungit.config.bugtracking) {
+		console.log('Initing bugtracking');
+
+    	Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
+			logger: 'root',
+			tags: {
+				version: ungit.version,
+				subsystem: 'ui',
+      			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
+			}
+		}).install();
+
+		Raven.setUser({
+			id: ungit.userHash
+		});
+
+    }
+</script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/ungit.js"></script>
+<script>
+	if (ungit.config.sendUsageStatistics) {
+
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-42045410-1', { 'cookieDomain': 'none' });
+		ga('send', 'pageview');
+		console.log('Google analytics inited');
+
+		var Keen=Keen||{configure:function(e){this._cf=e},addEvent:function(e,t,n,i){this._eq=this._eq||[],this._eq.push([e,t,n,i])},setGlobalProperties:function(e){this._gp=e},onChartsReady:function(e){this._ocrq=this._ocrq||[],this._ocrq.push(e)}};(function(){var e=document.createElement("script");e.type="text/javascript",e.async=!0,e.src=("https:"==document.location.protocol?"https://":"http://")+"dc8na2hxrj29i.cloudfront.net/code/keen-2.1.0-min.js";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)})();
+
+		Keen.configure({
+			projectId: '5240b1d436bf5a753800000c',
+			writeKey: 'da0303fb058149813443f1321a139f23420323887b6a4940e82d47d02df451a4a132b938d2e8200a17914e06aa2767dc1a6fa0891db41942918db91a8daa61784d7af2495b934a05111605e4aa4e5c3d92b0b7f8be4d146e05586701894dc35d619443ae234dbc608a36de9ee97e0e1a'
+		});
+		Keen.addEvent('ui-start', { version: ungit.version, userHash: ungit.userHash });
+
+		Raven.TraceKit.report.subscribe(function(err) {
+			Keen.addEvent('ui-exception', { version: ungit.version, userHash: ungit.userHash });
+		});
+		console.log('Keen.io inited');
+	}
+</script>
+
+</body>
+</html>
