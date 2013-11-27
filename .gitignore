@@ -33,3 +33,4 @@ report/
 /*.dll
 /nw.exe
 /nw.pak
+/bower_components/*
