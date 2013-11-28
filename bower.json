@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap": "~3.0.2"
+    "jquery": "~2.0.3",
+    "jquery-ui": "1.10.3"
   }
 }
