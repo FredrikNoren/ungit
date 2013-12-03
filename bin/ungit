@@ -22,7 +22,6 @@ process.on('uncaughtException', function(err) {
   });
 });
 
-
 var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
   silent: false,
   minUptime: 2000,
@@ -36,18 +35,32 @@ child.on('exit', function (res) {
   console.log('Stopped keeping ungit alive');
 });
 
-function launchBrowser() {
+function launch(callback) {
   var currentUrl = config.urlBase + ':' + config.port;
   if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
   else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
   console.log('Browse to ' + currentUrl);
-  if (config.launchBrowser)
+  if (config.launchBrowser && !config.launchCommand) {
     open(currentUrl);
+  } else {
+    var command = config.launchCommand.replace(/%U/g, currentUrl);
+    console.log('Running custom launch command: ' + command);
+    child_process.exec(command, function(err, stdout, stderr) {
+      if (err) {
+        callback(err);
+        return;
+      }
+      if (config.launchBrowser)
+        open(currentUrl);
+    });
+  }
 }
 
 function startupListener(data) {
   if (data.toString().indexOf('## Ungit started ##') >= 0) {
-    launchBrowser();
+    launch(function(err) {
+      if (err) console.log(err);
+    });
     child.removeListener('stdout', startupListener);
     var launchTime = (Date.now() - startLaunchTime);
     console.log('Took ' + launchTime + 'ms to start server.');
@@ -94,7 +107,9 @@ function checkIfUngitIsRunning(callback) {
 checkIfUngitIsRunning(function(err1, ungitRunning) {
   if (ungitRunning) {
     console.log('Ungit server already running');
-    launchBrowser();
+    launch(function(err) {
+      if (err) console.log(err);
+    });
   }
   else {
     verifyGitVersion(function(err) {

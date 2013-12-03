@@ -68,6 +68,15 @@ var defaultConfig = {
 
   // Used for development purposes.
   dev: false,
+
+  // Manual launch command; specify %U where you want the URL to appear.
+  //
+  // NOTE: This will execute *before* opening the browser window.
+  // example:
+  //     # Override the browser launch command; use chrome's "app" 
+  //     #   argument to get a new, chromeless window for that "native feel"
+  //     $ ungit --launchBrowser=0 --launchCommand "chrome --app=%U"
+  launchCommand: undefined,
 };
 
 // Works for now but should be moved to bin/ungit
