@@ -42,7 +42,7 @@ function launch(callback) {
   console.log('Browse to ' + currentUrl);
   if (config.launchBrowser && !config.launchCommand) {
     open(currentUrl);
-  } else {
+  } else if (config.launchCommand) {
     var command = config.launchCommand.replace(/%U/g, currentUrl);
     console.log('Running custom launch command: ' + command);
     child_process.exec(command, function(err, stdout, stderr) {
