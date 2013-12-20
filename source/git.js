@@ -154,7 +154,7 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  git('status -s -b -u "' + (file || '') + '"', repoPath)
+  git('status -s -b -u ' + (file ? '"' + file + '"' : ''), repoPath)
     .parser(gitParser.parseGitStatus)
     .started(task.setStarted)
     .fail(task.setResult)
