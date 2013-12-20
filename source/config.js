@@ -68,6 +68,17 @@ var defaultConfig = {
 
   // Used for development purposes.
   dev: false,
+
+  // Specify a custom command to launch. `%U` will be replaced with the URL
+  //  that corresponds with the working git directory.
+  //
+  // NOTE: This will execute *before* opening the browser window if the
+  //        `launchBrowser` option is `true`.
+  // Example:
+  //     # Override the browser launch command; use chrome's "app" 
+  //     #   argument to get a new, chromeless window for that "native feel"
+  //     $ ungit --launchBrowser=0 --launchCommand "chrome --app=%U"
+  launchCommand: undefined,
 };
 
 // Works for now but should be moved to bin/ungit
