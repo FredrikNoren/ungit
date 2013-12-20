@@ -40,7 +40,7 @@ if (config.authentication) {
   });
 
   passport.deserializeUser(function(username, done) {
-    done(null, users[username]);
+    done(null, users[username] !== undefined ? username : null);
   });
 
   passport.use(new LocalStrategy(function(username, password, done) {
