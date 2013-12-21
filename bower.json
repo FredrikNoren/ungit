@@ -1,0 +1,23 @@
+{
+  "name": "ungit-bower",
+  "version": "0.0.1",
+  "homepage": "https://github.com/FredrikNoren/ungit",
+  "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FredrikNoren/ungit.git"
+  },
+  "description": "ungit bower file",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.3",
+    "jquery-ui": "~1.10.3"
+  }
+}

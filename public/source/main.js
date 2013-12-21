@@ -1,11 +1,15 @@
 
 var _ = require('lodash');
 var ko = require('knockout');
-var $ = require('../vendor/js/jquery-2.0.0.min');
+var $ = require('../../bower_components/jquery/jquery.min.js');
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
-require('../vendor/js/jquery-ui-1.10.3.custom.js');
+require('../../bower_components/jquery-ui/ui/jquery.ui.core.js');
+require('../../bower_components/jquery-ui/ui/jquery.ui.widget.js');
+require('../../bower_components/jquery-ui/ui/jquery.ui.position.js');
+require('../../bower_components/jquery-ui/ui/jquery.ui.autocomplete.js');
+require('../../bower_components/jquery-ui/ui/jquery.ui.menu.js');
 var hasher = require('hasher');
 var crossroads = require('crossroads');
 var AppViewModel = require('./app');

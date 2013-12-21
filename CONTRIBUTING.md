@@ -23,9 +23,10 @@ To get started developing on Ungit:
  1. Make sure you have [node.js](http://nodejs.org), [npm](https://npmjs.org/), [git](http://git-scm.com/) and [grunt](http://gruntjs.com/) installed.
  2. Clone the repository to a local directory.
  3. Run `npm install` to install dependencies.
- 4. Run `grunt` to build (compile templates, css and js).
- 5. Type `npm start` to start ungit, or `npm test` to run tests.
- 6. (Optional). Run `grunt watch` to automatically rebuild stuff when you change files.
+ 4. Run `bower install` to pull in clientside libraries.
+ 5. Run `grunt` to build (compile templates, css and js).
+ 6. Type `npm start` to start ungit, or `npm test` to run tests.
+ 7. (Optional). Run `grunt watch` to automatically rebuild stuff when you change files.
 
 Architecture overview
 ---------------------
