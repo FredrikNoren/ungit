@@ -47,6 +47,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.parents = ko.observable([]);
   this.message = ko.observable();
   this.title = ko.observable();
+  this.fullTitle = ko.observable();
   this.body = ko.observable();
   this.authorDate = ko.observable(0);
   this.authorDateFromNow = ko.observable();
@@ -129,6 +130,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   var message = args.message.split('\n');
   this.message(args.message);
   this.title(this.trimTitle(message[0]));
+  this.fullTitle(message[0]);
   this.body(message.slice(2).join('\n'));
   this.authorDate(moment(args.authorDate));
   this.authorDateFromNow(this.authorDate().fromNow());
