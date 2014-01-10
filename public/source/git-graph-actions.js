@@ -212,9 +212,11 @@ GraphActions.Checkout = function(graph, node) {
   this.node = node;
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
-    return self.graph.currentActionContext() instanceof RefViewModel && 
-      self.graph.currentActionContext().node() == self.node &&
-      !self.graph.currentActionContext().current();
+    if (self.graph.currentActionContext() instanceof RefViewModel)
+      return self.graph.currentActionContext().node() == self.node &&
+        !self.graph.currentActionContext().current();
+    return ungit.config.allowCheckoutNodes &&
+      self.graph.currentActionContext() == self.node;
   });
 }
 inherits(GraphActions.Checkout, GraphActions.ActionBase);
@@ -222,14 +224,17 @@ GraphActions.Checkout.prototype.text = 'Checkout';
 GraphActions.Checkout.prototype.style = 'checkout';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
-  var ref = this.graph.currentActionContext();
-  this.app.post('/checkout', { path: this.graph.repoPath, name: ref.refName }, function(err) {
+  var context = this.graph.currentActionContext();
+  var refName;
+  if (context instanceof RefViewModel) refName = context.refName;
+  else refName = context.sha1;
+  this.app.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
     if (err && err.errorCode != 'merge-failed') {
       callback();
       return;
     }
-    if (ref.isRemoteBranch)
-      self.app.post('/reset', { path: self.graph.repoPath, to: ref.name, mode: 'hard' }, function(err, res) {
+    if (context instanceof RefViewModel && context.isRemoteBranch)
+      self.app.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
         callback();
         if (err && err.errorCode != 'merge-failed') return;
         return true;

@@ -79,6 +79,9 @@ var defaultConfig = {
   //     #   argument to get a new, chromeless window for that "native feel"
   //     $ ungit --launchBrowser=0 --launchCommand "chrome --app=%U"
   launchCommand: undefined,
+
+  // Allow checking out nodes (which results in a detached head)
+  allowCheckoutNodes: false,
 };
 
 // Works for now but should be moved to bin/ungit
