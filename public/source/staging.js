@@ -100,8 +100,13 @@ StagingViewModel.prototype.toogleAmend = function() {
     this.commitMessageBody(this.repository.graph.HEAD().body());
   }
   else if(this.amend()) {
-    this.commitMessageTitle('');
-    this.commitMessageBody('');
+    var isPrevDefaultMsg = 
+      this.commitMessageTitle() == this.repository.graph.HEAD().title() &&
+      this.commitMessageBody() == this.repository.graph.HEAD().body();
+    if (isPrevDefaultMsg) {
+      this.commitMessageTitle('');
+      this.commitMessageBody('');
+    }
   }
   this.amend(!this.amend());
 }
