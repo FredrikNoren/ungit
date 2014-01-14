@@ -254,6 +254,10 @@ describe('git-api', function () {
 		common.post(req, '/createdir', { dir: path.join(testDir, testSubDir) }, done);
 	});
 
+	it('creating test multi layer dir should work', function(done) {
+		common.post(req, '/createdir', { dir: path.join(testDir, testSubDir + 'test/moretest/andmore') }, done);
+	});
+
 	var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
 
 	it('creating a test file in sub dir should work', function(done) {
