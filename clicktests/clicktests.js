@@ -95,6 +95,17 @@ test('Clicking logo should bring you to home screen', function(done) {
   });
 });
 
+test('Entering an invalid path and create directory in that location', function(done) {
+  helpers.click(page, '[data-ta-input="navigation-path"]');
+  helpers.write(page, testRootPath + '/not\n');
+  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {  
+    helpers.click(page, '[data-ta-clickable="commit"]');
+    helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
+      done();
+    });
+  });
+});
+
 test('Entering an invalid path should bring you to an error screen', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, '/a/path/that/doesnt/exist\n');
