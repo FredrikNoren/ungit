@@ -520,6 +520,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
   app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
     var path = req.param('path') || req.param('dir');
+    if (!path) {
+      return;
+    }
     fs.exists(path, function(exists) {
       if(exists) {
         res.json(400, { error: 'File exists: ' + path, errorCode: 'file-exist' });
