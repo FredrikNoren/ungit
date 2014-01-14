@@ -519,23 +519,30 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
   });
 
   app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
-    var path = req.param('path') || req.param('dir');
-    if (!path) {
+    var dir = req.param('path') || req.param('dir');
+    if (!dir) {
       return;
     }
-    fs.exists(path, function(exists) {
-      if(exists) {
-        res.json(400, { error: 'File exists: ' + path, errorCode: 'file-exist' });
-      } else {
-        fs.mkdir(path, function(err) {
-          if(err) {
-            res.json(400, err);
-          } else {
-            res.json('uninited');
-          }
-        });
+    dir = dir.split(path.sep);
+    var prepend = dir[0] + path.sep;
+
+    console.log(dir);
+
+    for(var n = 1; n < dir.length; n++) {
+      var toCreate = path.join(prepend, dir[n]);
+      var exists = fs.existsSync(toCreate);
+
+      if (!exists) {
+        try {
+          fs.mkdirSync(toCreate);
+        } catch (err) {
+          res.json(400, err);
+        }
       }
-    })
+
+      prepend = toCreate;
+    }
+    res.json('uninited');
   });
 
   if (config.gerrit) {
