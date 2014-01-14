@@ -88,6 +88,7 @@ var PathViewModel = function(app, path) {
   this.loadingProgressBar.start();
   this.cloningProgressBar = new ProgressBarViewModel('path-loading-' + path, 10000);
   this.cloneUrl = ko.observable();
+  this.title = ko.observable();
   this.cloneDestinationImplicit = ko.computed(function() {
     var defaultText = 'destination folder';
     if (!self.cloneUrl()) return defaultText;
@@ -109,17 +110,9 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.app.get('/quickstatus', { path: this.path }, function(err, status){
-    self.loadingProgressBar.stop();
-    if (err) return;
-    if (status == 'inited') {
-      self.status('repository');
-      self.repository(new RepositoryViewModel(self.app, self.path));
-    } else if (status == 'uninited') {
-      self.status('uninited');
-    } else if (status == 'no-such-path') {
-      self.status('invalidpath');
-    }
+  this.app.get('/quickstatus', { path: this.path }, function(err, status) {
+    self.title="Not a repository";
+    receiveDirectoryStatus(err, status, self);
   });
 }
 PathViewModel.prototype.initRepository = function() {
@@ -149,6 +142,26 @@ PathViewModel.prototype.cloneRepository = function() {
   });
 }
 
+PathViewModel.prototype.createDir = function() {
+  var self = this;
+  this.app.get('/createDir',  {path: this.path }, function(err, status) {
+    self.title="Directory created";
+    receiveDirectoryStatus(err, status, self);
+  });
+}
+
+var receiveDirectoryStatus = function(err, status, pathModel) {
+  pathModel.loadingProgressBar.stop();
+  if (err) return;
+  if (status == 'inited') {
+    pathModel.status('repository');
+    pathModel.repository(new RepositoryViewModel(pathModel.app, pathModel.path));
+  } else if (status == 'uninited') {
+    pathModel.status('uninited');
+  } else if (status == 'no-such-path') {
+    pathModel.status('invalidpath');
+  }
+};
 
 var LoginViewModel = function(app) {
   var self = this;

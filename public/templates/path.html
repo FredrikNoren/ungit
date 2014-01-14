@@ -17,7 +17,7 @@
 	<!-- ko if: status() == 'uninited' -->
 	<div class="uninited" data-ta-container="uninited-path-page">
 		<div class="container">
-			<h1>Not a repository</h1>
+			<h1 data-bind="text: title"></h1>
 			<p>There is no repository at the selected path.</p>
 			<div class="row">
 				<div class="col-lg-6">
@@ -52,6 +52,9 @@
 	<div data-ta-container="invalid-path" data-bind="visible: status() == 'invalidpath'">
 		<h2>Invalid path</h2>
 		<p>"<span data-bind="text: path"></span>" doesn&#39;t seem to be a valid path.</p>
+		<div class="create-dir">
+			<button class="btn btn-info btn-larg" data-ta-clickable="commit" data-bind="click: createDir">Create Directory</button>
+		</div>
 	</div>
 	<!-- /ko -->
 

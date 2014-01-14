@@ -518,6 +518,22 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     }
   });
 
+  app.get(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
+    var path = req.param('path') || req.param('dir');
+    fs.exists(path, function(exists) {
+      if(exists) {
+        res.json(400, { error: 'File exists: ' + path, errorCode: 'file-exist' });
+      } else {
+        fs.mkdir(path, function(err) {
+          if(err) {
+            res.json(400, err);
+          } else {
+            res.json('uninited');
+          }
+        });
+      }
+    })
+  });
 
   if (config.gerrit) {
 
@@ -562,7 +578,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
           });
         });
     });
-
   }
 
   if (config.dev) {
