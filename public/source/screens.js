@@ -144,7 +144,7 @@ PathViewModel.prototype.cloneRepository = function() {
 
 PathViewModel.prototype.createDir = function() {
   var self = this;
-  this.app.get('/createDir',  {path: this.path }, function(err, status) {
+  this.app.post('/createDir',  {path: this.path }, function(err, status) {
     self.title="Directory created";
     receiveDirectoryStatus(err, status, self);
   });

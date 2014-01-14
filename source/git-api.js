@@ -518,7 +518,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     }
   });
 
-  app.get(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
+  app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
     var path = req.param('path') || req.param('dir');
     fs.exists(path, function(exists) {
       if(exists) {
@@ -585,11 +585,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
       temp.mkdir('test-temp-dir', function(err, path) {
         res.json({ path: path });
-      });
-    });
-    app.post(exports.pathPrefix + '/testing/createdir', ensureAuthenticated, function(req, res){
-      fs.mkdir(req.param('dir'), function() {
-        res.json({});
       });
     });
     app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
