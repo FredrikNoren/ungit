@@ -63,6 +63,7 @@
 					<button class="btn btn-default" data-bind="click: stashAll, css: { disabled: !canStashAll() }">
 						<span class="glyphicon glyphicon-paperclip"></span> 
 						Stash all
+						<!-- ko template: { name: 'temporaryProgressBar', data: stashProgressBar } --><!-- /ko -->
 					</button>
 				</div>
 

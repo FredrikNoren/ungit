@@ -45,6 +45,7 @@ var StagingViewModel = function(repository) {
   this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
   this.mergeContinueProgressBar = new ProgressBarViewModel('merge-continue-' + repository.repoPath);
   this.mergeAbortProgressBar = new ProgressBarViewModel('merge-abort-' + repository.repoPath);
+  this.stashProgressBar = new ProgressBarViewModel('stash-' + repository.repoPath);
   this.commitValidationError = ko.computed(function() {
     if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
       return "No files to commit";
@@ -183,7 +184,10 @@ StagingViewModel.prototype.discardAllChanges = function() {
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
-  this.app.post('/stashes', { path: this.repository.repoPath, message: this.commitMessageTitle() });
+  this.stashProgressBar.start();
+  this.app.post('/stashes', { path: this.repository.repoPath, message: this.commitMessageTitle() }, function(err, res) {
+    self.stashProgressBar.stop();
+  });
 }
 StagingViewModel.prototype.toogleAllStages = function() {
   var self = this;
