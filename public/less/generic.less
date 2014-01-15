@@ -43,13 +43,16 @@
 @input-color-placeholder: rgba(255, 255, 255, 0.3);
 @btn-default-bg: #556666;
 @btn-default-color: @text-color;
+@btn-default-border: rgba(0, 0, 0, 0.1);
 @link-hover-color: lighten(@link-color, 15%);
 
 .btn {
-	border: 0px;
 	.glyphicon {
 		font-size: 0.8em;
 		margin-right: 0.1em;
+	}
+	&:focus {
+		outline: none;
 	}
 }
 
@@ -127,6 +130,7 @@ a.disabled {
 	right: 0px;
 	top: 0px;
 	background: transparent;
+	border: 0px;
 	opacity: 0.3;
 	&:hover {
 		opacity: 1;
@@ -217,14 +221,6 @@ a.disabled {
 		white-space: pre;
 		word-wrap: break-word;
 	}
-}
-
-.stageIcon {
-	cursor: pointer;
-	opacity: .7;
-}
-span.stageIcon:hover {
-	opacity: 1;
 }
 
 ::-webkit-scrollbar {
