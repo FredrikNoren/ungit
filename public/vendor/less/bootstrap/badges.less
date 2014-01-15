@@ -9,18 +9,24 @@
   min-width: 10px;
   padding: 3px 7px;
   font-size: @font-size-small;
-  font-weight: bold;
+  font-weight: @badge-font-weight;
   color: @badge-color;
-  line-height: 1;
-  vertical-align: middle;
+  line-height: @badge-line-height;
+  vertical-align: baseline;
   white-space: nowrap;
   text-align: center;
   background-color: @badge-bg;
-  border-radius: 10px;
+  border-radius: @badge-border-radius;
 
-  // Empty labels/badges collapse
+  // Empty badges collapse automatically (not available in IE8)
   &:empty {
     display: none;
+  }
+
+  // Quick fix for badges in buttons
+  .btn & {
+    position: relative;
+    top: -1px;
   }
 }
 
@@ -32,12 +38,6 @@ a.badge {
     text-decoration: none;
     cursor: pointer;
   }
-}
-
-// Quick fix for labels/badges in buttons
-.btn .badge {
-  position: relative;
-  top: -1px;
 }
 
 // Account for counters in navs

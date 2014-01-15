@@ -18,9 +18,9 @@ body {
 	margin-right: 18px;
 	border: 5px solid #686868;
 	border-radius: 100%;
-	padding-bottom: 4px;
+	padding-bottom: 7px;
 	padding-top: 6px;
-	padding-right: 7px;
+	padding-right: 20px;
 	padding-left: 7px;
 }
 
@@ -28,7 +28,7 @@ body {
 	padding-top: 23px;
 	z-index: 5;
 	box-shadow: 0px 15px 15px #252833;
-	height: 83px;
+	height: 92px;
 
 	.backlink {
 		margin-left: 9px;
@@ -60,8 +60,8 @@ body {
 			}
 			.add-to-repolist {
 				position: absolute;
-				right: 0px;
-				top: 0px;
+				right: 4px;
+				top: 6px;
 				background: transparent;
 				opacity: 0.3;
 				&:hover {
@@ -345,7 +345,7 @@ body {
 				z-index: 3;
 			}
 
-			.logEntryBox {
+			.logEntryBox > .panel-body {
 				position: relative;
 				
 				padding: 10px;
@@ -577,11 +577,11 @@ body {
 	}
 }
 
-@media (min-width: @screen-medium) {
+@media (min-width: @screen-md-min) {
 	.repository-view .graph {
 		.nodeContainer {
 			.log {
-				.logEntryBox {
+				.logEntryBox > .panel-body {
 					width: @log-width-large;
 					.gravatar {
 						display: block;
@@ -606,7 +606,7 @@ body {
 	}
 }
 
-@media (min-width: @screen-large) {
+@media (min-width: @screen-lg-min) {
 	.repository-view .graph {
 		.daySeparators {
 			display: block;
