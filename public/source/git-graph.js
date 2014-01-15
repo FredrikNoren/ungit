@@ -1,6 +1,7 @@
 
 
 var ko = require('knockout');
+var $ = require('../vendor/js/jquery-2.0.0.min');
 var Vector2 = require('../../source/utils/vector2.js');
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
@@ -9,6 +10,8 @@ var moment = require('moment');
 var _ = require('lodash');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
+require('../vendor/js/bootstrap/tooltip');
+require('../vendor/js/bootstrap/popover');
 
 var GitGraphViewModel = function(repository) {
   var self = this;
@@ -129,6 +132,7 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
     }
   });
   this.setNodes(nodeVMs);
+  $(".title").popover();
 }
 GitGraphViewModel.prototype.getNode = function(sha1) {
   var nodeViewModel = this.nodesById[sha1];

@@ -45,7 +45,7 @@
 								onerror="this.style.display='none';">
 							<div>
 								<div>
-									<span class="title" data-bind="text: title"></span>
+									<span class="title" data-bind="text: title, attr: { 'data-content': fullTitle }" rel="popover" data-placement="top" data-trigger="hover"></span>
 									<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
 								</div>
 								<div class="body" data-bind="text: body, visible: showBody"></div>
