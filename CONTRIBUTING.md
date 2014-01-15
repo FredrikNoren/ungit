@@ -53,3 +53,9 @@ Running tests
 -------------
 
 `grunt test` will run both unit tests, REST-interface tests, and clicktests. `grunt unittest` only runs the tests in the test/ folder, `grunt clicktest` runs only the tests in the clicktests/ folder. Install mocha (`npm install -g mocha`) to run specific tests in the test folder and get better stack traces: `mocha test/spec.git-api.js`.
+
+Things to consider when developing
+----------------------------------
+
+* Try to make everything as touch friendly as possible, for instance no mouse over tooltips (try to make it clear without that). Everything doesn't adhere 100% to that right now but I'm trying to move it more in that direction.
+* Write tests. The most important tests to write are usually the clicktests since they will cover the most code (both ui and backend).
