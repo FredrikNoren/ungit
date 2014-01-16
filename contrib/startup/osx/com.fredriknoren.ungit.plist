@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.glasstowerstudios.ungit</string>
+    <string>com.fredriknoren.ungit</string>
 
     <key>ProgramArguments</key>
     <array>
