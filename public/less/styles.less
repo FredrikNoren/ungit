@@ -500,21 +500,6 @@ body {
 
 	}
 
-	.daySeparators {
-		display: none;
-		position: absolute;
-		top: -15px;
-		left: 0px;
-		.daySeparator {
-			position: absolute;
-			font-size: 1.1em;
-			color: #364B53;
-			text-shadow: 1px 1px rgb(21, 28, 41);
-			width: 70px;
-			padding: 5px;
-		}
-	}
-
 	.graphFooter {
 		height: 60px;
 		.progressBar {
@@ -609,20 +594,4 @@ body {
 }
 
 @media (min-width: @screen-lg-min) {
-	.repository-view .graph {
-		.daySeparators {
-			display: block;
-		}
-		.nodeContainer {
-			margin-left: 100px;
-		}
-		.graphLog {
-			left: (@log-width-large + 125px);
-		}
-	}
-	.staging {
-		.arrowDown {
-			left: (@log-width-large + 145px);
-		}
-	}
 }

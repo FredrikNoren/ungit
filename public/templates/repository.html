@@ -32,12 +32,6 @@
 		<!-- ko with: graph -->
 		<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
 
-			<div class="daySeparators" data-bind="foreach: daySeparators">
-				<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
-					<div class="dateLabel" data-bind="text: date"></div>
-				</div>
-			</div>
-
 			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
 
 			<div class="nodes" data-bind="foreach: nodes">
