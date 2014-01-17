@@ -28,16 +28,27 @@ sysinfo.getUngitPackageJsonVersion = function(callback) {
   callback(null, require('../package.json').version);
 };
 
-var npm;
+function noop() {};
+
+var npmconf, RegClient;
 sysinfo.getUngitLatestVersion = function(callback) {
-  if (!npm) npm = require('npm');
-  var packageName = 'ungit';
-  npm.load(function() {
-    npm.commands.show([packageName, 'versions'], true, function(err, data) {
-      if(err) return callback(err);
-      var versions = data[Object.keys(data)[0]].versions;
-      callback(null, versions[versions.length - 1]);
+  if (!npmconf) npmconf = require('npmconf');
+  if (!RegClient) RegClient = require('npm-registry-client');
+  npmconf.load({}, function(err, config) {
+    if (err) return callback(err);
+    var client = new RegClient({
+      registry: 'https://registry.npmjs.org',
+      cache: config.get('cache'),
+      log: { error: noop, warn: noop, info: noop,
+             verbose: noop, silly: noop, http: noop,
+             pause: noop, resume: noop }
     });
+
+    client.get('ungit', 'latest', 1000, function (err, data, raw, res) {
+      if (err) return callback(err);
+      var versions = Object.keys(data.versions);
+      callback(null, versions[versions.length - 1]);
+    })
   });
 }
 
