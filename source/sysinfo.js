@@ -28,7 +28,7 @@ sysinfo.getUngitPackageJsonVersion = function(callback) {
   callback(null, require('../package.json').version);
 };
 
-function noop() {};
+function noop() {}
 
 var npmconf, RegClient;
 sysinfo.getUngitLatestVersion = function(callback) {
