@@ -519,14 +519,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
   });
 
   app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
-    var dir = req.param('path') || req.param('dir');
+    var dir = req.param('dir');
     if (!dir) {
-      return;
+      return res.json(400, { errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
     }
+    
     dir = dir.split(path.sep);
     var prepend = dir[0] + path.sep;
-
-    console.log(dir);
 
     for(var n = 1; n < dir.length; n++) {
       var toCreate = path.join(prepend, dir[n]);
@@ -536,13 +535,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
         try {
           fs.mkdirSync(toCreate);
         } catch (err) {
-          res.json(400, err);
+          return res.json(400, err);
         }
       }
 
       prepend = toCreate;
     }
-    res.json('uninited');
+    return res.json('uninited');
   });
 
   if (config.gerrit) {

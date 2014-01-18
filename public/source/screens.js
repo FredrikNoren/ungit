@@ -88,7 +88,7 @@ var PathViewModel = function(app, path) {
   this.loadingProgressBar.start();
   this.cloningProgressBar = new ProgressBarViewModel('path-loading-' + path, 10000);
   this.cloneUrl = ko.observable();
-  this.title = ko.observable();
+  this.unitiedPathTitle = ko.observable();
   this.cloneDestinationImplicit = ko.computed(function() {
     var defaultText = 'destination folder';
     if (!self.cloneUrl()) return defaultText;
@@ -110,10 +110,8 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.app.get('/quickstatus', { path: this.path }, function(err, status) {
-    self.title="Not a repository";
-    receiveDirectoryStatus(err, status, self);
-  });
+  self.unitiedPathTitle('Not a repository');
+  this.app.get('/quickstatus', { path: this.path }, this.receiveDirectoryStatus.bind(this));
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
@@ -141,25 +139,22 @@ PathViewModel.prototype.cloneRepository = function() {
     self.app.browseTo('repository?path=' + encodeURIComponent(res.path));
   });
 }
-
 PathViewModel.prototype.createDir = function() {
   var self = this;
-  this.app.post('/createDir',  {path: this.path }, function(err, status) {
-    self.title="Directory created";
-    receiveDirectoryStatus(err, status, self);
-  });
+  self.unitiedPathTitle('Directory created');
+  this.app.post('/createDir',  {dir: this.path }, this.receiveDirectoryStatus.bind(this));
 }
-
-var receiveDirectoryStatus = function(err, status, pathModel) {
-  pathModel.loadingProgressBar.stop();
+PathViewModel.prototype.receiveDirectoryStatus = function(err, status) {
+  console.log(this);
+  this.loadingProgressBar.stop();
   if (err) return;
   if (status == 'inited') {
-    pathModel.status('repository');
-    pathModel.repository(new RepositoryViewModel(pathModel.app, pathModel.path));
+    this.status('repository');
+    this.repository(new RepositoryViewModel(this.app, this.path));
   } else if (status == 'uninited') {
-    pathModel.status('uninited');
+    this.status('uninited');
   } else if (status == 'no-such-path') {
-    pathModel.status('invalidpath');
+    this.status('invalidpath');
   }
 };
 
