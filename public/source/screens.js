@@ -145,7 +145,6 @@ PathViewModel.prototype.createDir = function() {
   this.app.post('/createDir',  {dir: this.path }, this.receiveDirectoryStatus.bind(this));
 }
 PathViewModel.prototype.receiveDirectoryStatus = function(err, status) {
-  console.log(this);
   this.loadingProgressBar.stop();
   if (err) return;
   if (status == 'inited') {
