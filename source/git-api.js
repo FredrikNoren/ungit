@@ -10,6 +10,7 @@ var gitParser = require('./git-parser');
 var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
+var mkdirp = require('mkdirp');
 var socketIO;
 
 exports.pathPrefix = '';
@@ -523,24 +524,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     if (!dir) {
       return res.json(400, { errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
     }
-    
-    dir = dir.split(path.sep);
-    var prepend = dir[0] + path.sep;
 
-    for(var n = 1; n < dir.length; n++) {
-      var toCreate = path.join(prepend, dir[n]);
-      var exists = fs.existsSync(toCreate);
-
-      if (!exists) {
-        try {
-          fs.mkdirSync(toCreate);
-        } catch (err) {
-          return res.json(400, err);
-        }
+    mkdirp(dir, function(err) {
+      if (err) {
+        return res.json(400, err);
       }
-
-      prepend = toCreate;
-    }
+    });
+    
     return res.json('uninited');
   });
 

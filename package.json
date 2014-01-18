@@ -43,7 +43,8 @@
     "getmac": "~1.0.6",
     "deep-extend": "~0.2.6",
     "raven": "~0.6.0",
-    "knockout": "~3.0.0"
+    "knockout": "~3.0.0",
+    "mkdirp": "~0.3.5"
   },
   "devDependencies": {
     "mocha": "~1.14.0",
