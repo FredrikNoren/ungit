@@ -531,7 +531,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       }
     });
     
-    return res.json('uninited');
+    return res.json({});
   });
 
   if (config.gerrit) {

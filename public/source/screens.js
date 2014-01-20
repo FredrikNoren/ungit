@@ -111,7 +111,18 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
   self.unitiedPathTitle('Not a repository');
-  this.app.get('/quickstatus', { path: this.path }, this.receiveDirectoryStatus.bind(this));
+  this.app.get('/quickstatus', { path: this.path }, function(err, status){
+    self.loadingProgressBar.stop();
+    if (err) return;
+    if (status == 'inited') {
+      self.status('repository');
+      self.repository(new RepositoryViewModel(self.app, self.path));
+    } else if (status == 'uninited') {
+      self.status('uninited');
+    } else if (status == 'no-such-path') {
+      self.status('invalidpath');
+    }
+  });
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
@@ -142,20 +153,10 @@ PathViewModel.prototype.cloneRepository = function() {
 PathViewModel.prototype.createDir = function() {
   var self = this;
   self.unitiedPathTitle('Directory created');
-  this.app.post('/createDir',  {dir: this.path }, this.receiveDirectoryStatus.bind(this));
+  this.app.post('/createDir',  {dir: this.path }, function() {
+    self.status('uninited');
+  });
 }
-PathViewModel.prototype.receiveDirectoryStatus = function(err, status) {
-  this.loadingProgressBar.stop();
-  if (err) return;
-  if (status == 'inited') {
-    this.status('repository');
-    this.repository(new RepositoryViewModel(this.app, this.path));
-  } else if (status == 'uninited') {
-    this.status('uninited');
-  } else if (status == 'no-such-path') {
-    this.status('invalidpath');
-  }
-};
 
 var LoginViewModel = function(app) {
   var self = this;
