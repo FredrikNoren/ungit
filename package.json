@@ -58,7 +58,7 @@
     "grunt-release": "~0.6.0",
     "grunt-simple-mocha": "0.4.0",
     "grunt-plato": "0.2.1",
-    "grunt-contrib-imagemin": "~0.5.0",
+    "grunt-contrib-imagemin": "~0.3.0",
     "grunt-image-embed": "0.3.1",
     "grunt-browserify": "~2.0.0",
     "phantomjs": "~1.9.2-6",
