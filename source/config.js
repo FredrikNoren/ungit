@@ -82,6 +82,11 @@ var defaultConfig = {
 
   // Allow checking out nodes (which results in a detached head)
   allowCheckoutNodes: false,
+
+  // An array of ip addresses that can connect to ungit. All others are denied.
+  // null indicates all IPs are allowed.
+  // Example (only allow localhost): allowedIPs: ["127.0.0.1"]
+  allowedIPs: null,
 };
 
 // Works for now but should be moved to bin/ungit

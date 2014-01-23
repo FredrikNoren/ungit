@@ -63,6 +63,15 @@ if (config.logRESTRequests) {
   });
 }
 
+if (config.allowedIPs) {
+  app.use(function(req, res, next) {
+    var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+    if (config.allowedIPs.indexOf(ip) >= 0) next();
+    else res.send(403, '<h3>This host is not authorized to connect</h3>' +
+      '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
+  });
+}
+
 var noCache = function(req, res, next) {
   res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.set('Pragma', 'no-cache');
