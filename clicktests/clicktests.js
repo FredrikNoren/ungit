@@ -64,13 +64,15 @@ var testRepoPath;
 
 test('Create test directory', function(done) {
   testRepoPath = testRootPath + '/testrepo';
-  page.open('http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
+  console.log(testRepoPath);
+  page.open('http://localhost:' + config.port + '/api/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
     if (status == 'fail') return done({ status: status, content: page.plainText });
     done();
   });
 });
 
 test('Open path screen', function(done) {
+  console.log(testRepoPath);
   page.open('http://localhost:' + config.port + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
     helpers.waitForElement(page, '[data-ta-container="uninited-path-page"]', function() {
       done();
@@ -90,6 +92,17 @@ test('Clicking logo should bring you to home screen', function(done) {
   helpers.click(page, '[data-ta-clickable="home-link"]');
   helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
     done();
+  });
+});
+
+test('Entering an invalid path and create directory in that location', function(done) {
+  helpers.click(page, '[data-ta-input="navigation-path"]');
+  helpers.write(page, testRootPath + '/not/existing\n');
+  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {  
+    helpers.click(page, '[data-ta-clickable="commit"]');
+    helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
+      done();
+    });
   });
 });
 
@@ -300,7 +313,7 @@ var bareRepoPath;
 
 test('Create a bare repo (not in ui)', function(done) {
   bareRepoPath = testRootPath + '/barerepo';
-  backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/createdir?dir=' + encodeURIComponent(bareRepoPath), function() {
+  backgroundAction('POST', 'http://localhost:' + config.port + '/api/createdir?dir=' + encodeURIComponent(bareRepoPath), function() {
     backgroundAction('POST', 'http://localhost:' + config.port + '/api/init?bare=true&path=' + encodeURIComponent(bareRepoPath), done);
   });
 });

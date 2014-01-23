@@ -10,6 +10,7 @@ var gitParser = require('./git-parser');
 var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
+var mkdirp = require('mkdirp');
 var socketIO;
 
 exports.pathPrefix = '';
@@ -518,6 +519,20 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     }
   });
 
+  app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
+    var dir = req.param('dir');
+    if (!dir) {
+      return res.json(400, { errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
+    }
+
+    mkdirp(dir, function(err) {
+      if (err) {
+        return res.json(400, err);
+      }
+    });
+    
+    return res.json({});
+  });
 
   if (config.gerrit) {
 
@@ -562,7 +577,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
           });
         });
     });
-
   }
 
   if (config.dev) {
@@ -570,11 +584,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
       temp.mkdir('test-temp-dir', function(err, path) {
         res.json({ path: path });
-      });
-    });
-    app.post(exports.pathPrefix + '/testing/createdir', ensureAuthenticated, function(req, res){
-      fs.mkdir(req.param('dir'), function() {
-        res.json({});
       });
     });
     app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
