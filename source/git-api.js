@@ -526,12 +526,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     }
 
     mkdirp(dir, function(err) {
-      if (err) {
-        return res.json(400, err);
-      }
+      if (err) return res.json(400, err);
+      else return res.json({});
     });
-    
-    return res.json({});
   });
 
   if (config.gerrit) {
