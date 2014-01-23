@@ -99,7 +99,7 @@ test('Entering an invalid path and create directory in that location', function(
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, testRootPath + '/not/existing\n');
   helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {  
-    helpers.click(page, '[data-ta-clickable="commit"]');
+    helpers.click(page, '[data-ta-clickable="create-dir"]');
     helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
       done();
     });
