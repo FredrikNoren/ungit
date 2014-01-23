@@ -11,16 +11,16 @@
 // Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
 
 body {
-	padding-top: 105px;
+	padding-top: 112px;
 }
 
 .glyphicon-circled {
 	margin-right: 18px;
 	border: 5px solid #686868;
 	border-radius: 100%;
-	padding-bottom: 4px;
+	padding-bottom: 7px;
 	padding-top: 6px;
-	padding-right: 7px;
+	padding-right: 20px;
 	padding-left: 7px;
 }
 
@@ -28,7 +28,7 @@ body {
 	padding-top: 23px;
 	z-index: 5;
 	box-shadow: 0px 15px 15px #252833;
-	height: 83px;
+	height: 92px;
 
 	.backlink {
 		margin-left: 9px;
@@ -60,9 +60,10 @@ body {
 			}
 			.add-to-repolist {
 				position: absolute;
-				right: 0px;
-				top: 0px;
+				right: 4px;
+				top: 6px;
 				background: transparent;
+				border: 0px;
 				opacity: 0.3;
 				&:hover {
 					opacity: 0.8;
@@ -112,10 +113,10 @@ body {
 	}
 }
 
-.fetchButton {
+.repository-actions {
 	position: absolute;
 	margin-top: 20px;
-	right: 20px;
+	right: 0px;
 	z-index: 30;
 }
 
@@ -246,6 +247,7 @@ body {
 				font-size: 1.3em;
 				cursor: pointer;
 				padding: 3px;
+				border: 0px;
 				border-radius: 3px;
 				color: rgba(255, 255, 255, 0.8);
 			}
@@ -345,7 +347,7 @@ body {
 				z-index: 3;
 			}
 
-			.logEntryBox {
+			.logEntryBox > .panel-body {
 				position: relative;
 				
 				padding: 10px;
@@ -498,21 +500,6 @@ body {
 
 	}
 
-	.daySeparators {
-		display: none;
-		position: absolute;
-		top: -15px;
-		left: 0px;
-		.daySeparator {
-			position: absolute;
-			font-size: 1.1em;
-			color: #364B53;
-			text-shadow: 1px 1px rgb(21, 28, 41);
-			width: 70px;
-			padding: 5px;
-		}
-	}
-
 	.graphFooter {
 		height: 60px;
 		.progressBar {
@@ -577,11 +564,11 @@ body {
 	}
 }
 
-@media (min-width: @screen-medium) {
+@media (min-width: @screen-md-min) {
 	.repository-view .graph {
 		.nodeContainer {
 			.log {
-				.logEntryBox {
+				.logEntryBox > .panel-body {
 					width: @log-width-large;
 					.gravatar {
 						display: block;
@@ -606,21 +593,5 @@ body {
 	}
 }
 
-@media (min-width: @screen-large) {
-	.repository-view .graph {
-		.daySeparators {
-			display: block;
-		}
-		.nodeContainer {
-			margin-left: 100px;
-		}
-		.graphLog {
-			left: (@log-width-large + 125px);
-		}
-	}
-	.staging {
-		.arrowDown {
-			left: (@log-width-large + 145px);
-		}
-	}
+@media (min-width: @screen-lg-min) {
 }

@@ -18,11 +18,9 @@ var GitGraphViewModel = function(repository) {
   this.nodes = ko.observable([]);
   this.edgesById = {};
   this.refs = ko.observableArray();
-  this.daySeparators = ko.observable();
   this.nodesById = {};
   this.refsByRefName = {};
   this.repoPath = repository.repoPath;
-  this.isLoading = ko.observable(false);
   this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000, 400);
   this.checkedOutBranch = ko.observable();
   this.checkedOutRef = ko.computed(function() {
@@ -74,12 +72,10 @@ GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function() {
   var self = this;
-  this.isLoading(true);
   this.nodesLoader.start();
   this.app.get('/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
     if (err) { self.nodesLoader.stop(); return; }
     self.setNodesFromLog(logEntries);
-    self.isLoading(false);
     self.nodesLoader.stop();
   });
 }
@@ -212,7 +208,6 @@ GitGraphViewModel.randomColor = function() {
 
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
-  var daySeparators = [];
   nodes.sort(function(a, b) { return b.commitTime().unix() - a.commitTime().unix(); });
   nodes.forEach(function(node, i) { node.index(i); });
   nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
@@ -288,14 +283,8 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
     goalPosition.y = y;
     node.setPosition(goalPosition);
 
-    var secondsInADay = 60 * 60 * 24;
-    if (prevNode && Math.floor(prevNode.commitTime().unix() / secondsInADay) != Math.floor(node.commitTime().unix() / secondsInADay)) {
-      daySeparators.push({ x: 0, y: goalPosition.y, date: node.commitTime().format('ll') });
-    }
-
     prevNode = node;
   });
 
   this.nodes(nodes);
-  this.daySeparators(daySeparators);
 }

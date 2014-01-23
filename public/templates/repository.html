@@ -19,37 +19,41 @@
 
 		<!-- ko if: showLog -->
 
-		<!-- ko template: { name: 'remotes', data: remotes } --><!-- /ko -->
+		<div class="repository-actions">
+			<!-- ko with: graph -->
+			<button type="button" class="btn btn-default" data-ta-clickable="refresh-graph" data-bind="click: loadNodesFromApi">
+				<span class="glyphicon glyphicon-refresh"></span>
+				<!-- ko template: { name: 'temporaryProgressBar', data: nodesLoader } --><!-- /ko -->
+			</button>
+			<!-- /ko -->
+			<!-- ko template: { name: 'remotes', data: remotes } --><!-- /ko -->
+		</div>
 		
 		<!-- ko with: graph -->
 		<div class="graph" data-bind="scrolledToEnd: scrolledToEnd">
-
-			<div class="daySeparators" data-bind="foreach: daySeparators">
-				<div class="daySeparator" data-bind="style: { left: x + 'px', top: y + 'px' }">
-					<div class="dateLabel" data-bind="text: date"></div>
-				</div>
-			</div>
 
 			<!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
 
 			<div class="nodes" data-bind="foreach: nodes">
 				<div class="nodeContainer" data-ta-container="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
 					<div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { highlighted: highlighted, hover: nodeIsMousehover }">
-						<div class="logEntryBox panel clearfix">
-							<div class="arrowContainer arrowRight">
-								<div class="shadow"></div>
-								<div class="arrow"></div>
-							</div>
-							<img class="pull-left img-circle gravatar"
-								data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
-								onerror="this.style.display='none';">
-							<div>
-								<div>
-									<span class="title" data-bind="text: title"></span>
-									<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+						<div class="logEntryBox panel panel-default">
+							<div class="panel-body clearfix">
+								<div class="arrowContainer arrowRight">
+									<div class="shadow"></div>
+									<div class="arrow"></div>
 								</div>
-								<div class="body" data-bind="text: body, visible: showBody"></div>
-								<div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
+								<img class="pull-left img-circle gravatar"
+									data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
+									onerror="this.style.display='none';">
+								<div>
+									<div>
+										<span class="title" data-bind="text: title"></span>
+										<span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+									</div>
+									<div class="body" data-bind="text: body, visible: showBody"></div>
+									<div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -109,9 +113,7 @@
 			</div>
 
 			<div class="graphFooter">
-				<!-- ko if: isLoading -->
-				<!-- ko template: { name: 'progressBar', data: nodesLoader } --><!-- /ko -->
-				<!-- /ko -->
+				<!-- ko template: { name: 'temporaryProgressBar', data: nodesLoader } --><!-- /ko -->
 			</div>
 
 		</div>

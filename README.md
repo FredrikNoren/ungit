@@ -15,7 +15,7 @@ The easiest way to use git. On any platform. Anywhere.
 
 Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
 
-[![Screenshot](/screenshot.png)](http://youtu.be/hkBVAi3oKvo)
+[![Screenshot](screenshot.png)](http://youtu.be/hkBVAi3oKvo)
 
 Installing
 ----------
