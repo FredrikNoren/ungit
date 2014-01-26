@@ -93,7 +93,7 @@ var defaultConfig = {
 var argv = optimist
   .usage('ungit [-b] [--cliconfigonly]')
   .alias('b', 'launchBrowser')
-  .describe('b', 'Launch a browser window with ungit when the ungit server is started')
+  .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this.')
   .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
   .argv;
 
