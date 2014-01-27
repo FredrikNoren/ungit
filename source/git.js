@@ -69,6 +69,7 @@ var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
+  this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
@@ -76,14 +77,25 @@ GitExecutionTask.prototype.parser = function(parser) {
   this._parser = parser;
   return this;
 }
-GitExecutionTask.prototype.setEncoding = function(encoding) {
-  this.encoding = encoding;
+GitExecutionTask.prototype.encoding = function(encoding) {
+  this._encoding = encoding;
+  return this;
+}
+GitExecutionTask.prototype.timeout = function(timeout) {
+  this._timeout = timeout;
   return this;
 }
 
 var gitQueue = async.queue(function (task, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command + ' ' + task.encoding);
-  var process = child_process.exec(task.command, { cwd: task.repoPath, maxBuffer: 1024 * 1024 * 10, encoding: task.encoding},
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
+  var process = child_process.exec(
+    task.command, 
+    { 
+      cwd: task.repoPath,
+      maxBuffer: 1024 * 1024 * 10,
+      encoding: task._encoding,
+      timeout: task._timeout
+    },
     function (error, stdout, stderr) {
       stdout = stdout.toString(); // Convert Buffers to strings
       stderr = stderr.toString();
@@ -212,7 +224,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 
 git.binaryFileContentAtHead = function(repoPath, filename) {
   return git('show HEAD:' + filename, repoPath)
-        .setEncoding('binary');
+        .encoding('binary');
 }
 
 

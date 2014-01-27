@@ -150,11 +150,13 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
   app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Default timeout is 2min but clone can take much longer than that (allows up to 2h)
-    if (res.setTimeout) res.setTimeout(2 * 60 * 60 * 1000);
+    var timeoutMs = 2 * 60 * 60 * 1000;
+    if (res.setTimeout) res.setTimeout(timeoutMs);
 
     var url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
     git(credentialsOption(req.param('socketId')) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'))
+      .timeout(timeoutMs)
       .fail(jsonFail.bind(null, res))
       .done(function(result) { res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) }); })
       .always(emitGitDirectoryChanged.bind(null, req.param('path')));
@@ -162,21 +164,25 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
   app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Allow a little longer timeout on fetch (10min)
-    if (res.setTimeout) res.setTimeout(10 * 60 * 1000);
+    var timeoutMs = 10 * 60 * 1000;
+    if (res.setTimeout) res.setTimeout(timeoutMs);
 
     git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' + 
         (req.param('ref') ? req.param('ref') : '') + (config.autoPruneOnFetch ? ' --prune' : ''),
         req.param('path'))
+      .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')));
   });
 
   app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Allow a little longer timeout on push (10min)
-    if (res.setTimeout) res.setTimeout(10 * 60 * 1000);
+    var timeoutMs = 10 * 60 * 1000;
+    if (res.setTimeout) res.setTimeout(timeoutMs);
 
     git(credentialsOption(req.param('socketId')) + ' push ' + (req.param('force') ? ' -f ' : '') + req.param('remote') + ' ' + (req.body.refSpec ? req.body.refSpec : 'HEAD') +
       (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
+      .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')));
   });
