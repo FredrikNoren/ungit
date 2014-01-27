@@ -87,6 +87,10 @@ var defaultConfig = {
   // null indicates all IPs are allowed.
   // Example (only allow localhost): allowedIPs: ["127.0.0.1"]
   allowedIPs: null,
+
+  // Automatically remove remote tracking branches that have been removed on the
+  // server when fetching. (git fetch -p)
+  autoPruneOnFetch: true,
 };
 
 // Works for now but should be moved to bin/ungit

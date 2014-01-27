@@ -164,7 +164,9 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     // Allow a little longer timeout on fetch (10min)
     if (res.setTimeout) res.setTimeout(10 * 60 * 1000);
 
-    git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' + (req.param('ref') ? req.param('ref') : ''), req.param('path'))
+    git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' + 
+        (req.param('ref') ? req.param('ref') : '') + (config.autoPruneOnFetch ? ' --prune' : '')
+        , req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')));
   });
