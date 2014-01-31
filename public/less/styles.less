@@ -345,6 +345,15 @@ body {
 			}
 			&.hover {
 				z-index: 3;
+
+				.logEntryBox > .panel-body {
+					.title {
+						font-size: 1.3em;
+						overflow:auto;
+						white-space: inherit;
+						display: inline;
+					}
+				}
 			}
 
 			.logEntryBox > .panel-body {
@@ -370,6 +379,11 @@ body {
 
 				.title {
 					font-size: 1.3em;
+					overflow:hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					width: 340px;
+					display: block;
 				}
 
 				.body {
