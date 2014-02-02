@@ -27,6 +27,7 @@ GraphActions.ActionBase = function(graph) {
     return c;
   })
 }
+GraphActions.ActionBase.prototype.icon = null;
 GraphActions.ActionBase.prototype.doPerform = function() {
   var self = this;
   this.graph.hoverGraphAction(null);
@@ -63,6 +64,7 @@ GraphActions.Move = function(graph, node) {
 inherits(GraphActions.Move, GraphActions.ActionBase);
 GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.style = 'move';
+GraphActions.Move.prototype.icon = 'glyphicon-move';
 GraphActions.Move.prototype.perform = function(callback) {
   this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
@@ -87,6 +89,7 @@ GraphActions.Reset = function(graph, node) {
 inherits(GraphActions.Reset, GraphActions.ActionBase);
 GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.style = 'reset';
+GraphActions.Reset.prototype.icon = 'glyphicon-trash';
 GraphActions.Reset.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
@@ -177,6 +180,7 @@ GraphActions.Push = function(graph, node) {
 inherits(GraphActions.Push, GraphActions.ActionBase);
 GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
+GraphActions.Push.prototype.icon = 'glyphicon-open';
 GraphActions.Push.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
@@ -222,6 +226,7 @@ GraphActions.Checkout = function(graph, node) {
 inherits(GraphActions.Checkout, GraphActions.ActionBase);
 GraphActions.Checkout.prototype.text = 'Checkout';
 GraphActions.Checkout.prototype.style = 'checkout';
+GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
@@ -259,6 +264,7 @@ GraphActions.Delete = function(graph, node) {
 inherits(GraphActions.Delete, GraphActions.ActionBase);
 GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.style = 'delete';
+GraphActions.Delete.prototype.icon = 'glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
   var self = this;
   var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
