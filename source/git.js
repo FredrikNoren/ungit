@@ -236,15 +236,17 @@ git.diffFile = function(repoPath, filename) {
     .fail(task.setResult)
     .done(function(status) {
       var file = status.files[filename];
+      var filePath = path.join(repoPath, filename);
       if (!file) {
         if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
-      } else if (!file.isNew) {
+        // If the file is new or if it's a directory, i.e. a submodule
+      } else if (!file.isNew || fs.lstatSync(filePath).isDirectory()) {
         git('diff HEAD -- "' + filename.trim() + '"', repoPath)
           .parser(gitParser.parseGitDiff)
           .always(task.setResult);
       } else {
-        fs.readFile(path.join(repoPath, filename), { encoding: 'utf8' }, function(err, text) {
+        fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
           var diffs = [];
           var diff = { };
