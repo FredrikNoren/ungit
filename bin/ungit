@@ -76,8 +76,14 @@ function verifyGitVersion(callback) {
     if (err) {
       callback('Can\'t run "git --version". Is git installed and available in your path?');
     } else {
-      var version = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout)[1];
+      var versionSearch = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout);
       var requiredVersion = '>=1.8.x';
+      if (!versionSearch) {
+        console.log('Failed to parse git version number: ', stdout);
+        console.log('Note that Ungit requires git version ' + requiredVersion);
+        return callback();
+      }
+      var version = versionSearch[1];
       if (!semver.satisfies(version, requiredVersion)) {
         callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
       } else {
