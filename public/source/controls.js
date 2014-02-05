@@ -1,77 +1,81 @@
 
 var ko = require('knockout');
 
-var ProgressBarViewModel = function(predictionMemoryKey, defaultTimeMs, showTime) {
+var ProgressBarViewModel = function(predictionMemoryKey, fallbackPredictedTimeMs) {
   var self = this;
-  if (defaultTimeMs === undefined) defaultTimeMs = 1000;
-  if (showTime === undefined) showTime = 200;
-  this.progress = ko.observable();
+  if (fallbackPredictedTimeMs === undefined) fallbackPredictedTimeMs = 1000;
+  this.style = ko.observable();
   this.running = ko.observable(false);
-  this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
-  this.predictionMs = ko.observable();
-  this.isFirstRun = ko.observable(false);
-  this.defaultTimeMs = defaultTimeMs;
-  this.elapsedMs = ko.observable(0);
-  this.paused = ko.observable(false);
-  this.show = ko.computed(function() {
-    if (self.isFirstRun()) return self.elapsedMs() > showTime;
-    else return self.predictionMs() > showTime;
-  });
+  self._width = ko.observable(0);
+  self._opacity = ko.observable(1);
+  self._widthSpeed = ko.observable(0);
+  self._opacitySpeed = ko.observable(0);
+  self._animationState = ko.observable('running');
   this.style = ko.computed(function() {
-    if (self.isFirstRun()) {
-      if (self.elapsedMs() > showTime) return 'animated fadeIn';
-      else return '';
-    }
-    else if (self.predictionMs() > showTime) return 'animated fadeIn';
+    return 'width: ' + self._width() + '%; ' + 
+      'opacity: ' + self._opacity() + '; ' +
+      '-webkit-transition: width ' + self._widthSpeed() + 'ms, opacity ' + self._opacitySpeed() + 'ms;' +
+      'transition: width ' + self._widthSpeed() + 'ms, opacity ' + self._opacitySpeed() + 'ms; ' +
+      'animation-play-state: ' + self._animationState();
   });
+  this.predictionMemoryKey = 'predict-' + predictionMemoryKey;
+  this.isFirstRun = ko.observable(false);
+  this.fallbackPredictedTimeMs = fallbackPredictedTimeMs;
 }
 exports.ProgressBarViewModel = ProgressBarViewModel;
 ProgressBarViewModel.prototype.start = function() {
   if (this.running()) return;
-  this.running(true);
-  this.progress(0);
-  this.paused(false);
-  this.elapsedMs(0);
-  this.lastUpdate = Date.now();
+  var self = this;
   var predictionMs = localStorage.getItem(this.predictionMemoryKey);
   if (!predictionMs || isNaN(predictionMs)) {
     this.isFirstRun(true);
-    predictionMs = this.defaultTimeMs;
+    predictionMs = this.fallbackPredictedTimeMs;
   } else {
     predictionMs = parseInt(predictionMs);
   }
-  this.predictionMs(predictionMs);
-  this.update();
+  this.predictionMs = predictionMs;
+  this._width(0);
+  this._opacity(1);
+  this._opacitySpeed(0);
+  this._widthSpeed(0);
+  this._animationState('running');
+  this.running(true);
+  this.startMs = Date.now();
+  this.pausedMs = 0;
+  setTimeout(function(){
+    predictionMs = Math.max(500, predictionMs);
+    self._width(80);
+    self._widthSpeed(predictionMs);
+  }, 1);
 }
-ProgressBarViewModel.prototype.update = function() {
-  if (!this.running()) return;
-  if (!this.paused()) {
-    var time = Date.now();
-    var delta = time - this.lastUpdate;
-    this.lastUpdate = time;
-    this.elapsedMs(this.elapsedMs() + delta);
-    var value = this.elapsedMs() / this.predictionMs();
-    value = Math.min(1, value);
-    this.progress(value);
-  }
-  window.requestAnimationFrame(this.update.bind(this));
-}
+
 ProgressBarViewModel.prototype.pause = function() {
-  this.paused(true);
+  this._animationState('paused');
+  this.pauseStartMs = Date.now();
 }
 ProgressBarViewModel.prototype.unpause = function() {
-  this.paused(false);
-  this.lastUpdate = Date.now();
+  this._animationState('running');
+  this.pausedMs += Date.now() - this.pauseStartMs;
 }
 ProgressBarViewModel.prototype.stop = function() {
-  if (!this.running()) return;
-  this.running(false);
-  this.lastRealTime = this.elapsedMs();
-  if (this.isFirstRun()) {
-    this.isFirstRun(false);
-    this.predictionMs(this.lastRealTime);
+  var self = this;
+  var elapsedMs = Date.now() - this.startMs - this.pausedMs;
+  var newPrediction;
+  if (self.isFirstRun()) {
+    self.isFirstRun(false);
+    newPrediction = elapsedMs;
   } else {
-    this.predictionMs(this.lastRealTime * 0.1 + this.predictionMs() * 0.9);
+    newPrediction = elapsedMs * 0.1 + self.predictionMs * 0.9;
   }
-  localStorage.setItem(this.predictionMemoryKey, this.predictionMs().toString());
+  localStorage.setItem(self.predictionMemoryKey, newPrediction.toString());
+
+  self._width(100);
+  self._widthSpeed(300);
+  setTimeout(function() {
+    self._opacity(0);
+    self._opacitySpeed(300);
+    setTimeout(function() {
+      self.running(false);
+    }, 310);
+  }, 400);
 }

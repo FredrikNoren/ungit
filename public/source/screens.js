@@ -157,6 +157,10 @@ PathViewModel.prototype.createDir = function() {
     self.status('uninited');
   });
 }
+PathViewModel.prototype.refreshContent = function(callback) {
+  if (this.repository()) this.repository().refreshContent(callback);
+  else callback();
+}
 
 var LoginViewModel = function(app) {
   var self = this;

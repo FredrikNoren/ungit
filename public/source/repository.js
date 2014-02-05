@@ -37,7 +37,7 @@ var RepositoryViewModel = function(app, repoPath) {
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
-  this.staging.refresh();
+  this.staging.refreshContent();
   this.staging.invalidateFilesDiffs();
 }
 RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
@@ -45,6 +45,12 @@ RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
   this.graph.loadNodesFromApi();
   this.graph.updateBranches();
   this.remotes.updateRemotes();
+}
+RepositoryViewModel.prototype.refreshContent = function(callback) {
+  async.parallel([
+    this.staging.refreshContent.bind(this.staging),
+    this.graph.loadNodesFromApi.bind(this.graph)
+  ], callback);
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.graph.updateAnimationFrame(deltaT);

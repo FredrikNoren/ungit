@@ -21,7 +21,7 @@ var GitGraphViewModel = function(repository) {
   this.nodesById = {};
   this.refsByRefName = {};
   this.repoPath = repository.repoPath;
-  this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000, 400);
+  this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000);
   this.checkedOutBranch = ko.observable();
   this.checkedOutRef = ko.computed(function() {
     if (self.checkedOutBranch())
@@ -70,13 +70,18 @@ exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.graphic.updateAnimationFrame(deltaT);
 }
-GitGraphViewModel.prototype.loadNodesFromApi = function() {
+GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
   this.nodesLoader.start();
   this.app.get('/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
-    if (err) { self.nodesLoader.stop(); return; }
+    if (err) {
+      self.nodesLoader.stop();
+      if (callback) callback();
+      return;
+    }
     self.setNodesFromLog(logEntries);
     self.nodesLoader.stop();
+    if (callback) callback();
   });
 }
 GitGraphViewModel.prototype.updateBranches = function() {

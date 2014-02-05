@@ -7,6 +7,7 @@ var blockable = require('../../source/utils/blockable');
 var _ = require('lodash');
 var superagent = require('../vendor/js/superagent');
 var async = require('async');
+var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 
 
 var AppViewModel = function(appContainer, browseTo) {
@@ -32,6 +33,7 @@ var AppViewModel = function(appContainer, browseTo) {
   this.showBackButton = ko.computed(function() {
     return !(self.content() instanceof screens.HomeViewModel);
   });
+  this.refreshingProgressBar = new ProgressBarViewModel('refreshing-content');
 
   this.bugtrackingNagscreenDismissed = ko.computed({
     read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
@@ -185,6 +187,16 @@ AppViewModel.prototype.addCurrentPathToRepoList = function() {
   if (repos.indexOf(repoPath) != -1) return;
   repos.push(repoPath);
   this.repoList(repos);
+  return true;
+}
+AppViewModel.prototype.refresh = function() {
+  var self = this;
+  if (this.content().refreshContent) {
+    this.refreshingProgressBar.start();
+    this.content().refreshContent(function() {
+      self.refreshingProgressBar.stop();
+    });
+  }
   return true;
 }
 AppViewModel.prototype.get = function(path, query, callback) {
