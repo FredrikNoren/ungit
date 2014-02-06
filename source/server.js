@@ -13,6 +13,7 @@ var path = require('path');
 var fs = require('fs');
 var async = require('async');
 var signals = require('signals');
+var os = require('os');
 
 process.on('uncaughtException', function(err) {
   winston.error(err.stack.toString());
@@ -149,6 +150,7 @@ app.get('/serverdata.js', function(req, res) {
     var text = 'ungit.config = ' + JSON.stringify(config) + ';\n';
     text += 'ungit.userHash = "' + data.userHash + '";\n';
     text += 'ungit.version = "' + data.version + '";\n';
+    text += 'ungit.platform = "' + os.platform() + '"\n';
     res.send(text);
   });
 });

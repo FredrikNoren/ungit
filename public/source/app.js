@@ -29,6 +29,7 @@ var AppViewModel = function(appContainer, browseTo) {
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
   this.newVersionAvailable = ko.observable();
+  this.newVersionInstallCommand = (ungit.platform == 'win32' ? '' : 'sudo -H ') + 'npm update -g ungit';
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
   this.showBackButton = ko.computed(function() {
     return !(self.content() instanceof screens.HomeViewModel);

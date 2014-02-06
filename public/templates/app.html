@@ -28,7 +28,7 @@
 
 <div class="container">
 	<div class="alert alert-info" data-bind="visible: newVersionAvailable">
-		A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run 'npm update -g ungit' to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
+		A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run <code data-bind="text: newVersionInstallCommand"></code> to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 	</div>
 
