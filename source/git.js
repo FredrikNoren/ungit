@@ -13,6 +13,16 @@ var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 
+var git = function(command, repoPath, sendToQueue) {
+  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+
+  var task = new GitExecutionTask(command, repoPath);
+
+  if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
+
+  return task;
+}
+
 var GitTask = function() {
   var self = this;
   this._completed = false;
@@ -86,8 +96,13 @@ GitExecutionTask.prototype.timeout = function(timeout) {
   return this;
 }
 
+
+git.runningTasks = [];
+
 var gitQueue = async.queue(function (task, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
+  git.runningTasks.push(task);
+  task.startTime = Date.now();
   var process = child_process.exec(
     task.command, 
     { 
@@ -97,6 +112,7 @@ var gitQueue = async.queue(function (task, callback) {
       timeout: task._timeout
     },
     function (error, stdout, stderr) {
+      git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
       stdout = stdout.toString(); // Convert Buffers to strings
       stderr = stderr.toString();
       if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
@@ -149,16 +165,6 @@ var gitQueue = async.queue(function (task, callback) {
 
   task.setStarted(process);
 }, config.maxConcurrentGitOperations);
-
-var git = function(command, repoPath, sendToQueue) {
-  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
-
-  var task = new GitExecutionTask(command, repoPath);
-
-  if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
-
-  return task;
-}
 
 git.queueTask = function(task) {
   gitQueue.push(task);

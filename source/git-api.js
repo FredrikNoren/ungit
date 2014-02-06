@@ -584,6 +584,18 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
     });
   }
 
+  app.get(exports.pathPrefix + '/debug', ensureAuthenticated, function(req, res) {
+    res.json({
+      runningGitTasks: git.runningTasks.map(function(task) {
+        return {
+          path: task.repoPath,
+          command: task.command,
+          runningTime: (Date.now() - task.startTime) / 1000
+        };
+      })
+    });
+  });
+
   if (config.dev) {
 
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
