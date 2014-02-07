@@ -107,7 +107,7 @@ var gitQueue = async.queue(function (task, callback) {
     task.command, 
     { 
       cwd: task.repoPath,
-      maxBuffer: 1024 * 1024 * 10,
+      maxBuffer: 1024 * 1024 * 100,
       encoding: task._encoding,
       timeout: task._timeout
     },
