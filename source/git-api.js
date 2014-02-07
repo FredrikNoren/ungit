@@ -459,7 +459,7 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
 
       git('rev-parse --is-inside-work-tree', req.param('path'))
         .always(function(err, result) {
-          if (err || result.indexOf('true') == -1) res.json('uninited');
+          if (err || result.toString().indexOf('true') == -1) res.json('uninited');
           else res.json('inited');
         });
     })
