@@ -91,6 +91,17 @@ RefViewModel.prototype.getRemoteRefFullName = function(remote) {
   if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
   return null;
 }
+RefViewModel.prototype.remove = function(callback) {
+  var self = this;
+  var url = this.isTag ? '/tags' : '/branches';
+  if (this.isRemote) url = '/remote' + url;
+  this.app.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
+    callback();
+    self.graph.loadNodesFromApi();
+    if (url == '/remote/tags')
+      self.graph.repository.remotes.fetch({ tags: true });
+  });
+}
 RefViewModel.prototype.moveTo = function(target, callback) {
   var self = this;
   if (this.isLocal) {

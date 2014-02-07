@@ -266,15 +266,7 @@ GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.icon = 'glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
-  var self = this;
-  var url = this.graph.currentActionContext().isTag ? '/tags' : '/branches';
-  if (this.graph.currentActionContext().isRemote) url = '/remote' + url;
-  this.app.del(url, { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(), name: this.graph.currentActionContext().refName }, function(err) {
-    callback();
-    self.graph.loadNodesFromApi();
-    if (url == '/remote/tags')
-      self.graph.repository.remotes.fetch({ tags: true });
-  });
+  this.graph.currentActionContext().remove(callback);
 }
 
 
