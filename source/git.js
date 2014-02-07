@@ -153,6 +153,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'non-fast-forward';
         else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
           err.errorCode = 'merge-failed';
+        else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
+          err.errorCode = 'must-be-in-working-tree';
         task.setResult(err);
         callback(err);
       }

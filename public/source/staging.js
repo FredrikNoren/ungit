@@ -66,7 +66,7 @@ StagingViewModel.prototype.refreshContent = function(callback) {
   this.app.get('/status', { path: this.repoPath }, function(err, status) {
     if (err) {
       if (callback) callback(err);
-      return;
+      return err.errorCode == 'must-be-in-working-tree';
     }
     self.setFiles(status.files);
     self.inRebase(!!status.inRebase);
