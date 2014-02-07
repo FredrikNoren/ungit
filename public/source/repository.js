@@ -83,13 +83,14 @@ function RemotesViewModel(repository) {
   this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
 
   this.fetchEnabled = ko.computed(function() {
-    return self.remotes().length > 0 && !self.fetchingProgressBar.running();
+    return self.remotes().length > 0;
   });
 
   this.shouldAutoFetch = ungit.config.autoFetch;
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.fetch = function(options, callback) {
+  if (this.fetchingProgressBar.running()) return;
   var self = this;
 
   var programEventListener = function(event) {
