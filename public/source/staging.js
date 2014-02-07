@@ -37,7 +37,7 @@ var StagingViewModel = function(repository) {
     return !self.amend();
   });
   this.showNux = ko.computed(function() {
-    return self.files().length == 0 && !self.amend();
+    return self.files().length == 0 && !self.amend() && !self.inRebase();
   });
   this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
   this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
