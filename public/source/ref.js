@@ -38,10 +38,6 @@ var RefViewModel = function(args) {
   }
   if (this.isRemoteBranch) {
     this.localRefName = this.name.slice('refs/remotes/'.length);
-    // get rid of the origin/ part of origin/branchname
-    var s = this.localRefName.split('/');
-    this.remote = s[0];
-    this.refName = s.slice(1).join('/');
   }
   if (this.isLocalTag) {
     this.localRefName = this.name.slice('tag: refs/tags/'.length);
@@ -49,7 +45,9 @@ var RefViewModel = function(args) {
   }
   if (this.isRemoteTag) {
     this.localRefName = this.name.slice('remote-tag: '.length);
-    // same as for the remote branch
+  }
+  if (this.isRemote) {
+    // get rid of the origin/ part of origin/branchname
     var s = this.localRefName.split('/');
     this.remote = s[0];
     this.refName = s.slice(1).join('/');
