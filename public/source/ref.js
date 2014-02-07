@@ -39,7 +39,9 @@ var RefViewModel = function(args) {
   if (this.isRemoteBranch) {
     this.localRefName = this.name.slice('refs/remotes/'.length);
     // get rid of the origin/ part of origin/branchname
-    this.refName = this.localRefName.split('/').slice(1).join('/');
+    var s = this.localRefName.split('/');
+    this.remote = s[0];
+    this.refName = s.slice(1).join('/');
   }
   if (this.isLocalTag) {
     this.localRefName = this.name.slice('tag: refs/tags/'.length);
@@ -48,7 +50,9 @@ var RefViewModel = function(args) {
   if (this.isRemoteTag) {
     this.localRefName = this.name.slice('remote-tag: '.length);
     // same as for the remote branch
-    this.refName = this.localRefName.split('/').slice(1).join('/');
+    var s = this.localRefName.split('/');
+    this.remote = s[0];
+    this.refName = s.slice(1).join('/');
   }
   this.show = true;
   this.graph = args.graph;
@@ -97,7 +101,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     else
       this.app.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
   } else {
-    var pushReq = { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
+    var pushReq = { path: this.graph.repoPath, remote: this.remote,
       refSpec: target, remoteBranch: this.refName };
     this.app.post('/push', pushReq, function(err, res) {
         if (err) {
