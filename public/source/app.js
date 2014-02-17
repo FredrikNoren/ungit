@@ -43,6 +43,21 @@ var AppViewModel = function(appContainer, browseTo) {
   this.showBugtrackingNagscreen = ko.computed(function() {
     return !self.bugtrackingEnabled() && !self.bugtrackingNagscreenDismissed();
   });
+
+  var NPSSurveyLastDismissed = parseInt(localStorage.getItem('NPSSurveyLastDismissed') || '0');
+  var monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
+  this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
+  this.sendNPS = function(value) {
+    Keen.addEvent('survey-nps', {
+      version: ungit.version,
+      userHash: ungit.userHash,
+      rating: value,
+      bugtrackingEnabled: ungit.config.bugtracking,
+      sendUsageStatistics: ungit.config.sendUsageStatistics
+    });
+    self.dismissNPSSurvey();
+  }
+
   this.programEvents = new signals.Signal();
   this.programEvents.add(function(event) {
     console.log('Event:', event);
@@ -177,6 +192,10 @@ AppViewModel.prototype.enableBugtracking = function() {
 }
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
   this.bugtrackingNagscreenDismissed(true);
+}
+AppViewModel.prototype.dismissNPSSurvey = function() {
+  this.showNPSSurvey(false);
+  localStorage.setItem('NPSSurveyLastDismissed', Date.now());
 }
 AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
