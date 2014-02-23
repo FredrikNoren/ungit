@@ -153,7 +153,7 @@ var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
     var componentInjection = Object.keys(components).map(function(componentName) {
       var component = components[componentName];
-      var inject = '<script type="text/javascript" src="/components/' + component.dir + '/' + component.manifest.clientMain + '"></script>\n';
+      var inject = '<script type="text/javascript" src="' + component.httpBasePath + '/components/' + component.dir + '/' + component.manifest.clientMain + '"></script>\n';
       if (typeof(component.manifest.injectHtml) == 'string') component.manifest.injectHtml = [component.manifest.injectHtml];
       if (component.manifest.injectHtml instanceof Array) {
         component.manifest.injectHtml.forEach(function(fileName) {
@@ -193,10 +193,10 @@ var apiEnvironment = {
 gitApi.registerApi(apiEnvironment);
 
 // Init components
-var components = {};
-function loadComponents(componentsBasePath) {
+var components = [];
+function loadComponents(componentsBasePath, httpBasePath) {
   fs.readdirSync(componentsBasePath).forEach(function(componentDir) {
-    var component = { dir: componentDir };
+    var component = { dir: componentDir, httpBasePath: httpBasePath };
     winston.info('Loading component: ' + componentDir);
     component.path = path.join(componentsBasePath, componentDir);
     component.manifest = require(path.join(component.path, "ungit-component.json"));
@@ -205,13 +205,13 @@ function loadComponents(componentsBasePath) {
       return;
     }
     component.init = function() {
-      app.use('/components/' + this.dir, express.static(this.path));
+      app.use(this.httpBasePath + '/components/' + this.dir, express.static(this.path));
     }
-    components[componentDir] = component;
+    components.push(component);
     winston.info('Component loaded: ' + componentDir);
   });
 }
-loadComponents(path.join(__dirname, '..', 'components'));
+loadComponents(path.join(__dirname, '..', 'components'), '');
 
 // Init plugins
 var plugins = [];
@@ -225,7 +225,8 @@ function loadPlugins(pluginBasePath) {
       return;
     }
     var componentsBasePath = path.join(pluginPath, 'components');
-    if (path.existsSync(componentsBasePath)) loadComponents(componentsBasePath);
+    if (path.existsSync(componentsBasePath))
+      loadComponents(componentsBasePath, 'plugins/' + pluginDir);
     if (pluginManifest.serverScript) {
       var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
       pluginBackend(apiEnvironment);
@@ -238,8 +239,8 @@ function loadPlugins(pluginBasePath) {
 if (path.existsSync(config.pluginDirectory))
   loadPlugins(config.pluginDirectory);
 
-Object.keys(components).forEach(function(componentName) {
-  components[componentName].init();
+components.forEach(function(component) {
+  component.init();
 })
 
 app.get('/serverdata.js', function(req, res) {
