@@ -61,7 +61,9 @@ ko.bindingHandlers.component = {
   },
   'update': function (element, valueAccessor, allBindings, viewModel, bindingContext) {
     var component = ko.utils.unwrapObservable(valueAccessor());
-    component.updateNode(element);
+    var node = component.updateNode(element);
+    if (node)
+      ko.virtualElements.setDomNodeChildren(element, [node]);
   }
 };
 ko.virtualElements.allowedBindings.component = true;
