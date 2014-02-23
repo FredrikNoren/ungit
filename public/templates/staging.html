@@ -20,23 +20,23 @@
 				
 				<button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
 					Commit
-					<!-- ko template: { name: 'temporaryProgressBar', data: committingProgressBar } --><!-- /ko -->
+					<!-- ko component: committingProgressBar --><!-- /ko -->
 				</button>
 				<button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
 					Continue rebase
-					<!-- ko template: { name: 'temporaryProgressBar', data: rebaseContinueProgressBar } --><!-- /ko -->
+					<!-- ko component: rebaseContinueProgressBar --><!-- /ko -->
 				</button>
 				<button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
 					Abort rebase
-					<!-- ko template: { name: 'temporaryProgressBar', data: rebaseAbortProgressBar } --><!-- /ko -->
+					<!-- ko component: rebaseAbortProgressBar --><!-- /ko -->
 				</button>
 				<button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
 					Continue merge
-					<!-- ko template: { name: 'temporaryProgressBar', data: mergeContinueProgressBar } --><!-- /ko -->
+					<!-- ko component: mergeContinueProgressBar --><!-- /ko -->
 				</button>
 				<button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
 					Abort merge
-					<!-- ko template: { name: 'temporaryProgressBar', data: mergeAbortProgressBar } --><!-- /ko -->
+					<!-- ko component: mergeAbortProgressBar --><!-- /ko -->
 				</button>
 				<span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
 			</div>
@@ -54,7 +54,7 @@
 					<button class="btn btn-default" data-bind="click: stashAll, css: { disabled: !canStashAll() }">
 						<span class="glyphicon glyphicon-paperclip"></span> 
 						Stash all
-						<!-- ko template: { name: 'temporaryProgressBar', data: stashProgressBar } --><!-- /ko -->
+						<!-- ko component: stashProgressBar --><!-- /ko -->
 					</button>
 				</div>
 
@@ -65,7 +65,7 @@
 						</div>
 						<button class="name btn btn-default" data-bind="click: toogleDiffs">
 							<span data-bind="text: name"></span>
-							<!-- ko template: { name: 'temporaryProgressBar', data: diffsProgressBar } --><!-- /ko -->
+							<!-- ko component: diffsProgressBar --><!-- /ko -->
 						</button>
 						<span class="new" data-bind="visible: isNew">New</span>
 						<span class="deleted" data-bind="visible: removed">Removed</span>

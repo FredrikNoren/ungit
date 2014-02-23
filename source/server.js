@@ -153,6 +153,7 @@ var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
     var componentInjection = components.map(function(component) {
       var inject = '<script type="text/javascript" src="/components/' + component.dir + '/' + component.manifest.clientMain + '"></script>\n';
+      if (typeof(component.manifest.injectHtml) == 'string') component.manifest.injectHtml = [component.manifest.injectHtml];
       if (component.manifest.injectHtml instanceof Array) {
         component.manifest.injectHtml.forEach(function(fileName) {
           inject += fs.readFileSync(path.join(component.path, fileName));

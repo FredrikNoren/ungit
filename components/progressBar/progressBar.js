@@ -1,9 +1,15 @@
 
 var ko = require('knockout');
+var components = require('ungit-components');
 
-var ProgressBarViewModel = function(predictionMemoryKey, fallbackPredictedTimeMs) {
+components.register('progressBar', function(args) {
+  return new ProgressBarViewModel(args.predictionMemoryKey, args.fallbackPredictedTimeMs, args.temporary);
+});
+
+var ProgressBarViewModel = function(predictionMemoryKey, fallbackPredictedTimeMs, temporary) {
   var self = this;
   if (fallbackPredictedTimeMs === undefined) fallbackPredictedTimeMs = 1000;
+  this.temporary = temporary;
   this.style = ko.observable();
   this.running = ko.observable(false);
   self._width = ko.observable(0);
@@ -22,7 +28,9 @@ var ProgressBarViewModel = function(predictionMemoryKey, fallbackPredictedTimeMs
   this.isFirstRun = ko.observable(false);
   this.fallbackPredictedTimeMs = fallbackPredictedTimeMs;
 }
-exports.ProgressBarViewModel = ProgressBarViewModel;
+ProgressBarViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate(this.temporary ? 'temporaryProgressBar' : 'progressBar', this, {}, parentElement);
+}
 ProgressBarViewModel.prototype.start = function() {
   if (this.running()) return;
   var self = this;

@@ -51,20 +51,6 @@
 	</div>
 </script>
 
-<script type="text/html" id="progressBar">
-	<div class="progress" data-ta-element="progress-bar">
-		<!--span data-bind="text: predictionMs"></span-->
-		<div class="progress-bar" data-bind="attr: { style: style }"></div>
-	</div>
-</script>
-
-<!-- Only visible while it's running -->
-<script type="text/html" id="temporaryProgressBar">
-	<!-- ko if: running -->
-	<!-- ko template: { name: 'progressBar', data: $data } --><!-- /ko -->
-	<!-- /ko -->
-</script>
-
 <!-- ungit-import-template: "app.html" -->
 <!-- ungit-import-template: "path.html" -->
 <!-- ungit-import-template: "stash.html" -->

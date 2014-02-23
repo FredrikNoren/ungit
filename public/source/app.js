@@ -7,7 +7,7 @@ var blockable = require('../../source/utils/blockable');
 var _ = require('lodash');
 var superagent = require('../vendor/js/superagent');
 var async = require('async');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var components = require('./components');
 
 
 var AppViewModel = function(appContainer, browseTo) {
@@ -34,7 +34,7 @@ var AppViewModel = function(appContainer, browseTo) {
   this.showBackButton = ko.computed(function() {
     return !(self.content() instanceof screens.HomeViewModel);
   });
-  this.refreshingProgressBar = new ProgressBarViewModel('refreshing-content');
+  this.refreshingProgressBar = components.create('progressBar', { predictionMemoryKey: 'refreshing-content', temporary: true });
 
   this.bugtrackingNagscreenDismissed = ko.computed({
     read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },

@@ -1,6 +1,6 @@
 
 var ko = require('knockout');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var components = require('./components');
 var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var addressParser = require('../../source/address-parser');
 var signals = require('signals');
@@ -84,9 +84,12 @@ var PathViewModel = function(app, path) {
   this.app = app;
   this.path = path;
   this.status = ko.observable('loading');
-  this.loadingProgressBar = new ProgressBarViewModel('path-loading-' + path);
+  this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
   this.loadingProgressBar.start();
-  this.cloningProgressBar = new ProgressBarViewModel('path-loading-' + path, 10000);
+  this.cloningProgressBar = components.create('progressBar', {
+    predictionMemoryKey: 'path-cloning-' + path,
+    fallbackPredictedTimeMs: 10000
+  });
   this.cloneUrl = ko.observable();
   this.unitiedPathTitle = ko.observable();
   this.cloneDestinationImplicit = ko.computed(function() {

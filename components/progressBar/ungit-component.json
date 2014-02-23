@@ -1,0 +1,4 @@
+{
+  "clientMain": "progressBar.js",
+  "injectHtml": "progressBar.html"
+}

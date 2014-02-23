@@ -2,7 +2,7 @@
 	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="click: clickFetch, enable: fetchEnabled">
 		<span class="glyphicon glyphicon-download-alt"></span>
 		<span data-bind="text: fetchLabel"></span>
-		<!-- ko template: { name: 'temporaryProgressBar', data: fetchingProgressBar } --><!-- /ko -->
+		<!-- ko component: fetchingProgressBar --><!-- /ko -->
 	</button>
 	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="remotes-menu">
 		<span class="caret"></span>

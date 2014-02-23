@@ -1,7 +1,7 @@
 
 var ko = require('knockout');
 var moment = require('moment');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var components = require('./components');
 
 function StashItemViewModel(stash, data) {
   this.stash = stash;
@@ -9,7 +9,7 @@ function StashItemViewModel(stash, data) {
   this.id = data.id;
   this.title = data.name + ' ' + moment(data.date).fromNow();
   this.body = data.title;
-  this.stashPopProgressBar = new ProgressBarViewModel('stash-pop');
+  this.stashPopProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-pop', temporary: true });
 }
 StashItemViewModel.prototype.pop = function() {
   var self = this;

@@ -3,7 +3,6 @@ var ko = require('knockout');
 var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
-var ProgressBarViewModel = require('ungit-controls').ProgressBarViewModel;
 var dialogs = require('ungit-dialogs');
 
 components.register('remotes', function(args) {
@@ -22,7 +21,7 @@ function RemotesViewModel(repository) {
     else return 'No remotes specified';
   })
 
-  this.fetchingProgressBar = new ProgressBarViewModel('fetching-' + this.repoPath);
+  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
 
   this.fetchEnabled = ko.computed(function() {
     return self.remotes().length > 0;
@@ -31,7 +30,7 @@ function RemotesViewModel(repository) {
   this.shouldAutoFetch = ungit.config.autoFetch;
 }
 RemotesViewModel.prototype.updateNode = function(parentElement) {
-  return ko.renderTemplate('remotes', this, {}, parentElement);
+  ko.renderTemplate('remotes', this, {}, parentElement);
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.fetch = function(options, callback) {

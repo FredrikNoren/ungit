@@ -1,6 +1,6 @@
 
 var ko = require('knockout');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var components = require('./components');
 var screens = require('./screens');
 var dialogs = require('./dialogs');
 var inherits = require('util').inherits;
@@ -39,12 +39,12 @@ var StagingViewModel = function(repository) {
   this.showNux = ko.computed(function() {
     return self.files().length == 0 && !self.amend() && !self.inRebase();
   });
-  this.committingProgressBar = new ProgressBarViewModel('committing-' + repository.repoPath);
-  this.rebaseContinueProgressBar = new ProgressBarViewModel('rebase-continue-' + repository.repoPath);
-  this.rebaseAbortProgressBar = new ProgressBarViewModel('rebase-abort-' + repository.repoPath);
-  this.mergeContinueProgressBar = new ProgressBarViewModel('merge-continue-' + repository.repoPath);
-  this.mergeAbortProgressBar = new ProgressBarViewModel('merge-abort-' + repository.repoPath);
-  this.stashProgressBar = new ProgressBarViewModel('stash-' + repository.repoPath);
+  this.committingProgressBar = components.create('progressBar', { predictionMemoryKey: 'committing-' + repository.repoPath, temporary: true });
+  this.rebaseContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'rebase-continue-' + repository.repoPath, temporary: true });
+  this.rebaseAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'rebase-abort-' + repository.repoPath, temporary: true });
+  this.mergeContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-continue-' + repository.repoPath, temporary: true });
+  this.mergeAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-abort-' + repository.repoPath, temporary: true });
+  this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + repository.repoPath, temporary: true });
   this.commitValidationError = ko.computed(function() {
     if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
       return "No files to commit";
@@ -211,7 +211,7 @@ var FileViewModel = function(staging, type) {
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
-  this.diffsProgressBar = new ProgressBarViewModel('diffs-' + this.staging.repository.repoPath);
+  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repository.repoPath, temporary: true });
   this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
 }
 FileViewModel.prototype.toogleStaged = function() {

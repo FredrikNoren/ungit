@@ -1,6 +1,5 @@
 
 var ko = require('knockout');
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
 var async = require('async');
 var StagingViewModel = require('./staging').StagingViewModel;

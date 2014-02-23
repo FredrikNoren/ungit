@@ -4,7 +4,7 @@ var ko = require('knockout');
 var Vector2 = require('../../source/utils/vector2.js');
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
-var ProgressBarViewModel = require('./controls.js').ProgressBarViewModel;
+var components = require('./components');
 var moment = require('moment');
 var _ = require('lodash');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
@@ -21,7 +21,11 @@ var GitGraphViewModel = function(repository) {
   this.nodesById = {};
   this.refsByRefName = {};
   this.repoPath = repository.repoPath;
-  this.nodesLoader = new ProgressBarViewModel('gitgraph-' + repository.repoPath, 1000);
+  this.nodesLoader = components.create('progressBar', {
+      predictionMemoryKey: 'gitgraph-' + repository.repoPath,
+      fallbackPredictedTimeMs: 1000,
+      temporary: true
+    });
   this.checkedOutBranch = ko.observable();
   this.checkedOutRef = ko.computed(function() {
     if (self.checkedOutBranch())

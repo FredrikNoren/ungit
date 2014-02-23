@@ -270,18 +270,7 @@ ko.bindingHandlers.hasFocus2 = {
 })();
 
 
-var prevTimestamp = 0;
-var updateAnimationFrame = function(timestamp) {
-  var delta = timestamp - prevTimestamp;
-  prevTimestamp = timestamp;
-  app.updateAnimationFrame(delta);
-  window.requestAnimationFrame(updateAnimationFrame);
-}
-window.requestAnimationFrame(updateAnimationFrame);
 
-Raven.TraceKit.report.subscribe(function(err) {
-  appContainer.content(new CrashViewModel());
-});
 
 var AppContainerViewModel = function() {
   var self = this;
@@ -293,44 +282,58 @@ AppContainerViewModel.prototype.templateChooser = function(data) {
   return data.template;
 };
 
+var app, appContainer;
 
-var appContainer = new AppContainerViewModel();
-var app = new AppViewModel(appContainer, browseTo);
-exports.appContainer = appContainer;
-exports.app = app;
-app.connectionState.subscribe(function(value) {
-  if (value == 'disconnected') appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
-})
-if (ungit.config.authentication) {
-  var authenticationScreen = new screens.LoginViewModel(app);
-  appContainer.content(authenticationScreen);
-  authenticationScreen.loggedIn.add(function() {
+exports.start = function() {
+
+  appContainer = new AppContainerViewModel();
+  app = new AppViewModel(appContainer, browseTo);
+  app.connectionState.subscribe(function(value) {
+    if (value == 'disconnected') appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+  })
+  if (ungit.config.authentication) {
+    var authenticationScreen = new screens.LoginViewModel(app);
+    appContainer.content(authenticationScreen);
+    authenticationScreen.loggedIn.add(function() {
+      app.initSocket(function() {
+        appContainer.content(app);
+      });
+    });
+  } else {
     app.initSocket(function() {
       appContainer.content(app);
     });
-  });
-} else {
-  app.initSocket(function() {
-    appContainer.content(app);
-  });
-}
+  }
 
-exports.start = function() {
+  Raven.TraceKit.report.subscribe(function(err) {
+    appContainer.content(new CrashViewModel());
+  });
+
+  var prevTimestamp = 0;
+  var updateAnimationFrame = function(timestamp) {
+    var delta = timestamp - prevTimestamp;
+    prevTimestamp = timestamp;
+    app.updateAnimationFrame(delta);
+    window.requestAnimationFrame(updateAnimationFrame);
+  }
+  window.requestAnimationFrame(updateAnimationFrame);
+
   ko.applyBindings(appContainer);
+
+  // routing
+  crossroads.addRoute('/', function() {
+    app.path('');
+    app.content(new HomeViewModel(app));
+  });
+
+  crossroads.addRoute('/repository{?query}', function(query) {
+    app.path(query.path);
+    app.content(new PathViewModel(app, query.path));
+  })
+
   hasher.init();
+
 }
-
-// routing
-crossroads.addRoute('/', function() {
-  app.path('');
-  app.content(new HomeViewModel(app));
-});
-
-crossroads.addRoute('/repository{?query}', function(query) {
-  app.path(query.path);
-  app.content(new PathViewModel(app, query.path));
-})
-
 
 //setup hasher
 function parseHash(newHash, oldHash){

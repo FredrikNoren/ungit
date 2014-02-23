@@ -1,7 +1,7 @@
 
 var ko = require('knockout');
 var inherits = require('util').inherits;
-var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
+var components = require('./components');
 var RefViewModel = require('./ref.js').RefViewModel;
 var graphGraphicsActions = require('./graph-graphics/actions');
 var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
@@ -17,7 +17,12 @@ GraphActions.ActionBase = function(graph) {
   this.graph = graph;
   this.repository = graph.repository;
   this.app = graph.repository.app;
-  this.performProgressBar = new ProgressBarViewModel('action-' + this.style + '-' + graph.repoPath, 1000);
+  this.performProgressBar = components.create('progressBar', {
+    predictionMemoryKey: 'action-' + this.style + '-' + graph.repoPath,
+    fallbackPredictedTimeMs: 1000,
+    temporary: true
+  });
+  
   this.isHighlighted = ko.computed(function() {
     return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
   });
