@@ -14,6 +14,7 @@ var fs = require('fs');
 var async = require('async');
 var signals = require('signals');
 var os = require('os');
+var cache = require('./utils/cache');
 
 process.on('uncaughtException', function(err) {
   winston.error(err.stack.toString());
@@ -148,7 +149,7 @@ if (config.authentication) {
   };
 }
 
-app.get('/', function(req, res) {
+var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
     var pluginInjection = plugins.map(function(plugin) {
       var inject = '<script type="text/javascript" src="/plugins/' + plugin.dir + '/' + plugin.manifest.clientScript + '"></script>';
@@ -160,8 +161,14 @@ app.get('/', function(req, res) {
       return inject;
     }).join('\n');
     data = data.toString().replace('<!-- ungit-plugins-placeholder -->', pluginInjection);
+    callback(null, data);
+  });
+});
+
+app.get('/', function(req, res) {
+  indexHtmlCache(function(err, data) { 
     res.end(data);
-  })
+  });
 });
 
 app.use(express.static(__dirname + '/../public'));
