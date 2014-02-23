@@ -1,5 +1,6 @@
 var rc = require('rc');
 var optimist = require('optimist');
+var path = require('path');
 
 var defaultConfig = {
   
@@ -91,7 +92,14 @@ var defaultConfig = {
   // Automatically remove remote tracking branches that have been removed on the
   // server when fetching. (git fetch -p)
   autoPruneOnFetch: true,
+
+  // Directory to look for plugins
+  pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins')
 };
+
+function getUserHome() {
+  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+}
 
 // Works for now but should be moved to bin/ungit
 var argv = optimist

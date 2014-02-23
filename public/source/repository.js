@@ -3,7 +3,6 @@ var ko = require('knockout');
 var ProgressBarViewModel = require('./controls').ProgressBarViewModel;
 var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
 var async = require('async');
-var GerritIntegrationViewModel = require('./gerrit').GerritIntegrationViewModel;
 var StagingViewModel = require('./staging').StagingViewModel;
 var dialogs = require('./dialogs');
 var _ = require('lodash');
@@ -18,7 +17,6 @@ var RepositoryViewModel = function(app, repoPath) {
 
   this.app = app;
   this.repoPath = repoPath;
-  this.gerritIntegration = ko.observable(null);
   this.graph = new GitGraphViewModel(this);
   this.remotes = new RemotesViewModel(this);
   this.stash = new StashViewModel(this);
@@ -28,9 +26,6 @@ var RepositoryViewModel = function(app, repoPath) {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
   app.watchRepository(repoPath, function() { self.watcherReady(true); });
-  if (ungit.config.gerrit) {
-    self.gerritIntegration(new GerritIntegrationViewModel(self));
-  }
 
   self.onWorkingTreeChanged();
   self.onGitDirectoryChanged();

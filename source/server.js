@@ -100,6 +100,15 @@ if (config.autoShutdownTimeout) {
   refreshAutoShutdownTimeout();
 }
 
+var ensurePathExists = function(req, res, next) {
+  var path = req.param('path');
+  if (!fs.existsSync(path)) {
+    res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
+  } else {
+    next();
+  }
+}
+
 var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {
@@ -139,8 +148,45 @@ if (config.authentication) {
   };
 }
 
+app.get('/', function(req, res) {
+  fs.readFile(__dirname + '/../public/index.html', function(err, data) {
+    var pluginInjection = plugins.map(function(plugin) {
+      return '<script type="text/javascript" src="/plugins/' + plugin.dir + '/' + plugin.manifest.clientScript + '"></script>';
+    }).join('\n');
+    data = data.toString().replace('<!-- ungit-plugins-placeholder -->', pluginInjection);
+    res.end(data);
+  })
+});
+
 app.use(express.static(__dirname + '/../public'));
-gitApi.registerApi(app, server, ensureAuthenticated, config);
+
+var apiEnvironment = {
+  app: app,
+  server: server,
+  ensureAuthenticated: ensureAuthenticated,
+  ensurePathExists: ensurePathExists,
+  git: require('./git'),
+  config: config
+};
+
+gitApi.registerApi(apiEnvironment);
+
+// Init plugins
+var plugins = [];
+fs.readdirSync(config.pluginDirectory).forEach(function(pluginDir) {
+  winston.info('Loading plugin: ' + pluginDir);
+  var pluginPath = path.join(config.pluginDirectory, pluginDir);
+  var pluginManifest = require(path.join(pluginPath, "ungit-plugin.json"));
+  if (pluginManifest.disabled) {
+    console.log('Plugin disabled: ' + pluginDir);
+    return;
+  }
+  var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
+  pluginBackend(apiEnvironment);
+  plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
+  app.use('/plugins/' + pluginDir, express.static(pluginPath));
+  winston.info('Plugin loaded: ' + pluginDir);
+});
 
 app.get('/serverdata.js', function(req, res) {
   async.parallel({

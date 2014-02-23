@@ -24,7 +24,17 @@ module.exports = function(grunt) {
     browserify: {
       options: {
         noParse: ['public/vendor/js/superagent.js'],
-        debug: true
+        debug: true,
+        // Make these globally requireable, for use in plugins
+        alias: [
+          'public/source/controls.js:ungit-controls',
+          'public/source/dialogs.js:ungit-dialogs',
+          'public/source/main.js:ungit-main',
+          'knockout:',
+          'lodash:',
+          'hasher:',
+          'crossroads:'
+        ]
       },
       dist: {
         files: {

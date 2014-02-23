@@ -5,7 +5,6 @@ var path = require('path');
 var temp = require('temp');
 var async=  require('async');
 var git = require('./git');
-var gerrit = require('./gerrit');
 var gitParser = require('./git-parser');
 var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
@@ -16,7 +15,13 @@ var socketIO;
 exports.pathPrefix = '';
 var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
 
-exports.registerApi = function(app, server, ensureAuthenticated, config) {
+exports.registerApi = function(env) {
+  var app = env.app;
+  var server = env.server;
+  var ensureAuthenticated = env.ensureAuthenticated;
+  var ensurePathExists = env.ensurePathExists;
+  var git = env.git;
+  var config = env.config;
 
   if (config.dev)
     temp.track();
@@ -80,15 +85,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
         });
       });
     });
-  }
-
-  var ensurePathExists = function(req, res, next) {
-    var path = req.param('path');
-    if (!fs.existsSync(path)) {
-      res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
-    } else {
-      next();
-    }
   }
 
   var ensureValidSocketId = function(req, res, next) {
@@ -538,51 +534,6 @@ exports.registerApi = function(app, server, ensureAuthenticated, config) {
       else return res.json({});
     });
   });
-
-  if (config.gerrit) {
-
-    app.get(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
-      var repoPath = req.param('path');
-      var hookPath = path.join(repoPath, '.git', 'hooks', 'commit-msg');
-      if (fs.existsSync(hookPath)) res.json({ exists: true });
-      else res.json({ exists: false });
-    });
-
-    app.post(exports.pathPrefix + '/gerrit/commithook', ensureAuthenticated, ensurePathExists, function(req, res) {
-      var repoPath = req.param('path');
-      git.getRemoteAddress(repoPath, 'origin')
-        .fail(jsonFail.bind(null, res))
-        .done(function(remote) {
-          if (!remote.host) throw new Error("Failed to parse host from: " + remote.address);
-          var command = 'scp -p ';
-          if (remote.port) command += ' -P ' + remote.port + ' ';
-          command += remote.host + ':hooks/commit-msg .git/hooks/';
-          var hooksPath = path.join(repoPath, '.git', 'hooks');
-          if (!fs.existsSync(hooksPath)) fs.mkdirSync(hooksPath);
-          child_process.exec(command, { cwd: repoPath },
-            function (err, stdout, stderr) {
-              if (err) return res.json(400, { error: err, stdout: stdout, stderr: stderr });
-              res.json({});
-            });
-        });
-    });
-
-    app.get(exports.pathPrefix + '/gerrit/changes', ensureAuthenticated, ensurePathExists, function(req, res) {
-      var repoPath = req.param('path');
-      git.getRemoteAddress(repoPath, 'origin')
-        .fail(jsonFail.bind(null, res))
-        .done(function(remote) {
-          if (!remote.host) throw new Error("Failed to parse host from: " + remote.address);
-          var command = 'query --format=JSON --current-patch-set status:open project:' + remote.project + '';
-          gerrit(remote, command, res, function(err, result) {
-            if (err) return;
-            result = result.split('\n').filter(function(r) { return r.trim(); });
-            result = result.map(function(r) { return JSON.parse(r); });
-            res.json(result);
-          });
-        });
-    });
-  }
 
   app.get(exports.pathPrefix + '/debug', ensureAuthenticated, function(req, res) {
     res.json({
