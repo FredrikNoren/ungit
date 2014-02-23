@@ -1,0 +1,6 @@
+{
+  "clientMain": "remotesFrontend.js",
+  "injectHtml": {
+    "remotes": "remotes.html"
+  }
+}

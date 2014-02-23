@@ -151,16 +151,22 @@ if (config.authentication) {
 
 var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
-    var pluginInjection = plugins.map(function(plugin) {
-      var inject = '<script type="text/javascript" src="/plugins/' + plugin.dir + '/' + plugin.manifest.clientScript + '"></script>';
-      if (plugin.manifest.htmlInject) {
-        plugin.manifest.htmlInject.forEach(function(fileName) {
-          inject += fs.readFileSync(path.join(plugin.path, fileName));
+    var componentInjection = components.map(function(component) {
+      var inject = '<script type="text/javascript" src="/components/' + component.dir + '/' + component.manifest.clientMain + '"></script>\n';
+      if (component.manifest.injectHtml instanceof Array) {
+        component.manifest.injectHtml.forEach(function(fileName) {
+          inject += fs.readFileSync(path.join(component.path, fileName));
         });
+      } else if (component.manifest.injectHtml instanceof Object) {
+        for (var templateName in component.manifest.injectHtml) {
+          inject += '<script type="text/html" id="' + templateName + '">\n' +
+            fs.readFileSync(path.join(component.path, component.manifest.injectHtml[templateName])) +
+            '\n</script>\n';
+        }
       }
       return inject;
-    }).join('\n');
-    data = data.toString().replace('<!-- ungit-plugins-placeholder -->', pluginInjection);
+    }).join('\n\n');
+    data = data.toString().replace('<!-- ungit-components-placeholder -->', componentInjection);
     callback(null, data);
   });
 });
@@ -199,6 +205,23 @@ fs.readdirSync(config.pluginDirectory).forEach(function(pluginDir) {
   plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
   app.use('/plugins/' + pluginDir, express.static(pluginPath));
   winston.info('Plugin loaded: ' + pluginDir);
+});
+
+// Init components
+var components = [];
+var componentsBasePath = path.join(__dirname, '..', 'components');
+fs.readdirSync(componentsBasePath).forEach(function(componentDir) {
+  var component = { dir: componentDir };
+  winston.info('Loading component: ' + componentDir);
+  component.path = path.join(componentsBasePath, componentDir);
+  component.manifest = require(path.join(component.path, "ungit-component.json"));
+  if (component.manifest.disabled) {
+    console.log('Component disabled: ' + componentDir);
+    return;
+  }
+  components.push(component);
+  app.use('/components/' + componentDir, express.static(component.path));
+  winston.info('Component loaded: ' + componentDir);
 });
 
 app.get('/serverdata.js', function(req, res) {

@@ -54,6 +54,17 @@ ko.bindingHandlers.debug = {
   }
 };
 
+ko.bindingHandlers.component = {
+  init: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    var component = ko.utils.unwrapObservable(valueAccessor());
+    var node = component.createNode();
+    console.log(node);
+    ko.virtualElements.setDomNodeChildren(element, [node]);
+    return { controlsDescendantBindings: true };
+  }
+};
+ko.virtualElements.allowedBindings.component = true;
+
 ko.bindingHandlers.editableText = {
   init: function(element, valueAccessor) {
     $(element).on('blur', function() {
@@ -303,7 +314,10 @@ if (ungit.config.authentication) {
   });
 }
 
-ko.applyBindings(appContainer);
+exports.start = function() {
+  ko.applyBindings(appContainer);
+  hasher.init();
+}
 
 // routing
 crossroads.addRoute('/', function() {
@@ -328,8 +342,6 @@ hasher.changed.add(parseHash); //parse hash changes
 function browseTo(path) {
   hasher.setHash(path);
 }
-
-hasher.init();
 
 $(document).ready(function() {
   $().dndPageScroll(); // Automatic page scrolling on drag-n-drop: http://www.planbox.com/blog/news/updates/html5-drag-and-drop-scrolling-the-page.html
