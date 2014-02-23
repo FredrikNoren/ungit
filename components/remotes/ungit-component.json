@@ -1,5 +1,5 @@
 {
-  "clientMain": "remotesFrontend.js",
+  "clientMain": "remotes.js",
   "injectHtml": {
     "remotes": "remotes.html"
   }
