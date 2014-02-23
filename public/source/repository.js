@@ -5,7 +5,6 @@ var async = require('async');
 var StagingViewModel = require('./staging').StagingViewModel;
 var dialogs = require('./dialogs');
 var _ = require('lodash');
-var StashViewModel = require('./stash');
 var components = require('./components');
 
 var idCounter = 0;
@@ -19,7 +18,7 @@ var RepositoryViewModel = function(app, repoPath) {
   this.repoPath = repoPath;
   this.graph = new GitGraphViewModel(this);
   this.remotes = components.create('remotes', { repositoryViewModel: this });
-  this.stash = new StashViewModel(this);
+  this.stash = components.create('stash', { repositoryViewModel: this });
   this.staging = new StagingViewModel(this);
   this.watcherReady = ko.observable(false);
   this.showLog = ko.computed(function() {

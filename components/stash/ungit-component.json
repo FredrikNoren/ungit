@@ -1,0 +1,6 @@
+{
+  "clientMain": "stash.js",
+  "injectHtml": {
+    "stash": "stash.html"
+  }
+}

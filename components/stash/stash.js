@@ -1,7 +1,11 @@
 
 var ko = require('knockout');
 var moment = require('moment');
-var components = require('./components');
+var components = require('ungit-components');
+
+components.register('stash', function(args) {
+  return new StashViewModel(args.repositoryViewModel);
+});
 
 function StashItemViewModel(stash, data) {
   this.stash = stash;
@@ -33,6 +37,9 @@ function StashViewModel(repository) {
   this.stashedChanges = ko.observable([]);
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0; });
 }
+StashViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('stash', this, {}, parentElement);
+}
 StashViewModel.prototype.refresh = function() {
   var self = this;
   this.app.get('/stashes', { path: this.repository.repoPath }, function(err, stashes) {
@@ -41,4 +48,4 @@ StashViewModel.prototype.refresh = function() {
   });
 }
 
-module.exports = StashViewModel;
+

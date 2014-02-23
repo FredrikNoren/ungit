@@ -34,7 +34,8 @@ module.exports = function(grunt) {
           'lodash:',
           'hasher:',
           'crossroads:',
-          'async:'
+          'async:',
+          'moment:'
         ]
       },
       dist: {
