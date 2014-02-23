@@ -151,7 +151,13 @@ if (config.authentication) {
 app.get('/', function(req, res) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
     var pluginInjection = plugins.map(function(plugin) {
-      return '<script type="text/javascript" src="/plugins/' + plugin.dir + '/' + plugin.manifest.clientScript + '"></script>';
+      var inject = '<script type="text/javascript" src="/plugins/' + plugin.dir + '/' + plugin.manifest.clientScript + '"></script>';
+      if (plugin.manifest.htmlInject) {
+        plugin.manifest.htmlInject.forEach(function(fileName) {
+          inject += fs.readFileSync(path.join(plugin.path, fileName));
+        });
+      }
+      return inject;
     }).join('\n');
     data = data.toString().replace('<!-- ungit-plugins-placeholder -->', pluginInjection);
     res.end(data);
