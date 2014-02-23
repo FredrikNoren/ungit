@@ -56,11 +56,12 @@ ko.bindingHandlers.debug = {
 
 ko.bindingHandlers.component = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel) {
-    var component = ko.utils.unwrapObservable(valueAccessor());
-    var node = component.createNode();
-    console.log(node);
-    ko.virtualElements.setDomNodeChildren(element, [node]);
+    ko.virtualElements.emptyNode(element);
     return { controlsDescendantBindings: true };
+  },
+  'update': function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+    var component = ko.utils.unwrapObservable(valueAccessor());
+    component.updateNode(element);
   }
 };
 ko.virtualElements.allowedBindings.component = true;

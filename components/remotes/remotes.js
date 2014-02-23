@@ -30,11 +30,8 @@ function RemotesViewModel(repository) {
 
   this.shouldAutoFetch = ungit.config.autoFetch;
 }
-RemotesViewModel.prototype.createNode = function() {
-  var node = document.createElement('div');
-  node.innerHTML = '<!-- ko template: \'remotes\' --><!-- /ko -->';
-  ko.applyBindingsToDescendants(this, node);
-  return node;
+RemotesViewModel.prototype.updateNode = function(parentElement) {
+  return ko.renderTemplate('remotes', this, {}, parentElement);
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.fetch = function(options, callback) {
