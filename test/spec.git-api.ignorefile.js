@@ -9,9 +9,7 @@ var common = require('./common.js');
 
 var app = express();
 
-restGit.registerApi(app, null, null, {
-  dev: true
-});
+restGit.registerApi({ app: app, config: { dev: true } });
 
 var req = request(app);
 

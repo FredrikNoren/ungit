@@ -18,15 +18,12 @@ var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
 exports.registerApi = function(env) {
   var app = env.app;
   var server = env.server;
-  var ensureAuthenticated = env.ensureAuthenticated;
-  var ensurePathExists = env.ensurePathExists;
-  var git = env.git;
+  var ensureAuthenticated = env.ensureAuthenticated || function(req, res, next) { next(); };
+  var ensurePathExists = env.ensurePathExists || function(req, res, next) { next(); };
   var config = env.config;
 
   if (config.dev)
     temp.track();
-
-  ensureAuthenticated = ensureAuthenticated || function(req, res, next) { next(); };
 
   app.use(express.json());
   app.use(express.urlencoded());

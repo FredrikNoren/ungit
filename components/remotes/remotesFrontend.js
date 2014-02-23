@@ -4,6 +4,7 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var ProgressBarViewModel = require('ungit-controls').ProgressBarViewModel;
+var dialogs = require('ungit-dialogs');
 
 components.register('remotes', function(args) {
   return new RemotesViewModel(args.repositoryViewModel);

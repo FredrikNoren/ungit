@@ -192,20 +192,22 @@ gitApi.registerApi(apiEnvironment);
 
 // Init plugins
 var plugins = [];
-fs.readdirSync(config.pluginDirectory).forEach(function(pluginDir) {
-  winston.info('Loading plugin: ' + pluginDir);
-  var pluginPath = path.join(config.pluginDirectory, pluginDir);
-  var pluginManifest = require(path.join(pluginPath, "ungit-plugin.json"));
-  if (pluginManifest.disabled) {
-    console.log('Plugin disabled: ' + pluginDir);
-    return;
-  }
-  var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
-  pluginBackend(apiEnvironment);
-  plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
-  app.use('/plugins/' + pluginDir, express.static(pluginPath));
-  winston.info('Plugin loaded: ' + pluginDir);
-});
+if (path.existsSync(config.pluginDirectory)) {
+  fs.readdirSync(config.pluginDirectory).forEach(function(pluginDir) {
+    winston.info('Loading plugin: ' + pluginDir);
+    var pluginPath = path.join(config.pluginDirectory, pluginDir);
+    var pluginManifest = require(path.join(pluginPath, "ungit-plugin.json"));
+    if (pluginManifest.disabled) {
+      console.log('Plugin disabled: ' + pluginDir);
+      return;
+    }
+    var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
+    pluginBackend(apiEnvironment);
+    plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
+    app.use('/plugins/' + pluginDir, express.static(pluginPath));
+    winston.info('Plugin loaded: ' + pluginDir);
+  });
+}
 
 // Init components
 var components = [];
