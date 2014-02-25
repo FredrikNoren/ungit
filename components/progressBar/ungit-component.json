@@ -1,4 +1,6 @@
 {
-  "clientMain": "progressBar.js",
-  "injectHtml": "progressBar.html"
+  "exports": {
+    "raw": "progressBar.html",
+    "javascript": "progressBar.js"
+  }
 }

@@ -1,6 +1,9 @@
 {
-  "clientMain": "stash.js",
-  "injectHtml": {
-    "stash": "stash.html"
+  "exports": {
+    "knockoutTemplates": {
+      "stash": "stash.html"
+    },
+    "javascript": "stash.js",
+    "css": "stash.css"
   }
 }

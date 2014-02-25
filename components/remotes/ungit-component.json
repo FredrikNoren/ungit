@@ -1,6 +1,8 @@
 {
-  "clientMain": "remotes.js",
-  "injectHtml": {
-    "remotes": "remotes.html"
+  "exports": {
+    "knockoutTemplates": {
+      "remotes": "remotes.html"
+    },
+    "javascript": "remotes.js"
   }
 }
