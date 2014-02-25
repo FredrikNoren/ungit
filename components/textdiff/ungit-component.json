@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "textdiff": "textdiff.html"
+    },
+    "javascript": "textdiff.js",
+    "less": "textdiff.less"
+  }
+}

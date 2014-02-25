@@ -18,7 +18,7 @@ var cache = require('./utils/cache');
 var UngitComponent = require('./ungit-component');
 
 process.on('uncaughtException', function(err) {
-  winston.error(err.stack.toString());
+  winston.error(err.stack ? err.stack.toString() : err.toString());
   async.parallel([
     bugtracker.notify.bind(bugtracker, err, 'ungit-server'),
     usageStatistics.addEvent.bind(usageStatistics, 'server-exception')
@@ -152,15 +152,18 @@ if (config.authentication) {
 
 var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
-    var componentInjection = Object.keys(components).map(function(componentName) {
-      return components[componentName].compile();
-    }).join('\n\n');
-    data = data.toString().replace('<!-- ungit-components-placeholder -->', componentInjection);
-    callback(null, data);
+    async.map(Object.keys(components), function(componentName, callback) {
+      components[componentName].compile(callback);
+    }, function(err, result) {
+      var html = result.join('\n\n');
+      data = data.toString().replace('<!-- ungit-components-placeholder -->', html);
+      callback(null, data);
+    });
   });
 });
 
 app.get('/', function(req, res) {
+  indexHtmlCache.invalidate();
   indexHtmlCache(function(err, data) { 
     res.end(data);
   });

@@ -85,8 +85,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type);
-      fileViewModel.name(file);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type, file);
     }
     fileViewModel.isNew(files[file].isNew);
     fileViewModel.removed(files[file].removed);
@@ -199,20 +198,20 @@ StagingViewModel.prototype.toogleAllStages = function() {
   self.allStageFlag(!self.allStageFlag());
 }
 
-var FileViewModel = function(staging, type) {
+var FileViewModel = function(staging, type, name) {
   var self = this;
   this.staging = staging;
   this.app = staging.app;
   this.type = type;
-  this.templateName = type == 'image' ? 'imageFileDiff' : 'textFileDiff';
   this.staged = ko.observable(true);
-  this.name = ko.observable();
+  this.name = ko.observable(name);
   this.isNew = ko.observable(false);
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repository.repoPath, temporary: true });
-  this.diff = type == 'image' ? new ImageDiffViewModel(this) : new LineByLineDiffViewModel(this);
+  this.diff = 
+    components.create(type == 'image' ? 'imagediff' : 'textdiff', { filename: this.name(), repoPath: this.staging.repository.repoPath, app: this.app });
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
@@ -242,63 +241,13 @@ FileViewModel.prototype.toogleDiffs = function() {
   }
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-  if (this.showingDiffs() && (drawProgressBar || this.type != 'image'))
-    this.diff.invalidateDiff(drawProgressBar);
-}
-
-var LineByLineDiffViewModel = function(fileViewModel) {
-  this.fileViewModel = fileViewModel;
-  this.diffs = ko.observable();
-}
-LineByLineDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   var self = this;
-
-  if (drawProgressBar) self.fileViewModel.diffsProgressBar.start();
-  var isTextType = self.fileViewModel.type == 'text' ? true : false;
-  self.fileViewModel.app.get('/diff', { file: self.fileViewModel.name(), path: self.fileViewModel.staging.repository.repoPath}, function(err, diffs) {
-    if (drawProgressBar) self.fileViewModel.diffsProgressBar.stop();
-    if (err) {
-      if (err.errorCode == 'no-such-file') {
-        // The file existed before but has been removed, but we're trying to get a diff for it
-        // Most likely it will just disappear with the next refresh of the staging area
-        // so we just ignore the error here
-        return true;
-      }
-      return;
-    }
-    var newDiffs = [];
-    diffs.forEach(function(diff) {
-      diff.lines.forEach(
-        function(line) {
-          newDiffs.push({
-            oldLineNumber: line[0],
-            newLineNumber: line[1],
-            added: line[2][0] == '+',
-            removed: line[2][0] == '-' || line[2][0] == '\\',
-            text: line[2]
-          });
-        }
-      );
+  if (this.showingDiffs() && (drawProgressBar || this.type != 'image')) {
+    this.diffsProgressBar.start();
+    this.diff.invalidateDiff(function() {
+      self.diffsProgressBar.stop();
     });
-    self.diffs(newDiffs);
-  });
-}
-
-var ImageDiffViewModel = function(fileViewModel) {
-  this.fileViewModel = fileViewModel;
-  this.state = ko.computed(function() {
-    if (fileViewModel.isNew()) return 'new';
-    if (fileViewModel.removed()) return 'removed';
-    return 'changed';
-  });
-  this.oldImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(fileViewModel.staging.repoPath) + '&filename=' + fileViewModel.name() + '&version=previous';
-  });
-  this.newImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(fileViewModel.staging.repoPath) + '&filename=' + fileViewModel.name() + '&version=current';
-  });
-}
-ImageDiffViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+  }
 }
 
  
