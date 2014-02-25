@@ -218,7 +218,15 @@ function loadPlugins(pluginBasePath) {
       loadComponents(componentsBasePath, 'plugins/' + pluginDir);
     if (pluginManifest.serverScript) {
       var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
-      pluginBackend(apiEnvironment);
+      pluginBackend({
+        app: app,
+        server: server,
+        ensureAuthenticated: ensureAuthenticated,
+        ensurePathExists: ensurePathExists,
+        git: require('./git'),
+        config: config,
+        httpPath: gitApi.pathPrefix + '/' + pluginManifest.name
+      });
     }    
     plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
     app.use('/plugins/' + pluginDir, express.static(pluginPath));
