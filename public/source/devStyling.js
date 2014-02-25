@@ -1,11 +1,11 @@
 // Used for devStyling.html (development styling file)
 
 var ko = require('knockout');
-var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
-var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
-var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
+var GraphViewModel = require('./../../components/graph/graph-graphics/graph').GraphViewModel;
+var NodeViewModel = require('./../../components/graph/graph-graphics/node').NodeViewModel;
+var EdgeViewModel = require('./../../components/graph/graph-graphics/edge').EdgeViewModel;
 var Vector2 = require('../../source/utils/vector2');
-var graphGraphicsActions = require('./graph-graphics/actions');
+var graphGraphicsActions = require('./../../components/graph/graph-graphics/actions');
 
 var viewModel = {};
 

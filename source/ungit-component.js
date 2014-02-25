@@ -3,6 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var less = require('less');
 var async = require('async');
+var browserify = require('browserify');
 
 function UngitComponent(args) {
   this.dir = args.dir;
@@ -38,17 +39,31 @@ UngitComponent.prototype.compile = function(callback) {
 
   if (exports.javascript) {
     var js = assureArray(exports.javascript);
-    js.forEach(function(jsSource) {
-      tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, jsSource), function(err, text) {
-          callback(err, '<script type="text/javascript">\n' +
-            '(function() {' +
-            text + '\n' +
-            '})();\n' +
-            '</script>\n');
-        });
-      });
+
+    var b = browserify({
+      entries: js.map(function(jsSource) { return path.join(self.path, jsSource); })
     });
+    b.external('ungit-components');
+    b.external('ungit-dialogs');
+    b.external('ungit-screens');
+    b.external('ungit-main');
+    b.external('ungit-vector2');
+    b.external('knockout');
+    b.external('lodash');
+    b.external('hasher');
+    b.external('crossroads');
+    b.external('async');
+    b.external('moment');
+    b.external('blueimp-md5');
+    tasks.push(function(callback) {
+      b.bundle(null, function(err, text) {
+        callback(err, '<script type="text/javascript">\n' +
+          '(function() {' +
+          text + '\n' +
+          '})();\n' +
+          '</script>\n');
+      });
+    })
   }
 
   if (exports.knockoutTemplates) {
@@ -77,7 +92,7 @@ UngitComponent.prototype.compile = function(callback) {
   if (exports.less) {
     var lessSources = assureArray(exports.less);
     lessSources.forEach(function(lessSource) {
-      var parser = new(less.Parser)({ filename: lessSource });
+      var parser = new(less.Parser)({ paths: ['.', path.join(__dirname, '..')], filename: lessSource });
       tasks.push(function(callback) {
         fs.readFile(path.join(self.path, lessSource), function(err, text) {
           if (err) return callback(err);

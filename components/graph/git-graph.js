@@ -1,14 +1,18 @@
 
 
 var ko = require('knockout');
-var Vector2 = require('../../source/utils/vector2.js');
+var Vector2 = require('ungit-vector2');
 var GitNodeViewModel = require('./git-node').GitNodeViewModel;
 var RefViewModel = require('./ref.js').RefViewModel;
-var components = require('./components');
+var components = require('ungit-components');
 var moment = require('moment');
 var _ = require('lodash');
 var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
+
+components.register('graph', function(args) {
+  return new GitGraphViewModel(args.repositoryViewModel);
+});
 
 var GitGraphViewModel = function(repository) {
   var self = this;
@@ -69,6 +73,9 @@ var GitGraphViewModel = function(repository) {
       self.graphic.hoverGraphActionGraphic(null);
     }
   });
+}
+GitGraphViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('graph', this, {}, parentElement);
 }
 exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {

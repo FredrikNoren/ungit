@@ -31,13 +31,15 @@ module.exports = function(grunt) {
           'public/source/components.js:ungit-components',
           'public/source/screens.js:ungit-screens',
           'public/source/main.js:ungit-main',
+          'source/utils/vector2.js:ungit-vector2',
           'knockout:',
           'lodash:',
           'hasher:',
           'crossroads:',
           'async:',
           'moment:',
-          'util:'
+          'blueimp-md5:',
+          'color:'
         ]
       },
       dist: {

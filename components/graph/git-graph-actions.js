@@ -1,7 +1,7 @@
 
 var ko = require('knockout');
 var inherits = require('util').inherits;
-var components = require('./components');
+var components = require('ungit-components');
 var RefViewModel = require('./ref.js').RefViewModel;
 var graphGraphicsActions = require('./graph-graphics/actions');
 var RebaseViewModel = graphGraphicsActions.RebaseViewModel;

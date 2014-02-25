@@ -1,0 +1,10 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "graph": "graph.html",
+      "graphGraphics": "graph-graphics.html"
+    },
+    "javascript": "git-graph.js",
+    "less": "graph.less"
+  }
+}

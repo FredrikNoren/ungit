@@ -1,5 +1,5 @@
 
-@log-width-small: 300px;
+@import "public/less/variables.less";
 
 .staging {
   background: #643A44;
@@ -130,4 +130,15 @@
     }
   }
 
+}
+
+@media (min-width: @screen-md-min) {
+  .staging {
+    .arrowDown {
+      left: (@log-width-large + 45px);
+    }
+  }
+}
+
+@media (min-width: @screen-lg-min) {
 }

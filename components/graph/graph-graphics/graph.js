@@ -1,6 +1,6 @@
 
 var ko = require('knockout');
-var Vector2 = require('../../../source/utils/vector2');
+var Vector2 = require('ungit-vector2');
 var EdgeViewModel = require('./edge').EdgeViewModel;
 
 var GraphViewModel = function() {

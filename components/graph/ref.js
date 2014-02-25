@@ -1,6 +1,6 @@
 
 var ko = require('knockout');
-var dialogs = require('./dialogs');
+var dialogs = require('ungit-dialogs');
 var md5 = require('blueimp-md5').md5;
 var Selectable = require('./git-selectable').Selectable;
 

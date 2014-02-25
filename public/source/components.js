@@ -10,5 +10,7 @@ components.register = function(name, creator) {
 }
 
 components.create = function(name, args) {
-  return components.registered[name](args);
+  var componentConstructor = components.registered[name];
+  if (!componentConstructor) throw new Error('No component found: ' + name);
+  return componentConstructor(args);
 }

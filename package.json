@@ -46,7 +46,8 @@
     "npm-registry-client": "~0.3.3",
     "npmconf": "~0.1.12",
     "mkdirp": "~0.3.5",
-    "less": "~1.6.3"
+    "less": "~1.6.3",
+    "browserify": "~3.30.2"
   },
   "devDependencies": {
     "mocha": "~1.17.0",
