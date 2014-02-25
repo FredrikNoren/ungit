@@ -1,9 +1,13 @@
 
 var ko = require('knockout');
-var components = require('./components');
-var screens = require('./screens');
-var dialogs = require('./dialogs');
+var screens = require('ungit-screens');
+var dialogs = require('ungit-dialogs');
 var inherits = require('util').inherits;
+var components = require('ungit-components');
+
+components.register('staging', function(args) {
+  return new StagingViewModel(args.repositoryViewModel);
+});
 
 var StagingViewModel = function(repository) {
   var self = this;
@@ -60,7 +64,9 @@ var StagingViewModel = function(repository) {
     else return 'glyphicon-check';
   });
 }
-exports.StagingViewModel = StagingViewModel;
+StagingViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('staging', this, {}, parentElement);
+}
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
   this.app.get('/status', { path: this.repoPath }, function(err, status) {

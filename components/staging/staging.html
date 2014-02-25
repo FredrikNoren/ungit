@@ -1,0 +1,83 @@
+
+<div class="staging panel panel-default" data-bind="css: { commitValidationError: commitValidationError }">
+  <div class="panel-body">
+    <div class="arrowContainer arrowDown">
+      <div class="arrow"></div>
+    </div>
+    <div data-bind="visible: showNux" class="nux">
+      Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
+    </div>
+    <div class="row" data-bind="visible: !showNux()">
+      <div class="col-lg-3">
+        <input class="form-control" data-ta-input="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase()">
+        <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase()"></textarea>
+        <div>
+          <span class="amend" data-bind="visible: canAmend">
+                          <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+                          <a href="#" data-bind="click: toogleAmend">Amend last commit</a>
+                  </span>
+        </div>
+        
+        <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+          Commit
+          <!-- ko component: committingProgressBar --><!-- /ko -->
+        </button>
+        <button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
+          Continue rebase
+          <!-- ko component: rebaseContinueProgressBar --><!-- /ko -->
+        </button>
+        <button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
+          Abort rebase
+          <!-- ko component: rebaseAbortProgressBar --><!-- /ko -->
+        </button>
+        <button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
+          Continue merge
+          <!-- ko component: mergeContinueProgressBar --><!-- /ko -->
+        </button>
+        <button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
+          Abort merge
+          <!-- ko component: mergeAbortProgressBar --><!-- /ko -->
+        </button>
+        <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
+      </div>
+      <div class="col-lg-9 file-area">
+        <div class="commands btn-group btn-group-sm"> 
+          <button class="btn btn-default" disabled data-bind="text: stats"></button>
+          <button class="btn btn-default" data-bind="click: toogleAllStages">
+            <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span> 
+            Toggle all
+          </button>
+          <button class="btn btn-default" data-bind="click: discardAllChanges">
+            <span class="glyphicon glyphicon-trash"></span> 
+            Discard all
+          </button>
+          <button class="btn btn-default" data-bind="click: stashAll, css: { disabled: !canStashAll() }">
+            <span class="glyphicon glyphicon-paperclip"></span> 
+            Stash all
+            <!-- ko component: stashProgressBar --><!-- /ko -->
+          </button>
+        </div>
+
+        <div class="files" data-bind="foreach: files">
+          <div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
+            <div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
+              &#10003;
+            </div>
+            <button class="name btn btn-default" data-bind="click: toogleDiffs">
+              <span data-bind="text: name"></span>
+              <!-- ko component: diffsProgressBar --><!-- /ko -->
+            </button>
+            <span class="new" data-bind="visible: isNew">New</span>
+            <span class="deleted" data-bind="visible: removed">Removed</span>
+            <span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
+            <span class="ignore" data-ta-clickable="ignore-file" data-bind="click: ignoreFile">i<span class="explanation">&nbsp;Add to .gitignore</span></span>
+            <span class="discard" data-ta-clickable="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation">&nbsp;Discard changes</span></span>
+            <!-- ko if: showingDiffs -->
+            <div class="diffContainer" data-bind="component: diff"></div>
+            <!-- /ko -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

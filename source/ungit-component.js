@@ -19,7 +19,7 @@ function assureArray(obj) {
 
 UngitComponent.prototype.compile = function(callback) {
   var self = this;
-  console.log('Compiling ' + this.dir);
+  console.log('Compiling ' + this.path);
 
   var exports = this.manifest.exports || {};
 
@@ -82,7 +82,7 @@ UngitComponent.prototype.compile = function(callback) {
         fs.readFile(path.join(self.path, lessSource), function(err, text) {
           if (err) return callback(err);
           parser.parse(text.toString(), function (e, tree) {
-            callback(e, '<style>\n' + tree.toCSS({ compress: true }) + '\n</style>\n');
+            callback(e, e ? '' : ('<style>\n' + tree.toCSS({ compress: true }) + '\n</style>\n'));
           });
         });
       });
@@ -90,6 +90,7 @@ UngitComponent.prototype.compile = function(callback) {
   }
 
   async.parallel(tasks, function(err, result) {
-    callback(err, '<!-- Component: ' + this.dir + ' -->\n' + result.join(''))
+    if (err) throw err;
+    callback(err, '<!-- Component: ' + self.dir + ' -->\n' + result.join(''))
   });
 }

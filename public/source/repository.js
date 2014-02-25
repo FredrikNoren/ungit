@@ -2,7 +2,6 @@
 var ko = require('knockout');
 var GitGraphViewModel = require('./git-graph').GitGraphViewModel;
 var async = require('async');
-var StagingViewModel = require('./staging').StagingViewModel;
 var dialogs = require('./dialogs');
 var _ = require('lodash');
 var components = require('./components');
@@ -19,7 +18,7 @@ var RepositoryViewModel = function(app, repoPath) {
   this.graph = new GitGraphViewModel(this);
   this.remotes = components.create('remotes', { repositoryViewModel: this });
   this.stash = components.create('stash', { repositoryViewModel: this });
-  this.staging = new StagingViewModel(this);
+  this.staging = components.create('staging', { repositoryViewModel: this });
   this.watcherReady = ko.observable(false);
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();

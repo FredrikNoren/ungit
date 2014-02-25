@@ -29,13 +29,15 @@ module.exports = function(grunt) {
         alias: [
           'public/source/dialogs.js:ungit-dialogs',
           'public/source/components.js:ungit-components',
+          'public/source/screens.js:ungit-screens',
           'public/source/main.js:ungit-main',
           'knockout:',
           'lodash:',
           'hasher:',
           'crossroads:',
           'async:',
-          'moment:'
+          'moment:',
+          'util:'
         ]
       },
       dist: {
