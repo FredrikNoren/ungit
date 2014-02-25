@@ -1,7 +1,6 @@
 
 var ko = require('knockout');
 var components = require('./components');
-var RepositoryViewModel = require('./repository').RepositoryViewModel;
 var addressParser = require('../../source/address-parser');
 var signals = require('signals');
 
@@ -119,7 +118,7 @@ PathViewModel.prototype.updateStatus = function() {
     if (err) return;
     if (status == 'inited') {
       self.status('repository');
-      self.repository(new RepositoryViewModel(self.app, self.path));
+      self.repository(components.create('repository', { app: self.app, repoPath: self.path }));
     } else if (status == 'uninited') {
       self.status('uninited');
     } else if (status == 'no-such-path') {

@@ -1,13 +1,16 @@
 
 var ko = require('knockout');
+var dialogs = require('ungit-dialogs');
+var components = require('ungit-components');
 var async = require('async');
-var dialogs = require('./dialogs');
 var _ = require('lodash');
-var components = require('./components');
+
+components.register('repository', function(args) {
+  return new RepositoryViewModel(args.app, args.repoPath);
+});
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
-
 
 var RepositoryViewModel = function(app, repoPath) {
   var self = this;
@@ -26,6 +29,9 @@ var RepositoryViewModel = function(app, repoPath) {
 
   self.onWorkingTreeChanged();
   self.onGitDirectoryChanged();
+}
+RepositoryViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('repository', this, {}, parentElement);
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
@@ -59,3 +65,5 @@ RepositoryViewModel.prototype.handleBubbledClick = function(elem, event) {
   if (event.target.nodeName === 'INPUT') return true;
 }
 
+
+ 

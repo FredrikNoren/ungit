@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "repository": "repository.html"
+    },
+    "javascript": "repository.js",
+    "less": "repository.less"
+  }
+}
