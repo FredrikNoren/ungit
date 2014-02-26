@@ -1,6 +1,5 @@
 
 var ko = require('knockout');
-var screens = require('ungit-screens');
 var dialogs = require('ungit-dialogs');
 var inherits = require('util').inherits;
 var components = require('ungit-components');

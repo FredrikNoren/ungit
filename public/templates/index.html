@@ -9,18 +9,10 @@
 </head>
 <body>
 
-<script type="text/html" id="crash">
-	<div class="container">
-		<div class="panel panel-default crash">
-			<div class="panel-body">
-				<h1>Whooops</h1>
-				Something went wrong, reload the page to start over.
-			</div>
-		</div>
-	</div>
-</script>
+<!-- ungit-import-template: "formDialog.html" -->
+<!-- ungit-import-template: "prompt.html" -->
 
-<script type="text/html" id="usererror">
+<!-- ko with: crash -->
 	<div class="container" data-ta-container="user-error-page">
 		<div class="panel panel-default crash">
 			<div class="panel-body">
@@ -29,15 +21,11 @@
 			</div>
 		</div>
 	</div>
-</script>
-
-<!-- ungit-import-template: "app.html" -->
-<!-- ungit-import-template: "formDialog.html" -->
-<!-- ungit-import-template: "login.html" -->
-<!-- ungit-import-template: "prompt.html" -->
-
-<!-- ko if: content -->
-<div data-bind="template: { name: templateChooser, data: content }"></div>
+<!-- /ko -->
+<!-- ko ifnot: crash -->
+	<!-- ko if: content -->
+	<!-- ko component: content --><!-- /ko -->
+	<!-- /ko -->
 <!-- /ko -->
 
 <script type="text/javascript">ungit = {}</script>

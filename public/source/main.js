@@ -6,9 +6,6 @@ require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
-var AppViewModel = require('./app');
-var screens = require('./screens');
-var CrashViewModel = screens.CrashViewModel;
 var components = require('./components');
 var Server = require('./server');
 var programEvents = require('./program-events');
@@ -277,6 +274,7 @@ ko.bindingHandlers.hasFocus2 = {
 var AppContainerViewModel = function() {
   var self = this;
   this.content = ko.observable();
+  this.crash = ko.observable();
 }
 exports.AppContainerViewModel = AppContainerViewModel;
 AppContainerViewModel.prototype.templateChooser = function(data) {
@@ -285,23 +283,24 @@ AppContainerViewModel.prototype.templateChooser = function(data) {
 };
 
 var app, appContainer, server;
+var DEFAULT_UNKOWN_CRASH = { title: 'Whooops', details: 'Something went wrong, reload the page to start over.' };
 
 exports.start = function() {
 
   server = new Server();
   appContainer = new AppContainerViewModel();
-  app = new AppViewModel(appContainer, server);
+  app = components.create('app', { appContainer: appContainer, server: server });
   programEvents.add(function(event) {
     if (event.event == 'disconnected') {
-      appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+      appContainer.crash({ title: 'Connection lost', details: 'Refresh the page to try to reconnect' });
     } else if (event.event  == 'git-crash-error') {
-      appContainer.content(new screens.CrashViewModel());
+      appContainer.crash(DEFAULT_UNKOWN_CRASH);
     } else {
       app.onProgramEvent(event);
     }
   });
   if (ungit.config.authentication) {
-    var authenticationScreen = new screens.LoginViewModel(server);
+    var authenticationScreen = components.create('login', { server: server });
     appContainer.content(authenticationScreen);
     authenticationScreen.loggedIn.add(function() {
       server.initSocket(function() {
@@ -315,7 +314,7 @@ exports.start = function() {
   }
 
   Raven.TraceKit.report.subscribe(function(err) {
-    appContainer.content(new CrashViewModel());
+    appContainer.crash(DEFAULT_UNKOWN_CRASH);
   });
 
   var prevTimestamp = 0;

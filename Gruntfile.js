@@ -31,7 +31,6 @@ module.exports = function(grunt) {
           'public/source/components.js:ungit-components',
           'public/source/program-events.js:ungit-program-events',
           'public/source/navigation.js:ungit-navigation',
-          'public/source/screens.js:ungit-screens',
           'public/source/main.js:ungit-main',
           'source/utils/vector2.js:ungit-vector2',
           'source/address-parser.js:ungit-address-parser',
@@ -42,7 +41,8 @@ module.exports = function(grunt) {
           'async:',
           'moment:',
           'blueimp-md5:',
-          'color:'
+          'color:',
+          'signals:'
         ]
       },
       dist: {

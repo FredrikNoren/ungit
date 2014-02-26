@@ -1,26 +1,11 @@
 
 var ko = require('knockout');
-var components = require('./components');
-var addressParser = require('../../source/address-parser');
+var components = require('ungit-components');
 var signals = require('signals');
 
-
-var CrashViewModel = function() {
-}
-exports.CrashViewModel = CrashViewModel;
-CrashViewModel.prototype.template = 'crash';
-
-
-var UserErrorViewModel = function(args) {
-  if (typeof(arguments[0]) == 'string')
-    args = { title: arguments[0], details: arguments[1] };
-  args = args || {};
-  this.title = ko.observable(args.title);
-  this.details = ko.observable(args.details);
-}
-exports.UserErrorViewModel = UserErrorViewModel;
-UserErrorViewModel.prototype.template = 'usererror';
-
+components.register('login', function(args) {
+  return new LoginViewModel(args.server);
+});
 
 var LoginViewModel = function(server) {
   var self = this;
@@ -39,6 +24,9 @@ var LoginViewModel = function(server) {
   });
 }
 exports.LoginViewModel = LoginViewModel;
+LoginViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('login', this, {}, parentElement);
+}
 LoginViewModel.prototype.login = function() {
   var self = this;
   this.server.post('/login', { username: this.username(), password: this.password() }, function(err, res) {
@@ -53,4 +41,4 @@ LoginViewModel.prototype.login = function() {
     }
   });
 }
-LoginViewModel.prototype.template = 'login';
+

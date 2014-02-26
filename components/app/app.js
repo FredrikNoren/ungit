@@ -1,12 +1,13 @@
 
-var signals = require('signals');
 var ko = require('knockout');
-var dialogs = require('./dialogs');
-var screens = require('./screens');
-var async = require('async');
-var components = require('./components');
-var programEvents = require('./program-events');
-var navigation = require('./navigation');
+var components = require('ungit-components');
+var dialogs = require('ungit-dialogs');
+var programEvents = require('ungit-program-events');
+var navigation = require('ungit-navigation');
+
+components.register('app', function(args) {
+  return new AppViewModel(args.appContainer, args.server);
+});
 
 var AppViewModel = function(appContainer, server) {
   var self = this;
@@ -21,9 +22,6 @@ var AppViewModel = function(appContainer, server) {
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
   
   this.content = ko.observable(components.create('home', { app: this }));
-  /*this.content.subscribe(function(value) {
-    self.header.showBackButton(!(value instanceof screens.HomeViewModel));
-  });*/
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
   this.newVersionAvailable = ko.observable();
@@ -54,6 +52,9 @@ var AppViewModel = function(appContainer, server) {
 
 }
 module.exports = AppViewModel;
+AppViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('app', this, {}, parentElement);
+}
 AppViewModel.prototype.template = 'app';
 AppViewModel.prototype.shown = function() {
   var self = this;
@@ -172,4 +173,6 @@ AppViewModel.prototype.refresh = function(callback) {
     callback();
   }
 }
+
+
 
