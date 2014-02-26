@@ -337,7 +337,7 @@ exports.start = function() {
 
   navigation.crossroads.addRoute('/repository{?query}', function(query) {
     app.path(query.path);
-    app.content(components.create('path', { app: app, path: query.path }));
+    app.content(components.create('path', { server: server, path: query.path }));
   })
 
   navigation.init();

@@ -6,17 +6,16 @@ var async = require('async');
 var _ = require('lodash');
 
 components.register('repository', function(args) {
-  return new RepositoryViewModel(args.app, args.repoPath);
+  return new RepositoryViewModel(args.server, args.repoPath);
 });
 
 var idCounter = 0;
 var newId = function() { return idCounter++; };
 
-var RepositoryViewModel = function(app, repoPath) {
+var RepositoryViewModel = function(server, repoPath) {
   var self = this;
 
-  this.app = app;
-  this.server = app.server;
+  this.server = server;
   this.repoPath = repoPath;
   this.graph = components.create('graph', { repositoryViewModel: this });
   this.remotes = components.create('remotes', { repositoryViewModel: this });

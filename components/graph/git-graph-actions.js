@@ -17,7 +17,7 @@ GraphActions.ActionBase = function(graph) {
   var self = this;
   this.graph = graph;
   this.repository = graph.repository;
-  this.server = graph.repository.app.server;
+  this.server = graph.repository.server;
   this.performProgressBar = components.create('progressBar', {
     predictionMemoryKey: 'action-' + this.style + '-' + graph.repoPath,
     fallbackPredictedTimeMs: 1000,

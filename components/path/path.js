@@ -5,13 +5,12 @@ var addressParser = require('ungit-address-parser');
 var navigation = require('ungit-navigation');
 
 components.register('path', function(args) {
-  return new PathViewModel(args.app, args.path);
+  return new PathViewModel(args.server, args.path);
 });
 
-var PathViewModel = function(app, path) {
+var PathViewModel = function(server, path) {
   var self = this;
-  this.app = app;
-  this.server = app.server;
+  this.server = server;
   this.path = path;
   this.status = ko.observable('loading');
   this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
@@ -52,7 +51,7 @@ PathViewModel.prototype.updateStatus = function() {
     if (err) return;
     if (status == 'inited') {
       self.status('repository');
-      self.repository(components.create('repository', { app: self.app, repoPath: self.path }));
+      self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
     } else if (status == 'uninited') {
       self.status('uninited');
     } else if (status == 'no-such-path') {
