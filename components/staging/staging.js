@@ -91,11 +91,9 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, files[file].type, file);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file);
     }
-    fileViewModel.isNew(files[file].isNew);
-    fileViewModel.removed(files[file].removed);
-    fileViewModel.conflict(files[file].conflict);
+    fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
     newFiles.push(fileViewModel);
   }
@@ -204,11 +202,11 @@ StagingViewModel.prototype.toogleAllStages = function() {
   self.allStageFlag(!self.allStageFlag());
 }
 
-var FileViewModel = function(staging, type, name) {
+var FileViewModel = function(staging, name) {
   var self = this;
   this.staging = staging;
   this.app = staging.app;
-  this.type = type;
+  this.type = ko.observable();
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
   this.isNew = ko.observable(false);
@@ -216,8 +214,22 @@ var FileViewModel = function(staging, type, name) {
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repository.repoPath, temporary: true });
-  this.diff = 
-    components.create(type == 'image' ? 'imagediff' : 'textdiff', { filename: this.name(), repoPath: this.staging.repository.repoPath, app: this.app });
+  this.diff = ko.observable();
+    
+}
+FileViewModel.prototype.setState = function(state) {
+  this.type(state.type);
+  this.isNew(state.isNew);
+  this.removed(state.removed);
+  this.conflict(state.conflict);
+  this.diff(
+    components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
+      filename: this.name(),
+      repoPath: this.staging.repository.repoPath,
+      app: this.app,
+      isNew: this.isNew(),
+      isRemoved: this.removed()
+    }));
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
@@ -250,7 +262,7 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   var self = this;
   if (this.showingDiffs() && (drawProgressBar || this.type != 'image')) {
     this.diffsProgressBar.start();
-    this.diff.invalidateDiff(function() {
+    this.diff().invalidateDiff(function() {
       self.diffsProgressBar.stop();
     });
   }
