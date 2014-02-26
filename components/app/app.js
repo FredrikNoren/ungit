@@ -11,7 +11,6 @@ components.register('app', function(args) {
 var AppViewModel = function(appContainer, server) {
   var self = this;
   this.appContainer = appContainer;
-  this.path = ko.observable();
   this.server = server;
   this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);

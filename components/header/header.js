@@ -11,7 +11,7 @@ function HeaderViewModel(app) {
   var self = this;
   this.app = app;
   this.showBackButton = ko.observable(false);
-  this.path = this.app.path;
+  this.path = ko.observable();
   this.currentVersion = ungit.version;
   this.showAddToRepoListButton = ko.computed(function() {
     return self.path() && self.app.repoList().indexOf(self.path()) == -1;
@@ -27,6 +27,8 @@ HeaderViewModel.prototype.submitPath = function() {
 HeaderViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'navigation-changed') {
     this.showBackButton(event.path != '');
+  } else if (event.event == 'navigated-to-path') {
+    this.path(event.path);
   }
 }
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {

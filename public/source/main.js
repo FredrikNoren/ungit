@@ -115,7 +115,7 @@ exports.start = function() {
       appContainer.crash({ title: 'Connection lost', details: 'Refresh the page to try to reconnect' });
     } else if (event.event  == 'git-crash-error') {
       appContainer.crash(DEFAULT_UNKOWN_CRASH);
-    } else {
+    } else if (app.onProgramEvent) {
       app.onProgramEvent(event);
     }
   });
@@ -150,12 +150,11 @@ exports.start = function() {
 
   // routing
   navigation.crossroads.addRoute('/', function() {
-    app.path('');
     app.content(components.create('home', { app: app }));
   });
 
   navigation.crossroads.addRoute('/repository{?query}', function(query) {
-    app.path(query.path);
+    programEvents.dispatch({ event: 'navigated-to-path', path: query.path });
     app.content(components.create('path', { server: server, path: query.path }));
   })
 
