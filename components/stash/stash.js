@@ -4,7 +4,7 @@ var moment = require('moment');
 var components = require('ungit-components');
 
 components.register('stash', function(args) {
-  return new StashViewModel(args.repositoryViewModel);
+  return new StashViewModel(args.server, args.repoPath);
 });
 
 function StashItemViewModel(stash, data) {
@@ -18,22 +18,22 @@ function StashItemViewModel(stash, data) {
 StashItemViewModel.prototype.pop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repository.repoPath, pop: true }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath, pop: true }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repository.repoPath }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
 
-function StashViewModel(repository) {
+function StashViewModel(server, repoPath) {
   var self = this;
-  this.repository = repository;
-  this.server = repository.server;
+  this.server = server;
+  this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0; });
 }
@@ -42,7 +42,7 @@ StashViewModel.prototype.updateNode = function(parentElement) {
 }
 StashViewModel.prototype.refresh = function() {
   var self = this;
-  this.server.get('/stashes', { path: this.repository.repoPath }, function(err, stashes) {
+  this.server.get('/stashes', { path: this.repoPath }, function(err, stashes) {
     if (err) return;
     self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
   });
