@@ -2,6 +2,27 @@
 var ko = require('knockout');
 var signals = require('signals');
 var inherits = require('util').inherits;
+var components = require('ungit-components');
+
+components.register('formdialog', function(args) {
+  return new FormDialogViewModel(args.title);
+});
+
+components.register('credentialsdialog', function(args) {
+  return new CredentialsDialogViewModel();
+});
+
+components.register('addremotedialog', function(args) {
+  return new AddRemoteDialogViewModel();
+});
+
+components.register('promptdialog', function(args) {
+  return new PromptDialogViewModel(args.title, args.details);
+});
+
+components.register('yesnodialog', function(args) {
+  return new YesNoDialogViewModel(args.title, args.details);
+});
 
 function DialogViewModel(title) {
   this.closed = new signals.Signal();

@@ -27,7 +27,6 @@ module.exports = function(grunt) {
         debug: true,
         // Make these globally requireable, for use in plugins
         alias: [
-          'public/source/dialogs.js:ungit-dialogs',
           'public/source/components.js:ungit-components',
           'public/source/program-events.js:ungit-program-events',
           'public/source/navigation.js:ungit-navigation',

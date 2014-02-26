@@ -1,9 +1,9 @@
 
 var ko = require('knockout');
-var dialogs = require('ungit-dialogs');
 var md5 = require('blueimp-md5').md5;
 var Selectable = require('./git-selectable').Selectable;
 var programEvents = require('ungit-program-events');
+var components = require('ungit-components');
 
 var RefViewModel = function(args) {
   Selectable.call(this, args.graph);
@@ -116,7 +116,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     this.server.post('/push', pushReq, function(err, res) {
         if (err) {
           if (err.errorCode == 'non-fast-forward') {
-            var forcePushDialog = new dialogs.YesNoDialogViewModel('Force push?', 'The remote branch can\'t be fast-forwarded.');
+            var forcePushDialog = components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' });
             forcePushDialog.closed.add(function() {
               if (!forcePushDialog.result()) return callback();
               pushReq.force = true;

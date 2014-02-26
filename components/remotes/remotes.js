@@ -3,7 +3,6 @@ var ko = require('knockout');
 var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
-var dialogs = require('ungit-dialogs');
 var programEvents = require('ungit-program-events');
 
 components.register('remotes', function(args) {
@@ -80,7 +79,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
 }
 RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var self = this;
-  var diag = new dialogs.AddRemoteDialogViewModel();
+  var diag = components.create('addremotedialog');
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
       self.server.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {

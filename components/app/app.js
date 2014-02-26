@@ -1,7 +1,6 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
-var dialogs = require('ungit-dialogs');
 var programEvents = require('ungit-program-events');
 var navigation = require('ungit-navigation');
 
@@ -115,13 +114,15 @@ AppViewModel.prototype._handleCredentialsRequested = function() {
   var diag;
   // Only show one credentials dialog if we're asked to show another one while the first one is open
   // This happens for instance when we fetch nodes and remote tags at the same time
-  if (self.dialog() instanceof dialogs.CredentialsDialogViewModel)
+  if (this._isShowingCredentialsDialog)
     diag = self.dialog();
   else {
-    diag = new dialogs.CredentialsDialogViewModel();
+    diag = components.create('credentialsdialog');
     self.showDialog(diag);
   }
+  this._isShowingCredentialsDialog = true;
   diag.closed.add(function() {
+    self._isShowingCredentialsDialog = false;
     programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
   });
 }

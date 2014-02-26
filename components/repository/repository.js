@@ -1,6 +1,5 @@
 
 var ko = require('knockout');
-var dialogs = require('ungit-dialogs');
 var components = require('ungit-components');
 var async = require('async');
 var _ = require('lodash');

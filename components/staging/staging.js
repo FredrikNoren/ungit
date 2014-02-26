@@ -1,6 +1,5 @@
 
 var ko = require('knockout');
-var dialogs = require('ungit-dialogs');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
@@ -173,7 +172,7 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 }
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
-  var diag = new dialogs.YesNoDialogViewModel('Are you sure you want to discard all changes?', 'This operation cannot be undone.');
+  var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'});
   diag.closed.add(function() {
     if (diag.result()) self.server.post('/discardchanges', { path: self.repository.repoPath, all: true });
   });

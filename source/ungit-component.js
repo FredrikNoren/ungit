@@ -46,7 +46,6 @@ UngitComponent.prototype.compile = function(callback) {
     b.external('ungit-components');
     b.external('ungit-program-events');
     b.external('ungit-navigation');
-    b.external('ungit-dialogs');
     b.external('ungit-main');
     b.external('ungit-vector2');
     b.external('ungit-address-parser');
