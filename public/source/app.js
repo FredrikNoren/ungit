@@ -15,26 +15,23 @@ var AppViewModel = function(appContainer, browseTo) {
   this.appContainer = appContainer;
   this.browseTo = browseTo;
   this.path = ko.observable();
+  this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);
   this.connectionState = ko.observable('connecting');
   this.gitErrors = ko.observable([]);
 
   this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
-  this.showAddToRepoListButton = ko.computed(function() {
-    return self.path() && self.repoList().indexOf(self.path()) == -1;
-  });
-
+  
   this.content = ko.observable(new screens.HomeViewModel(this));
+  this.content.subscribe(function(value) {
+    self.header.showBackButton(!(value instanceof screens.HomeViewModel));
+  });
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
   this.newVersionAvailable = ko.observable();
   this.newVersionInstallCommand = (ungit.platform == 'win32' ? '' : 'sudo -H ') + 'npm update -g ungit';
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
-  this.showBackButton = ko.computed(function() {
-    return !(self.content() instanceof screens.HomeViewModel);
-  });
-  this.refreshingProgressBar = components.create('progressBar', { predictionMemoryKey: 'refreshing-content', temporary: true });
 
   this.bugtrackingNagscreenDismissed = ko.computed({
     read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
@@ -157,9 +154,6 @@ AppViewModel.prototype.watchRepository = function(repositoryPath, callback) {
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
-AppViewModel.prototype.submitPath = function() {
-  this.browseTo('repository?path=' + encodeURIComponent(this.path()));
-}
 AppViewModel.prototype.showDialog = function(dialog) {
   var self = this;
   dialog.closed.add(function() {
@@ -201,23 +195,12 @@ AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
   return data.template;
 };
-AppViewModel.prototype.addCurrentPathToRepoList = function() {
-  var repoPath = this.path();
-  var repos = this.repoList();
-  if (repos.indexOf(repoPath) != -1) return;
-  repos.push(repoPath);
-  this.repoList(repos);
-  return true;
-}
-AppViewModel.prototype.refresh = function() {
-  var self = this;
+AppViewModel.prototype.refresh = function(callback) {
   if (this.content().refreshContent) {
-    this.refreshingProgressBar.start();
-    this.content().refreshContent(function() {
-      self.refreshingProgressBar.stop();
-    });
+    this.content().refreshContent(callback);
+  } else {
+    callback();
   }
-  return true;
 }
 AppViewModel.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);
