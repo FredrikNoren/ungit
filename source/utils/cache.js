@@ -12,7 +12,7 @@ var cache = function(constructValue) {
     if (hasCache) return callback(f.error, f.value);
     if (constructDone) return constructDone.add(callback);
 
-    constructDone = new signals.Signal();
+    var localConstructDone = constructDone = new signals.Signal();
     constructDone.add(function(err, val) {
       constructDone = null;
       callback(err, val);
@@ -21,7 +21,7 @@ var cache = function(constructValue) {
       hasCache = true;
       f.error = err;
       f.value = value;
-      constructDone.dispatch(err, value);
+      localConstructDone.dispatch(err, value);
     });
   };
 
