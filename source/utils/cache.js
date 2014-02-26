@@ -12,7 +12,8 @@ var cache = function(constructValue) {
     if (hasCache) return callback(f.error, f.value);
     if (constructDone) return constructDone.add(callback);
 
-    var localConstructDone = constructDone = new signals.Signal();
+    constructDone = new signals.Signal();
+    var localConstructDone = constructDone;
     constructDone.add(function(err, val) {
       constructDone = null;
       callback(err, val);
