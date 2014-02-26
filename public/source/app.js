@@ -6,12 +6,11 @@ var screens = require('./screens');
 var async = require('async');
 var components = require('./components');
 var programEvents = require('./program-events');
+var navigation = require('./navigation');
 
-
-var AppViewModel = function(appContainer, browseTo, server) {
+var AppViewModel = function(appContainer, server) {
   var self = this;
   this.appContainer = appContainer;
-  this.browseTo = browseTo;
   this.path = ko.observable();
   this.server = server;
   this.header = components.create('header', { app: this });

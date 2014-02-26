@@ -1,6 +1,8 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
+var addressParser = require('ungit-address-parser');
+var navigation = require('ungit-navigation');
 
 components.register('path', function(args) {
   return new PathViewModel(args.app, args.path);
@@ -80,7 +82,7 @@ PathViewModel.prototype.cloneRepository = function() {
   this.server.post('/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
     self.cloningProgressBar.stop();
     if (err) return;
-    self.server.browseTo('repository?path=' + encodeURIComponent(res.path));
+    navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
   });
 }
 PathViewModel.prototype.createDir = function() {

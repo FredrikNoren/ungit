@@ -1,6 +1,7 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
+var navigation = require('ungit-navigation');
 
 components.register('header', function(args) {
   return new HeaderViewModel(args.app);
@@ -21,7 +22,7 @@ HeaderViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('header', this, {}, parentElement);
 }
 HeaderViewModel.prototype.submitPath = function() {
-  this.app.browseTo('repository?path=' + encodeURIComponent(this.path()));
+  navigation.browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
   var repoPath = this.path();

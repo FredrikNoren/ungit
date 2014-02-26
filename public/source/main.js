@@ -6,14 +6,13 @@ require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
-var hasher = require('hasher');
-var crossroads = require('crossroads');
 var AppViewModel = require('./app');
 var screens = require('./screens');
 var CrashViewModel = screens.CrashViewModel;
 var components = require('./components');
 var Server = require('./server');
 var programEvents = require('./program-events');
+var navigation = require('./navigation');
 
 // Request animation frame polyfill
 (function() {
@@ -291,7 +290,7 @@ exports.start = function() {
 
   server = new Server();
   appContainer = new AppContainerViewModel();
-  app = new AppViewModel(appContainer, browseTo, server);
+  app = new AppViewModel(appContainer, server);
   programEvents.add(function(event) {
     if (event.event == 'disconnected') {
       appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
@@ -331,31 +330,19 @@ exports.start = function() {
   ko.applyBindings(appContainer);
 
   // routing
-  crossroads.addRoute('/', function() {
+  navigation.crossroads.addRoute('/', function() {
     app.path('');
     app.content(components.create('home', { app: app }));
   });
 
-  crossroads.addRoute('/repository{?query}', function(query) {
+  navigation.crossroads.addRoute('/repository{?query}', function(query) {
     app.path(query.path);
     app.content(components.create('path', { app: app, path: query.path }));
   })
 
-  hasher.init();
-
+  navigation.init();
 }
 
-//setup hasher
-function parseHash(newHash, oldHash){
-  crossroads.parse(newHash);
-}
-hasher.initialized.add(parseHash); //parse initial hash
-hasher.changed.add(parseHash); //parse hash changes
-
-
-function browseTo(path) {
-  hasher.setHash(path);
-}
 
 $(document).ready(function() {
   $().dndPageScroll(); // Automatic page scrolling on drag-n-drop: http://www.planbox.com/blog/news/updates/html5-drag-and-drop-scrolling-the-page.html
