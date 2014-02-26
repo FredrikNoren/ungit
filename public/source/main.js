@@ -11,8 +11,7 @@ var crossroads = require('crossroads');
 var AppViewModel = require('./app');
 var screens = require('./screens');
 var CrashViewModel = screens.CrashViewModel;
-var PathViewModel = screens.PathViewModel;
-var HomeViewModel = screens.HomeViewModel;
+var components = require('./components');
 
 // Request animation frame polyfill
 (function() {
@@ -325,12 +324,12 @@ exports.start = function() {
   // routing
   crossroads.addRoute('/', function() {
     app.path('');
-    app.content(new HomeViewModel(app));
+    app.content(components.create('home', { app: app }));
   });
 
   crossroads.addRoute('/repository{?query}', function(query) {
     app.path(query.path);
-    app.content(new PathViewModel(app, query.path));
+    app.content(components.create('path', { app: app, path: query.path }));
   })
 
   hasher.init();

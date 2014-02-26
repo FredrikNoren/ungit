@@ -23,10 +23,10 @@ var AppViewModel = function(appContainer, browseTo) {
   this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
   
-  this.content = ko.observable(new screens.HomeViewModel(this));
-  this.content.subscribe(function(value) {
+  this.content = ko.observable(components.create('home', { app: this }));
+  /*this.content.subscribe(function(value) {
     self.header.showBackButton(!(value instanceof screens.HomeViewModel));
-  });
+  });*/
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
   this.newVersionAvailable = ko.observable();
@@ -61,12 +61,12 @@ var AppViewModel = function(appContainer, browseTo) {
   });
 
   this.workingTreeChanged = blockable(_.throttle(function() {
-    if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
-      self.content().repository().onWorkingTreeChanged();
+    if (self.content() && self.content().onWorkingTreeChanged)
+      self.content().onWorkingTreeChanged();
   }, 500));
   this.gitDirectoryChanged = blockable(_.throttle(function() {
-    if (self.content() && self.content() instanceof screens.PathViewModel && self.content().repository())
-      self.content().repository().onGitDirectoryChanged();
+    if (self.content() && self.content().onGitDirectoryChanged)
+      self.content().onGitDirectoryChanged();
   }, 500));
 }
 module.exports = AppViewModel;
