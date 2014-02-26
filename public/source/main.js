@@ -12,6 +12,8 @@ var AppViewModel = require('./app');
 var screens = require('./screens');
 var CrashViewModel = screens.CrashViewModel;
 var components = require('./components');
+var Server = require('./server');
+var programEvents = require('./program-events');
 
 // Request animation frame polyfill
 (function() {
@@ -264,7 +266,7 @@ ko.bindingHandlers.hasFocus2 = {
     // If the user didn't move for 3 sec and then moved again, it's likely it's a tab-back
     if (Date.now() - lastMoved > 3000) {
       console.log('Fire change event due to re-activity');
-      app.workingTreeChanged();
+      programEvents.dispatch({ event: 'working-tree-changed' });
     }
     lastMoved = Date.now();
   });
@@ -283,25 +285,32 @@ AppContainerViewModel.prototype.templateChooser = function(data) {
   return data.template;
 };
 
-var app, appContainer;
+var app, appContainer, server;
 
 exports.start = function() {
 
+  server = new Server();
   appContainer = new AppContainerViewModel();
-  app = new AppViewModel(appContainer, browseTo);
-  app.connectionState.subscribe(function(value) {
-    if (value == 'disconnected') appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
-  })
+  app = new AppViewModel(appContainer, browseTo, server);
+  programEvents.add(function(event) {
+    if (event.event == 'disconnected') {
+      appContainer.content(new screens.UserErrorViewModel('Connection lost', 'Refresh the page to try to reconnect'));
+    } else if (event.event  == 'git-crash-error') {
+      appContainer.content(new screens.CrashViewModel());
+    } else {
+      app.onProgramEvent(event);
+    }
+  });
   if (ungit.config.authentication) {
     var authenticationScreen = new screens.LoginViewModel(app);
     appContainer.content(authenticationScreen);
     authenticationScreen.loggedIn.add(function() {
-      app.initSocket(function() {
+      server.initSocket(function() {
         appContainer.content(app);
       });
     });
   } else {
-    app.initSocket(function() {
+    server.initSocket(function() {
       appContainer.content(app);
     });
   }

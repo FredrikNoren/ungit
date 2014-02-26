@@ -9,6 +9,7 @@ components.register('home', function(args) {
 function HomeRepositoryViewModel(home, path) {
   this.home = home;
   this.app = home.app;
+  this.server = this.app.server;
   this.path = path;
   this.title = path;
   this.link = '/#/repository?path=' + encodeURIComponent(path);
@@ -18,10 +19,10 @@ function HomeRepositoryViewModel(home, path) {
 }
 HomeRepositoryViewModel.prototype.updateState = function() {
   var self = this;
-  this.app.get('/fs/exists?path=' + encodeURIComponent(this.path), undefined, function(err, exists) {
+  this.server.get('/fs/exists?path=' + encodeURIComponent(this.path), undefined, function(err, exists) {
     self.pathRemoved(!exists);
   });
-  this.app.get('/remotes/origin?path=' + encodeURIComponent(this.path), undefined, function(err, remote) {
+  this.server.get('/remotes/origin?path=' + encodeURIComponent(this.path), undefined, function(err, remote) {
     if (err) {
       self.remote('');
       return true;

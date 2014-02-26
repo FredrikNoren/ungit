@@ -29,6 +29,7 @@ module.exports = function(grunt) {
         alias: [
           'public/source/dialogs.js:ungit-dialogs',
           'public/source/components.js:ungit-components',
+          'public/source/program-events.js:ungit-program-events',
           'public/source/screens.js:ungit-screens',
           'public/source/main.js:ungit-main',
           'source/utils/vector2.js:ungit-vector2',

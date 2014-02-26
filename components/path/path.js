@@ -9,6 +9,7 @@ components.register('path', function(args) {
 var PathViewModel = function(app, path) {
   var self = this;
   this.app = app;
+  this.server = app.server;
   this.path = path;
   this.status = ko.observable('loading');
   this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
@@ -44,7 +45,7 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
   self.unitiedPathTitle('Not a repository');
-  this.app.get('/quickstatus', { path: this.path }, function(err, status){
+  this.server.get('/quickstatus', { path: this.path }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
     if (status == 'inited') {
@@ -57,18 +58,18 @@ PathViewModel.prototype.updateStatus = function() {
     }
   });
 }
-PathViewModel.prototype.onWorkingTreeChanged = function() {
-  if (this.repository()) this.repository().onWorkingTreeChanged();
-}
-PathViewModel.prototype.onGitDirectoryChanged = function() {
-  if (this.repository()) this.repository().onGitDirectoryChanged();
-}
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  this.app.post('/init', { path: this.path }, function(err, res) {
+  this.server.post('/init', { path: this.path }, function(err, res) {
     if (err) return;
     self.updateStatus();
   });
+}
+PathViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'request-credentials') self.cloningProgressBar.pause();
+  else if (event.event == 'request-credentials-response') self.cloningProgressBar.unpause();
+
+  if (this.repository()) this.repository().onProgramEvent(event);
 }
 PathViewModel.prototype.cloneRepository = function() {
   var self = this;
@@ -76,23 +77,16 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  var programEventListener = function(event) {
-    if (event.event == 'credentialsRequested') self.cloningProgressBar.pause();
-    else if (event.event == 'credentialsProvided') self.cloningProgressBar.unpause();
-  };
-  this.app.programEvents.add(programEventListener);
-
-  this.app.post('/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
-    self.app.programEvents.remove(programEventListener);
+  this.server.post('/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
     self.cloningProgressBar.stop();
     if (err) return;
-    self.app.browseTo('repository?path=' + encodeURIComponent(res.path));
+    self.server.browseTo('repository?path=' + encodeURIComponent(res.path));
   });
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;
   self.unitiedPathTitle('Directory created');
-  this.app.post('/createDir',  {dir: this.path }, function() {
+  this.server.post('/createDir',  {dir: this.path }, function() {
     self.status('uninited');
   });
 }

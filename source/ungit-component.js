@@ -44,6 +44,7 @@ UngitComponent.prototype.compile = function(callback) {
       entries: js.map(function(jsSource) { return path.join(self.path, jsSource); })
     });
     b.external('ungit-components');
+    b.external('ungit-program-events');
     b.external('ungit-dialogs');
     b.external('ungit-screens');
     b.external('ungit-main');

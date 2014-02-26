@@ -54,7 +54,7 @@ var RefViewModel = function(args) {
   }
   this.show = true;
   this.graph = args.graph;
-  this.app = this.graph.app;
+  this.server = this.graph.server;
   this.localRef = ko.observable();
   this.isDragging = ko.observable(false);
   this.current = ko.computed(function() {
@@ -93,7 +93,7 @@ RefViewModel.prototype.remove = function(callback) {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
-  this.app.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
+  this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
     callback();
     self.graph.loadNodesFromApi();
     if (url == '/remote/tags')
@@ -104,24 +104,24 @@ RefViewModel.prototype.moveTo = function(target, callback) {
   var self = this;
   if (this.isLocal) {
     if (this.current())
-      this.app.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callback);
+      this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callback);
     else if (this.isTag)
-      this.app.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
+      this.server.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
     else
-      this.app.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
+      this.server.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
   } else {
     var pushReq = { path: this.graph.repoPath, remote: this.remote,
       refSpec: target, remoteBranch: this.refName };
-    this.app.post('/push', pushReq, function(err, res) {
+    this.server.post('/push', pushReq, function(err, res) {
         if (err) {
           if (err.errorCode == 'non-fast-forward') {
             var forcePushDialog = new dialogs.YesNoDialogViewModel('Force push?', 'The remote branch can\'t be fast-forwarded.');
             forcePushDialog.closed.add(function() {
               if (!forcePushDialog.result()) return callback();
               pushReq.force = true;
-              self.app.post('/push', pushReq, callback);
+              self.server.post('/push', pushReq, callback);
             });
-            self.app.showDialog(forcePushDialog);
+            self.server.showDialog(forcePushDialog);
             return true;
           } else {
             callback(err, res);
@@ -133,6 +133,6 @@ RefViewModel.prototype.moveTo = function(target, callback) {
   }
 }
 RefViewModel.prototype.createRemoteRef = function(callback) {
-  this.app.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
+  this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
       refSpec: this.refName, remoteBranch: this.refName }, callback);
 }

@@ -13,7 +13,7 @@ var GitNodeViewModel = function(graph, sha1) {
   var self = this;
 
   this.graph = graph;
-  this.app = graph.repository.app;
+  this.server = graph.repository.server;
   this.sha1 = sha1;
 
   
@@ -153,13 +153,13 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
-  this.app.post('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+  this.server.post('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
   this.branchingFormVisible(false);
   this.newBranchName('');
 }
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
-  this.app.post('/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+  this.server.post('/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
   this.branchingFormVisible(false);
   this.newBranchName('');
 }

@@ -16,6 +16,7 @@ var RepositoryViewModel = function(app, repoPath) {
   var self = this;
 
   this.app = app;
+  this.server = app.server;
   this.repoPath = repoPath;
   this.graph = components.create('graph', { repositoryViewModel: this });
   this.remotes = components.create('remotes', { repositoryViewModel: this });
@@ -25,7 +26,7 @@ var RepositoryViewModel = function(app, repoPath) {
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
-  app.watchRepository(repoPath, function() { self.watcherReady(true); });
+  this.server.watchRepository(repoPath, function() { self.watcherReady(true); });
 
   self.onWorkingTreeChanged();
   self.onGitDirectoryChanged();
@@ -34,6 +35,10 @@ RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
 }
 exports.RepositoryViewModel = RepositoryViewModel;
+RepositoryViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'working-tree-changed') this.onWorkingTreeChanged();
+  else if (event.event == 'git-directory-changed') this.onGitDirectoryChanged();
+}
 RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
   this.staging.refreshContent();
   this.staging.invalidateFilesDiffs();

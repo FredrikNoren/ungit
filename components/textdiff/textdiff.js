@@ -9,7 +9,7 @@ components.register('textdiff', function(args) {
 var TextDiffViewModel = function(args) {
   this.filename = args.filename;
   this.repoPath = args.repoPath;
-  this.app = args.app;
+  this.server = args.server;
   this.diffs = ko.observable();
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -18,7 +18,7 @@ TextDiffViewModel.prototype.updateNode = function(parentElement) {
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  self.app.get('/diff', { file: self.filename, path: self.repoPath}, function(err, diffs) {
+  self.server.get('/diff', { file: self.filename, path: self.repoPath}, function(err, diffs) {
     if (err) {
       if (err.errorCode == 'no-such-file') {
         // The file existed before but has been removed, but we're trying to get a diff for it

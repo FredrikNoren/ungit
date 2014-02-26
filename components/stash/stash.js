@@ -9,7 +9,7 @@ components.register('stash', function(args) {
 
 function StashItemViewModel(stash, data) {
   this.stash = stash;
-  this.app = stash.app;
+  this.server = stash.server;
   this.id = data.id;
   this.title = data.name + ' ' + moment(data.date).fromNow();
   this.body = data.title;
@@ -18,14 +18,14 @@ function StashItemViewModel(stash, data) {
 StashItemViewModel.prototype.pop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath, pop: true }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repository.repoPath, pop: true }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.app.del('/stashes/' + this.id, { path: this.stash.repository.repoPath }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repository.repoPath }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
@@ -33,7 +33,7 @@ StashItemViewModel.prototype.drop = function() {
 function StashViewModel(repository) {
   var self = this;
   this.repository = repository;
-  this.app = repository.app;
+  this.server = repository.server;
   this.stashedChanges = ko.observable([]);
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0; });
 }
@@ -42,7 +42,7 @@ StashViewModel.prototype.updateNode = function(parentElement) {
 }
 StashViewModel.prototype.refresh = function() {
   var self = this;
-  this.app.get('/stashes', { path: this.repository.repoPath }, function(err, stashes) {
+  this.server.get('/stashes', { path: this.repository.repoPath }, function(err, stashes) {
     if (err) return;
     self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
   });

@@ -4,6 +4,7 @@ var screens = require('ungit-screens');
 var dialogs = require('ungit-dialogs');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
+var programEvents = require('ungit-program-events');
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.repositoryViewModel);
@@ -12,7 +13,7 @@ components.register('staging', function(args) {
 var StagingViewModel = function(repository) {
   var self = this;
   this.repository = repository;
-  this.app =repository.app;
+  this.server =repository.server;
   this.repoPath = this.repository.repoPath;
   this.filesByPath = {};
   this.files = ko.observable([]);
@@ -69,7 +70,7 @@ StagingViewModel.prototype.updateNode = function(parentElement) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
-  this.app.get('/status', { path: this.repoPath }, function(err, status) {
+  this.server.get('/status', { path: this.repoPath }, function(err, status) {
     if (err) {
       if (callback) callback(err);
       return err.errorCode == 'must-be-in-working-tree';
@@ -125,15 +126,8 @@ StagingViewModel.prototype.commit = function() {
   });
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.app.post('/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
+  this.server.post('/commit', { path: this.repository.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
     if (err) {
-      if (err.errorCode == 'no-git-name-email-configured') {
-        self.repository.app.content(new screens.UserErrorViewModel({
-          title: 'Git email and/or name not configured',
-          details: 'You need to configure your git email and username to commit files.<br> Run <code>git config --global user.name "your name"</code> and <code>git config --global user.email "your@email.com"</code>'
-        }));
-        return true;
-      }
       return;
     }
     self.commitMessageTitle('');
@@ -146,14 +140,14 @@ StagingViewModel.prototype.commit = function() {
 StagingViewModel.prototype.rebaseContinue = function() {
   var self = this;
   this.rebaseContinueProgressBar.start();
-  this.app.post('/rebase/continue', { path: this.repository.repoPath }, function(err, res) {
+  this.server.post('/rebase/continue', { path: this.repository.repoPath }, function(err, res) {
     self.rebaseContinueProgressBar.stop();
   });
 }
 StagingViewModel.prototype.rebaseAbort = function() {
   var self = this;
   this.rebaseAbortProgressBar.start();
-  this.app.post('/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
+  this.server.post('/rebase/abort', { path: this.repository.repoPath }, function(err, res) {
     self.rebaseAbortProgressBar.stop();
   });
 }
@@ -162,14 +156,14 @@ StagingViewModel.prototype.mergeContinue = function() {
   this.mergeContinueProgressBar.start();
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.app.post('/merge/continue', { path: this.repository.repoPath, message: commitMessage }, function(err, res) {
+  this.server.post('/merge/continue', { path: this.repository.repoPath, message: commitMessage }, function(err, res) {
     self.mergeContinueProgressBar.stop();
   });
 }
 StagingViewModel.prototype.mergeAbort = function() {
   var self = this;
   this.mergeAbortProgressBar.start();
-  this.app.post('/merge/abort', { path: this.repository.repoPath }, function(err, res) {
+  this.server.post('/merge/abort', { path: this.repository.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
   }); 
 }
@@ -182,14 +176,14 @@ StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
   var diag = new dialogs.YesNoDialogViewModel('Are you sure you want to discard all changes?', 'This operation cannot be undone.');
   diag.closed.add(function() {
-    if (diag.result()) self.app.post('/discardchanges', { path: self.repository.repoPath, all: true });
+    if (diag.result()) self.server.post('/discardchanges', { path: self.repository.repoPath, all: true });
   });
-  this.app.showDialog(diag);
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
   this.stashProgressBar.start();
-  this.app.post('/stashes', { path: this.repository.repoPath, message: this.commitMessageTitle() }, function(err, res) {
+  this.server.post('/stashes', { path: this.repository.repoPath, message: this.commitMessageTitle() }, function(err, res) {
     self.stashProgressBar.stop();
   });
 }
@@ -205,7 +199,7 @@ StagingViewModel.prototype.toogleAllStages = function() {
 var FileViewModel = function(staging, name) {
   var self = this;
   this.staging = staging;
-  this.app = staging.app;
+  this.server = staging.server;
   this.type = ko.observable();
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
@@ -226,7 +220,7 @@ FileViewModel.prototype.setState = function(state) {
     components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
       filename: this.name(),
       repoPath: this.staging.repository.repoPath,
-      app: this.app,
+      server: this.server,
       isNew: this.isNew(),
       isRemoved: this.removed()
     }));
@@ -235,20 +229,20 @@ FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-  this.app.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
+  this.server.post('/discardchanges', { path: this.staging.repository.repoPath, file: this.name() });
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.app.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() }, function(err) {
+  this.server.post('/ignorefile', { path: this.staging.repository.repoPath, file: this.name() }, function(err) {
     if (err && err.errorCode == 'file-already-git-ignored') {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
-      self.app.workingTreeChanged();
+      programEvents.dispatch({ event: 'working-tree-changed' });
       return true;
     } 
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
-  this.app.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
+  this.server.post('/resolveconflicts', { path: this.staging.repository.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toogleDiffs = function() {
   var self = this;

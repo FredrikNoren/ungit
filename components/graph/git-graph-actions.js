@@ -8,6 +8,7 @@ var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
 var MergeViewModel = graphGraphicsActions.MergeViewModel;
 var ResetViewModel = graphGraphicsActions.ResetViewModel;
 var PushViewModel = graphGraphicsActions.PushViewModel;
+var programEvents = require('ungit-program-events');
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -16,7 +17,7 @@ GraphActions.ActionBase = function(graph) {
   var self = this;
   this.graph = graph;
   this.repository = graph.repository;
-  this.app = graph.repository.app;
+  this.server = graph.repository.app.server;
   this.performProgressBar = components.create('progressBar', {
     predictionMemoryKey: 'action-' + this.style + '-' + graph.repoPath,
     fallbackPredictedTimeMs: 1000,
@@ -104,7 +105,7 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
 }
 GraphActions.Reset.prototype.perform = function(callback) {
   var remoteRef = this.graph.currentActionContext().getRemoteRef(this.repository.remotes.currentRemote());
-  this.app.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
+  this.server.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
 }
 
 
@@ -134,7 +135,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
   return new RebaseViewModel(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
-  this.app.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
+  this.server.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
     callback();
     if (err && err.errorCode == 'merge-failed') return true;
   });
@@ -165,7 +166,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
   return new MergeViewModel(this.graph.graphic, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
-  this.app.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().refName }, function(err) {
+  this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().refName }, function(err) {
     callback();
     if (err && err.errorCode == 'merge-failed') return true;
   });
@@ -196,13 +197,13 @@ GraphActions.Push.prototype.createHoverGraphic = function() {
 GraphActions.Push.prototype.perform = function( callback) {
   var self = this;
   var programEventListener = function(event) {
-    if (event.event == 'credentialsRequested') self.performProgressBar.pause();
-    else if (event.event == 'credentialsProvided') self.performProgressBar.unpause();
+    if (event.event == 'request-credentials') self.performProgressBar.pause();
+    else if (event.event == 'request-credentials-response') self.performProgressBar.unpause();
   };
-  this.graph.repository.app.programEvents.add(programEventListener);
+  programEvents.add(programEventListener);
   var ref = this.graph.currentActionContext();
   var onDone = function(err) {
-    self.graph.repository.app.programEvents.remove(programEventListener);
+    programEvents.remove(programEventListener);
     callback();
     if (!err) {
       self.graph.loadNodesFromApi();
@@ -238,13 +239,13 @@ GraphActions.Checkout.prototype.perform = function(callback) {
   var refName;
   if (context instanceof RefViewModel) refName = context.refName;
   else refName = context.sha1;
-  this.app.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
+  this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
     if (err && err.errorCode != 'merge-failed') {
       callback();
       return;
     }
     if (context instanceof RefViewModel && context.isRemoteBranch)
-      self.app.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
+      self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
         callback();
         if (err && err.errorCode != 'merge-failed') return;
         return true;
@@ -289,7 +290,7 @@ GraphActions.CherryPick.prototype.text = 'Cherry pick';
 GraphActions.CherryPick.prototype.style = 'cherry-pick';
 GraphActions.CherryPick.prototype.perform = function(callback) {
   var self = this;
-  this.app.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
+  this.server.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
     callback();
     if (err && err.errorCode == 'merge-failed') return true;
   });
@@ -310,7 +311,7 @@ GraphActions.Uncommit.prototype.text = 'Uncommit';
 GraphActions.Uncommit.prototype.style = 'uncommit';
 GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
-  this.app.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
+  this.server.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
 }
 
 GraphActions.Revert = function(graph, node) {
@@ -327,5 +328,5 @@ GraphActions.Revert.prototype.text = 'Revert';
 GraphActions.Revert.prototype.style = 'revert';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
-  this.app.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
+  this.server.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
 }

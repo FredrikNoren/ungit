@@ -17,7 +17,7 @@ components.register('graph', function(args) {
 var GitGraphViewModel = function(repository) {
   var self = this;
   this.repository = repository;
-  this.app = repository.app;
+  this.server = repository.server;
   this.maxNNodes = 25;
   this.nodes = ko.observable([]);
   this.edgesById = {};
@@ -84,7 +84,7 @@ GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
   this.nodesLoader.start();
-  this.app.get('/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
+  this.server.get('/log', { path: this.repoPath, limit: this.maxNNodes }, function(err, logEntries) {
     if (err) {
       self.nodesLoader.stop();
       if (callback) callback();
@@ -97,7 +97,7 @@ GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
 }
 GitGraphViewModel.prototype.updateBranches = function() {
   var self = this;
-  this.app.get('/checkout', { path: this.repoPath }, function(err, branch) {
+  this.server.get('/checkout', { path: this.repoPath }, function(err, branch) {
     if (err && err.errorCode == 'not-a-repository') return true;
     if (err) return;
     self.checkedOutBranch(branch);

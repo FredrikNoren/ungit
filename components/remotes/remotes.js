@@ -4,6 +4,7 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var dialogs = require('ungit-dialogs');
+var programEvents = require('ungit-program-events');
 
 components.register('remotes', function(args) {
   return new RemotesViewModel(args.repositoryViewModel);
@@ -13,7 +14,7 @@ function RemotesViewModel(repository) {
   var self = this;
   this.repository = repository;
   this.repoPath = repository.repoPath;
-  this.app = repository.app;
+  this.server = this.repository.server;
   this.remotes = ko.observable([]);
   this.currentRemote = ko.observable(null);
   this.fetchLabel = ko.computed(function() {
@@ -33,22 +34,19 @@ RemotesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('remotes', this, {}, parentElement);
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
+RemotesViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'request-credentials') self.fetchingProgressBar.pause();
+  else if (event.event == 'request-credentials-response') self.fetchingProgressBar.unpause();
+}
 RemotesViewModel.prototype.fetch = function(options, callback) {
   if (this.fetchingProgressBar.running()) return;
   var self = this;
 
-  var programEventListener = function(event) {
-    if (event.event == 'credentialsRequested') self.fetchingProgressBar.pause();
-    else if (event.event == 'credentialsProvided') self.fetchingProgressBar.unpause();
-  };
-  this.app.programEvents.add(programEventListener);
-
   this.fetchingProgressBar.start();
   var jobs = [];
-  if (options.tags) jobs.push(function(done) { self.app.get('/remote/tags', { path: self.repoPath, remote: self.currentRemote() }, done); });
-  if (options.nodes) jobs.push(function(done) { self.app.post('/fetch', { path: self.repoPath, remote: self.currentRemote() }, done);  });
+  if (options.tags) jobs.push(function(done) { self.server.get('/remote/tags', { path: self.repoPath, remote: self.currentRemote() }, done); });
+  if (options.nodes) jobs.push(function(done) { self.server.post('/fetch', { path: self.repoPath, remote: self.currentRemote() }, done);  });
   async.parallel(jobs, function(err, result) {
-    self.app.programEvents.remove(programEventListener);
     self.fetchingProgressBar.stop();
 
     if (!err && options.tags) self.repository.graph.setRemoteTags(result[0]);
@@ -57,7 +55,7 @@ RemotesViewModel.prototype.fetch = function(options, callback) {
 
 RemotesViewModel.prototype.updateRemotes = function() {
   var self = this;
-  this.app.get('/remotes', { path: this.repoPath }, function(err, remotes) {
+  this.server.get('/remotes', { path: this.repoPath }, function(err, remotes) {
     if (err && err.errorCode == 'not-a-repository') return true;
     if (err) return;
     remotes = remotes.map(function(remote) {
@@ -85,12 +83,12 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var diag = new dialogs.AddRemoteDialogViewModel();
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
-      self.app.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {
+      self.server.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {
         if (err) return;
         self.updateRemotes();
       })
     }
   });
-  this.app.showDialog(diag);
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
