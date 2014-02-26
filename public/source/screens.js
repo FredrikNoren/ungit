@@ -22,15 +22,15 @@ exports.UserErrorViewModel = UserErrorViewModel;
 UserErrorViewModel.prototype.template = 'usererror';
 
 
-var LoginViewModel = function(app) {
+var LoginViewModel = function(server) {
   var self = this;
-  this.app = app;
+  this.server = server;
   this.loggedIn = new signals.Signal();
   this.status = ko.observable('loading');
   this.username = ko.observable();
   this.password = ko.observable();
   this.loginError = ko.observable();
-  this.app.get('/loggedin', undefined, function(err, status) {
+  this.server.get('/loggedin', undefined, function(err, status) {
     if (status.loggedIn) {
       self.loggedIn.dispatch();
       self.status('loggedIn');
@@ -41,7 +41,7 @@ var LoginViewModel = function(app) {
 exports.LoginViewModel = LoginViewModel;
 LoginViewModel.prototype.login = function() {
   var self = this;
-  this.app.post('/login', { username: this.username(), password: this.password() }, function(err, res) {
+  this.server.post('/login', { username: this.username(), password: this.password() }, function(err, res) {
     if (err) {
       if (err.res.body.error) {
         self.loginError(err.res.body.error);

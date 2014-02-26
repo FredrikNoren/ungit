@@ -217,7 +217,7 @@ ko.bindingHandlers.autocomplete = {
     var handleKeyEvent = function(event) {
       var lastChar = $(element).val().slice(-1);
       if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
-        app.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
+        server.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
           if (err) {
             if (err.errorCode == 'read-dir-failed') return true;
             else return false;
@@ -301,7 +301,7 @@ exports.start = function() {
     }
   });
   if (ungit.config.authentication) {
-    var authenticationScreen = new screens.LoginViewModel(app);
+    var authenticationScreen = new screens.LoginViewModel(server);
     appContainer.content(authenticationScreen);
     authenticationScreen.loggedIn.add(function() {
       server.initSocket(function() {
