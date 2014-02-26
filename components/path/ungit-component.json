@@ -3,7 +3,6 @@
     "knockoutTemplates": {
       "path": "path.html"
     },
-    "javascript": "path.js",
-    "less": "path.less"
+    "javascript": "path.js"
   }
 }
