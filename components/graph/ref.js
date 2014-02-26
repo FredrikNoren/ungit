@@ -3,6 +3,7 @@ var ko = require('knockout');
 var dialogs = require('ungit-dialogs');
 var md5 = require('blueimp-md5').md5;
 var Selectable = require('./git-selectable').Selectable;
+var programEvents = require('ungit-program-events');
 
 var RefViewModel = function(args) {
   Selectable.call(this, args.graph);
@@ -121,7 +122,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
               pushReq.force = true;
               self.server.post('/push', pushReq, callback);
             });
-            self.server.showDialog(forcePushDialog);
+            programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
             return true;
           } else {
             callback(err, res);
