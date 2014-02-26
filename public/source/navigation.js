@@ -1,4 +1,6 @@
 
+var programEvents = require('./program-events');
+
 var navigation = {};
 module.exports = navigation;
 
@@ -14,6 +16,7 @@ navigation.init = function() {
   //setup hasher
   function parseHash(newHash, oldHash){
     crossroads.parse(newHash);
+    programEvents.dispatch({ event: 'navigation-changed', path: newHash, oldPath: oldHash });
   }
   hasher.initialized.add(parseHash); //parse initial hash
   hasher.changed.add(parseHash); //parse hash changes

@@ -24,6 +24,11 @@ HeaderViewModel.prototype.updateNode = function(parentElement) {
 HeaderViewModel.prototype.submitPath = function() {
   navigation.browseTo('repository?path=' + encodeURIComponent(this.path()));
 }
+HeaderViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'navigation-changed') {
+    this.showBackButton(event.path != '');
+  }
+}
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
   var repoPath = this.path();
   var repos = this.repoList();

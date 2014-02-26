@@ -85,6 +85,7 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 
   if (this.content() && this.content().onProgramEvent)
     this.content().onProgramEvent(event);
+  if (this.header.onProgramEvent) this.header.onProgramEvent(event);
 }
 AppViewModel.prototype._handleGitError = function(event) {
   var self = this;
