@@ -6,14 +6,13 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 
 components.register('remotes', function(args) {
-  return new RemotesViewModel(args.repositoryViewModel);
+  return new RemotesViewModel(args.server, args.repoPath);
 });
 
-function RemotesViewModel(repository) {
+function RemotesViewModel(server, repoPath) {
   var self = this;
-  this.repository = repository;
-  this.repoPath = repository.repoPath;
-  this.server = this.repository.server;
+  this.repoPath = repoPath;
+  this.server = server;
   this.remotes = ko.observable([]);
   this.currentRemote = ko.observable(null);
   this.fetchLabel = ko.computed(function() {
