@@ -4,21 +4,33 @@ var path = require('path');
 var less = require('less');
 var async = require('async');
 var browserify = require('browserify');
+var express = require('express');
 
-function UngitComponent(args) {
+function UngitPlugin(args) {
   this.dir = args.dir;
   this.path = args.path;
   this.httpBasePath = args.httpBasePath;
-  this.manifest = require(path.join(this.path, "ungit-component.json"));
+  this.manifest = require(path.join(this.path, "ungit-plugin.json"));
 }
-module.exports = UngitComponent;
+module.exports = UngitPlugin;
 
-function assureArray(obj) {
-  if (obj instanceof Array) return obj;
-  else return [obj];
+UngitPlugin.prototype.init = function(env) {
+  if (this.manifest.server) {
+    var serverScript = require(path.join(this.path, this.manifest.server));
+    serverScript.install({
+        app: env.app,
+        httpServer: env.httpServer,
+        ensureAuthenticated: env.ensureAuthenticated,
+        ensurePathExists: env.ensurePathExists,
+        git: require('./git'),
+        config: env.config,
+        httpPath: env.pathPrefix + '/plugins/' + this.manifest.name
+      });
+  }
+  env.app.use('/plugins/' + this.dir, express.static(this.path));
 }
 
-UngitComponent.prototype.compile = function(callback) {
+UngitPlugin.prototype.compile = function(callback) {
   var self = this;
   console.log('Compiling ' + this.path);
 
@@ -109,4 +121,9 @@ UngitComponent.prototype.compile = function(callback) {
     if (err) throw err;
     callback(err, '<!-- Component: ' + self.dir + ' -->\n' + result.join(''))
   });
+}
+
+function assureArray(obj) {
+  if (obj instanceof Array) return obj;
+  else return [obj];
 }

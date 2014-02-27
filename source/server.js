@@ -15,7 +15,7 @@ var async = require('async');
 var signals = require('signals');
 var os = require('os');
 var cache = require('./utils/cache');
-var UngitComponent = require('./ungit-component');
+var UngitPlugin = require('./ungit-plugin');
 
 process.on('uncaughtException', function(err) {
   winston.error(err.stack ? err.stack.toString() : err.toString());
@@ -152,11 +152,11 @@ if (config.authentication) {
 
 var indexHtmlCache = cache(function(callback) {
   fs.readFile(__dirname + '/../public/index.html', function(err, data) {
-    async.map(Object.keys(components), function(componentName, callback) {
-      components[componentName].compile(callback);
+    async.map(Object.keys(plugins), function(pluginName, callback) {
+      plugins[pluginName].compile(callback);
     }, function(err, result) {
       var html = result.join('\n\n');
-      data = data.toString().replace('<!-- ungit-components-placeholder -->', html);
+      data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
       callback(null, data);
     });
   });
@@ -177,62 +177,32 @@ var apiEnvironment = {
   ensureAuthenticated: ensureAuthenticated,
   ensurePathExists: ensurePathExists,
   git: require('./git'),
-  config: config
+  config: config,
+  pathPrefix: gitApi.pathPrefix
 };
 
 gitApi.registerApi(apiEnvironment);
-
-// Init components
-var components = [];
-function loadComponents(componentsBasePath, httpBasePath) {
-  fs.readdirSync(componentsBasePath).forEach(function(componentDir) {
-    winston.info('Loading component: ' + componentDir);
-    var component = new UngitComponent({
-      dir: componentDir,
-      httpBasePath: httpBasePath,
-      path: path.join(componentsBasePath, componentDir)
-    });
-    if (component.manifest.disabled) {
-      console.log('Component disabled: ' + componentDir);
-      return;
-    }
-    components.push(component);
-    winston.info('Component loaded: ' + componentDir);
-  });
-}
-loadComponents(path.join(__dirname, '..', 'components'), '');
 
 // Init plugins
 var plugins = [];
 function loadPlugins(pluginBasePath) {
   fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
     winston.info('Loading plugin: ' + pluginDir);
-    var pluginPath = path.join(pluginBasePath, pluginDir);
-    var pluginManifest = require(path.join(pluginPath, "ungit-plugin.json"));
-    if (pluginManifest.disabled) {
+    var plugin = new UngitPlugin({
+      dir: pluginDir,
+      httpBasePath: 'plugins/' + pluginDir,
+      path: path.join(pluginBasePath, pluginDir)
+    });
+    if (plugin.manifest.disabled) {
       console.log('Plugin disabled: ' + pluginDir);
       return;
     }
-    var componentsBasePath = path.join(pluginPath, 'components');
-    if (path.existsSync(componentsBasePath))
-      loadComponents(componentsBasePath, 'plugins/' + pluginDir);
-    if (pluginManifest.serverScript) {
-      var pluginBackend = require(path.join(pluginPath, pluginManifest.serverScript));
-      pluginBackend({
-        app: app,
-        server: server,
-        ensureAuthenticated: ensureAuthenticated,
-        ensurePathExists: ensurePathExists,
-        git: require('./git'),
-        config: config,
-        httpPath: gitApi.pathPrefix + '/' + pluginManifest.name
-      });
-    }    
-    plugins.push({ dir: pluginDir, path: pluginPath, manifest: pluginManifest });
-    app.use('/plugins/' + pluginDir, express.static(pluginPath));
+    plugin.init(apiEnvironment);
+    plugins.push(plugin);
     winston.info('Plugin loaded: ' + pluginDir);
   });
 }
+loadPlugins(path.join(__dirname, '..', 'components'));
 if (path.existsSync(config.pluginDirectory))
   loadPlugins(config.pluginDirectory);
 
