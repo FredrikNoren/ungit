@@ -64,7 +64,6 @@ RemotesViewModel.prototype.updateRemotes = function() {
       }
     });
     self.remotes(remotes);
-    self.repository.graph.hasRemotes(remotes.length != 0);
     if (!self.currentRemote() && remotes.length > 0) {
       if (_.find(remotes, { 'name': 'origin' })) // default to origin if it exists
         self.currentRemote('origin');
