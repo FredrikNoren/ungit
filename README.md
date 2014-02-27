@@ -9,7 +9,7 @@ The easiest way to use git. On any platform. Anywhere.
  * Runs on any platform that node.js & git supports.
  * Web-based, meaning you can run it on your cloud/pure shell machine and use the ui from your browser (just browse to http://your-cloud-machine.com:8448).
  * Works well with GitHub.
- * [Gerrit](https://code.google.com/p/gerrit/) integration (view, checkout and push changes from/to gerrit).
+ * [Gerrit](https://code.google.com/p/gerrit/) integration through plugin: https://github.com/FredrikNoren/ungit-gerrit
 
 [Follow @ungitui on twitter](https://twitter.com/ungitui)
 
@@ -51,6 +51,10 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 ```
 
 Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [optimist](https://github.com/substack/node-optimist) for command line arguments. See corresponding documentations for more details.
+
+Plugins
+-------
+Plugins are installed by simply placing them in the Ungit plugin directory (`~/.ungit/plugins` by default), and then restarting Ungit.
 
 Developing
 ----------
