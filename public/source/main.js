@@ -141,7 +141,8 @@ exports.start = function() {
   var updateAnimationFrame = function(timestamp) {
     var delta = timestamp - prevTimestamp;
     prevTimestamp = timestamp;
-    app.updateAnimationFrame(delta);
+    if (app.updateAnimationFrame)
+      app.updateAnimationFrame(delta);
     window.requestAnimationFrame(updateAnimationFrame);
   }
   window.requestAnimationFrame(updateAnimationFrame);

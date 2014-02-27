@@ -9,7 +9,8 @@ var config = {
   port: 8449,
   testTimeout: 10000,
   serverTimeout: 10000,
-  viewportSize: { width: 2000, height: 2000 }
+  viewportSize: { width: 2000, height: 2000 },
+  showServerOutput: false
 };
 
 var helpers = exports;
@@ -79,7 +80,7 @@ helpers.startUngitServer = function(options, callback) {
     .concat(options);
   var ungitServer = child_process.spawn('node', options);
   ungitServer.stdout.on("data", function (data) {
-    //console.log(prependLines('[server] ', data));
+    if (config.showServerOutput) console.log(prependLines('[server] ', data));
     
     if (data.toString().indexOf('Ungit server already running') >= 0) {
       callback('server-already-running');
