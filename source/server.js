@@ -223,6 +223,7 @@ app.get('/serverdata.js', function(req, res) {
     text += 'ungit.userHash = "' + data.userHash + '";\n';
     text += 'ungit.version = "' + data.version + '";\n';
     text += 'ungit.platform = "' + os.platform() + '"\n';
+    text += 'ungit.pluginApiVersion = "' + require('../package.json').ungitPluginApiVersion + '"\n';
     res.send(text);
   });
 });

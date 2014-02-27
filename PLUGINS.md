@@ -47,3 +47,6 @@ Just restart Ungit, or if you have `"dev": true` in your `.ungitrc` you can just
 ### More examples
 
 All the components in Ungit is built as plugins, take a look in the `components` directory for inspiration. Or take a look at the [gerrit plugin](https://github.com/FredrikNoren/ungit-gerrit) which is a complete example of how a plugin can look.
+
+### Ungit Plugin API version
+The Ungit Plugin API follows semver, and the current version can be found in the package.json (ungitPluginApiVersion). On the frontend it can be accessed from `ungit.pluginApiVersion` and on the backend `env.pluginApiVersion`.

@@ -29,7 +29,8 @@ UngitPlugin.prototype.init = function(env) {
         git: require('./git'),
         config: env.config,
         pluginConfig: this.config,
-        httpPath: env.pathPrefix + '/plugins/' + this.name
+        httpPath: env.pathPrefix + '/plugins/' + this.name,
+        pluginApiVersion: require('../package.json').ungitPluginApiVersion
       });
   }
   env.app.use('/plugins/' + this.name, express.static(this.path));
