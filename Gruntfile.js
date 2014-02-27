@@ -47,7 +47,7 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'public/js/ungit.js': ['public/source/main.js'],
-          'public/js/devStyling.js': ['public/source/devStyling.js']
+          'public/js/devStyling.js': ['public/devStyling/devStyling.js']
         }
       }
     },

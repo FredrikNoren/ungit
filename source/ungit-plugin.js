@@ -11,6 +11,8 @@ function UngitPlugin(args) {
   this.path = args.path;
   this.httpBasePath = args.httpBasePath;
   this.manifest = require(path.join(this.path, "ungit-plugin.json"));
+  this.packageJson = require(path.join(this.path, "package.json")) || {};
+  this.name = this.manifest.name || this.packageJson.name || this.dir;
 }
 module.exports = UngitPlugin;
 
@@ -24,10 +26,10 @@ UngitPlugin.prototype.init = function(env) {
         ensurePathExists: env.ensurePathExists,
         git: require('./git'),
         config: env.config,
-        httpPath: env.pathPrefix + '/plugins/' + this.manifest.name
+        httpPath: env.pathPrefix + '/plugins/' + this.name
       });
   }
-  env.app.use('/plugins/' + this.dir, express.static(this.path));
+  env.app.use('/plugins/' + this.name, express.static(this.path));
 }
 
 UngitPlugin.prototype.compile = function(callback) {
@@ -119,7 +121,7 @@ UngitPlugin.prototype.compile = function(callback) {
 
   async.parallel(tasks, function(err, result) {
     if (err) throw err;
-    callback(err, '<!-- Component: ' + self.dir + ' -->\n' + result.join(''))
+    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join(''))
   });
 }
 
