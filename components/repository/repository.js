@@ -16,7 +16,7 @@ var RepositoryViewModel = function(server, repoPath) {
 
   this.server = server;
   this.repoPath = repoPath;
-  this.graph = components.create('graph', { repositoryViewModel: this });
+  this.graph = components.create('graph', { server: server, repoPath: repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
   this.staging = components.create('staging', { server: server, repoPath: repoPath });

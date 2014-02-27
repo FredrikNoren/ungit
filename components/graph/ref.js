@@ -97,8 +97,9 @@ RefViewModel.prototype.remove = function(callback) {
   this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
     callback();
     self.graph.loadNodesFromApi();
-    if (url == '/remote/tags')
-      self.graph.repository.remotes.fetch({ tags: true });
+    if (url == '/remote/tags') {
+      programEvents.dispatch({ event: 'request-fetch-tags' });
+    }
   });
 }
 RefViewModel.prototype.moveTo = function(target, callback) {
@@ -134,6 +135,6 @@ RefViewModel.prototype.moveTo = function(target, callback) {
   }
 }
 RefViewModel.prototype.createRemoteRef = function(callback) {
-  this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.repository.remotes.currentRemote(),
+  this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.currentRemote(),
       refSpec: this.refName, remoteBranch: this.refName }, callback);
 }

@@ -15,6 +15,9 @@ function RemotesViewModel(server, repoPath) {
   this.server = server;
   this.remotes = ko.observable([]);
   this.currentRemote = ko.observable(null);
+  this.currentRemote.subscribe(function(value) {
+    programEvents.dispatch({ event: 'current-remote-changed', newRemote: value });
+  });
   this.fetchLabel = ko.computed(function() {
     if (self.currentRemote()) return 'Fetch nodes from ' + self.currentRemote();
     else return 'No remotes specified';
@@ -35,8 +38,9 @@ RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, t
 RemotesViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-credentials') self.fetchingProgressBar.pause();
   else if (event.event == 'request-credentials-response') self.fetchingProgressBar.unpause();
+  else if (event.event == 'request-fetch-tags') this.fetch({ tags: true });
 }
-RemotesViewModel.prototype.fetch = function(options, callback) {
+RemotesViewModel.prototype.fetch = function(options) {
   if (this.fetchingProgressBar.running()) return;
   var self = this;
 

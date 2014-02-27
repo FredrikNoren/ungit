@@ -13,7 +13,7 @@ var GitNodeViewModel = function(graph, sha1) {
   var self = this;
 
   this.graph = graph;
-  this.server = graph.repository.server;
+  this.server = graph.server;
   this.sha1 = sha1;
 
   

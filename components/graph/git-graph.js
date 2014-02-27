@@ -11,22 +11,22 @@ var GraphViewModel = require('./graph-graphics/graph').GraphViewModel;
 var EdgeViewModel = require('./graph-graphics/edge').EdgeViewModel;
 
 components.register('graph', function(args) {
-  return new GitGraphViewModel(args.repositoryViewModel);
+  return new GitGraphViewModel(args.server, args.repoPath);
 });
 
-var GitGraphViewModel = function(repository) {
+var GitGraphViewModel = function(server, repoPath) {
   var self = this;
-  this.repository = repository;
-  this.server = repository.server;
+  this.server = server;
+  this.repoPath = repoPath;
+  this.currentRemote = ko.observable();
   this.maxNNodes = 25;
   this.nodes = ko.observable([]);
   this.edgesById = {};
   this.refs = ko.observableArray();
   this.nodesById = {};
   this.refsByRefName = {};
-  this.repoPath = repository.repoPath;
   this.nodesLoader = components.create('progressBar', {
-      predictionMemoryKey: 'gitgraph-' + repository.repoPath,
+      predictionMemoryKey: 'gitgraph-' + self.repoPath,
       fallbackPredictedTimeMs: 1000,
       temporary: true
     });
@@ -88,6 +88,8 @@ GitGraphViewModel.prototype.onProgramEvent = function(event) {
     this.loadNodesFromApi();
   } else if (event.event == 'remote-tags-update') {
     this.setRemoteTags(event.tags);
+  } else if (event.event == 'current-remote-changed') {
+    this.currentRemote(event.newRemote);
   }
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {

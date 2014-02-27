@@ -16,8 +16,7 @@ module.exports = GraphActions;
 GraphActions.ActionBase = function(graph) {
   var self = this;
   this.graph = graph;
-  this.repository = graph.repository;
-  this.server = graph.repository.server;
+  this.server = graph.server;
   this.performProgressBar = components.create('progressBar', {
     predictionMemoryKey: 'action-' + this.style + '-' + graph.repoPath,
     fallbackPredictedTimeMs: 1000,
@@ -86,7 +85,7 @@ GraphActions.Reset = function(graph, node) {
     if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
     var context = self.graph.currentActionContext();
     if (context.node() != self.node) return false;
-    var remoteRef = context.getRemoteRef(self.repository.remotes.currentRemote());
+    var remoteRef = context.getRemoteRef(self.graph.currentRemote());
     return remoteRef &&
       remoteRef.node() != context.node() &&
       remoteRef.node().commitTime().unix() < context.node().commitTime().unix();
@@ -99,12 +98,12 @@ GraphActions.Reset.prototype.icon = 'glyphicon-trash';
 GraphActions.Reset.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
-  var remoteRef = context.getRemoteRef(this.repository.remotes.currentRemote());
+  var remoteRef = context.getRemoteRef(this.graph.currentRemote());
   var nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
   return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-  var remoteRef = this.graph.currentActionContext().getRemoteRef(this.repository.remotes.currentRemote());
+  var remoteRef = this.graph.currentActionContext().getRemoteRef(this.graph.currentRemote());
   this.server.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
 }
 
@@ -180,7 +179,7 @@ GraphActions.Push = function(graph, node) {
     if (self.performProgressBar.running()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().node() == self.node &&
-      self.graph.currentActionContext().canBePushed(self.repository.remotes.currentRemote());
+      self.graph.currentActionContext().canBePushed(self.graph.currentRemote());
   });
 }
 inherits(GraphActions.Push, GraphActions.ActionBase);
@@ -190,7 +189,7 @@ GraphActions.Push.prototype.icon = 'glyphicon-open';
 GraphActions.Push.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
-  var remoteRef = context.getRemoteRef(this.repository.remotes.currentRemote());
+  var remoteRef = context.getRemoteRef(this.graph.currentRemote());
   if (!remoteRef) return null;
   return new PushViewModel(remoteRef.node(), context.node());
 }
@@ -207,11 +206,12 @@ GraphActions.Push.prototype.perform = function( callback) {
     callback();
     if (!err) {
       self.graph.loadNodesFromApi();
-      if (ref.isTag)
-        self.graph.repository.remotes.fetch({ tags: true });
+      if (ref.isTag) {
+        programEvents.dispatch({ event: 'request-fetch-tags' });
+      }
     }
   }
-  var remoteRef = ref.getRemoteRef(this.repository.remotes.currentRemote());
+  var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
   else ref.createRemoteRef(onDone);
 }
