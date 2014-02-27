@@ -313,3 +313,15 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 
   this.nodes(nodes);
 }
+
+GitGraphViewModel.prototype.handleBubbledClick = function(elem, event) {
+  // If the clicked element is bound to the current action context,
+  // then let's not deselect it.
+  if (ko.dataFor(event.target) === this.currentActionContext()) return;
+  this.currentActionContext(null);
+  // If the click was on an input element, then let's allow the default action to proceed.
+  // This is especially needed since for some strange reason any submit (ie. enter in a textbox)
+  // will trigger a click event on the submit input of the form, which will end up here,
+  // and if we don't return true, then the submit event is never fired, breaking stuff.
+  if (event.target.nodeName === 'INPUT') return true;
+}
