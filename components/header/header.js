@@ -30,8 +30,6 @@ HeaderViewModel.prototype.onProgramEvent = function(event) {
     this.showBackButton(event.path != '');
   } else if (event.event == 'navigated-to-path') {
     this.path(event.path);
-  } else if (event.event == 'app-content-refreshed') {
-    this.refreshingProgressBar.stop();
   }
 }
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
@@ -39,7 +37,11 @@ HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
   return true;
 }
 HeaderViewModel.prototype.refresh = function() {
+  var self = this;
   programEvents.dispatch({ event: 'request-app-content-refresh' });
   this.refreshingProgressBar.start();
+  setTimeout(function() { // Fake the progress bar, for now (since we don't really know who and when this message will be handled)
+    self.refreshingProgressBar.stop();
+  }, 100);
   return true;
 }

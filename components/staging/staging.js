@@ -66,6 +66,11 @@ var StagingViewModel = function(server, repoPath) {
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
 }
+StagingViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'request-app-content-refresh') {
+    this.refreshContent();
+  }
+}
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
   this.server.get('/log', { path: this.repoPath, limit: 1 }, function(err, log) {

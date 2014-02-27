@@ -81,6 +81,14 @@ exports.GitGraphViewModel = GitGraphViewModel;
 GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.graphic.updateAnimationFrame(deltaT);
 }
+GitGraphViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'git-directory-changed') {
+    this.loadNodesFromApi();
+    this.updateBranches();
+  } else if (event.event == 'request-app-content-refresh') {
+    this.loadNodesFromApi();
+  }
+}
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
   this.nodesLoader.start();

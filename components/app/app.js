@@ -82,7 +82,6 @@ AppViewModel.prototype.onProgramEvent = function(event) {
   else if (event.event == 'request-credentials') this._handleCredentialsRequested(event);
   else if (event.event == 'request-show-dialog') this.showDialog(event.dialog);
   else if (event.event == 'request-remember-repo') this._handleRequestRememberRepo(event);
-  else if (event.event == 'request-app-content-refresh') this.refresh();
 
   if (this.content() && this.content().onProgramEvent)
     this.content().onProgramEvent(event);
@@ -175,15 +174,6 @@ AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
   return data.template;
 };
-AppViewModel.prototype.refresh = function() {
-  if (this.content().refreshContent) {
-    this.content().refreshContent(function() {
-      programEvents.dispatch({ event: 'app-content-refreshed' });
-    });
-  } else {
-    programEvents.dispatch({ event: 'app-content-refreshed' });
-  }
-}
 
 
 

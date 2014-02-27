@@ -36,6 +36,8 @@ exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'working-tree-changed') this.onWorkingTreeChanged();
   else if (event.event == 'git-directory-changed') this.onGitDirectoryChanged();
+  if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);
+  if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
 }
 RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
   this.staging.refreshContent();
@@ -43,18 +45,10 @@ RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
 }
 RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
   this.stash.refresh();
-  this.graph.loadNodesFromApi();
-  this.graph.updateBranches();
   this.remotes.updateRemotes();
 }
-RepositoryViewModel.prototype.refreshContent = function(callback) {
-  async.parallel([
-    this.staging.refreshContent.bind(this.staging),
-    this.graph.loadNodesFromApi.bind(this.graph)
-  ], callback);
-}
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
-  this.graph.updateAnimationFrame(deltaT);
+  if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
 }
 RepositoryViewModel.prototype.handleBubbledClick = function(elem, event) {
   // If the clicked element is bound to the current action context,
