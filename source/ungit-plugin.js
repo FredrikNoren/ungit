@@ -12,7 +12,7 @@ function UngitPlugin(args) {
   this.dir = args.dir;
   this.path = args.path;
   this.httpBasePath = args.httpBasePath;
-  this.manifest = require(path.join(this.path, "ungit-plugin.json"));
+  this.manifest = JSON.parse(fs.readFileSync(path.join(this.path, "ungit-plugin.json")));
   this.name = this.manifest.name || this.dir;
   this.config = config.pluginConfigs[this.name] || {};
 }

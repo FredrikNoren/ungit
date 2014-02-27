@@ -151,19 +151,24 @@ if (config.authentication) {
 }
 
 var indexHtmlCache = cache(function(callback) {
-  fs.readFile(__dirname + '/../public/index.html', function(err, data) {
-    async.map(Object.keys(plugins), function(pluginName, callback) {
-      plugins[pluginName].compile(callback);
-    }, function(err, result) {
-      var html = result.join('\n\n');
-      data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
-      callback(null, data);
+  pluginsCache(function(plugins) {
+    fs.readFile(__dirname + '/../public/index.html', function(err, data) {
+      async.map(Object.keys(plugins), function(pluginName, callback) {
+        plugins[pluginName].compile(callback);
+      }, function(err, result) {
+        var html = result.join('\n\n');
+        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
+        callback(null, data);
+      });
     });
   });
 });
 
 app.get('/', function(req, res) {
-  if (req.param('dev') !== undefined) indexHtmlCache.invalidate();
+  if (config.dev) {
+    pluginsCache.invalidate();
+    indexHtmlCache.invalidate();
+  }
   indexHtmlCache(function(err, data) {
     res.end(data);
   });
@@ -184,8 +189,7 @@ var apiEnvironment = {
 gitApi.registerApi(apiEnvironment);
 
 // Init plugins
-var plugins = [];
-function loadPlugins(pluginBasePath) {
+function loadPlugins(plugins, pluginBasePath) {
   fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
     winston.info('Loading plugin: ' + pluginDir);
     var plugin = new UngitPlugin({
@@ -202,9 +206,13 @@ function loadPlugins(pluginBasePath) {
     winston.info('Plugin loaded: ' + pluginDir);
   });
 }
-loadPlugins(path.join(__dirname, '..', 'components'));
-if (fs.existsSync(config.pluginDirectory))
-  loadPlugins(config.pluginDirectory);
+var pluginsCache = cache(function(callback) {
+  var plugins = [];
+  loadPlugins(plugins, path.join(__dirname, '..', 'components'));
+  if (fs.existsSync(config.pluginDirectory))
+    loadPlugins(plugins, config.pluginDirectory);
+  callback(plugins);
+});
 
 app.get('/serverdata.js', function(req, res) {
   async.parallel({
