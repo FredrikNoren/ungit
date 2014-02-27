@@ -9,8 +9,8 @@ Writing plugins
 ===============
 It's super easy to write an Ungit plugin. Here's how to write a completely new (though super simple) git log:
 
-### 1. Create a folder for your plugin.
-Add an `ungit-plugin.json` with the following content:
+### 1. Create a new folder for your plugin.
+Create a folder at `~/.ungit/plugins/MY_FANCY_PLUGIN`, then add a file called `ungit-plugin.json` with the following content:
 ```JSON
 {
   "exports": {
@@ -28,7 +28,7 @@ var components = require('ungit-components');
 // We're overriding the graph component here
 components.register('graph', function(args) {
   return {
-    // This method creates and returns the dom that represents this component.
+    // This method creates and returns the DOM node that represents this component.
     updateNode: function() {
       var node = document.createElement('div');
       // Request all log entries from the backend
@@ -46,10 +46,10 @@ components.register('graph', function(args) {
 });
 ```
 
-### 3. Restart Ungit
-Or if you have `"dev": true` in your `.ungitrc` you can just refresh.
+### 3. Done!
+Just restart Ungit, or if you have `"dev": true` in your `.ungitrc` you can just refresh your browser.
 
-### More examples of plugins
+### More examples
 
 All the components in Ungit is built as plugins, take a look in the `components` directory for inspiration. Or take a look at the [gerrit plugin](https://github.com/FredrikNoren/ungit-gerrit) which is a complete example of how a plugin can look.
 
