@@ -24,12 +24,30 @@ module.exports = function(grunt) {
     browserify: {
       options: {
         noParse: ['public/vendor/js/superagent.js'],
-        debug: true
+        debug: true,
+        // Make these globally requireable, for use in plugins
+        alias: [
+          'public/source/components.js:ungit-components',
+          'public/source/program-events.js:ungit-program-events',
+          'public/source/navigation.js:ungit-navigation',
+          'public/source/main.js:ungit-main',
+          'source/utils/vector2.js:ungit-vector2',
+          'source/address-parser.js:ungit-address-parser',
+          'knockout:',
+          'lodash:',
+          'hasher:',
+          'crossroads:',
+          'async:',
+          'moment:',
+          'blueimp-md5:',
+          'color:',
+          'signals:'
+        ]
       },
       dist: {
         files: {
           'public/js/ungit.js': ['public/source/main.js'],
-          'public/js/devStyling.js': ['public/source/devStyling.js']
+          'public/js/devStyling.js': ['public/devStyling/devStyling.js']
         }
       }
     },
@@ -47,14 +65,7 @@ module.exports = function(grunt) {
         options: {
           spawn: false,
         },
-      },
-      templates: {
-        files: ['public/templates/*'],
-        tasks: ['templates'],
-        options: {
-          spawn: false,
-        },
-      },
+      }
     },
     lineending: {
       // Debian won't accept bin files with the wrong line ending
@@ -245,24 +256,6 @@ module.exports = function(grunt) {
     });
   });
 
-  var templateIncludeRegexp = /<!-- ungit-import-template: "([^"^.]*).html" -->/gm;
-  grunt.registerTask('templates', 'Compiling templates', function() {
-    function compileTemplate(inFilename, outFilename) {
-      var template = fs.readFileSync(inFilename, 'utf8');
-      var newTemplate = template.replace(templateIncludeRegexp, function(match, templateName) {
-        var templateFilename = path.join(path.dirname(inFilename), templateName + '.html');
-        var res = 
-          '<script type="text/html" id="' + templateName + '">\n' +
-          fs.readFileSync(templateFilename, 'utf8') + '\n' +
-          '</script>';
-        return res;
-      });
-      fs.writeFileSync(outFilename, newTemplate);
-    }
-    compileTemplate('public/templates/index.html', 'public/index.html')
-    compileTemplate('public/templates/devStyling.html', 'public/devStyling.html')
-  });
-
   function bumpDependency(packageJson, dependencyType, packageName, callback) {
     var currentVersion = packageJson[dependencyType][packageName];
     if (currentVersion[0] == '~') currentVersion = currentVersion.slice(1);
@@ -320,7 +313,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default', 'templates']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
   grunt.registerTask('unittest', ['simplemocha']);

@@ -1,0 +1,29 @@
+
+
+.textDiff {
+  width: 100%;
+  overflow: hidden;
+  table-layout: fixed;
+  font-family: 'Source Code Pro';
+  font-size: 12px;
+  .textDiffLineNumbers {
+    width: 50px;
+    text-align: center;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .textDiffAdded {
+    background: #66F27B;
+    color: #000;
+  }
+  .textDiffRemoved {
+    background: #E86756;
+    color: #fff;
+  }
+  .textDiffContent {
+    padding-left: 10px;
+    padding-right: 3px;
+    white-space: pre;
+    word-wrap: break-word;
+  }
+}

@@ -1,0 +1,18 @@
+
+<div class="container home animated fadeInLeft" data-ta-container="home-page" data-bind="shown: shown">
+  <div class="nux" data-bind="visible: showNux">
+    <img src="images/logoLarge.png" class="logo-large">
+    <div class="alert alert-info">
+      <h4>Enter a path to a repository to get started!</h4>
+      Then press the <span class="glyphicon glyphicon-plus"></span> symbol to make it show up here.
+    </div>
+  </div>
+  <div class="list-group" data-bind="foreach: repos">
+    <a class="list-group-item repository" data-bind="attr: { href: link }, css: { 'path-removed': pathRemoved }">
+      <span class="glyphicon glyphicon-arrow-right glyphicon-circled pull-left"></span>
+      <h4 class="list-group-item-heading" data-bind="text: title"></h4>
+      <p class="list-group-item-text" data-bind="text: remote"></p>
+      <button type="button" class="btn btn-default list-item-remove" data-bind="click: remove">&#x2716;</button>
+    </a>
+  </div>
+</div>

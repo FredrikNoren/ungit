@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="shortcut icon" href="/favicon.ico" >
+	<title>ungit styles</title>
+	<style>
+	.modal.example {
+		position: relative;
+		top: auto;
+		left: auto;
+		display: block;
+		overflow: visible;
+	}
+	</style>
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top">
+
+	<a class="backlink" href="/#/">
+		<span class="glyphicon glyphicon-arrow-left glyphicon-circled glyph-shown"></span>
+		<img src="images/logo.png">
+	</a>
+
+	<div class="form-container">
+		<form class="path-input-form">
+			<input type="text" class="form-control input-lg">
+		</form>
+	</div>
+
+	<div class="arrowUp"></div>
+</div>
+
+<div class="container">
+	<h3>Typography</h3>
+	<p>Normal text</p>
+	<h2>Header <small>with subheader</small></h2>
+	<h2 class="text-muted">Muted header <small>with subheader</small></h2>
+	<h3>Progress bar</h3>
+	<div class="progress">
+		<div class="progress-bar" style="width: 20%"></div>
+	</div>
+
+	<h3>Buttons</h3>
+	<button type="button" class="btn btn-default">Button</button>
+	<button type="button" class="btn btn-default" disabled="true">Button disabled</button>
+	<button type="button" class="btn btn-default">Button with progress
+		<div class="progress">
+			<div class="progress-bar" style="width: 20%"></div>
+		</div>
+	</button>
+	<button type="button" class="btn btn-primary">Primary</button>
+	<button type="button" class="btn btn-primary" disabled="true">Primary disabled</button>
+	<button type="button" class="btn btn-warning">Warning</button>
+	<button type="button" class="btn btn-primary btn-lg">Large primary</button>
+
+	<h3>Button groups</h3>
+	<div class="btn-group">
+		<button type="button" class="btn btn-default">Left</button>
+		<button type="button" class="btn btn-default">Middle</button>
+		<button type="button" class="btn btn-default">Right
+			<div class="progress">
+				<div class="progress-bar" style="width: 20%"></div>
+			</div>
+		</button>
+	</div>
+
+	<h3>Panel</h3>
+	<div class="panel panel-default">
+		<div class="panel-heading">Heading</div>
+		<div class="panel-body">
+			<h3>Title</h3>
+			<div class="list-group">
+				<a href="#" class="list-group-item">Item 1</a>
+				<a href="#" class="list-group-item">Item 2</a>
+				<div class="list-group-item">
+					<a href="#">Item 3</a>
+	      	<button type="button" class="btn btn-default list-item-remove" data-bind="click: drop">&#x2716;</button>
+	      	<div class="progress">
+						<div class="progress-bar" style="width: 20%"></div>
+					</div>
+				</div>
+				<a href="#" class="list-group-item">
+				    <h4 class="list-group-item-heading">List group item heading</h4>
+				    <p class="list-group-item-text">Sub text</p>
+				</a>
+			</div>
+			<input type="text" class="form-control" placeholder="Text input">
+		</div>
+	</div>
+
+	<h3>Alert</h3>
+	<div class="alert alert-info">
+		A new version of ungit is available, run 'something something' to get the newest version.
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	</div>
+	<div class="alert alert-danger">
+		<strong>Remote error!</strong>
+		Something bad happend remotely.
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	</div>
+
+	<h3>Droparea</h3>
+	<div class="droparea">
+		Drop stuff here!
+	</div>
+
+	<div class="droparea">
+		With progress bar
+		<div class="progress">
+			<div class="progress-bar" style="width: 20%"></div>
+		</div>
+	</div>
+
+	<h3>Checkmark</h3>
+	<p><div class="checkmark">&#10003;</div> Unchecked</p>
+	<p><div class="checkmark checked">&#10003;</div> Checked</p>
+
+	<h3>File diff</h3>
+	<table class="textDiff">
+		<tr class="textDiffAdded">
+			<td class="textDiffLineNumbers"></td>
+			<td class="textDiffLineNumbers">2</td>
+			<td class="textDiffContent">Added</td>
+		</tr>
+		<tr>
+			<td class="textDiffLineNumbers">4</td>
+			<td class="textDiffLineNumbers">4</td>
+			<td class="textDiffContent">Unchanged</td>
+		</tr>
+		<tr class="textDiffRemoved">
+			<td class="textDiffLineNumbers">7</td>
+			<td class="textDiffLineNumbers"></td>
+			<td class="textDiffContent">Removed</td>
+		</tr>
+	</table>
+
+	<h3>Modal</h3>
+	<div class="modal example">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Title</h4>
+				</div>
+				<div class="modal-body">
+					Body
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary">Button</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<h3>Graph graphics</h3>
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.normal } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.rebase } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.merge } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.reset } --><!-- /ko -->
+	<!-- ko template: { name: 'graphGraphics', data: graphGraphicsSamples.push } --><!-- /ko -->
+</div>
+
+
+<script type="text/javascript" src="/js/devStyling.js"></script>
+
+</body>
+</html>

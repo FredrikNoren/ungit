@@ -10,7 +10,7 @@ var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 
-restGit.registerApi(app, null, null, { dev: true });
+restGit.registerApi({ app: app, config: { dev: true } });
 
 var testDir;
 var gitConfig;

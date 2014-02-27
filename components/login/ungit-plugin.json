@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "login": "login.html"
+    },
+    "javascript": "login.js"
+  }
+}

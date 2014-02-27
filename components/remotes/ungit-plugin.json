@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "remotes": "remotes.html"
+    },
+    "javascript": "remotes.js"
+  }
+}

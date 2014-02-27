@@ -14,9 +14,11 @@ var fs = require('fs');
 var async = require('async');
 var signals = require('signals');
 var os = require('os');
+var cache = require('./utils/cache');
+var UngitPlugin = require('./ungit-plugin');
 
 process.on('uncaughtException', function(err) {
-  winston.error(err.stack.toString());
+  winston.error(err.stack ? err.stack.toString() : err.toString());
   async.parallel([
     bugtracker.notify.bind(bugtracker, err, 'ungit-server'),
     usageStatistics.addEvent.bind(usageStatistics, 'server-exception')
@@ -100,6 +102,15 @@ if (config.autoShutdownTimeout) {
   refreshAutoShutdownTimeout();
 }
 
+var ensurePathExists = function(req, res, next) {
+  var path = req.param('path');
+  if (!fs.existsSync(path)) {
+    res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
+  } else {
+    next();
+  }
+}
+
 var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {
@@ -139,8 +150,69 @@ if (config.authentication) {
   };
 }
 
+var indexHtmlCache = cache(function(callback) {
+  pluginsCache(function(plugins) {
+    fs.readFile(__dirname + '/../public/index.html', function(err, data) {
+      async.map(Object.keys(plugins), function(pluginName, callback) {
+        plugins[pluginName].compile(callback);
+      }, function(err, result) {
+        var html = result.join('\n\n');
+        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
+        callback(null, data);
+      });
+    });
+  });
+});
+
+app.get('/', function(req, res) {
+  if (config.dev) {
+    pluginsCache.invalidate();
+    indexHtmlCache.invalidate();
+  }
+  indexHtmlCache(function(err, data) {
+    res.end(data);
+  });
+});
+
 app.use(express.static(__dirname + '/../public'));
-gitApi.registerApi(app, server, ensureAuthenticated, config);
+
+var apiEnvironment = {
+  app: app,
+  server: server,
+  ensureAuthenticated: ensureAuthenticated,
+  ensurePathExists: ensurePathExists,
+  git: require('./git'),
+  config: config,
+  pathPrefix: gitApi.pathPrefix
+};
+
+gitApi.registerApi(apiEnvironment);
+
+// Init plugins
+function loadPlugins(plugins, pluginBasePath) {
+  fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
+    winston.info('Loading plugin: ' + pluginDir);
+    var plugin = new UngitPlugin({
+      dir: pluginDir,
+      httpBasePath: 'plugins/' + pluginDir,
+      path: path.join(pluginBasePath, pluginDir)
+    });
+    if (plugin.manifest.disabled || plugin.config.disabled) {
+      winston.info('Plugin disabled: ' + pluginDir);
+      return;
+    }
+    plugin.init(apiEnvironment);
+    plugins.push(plugin);
+    winston.info('Plugin loaded: ' + pluginDir);
+  });
+}
+var pluginsCache = cache(function(callback) {
+  var plugins = [];
+  loadPlugins(plugins, path.join(__dirname, '..', 'components'));
+  if (fs.existsSync(config.pluginDirectory))
+    loadPlugins(plugins, config.pluginDirectory);
+  callback(plugins);
+});
 
 app.get('/serverdata.js', function(req, res) {
   async.parallel({
@@ -151,6 +223,7 @@ app.get('/serverdata.js', function(req, res) {
     text += 'ungit.userHash = "' + data.userHash + '";\n';
     text += 'ungit.version = "' + data.version + '";\n';
     text += 'ungit.platform = "' + os.platform() + '"\n';
+    text += 'ungit.pluginApiVersion = "' + require('../package.json').ungitPluginApiVersion + '"\n';
     res.send(text);
   });
 });

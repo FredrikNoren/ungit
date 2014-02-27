@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="shortcut icon" href="/favicon.ico" >
+	<title>ungit</title>
+</head>
+<body>
+
+<!-- ko with: crash -->
+	<div class="container" data-ta-container="user-error-page">
+		<div class="panel panel-default crash">
+			<div class="panel-body">
+				<h1 data-bind="text: title"></h1>
+				<span data-bind="html: details"></span>
+			</div>
+		</div>
+	</div>
+<!-- /ko -->
+<!-- ko ifnot: crash -->
+	<!-- ko if: content -->
+	<!-- ko component: content --><!-- /ko -->
+	<!-- /ko -->
+<!-- /ko -->
+
+<script type="text/javascript">ungit = {}</script>
+<script type="text/javascript" src="/serverdata.js"></script>
+<script type="text/javascript" src="/js/raven.min.js"></script>
+<script type="text/javascript">
+	console.log('App version: ' + ungit.version);
+	if (ungit.config.bugtracking) {
+		console.log('Initing bugtracking');
+
+    	Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
+			logger: 'root',
+			tags: {
+				version: ungit.version,
+				subsystem: 'ui',
+      			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
+			}
+		}).install();
+
+		Raven.setUser({
+			id: ungit.userHash
+		});
+
+    }
+</script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/ungit.js"></script>
+
+<!-- ungit-plugins-placeholder -->
+
+<script type="text/javascript">
+
+	var Keen=Keen||{configure:function(e){this._cf=e},addEvent:function(e,t,n,i){this._eq=this._eq||[],this._eq.push([e,t,n,i])},setGlobalProperties:function(e){this._gp=e},onChartsReady:function(e){this._ocrq=this._ocrq||[],this._ocrq.push(e)}};(function(){var e=document.createElement("script");e.type="text/javascript",e.async=!0,e.src=("https:"==document.location.protocol?"https://":"http://")+"dc8na2hxrj29i.cloudfront.net/code/keen-2.1.0-min.js";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)})();
+
+	Keen.configure({
+		projectId: '5240b1d436bf5a753800000c',
+		writeKey: 'da0303fb058149813443f1321a139f23420323887b6a4940e82d47d02df451a4a132b938d2e8200a17914e06aa2767dc1a6fa0891db41942918db91a8daa61784d7af2495b934a05111605e4aa4e5c3d92b0b7f8be4d146e05586701894dc35d619443ae234dbc608a36de9ee97e0e1a'
+	});
+	
+	if (ungit.config.sendUsageStatistics) {
+
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-42045410-1', { 'cookieDomain': 'none' });
+		ga('send', 'pageview');
+		console.log('Google analytics inited');
+
+		Keen.addEvent('ui-start', { version: ungit.version, userHash: ungit.userHash });
+
+		Raven.TraceKit.report.subscribe(function(err) {
+			Keen.addEvent('ui-exception', { version: ungit.version, userHash: ungit.userHash });
+		});
+		console.log('Keen.io inited');
+	}
+
+	require('ungit-main').start();
+</script>
+
+</body>
+</html>

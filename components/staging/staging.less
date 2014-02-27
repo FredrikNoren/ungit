@@ -1,0 +1,144 @@
+
+@import "public/less/variables.less";
+
+.staging {
+  background: #643A44;
+  box-shadow: 0px -1px 15px #252833;
+  color: #B8A5A5;
+  z-index: 5;
+  position: relative;
+
+  .arrowDown {
+    position: absolute;
+    left: (@log-width-small + 45px);
+    bottom: 0px;
+    .arrow {
+      background: url('../images/stagingArrowDown.png');
+    }
+  }
+
+  .file-area {
+    position: relative;
+  }
+
+  .validationError {
+    display: none;
+    color: #D6542D;
+    padding: 0.25em;
+  }
+  &:hover .validationError {
+    display: inline-block;
+  }
+
+  .diffContainer {
+    margin-top: 0px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .discard {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    .explanation {
+      display: none;
+    }
+    &:hover {
+      background: #000;
+      color: rgba(255, 255, 255, 0.9);
+      .explanation {
+        display: inline-block;
+      }
+    }
+  }
+
+  .ignore {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    .explanation {
+      display: none;
+    }
+    &:hover {
+      background: #55f;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: normal;
+      .explanation {
+        display: inline-block;
+      }
+    }
+  }
+
+
+  .files {
+    position: relative;
+    .file {
+      &.showingDiffs {
+        .name {
+          background: rgba(255, 255, 255, 0.1);
+          color: #000;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+      }
+      .name {
+        background: transparent;
+        font-size: 1.3em;
+        cursor: pointer;
+        padding: 3px;
+        border: 0px;
+        border-radius: 3px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+      padding: 0.3em;
+      
+      .new, .deleted, .conflict {
+        padding: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      .new {
+        color: #89D64D;
+      }
+      .deleted {
+        color: #DB3712;
+      }
+      .conflict {
+        color: #DB12C0;
+        cursor: pointer;
+        .explanation {
+          display: none;
+        }
+        &:hover {
+          background: #A445ED;
+          color: #000;
+          border-radius: 3px;
+          .explanation {
+            display: inline;
+          }
+        }
+      }
+    }
+  }
+
+}
+
+@media (min-width: @screen-md-min) {
+  .staging {
+    .arrowDown {
+      left: (@log-width-large + 45px);
+    }
+  }
+}
+
+@media (min-width: @screen-lg-min) {
+}

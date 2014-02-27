@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "formDialog": "formDialog.html",
+      "prompt": "prompt.html"
+    },
+    "javascript": "dialogs.js"
+  }
+}

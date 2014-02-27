@@ -1,5 +1,6 @@
 var rc = require('rc');
 var optimist = require('optimist');
+var path = require('path');
 
 var defaultConfig = {
   
@@ -8,9 +9,6 @@ var defaultConfig = {
 
   // The base URL ungit will be accessible from.
   urlBase: "http://localhost",
-
-  // Enables gerrit integration.
-  gerrit: false,
 
   // Directory to output log files.
   logDirectory: null,
@@ -35,12 +33,6 @@ var defaultConfig = {
   
   // Map of username/passwords which are granted access.
   users: undefined,
-
-  // Ssh username. Defaults to what the repository is configured with, or the currently logged in user.
-  sshUsername: undefined,
-
-  // Ssh agent. Defaults to pageant on Windows and SSH_AUTH_SOCK on Unix.
-  sshAgent: undefined,
 
   // Set to false to show rebase and merge on drag and drop on all nodes.
   showRebaseAndMergeOnlyOnRefs: true,
@@ -91,7 +83,18 @@ var defaultConfig = {
   // Automatically remove remote tracking branches that have been removed on the
   // server when fetching. (git fetch -p)
   autoPruneOnFetch: true,
+
+  // Directory to look for plugins
+  pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins'),
+
+  // Name-object pairs of configurations for plugins. To disable a plugin, use "disabled": true, for example:
+  // "pluginConfigs": { "gerrit": { "disabled": true } }
+  pluginConfigs: {}
 };
+
+function getUserHome() {
+  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+}
 
 // Works for now but should be moved to bin/ungit
 var argv = optimist

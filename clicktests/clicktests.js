@@ -467,6 +467,29 @@ test('Filling out the authentication should bring you to the home screen', funct
   });
 });
 
+test('Shutdown server should bring you to connection lost page', function(done) {
+  shutdownServer(function() {
+    helpers.waitForElement(page, '[data-ta-container="user-error-page"]', function() {
+      done();
+    });
+  });
+});
+
+// Test plugins
+
+test('Start with authentication', function(done) {
+  helpers.startUngitServer(['--pluginDirectory=' + phantom.libraryPath + '/test-plugins'], done);
+});
+
+test('Plugin should replace all of the app', function(done) {
+  page.open('http://localhost:' + config.port, function() {
+    helpers.waitForElement(page, '[data-ta-element="dummy-app"]', function() {
+      helpers.expectNotFindElement(page, '[data-ta-container="app"]');
+      done();
+    });
+  });
+});
+
 test('Cleanup and shutdown server', function(done) {
   backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/cleanup', function() {
     shutdownServer(function() {

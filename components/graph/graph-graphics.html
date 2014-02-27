@@ -1,0 +1,75 @@
+
+<svg class="graphLog" xmlns="http://www.w3.org/2000/svg" version="1.1" data-bind="attr: { width: graphWidth, height: graphHeight }">
+  <defs>
+    <marker id="rebaseArrowEnd"
+      viewBox="0 0 10 10" refX="0" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#22252E" />
+    </marker>
+    <marker id="pushArrowEnd"
+      viewBox="0 0 10 10" refX="0" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(61, 139, 255)" />
+    </marker>
+  </defs>
+  <g data-bind="attr: { transform: 'translate(' + offset().x + ', ' + offset().y + ')' }" >
+    <!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: arrows -->
+      <line data-bind="attr: { x1: from.x, y1: from.y, x2: to.x, y2: to.y }" stroke="#22252E" stroke-width="15" marker-end="url(#rebaseArrowEnd)" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
+    <!-- ko foreach: edges -->
+    <line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" />
+    <!-- /ko -->
+    <!-- ko foreach: nodes -->
+    <circle data-bind="attr: { cx: x(), cy: y(), r: radius(), fill: color() }" />
+    <!-- ko if: selected -->
+      <circle data-bind="attr: { cx: x(), cy: y(), r: radius() - 4 }" stroke="#252833" stroke-width="4" fill="transparent" />
+    <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: showCommitNode -->
+      <g data-bind="attr: { opacity: commitOpacity }">
+      <!-- ko with: commitNodeEdge -->
+      <line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+      <!-- ko with: commitNode -->
+      <circle data-bind="attr: { cx: position().x, cy: position().y, r: radius(), stroke: color() }" stroke-width="8" fill="transparent" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+      </g>
+    <!-- /ko -->
+
+    <!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: edges -->
+      <line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+      <!-- ko foreach: nodes -->
+      <circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
+
+    <!-- ko if: hoverGraphActionGraphicType() == 'merge' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: edges -->
+      <line data-bind="attr: { x1: x1, y1: y1, x2: x2, y2: y2 }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+      <!-- ko with: newNode -->
+      <circle data-bind="attr: { cx: x(), cy: y() }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
+
+    <!-- ko if: hoverGraphActionGraphicType() == 'reset' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: nodes -->
+      <line data-bind="attr: { x1: x() - radius(), y1: y() - radius(), x2: x() + radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+      <line data-bind="attr: { x1: x() + radius(), y1: y() - radius(), x2: x() - radius(), y2: y() + radius() }" stroke="rgb(255, 129, 31)" stroke-width="8" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
+
+    <!-- ko if: hoverGraphActionGraphicType() == 'push' --><!-- ko with: hoverGraphActionGraphic -->
+      <line data-bind="attr: { x1: fromPosition.x, y1: fromPosition.y, x2: toPosition.x, y2: toPosition.y }" stroke="rgb(61, 139, 255)" stroke-width="15" stroke-dasharray="10, 5" marker-end="url(#pushArrowEnd)" />
+    <!-- /ko --><!-- /ko -->
+
+  </g>
+</svg>

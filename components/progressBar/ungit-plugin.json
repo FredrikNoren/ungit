@@ -1,0 +1,6 @@
+{
+  "exports": {
+    "raw": "progressBar.html",
+    "javascript": "progressBar.js"
+  }
+}
