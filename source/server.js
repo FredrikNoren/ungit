@@ -163,8 +163,8 @@ var indexHtmlCache = cache(function(callback) {
 });
 
 app.get('/', function(req, res) {
-  indexHtmlCache.invalidate();
-  indexHtmlCache(function(err, data) { 
+  if (req.param('dev') !== undefined) indexHtmlCache.invalidate();
+  indexHtmlCache(function(err, data) {
     res.end(data);
   });
 });
@@ -194,7 +194,7 @@ function loadPlugins(pluginBasePath) {
       path: path.join(pluginBasePath, pluginDir)
     });
     if (plugin.manifest.disabled || config.disabledPlugins.indexOf(plugin.name) != -1) {
-      console.log('Plugin disabled: ' + pluginDir);
+      winston.info('Plugin disabled: ' + pluginDir);
       return;
     }
     plugin.init(apiEnvironment);

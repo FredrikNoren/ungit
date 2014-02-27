@@ -5,6 +5,7 @@ var less = require('less');
 var async = require('async');
 var browserify = require('browserify');
 var express = require('express');
+var winston = require('winston');
 
 function UngitPlugin(args) {
   this.dir = args.dir;
@@ -33,7 +34,7 @@ UngitPlugin.prototype.init = function(env) {
 
 UngitPlugin.prototype.compile = function(callback) {
   var self = this;
-  console.log('Compiling ' + this.path);
+  winston.info('Compiling plugin ' + this.path);
 
   var exports = this.manifest.exports || {};
 
