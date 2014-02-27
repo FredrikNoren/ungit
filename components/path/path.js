@@ -67,8 +67,8 @@ PathViewModel.prototype.initRepository = function() {
   });
 }
 PathViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-credentials') self.cloningProgressBar.pause();
-  else if (event.event == 'request-credentials-response') self.cloningProgressBar.unpause();
+  if (event.event == 'request-credentials') this.cloningProgressBar.pause();
+  else if (event.event == 'request-credentials-response') this.cloningProgressBar.unpause();
 
   if (this.repository()) this.repository().onProgramEvent(event);
 }

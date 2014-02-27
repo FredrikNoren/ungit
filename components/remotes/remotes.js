@@ -36,8 +36,8 @@ RemotesViewModel.prototype.updateNode = function(parentElement) {
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-credentials') self.fetchingProgressBar.pause();
-  else if (event.event == 'request-credentials-response') self.fetchingProgressBar.unpause();
+  if (event.event == 'request-credentials') this.fetchingProgressBar.pause();
+  else if (event.event == 'request-credentials-response') this.fetchingProgressBar.unpause();
   else if (event.event == 'request-fetch-tags') this.fetch({ tags: true });
 }
 RemotesViewModel.prototype.fetch = function(options) {
