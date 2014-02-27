@@ -2,6 +2,7 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var navigation = require('ungit-navigation');
+var programEvents = require('ungit-program-events');
 
 components.register('header', function(args) {
   return new HeaderViewModel(args.app);
@@ -29,21 +30,16 @@ HeaderViewModel.prototype.onProgramEvent = function(event) {
     this.showBackButton(event.path != '');
   } else if (event.event == 'navigated-to-path') {
     this.path(event.path);
+  } else if (event.event == 'app-content-refreshed') {
+    this.refreshingProgressBar.stop();
   }
 }
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
-  var repoPath = this.path();
-  var repos = this.repoList();
-  if (repos.indexOf(repoPath) != -1) return;
-  repos.push(repoPath);
-  this.repoList(repos);
+  programEvents.dispatch({ event: 'request-remember-repo', repoPath: this.path() });
   return true;
 }
 HeaderViewModel.prototype.refresh = function() {
-  var self = this;
+  programEvents.dispatch({ event: 'request-app-content-refresh' });
   this.refreshingProgressBar.start();
-  this.app.refresh(function() {
-    self.refreshingProgressBar.stop();
-  });
   return true;
 }
