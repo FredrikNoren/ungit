@@ -48,7 +48,7 @@ RemotesViewModel.prototype.fetch = function(options, callback) {
   async.parallel(jobs, function(err, result) {
     self.fetchingProgressBar.stop();
 
-    if (!err && options.tags) self.repository.graph.setRemoteTags(result[0]);
+    if (!err && options.tags) programEvents.dispatch({ event: 'remote-tags-update', tags: result[0] });
   });
 }
 

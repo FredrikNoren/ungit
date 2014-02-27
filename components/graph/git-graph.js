@@ -86,6 +86,8 @@ GitGraphViewModel.prototype.onProgramEvent = function(event) {
     this.updateBranches();
   } else if (event.event == 'request-app-content-refresh') {
     this.loadNodesFromApi();
+  } else if (event.event == 'remote-tags-update') {
+    this.setRemoteTags(event.tags);
   }
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
