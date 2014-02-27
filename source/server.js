@@ -203,7 +203,7 @@ function loadPlugins(pluginBasePath) {
   });
 }
 loadPlugins(path.join(__dirname, '..', 'components'));
-if (path.existsSync(config.pluginDirectory))
+if (fs.existsSync(config.pluginDirectory))
   loadPlugins(config.pluginDirectory);
 
 app.get('/serverdata.js', function(req, res) {
