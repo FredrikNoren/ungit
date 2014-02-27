@@ -6,6 +6,7 @@ var async = require('async');
 var browserify = require('browserify');
 var express = require('express');
 var winston = require('winston');
+var config = require('./config');
 
 function UngitPlugin(args) {
   this.dir = args.dir;
@@ -13,6 +14,7 @@ function UngitPlugin(args) {
   this.httpBasePath = args.httpBasePath;
   this.manifest = require(path.join(this.path, "ungit-plugin.json"));
   this.name = this.manifest.name || this.dir;
+  this.config = config.pluginConfigs[this.name] || {};
 }
 module.exports = UngitPlugin;
 
@@ -26,6 +28,7 @@ UngitPlugin.prototype.init = function(env) {
         ensurePathExists: env.ensurePathExists,
         git: require('./git'),
         config: env.config,
+        pluginConfig: this.config,
         httpPath: env.pathPrefix + '/plugins/' + this.name
       });
   }

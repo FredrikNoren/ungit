@@ -93,8 +93,9 @@ var defaultConfig = {
   // Directory to look for plugins
   pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins'),
 
-  // List of disabled plugins
-  disabledPlugins: []
+  // Name-object pairs of configurations for plugins. To disable a plugin, use "disabled": true, for example:
+  // "pluginConfigs": { "gerrit": { "disabled": true } }
+  pluginConfigs: {}
 };
 
 function getUserHome() {
