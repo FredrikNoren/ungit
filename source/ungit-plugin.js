@@ -11,8 +11,7 @@ function UngitPlugin(args) {
   this.path = args.path;
   this.httpBasePath = args.httpBasePath;
   this.manifest = require(path.join(this.path, "ungit-plugin.json"));
-  this.packageJson = require(path.join(this.path, "package.json")) || {};
-  this.name = this.manifest.name || this.packageJson.name || this.dir;
+  this.name = this.manifest.name || this.dir;
 }
 module.exports = UngitPlugin;
 

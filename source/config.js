@@ -10,9 +10,6 @@ var defaultConfig = {
   // The base URL ungit will be accessible from.
   urlBase: "http://localhost",
 
-  // Enables gerrit integration.
-  gerrit: false,
-
   // Directory to output log files.
   logDirectory: null,
 
@@ -94,7 +91,10 @@ var defaultConfig = {
   autoPruneOnFetch: true,
 
   // Directory to look for plugins
-  pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins')
+  pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins'),
+
+  // List of disabled plugins
+  disabledPlugins: []
 };
 
 function getUserHome() {

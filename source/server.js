@@ -193,7 +193,7 @@ function loadPlugins(pluginBasePath) {
       httpBasePath: 'plugins/' + pluginDir,
       path: path.join(pluginBasePath, pluginDir)
     });
-    if (plugin.manifest.disabled) {
+    if (plugin.manifest.disabled || config.disabledPlugins.indexOf(plugin.name) != -1) {
       console.log('Plugin disabled: ' + pluginDir);
       return;
     }
