@@ -146,7 +146,7 @@ module.exports = function(grunt) {
             'Raven': true
           }
         },
-        src: ['public/source/**/*.js']
+        src: ['public/source/**/*.js', 'components/**/*.js']
       },
       phantomjs: {
         options: {
