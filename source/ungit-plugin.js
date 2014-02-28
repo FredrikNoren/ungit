@@ -28,6 +28,8 @@ UngitPlugin.prototype.init = function(env) {
         ensurePathExists: env.ensurePathExists,
         git: require('./git'),
         config: env.config,
+        socketIO: env.socketIO,
+        socketsById: env.socketsById,
         pluginConfig: this.config,
         httpPath: env.pathPrefix + '/plugins/' + this.name,
         pluginApiVersion: require('../package.json').ungitPluginApiVersion

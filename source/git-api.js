@@ -10,7 +10,6 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
-var socketIO;
 
 exports.pathPrefix = '';
 var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
@@ -21,6 +20,8 @@ exports.registerApi = function(env) {
   var ensureAuthenticated = env.ensureAuthenticated || function(req, res, next) { next(); };
   var ensurePathExists = env.ensurePathExists || function(req, res, next) { next(); };
   var config = env.config;
+  var io = env.socketIO;
+  var socketsById = env.socketsById || {};
 
   if (config.dev)
     temp.track();
@@ -28,58 +29,38 @@ exports.registerApi = function(env) {
   app.use(express.json());
   app.use(express.urlencoded());
 
-  var sockets = {};
-  var socketIdCounter = 0;
-  var io;
-
-  if (server) {
-    // To speed up loading times, we start this the next tick since it doesn't have to be instantly started with the server
-    process.nextTick(function() {
-      if (!socketIO) socketIO = require('socket.io');
-      io = socketIO.listen(server, {
-        logger: {
-          debug: winston.debug.bind(winston),
-          info: winston.info.bind(winston),
-          error: winston.error.bind(winston),
-          warn: winston.warn.bind(winston)
+  if (io) {
+    io.sockets.on('connection', function (socket) {
+      socket.on('disconnect', function () {
+        if (socket.watcher) {
+          socket.watcher.close();
+          socket.watcher = null;
+          winston.info('Stop watching ' + socket.watcherPath);
         }
       });
-      io.sockets.on('connection', function (socket) {
-        var socketId = socketIdCounter++;
-        sockets[socketId] = socket;
-        socket.emit('connected', { socketId: socketId });
-        socket.on('disconnect', function () {
-          if (socket.watcher) {
-            socket.watcher.close();
-            socket.watcher = null;
-            winston.info('Stop watching ' + socket.watcherPath);
-          }
-          delete sockets[socketId];
-        });
-        socket.on('watch', function (data, callback) {
-          if (socket.watcher) {
-            socket.leave(socket.watcherPath);
-            socket.watcher.close(); // only one watcher per socket
-            winston.info('Stop watching ' + socket.watcherPath);
-          }
-          socket.join(path.normalize(data.path)); // join room for this path
-          socket.watcherPath = data.path;
-          try {
-            socket.watcher = fs.watch(data.path, function(event, filename) {
-              // The .git dir changes on for instance 'git status', so we
-              // can't trigger a change here (since that would lead to an endless
-              // loop of the client getting the change and then requesting the new data)
-              if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-                socket.emit('working-tree-changed', { repository: data.path });
-            });
-            winston.info('Start watching ' + socket.watcherPath);
-          } catch(err) {
-            // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
-            // which is pretty weird, but hard to do anything about, so we just log them here.
-            usageStatistics.addEvent('fs-watch-exception');
-          }
-          callback();
-        });
+      socket.on('watch', function (data, callback) {
+        if (socket.watcher) {
+          socket.leave(socket.watcherPath);
+          socket.watcher.close(); // only one watcher per socket
+          winston.info('Stop watching ' + socket.watcherPath);
+        }
+        socket.join(path.normalize(data.path)); // join room for this path
+        socket.watcherPath = data.path;
+        try {
+          socket.watcher = fs.watch(data.path, function(event, filename) {
+            // The .git dir changes on for instance 'git status', so we
+            // can't trigger a change here (since that would lead to an endless
+            // loop of the client getting the change and then requesting the new data)
+            if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
+              socket.emit('working-tree-changed', { repository: data.path });
+          });
+          winston.info('Start watching ' + socket.watcherPath);
+        } catch(err) {
+          // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
+          // which is pretty weird, but hard to do anything about, so we just log them here.
+          usageStatistics.addEvent('fs-watch-exception');
+        }
+        callback();
       });
     });
   }
@@ -87,7 +68,7 @@ exports.registerApi = function(env) {
   var ensureValidSocketId = function(req, res, next) {
     var socketId = req.param('socketId');
     if (socketId == 'ignore') return next(); // Used in unit tests
-    var socket = sockets[socketId];
+    var socket = socketsById[socketId];
     if (!socket) {
       res.json(400, { error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });
     } else {
@@ -219,7 +200,7 @@ exports.registerApi = function(env) {
     var currentPath = req.param('path').trim();
     var gitIgnoreFile = currentPath + '/.gitignore';
     var ignoreFile = req.param('file').trim();
-    var socket = sockets[req.param('socketId')];
+    var socket = socketsById[req.param('socketId')];
 
     if (!fs.existsSync(gitIgnoreFile)) fs.writeFileSync(gitIgnoreFile, '');
 
@@ -506,7 +487,7 @@ exports.registerApi = function(env) {
       res.json(400, { errorCode: 'request-from-unathorized-location' });
       return;
     }
-    var socket = sockets[req.param('socketId')];
+    var socket = socketsById[req.param('socketId')];
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.

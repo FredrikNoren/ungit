@@ -176,6 +176,28 @@ app.get('/', function(req, res) {
 
 app.use(express.static(__dirname + '/../public'));
 
+// Socket-IO
+var socketIO = require('socket.io');
+var socketsById = {};
+var socketIdCounter = 0;
+var io = socketIO.listen(server, {
+  logger: {
+    debug: winston.debug.bind(winston),
+    info: winston.info.bind(winston),
+    error: winston.error.bind(winston),
+    warn: winston.warn.bind(winston)
+  }
+});
+io.sockets.on('connection', function (socket) {
+  var socketId = socketIdCounter++;
+  socketsById[socketId] = socket;
+  socket.socketId = socketId;
+  socket.emit('connected', { socketId: socketId });
+  socket.on('disconnect', function () {
+    delete socketsById[socketId];
+  });
+});
+
 var apiEnvironment = {
   app: app,
   server: server,
@@ -183,7 +205,9 @@ var apiEnvironment = {
   ensurePathExists: ensurePathExists,
   git: require('./git'),
   config: config,
-  pathPrefix: gitApi.pathPrefix
+  pathPrefix: gitApi.pathPrefix,
+  socketIO: io,
+  socketsById: socketsById
 };
 
 gitApi.registerApi(apiEnvironment);
