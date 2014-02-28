@@ -1,5 +1,5 @@
 
-var expect = require('../node_modules/expect.js/expect');
+var expect = require('../node_modules/expect.js/index');
 var helpers = require('./helpers');
 
 var config = helpers.config;
