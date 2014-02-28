@@ -127,12 +127,15 @@ test('Entering a path to a repo should bring you to that repo', function(done) {
   enterRepoByTypingPath(testRepoPath, done);
 });
 
-var createCommitWithNewFile = function(fileName, commitMessage, callback) {
+var createCommitWithNewFile = function(fileName, commitMessage, isAmend, callback) {
   createTestFile(testRepoPath + '/' + fileName, function(err) {
     if (err) return callback(err);
     helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
-      helpers.click(page, '[data-ta-input="staging-commit-title"]')
-      helpers.write(page, commitMessage);
+      if (isAmend) helpers.click(page, '[data-bind="click: toogleAmend"]');
+      else {
+        helpers.click(page, '[data-ta-input="staging-commit-title"]');
+        helpers.write(page, commitMessage);
+      }
       setTimeout(function() {
         helpers.click(page, '[data-ta-clickable="commit"]');
         helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
@@ -146,7 +149,15 @@ var createCommitWithNewFile = function(fileName, commitMessage, callback) {
 }
 
 test('Should be possible to create and commit a file', function(done) {
-  createCommitWithNewFile('testfile.txt', 'Init', function() {
+  createCommitWithNewFile('testfile.txt', 'Init', false, function() {
+    helpers.waitForElement(page, '[data-ta-container="node"]', function() {
+      done();
+    });
+  })
+});
+
+test('Should be possible to amend a file', function(done) {
+  createCommitWithNewFile('testfile100.txt', 'Init', true, function() {
     helpers.waitForElement(page, '[data-ta-container="node"]', function() {
       done();
     });
@@ -256,7 +267,7 @@ test('Checkout a branch', function(done) {
 });
 
 test('Create another commit', function(done) {
-  createCommitWithNewFile('testy2.txt', 'Branch commit', done);
+  createCommitWithNewFile('testy2.txt', 'Branch commit', false, done);
 });
 
 function refAction(page, ref, local, action, callback) {
@@ -281,7 +292,7 @@ test('Checkout master again', function(done) {
 });
 
 test('Create yet another commit', function(done) {
-  createCommitWithNewFile('testy3.txt', 'Branch commit', done);
+  createCommitWithNewFile('testy3.txt', 'Branch commit', false, done);
 });
 
 test('Merge', function(done) {

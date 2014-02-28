@@ -77,7 +77,10 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     if (err) {
       return err.errorCode == 'must-be-in-working-tree';
     }
-    if (log.length > 0) self.HEAD(log[0]);
+    if (log.length > 0) {
+      var array = log[0].message.split('\n');
+      self.HEAD({title: array[0], body: array.slice(2).join('\n')});
+    }
     else self.HEAD(null);
   });
   this.server.get('/status', { path: this.repoPath }, function(err, status) {
@@ -112,13 +115,13 @@ StagingViewModel.prototype.setFiles = function(files) {
 }
 StagingViewModel.prototype.toogleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
-    this.commitMessageTitle(this.HEAD().title());
-    this.commitMessageBody(this.HEAD().body());
+    this.commitMessageTitle(this.HEAD().title);
+    this.commitMessageBody(this.HEAD().body);
   }
   else if(this.amend()) {
     var isPrevDefaultMsg = 
-      this.commitMessageTitle() == this.HEAD().title() &&
-      this.commitMessageBody() == this.HEAD().body();
+      this.commitMessageTitle() == this.HEAD().title &&
+      this.commitMessageBody() == this.HEAD().body;
     if (isPrevDefaultMsg) {
       this.commitMessageTitle('');
       this.commitMessageBody('');
