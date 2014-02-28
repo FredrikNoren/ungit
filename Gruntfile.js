@@ -281,12 +281,12 @@ module.exports = function(grunt) {
           // Keep forever-monitor at 1.1.0 until https://github.com/nodejitsu/forever-monitor/issues/38 is fixed
           if (dep == 'forever-monitor') return callback();
 
+          bumpDependency(tempPackageJson, 'dependencies', dep, callback);
+        }),
+        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
 
-          bumpDependency(tempPackageJson, 'dependencies', dep, callback);
-        }),
-        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
           bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
         })
       ], function() {
