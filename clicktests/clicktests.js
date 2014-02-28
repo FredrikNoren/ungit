@@ -131,9 +131,9 @@ var createCommitWithNewFile = function(fileName, commitMessage, isAmend, callbac
   createTestFile(testRepoPath + '/' + fileName, function(err) {
     if (err) return callback(err);
     helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
-      if (isAmend) helpers.click(page, '[data-bind="click: toogleAmend"]')
+      if (isAmend) helpers.click(page, '[data-bind="click: toogleAmend"]');
       else {
-        helpers.click(page, '[data-ta-input="staging-commit-title"]')
+        helpers.click(page, '[data-ta-input="staging-commit-title"]');
         helpers.write(page, commitMessage);
       }
       setTimeout(function() {
