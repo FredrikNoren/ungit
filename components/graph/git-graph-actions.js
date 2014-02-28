@@ -22,7 +22,7 @@ GraphActions.ActionBase = function(graph) {
     fallbackPredictedTimeMs: 1000,
     temporary: true
   });
-  
+
   this.isHighlighted = ko.computed(function() {
     return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
   });
@@ -165,7 +165,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
   return new MergeViewModel(this.graph.graphic, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
-  this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().refName }, function(err) {
+  this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().localRefName }, function(err) {
     callback();
     if (err && err.errorCode == 'merge-failed') return true;
   });
@@ -262,7 +262,7 @@ GraphActions.Delete = function(graph, node) {
   this.node = node;
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
-    return self.graph.currentActionContext() instanceof RefViewModel && 
+    return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().node() == self.node &&
       !self.graph.currentActionContext().current();
   });
