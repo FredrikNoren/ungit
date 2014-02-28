@@ -1,8 +1,7 @@
-
 Writing Ungit plugins
 =====================
 
-It's super easy to write an Ungit plugin. Here's how to write a completely new (though super simple) git log:
+It's super easy to write an Ungit plugin. Here's how to write a completely new (though super simple) git log ui:
 
 ### 1. Create a new folder for your plugin.
 Create a folder at `~/.ungit/plugins/MY_FANCY_PLUGIN`, then add a file called `ungit-plugin.json` with the following content:
