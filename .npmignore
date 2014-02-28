@@ -22,8 +22,8 @@ assets/
 test/
 report/
 public/source/
-public/vendor/
-public/less/
+public/vendor/css/
+public/vendor/js/
 public/templates/
 public/devStyling.html
 public/js/devStyling.js

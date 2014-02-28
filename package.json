@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "0.6.2",
+  "version": "0.7.1",
   "ungitPluginApiVersion": "0.1.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -60,7 +60,7 @@
     "grunt-release": "~0.7.0",
     "grunt-simple-mocha": "0.4.0",
     "grunt-plato": "~1.0.0",
-    "grunt-contrib-imagemin": "~0.5.0",
+    "grunt-contrib-imagemin": "~0.3.0",
     "grunt-image-embed": "0.3.1",
     "grunt-browserify": "~2.0.0",
     "phantomjs": "~1.9.7-1",
