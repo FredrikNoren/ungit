@@ -18,7 +18,7 @@ var NodeViewModel = function(position, radius) {
   this.animationSpeed = 0.4;
   this.color = ko.observable('#ff00ff');
   this.selected = ko.observable(false);
-  this.opacity = ko.observable(1);
+  this.opacity = ko.observable(1.0);
 }
 exports.NodeViewModel = NodeViewModel;
 NodeViewModel.prototype.setPosition = function(position) {
@@ -71,5 +71,5 @@ NodeViewModel.prototype.fade = function() {
   this.opacity(0.4);
 }
 NodeViewModel.prototype.resetOpacity = function() {
-  this.opacity(1);
+  this.opacity(1.0);
 }
