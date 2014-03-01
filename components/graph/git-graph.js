@@ -90,6 +90,12 @@ GitGraphViewModel.prototype.onProgramEvent = function(event) {
     this.setRemoteTags(event.tags);
   } else if (event.event == 'current-remote-changed') {
     this.currentRemote(event.newRemote);
+  } else if (event.event == 'amend') {
+    if (event.flag) {
+      this.HEAD().fade();
+    } else {
+      this.HEAD().resetOpacity();
+    }
   }
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
