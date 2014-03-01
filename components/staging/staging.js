@@ -5,13 +5,14 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 
 components.register('staging', function(args) {
-  return new StagingViewModel(args.server, args.repoPath);
+  return new StagingViewModel(args.server, args.repoPath, args.graph);
 });
 
-var StagingViewModel = function(server, repoPath) {
+var StagingViewModel = function(server, repoPath, graph) {
   var self = this;
   this.server = server;
   this.repoPath = repoPath;
+  this.graph = graph;
   this.filesByPath = {};
   this.files = ko.observable([]);
   this.commitMessageTitle = ko.observable();
@@ -19,7 +20,6 @@ var StagingViewModel = function(server, repoPath) {
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.allStageFlag = ko.observable(false);
-  this.HEAD = ko.observable();
   this.commitButtonVisible = ko.computed(function() {
     return !self.inRebase() && !self.inMerge();
   });
@@ -34,7 +34,7 @@ var StagingViewModel = function(server, repoPath) {
   });
   this.amend = ko.observable(false);
   this.canAmend = ko.computed(function() {
-    return self.HEAD() && !self.inRebase() && !self.inMerge();
+    return self.graph.HEAD() && !self.inRebase() && !self.inMerge();
   });
   this.canStashAll = ko.computed(function() {
     return !self.amend();
@@ -73,16 +73,6 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
-  this.server.get('/log', { path: this.repoPath, limit: 1 }, function(err, log) {
-    if (err) {
-      return err.errorCode == 'must-be-in-working-tree';
-    }
-    if (log.length > 0) {
-      var array = log[0].message.split('\n');
-      self.HEAD({title: array[0], body: array.slice(2).join('\n')});
-    }
-    else self.HEAD(null);
-  });
   this.server.get('/status', { path: this.repoPath }, function(err, status) {
     if (err) {
       if (callback) callback(err);
@@ -115,17 +105,19 @@ StagingViewModel.prototype.setFiles = function(files) {
 }
 StagingViewModel.prototype.toogleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
-    this.commitMessageTitle(this.HEAD().title);
-    this.commitMessageBody(this.HEAD().body);
+    this.commitMessageTitle(this.graph.HEAD().title());
+    this.commitMessageBody(this.graph.HEAD().body());
+    this.graph.HEAD().fade();
   }
   else if(this.amend()) {
     var isPrevDefaultMsg = 
-      this.commitMessageTitle() == this.HEAD().title &&
-      this.commitMessageBody() == this.HEAD().body;
+      this.commitMessageTitle() == this.graph.HEAD().title() &&
+      this.commitMessageBody() == this.graph.HEAD().body();
     if (isPrevDefaultMsg) {
       this.commitMessageTitle('');
       this.commitMessageBody('');
     }
+    this.graph.HEAD().resetOpacity();
   }
   this.amend(!this.amend());
 }

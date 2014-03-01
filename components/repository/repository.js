@@ -19,7 +19,7 @@ var RepositoryViewModel = function(server, repoPath) {
   this.graph = components.create('graph', { server: server, repoPath: repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
-  this.staging = components.create('staging', { server: server, repoPath: repoPath });
+  this.staging = components.create('staging', { server: server, repoPath: repoPath, graph: this.graph });
   this.watcherReady = ko.observable(false);
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();
