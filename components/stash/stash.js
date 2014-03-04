@@ -43,7 +43,8 @@ StashViewModel.prototype.updateNode = function(parentElement) {
 }
 StashViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-app-content-refresh' ||
-    event.event == 'working-tree-changed')
+    event.event == 'working-tree-changed' ||
+    event.event == 'git-directory-changed')
     this.refresh();
 }
 StashViewModel.prototype.refresh = function() {
