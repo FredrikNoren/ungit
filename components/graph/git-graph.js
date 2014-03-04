@@ -72,6 +72,8 @@ var GitGraphViewModel = function(server, repoPath) {
       self.graphic.hoverGraphActionGraphic(null);
     }
   });
+
+  this.loadNodesFromApi();
 }
 GitGraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
