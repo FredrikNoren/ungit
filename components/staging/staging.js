@@ -5,10 +5,10 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 
 components.register('staging', function(args) {
-  return new StagingViewModel(args.server, args.repoPath, args.graph);
+  return new StagingViewModel(args.server, args.repoPath);
 });
 
-var StagingViewModel = function(server, repoPath, graph) {
+var StagingViewModel = function(server, repoPath) {
   var self = this;
   this.server = server;
   this.repoPath = repoPath;
@@ -130,7 +130,7 @@ StagingViewModel.prototype.toogleAmend = function() {
     }
   }
 
-  programEvents.dispatch({ event: 'amend', flag: this.amend() });
+  programEvents.dispatch({ event: 'amend-toogle-changed', flag: this.amend() });
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;

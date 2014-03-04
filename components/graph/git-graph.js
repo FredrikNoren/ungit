@@ -90,7 +90,7 @@ GitGraphViewModel.prototype.onProgramEvent = function(event) {
     this.setRemoteTags(event.tags);
   } else if (event.event == 'current-remote-changed') {
     this.currentRemote(event.newRemote);
-  } else if (event.event == 'amend') {
+  } else if (event.event == 'amend-toogle-changed') {
     if (event.flag) {
       this.HEAD().fade();
     } else {
