@@ -62,13 +62,17 @@ var StagingViewModel = function(server, repoPath) {
     if (self.allStageFlag()) return 'glyphicon-unchecked';
     else return 'glyphicon-check';
   });
+
+  this.refreshContent();
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
 }
 StagingViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-app-content-refresh') {
+  if (event.event == 'request-app-content-refresh' ||
+    event.event == 'working-tree-changed') {
     this.refreshContent();
+    this.invalidateFilesDiffs();
   }
 }
 StagingViewModel.prototype.refreshContent = function(callback) {

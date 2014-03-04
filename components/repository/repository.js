@@ -25,27 +25,16 @@ var RepositoryViewModel = function(server, repoPath) {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
   this.server.watchRepository(repoPath, function() { self.watcherReady(true); });
-
-  self.onWorkingTreeChanged();
-  self.onGitDirectoryChanged();
 }
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'working-tree-changed') this.onWorkingTreeChanged();
-  else if (event.event == 'git-directory-changed') this.onGitDirectoryChanged();
   if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);
   if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
-}
-RepositoryViewModel.prototype.onWorkingTreeChanged = function() {
-  this.staging.refreshContent();
-  this.staging.invalidateFilesDiffs();
-}
-RepositoryViewModel.prototype.onGitDirectoryChanged = function() {
-  this.stash.refresh();
-  this.remotes.updateRemotes();
+  if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);
+  if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
