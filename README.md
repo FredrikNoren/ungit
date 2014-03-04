@@ -56,6 +56,8 @@ Plugins
 -------
 Plugins are installed by simply placing them in the Ungit plugin directory (`~/.ungit/plugins` by default), and then restarting Ungit.
 
+[List of available plugins](https://github.com/FredrikNoren/ungit/wiki/List-of-plugins)
+
 There's a guide in the [PLUGINS.md](PLUGINS.md) file on how to write new plugins.
 
 Developing
