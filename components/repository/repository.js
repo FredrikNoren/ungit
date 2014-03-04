@@ -8,9 +8,6 @@ components.register('repository', function(args) {
   return new RepositoryViewModel(args.server, args.repoPath);
 });
 
-var idCounter = 0;
-var newId = function() { return idCounter++; };
-
 var RepositoryViewModel = function(server, repoPath) {
   var self = this;
 
@@ -20,11 +17,10 @@ var RepositoryViewModel = function(server, repoPath) {
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
   this.staging = components.create('staging', { server: server, repoPath: repoPath });
-  this.watcherReady = ko.observable(false);
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
-  this.server.watchRepository(repoPath, function() { self.watcherReady(true); });
+  this.server.watchRepository(repoPath);
 }
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
