@@ -42,19 +42,19 @@
     "getmac": "~1.0.6",
     "deep-extend": "~0.2.8",
     "raven": "~0.6.2",
-    "knockout": "~3.0.0",
+    "knockout": "~3.1.0",
     "npm-registry-client": "~0.4.4",
     "npmconf": "~0.1.13",
     "mkdirp": "~0.3.5",
     "less": "~1.7.0",
-    "browserify": "~3.31.2"
+    "browserify": "~3.32.0"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
     "expect.js": "~0.3.1",
     "supertest": "~0.9.0",
     "grunt": "~0.4.2",
-    "grunt-contrib-less": "~0.9.0",
+    "grunt-contrib-less": "~0.10.0",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-lineending": "~0.2.2",
     "grunt-release": "~0.7.0",
