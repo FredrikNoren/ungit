@@ -3,6 +3,7 @@ var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
+var _ = require('lodash');
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -63,16 +64,21 @@ var StagingViewModel = function(server, repoPath) {
     else return 'glyphicon-check';
   });
 
-  this.refreshContent();
+  this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
+  this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
+  this.refreshContentThrottled();
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
 }
 StagingViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-app-content-refresh' ||
-    event.event == 'working-tree-changed') {
+  if (event.event == 'request-app-content-refresh') {
     this.refreshContent();
     this.invalidateFilesDiffs();
+  }
+  if (event.event == 'working-tree-changed') {
+    this.refreshContentThrottled();
+    this.invalidateFilesDiffsThrottled();
   }
 }
 StagingViewModel.prototype.refreshContent = function(callback) {

@@ -2,16 +2,9 @@
 var signals = require('signals');
 var programEvents = require('./program-events');
 var superagent = require('../vendor/js/superagent');
-var blockable = require('../../source/utils/blockable');
 var _ = require('lodash');
 
 function Server() {
-  this.workingTreeChanged = blockable(_.throttle(function() {
-    programEvents.dispatch({ event: 'working-tree-changed' });
-  }, 500));
-  this.gitDirectoryChanged = blockable(_.throttle(function() {
-    programEvents.dispatch({ event: 'git-directory-changed' });
-  }, 500));
 }
 module.exports = Server;
 
@@ -32,10 +25,10 @@ Server.prototype.initSocket = function(callback) {
     callback();
   });
   this.socket.on('working-tree-changed', function () {
-    self.workingTreeChanged();
+    programEvents.dispatch({ event: 'working-tree-changed' });
   });
   this.socket.on('git-directory-changed', function () {
-    self.gitDirectoryChanged();
+    programEvents.dispatch({ event: 'git-directory-changed' });
   });
   this.socket.on('request-credentials', function () {
     self._getCredentials(function(credentials) {
@@ -82,17 +75,9 @@ Server.prototype.query = function(method, path, body, callback) {
   var q = superagent(method, '/api' + path);
   if (method == 'GET' || method == 'DELETE') q.query(body);
   else q.send(body);
-  if (method != 'GET') {
-    self.workingTreeChanged.block();
-    self.gitDirectoryChanged.block();
-  }
   q.set('Accept', 'application/json');
   var precreatedError = new Error(); // Capture stack-trace
   q.end(function(error, res) {
-    if (method != 'GET') {
-      self.workingTreeChanged.unblock();
-      self.gitDirectoryChanged.unblock();
-    }
     if (error || !res.ok) {
       // superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
       if (error && error.crossDomain) {
