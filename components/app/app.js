@@ -14,7 +14,6 @@ var AppViewModel = function(appContainer, server) {
   this.server = server;
   this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);
-  this.gitErrors = ko.observable([]);
 
   this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
@@ -78,8 +77,7 @@ AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
 }
 AppViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'git-error') this._handleGitError(event);
-  else if (event.event == 'request-credentials') this._handleCredentialsRequested(event);
+  if (event.event == 'request-credentials') this._handleCredentialsRequested(event);
   else if (event.event == 'request-show-dialog') this.showDialog(event.dialog);
   else if (event.event == 'request-remember-repo') this._handleRequestRememberRepo(event);
 
@@ -93,28 +91,6 @@ AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   if (repos.indexOf(repoPath) != -1) return;
   repos.push(repoPath);
   this.repoList(repos);
-}
-AppViewModel.prototype._handleGitError = function(event) {
-  var self = this;
-  var gitErrors = this.gitErrors();
-  gitErrors.push({
-    tip: event.data.tip,
-    command: event.data.command,
-    error: event.data.error,
-    stdout: event.data.stdout,
-    stderr: event.data.stderr,
-    showEnableBugtracking: ko.computed(function() { return !self.bugtrackingEnabled() && !event.data.shouldSkipReport; }),
-    bugReportWasSent: ungit.config.bugtracking,
-    enableBugtrackingAndStatistics: self.enableBugtrackingAndStatistics.bind(self),
-    enableBugtracking: self.enableBugtracking.bind(self),
-    dismiss: function() {
-      var t = this;
-      var gitErrors = self.gitErrors();
-      gitErrors = gitErrors.filter(function(e) { return e != t; });
-      self.gitErrors(gitErrors);
-    }
-  });
-  this.gitErrors(gitErrors);
 }
 AppViewModel.prototype._handleCredentialsRequested = function() {
   var self = this;

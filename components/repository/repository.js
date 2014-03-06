@@ -13,6 +13,7 @@ var RepositoryViewModel = function(server, repoPath) {
 
   this.server = server;
   this.repoPath = repoPath;
+  this.gitErrors = components.create('gitErrors', { server: server, repoPath: repoPath });
   this.graph = components.create('graph', { server: server, repoPath: repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
@@ -27,6 +28,7 @@ RepositoryViewModel.prototype.updateNode = function(parentElement) {
 }
 exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onProgramEvent = function(event) {
+  if (this.gitErrors.onProgramEvent) this.gitErrors.onProgramEvent(event);
   if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);
   if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
   if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);

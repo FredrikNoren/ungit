@@ -1,0 +1,22 @@
+
+<!-- ko foreach: gitErrors -->
+<div class="alert alert-danger">
+  <button type="button" class="close" data-bind="click: dismiss">&times;</button>
+  <h3><span class="glyphicon glyphicon-warning-sign"></span> Unhandled git error!</h3>
+  <p>
+    Ungit tried to run a git command that resulted in an unhandled error. <span data-bind="visible: bugReportWasSent">An automatic bug report was sent.</span>
+  </p>
+  <p data-bind="visible: tip, text: tip"></p>
+  <p data-bind="visible: showEnableBugtracking">
+    <button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button> to automatically report bugs, and/or <a href="https://github.com/FredrikNoren/ungit/issues" target="_blank">file an issue on the ungit issue tracker</a>.
+  </p>
+  <h4>Command</h4>
+  <pre data-bind="text: command"></pre>
+  <h4>Error</h4>
+  <pre data-bind="text: error"></pre>
+  <h4>Stderr</h4>
+  <pre data-bind="text: stderr"></pre>
+  <h4>Stdout</h4>
+  <pre data-bind="text: stdout"></pre>
+</div>
+<!-- /ko -->

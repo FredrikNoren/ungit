@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "gitErrors": "gitErrors.html"
+    },
+    "javascript": "gitErrors.js"
+  }
+}

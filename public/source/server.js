@@ -158,7 +158,8 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
       error: err.res.body.error,
       stdout: err.res.body.stdout,
       stderr: err.res.body.stderr,
-      shouldSkipReport: shouldSkipReport
+      shouldSkipReport: shouldSkipReport,
+      repoPath: err.res.body.workingDirectory
     } });
   }
   // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
