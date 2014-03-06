@@ -115,7 +115,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type);
     }
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
@@ -219,11 +219,11 @@ StagingViewModel.prototype.toogleAllStages = function() {
   self.allStageFlag(!self.allStageFlag());
 }
 
-var FileViewModel = function(staging, name) {
+var FileViewModel = function(staging, name, type) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
-  this.type = ko.observable();
+  this.type = ko.observable(type);
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
   this.isNew = ko.observable(false);
@@ -231,22 +231,18 @@ var FileViewModel = function(staging, name) {
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
-  this.diff = ko.observable();
-    
+  this.diff = ko.observable(components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
+      filename: this.name(),
+      repoPath: this.staging.repoPath,
+      server: this.server
+    }));
 }
 FileViewModel.prototype.setState = function(state) {
-  this.type(state.type);
   this.isNew(state.isNew);
   this.removed(state.removed);
   this.conflict(state.conflict);
-  this.diff(
-    components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
-      filename: this.name(),
-      repoPath: this.staging.repoPath,
-      server: this.server,
-      isNew: this.isNew(),
-      isRemoved: this.removed()
-    }));
+  if (this.diff().isNew) this.diff().isNew(state.isNew);
+  if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());

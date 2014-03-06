@@ -10,9 +10,11 @@ var ImageDiffViewModel = function(args) {
   var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
+  this.isNew = ko.observable(false);
+  this.isRemoved = ko.observable(false);
   this.state = ko.computed(function() {
-    if (args.isNew) return 'new';
-    if (args.isRemoved) return 'removed';
+    if (self.isNew()) return 'new';
+    if (self.isRemoved()) return 'removed';
     return 'changed';
   });
   this.oldImageSrc = ko.computed(function() {
