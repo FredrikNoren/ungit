@@ -42,7 +42,7 @@
     "getmac": "~1.0.6",
     "deep-extend": "~0.2.8",
     "raven": "~0.6.2",
-    "knockout": "~3.1.0",
+    "knockout": "~3.0.0",
     "npm-registry-client": "~0.4.4",
     "npmconf": "~0.1.13",
     "mkdirp": "~0.3.5",
