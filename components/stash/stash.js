@@ -36,9 +36,16 @@ function StashViewModel(server, repoPath) {
   this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0; });
+  this.refresh();
 }
 StashViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('stash', this, {}, parentElement);
+}
+StashViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'request-app-content-refresh' ||
+    event.event == 'working-tree-changed' ||
+    event.event == 'git-directory-changed')
+    this.refresh();
 }
 StashViewModel.prototype.refresh = function() {
   var self = this;

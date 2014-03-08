@@ -60,7 +60,7 @@ exports.registerApi = function(env) {
           // which is pretty weird, but hard to do anything about, so we just log them here.
           usageStatistics.addEvent('fs-watch-exception');
         }
-        callback();
+        if (callback) callback();
       });
     });
   }
@@ -469,7 +469,8 @@ exports.registerApi = function(env) {
     if (req.query.pop === 'true') type = 'pop';
     git('stash ' + type +' stash@{' + req.param('id') + '}' , req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.param('path')));
+      .always(emitGitDirectoryChanged.bind(null, req.param('path')))
+      .always(emitWorkingTreeChanged.bind(null, req.param('path')));
   });
 
   app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){

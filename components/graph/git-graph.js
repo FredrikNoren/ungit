@@ -73,7 +73,10 @@ var GitGraphViewModel = function(server, repoPath) {
     }
   });
 
-  this.loadNodesFromApi();
+  this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
+  this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
+  this.loadNodesFromApiThrottled();
+  this.updateBranchesThrottled();
 }
 GitGraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
@@ -84,10 +87,10 @@ GitGraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 GitGraphViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'git-directory-changed') {
-    this.loadNodesFromApi();
-    this.updateBranches();
+    this.loadNodesFromApiThrottled();
+    this.updateBranchesThrottled();
   } else if (event.event == 'request-app-content-refresh') {
-    this.loadNodesFromApi();
+    this.loadNodesFromApiThrottled();
   } else if (event.event == 'remote-tags-update') {
     this.setRemoteTags(event.tags);
   } else if (event.event == 'current-remote-changed') {
