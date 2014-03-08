@@ -124,11 +124,13 @@ StagingViewModel.prototype.setFiles = function(files) {
   this.files(newFiles);
 }
 StagingViewModel.prototype.toogleAmend = function() {
-  if (!this.amend() && !this.commitMessageTitle()) {
+  this.amend(!this.amend());
+
+  if (this.amend() && !this.commitMessageTitle()) {
     this.commitMessageTitle(this.HEAD().title);
     this.commitMessageBody(this.HEAD().body);
   }
-  else if(this.amend()) {
+  else if(!this.amend()) {
     var isPrevDefaultMsg = 
       this.commitMessageTitle() == this.HEAD().title &&
       this.commitMessageBody() == this.HEAD().body;
@@ -137,7 +139,8 @@ StagingViewModel.prototype.toogleAmend = function() {
       this.commitMessageBody('');
     }
   }
-  this.amend(!this.amend());
+
+  programEvents.dispatch({ event: 'amend-toogle-changed', flag: this.amend() });
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;
