@@ -6,6 +6,10 @@ var inherits = require('util').inherits;
 var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
+var FileViewModel = require('../staging').FileViewModel;
+var gitParser = require('../../source/git-parser');
+
+var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -14,9 +18,10 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.graph = graph;
   this.server = graph.server;
+  this.app = graph.repository.app;
   this.sha1 = sha1;
 
-  
+
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
@@ -42,6 +47,7 @@ var GitNodeViewModel = function(graph, sha1) {
     return self.radius()*2;
   });
 
+  this.nodeFiles = ko.observable([]);
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();
   this.parents = ko.observable([]);
@@ -69,7 +75,14 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.showBody = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
-  })
+  });
+  var hideAllDiffs = function() {
+    this.nodeFiles().forEach(
+      function(file) {
+        file.showingDiffs(false);
+      });
+  };
+  this.hideAllDiffs = hideAllDiffs;
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
@@ -120,6 +133,13 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Revert(this.graph, this)
   ];
 }
+GitNodeViewModel.prototype.showingDiffs = function() {
+  this.nodeFiles.forEach(
+    function(file) {
+      if (file.showingDiffs()) return true;
+    });
+  return false;
+}
 inherits(GitNodeViewModel, NodeViewModel);
 exports.GitNodeViewModel = GitNodeViewModel;
 GitNodeViewModel.prototype.setData = function(args) {
@@ -134,6 +154,55 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
+  if (args.changedFiles)
+    this.setChangedFiles(args);
+}
+GitNodeViewModel.prototype.setChangedFiles = function(args) {
+  var files = [];
+  var nDiffs = gitParser.parseGitDiff(args.diff);
+  nDiffs.forEach(
+    function(diff) {
+      var type = imageFileExtensions.indexOf(path.extname(diff.aPath).toUpperCase()) != -1 ? 'image' : 'text';
+      var file = new FileViewModel(this, type);
+      var currentFileName = diff.aPath;
+      var currentFileInfo = args.changedFiles[currentFileName];
+      file.name(currentFileName);
+      // file.fileName(path.basename(currentFileName));
+      // file.path(path.dirname(currentFileName) + "/");
+      file.isNew(diff.newFile);
+      file.removed(diff.deletedFile);
+      var newDiff = [];
+      if (!diff.deletedFile && !diff.renamedFile) {
+        file.addedLines(currentFileInfo[0]);
+        file.deletedLines(currentFileInfo[1]);
+        diff.lines.forEach(
+          function(line) {
+            newDiff.push({
+              oldLineNumber: line[0],
+              newLineNumber: line[1],
+              added: line[2][0] == '+',
+              removed: line[2][0] == '-' || line[2][0] == '\\',
+              text: line[2]
+            });
+          });
+      } else {
+        file.addedLines("-");
+        file.deletedLines("-");
+        if (!diff.deletedFile) {
+          newDiff.push({
+            oldLineNumber: null,
+            newLineNumber: null,
+            added: false,
+            removed: false,
+            text: diff.lines[0][2]
+          });
+        }
+      }
+      file.diff.diffs(newDiff);
+      files.push(file);
+    });
+
+  this.nodeFiles(files);
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;

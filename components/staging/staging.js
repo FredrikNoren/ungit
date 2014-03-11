@@ -129,7 +129,7 @@ StagingViewModel.prototype.toogleAmend = function() {
     this.commitMessageBody(this.HEAD().body);
   }
   else if(this.amend()) {
-    var isPrevDefaultMsg = 
+    var isPrevDefaultMsg =
       this.commitMessageTitle() == this.HEAD().title &&
       this.commitMessageBody() == this.HEAD().body;
     if (isPrevDefaultMsg) {
@@ -188,7 +188,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   this.mergeAbortProgressBar.start();
   this.server.post('/merge/abort', { path: this.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
-  }); 
+  });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -223,6 +223,7 @@ var FileViewModel = function(staging, name, type) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
+  this.app = staging.app;
   this.type = ko.observable(type);
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
@@ -244,6 +245,9 @@ FileViewModel.prototype.setState = function(state) {
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
+FileViewModel.prototype.toggleDiffsNoInvalidate = function () {
+  this.showingDiffs(!this.showingDiffs());
+}
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
 }
@@ -257,7 +261,7 @@ FileViewModel.prototype.ignoreFile = function() {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
       return true;
-    } 
+    }
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
@@ -281,4 +285,4 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   }
 }
 
- 
+
