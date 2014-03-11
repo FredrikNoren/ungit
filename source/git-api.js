@@ -244,7 +244,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git('log --decorate=full --pretty=fuller --all --parents ' + limit, req.param('path'))
+    git('log --decorate=full --pretty=fuller --all --parents --numstat ' + limit, req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
