@@ -21,6 +21,9 @@
               </div>
               <div class="body" data-bind="text: body, visible: showBody"></div>
               <div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
+              <div>
+                <span class='lineAdded'>++<span data-bind="text: fileLineDiffs()[0][0];"></span></span> <span class='lineDeleted'>--<span data-bind="text: fileLineDiffs()[0][1]"></span></span>
+              </div>
             </div>
           </div>
         </div>
