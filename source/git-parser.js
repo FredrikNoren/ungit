@@ -165,7 +165,7 @@ exports.parseGitLog = function(data) {
     }
   }
   var parseCommitMessage = function(row, index) {
-    if (rows[index + 1].trim() && /\d\t\d\t.+/g.test(rows[index + 1])) {
+    if (/\d\t\d\t.+/g.test(rows[index + 1])) {
       parser = parseFileChanges;
       return;
     }
