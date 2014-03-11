@@ -22,7 +22,18 @@
               <div class="body" data-bind="text: body, visible: showBody"></div>
               <div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
               <div>
-                <span class='lineAdded'>++<span data-bind="text: fileLineDiffs()[0][0];"></span></span> <span class='lineDeleted'>--<span data-bind="text: fileLineDiffs()[0][1]"></span></span>
+                <a href='#' data-bind='click: selected'>
+                  <span class='linesAdded'>++<span data-bind="text: totalLineDiffs()[0];"></span></span> 
+                  <span class='linesDeleted'>--<span data-bind="text: totalLineDiffs()[1]"></span></span>
+                </a>
+              </div>
+            </div>
+
+            <div data-bind='foreach: fileLineDiffs, visible: selected' class='nodeFilesChangeDisplay'>
+              <div class='aFileChangeDisplay'>
+                <div class='linesAdded'>++<span data-bind="text: $data[0]"></span></div>
+                <div class='linesDeleted'>--<span data-bind="text: $data[1]"></span></div> 
+                <div class='fileNameCell' data-bind='text: $data[2]'></div>
               </div>
             </div>
           </div>

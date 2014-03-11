@@ -52,6 +52,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.authorDateFromNow = ko.observable();
   this.authorName = ko.observable();
   this.authorEmail = ko.observable();
+  this.totalLineDiffs = ko.observable([]);
   this.fileLineDiffs = ko.observable([]);
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
 
@@ -135,6 +136,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
+  this.totalLineDiffs(args.fileLineDiffs.shift());
   this.fileLineDiffs(args.fileLineDiffs);
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
