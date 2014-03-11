@@ -223,7 +223,6 @@ var FileViewModel = function(staging, name, type) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
-  this.app = staging.app;
   this.type = ko.observable(type);
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
@@ -231,6 +230,8 @@ var FileViewModel = function(staging, name, type) {
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
+  this.addedLines = ko.observable();
+  this.deletedLines = ko.observable();
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.diff = ko.observable(components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
       filename: this.name(),
@@ -238,6 +239,7 @@ var FileViewModel = function(staging, name, type) {
       server: this.server
     }));
 }
+exports.FileViewModel = FileViewModel;
 FileViewModel.prototype.setState = function(state) {
   this.isNew(state.isNew);
   this.removed(state.removed);
@@ -247,6 +249,7 @@ FileViewModel.prototype.setState = function(state) {
 }
 FileViewModel.prototype.toggleDiffsNoInvalidate = function () {
   this.showingDiffs(!this.showingDiffs());
+  this.staging.diffsShown(this.staging.diffsShown() + this.showingDiffs()? 1 : -1);
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());

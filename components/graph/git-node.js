@@ -2,11 +2,12 @@
 var ko = require('knockout');
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
+var path = require('path');
 var inherits = require('util').inherits;
 var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
-var FileViewModel = require('../staging').FileViewModel;
+var FileViewModel = require('../staging/staging').FileViewModel;
 var gitParser = require('../../source/git-parser');
 
 var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
@@ -18,8 +19,8 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.graph = graph;
   this.server = graph.server;
-  this.app = graph.repository.app;
   this.sha1 = sha1;
+  this.repoPath = graph.repoPath;
 
 
   this.boxDisplayX = ko.computed(function() {
@@ -73,16 +74,20 @@ var GitNodeViewModel = function(graph, sha1) {
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });
-  this.showBody = ko.computed(function() {
-    return self.nodeIsMousehover() || self.selected();
-  });
+  this.diffsShown = ko.observable(0);
   var hideAllDiffs = function() {
+    this.diffsShown(0);
     this.nodeFiles().forEach(
       function(file) {
         file.showingDiffs(false);
       });
   };
   this.hideAllDiffs = hideAllDiffs;
+  this.showBody = ko.computed(function() {
+    var show = self.nodeIsMousehover() || self.selected();
+    if (!show) self.hideAllDiffs();
+    return show;
+  });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
@@ -158,15 +163,15 @@ GitNodeViewModel.prototype.setData = function(args) {
     this.setChangedFiles(args);
 }
 GitNodeViewModel.prototype.setChangedFiles = function(args) {
+  var self = this;
   var files = [];
   var nDiffs = gitParser.parseGitDiff(args.diff);
   nDiffs.forEach(
     function(diff) {
       var type = imageFileExtensions.indexOf(path.extname(diff.aPath).toUpperCase()) != -1 ? 'image' : 'text';
-      var file = new FileViewModel(this, type);
       var currentFileName = diff.aPath;
       var currentFileInfo = args.changedFiles[currentFileName];
-      file.name(currentFileName);
+      var file = new FileViewModel(self, currentFileName, type);
       // file.fileName(path.basename(currentFileName));
       // file.path(path.dirname(currentFileName) + "/");
       file.isNew(diff.newFile);
@@ -198,7 +203,7 @@ GitNodeViewModel.prototype.setChangedFiles = function(args) {
           });
         }
       }
-      file.diff.diffs(newDiff);
+      file.diff().diffs(newDiff);
       files.push(file);
     });
 
