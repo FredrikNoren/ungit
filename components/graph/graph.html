@@ -29,8 +29,8 @@
               </div>
             </div>
 
-            <div data-bind='foreach: fileLineDiffs, visible: selected' class='nodeFilesChangeDisplay'>
-              <div class='aFileChangeDisplay'>
+            <div data-bind='foreach: fileLineDiffs, visible: selected' class='nodeFilesLineDiffDisplay'>
+              <div class='aFileLineDiffDisplay'>
                 <div class='linesAdded'>++<span data-bind="text: $data[0]"></span></div>
                 <div class='linesDeleted'>--<span data-bind="text: $data[1]"></span></div> 
                 <div class='fileNameCell' data-bind='text: $data[2]'></div>
