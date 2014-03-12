@@ -136,7 +136,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
-  this.subDiff(new SubDiff(args.fileLineDiffs));
+  this.subDiff(new SubDiff( {fileLineDiffs: args.fileLineDiffs, sha1: this.sha1.substr(0,7), path: this.graph.repoPath, server: this.server }));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;

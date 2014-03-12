@@ -1,11 +1,11 @@
 var ko = require('knockout');
 var FileLineDiff = require('./git-file-line-diff.js').FileLineDiff;
 
-var SubDiff = function(fileLineDiffs) {
+var SubDiff = function(args) {
   this.totalLineDiffs = ko.observable();
   this.fileLineDiffs = ko.observable([]);
 
-  var totalLineDiffs = fileLineDiffs.shift();
+  var totalLineDiffs = args.fileLineDiffs.shift();
   if (!totalLineDiffs) {
     this.totalLineDiffs([0, 0, 'total']);
   } else {
@@ -13,9 +13,10 @@ var SubDiff = function(fileLineDiffs) {
   }
 
   var tempFileLineDiffs = [];
-  for (var counter in fileLineDiffs){
-    tempFileLineDiffs.push(new FileLineDiff(fileLineDiffs[counter]));
-  }
+  args.fileLineDiffs.forEach(function(fileLineDiff) {
+    args.fileLineDiff = fileLineDiff;
+    tempFileLineDiffs.push(new FileLineDiff(args));
+  });
   this.fileLineDiffs(tempFileLineDiffs);
 };
 exports.SubDiff = SubDiff;
