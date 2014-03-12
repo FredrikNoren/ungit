@@ -6,6 +6,7 @@ var inherits = require('util').inherits;
 var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
+var SubDiff = require('./git-sub-diff.js').SubDiff;
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -52,8 +53,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.authorDateFromNow = ko.observable();
   this.authorName = ko.observable();
   this.authorEmail = ko.observable();
-  this.totalLineDiffs = ko.observable([]);
-  this.fileLineDiffs = ko.observable([]);
+  this.subDiff = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
 
   this.index = ko.observable();
@@ -136,14 +136,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
-
-  var totalLineDiffs = args.fileLineDiffs.shift();
-  if (!totalLineDiffs) {
-    this.totalLineDiffs([0, 0, 'total']);
-  } else {
-    this.totalLineDiffs(totalLineDiffs);
-  }
-  this.fileLineDiffs(args.fileLineDiffs);
+  this.subDiff(new SubDiff(args.fileLineDiffs));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
