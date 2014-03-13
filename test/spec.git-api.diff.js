@@ -138,7 +138,7 @@ describe('git-api diff', function () {
 	});
 
 	it('getting previous image file should work', function(done) {
-		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'previous' }, function(err, res) {
+		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' }, function(err, res) {
 			if (err) return done(err);
 			done();	
 			expect(res.text).to.be('png');
@@ -172,7 +172,7 @@ describe('git-api diff', function () {
 	});
 
 	it('getting previous image file should work', function(done) {
-		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'previous' }, function(err, res) {
+		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' }, function(err, res) {
 			if (err) return done(err);
 			done();	
 			expect(res.text).to.be('png ~~');
