@@ -3,7 +3,7 @@ var components = require('ungit-components');
 var inherits = require('util').inherits;
 var TextDiffViewModel = require('../textdiff/textdiff.js').TextDiffViewModel;
 
-var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
+var imageFileExtensions = ['PNG', 'JPG', 'BMP', 'GIF'];
 
 var SubLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
