@@ -174,8 +174,8 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
-    if (req.query.version == 'previous') {
-      git.binaryFileContentAtHead(req.query.path, req.query.filename)
+    if (req.query.version !== 'current') {
+      git.binaryFileContentAtHead(req.query.path, req.query.filename, req.query.version)
         .always(function(err, result) {
           res.type(path.extname(req.query.filename));
           if (err) res.json(400, err); 
