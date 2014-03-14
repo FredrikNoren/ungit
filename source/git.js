@@ -230,7 +230,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.binaryFileContentAtHead = function(repoPath, filename, version) {
+git.binaryFileContent = function(repoPath, filename, version) {
   return git('show ' + version + ':' + filename, repoPath)
         .encoding('binary');
 }
