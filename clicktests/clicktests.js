@@ -182,6 +182,17 @@ test('Should be able to add a new file to .gitignore', function(done) {
   });
 });
 
+test('Test sub diff between git commit', function(done) {
+  helpers.click(page, '[class="linesAdded"]');
+  helpers.click(page, '[data-bind="text: $data.fileName"]');
+  helpers.waitForElement(page, '[class="textDiff"]', function() {
+    setTimeout(function() { // let it finish making api call
+      helpers.click(page, '[class="graph"]'); // close opened sub diff
+      done();
+    }, 1000);
+  });
+});
+
 test('Should be possible to discard a created file', function(done) {
   createTestFile(testRepoPath + '/testfile2.txt', function(err) {
     if (err) return done(err);
