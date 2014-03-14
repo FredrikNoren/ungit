@@ -31,4 +31,9 @@ ImageDiffViewModel.prototype.updateNode = function(parentElement) {
 ImageDiffViewModel.prototype.invalidateDiff = function(callback) {
   callback();
 }
-
+ImageDiffViewModel.prototype.newImageError = function(data, event) {
+  this.isRemoved(true);
+}
+ImageDiffViewModel.prototype.oldImageError = function(data, event) {
+  this.isNew(true);
+}
