@@ -3,7 +3,7 @@ var optimist = require('optimist');
 var path = require('path');
 
 var defaultConfig = {
-  
+
   // The port ungit is exposed on.
   port: 8448,
 
@@ -30,7 +30,7 @@ var defaultConfig = {
 
   // True to enable authentication. Users are defined in the users configuration property.
   authentication: false,
-  
+
   // Map of username/passwords which are granted access.
   users: undefined,
 
@@ -67,7 +67,7 @@ var defaultConfig = {
   // NOTE: This will execute *before* opening the browser window if the
   //        `launchBrowser` option is `true`.
   // Example:
-  //     # Override the browser launch command; use chrome's "app" 
+  //     # Override the browser launch command; use chrome's "app"
   //     #   argument to get a new, chromeless window for that "native feel"
   //     $ ungit --launchBrowser=0 --launchCommand "chrome --app=%U"
   launchCommand: undefined,
@@ -89,7 +89,10 @@ var defaultConfig = {
 
   // Name-object pairs of configurations for plugins. To disable a plugin, use "disabled": true, for example:
   // "pluginConfigs": { "gerrit": { "disabled": true } }
-  pluginConfigs: {}
+  pluginConfigs: {},
+
+  // Git version check override
+  gitVersionCheckOverride: false
 };
 
 function getUserHome() {
