@@ -129,7 +129,7 @@ StagingViewModel.prototype.toogleAmend = function() {
     this.commitMessageBody(this.HEAD().body);
   }
   else if(this.amend()) {
-    var isPrevDefaultMsg = 
+    var isPrevDefaultMsg =
       this.commitMessageTitle() == this.HEAD().title &&
       this.commitMessageBody() == this.HEAD().body;
     if (isPrevDefaultMsg) {
@@ -188,7 +188,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   this.mergeAbortProgressBar.start();
   this.server.post('/merge/abort', { path: this.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
-  }); 
+  });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -230,6 +230,8 @@ var FileViewModel = function(staging, name, type) {
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
+  this.addedLines = ko.observable();
+  this.deletedLines = ko.observable();
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.diff = ko.observable(components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
       filename: this.name(),
@@ -237,12 +239,17 @@ var FileViewModel = function(staging, name, type) {
       server: this.server
     }));
 }
+exports.FileViewModel = FileViewModel;
 FileViewModel.prototype.setState = function(state) {
   this.isNew(state.isNew);
   this.removed(state.removed);
   this.conflict(state.conflict);
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
+}
+FileViewModel.prototype.toggleDiffsNoInvalidate = function () {
+  this.showingDiffs(!this.showingDiffs());
+  this.staging.diffsShown(this.staging.diffsShown() + this.showingDiffs()? 1 : -1);
 }
 FileViewModel.prototype.toogleStaged = function() {
   this.staged(!this.staged());
@@ -257,7 +264,7 @@ FileViewModel.prototype.ignoreFile = function() {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
       return true;
-    } 
+    }
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
@@ -281,4 +288,4 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   }
 }
 
- 
+

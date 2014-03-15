@@ -49,6 +49,9 @@
           }
         }
       }
+      &.diffs {
+        z-index: 4;
+      }
 
       .logEntryBox > .panel-body {
         position: relative;
@@ -83,6 +86,44 @@
           white-space: pre-wrap;
           word-wrap: break-word;
           color: #8F9FA6;
+        }
+      }
+      .files-changed {
+        border-top: 2px solid;
+        border-color: rgba(255, 255, 255, 0.1);
+        padding-top: 5px;
+        margin-top: 5px;
+        .files {
+          .file {
+            .new {
+              color: #89D64D;
+              vertical-align: 5px;
+            }
+            .deleted {
+              color: #DB3712;
+              vertical-alisgn: 5px;
+            }
+            .name {
+              .file-diff-info {
+                width: 80px;
+                display: inline-block;
+                .added-lines {
+                  width: 38px;
+                  display: inline-block;
+                  color: #66F27B;
+                }
+                .removed-lines {
+                  width: 38px;
+                  display: inline-block;
+                  color: #E86756;
+                }
+              }
+            }
+            .diffContainer {
+              max-height: 400px;
+              overflow-y: auto;
+            }
+          }
         }
       }
     }
