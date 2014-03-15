@@ -1,9 +1,9 @@
 var ko = require('knockout');
-var SubLineDiff = require('./git-sub-line-diff.js').SubLineDiff;
+var CommitLineDiff = require('./commitlinediff.js').CommitLineDiff;
 
-var SubDiff = function(args) {
+var CommitDiff = function(args) {
   this.totalLineDiffs = ko.observable();
-  this.subLineDiffs = ko.observable([]);
+  this.commitLineDiffs = ko.observable([]);
 
   var totalLineDiffs = args.fileLineDiffs.shift();
   if (!totalLineDiffs) {
@@ -12,11 +12,11 @@ var SubDiff = function(args) {
     this.totalLineDiffs(totalLineDiffs);
   }
 
-  var tempSubLineDiffs = [];
+  var tempCommitLineDiffs = [];
   args.fileLineDiffs.forEach(function(fileLineDiff) {
     args.fileLineDiff = fileLineDiff;
-    tempSubLineDiffs.push(new SubLineDiff(args));
+    tempCommitLineDiffs.push(new CommitLineDiff(args));
   });
-  this.subLineDiffs(tempSubLineDiffs);
+  this.commitLineDiffs(tempCommitLineDiffs);
 };
-exports.SubDiff = SubDiff;
+exports.CommitDiff = CommitDiff;
