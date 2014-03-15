@@ -1,7 +1,6 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
-var TextDiffViewModel = require('../textdiff/textdiff.js').TextDiffViewModel;
 
 var imageFileExtensions = ['PNG', 'JPG', 'BMP', 'GIF'];
 
