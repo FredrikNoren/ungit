@@ -1,5 +1,5 @@
 var ko = require('knockout');
-var CommitLineDiff = require('../graph/commitlinediff.js').CommitLineDiff;
+var CommitLineDiff = require('./commitlinediff.js').CommitLineDiff;
 var components = require('ungit-components');
 
 components.register('commitDiff', function(args) {

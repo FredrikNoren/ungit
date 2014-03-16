@@ -38,3 +38,10 @@ CommitLineDiff.prototype.type = function() {
   var ext = splited[splited.length - 1];
   return imageFileExtensions.indexOf(ext.toUpperCase()) != -1 ? 'imagediff' : 'textdiff';
 };
+
+CommitLineDiff.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('commitlinediff', this, {}, parentElement);
+};
+CommitLineDiff.prototype.invalidateDiff = function(callback) {
+  if (callback) callback();
+};
