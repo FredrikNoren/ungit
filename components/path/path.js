@@ -12,6 +12,8 @@ var PathViewModel = function(server, path) {
   var self = this;
   this.server = server;
   this.path = path;
+  var pathParts = path.replace('\\', '/').split('/');
+  this.dirName = pathParts[pathParts.length - 1];
   this.status = ko.observable('loading');
   this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
   this.loadingProgressBar.start();
@@ -20,7 +22,7 @@ var PathViewModel = function(server, path) {
     fallbackPredictedTimeMs: 10000
   });
   this.cloneUrl = ko.observable();
-  this.unitiedPathTitle = ko.observable();
+  this.showDirectoryCreatedAlert = ko.observable(false);
   this.cloneDestinationImplicit = ko.computed(function() {
     var defaultText = 'destination folder';
     if (!self.cloneUrl()) return defaultText;
@@ -45,7 +47,6 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  self.unitiedPathTitle('Not a repository');
   this.server.get('/quickstatus', { path: this.path }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
@@ -86,7 +87,7 @@ PathViewModel.prototype.cloneRepository = function() {
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;
-  self.unitiedPathTitle('Directory created');
+  this.showDirectoryCreatedAlert(true);
   this.server.post('/createDir',  {dir: this.path }, function() {
     self.status('uninited');
   });

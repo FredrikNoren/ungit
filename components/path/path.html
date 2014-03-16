@@ -17,7 +17,10 @@
   <!-- ko if: status() == 'uninited' -->
   <div class="uninited" data-ta-container="uninited-path-page">
     <div class="container">
-      <h1 data-bind="text: unitiedPathTitle"></h1>
+      <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
+        Directory '<span data-bind="text: dirName"></span>' created
+      </div>
+      <h1>'<span data-bind="text: dirName"></span>' is not a repository</h1>
       <p>There is no repository at the selected path.</p>
       <div class="row">
         <div class="col-lg-6">
@@ -25,14 +28,14 @@
             <div class="panel-heading">Create a new repository</div>
             <div class="panel-body">
               <button data-ta-clickable="init-repository" class="btn btn-primary btn-lg" data-bind='click: initRepository'>
-                Initialize a repository here!
+                Make '<span data-bind="text: dirName"></span>' a repository
               </button>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Clone a repository</div>
+            <div class="panel-heading">Clone a repository into a subfolder of '<span data-bind="text: dirName"></span>'</div>
             <div class="panel-body">
               <form data-bind="submit: cloneRepository">
                 <div class="form-group">
@@ -43,7 +46,7 @@
                   <label for="cloneToInput">to</label>
                   <input class="form-control" type="text" data-ta-input="clone-target" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
                 </div>
-                <input type="submit" class="btn btn-primary btn-lg" data-ta-clickable="clone-repository" value="Clone repository!">
+                <input type="submit" class="btn btn-primary btn-lg" data-ta-clickable="clone-repository" value="Clone repository">
               </form>
             </div>
           </div>
