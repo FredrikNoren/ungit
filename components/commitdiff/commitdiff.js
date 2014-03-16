@@ -1,5 +1,10 @@
 var ko = require('knockout');
-var CommitLineDiff = require('./commitlinediff.js').CommitLineDiff;
+var CommitLineDiff = require('../graph/commitlinediff.js').CommitLineDiff;
+var components = require('ungit-components');
+
+components.register('commitDiff', function(args) {
+  return new CommitDiff(args);
+});
 
 var CommitDiff = function(args) {
   this.totalLineDiffs = ko.observable();
@@ -19,4 +24,10 @@ var CommitDiff = function(args) {
   });
   this.commitLineDiffs(tempCommitLineDiffs);
 };
-exports.CommitDiff = CommitDiff;
+
+CommitDiff.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('commitdiff', this, {}, parentElement);
+};
+CommitDiff.prototype.invalidateDiff = function(callback) {
+  if (callback) callback();
+};
