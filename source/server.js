@@ -215,11 +215,14 @@ gitApi.registerApi(apiEnvironment);
 // Init plugins
 function loadPlugins(plugins, pluginBasePath) {
   fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
-    winston.info('Loading plugin: ' + pluginDir);
+    var pluginPath = path.join(pluginBasePath, pluginDir);
+    // if not a directory, just skip it.
+    if (!fs.lstatSync(pluginPath).isDirectory())  return;
+    winston.info('Loading plugin: ' + pluginPath);
     var plugin = new UngitPlugin({
       dir: pluginDir,
       httpBasePath: 'plugins/' + pluginDir,
-      path: path.join(pluginBasePath, pluginDir)
+      path: pluginPath
     });
     if (plugin.manifest.disabled || plugin.config.disabled) {
       winston.info('Plugin disabled: ' + pluginDir);
