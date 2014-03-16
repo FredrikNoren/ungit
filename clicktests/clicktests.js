@@ -182,8 +182,8 @@ test('Should be able to add a new file to .gitignore', function(done) {
   });
 });
 
-test('Test sub diff between git commit', function(done) {
-  helpers.click(page, '[class="linesAdded"]');
+test('Test commit diff between git commit', function(done) {
+  helpers.click(page, '[class="node"]');
   helpers.click(page, '[data-bind="text: $data.fileName"]');
   helpers.waitForElement(page, '[class="textDiff"]', function() {
     setTimeout(function() { // let it finish making api call
