@@ -169,6 +169,10 @@ exports.parseGitLog = function(data) {
       parser = parseFileChanges;
       return;
     }
+    if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
+      parser = parseCommitLine;
+      return;
+    }
     if (currentCommmit.message) currentCommmit.message += '\n';
     else currentCommmit.message = '';
     currentCommmit.message += row.trim();
