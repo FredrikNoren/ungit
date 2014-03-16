@@ -42,6 +42,3 @@ CommitLineDiff.prototype.type = function() {
 CommitLineDiff.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('commitlinediff', this, {}, parentElement);
 };
-CommitLineDiff.prototype.invalidateDiff = function(callback) {
-  if (callback) callback();
-};

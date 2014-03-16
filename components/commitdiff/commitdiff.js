@@ -28,6 +28,3 @@ var CommitDiff = function(args) {
 CommitDiff.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('commitdiff', this, {}, parentElement);
 };
-CommitDiff.prototype.invalidateDiff = function(callback) {
-  if (callback) callback();
-};
