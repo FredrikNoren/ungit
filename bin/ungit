@@ -78,9 +78,10 @@ function verifyGitVersion(callback) {
     } else {
       var versionSearch = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout);
       var requiredVersion = '>=1.8.x';
-      if (!versionSearch) {
+      if (!versionSearch || config.gitVersionCheckOverride) {
         console.log('Failed to parse git version number: ', stdout);
         console.log('Note that Ungit requires git version ' + requiredVersion);
+        console.log('Start ungit with --gitVersionCheckOverride (or set that option to true in your .ungitrc) to override this check.');
         return callback();
       }
       var version = versionSearch[1];
