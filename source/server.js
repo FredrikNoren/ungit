@@ -13,6 +13,7 @@ var path = require('path');
 var fs = require('fs');
 var async = require('async');
 var signals = require('signals');
+var pathHelper = require('./utils/path-helper.js');
 var os = require('os');
 var cache = require('./utils/cache');
 var UngitPlugin = require('./ungit-plugin');
@@ -273,7 +274,7 @@ app.get('/api/ping', function(req, res) {
 });
 
 function getUserHome() {
-  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || "/tmp";
 }
 var userConfigPath = path.join(getUserHome(), '.ungitrc');
 function readUserConfig(callback) {
@@ -305,11 +306,11 @@ app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
 
 
 app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
-  res.json(fs.existsSync(req.param('path')));
+  res.json(fs.existsSync(pathHelper.restrict(req.param('path'))));
 });
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
-  var dir = req.query.term.trim();
+  var dir = pathHelper.restrict(req.query.term.trim());
   
   readUserConfig(function(err, userconfig) {
     if (err) res.json(400, err);
@@ -326,6 +327,7 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
               callback(!err && stat && stat.isDirectory());
             });
           }, function(filteredFiles) {
+            pathHelper.strip_restriction(filteredFiles);
             res.json(filteredFiles);
           });
         }
