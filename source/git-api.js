@@ -335,6 +335,7 @@ exports.registerApi = function(env) {
   });
   
   app.del(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
+    var repoPath = pathHelper.restrict(req.param('path'));
     git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' :"refs/tags/' + req.param('name').trim() + '"', repoPath)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, repoPath));
