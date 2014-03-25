@@ -20,8 +20,13 @@
                 <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
               </div>
               <div class="body" data-bind="text: body, visible: showBody"></div>
-              <div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
-              <a href='#' data-bind='click: selected, visible: !selected(), component: commitDiff'></a>
+              <div class="text-muted nodeSummaryContainer">
+                <span data-bind="text: authorDateFromNow"></span> | 
+                <span data-bind="text: sha1.substr(0, 8)"></span> | 
+                <a href="#" data-bind="click: selected, visible: !selected()">
+                  <span class='linesAdded'>+<span data-bind="text: getAdded()"></span></span> 
+                  <span class='linesDeleted'>-<span data-bind="text: getRemoved()"></span></span></div>
+                </a>
             </div>
             <div data-bind='foreach: commitDiff().commitLineDiffs(), visible: selected' class='nodeFilesLineDiffDisplay'>
               <div data-bind='component: $data'></div>

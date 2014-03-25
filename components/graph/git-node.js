@@ -192,3 +192,9 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
+GitNodeViewModel.prototype.getAdded = function() {
+  return this.commitDiff().totalLineDiffs()[0];
+}
+GitNodeViewModel.prototype.getRemoved = function() {
+  return this.commitDiff().totalLineDiffs()[1];
+}
