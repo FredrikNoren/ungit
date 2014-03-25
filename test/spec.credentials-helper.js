@@ -18,7 +18,7 @@ describe('credentials-helper', function () {
 
 		server.listen(config.port, '127.0.0.1');
 
-		var command = 'node bin/credentials-helper' + ' ' + socketId + ' get';
+		var command = 'node bin/credentials-helper' + ' ' + socketId + ' ' + config.port + ' get';
 		child_process.exec(command, function(err, stdout, stderr) {
 			expect(err).to.not.be.ok();
 			var ss = stdout.split('\n');
