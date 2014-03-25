@@ -24,7 +24,7 @@
                 <span data-bind="text: authorDateFromNow"></span> | 
                 <span data-bind="text: sha1.substr(0, 8)"></span> | 
                 <a href="#" data-bind="click: selected, visible: !selected()">
-                  <span class='linesAdded'>+<span data-bind="text: getAdded()"></span></span> 
+                  <span class='linesAdded'>+<span data-bind="text: getAdded()" data-ta-clickable="totalAdded"></span></span> 
                   <span class='linesDeleted'>-<span data-bind="text: getRemoved()"></span></span></div>
                 </a>
             </div>
