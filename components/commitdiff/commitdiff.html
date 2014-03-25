@@ -1,2 +1,10 @@
-<span class='linesAdded'>+<span data-bind="text: totalLineDiffs()[0]"></span></span> 
-<span class='linesDeleted'>-<span data-bind="text: totalLineDiffs()[1]"></span></span>
+<div data-bind='foreach: commitLineDiffs()' class='nodeFilesLineDiffDisplay'>
+  <div class='aFileLineDiffDisplay'>
+    <div class='linesAdded diffNumCell'>+<span data-bind='text: $data.added'></span></div>
+    <div class='linesDeleted diffNumCell'>-<span data-bind='text: $data.removed'></span></div> 
+    <a href='#' data-bind='click: fileNameClick'><div class='fileNameCell' data-bind='text: $data.fileName'></div></a>
+    <div class='subFileDiff' data-bind='visible: showSpecificDiff'>
+      <div class="diffContainer" data-bind="component: specificDiff"></div>
+    </div>
+  </div>
+</div>

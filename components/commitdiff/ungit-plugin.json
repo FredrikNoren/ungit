@@ -1,8 +1,7 @@
 {
   "exports": {
     "knockoutTemplates": {
-      "commitdiff": "commitdiff.html",
-      "commitlinediff": "commitlinediff.html"
+      "commitdiff": "commitdiff.html"
     },
     "javascript": "commitdiff.js",
     "less": "commitdiff.less"

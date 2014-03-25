@@ -28,9 +28,7 @@
                   <span class='linesDeleted'>-<span data-bind="text: getRemoved()"></span></span></div>
                 </a>
             </div>
-            <div data-bind='foreach: commitDiff().commitLineDiffs(), visible: selected' class='nodeFilesLineDiffDisplay'>
-              <div data-bind='component: $data'></div>
-            </div>
+            <div data-bind="visible: selected, component: commitDiff"></div>
           </div>
         </div>
       </div>
