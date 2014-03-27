@@ -83,7 +83,7 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
-  this.server.get('/log', { path: this.repoPath, limit: 1 }, function(err, log) {
+  this.server.get('/head', { path: this.repoPath, limit: 1 }, function(err, log) {
     if (err) {
       return err.errorCode == 'must-be-in-working-tree';
     }

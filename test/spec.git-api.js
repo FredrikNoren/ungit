@@ -120,6 +120,15 @@ describe('git-api', function () {
 		});
 	});
 
+	it('head should be empty before first commit', function(done) {
+		common.get(req, '/head', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body).to.be.a('array');
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
+
 	it('commit should fail on non-existing file', function(done) {
 		req
 			.post(restGit.pathPrefix + '/commit')
@@ -177,6 +186,19 @@ describe('git-api', function () {
 			done();
 		});
 	});
+
+	it('head should show latest commit', function(done) {
+		common.get(req, '/head', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body).to.be.a('array');
+			expect(res.body.length).to.be(1);
+			expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
+			expect(res.body[0].authorName).to.be(gitConfig['user.name']);
+			expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
+			done();
+		});
+	});
+
 
 	it('modifying a test file should work', function(done) {
 		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) }, done);
