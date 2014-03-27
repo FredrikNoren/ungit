@@ -1,9 +1,0 @@
-{
-  "exports": {
-    "knockoutTemplates": {
-      "imagediff": "imagediff.html"
-    },
-    "javascript": "imagediff.js",
-    "less": "imagediff.less"
-  }
-}
