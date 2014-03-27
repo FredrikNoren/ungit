@@ -1,8 +1,0 @@
-{
-  "exports": {
-    "knockoutTemplates": {
-      "app": "app.html"
-    },
-    "javascript": "app.js"
-  }
-}
