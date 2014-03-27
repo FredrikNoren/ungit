@@ -1,0 +1,79 @@
+
+.navbarPadder {
+  height: 102px;
+}
+
+.navbar {
+  padding-top: 13px;
+  z-index: 5;
+  box-shadow: 0px 15px 15px #252833;
+  height: 81px;
+
+  .backlink {
+    margin-left: 9px;
+    margin-top: 7px;
+    position: absolute;
+    color: #686868;
+    &:hover {
+      text-decoration: none;
+      color: #A5A5A5;
+    }
+    .glyphicon-arrow-left {
+      -webkit-transition: opacity 0.5s ease-in-out;
+      -moz-transition: opacity 0.5s ease-in-out;
+      transition: opacity 0.5s ease-in-out;
+      opacity: 0;
+      &.glyph-shown {
+        opacity: 1;
+      }
+    }
+  }
+  .form-container {
+    margin-left: 180px;
+    margin-right: 107px;
+    .path-input-form {
+      width: 100%;
+      position: relative;
+      .form-control {
+        font-size: 1.7em;
+        width: 100%;
+      }
+      .add-to-repolist {
+        position: absolute;
+        right: 4px;
+        top: 6px;
+        background: transparent;
+        border: 0px;
+        opacity: 0.3;
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+  .toolbar {
+    position: absolute;
+    right: 55px;
+    top: 13px;
+    .refresh-button {
+      background: rgba(0, 0, 0, 0.1);
+      border: 0px;
+      font-size: 22px;
+    }
+  }
+  .arrowUp {
+    position: absolute;
+    bottom: 0px;
+    left: 300px;
+    background: url('../images/repositoryBackgroundArrowUp.png');
+    width: 30px;
+    height: 15px;
+  }
+  .version {
+    position: absolute;
+    right: 5px;
+    bottom: 2px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+}

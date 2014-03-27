@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="css/styles.css" />
+	<style>
+	#content {
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		width: 100%;
+		height: 100%;
+		border: 0px;
+	}
+	#titlebar {
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		width: 100%;
+		height: 20px;
+		-webkit-app-region: drag;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+	}
+	#controls {position: absolute;
+		top: 0px;
+		right: 30px;
+		background: rgba(255, 255, 255, 0.04);
+		border-bottom-left-radius: 5px;
+		border-bottom-right-radius: 5px;
+		padding: 2px;
+		padding-left: 7px;
+		padding-right: 7px;
+		box-shadow: 1px 1px 9px rgba(0, 0, 0, 0.3);
+		-webkit-app-region: no-drag;
+	}
+	#controls a {
+		color: rgba(255, 255, 255, 0.3);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+	}
+	#controls a:hover {
+		color: rgba(255, 255, 255, 0.7);
+		text-decoration: none;
+	}
+	</style>
+</head>
+<body>
+
+<iframe id="content">
+</iframe>
+
+<div id="titlebar">
+	<div id="controls">
+		<a href="#" id="reload-button"><span class="glyphicon glyphicon-repeat"></span></a>
+		<a href="#" id="minimize-button"><span class="glyphicon glyphicon-minus"></span></a>
+		<a href="#" id="maximize-button"><span class="glyphicon glyphicon-resize-full"></span></a>
+		<a href="#" id="unmaximize-button" style="display: none"><span class="glyphicon glyphicon-resize-small"></span></a>
+		<a href="#" id="close-button"><span class="glyphicon glyphicon-remove"></span></a>
+	</div>
+</div>
+
+<script id="loadingTemplate" type="text/template">
+<link rel="stylesheet" type="text/css" href="css/styles.css" />
+<div class="container">
+	<p class="text-center" style="padding-top: 20px;"><img src="images/logoLarge.png"></p>
+	<p><em>Launching ungit</em></p>
+	<p id="output"></p>
+</div>
+</script>
+
+<script type="text/javascript">
+var content = document.getElementById('content');
+content.contentWindow.document.open('text/html', 'replace');
+content.contentWindow.document.write(document.getElementById('loadingTemplate').innerHTML);
+content.contentWindow.document.close();
+var win = require("nw.gui").Window.get();
+document.getElementById('reload-button').onclick = function() {
+	content.contentWindow.location.reload();
+	return false;
+}
+document.getElementById('minimize-button').onclick = function() {
+	win.minimize();
+	return false;
+}
+document.getElementById('maximize-button').onclick = function() {
+	win.maximize();
+	return false;
+}
+document.getElementById('unmaximize-button').onclick = function() {
+	win.unmaximize();
+	return false;
+}
+document.getElementById('close-button').onclick = function() {
+	win.close();
+	return false;
+}
+function getStoredWindowState() {
+	var state;
+	try {
+		state = JSON.parse(localStorage.getItem('windowState') || '{}');
+	} catch(ex) {}
+	return state || {};
+}
+var windowMode = getStoredWindowState().mode || 'normal';
+win.on('maximize', function() {
+	document.getElementById('unmaximize-button').style.display = 'inline-block';
+	document.getElementById('maximize-button').style.display = 'none';
+	windowMode = 'maximized';
+});
+win.on('unmaximize', function() {
+	document.getElementById('unmaximize-button').style.display = 'none';
+	document.getElementById('maximize-button').style.display = 'inline-block';
+	windowMode = 'normal';
+});
+win.on('close', function () {
+	var state = getStoredWindowState();
+	state.mode = windowMode;
+	if (windowMode == 'normal') {
+		state.x = win.x;
+		state.y = win.y;
+		state.width = win.width;
+		state.height = win.height;
+	}
+	localStorage.setItem('windowState', JSON.stringify(state));
+    this.close(true);
+});
+document.addEventListener('keydown', function(event) {
+	if (event.keyIdentifier == 'F12') win.showDevTools();
+});
+require('../source/config').desktopMode = true;
+setTimeout(function() {
+	var s = require('../source/server');
+	s.started.add(function() {
+		content.src = 'http://localhost:8448';
+	});
+}, 1);
+
+if (windowMode == 'maximized') {
+	win.maximize();
+} else {
+	var state = getStoredWindowState();
+	if (state && state.width) {
+        win.resizeTo(state.width, state.height);
+        win.moveTo(state.x, state.y);
+	}
+}
+win.show();
+</script>
+
+</body>
+</html>

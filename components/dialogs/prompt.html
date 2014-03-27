@@ -1,0 +1,18 @@
+
+<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }, attr: { 'data-ta-container': taDialogName }">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" data-bind="text: title"></h4>
+			</div>
+			<div class="modal-body">
+				<p data-bind="text: details"></p>
+			</div>
+			<div class="modal-footer">
+				<!-- ko foreach: alternatives -->
+				<button type="button" class="btn btn-default" data-bind="css: { 'btn-primary': primary }, text: label, click: click, attr: { 'data-ta-clickable': taId }"></button>
+				<!-- /ko -->
+			</div>
+		</div>
+	</div>
+</div>

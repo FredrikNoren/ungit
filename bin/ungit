@@ -1,0 +1,127 @@
+#!/usr/bin/env node
+var startLaunchTime = Date.now();
+var forever = require('forever-monitor');
+var config = require('../source/config');
+var open = require('open');
+var path = require('path');
+var child_process = require('child_process');
+var semver = require('semver');
+var async = require('async');
+
+var BugTracker = require('../source/bugtracker');
+var bugtracker = new BugTracker('launcher');
+var usageStatistics = require('../source/usage-statistics');
+
+process.on('uncaughtException', function(err) {
+  console.error(err.stack.toString());
+  async.parallel([
+    bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'),
+    usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception')
+  ], function() {
+    process.exit();
+  });
+});
+
+var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.js'), {
+  silent: false,
+  minUptime: 2000,
+  max: config.maxNAutoRestartOnCrash,
+  cwd: path.join(process.cwd(), '..'),
+  options: process.argv.slice(2),
+  env: { LANG: 'en_US', LC_ALL: 'C' }
+});
+
+child.on('exit', function (res) {
+  console.log('Stopped keeping ungit alive');
+});
+
+function launch(callback) {
+  var currentUrl = config.urlBase + ':' + config.port;
+  if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
+  else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+  console.log('Browse to ' + currentUrl);
+  if (config.launchBrowser && !config.launchCommand) {
+    open(currentUrl);
+  } else if (config.launchCommand) {
+    var command = config.launchCommand.replace(/%U/g, currentUrl);
+    console.log('Running custom launch command: ' + command);
+    child_process.exec(command, function(err, stdout, stderr) {
+      if (err) {
+        callback(err);
+        return;
+      }
+      if (config.launchBrowser)
+        open(currentUrl);
+    });
+  }
+}
+
+function startupListener(data) {
+  if (data.toString().indexOf('## Ungit started ##') >= 0) {
+    launch(function(err) {
+      if (err) console.log(err);
+    });
+    child.removeListener('stdout', startupListener);
+    var launchTime = (Date.now() - startLaunchTime);
+    console.log('Took ' + launchTime + 'ms to start server.');
+    usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
+  }
+}
+
+child.on('stdout', startupListener);
+
+function verifyGitVersion(callback) {
+  child_process.exec('git --version', function(err, stdout, stderr) {
+
+    if (err) {
+      callback('Can\'t run "git --version". Is git installed and available in your path?');
+    } else {
+      var versionSearch = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout);
+      var requiredVersion = '>=1.8.x';
+      if (!versionSearch || config.gitVersionCheckOverride) {
+        console.log('Failed to parse git version number: ', stdout);
+        console.log('Note that Ungit requires git version ' + requiredVersion);
+        console.log('Start ungit with --gitVersionCheckOverride (or set that option to true in your .ungitrc) to override this check.');
+        return callback();
+      }
+      var version = versionSearch[1];
+      if (!semver.satisfies(version, requiredVersion)) {
+        callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+      } else {
+        callback();
+      }
+    }
+
+  });
+}
+
+function checkIfUngitIsRunning(callback) {
+  // Fastest way to find out if a port is used or not/i.e. if ungit is running
+  var net = require('net');
+  var server = net.createServer(function(c) { });
+  server.listen(config.port, function(err) {
+    server.close(function() {
+      callback(null, false);
+    });
+  });
+  server.on('error', function (e) {
+    if (e.code == 'EADDRINUSE') {
+      callback(null, true);
+    }
+  });
+}
+
+checkIfUngitIsRunning(function(err1, ungitRunning) {
+  if (ungitRunning) {
+    console.log('Ungit server already running');
+    launch(function(err) {
+      if (err) console.log(err);
+    });
+  }
+  else {
+    verifyGitVersion(function(err) {
+      if (err) console.log(err);
+      else child.start();
+    });
+  }
+});

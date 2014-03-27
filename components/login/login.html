@@ -1,0 +1,26 @@
+
+<div class="container">
+  <div data-bind="visible: status() == 'loading'">
+  </div>
+
+  <div class='login col-lg-6' data-bind="visible: status() == 'login'" data-ta-container="login-page">
+    <h1>Login</h1>
+    <!-- ko if: loginError -->
+    <div class="loginError" data-ta-element="login-error" data-bind="text: loginError"></div>
+    <!-- /ko -->
+    <form data-bind="submit: login" role="form">
+
+      <div class="form-group">
+        <label for="inputUsername">Username</label>
+        <input type="text" class="form-control" id="inputUsername" placeholder="Username" data-bind="value: username" data-ta-input="username">
+      </div>
+
+      <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <input type="password" class="form-control" id="inputPassword" placeholder="Password" data-bind="value: password" data-ta-input="password">
+      </div>
+
+      <input type="submit" class="btn btn-primary" value="Login" data-ta-clickable="submit">
+    </form>
+  </div>
+</div>

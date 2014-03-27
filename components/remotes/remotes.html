@@ -1,0 +1,17 @@
+<div class="btn-group fetchButton">
+	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="click: clickFetch, enable: fetchEnabled">
+		<span class="glyphicon glyphicon-download-alt"></span>
+		<span data-bind="text: fetchLabel"></span>
+		<!-- ko component: fetchingProgressBar --><!-- /ko -->
+	</button>
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="remotes-menu">
+		<span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu" data-ta-container="remotes">
+		<!-- ko foreach: remotes -->
+		<li><a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a></li>
+		<!-- /ko -->
+		<li class="divider"></li>
+		<li><a href="#" data-bind="click: showAddRemoteDialog" data-ta-clickable="show-add-remote-dialog">Add a new remote</a></li>
+	</ul>
+</div>

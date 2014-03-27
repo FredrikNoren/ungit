@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "stash": "stash.html"
+    },
+    "javascript": "stash.js",
+    "css": "stash.css"
+  }
+}

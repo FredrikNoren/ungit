@@ -1,0 +1,86 @@
+// Styles.less
+// This file contains styling that's only used in this app
+
+@import "generic.less";
+
+
+// -- Application specific layout ----
+// Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
+
+.glyphicon-circled {
+	margin-right: 18px;
+	border: 5px solid #686868;
+	border-radius: 100%;
+	padding-bottom: 7px;
+	padding-top: 6px;
+	padding-right: 20px;
+	padding-left: 7px;
+}
+
+.repository-actions {
+	position: absolute;
+	margin-top: 20px;
+	right: 0px;
+	z-index: 30;
+}
+
+.crash {
+	margin-top: 20px;
+}
+
+// -- Application specific styling ----
+
+
+
+.remote-icon {
+	background: url('../images/remoteIcon.png');
+	width: 12px;
+	height: 10px;
+	display: inline-block;
+}
+
+.branch-icon {
+	background: url('../images/branchIcon.png');
+	width: 9px;
+	height: 10px;
+	display: inline-block;
+}
+
+.tag-icon {
+	background: url('../images/tagIcon.png');
+	width: 5px;
+	height: 10px;
+	display: inline-block;
+}
+
+.ui-autocomplete {
+	background: rgba(200, 210, 230, 1);
+	box-shadow: 13px 13px 0px rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+	margin-top: 3px;
+	position: absolute;
+	display: block;
+	left: 0px;
+	top: 0px;
+	z-index: 100;
+	list-style: none;
+	padding-left: 0px;
+	margin-left: 0px;
+	padding: 3px;
+	.ui-menu-item {
+		list-style-type: none;
+		a {
+			padding: 2px;
+			padding-left: 4px;
+			border-radius: 3px;
+			display: block;
+			color: rgba(0, 0, 0, 0.6);
+			cursor: pointer;
+			text-decoration: none;
+			&.ui-state-focus, &.ui-state-active {
+				background: rgba(11, 26, 51, 1);
+				color: #fff;
+			}
+		}
+	}
+}

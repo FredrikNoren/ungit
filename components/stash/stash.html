@@ -1,0 +1,17 @@
+
+<div class="panel panel-default stash" data-bind="visible: visible">
+  <div class="panel-body">
+    <h4>Stashed changes</h4>
+    <div class="list-group" data-bind="foreach: stashedChanges">
+      <div class="list-group-item">
+        <a href="#" data-bind="click: pop">
+          <span class="glyphicon glyphicon-pencil glyphicon-circled pull-left"></span>
+          <h4 class="list-group-item-heading" data-bind="text: title"></h4>
+          <p class="list-group-item-text" data-bind="text: body"></p>
+        </a>
+        <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop">&#x2716;</button>
+          <!-- ko component: stashPopProgressBar --><!-- /ko -->
+      </div>
+    </div>
+  </div>
+</div>

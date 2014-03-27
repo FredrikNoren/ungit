@@ -1,0 +1,9 @@
+
+.stash {
+  z-index: 4;
+  position: relative;
+  margin-left: 20px;
+  margin-right: 20px;
+  top: 30px;
+  background: #55323C;
+}

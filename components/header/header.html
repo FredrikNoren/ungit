@@ -1,0 +1,29 @@
+
+<div class="navbar navbar-default navbar-fixed-top">
+
+  <a data-ta-clickable="home-link" class="backlink" href="/#/">
+    <span class="glyphicon glyphicon-arrow-left glyphicon-circled" data-bind="css: { 'glyph-shown': showBackButton }"></span>
+    <img src="images/logo.png">
+  </a>
+
+  <div class="form-container">
+    <form class="path-input-form" data-bind="submit: submitPath">
+      <input data-ta-input="navigation-path" type="text" class="form-control input-lg" data-bind="value: path, autocomplete: path" placeholder="Enter path to repository">
+      <button type="button" class="add-to-repolist btn btn-default" data-bind="visible: showAddToRepoListButton, click: addCurrentPathToRepoList">
+        <span class="glyphicon glyphicon-plus"></span>
+      </button>
+    </form>
+  </div>
+  
+  <div class="toolbar">
+    <button class="btn btn-default refresh-button" data-bind="click: refresh">
+      <span class="glyphicon glyphicon-refresh"></span>
+      <!-- ko component: refreshingProgressBar --><!-- /ko -->
+    </button>
+  </div>
+
+  <div class="arrowUp"></div>
+  <div class="version" data-bind="text: currentVersion"></div>
+</div>
+
+<div class="navbarPadder"></div>

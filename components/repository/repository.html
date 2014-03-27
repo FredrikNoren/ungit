@@ -1,0 +1,26 @@
+<div class="repository-view animated fadeInLeft" data-ta-container="repository-view">
+
+  <!-- ko component: gitErrors --><!-- /ko -->
+
+  <!-- ko component: stash --><!-- /ko -->
+
+  <!-- ko component: staging --><!-- /ko -->
+
+  <!-- ko if: staging.inRebase -->
+  <h2 class="text-muted">Rebase in progress <small>resolve conflicts to continue</small></h2>
+  <!-- /ko -->
+  <!-- ko if: staging.inMerge -->
+  <h2 class="text-muted">Merge in progress <small>resolve conflicts to continue</small></h2>
+  <!-- /ko -->
+
+  <!-- ko if: showLog -->
+
+  <div class="repository-actions">
+    <!-- ko component: remotes --><!-- /ko -->
+  </div>
+  
+  <!-- ko component: graph --><!-- /ko -->
+
+  <!-- /ko -->
+
+</div>
