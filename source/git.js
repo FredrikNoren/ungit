@@ -365,7 +365,7 @@ git.updateIndexFromFileList = function(repoPath, files) {
   return task;
 }
 
-git.commit = function(repoPath, amend, message, files) {
+git.commit = function(repoPath, amend, message, files, author) {
   var task = new GitTask();
 
   if (message === undefined)
@@ -377,7 +377,7 @@ git.commit = function(repoPath, amend, message, files) {
   git.updateIndexFromFileList(repoPath, files)
     .fail(task.setResult)
     .done(function() {
-      git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
+      git('commit ' + (amend ? '--amend' : '') + (author ? '--author="'+author+'"' : '') + ' --file=- ', repoPath)
         .always(task.setResult)
         .started(function(process) {
           process.stdin.end(message);
