@@ -260,6 +260,23 @@ exports.registerApi = function(env) {
       });
   });
 
+  app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('log --decorate=full --pretty=fuller --parents --max-count=1', req.param('path'))
+      .parser(gitParser.parseGitLog)
+      .always(function(err, log) {
+        if (err) {
+          if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+            res.json([]);
+          else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+            res.json([]);
+          else
+            res.json(400, err);
+        } else {
+          res.json(log);
+        }
+      });
+  });
+
   app.get(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
     git('branch', req.param('path'))
       .parser(gitParser.parseGitBranches)

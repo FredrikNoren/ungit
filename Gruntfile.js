@@ -286,6 +286,8 @@ module.exports = function(grunt) {
         async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
+          // And grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/167 is resolved
+          if (dep == 'grunt-browserify') return callback();
 
           bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
         })
