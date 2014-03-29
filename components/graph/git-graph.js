@@ -145,7 +145,8 @@ GitGraphViewModel.prototype.setNodesFromLog = function(nodesData) {
   var nodeVMs = [];
   nodesData.forEach(function(nodeData) {
     var nodeViewModel = self.getNode(nodeData.sha1);
-    nodeViewModel.setData(nodeData);
+    // Only set the data for the node once (since nodes never change)
+    if (!nodeViewModel.isInited) nodeViewModel.setData(nodeData);
     nodeVMs.push(nodeViewModel);
     if (nodeData.refs) {
       var refVMs = nodeData.refs.map(function(ref) {

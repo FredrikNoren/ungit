@@ -17,6 +17,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.server = graph.server;
   this.sha1 = sha1;
 
+  this.isInited = false;
   
   this.boxDisplayX = ko.computed(function() {
     return self.x();
@@ -141,6 +142,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.numberOfAddedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][0] : 0);
   this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
   this.commitDiff(components.create('commitDiff', {fileLineDiffs: args.fileLineDiffs, sha1: this.sha1, repoPath: this.graph.repoPath, server: this.server }));
+  this.isInited = true;
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
