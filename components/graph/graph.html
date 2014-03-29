@@ -22,10 +22,10 @@
               <div class="body" data-bind="text: body, visible: showBody"></div>
               <div class="text-muted nodeSummaryContainer">
                 <span data-bind="text: authorDateFromNow"></span> | 
-                <a href="#" data-bind="click: selected, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }">
+                <span data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout }">
                   <span class='linesAdded'>+<span data-bind="text: getAdded()" data-ta-clickable="totalAdded"></span></span> 
                   <span class='linesDeleted'>-<span data-bind="text: getRemoved()"></span></span>
-                </a> | 
+                </span> | 
                 <span data-bind="text: sha1.substr(0, 8)"></span>
               </div>
             </div>
