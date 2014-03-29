@@ -20,15 +20,23 @@
                 <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
               </div>
               <div class="body" data-bind="text: body, visible: showBody"></div>
-              <div class="text-muted"><span data-bind="text: authorDateFromNow"></span> | <span data-bind="text: sha1.substr(0, 8)"></span></div>
+              <div class="text-muted nodeSummaryContainer">
+                <span data-bind="text: authorDateFromNow"></span> | 
+                <span class='linesAdded'>+<span data-bind="text: numberOfAddedLines"></span></span> 
+                <span class='linesDeleted'>-<span data-bind="text: numberOfRemovedLines"></span></span>
+                 | 
+                <span data-bind="text: sha1.substr(0, 8)"></span>
+              </div>
             </div>
+            <div data-bind="visible: selected() || nodeIsMousehover(), component: commitDiff"></div>
           </div>
         </div>
       </div>
 
       <div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
         click: selected,
-        style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }">
+        style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }"
+        data-ta-clickable="node-clickable">
       </div>
 
       <div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">

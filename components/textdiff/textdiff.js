@@ -11,6 +11,7 @@ var TextDiffViewModel = function(args) {
   this.repoPath = args.repoPath;
   this.server = args.server;
   this.diffs = ko.observable();
+  this.sha1 = args.sha1;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -18,7 +19,7 @@ TextDiffViewModel.prototype.updateNode = function(parentElement) {
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  self.server.get('/diff', { file: self.filename, path: self.repoPath}, function(err, diffs) {
+  self.server.get('/diff', { file: self.filename, path: self.repoPath, sha1: self.sha1 ? self.sha1 : '' }, function(err, diffs) {
     if (err) {
       if (err.errorCode == 'no-such-file') {
         // The file existed before but has been removed, but we're trying to get a diff for it
@@ -43,7 +44,7 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
       );
     });
     self.diffs(newDiffs);
-    callback();
+    if (callback) callback();
   });
 }
 

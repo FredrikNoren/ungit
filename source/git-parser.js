@@ -140,7 +140,7 @@ exports.parseGitLog = function(data) {
   var currentCommmit;
   var parseCommitLine = function(row) {
     if (!row.trim()) return;
-    currentCommmit = { refs: [] };
+    currentCommmit = { refs: [], fileLineDiffs: [] };
     var ss = row.split('(');
     var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
@@ -165,6 +165,10 @@ exports.parseGitLog = function(data) {
     }
   }
   var parseCommitMessage = function(row, index) {
+    if (/[\d-]+\t[\d-]+\t.+/g.test(rows[index + 1])) {
+      parser = parseFileChanges;
+      return;
+    }
     if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
       parser = parseCommitLine;
       return;
@@ -173,11 +177,26 @@ exports.parseGitLog = function(data) {
     else currentCommmit.message = '';
     currentCommmit.message += row.trim();
   }
+  var parseFileChanges = function(row, index) {
+    if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
+      var total = [0, 0, 'Total'];
+      for (var n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
+        var fileLineDiff = currentCommmit.fileLineDiffs[n];
+        total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0]);
+        total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1]);
+      }
+      currentCommmit.fileLineDiffs.splice(0,0, total);
+      parser = parseCommitLine;
+      return;
+    }
+    currentCommmit.fileLineDiffs.push(row.replace(/\t/g, ' ').split(' '));
+  }
   var parser = parseCommitLine;
   var rows = data.split('\n');
   rows.forEach(function(row, index) {
     parser(row, index);
   });
+
   commits.forEach(function(commit) { commit.message = (typeof commit.message) === 'string' ? commit.message.trim() : ''; });
   return commits;
 };

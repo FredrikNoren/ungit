@@ -169,13 +169,13 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.diffFile(req.param('path'), req.param('file'))
+    git.diffFile(req.param('path'), req.param('file'), req.param('sha1'))
       .always(jsonResultOrFail.bind(null, res));
   });
 
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
-    if (req.query.version == 'previous') {
-      git.binaryFileContentAtHead(req.query.path, req.query.filename)
+    if (req.query.version !== 'current') {
+      git.binaryFileContent(req.query.path, req.query.filename, req.query.version)
         .always(function(err, result) {
           res.type(path.extname(req.query.filename));
           if (err) res.json(400, err); 
@@ -244,7 +244,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git('log --decorate=full --pretty=fuller --all --parents ' + limit, req.param('path'))
+    git('log --decorate=full --pretty=fuller --all --parents --numstat ' + limit, req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {

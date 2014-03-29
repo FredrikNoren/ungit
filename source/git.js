@@ -230,13 +230,13 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.binaryFileContentAtHead = function(repoPath, filename) {
-  return git('show HEAD:' + filename, repoPath)
+git.binaryFileContent = function(repoPath, filename, version) {
+  return git('show ' + version + ':' + filename, repoPath)
         .encoding('binary');
 }
 
 
-git.diffFile = function(repoPath, filename) {
+git.diffFile = function(repoPath, filename, sha1) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -245,12 +245,18 @@ git.diffFile = function(repoPath, filename) {
     .done(function(status) {
       var file = status.files[filename];
       var filePath = path.join(repoPath, filename);
-      if (!file) {
+      if (!file && !sha1) {
         if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
         // If the file is new or if it's a directory, i.e. a submodule
-      } else if (!file.isNew || fs.lstatSync(filePath).isDirectory()) {
-        git('diff HEAD -- "' + filename.trim() + '"', repoPath)
+      } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
+        var gitCommand;
+        if (sha1) {
+          gitCommand = 'diff ' + sha1 + '^@ "' + filename.trim() + '"';
+        } else {
+          gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
+        }
+        git(gitCommand, repoPath)
           .parser(gitParser.parseGitDiff)
           .always(task.setResult);
       } else {

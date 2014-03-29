@@ -12,16 +12,17 @@ var ImageDiffViewModel = function(args) {
   this.repoPath = args.repoPath;
   this.isNew = ko.observable(false);
   this.isRemoved = ko.observable(false);
+  this.sha1 = args.sha1;
   this.state = ko.computed(function() {
     if (self.isNew()) return 'new';
     if (self.isRemoved()) return 'removed';
     return 'changed';
   });
   this.oldImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=previous';
+    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1 + '^': 'HEAD');
   });
   this.newImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=current';
+    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
   });
 }
 ImageDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -30,4 +31,9 @@ ImageDiffViewModel.prototype.updateNode = function(parentElement) {
 ImageDiffViewModel.prototype.invalidateDiff = function(callback) {
   callback();
 }
-
+ImageDiffViewModel.prototype.newImageError = function(data, event) {
+  this.isRemoved(true);
+}
+ImageDiffViewModel.prototype.oldImageError = function(data, event) {
+  this.isNew(true);
+}
