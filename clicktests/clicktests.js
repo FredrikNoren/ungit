@@ -183,7 +183,7 @@ test('Should be able to add a new file to .gitignore', function(done) {
 });
 
 test('Test commit diff between git commit', function(done) {
-  helpers.click(page, '[data-ta-clickable="totalAdded"]');
+  helpers.click(page, '[data-ta-clickable="node-clickable"]');
   helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
   helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
     setTimeout(function() {                           // let it finish making api call
