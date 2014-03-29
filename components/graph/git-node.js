@@ -54,6 +54,8 @@ var GitNodeViewModel = function(graph, sha1) {
   this.authorName = ko.observable();
   this.authorEmail = ko.observable();
   this.commitDiff = ko.observable();
+  this.numberOfAddedLines = ko.observable();
+  this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
 
   this.index = ko.observable();
@@ -136,6 +138,8 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
+  this.numberOfAddedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][0] : 0);
+  this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
   this.commitDiff(components.create('commitDiff', {fileLineDiffs: args.fileLineDiffs, sha1: this.sha1, repoPath: this.graph.repoPath, server: this.server }));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
@@ -191,10 +195,4 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
-}
-GitNodeViewModel.prototype.getAdded = function() {
-  return this.commitDiff().totalLineDiffs()[0];
-}
-GitNodeViewModel.prototype.getRemoved = function() {
-  return this.commitDiff().totalLineDiffs()[1];
 }
