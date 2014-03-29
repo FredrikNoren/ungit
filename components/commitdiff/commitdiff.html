@@ -1,9 +1,13 @@
-<div data-bind='foreach: commitLineDiffs' class='nodeFilesLineDiffDisplay'>
-  <div class='aFileLineDiffDisplay'>
-    <div class='linesAdded diffNumCell'>+<span data-bind='text: added'></span></div>
-    <div class='linesDeleted diffNumCell'>-<span data-bind='text: removed'></span></div> 
-    <a href='#' data-bind='click: fileNameClick'><div class='fileNameCell' data-bind='text: fileName' data-ta-clickable="commitDiffFileName"></div></a>
-    <div class='subFileDiff' data-bind='visible: showSpecificDiff' data-ta-container="commitLineDiffs">
+<div data-bind="foreach: commitLineDiffs" class="commitdiff">
+  <div class="file"> 
+    <div class="head" data-bind="click: fileNameClick" data-ta-clickable="commitDiffFileName">
+      <span data-bind="text: fileName"></span>
+      <span class="file-stats">
+        (+<span data-bind="text: added"></span> 
+        -<span data-bind="text: removed"></span>)
+      </span>
+    </div>
+    <div class="diff" data-bind="visible: showSpecificDiff" data-ta-container="commitLineDiffs">
       <div class="diffContainer" data-bind="component: specificDiff"></div>
     </div>
   </div>

@@ -39,15 +39,6 @@
       }
       &.hover {
         z-index: 3;
-
-        .logEntryBox > .panel-body {
-          .title {
-            font-size: 1.3em;
-            overflow:auto;
-            white-space: inherit;
-            display: block;
-          }
-        }
       }
 
       .logEntryBox > .panel-body {
@@ -73,9 +64,7 @@
 
         .title {
           font-size: 1.3em;
-          overflow:hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
+          white-space: break-word;
           display: block;
         }
 
@@ -244,15 +233,6 @@
 }
 
 @media (min-width: @screen-lg-min) {
-}
-
-.linesAdded {
-  color: #43cc63;
-}
-
-.linesDeleted {
-  color: #cc4365;
-  margin-left: 10px;
 }
 
 .nodeSummaryContainer {

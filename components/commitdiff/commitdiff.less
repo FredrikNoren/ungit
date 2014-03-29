@@ -1,20 +1,28 @@
-.diffNumCell {
- float:left;
- display: table-cell;
- width: 45px;
-}
 
-.fileNameCell {
-  display: table-cell;
-  float: left;
-  word-wrap: break-word;
-}
-
-.nodeFilesLineDiffDisplay {
-  display: table;
+.commitdiff {
   width: 100%;
+  .file {
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 3px;
+    .head {
+      display: block;
+      cursor: pointer;
+      padding: 3px;
+      padding-left: 6px;
+      padding-right: 6px;
+      color: rgba(255, 255, 255, 0.79);
+      word-wrap: break-word;
+      .file-stats {
+        color: rgba(201, 255, 132, 0.36);
+      }
+    }
+    .diff {
+      background: rgba(0, 0, 0, 0.11);
+      .textDiff {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 }
 
-.aFileLineDiffDisplay {
-  display: table-row;
-}
