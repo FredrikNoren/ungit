@@ -252,7 +252,7 @@ git.diffFile = function(repoPath, filename, sha1) {
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
         var gitCommand;
         if (sha1) {
-          gitCommand = 'diff ' + sha1 + '^! -- "' + filename.trim() + '"';
+          gitCommand = 'diff ' + sha1  + (/^win/.test(process.platform) ? '^^' : '^') + '! -- "' + filename.trim() + '"';
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
