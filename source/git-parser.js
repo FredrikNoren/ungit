@@ -90,7 +90,7 @@ exports.parseGitDiff = function(text) {
         }
       }
     }
-    diff.lines = diff_lines;
+    diff.lines = diff_lines.length > 0 ? diff_lines : [[0, 0, "<There are no changes>"]];
 
     diffs.push(diff);
   }
