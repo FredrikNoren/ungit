@@ -12,7 +12,7 @@ var addressParser = require('./address-parser');
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
-var isWindow = /^win/.test(process.platform);
+var isWindows = /^win/.test(process.platform);
 
 var git = function(command, repoPath, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
@@ -253,7 +253,7 @@ git.diffFile = function(repoPath, filename, sha1) {
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
         var gitCommand;
         if (sha1) {
-          gitCommand = 'diff ' + sha1  + (isWindow ? '^^' : '^') + '! -- "' + filename.trim() + '"';
+          gitCommand = 'diff ' + sha1  + (isWindows ? '^^' : '^') + '! -- "' + filename.trim() + '"';
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
