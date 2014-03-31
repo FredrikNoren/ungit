@@ -182,14 +182,18 @@ exports.parseGitLog = function(data) {
       var total = [0, 0, 'Total'];
       for (var n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
         var fileLineDiff = currentCommmit.fileLineDiffs[n];
-        total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0]);
-        total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1]);
+        if (!isNaN(parseInt(fileLineDiff[0], 10))) {
+          total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
+        }
+        if (!isNaN(parseInt(fileLineDiff[1], 10))) {
+          total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
+        }
       }
       currentCommmit.fileLineDiffs.splice(0,0, total);
       parser = parseCommitLine;
       return;
     }
-    currentCommmit.fileLineDiffs.push(row.replace(/\t/g, ' ').split(' '));
+    currentCommmit.fileLineDiffs.push(row.split('\t'));
   }
   var parser = parseCommitLine;
   var rows = data.split('\n');
