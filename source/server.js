@@ -273,7 +273,7 @@ app.get('/api/ping', function(req, res) {
 });
 
 function getUserHome() {
-  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || "/tmp";
 }
 var userConfigPath = path.join(getUserHome(), '.ungitrc');
 function readUserConfig(callback) {
