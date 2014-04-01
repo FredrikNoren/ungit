@@ -178,7 +178,7 @@ exports.parseGitLog = function(data) {
     currentCommmit.message += row.trim();
   }
   var parseFileChanges = function(row, index) {
-    if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
+    if (rows.length === index + 1 || rows[index + 1] && rows[index + 1].indexOf('commit ') === 0) {
       var total = [0, 0, 'Total'];
       for (var n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
         var fileLineDiff = currentCommmit.fileLineDiffs[n];
