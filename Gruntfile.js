@@ -33,15 +33,15 @@ module.exports = function(grunt) {
           'public/source/main.js:ungit-main',
           'source/utils/vector2.js:ungit-vector2',
           'source/address-parser.js:ungit-address-parser',
-          'knockout:',
-          'lodash:',
-          'hasher:',
-          'crossroads:',
-          'async:',
-          'moment:',
-          'blueimp-md5:',
-          'color:',
-          'signals:'
+          'node_modules/knockout:knockout',
+          'node_modules/lodash:lodash',
+          'node_modules/hasher:hasher',
+          'node_modules/crossroads:crossroads',
+          'node_modules/async:async',
+          'node_modules/moment:moment',
+          'node_modules/blueimp-md5:blueimp-md5',
+          'node_modules/color:color',
+          'node_modules/signals:signals'
         ]
       },
       dist: {
@@ -133,7 +133,7 @@ module.exports = function(grunt) {
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation        
+        '-W069': true, // ignore ['HEAD'] is better written in dot notation
       },
       web: {
         options: {
@@ -283,7 +283,7 @@ module.exports = function(grunt) {
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
-        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
+        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
 
@@ -294,7 +294,7 @@ module.exports = function(grunt) {
         grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
         done();
       });
-      
+
     });
   });
 
