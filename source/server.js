@@ -16,6 +16,7 @@ var signals = require('signals');
 var os = require('os');
 var cache = require('./utils/cache');
 var UngitPlugin = require('./ungit-plugin');
+var pathHelper = require('./utils/path-helper.js');
 
 process.on('uncaughtException', function(err) {
   winston.error(err.stack ? err.stack.toString() : err.toString());
@@ -110,6 +111,18 @@ var ensurePathExists = function(req, res, next) {
     next();
   }
 }
+var restrictToDirectory = function(req, res, next) {
+  var path = req.param('path');
+  if (path) {
+    req.params.path = pathHelper.restrict(path);
+  }
+  next();
+}
+var ensurePathOk = function(req, res, next) {
+  ensurePathExists(req,res,function(){
+    restrictToDirectory(req,res,next);
+  })
+}
 
 var ensureAuthenticated = function(req, res, next) { next(); };
 
@@ -203,6 +216,8 @@ var apiEnvironment = {
   server: server,
   ensureAuthenticated: ensureAuthenticated,
   ensurePathExists: ensurePathExists,
+  restrictToDirectory: restrictToDirectory,
+  ensurePathOk: ensurePathOk,
   git: require('./git'),
   config: config,
   pathPrefix: gitApi.pathPrefix,
@@ -304,13 +319,13 @@ app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
 });
 
 
-app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
+app.get('/api/fs/exists', ensureAuthenticated, restrictToDirectory, function(req, res) {
   res.json(fs.existsSync(req.param('path')));
 });
 
-app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
+app.get('/api/fs/listDirectories', ensureAuthenticated, restrictToDirectory, function(req, res) {
   var dir = req.query.term.trim();
-  
+
   readUserConfig(function(err, userconfig) {
     if (err) res.json(400, err);
     else if (dir) {
@@ -326,6 +341,7 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
               callback(!err && stat && stat.isDirectory());
             });
           }, function(filteredFiles) {
+            pathHelper.strip_restriction(filteredFiles);
             res.json(filteredFiles);
           });
         }
