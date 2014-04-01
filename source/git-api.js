@@ -228,7 +228,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.commit(req.param('path'), req.param('amend'), req.param('message'), req.param('files'))
+    git.commit(req.param('path'), req.param('amend'), req.param('message'), req.param('files'), (config.authors && config.authors[req.user] ? config.authors[req.user] : undefined))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')));

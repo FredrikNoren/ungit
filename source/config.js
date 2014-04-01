@@ -34,6 +34,9 @@ var defaultConfig = {
   // Map of username/passwords which are granted access.
   users: undefined,
 
+  // Map of username/authors used in commits with "--author"
+  authors: undefined,
+
   // Set to false to show rebase and merge on drag and drop on all nodes.
   showRebaseAndMergeOnlyOnRefs: true,
 
