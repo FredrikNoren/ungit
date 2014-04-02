@@ -507,7 +507,7 @@ exports.registerApi = function(env) {
     }
   });
 
-  app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
+  app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, restrictToDirectory, function(req, res) {
     var dir = req.param('dir');
     if (!dir) {
       return res.json(400, { errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });

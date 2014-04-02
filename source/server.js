@@ -112,15 +112,17 @@ var ensurePathExists = function(req, res, next) {
   }
 }
 var restrictToDirectory = function(req, res, next) {
-  var path = req.param('path');
-  if (path) {
-    req.params.path = pathHelper.restrict(path);
+  if (req.param('path')) {
+    req.params.path = pathHelper.restrict(req.param('path'));
+  }
+  if (req.query.term) {
+    req.query.term = pathHelper.restrict(req.query.term.trim());
   }
   next();
 }
 var ensurePathOk = function(req, res, next) {
-  ensurePathExists(req,res,function(){
-    restrictToDirectory(req,res,next);
+  restrictToDirectory(req,res,function(){
+    ensurePathExists(req,res,next);
   })
 }
 
