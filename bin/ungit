@@ -76,7 +76,7 @@ function verifyGitVersion(callback) {
     if (err) {
       callback('Can\'t run "git --version". Is git installed and available in your path?');
     } else {
-      var versionSearch = /.*(\d+[.]\d+[.]\d+).*/.exec(stdout);
+      var versionSearch = /.*?(\d+[.]\d+[.]\d+).*/.exec(stdout);
       var requiredVersion = '>=1.8.x';
       if (!versionSearch || config.gitVersionCheckOverride) {
         console.log('Failed to parse git version number: ', stdout);
