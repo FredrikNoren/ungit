@@ -10,6 +10,7 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
+var pathHelper = require('./utils/path-helper.js');
 
 exports.pathPrefix = '';
 var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
