@@ -280,6 +280,8 @@ module.exports = function(grunt) {
         async.map.bind(null, Object.keys(tempPackageJson.dependencies), function(dep, callback) {
           // Keep forever-monitor at 1.1.0 until https://github.com/nodejitsu/forever-monitor/issues/38 is fixed
           if (dep == 'forever-monitor') return callback();
+          // Socket.io 1.0.0-pre didn't work with phantomjs, so keep it at 0.9.16 for now
+          if (dep == 'socket.io') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),

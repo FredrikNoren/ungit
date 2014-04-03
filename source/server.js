@@ -16,6 +16,8 @@ var signals = require('signals');
 var os = require('os');
 var cache = require('./utils/cache');
 var UngitPlugin = require('./ungit-plugin');
+var serveStatic = require('serve-static');
+var bodyParser = require('body-parser');
 
 process.on('uncaughtException', function(err) {
   winston.error(err.stack ? err.stack.toString() : err.toString());
@@ -83,8 +85,7 @@ var noCache = function(req, res, next) {
 }
 app.use(noCache);
 
-app.use(express.json());
-app.use(express.urlencoded());
+app.use(bodyParser());
 
 if (config.autoShutdownTimeout) {
   var autoShutdownTimeout;
@@ -114,8 +115,10 @@ var ensurePathExists = function(req, res, next) {
 var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {
-  app.use(express.cookieParser());
-  app.use(express.session({ secret: 'ungit' }));
+  var cookieParser = require('cookie-parser');
+  app.use(cookieParser());
+  var session = require('express-session');
+  app.use(session({ secret: 'ungit' }));
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -174,7 +177,7 @@ app.get('/', function(req, res) {
   });
 });
 
-app.use(express.static(__dirname + '/../public'));
+app.use(serveStatic(__dirname + '/../public'));
 
 // Socket-IO
 var socketIO = require('socket.io');

@@ -26,9 +26,6 @@ exports.registerApi = function(env) {
   if (config.dev)
     temp.track();
 
-  app.use(express.json());
-  app.use(express.urlencoded());
-
   if (io) {
     io.sockets.on('connection', function (socket) {
       socket.on('disconnect', function () {

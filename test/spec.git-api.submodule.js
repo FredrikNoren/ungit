@@ -10,6 +10,7 @@ var common = require('./common.js');
 var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
+app.use(require('body-parser')());
 
 restGit.registerApi({ app: app, config: { dev: true } });
 
