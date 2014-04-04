@@ -2,7 +2,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
 
-var imageFileExtensions = ['PNG', 'JPG', 'BMP', 'GIF'];
+var imageFileExtensions = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG'];
 
 var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
