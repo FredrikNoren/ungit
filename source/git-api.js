@@ -12,7 +12,7 @@ var os = require('os');
 var mkdirp = require('mkdirp');
 
 exports.pathPrefix = '';
-var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF'];
+var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF', '.JPEG'];
 
 exports.registerApi = function(env) {
   var app = env.app;
