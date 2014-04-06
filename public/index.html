@@ -27,13 +27,26 @@
 
 <script type="text/javascript">ungit = {}</script>
 <script type="text/javascript" src="/serverdata.js"></script>
+<script type="text/javascript">	
+	if (ungit.config.bugtracking) {
+		console.log('Initing TrackerJS');
+
+	  var _trackJs = { 
+	    customer: '8e1371b22a2144148d5731f084e589b8',
+	    userId: ungit.userHash,
+	  };
+	}
+</script>
+<script type="text/javascript" src="/js/tracker.js"></script>
 <script type="text/javascript" src="/js/raven.min.js"></script>
 <script type="text/javascript">
 	console.log('App version: ' + ungit.version);
 	if (ungit.config.bugtracking) {
-		console.log('Initing bugtracking');
+		console.log('Initing raven');
 
-    	Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
+		var trackerJSErrorHandler = window.onerror;
+
+    Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
 			logger: 'root',
 			tags: {
 				version: ungit.version,
@@ -45,6 +58,12 @@
 		Raven.setUser({
 			id: ungit.userHash
 		});
+
+		var ravenErrorHandler = window.onerror;
+		window.onerror = function() {
+			trackerJSErrorHandler.apply(null, arguments);
+			ravenErrorHandler.apply(null, arguments);
+		}
 
     }
 </script>
