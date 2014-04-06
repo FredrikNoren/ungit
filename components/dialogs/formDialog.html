@@ -5,7 +5,8 @@
 			<div class="modal-header">
 				<h4 class="modal-title" data-bind="text: title"></h4>
 			</div>
-			<form class="form-horizontal" data-bind="submit: submit">
+			<!-- Autocomplete is off here because of https://github.com/FredrikNoren/ungit/issues/363 -->
+			<form class="form-horizontal" data-bind="submit: submit" autocomplete="off">
 				<div class="modal-body" data-bind="foreach: items">
 					<div class="form-group">
 						<label data-bind="text: name, attr: { for: name }" class="col-lg-2 control-label"></label>
