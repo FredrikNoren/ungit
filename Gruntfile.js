@@ -90,7 +90,8 @@ module.exports = function(grunt) {
         reporter: 'spec'
       },
 
-      all: { src: 'test/*.js' }
+      all: { src: 'test/*.js' },
+      performance: { src: 'test/performance/*.js' }
     },
     // Plato code analysis
     plato: {
@@ -321,6 +322,7 @@ module.exports = function(grunt) {
 
   // Run tests
   grunt.registerTask('unittest', ['simplemocha']);
+  grunt.registerTask('perftest', ['simplemocha:performance']);
   grunt.registerTask('test', ['unittest', 'clicktest']);
 
   // Create desktop (node-webkit) release
