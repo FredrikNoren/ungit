@@ -321,7 +321,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
-  grunt.registerTask('unittest', ['simplemocha']);
+  grunt.registerTask('unittest', ['simplemocha:all']);
   grunt.registerTask('perftest', ['simplemocha:performance']);
   grunt.registerTask('test', ['unittest', 'clicktest']);
 
