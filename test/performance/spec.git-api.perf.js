@@ -18,7 +18,7 @@ console.log('--Error or interrupt during this test may leave large files at the 
 console.log('--Manual clean up may require in such cases.');
 
 describe('performance testing', function () {
-  this.timeout(60000);
+  this.timeout(120000);
 
   var testDir;
   before(function(done) {
