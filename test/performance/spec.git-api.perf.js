@@ -5,6 +5,7 @@ var express = require('express');
 var restGit = require('../../source/git-api');
 var path = require('path');
 var common = require('../common.js');
+var cliColor = require('ansi-color');
 
 var app = express();
 app.use(require('body-parser')());
@@ -14,8 +15,8 @@ restGit.registerApi({ app: app, config: { dev: true } });
 var req = request(app);
 
 console.log('\n');
-console.log('--Error or interrupt during this test may leave large files at the test directory.');
-console.log('--Manual clean up may require in such cases.');
+console.log(cliColor.set('--Error or interrupt during this test may leave large files at the test directory.', 'red'));
+console.log(cliColor.set('--Manual clean up may require in such cases.', 'red'));
 
 describe('performance testing', function () {
   this.timeout(120000);
@@ -36,7 +37,7 @@ describe('performance testing', function () {
   var fiveMbFile = 'mediumFile.txt';
   var tenMbFile = 'largeFile.txt';
 
-  var generateTestFiles = function() {
+  var generateInitialTestFiles = function() {
     testFileGenerator.generateTestFile(path.join(testDir, oneMbFile), 1024);
     testFileGenerator.generateTestFile(path.join(testDir, fiveMbFile), 5120);
     testFileGenerator.generateTestFile(path.join(testDir, tenMbFile), 10240);
@@ -44,11 +45,11 @@ describe('performance testing', function () {
 
   // Need a more realistic way to alter file as this doesn't have 100% test coverage
   var changeTestFiles = function() {
-    generateTestFiles();
+    generateInitialTestFiles();
   }
 
   it('create test files', function(done) {
-    generateTestFiles();
+    generateInitialTestFiles();
     common.post(req, '/commit', { path: testDir, message: 'whateve', files: [oneMbFile, fiveMbFile, tenMbFile] }, function() {
       changeTestFiles();
       done();
@@ -67,7 +68,24 @@ describe('performance testing', function () {
     performanceHelper.runner(req, '/diff', { path: testDir, file: fiveMbFile }, 10, done);
   });
 
-  it('git diff performance test on 10mb File', function(done) {
-    performanceHelper.runner(req, '/diff', { path: testDir, file: tenMbFile }, 10, done);
+  // it('git diff performance test on 10mb File', function(done) {
+  //   performanceHelper.runner(req, '/diff', { path: testDir, file: tenMbFile }, 10, done);
+  // });
+
+  it('large file changes that will break git log --numstat parsing', function(done) {
+    var fileNames = [];
+    
+    for(var n = 0; n < 300; n++) {
+      var fileName = testFileGenerator.getRandomString(10);
+      testFileGenerator.generateTestFile(path.join(testDir, fileName), 1024);
+      fileNames.push(fileName);
+    }
+
+    common.post(req, '/commit', { path: testDir, message: 'whateve', files: [oneMbFile, fiveMbFile, tenMbFile] }, function() {
+      for(var n = 0; n < fileNames.length; n++) {
+        testFileGenerator.generateTestFile(path.join(testDir, fileName), 1024);
+      }
+      performanceHelper.runner(req, '/log', { path: testDir }, 10, done);
+    });
   });
 });

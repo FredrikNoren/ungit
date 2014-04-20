@@ -24,22 +24,23 @@ var getRandomContent = function(size) {
   var lines = size * linesPerKBytes;
 
   for(var n = 0; n < lines; n++) {
-    file += getRandomString() + '\n';
+    file += getRandomString(kbytes / linesPerKBytes - 1) + '\n';
   }
 
   return file;
 }
 
 // generate a single random [kbytes] / [linesPerKBytes] bytes long string
-var getRandomString = function() {
+var getRandomString = function(size) {
   var str = '';
 
-  for(var n = 0; n < kbytes / linesPerKBytes - 1; n++) {
+  for(var n = 0; n < size; n++) {
     str += chars[getRandom()];
   }
 
   return str;
 }
+exports.getRandomString = getRandomString;
 
 // generate random int
 var  getRandom = function() {
