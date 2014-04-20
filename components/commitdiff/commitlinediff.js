@@ -23,9 +23,13 @@ CommitLineDiff.prototype.fileNameClick = function(data, event) {
     this.showSpecificDiff(false);
   } else {
     var self = this;
-    this.specificDiff().invalidateDiff(function() {
+    if (this.type() == 'textdiff' && !this.specificDiff().diffs()) {
+      this.specificDiff().invalidateDiff(function() {
+        self.showSpecificDiff(true);
+      });      
+    } else {
       self.showSpecificDiff(true);
-    });
+    }
   }
   event.stopImmediatePropagation();
 };
