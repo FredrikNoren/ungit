@@ -15,7 +15,11 @@ var StagingViewModel = function(server, repoPath) {
   this.repoPath = repoPath;
   this.filesByPath = {};
   this.files = ko.observable([]);
+  this.commitMessageTitleCount = ko.observable(0);
   this.commitMessageTitle = ko.observable();
+  this.commitMessageTitle.subscribe(function(value) {
+    self.commitMessageTitleCount(value.length);
+  });
   this.commitMessageBody = ko.observable();
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);

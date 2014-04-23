@@ -241,7 +241,6 @@ GitGraphViewModel.randomColor = function() {
 
 
 GitGraphViewModel.prototype.setNodes = function(nodes) {
-  nodes.sort(function(a, b) { return b.commitTime().unix() - a.commitTime().unix(); });
   nodes.forEach(function(node, i) { node.index(i); });
   nodes = nodes.slice(0, GitGraphViewModel.maxNNodes);
 
