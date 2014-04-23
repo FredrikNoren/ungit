@@ -118,9 +118,8 @@ GraphActions.Rebase = function(graph, node) {
     if (self.performProgressBar.running()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       (!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
-      !self.node.isAncestor(self.graph.currentActionContext().node()) &&
-      !self.graph.currentActionContext().node().isAncestor(self.node) &&
-      self.graph.currentActionContext().current();
+      self.graph.currentActionContext().current() &&
+      self.graph.currentActionContext().node() != self.node;
   });
 }
 inherits(GraphActions.Rebase, GraphActions.ActionBase);
@@ -151,8 +150,7 @@ GraphActions.Merge = function(graph, node) {
     if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       !self.graph.currentActionContext().current() &&
-      self.graph.checkedOutRef().node() == self.node &&
-      !self.node.isAncestor(self.graph.currentActionContext().node());
+      self.graph.checkedOutRef().node() == self.node;
   });
 }
 inherits(GraphActions.Merge, GraphActions.ActionBase);
