@@ -49,11 +49,11 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
         self.newMode(diff.bMode[1]);
 
         newDiffs.push({
-            oldLineNumber: '-',
-            newLineNumber: '-',
-            added: false,
-            removed: false,
-            text: 'Mode changed from ' + self.oldMode() + ' to ' + self.newMode()
+          oldLineNumber: '-',
+          newLineNumber: '-',
+          added: false,
+          removed: false,
+          text: 'Mode changed from ' + self.oldMode() + ' to ' + self.newMode()
         });
       }
     });
