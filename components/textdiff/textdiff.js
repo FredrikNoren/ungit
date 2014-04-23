@@ -12,8 +12,6 @@ var TextDiffViewModel = function(args) {
   this.server = args.server;
   this.diffs = ko.observable();
   this.sha1 = args.sha1;
-  this.oldMode = ko.observable();
-  this.newMode = ko.observable();
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -44,18 +42,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
           });
         }
       );
-      if (diff.aMode && diff.bMode) {
-        self.oldMode(diff.aMode[1]);
-        self.newMode(diff.bMode[1]);
-
-        newDiffs.push({
-            oldLineNumber: '-',
-            newLineNumber: '-',
-            added: false,
-            removed: false,
-            text: 'File permission changed from ' + self.oldMode() + ' to ' + self.newMode()
-        });
-      }
     });
     self.diffs(newDiffs);
     if (callback) callback();
