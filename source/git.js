@@ -14,10 +14,10 @@ var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 var isWindows = /^win/.test(process.platform);
 
-var git = function(command, repoPath, sendToQueue) {
+var git = function(command, repoPath, sendToQueue, args) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
 
-  var task = new GitExecutionTask(command, repoPath);
+  var task = new GitExecutionTask(command, repoPath, args);
 
   if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
@@ -76,12 +76,13 @@ var GitTask = function() {
   }
 }
 
-var GitExecutionTask = function(command, repoPath) {
+var GitExecutionTask = function(command, repoPath, args) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
+  this.parseArgs = args;
 }
 inherits(GitExecutionTask, GitTask);
 GitExecutionTask.prototype.parser = function(parser) {
@@ -160,7 +161,7 @@ var gitQueue = async.queue(function (task, callback) {
         callback(err);
       }
       else {
-        var result = task._parser ? task._parser(stdout) : stdout;
+        var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
         task.setResult(null, result);
         callback();
       }
@@ -237,7 +238,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1) {
+git.diffFile = function(repoPath, filename, sha1, loadAll) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -257,7 +258,7 @@ git.diffFile = function(repoPath, filename, sha1) {
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
-        git(gitCommand, repoPath)
+        git(gitCommand, repoPath, null, [ loadAll ])
           .parser(gitParser.parseGitDiff)
           .always(task.setResult);
       } else {

@@ -22,12 +22,12 @@ exports.parseGitStatus = function(text) {
   return result;
 };
 
-exports.parseGitDiff = function(text) {
-
+exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
+  var loadAll = args[0];
 
-  while(lines.length && lines[0]) {
+  while(lines.length && lines[0] && isLoadMore(loadAll, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0)) {
     var diff = {};
     var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
     diff.aPath = path[1];
@@ -73,7 +73,7 @@ exports.parseGitDiff = function(text) {
     lines.shift();
     var diff_lines = [];
     var originalLine, newLine;
-    while(lines[0] && !/^diff/.test(lines[0])) {
+    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(loadAll, diff_lines.length)) {
       var line = lines.shift();
       if (line.indexOf('@@ ') == 0) {
         var changeGroup = /@@ -(\d+)(,\d+)? [+](\d+)(,\d+)?/.exec(line);
@@ -90,12 +90,25 @@ exports.parseGitDiff = function(text) {
         }
       }
     }
+
+    var unparsedLines = 0;
+    while(lines[0] && !/^diff/.test(lines[0])) {
+      unparsedLines++;
+      lines.shift();
+    }
+
     diff.lines = diff_lines.length > 0 ? diff_lines : [[0, 0, "<There are no changes>"]];
+    diff.unparsedLines = unparsedLines;
 
     diffs.push(diff);
   }
+
   return diffs;
 }
+
+var isLoadMore = function(loadAll, lineCount) {
+  return loadAll === 'true' || lineCount < 50;
+};
 
 var authorRegexp = /([^<]+)<([^>]+)>/;
 var gitLogHeaders = {
