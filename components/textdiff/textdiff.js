@@ -20,7 +20,8 @@ var TextDiffViewModel = function(args) {
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
 }
-TextDiffViewModel.prototype.fullLoad = function() {
+TextDiffViewModel.prototype.fullLoad = function(data, event) {
+  event.stopImmediatePropagation();
   this.loadAll(true);
   this.invalidateDiff();
 }
