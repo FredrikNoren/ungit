@@ -14,10 +14,10 @@ var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 var isWindows = /^win/.test(process.platform);
 
-var git = function(command, repoPath, sendToQueue, args) {
+var git = function(command, repoPath, sendToQueue, parseArgs) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
 
-  var task = new GitExecutionTask(command, repoPath, args);
+  var task = new GitExecutionTask(command, repoPath, parseArgs);
 
   if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
@@ -76,13 +76,13 @@ var GitTask = function() {
   }
 }
 
-var GitExecutionTask = function(command, repoPath, args) {
+var GitExecutionTask = function(command, repoPath, parseArgs) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
-  this.parseArgs = args;
+  this.parseArgs = parseArgs;
 }
 inherits(GitExecutionTask, GitTask);
 GitExecutionTask.prototype.parser = function(parser) {
