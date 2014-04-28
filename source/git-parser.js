@@ -26,7 +26,11 @@ exports.parseGitStatus = function(text) {
 exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
-  var loadAll = args[0];
+  var loadAll = false;
+
+  if (args) {
+    loadAll = args[0];
+  }  
 
   while(lines.length && lines[0] && isLoadMore(loadAll, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0)) {
     var diff = {};
