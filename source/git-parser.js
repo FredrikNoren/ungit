@@ -1,4 +1,5 @@
 var moment = require('moment');
+var initialGitDiffLoadSize = 50;
 
 exports.parseGitStatus = function(text) {
   var result = {};
@@ -107,7 +108,7 @@ exports.parseGitDiff = function(text, args) {
 }
 
 var isLoadMore = function(loadAll, lineCount) {
-  return loadAll === 'true' || lineCount < 50;
+  return loadAll === 'true' || lineCount < initialGitDiffLoadSize;
 };
 
 var authorRegexp = /([^<]+)<([^>]+)>/;
