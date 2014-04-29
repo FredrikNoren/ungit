@@ -1,5 +1,6 @@
 var moment = require('moment');
 var initialGitDiffLoadSize = 50;
+exports.initialGitDiffLoadSize = initialGitDiffLoadSize;
 
 exports.parseGitStatus = function(text) {
   var result = {};

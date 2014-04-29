@@ -18,3 +18,26 @@ describe('git-parser stash show', function () {
     expect(res[0].filename).to.be('New Text Document (2).txt');
   });
 });
+
+describe('git-parse diff on big change', function() {
+  it('diff on big change sould show first 50 lines of changes first', function() {
+    var sampleText = "diff --git a/source/git-parser.js b/source/git-parser.js\nindex 643e964..df31474 100644\n--- a/source/git-parser.js\n+++ b/source/git-parser.js\n@@ -22,12 +22,12 @@ exports.parseGitStatus = function(text) {\n   return result;\n };\n";
+    sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
+    sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
+
+    var res = gitParser.parseGitDiff(sampleText, ['false']);
+    expect(res).to.be.an('array');
+    expect(res.length).to.be(1);
+    expect(res[0].lines.length).to.be(gitParser.initialGitDiffLoadSize);
+    expect(res[0].unparsedLines).to.be(13);
+
+
+    res = gitParser.parseGitDiff(sampleText, ['true']);
+    expect(res).to.be.an('array');
+    expect(res.length).to.be(1);
+    expect(res[0].lines.length).to.be(63);
+    expect(res[0].unparsedLines).to.be(0);
+  });
+
+});
+
