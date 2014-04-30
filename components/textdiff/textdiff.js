@@ -17,6 +17,7 @@ var TextDiffViewModel = function(args) {
   this.totalNumberOfLines = ko.observable(0);
   this.isLoadingAllLines = ko.observable(false);
   this.isShowLoadFullDiffButton = ko.observable(false);
+  this.initialLineDisplayLimit = args.initialLineDisplayLimit ? args.initialLineDisplayLimit : 100;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -26,9 +27,20 @@ TextDiffViewModel.prototype.loadAllLines = function(data, event) {
   this.isLoadingAllLines(true);
   this.invalidateDiff();
 }
+TextDiffViewModel.prototype.getDiffArguments = function() {
+  var args = {};
+  args.file = this.filename;
+  args.path = this.repoPath;
+  args.sha1 = this.sha1 ? this.sha1 : '';
+  args.isLoadingAllLines = this.isLoadingAllLines();
+  args.initialLineDisplayLimit = this.initialLineDisplayLimit;
+
+  return args;
+}
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
-  self.server.get('/diff', { file: self.filename, path: self.repoPath, sha1: self.sha1 ? self.sha1 : '', isLoadingAllLines: this.isLoadingAllLines() }, function(err, diffs) {
+
+  self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
     if (err) {
       if (err.errorCode == 'no-such-file') {
         // The file existed before but has been removed, but we're trying to get a diff for it

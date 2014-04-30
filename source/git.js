@@ -238,7 +238,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines) {
+git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines, initialLineDisplayLimit) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -259,7 +259,7 @@ git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines) {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
         git(gitCommand, repoPath, null)
-          .parser(gitParser.parseGitDiff, { isLoadingAllLines: isLoadingAllLines })
+          .parser(gitParser.parseGitDiff, { isLoadingAllLines: isLoadingAllLines, initialLineDisplayLimit: initialLineDisplayLimit })
           .always(task.setResult);
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
