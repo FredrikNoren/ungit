@@ -238,7 +238,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, loadAll) {
+git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -258,7 +258,7 @@ git.diffFile = function(repoPath, filename, sha1, loadAll) {
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
-        git(gitCommand, repoPath, null, [ loadAll ])
+        git(gitCommand, repoPath, null, [ isLoadingAllLines ])
           .parser(gitParser.parseGitDiff)
           .always(task.setResult);
       } else {
