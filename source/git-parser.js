@@ -26,16 +26,16 @@ exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
   var isLoadingAllLines = false;
-  var initialLineDisplayLimit = 100;
+  var initialDisplayLineLimit = 100;
 
   if (args.isLoadingAllLines) {
     isLoadingAllLines = args.isLoadingAllLines;
   } 
-  if (args.initialLineDisplayLimit) {
-    initialLineDisplayLimit = args.initialLineDisplayLimit;
+  if (args.initialDisplayLineLimit) {
+    initialDisplayLineLimit = args.initialDisplayLineLimit;
   } 
 
-  while(lines.length && lines[0] && isLoadMore(isLoadingAllLines, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0, initialLineDisplayLimit)) {
+  while(lines.length && lines[0] && isLoadMore(isLoadingAllLines, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0, initialDisplayLineLimit)) {
     var diff = {};
     var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
     diff.aPath = path[1];
@@ -81,7 +81,7 @@ exports.parseGitDiff = function(text, args) {
     lines.shift();
     var diff_lines = [];
     var originalLine, newLine;
-    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(isLoadingAllLines, diff_lines.length, initialLineDisplayLimit)) {
+    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(isLoadingAllLines, diff_lines.length, initialDisplayLineLimit)) {
       var line = lines.shift();
       if (line.indexOf('@@ ') == 0) {
         var changeGroup = /@@ -(\d+)(,\d+)? [+](\d+)(,\d+)?/.exec(line);
@@ -114,8 +114,8 @@ exports.parseGitDiff = function(text, args) {
   return diffs;
 }
 
-var isLoadMore = function(isLoadingAllLines, lineCount, initialLineDisplayLimit) {
-  return isLoadingAllLines === 'true' || lineCount < initialLineDisplayLimit;
+var isLoadMore = function(isLoadingAllLines, lineCount, initialDisplayLineLimit) {
+  return isLoadingAllLines === 'true' || lineCount < initialDisplayLineLimit;
 };
 
 var authorRegexp = /([^<]+)<([^>]+)>/;

@@ -17,7 +17,7 @@ var TextDiffViewModel = function(args) {
   this.totalNumberOfLines = ko.observable(0);
   this.isLoadingAllLines = ko.observable(false);
   this.isShowLoadFullDiffButton = ko.observable(false);
-  this.initialLineDisplayLimit = args.initialLineDisplayLimit ? args.initialLineDisplayLimit : 100;
+  this.initialDisplayLineLimit = args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -33,7 +33,7 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   args.path = this.repoPath;
   args.sha1 = this.sha1 ? this.sha1 : '';
   args.isLoadingAllLines = this.isLoadingAllLines();
-  args.initialLineDisplayLimit = this.initialLineDisplayLimit;
+  args.initialDisplayLineLimit = this.initialDisplayLineLimit;
 
   return args;
 }

@@ -25,20 +25,20 @@ describe('git-parse diff on big change', function() {
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
 
-    var res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialLineDisplayLimit: 50});
+    var res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 50});
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(50);
     expect(res[0].totalNumberOfLines).to.be(63);
 
 
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'true', initialLineDisplayLimit: 50});
+    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'true', initialDisplayLineLimit: 50});
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(63);
     expect(res[0].totalNumberOfLines).to.be(63);
 
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialLineDisplayLimit: 100});
+    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 100});
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(63);
@@ -47,7 +47,7 @@ describe('git-parse diff on big change', function() {
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialLineDisplayLimit: 100});
+    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 100});
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(100);
