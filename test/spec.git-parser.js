@@ -5,7 +5,7 @@ var gitParser = require('../source/git-parser');
 describe('git-parser diff', function () {
   it('should work with non-standard diff header line', function() {
     // Not sure what i/ and w/ exactly means (normally it's a/ and /b), but a user was experiened errors when this wasn't allowed.
-    gitParser.parseGitDiff('diff --git i/test w/test', [false]);
+    gitParser.parseGitDiff('diff --git i/test w/test', {isLoadingAllLines: 'false', initialDisplayLineLimit: 50});
   });
 });
 
@@ -47,7 +47,7 @@ describe('git-parse diff on big change', function() {
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 100});
+    res = gitParser.parseGitDiff(sampleText);
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(100);

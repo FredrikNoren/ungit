@@ -25,15 +25,8 @@ exports.parseGitStatus = function(text) {
 exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
-  var isLoadingAllLines = false;
-  var initialDisplayLineLimit = 100;
-
-  if (args.isLoadingAllLines) {
-    isLoadingAllLines = args.isLoadingAllLines;
-  } 
-  if (args.initialDisplayLineLimit) {
-    initialDisplayLineLimit = args.initialDisplayLineLimit;
-  } 
+  var isLoadingAllLines = args && args.isLoadingAllLines ? args.isLoadingAllLines : false;
+  var initialDisplayLineLimit = args && args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
 
   while(lines.length && lines[0] && isLoadMore(isLoadingAllLines, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0, initialDisplayLineLimit)) {
     var diff = {};
