@@ -104,7 +104,7 @@ exports.parseGitDiff = function(text, args) {
     }
 
     diff.lines = diff_lines.length > 0 ? diff_lines : [[0, 0, "<There are no changes>"]];
-    diff.unparsedLines = unparsedLines;
+    diff.totalNumberOfLines = diff.lines.length + unparsedLines;
 
     diffs.push(diff);
   }

@@ -14,8 +14,9 @@ var TextDiffViewModel = function(args) {
   this.sha1 = args.sha1;
   this.oldMode = ko.observable();
   this.newMode = ko.observable();
-  this.unparsedLines = ko.observable(0);
+  this.totalNumberOfLines = ko.observable(0);
   this.loadAll = ko.observable(false);
+  this.isShowLoadFullDiffButton = ko.observable(false);
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -65,7 +66,12 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     });
 
     self.diffs(newDiffs);
-    self.unparsedLines(diffs[0] ? diffs[0].unparsedLines : 0);
+    self.totalNumberOfLines(diffs[0] ? diffs[0].totalNumberOfLines : 0);
+
+    if (self.diffs().length !== self.totalNumberOfLines()) {
+      self.isShowLoadFullDiffButton(true);
+    }
+
     if (callback) callback();
   });
 }
