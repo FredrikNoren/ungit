@@ -68,7 +68,9 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     self.diffs(newDiffs);
     self.totalNumberOfLines(diffs[0] ? diffs[0].totalNumberOfLines : 0);
 
-    if (self.diffs().length !== self.totalNumberOfLines()) {
+    if (self.diffs().length === self.totalNumberOfLines()) {
+      self.isShowLoadFullDiffButton(false);
+    } else {
       self.isShowLoadFullDiffButton(true);
     }
 
