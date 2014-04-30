@@ -27,13 +27,13 @@ exports.parseGitStatus = function(text) {
 exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
-  var loadAll = false;
+  var isLoadingAllLines = false;
 
   if (args) {
-    loadAll = args[0];
+    isLoadingAllLines = args.isLoadingAllLines
   }  
 
-  while(lines.length && lines[0] && isLoadMore(loadAll, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0)) {
+  while(lines.length && lines[0] && isLoadMore(isLoadingAllLines, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0)) {
     var diff = {};
     var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
     diff.aPath = path[1];
@@ -79,7 +79,7 @@ exports.parseGitDiff = function(text, args) {
     lines.shift();
     var diff_lines = [];
     var originalLine, newLine;
-    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(loadAll, diff_lines.length)) {
+    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(isLoadingAllLines, diff_lines.length)) {
       var line = lines.shift();
       if (line.indexOf('@@ ') == 0) {
         var changeGroup = /@@ -(\d+)(,\d+)? [+](\d+)(,\d+)?/.exec(line);
@@ -112,8 +112,8 @@ exports.parseGitDiff = function(text, args) {
   return diffs;
 }
 
-var isLoadMore = function(loadAll, lineCount) {
-  return loadAll === 'true' || lineCount < initialGitDiffLoadSize;
+var isLoadMore = function(isLoadingAllLines, lineCount) {
+  return isLoadingAllLines === 'true' || lineCount < initialGitDiffLoadSize;
 };
 
 var authorRegexp = /([^<]+)<([^>]+)>/;

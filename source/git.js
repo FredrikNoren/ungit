@@ -14,10 +14,10 @@ var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 var isWindows = /^win/.test(process.platform);
 
-var git = function(command, repoPath, sendToQueue, parseArgs) {
+var git = function(command, repoPath, sendToQueue) {
   command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
 
-  var task = new GitExecutionTask(command, repoPath, parseArgs);
+  var task = new GitExecutionTask(command, repoPath);
 
   if (sendToQueue !== false) process.nextTick(git.queueTask.bind(null, task));
 
@@ -76,17 +76,17 @@ var GitTask = function() {
   }
 }
 
-var GitExecutionTask = function(command, repoPath, parseArgs) {
+var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
   this.repoPath = repoPath;
   this.command = command;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
-  this.parseArgs = parseArgs;
 }
 inherits(GitExecutionTask, GitTask);
-GitExecutionTask.prototype.parser = function(parser) {
+GitExecutionTask.prototype.parser = function(parser, parseArgs) {
   this._parser = parser;
+  this.parseArgs = parseArgs;
   return this;
 }
 GitExecutionTask.prototype.encoding = function(encoding) {
@@ -258,8 +258,8 @@ git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines) {
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
-        git(gitCommand, repoPath, null, [ isLoadingAllLines ])
-          .parser(gitParser.parseGitDiff)
+        git(gitCommand, repoPath, null)
+          .parser(gitParser.parseGitDiff, { isLoadingAllLines: isLoadingAllLines })
           .always(task.setResult);
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
