@@ -84,8 +84,9 @@ var GitExecutionTask = function(command, repoPath) {
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
 }
 inherits(GitExecutionTask, GitTask);
-GitExecutionTask.prototype.parser = function(parser) {
+GitExecutionTask.prototype.parser = function(parser, parseArgs) {
   this._parser = parser;
+  this.parseArgs = parseArgs;
   return this;
 }
 GitExecutionTask.prototype.encoding = function(encoding) {
@@ -160,7 +161,7 @@ var gitQueue = async.queue(function (task, callback) {
         callback(err);
       }
       else {
-        var result = task._parser ? task._parser(stdout) : stdout;
+        var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
         task.setResult(null, result);
         callback();
       }
@@ -237,7 +238,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1) {
+git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines, initialDisplayLineLimit) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -257,8 +258,8 @@ git.diffFile = function(repoPath, filename, sha1) {
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
-        git(gitCommand, repoPath)
-          .parser(gitParser.parseGitDiff)
+        git(gitCommand, repoPath, null)
+          .parser(gitParser.parseGitDiff, { isLoadingAllLines: isLoadingAllLines, initialDisplayLineLimit: initialDisplayLineLimit })
           .always(task.setResult);
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {

@@ -166,7 +166,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.diffFile(req.param('path'), req.param('file'), req.param('sha1'))
+    git.diffFile(req.param('path'), req.param('file'), req.param('sha1'), req.param('isLoadingAllLines'), req.param('initialDisplayLineLimit'))
       .always(jsonResultOrFail.bind(null, res));
   });
 
