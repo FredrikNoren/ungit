@@ -26,7 +26,7 @@ var CommitDiff = function(args) {
       tempCommitLineDiffs.push(new CommitLineDiff(args));
     });
   } else {
-    args.fileLineDiff = [null, null, '<<Diff between comits disabled due to large size>>'];
+    args.fileLineDiff = [null, null, '<<Diffs between commits disabled due to large size>>'];
     tempCommitLineDiffs.push(new CommitLineDiff(args));
   }
   this.commitLineDiffs(tempCommitLineDiffs);
