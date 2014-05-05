@@ -427,9 +427,8 @@ git.resolveConflicts = function(repoPath, files) {
   return task;
 }
 
-git._newGitTask = function()
-{
-  return(new GitTask());
+git.newGitTask = function() {
+  return new GitTask();
 }
 
 module.exports = git;
