@@ -257,6 +257,18 @@ exports.registerApi = function(env) {
       });
   });
 
+  app.get(exports.pathPrefix + '/show', ensureAuthenticated, function(req, res){
+    git('show --numstat ' + req.query.sha1, req.param('path'))
+      .parser(gitParser.parseGitLog)
+      .always(function(err, log) {
+        if (err) {
+          res.json(400, err);
+        } else {
+          res.json(log);
+        }
+      });
+  });
+
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
     git('log --decorate=full --pretty=fuller --parents --max-count=1', req.param('path'))
       .parser(gitParser.parseGitLog)
