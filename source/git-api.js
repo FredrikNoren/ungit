@@ -166,7 +166,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.diffFile(req.param('path'), req.param('file'), req.param('sha1'))
+    git.diffFile(req.param('path'), req.param('file'), req.param('sha1'), req.param('isLoadingAllLines'), req.param('initialDisplayLineLimit'))
       .always(jsonResultOrFail.bind(null, res));
   });
 
@@ -241,7 +241,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git('log --decorate=full --pretty=fuller --all --parents --numstat ' + limit, req.param('path'))
+    git('log --decorate=full --pretty=fuller --all --parents --numstat --topo-order ' + limit, req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {

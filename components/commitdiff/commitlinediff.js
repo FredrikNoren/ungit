@@ -13,7 +13,8 @@ var CommitLineDiff = function(args) {
       filename: this.fileName(),
       repoPath: args.repoPath,
       server: args.server,
-      sha1: args.sha1
+      sha1: args.sha1,
+      initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
     }));
 };
 exports.CommitLineDiff = CommitLineDiff;

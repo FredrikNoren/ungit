@@ -14,14 +14,33 @@ var TextDiffViewModel = function(args) {
   this.sha1 = args.sha1;
   this.oldMode = ko.observable();
   this.newMode = ko.observable();
+  this.totalNumberOfLines = ko.observable(0);
+  this.isLoadingAllLines = ko.observable(false);
+  this.isShowLoadFullDiffButton = ko.observable(false);
+  this.initialDisplayLineLimit = args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
 }
+TextDiffViewModel.prototype.loadAllLines = function(data, event) {
+  event.stopImmediatePropagation();
+  this.isLoadingAllLines(true);
+  this.invalidateDiff();
+}
+TextDiffViewModel.prototype.getDiffArguments = function() {
+  var args = {};
+  args.file = this.filename;
+  args.path = this.repoPath;
+  args.sha1 = this.sha1 ? this.sha1 : '';
+  args.isLoadingAllLines = this.isLoadingAllLines();
+  args.initialDisplayLineLimit = this.initialDisplayLineLimit;
+
+  return args;
+}
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  self.server.get('/diff', { file: self.filename, path: self.repoPath, sha1: self.sha1 ? self.sha1 : '' }, function(err, diffs) {
+  self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
     if (err) {
       if (err.errorCode == 'no-such-file') {
         // The file existed before but has been removed, but we're trying to get a diff for it
@@ -57,7 +76,16 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
         });
       }
     });
+
     self.diffs(newDiffs);
+    self.totalNumberOfLines(diffs[0] ? diffs[0].totalNumberOfLines : 0);
+
+    if (self.diffs().length === self.totalNumberOfLines()) {
+      self.isShowLoadFullDiffButton(false);
+    } else {
+      self.isShowLoadFullDiffButton(true);
+    }
+
     if (callback) callback();
   });
 }
