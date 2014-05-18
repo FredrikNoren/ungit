@@ -292,6 +292,8 @@ module.exports = function(grunt) {
           if (dep == 'grunt-contrib-imagemin') return callback();
           // Hold back grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved
           if (dep == 'grunt-browserify') return callback();
+          // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
+          if (dep == 'supertest') return callback();
 
           bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
         })
