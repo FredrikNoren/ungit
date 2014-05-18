@@ -282,13 +282,15 @@ module.exports = function(grunt) {
           if (dep == 'forever-monitor') return callback();
           // Socket.io 1.0.0-pre didn't work with phantomjs, so keep it at 0.9.16 for now
           if (dep == 'socket.io') return callback();
+          // Hold back browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved (peer dep to grunt-browserify)
+          if (dep == 'browserify') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
         async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
-          // And grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/167 is resolved
+          // Hold back grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved
           if (dep == 'grunt-browserify') return callback();
 
           bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
