@@ -62,7 +62,6 @@ describe('git-parse diff on big change', function() {
         throw new Error('Failed to parse git log with branch name with ().');
       }
     });
-
     it('should work with no branch name', function() {
       var refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
 
