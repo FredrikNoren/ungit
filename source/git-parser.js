@@ -157,12 +157,12 @@ exports.parseGitLog = function(data) {
   var parseCommitLine = function(row) {
     if (!row.trim()) return;
     currentCommmit = { refs: [], fileLineDiffs: [] };
-    var ss = row.split('(');
-    var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
+    var refStartIndex = row.indexOf('(');
+    var sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
     currentCommmit.parents = sha1s.slice(1);
-    if (ss[1]) {
-      var refs = ss[1].slice(0, ss[1].length - 1);
+    if (refStartIndex > 0) {
+      var refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(', ');
     }
     commits.push(currentCommmit);
