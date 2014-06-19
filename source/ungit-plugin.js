@@ -81,9 +81,7 @@ UngitPlugin.prototype.compile = function(callback) {
     var css = assureArray(exports.css);
     css.forEach(function(cssSource) {
       tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, cssSource), function(err, text) {
-          callback(err, '<style>\n' + text + '\n</style>\n');
-        });
+        callback(null, '<link rel="stylesheet" type="text/css" href="/plugins/' + self.name + '/' + cssSource + '" />');
       });
     });
   }
