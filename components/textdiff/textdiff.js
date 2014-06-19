@@ -7,6 +7,7 @@ components.register('textdiff', function(args) {
 });
 
 var TextDiffViewModel = function(args) {
+  var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
   this.server = args.server;
@@ -16,7 +17,9 @@ var TextDiffViewModel = function(args) {
   this.newMode = ko.observable();
   this.totalNumberOfLines = ko.observable(0);
   this.isLoadingAllLines = ko.observable(false);
-  this.isShowLoadFullDiffButton = ko.observable(false);
+  this.showLoadAllButton = ko.computed(function() {
+    return !self.isLoadingAllLines() && self.diffs() && self.totalNumberOfLines() != self.diffs().length;
+  });
   this.initialDisplayLineLimit = args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -32,8 +35,7 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   args.file = this.filename;
   args.path = this.repoPath;
   args.sha1 = this.sha1 ? this.sha1 : '';
-  args.isLoadingAllLines = this.isLoadingAllLines();
-  args.initialDisplayLineLimit = this.initialDisplayLineLimit;
+  args.maxNLines = this.isLoadingAllLines() ? 0 : this.initialDisplayLineLimit;
 
   return args;
 }
@@ -79,12 +81,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
 
     self.diffs(newDiffs);
     self.totalNumberOfLines(diffs[0] ? diffs[0].totalNumberOfLines : 0);
-
-    if (!self.totalNumberOfLines() || self.diffs().length === self.totalNumberOfLines()) {
-      self.isShowLoadFullDiffButton(false);
-    } else {
-      self.isShowLoadFullDiffButton(true);
-    }
 
     if (callback) callback();
   });
