@@ -33,3 +33,4 @@ report/
 /nw.pak
 
 /components/**/*.css
+/components/**/*.bundle.js

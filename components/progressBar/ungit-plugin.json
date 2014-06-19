@@ -1,6 +1,6 @@
 {
   "exports": {
     "raw": "progressBar.html",
-    "javascript": "progressBar.js"
+    "javascript": "progressBar.bundle.js"
   }
 }

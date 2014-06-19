@@ -3,6 +3,6 @@
     "knockoutTemplates": {
       "remotes": "remotes.html"
     },
-    "javascript": "remotes.js"
+    "javascript": "remotes.bundle.js"
   }
 }

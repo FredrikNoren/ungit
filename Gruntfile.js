@@ -30,38 +30,65 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
-      options: {
-        noParse: ['public/vendor/js/superagent.js'],
-        debug: true,
-        // Make these globally requireable, for use in plugins
-        alias: [
-          'public/source/components.js:ungit-components',
-          'public/source/program-events.js:ungit-program-events',
-          'public/source/navigation.js:ungit-navigation',
-          'public/source/main.js:ungit-main',
-          'source/utils/vector2.js:ungit-vector2',
-          'source/address-parser.js:ungit-address-parser',
-          'knockout:',
-          'lodash:',
-          'hasher:',
-          'crossroads:',
-          'async:',
-          'moment:',
-          'blueimp-md5:',
-          'color:',
-          'signals:'
-        ]
-      },
-      dist: {
+      common: {
+        options: {
+          noParse: ['public/vendor/js/superagent.js'],
+          debug: true,
+          // Make these globally requireable, for use in plugins
+          alias: [
+            'public/source/components.js:ungit-components',
+            'public/source/program-events.js:ungit-program-events',
+            'public/source/navigation.js:ungit-navigation',
+            'public/source/main.js:ungit-main',
+            'source/utils/vector2.js:ungit-vector2',
+            'source/address-parser.js:ungit-address-parser',
+            'knockout:',
+            'lodash:',
+            'hasher:',
+            'crossroads:',
+            'async:',
+            'moment:',
+            'blueimp-md5:',
+            'color:',
+            'signals:'
+          ]
+        },
         files: {
           'public/js/ungit.js': ['public/source/main.js'],
           'public/js/devStyling.js': ['public/devStyling/devStyling.js']
         }
+      },
+      components: {
+        options: {
+          external: [
+            'ungit-components',
+            'ungit-program-events',
+            'ungit-navigation',
+            'ungit-main',
+            'ungit-vector2',
+            'ungit-address-parser',
+            'knockout',
+            'lodash',
+            'hasher',
+            'crossroads',
+            'async',
+            'moment',
+            'blueimp-md5',
+          ],
+          debug: true
+        },
+        files: (function() {
+          var files = {};
+          fs.readdirSync('components').forEach(function(component) {
+            files['components/' + component + '/' + component + '.bundle.js'] = ['components/' + component + '/' + component + '.js'];
+          });
+          return files;
+        })()
       }
     },
     watch: {
       scripts: {
-        files: ['public/source/**/*.js', 'source/**/*.js'],
+        files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
         tasks: ['browserify'],
         options: {
           spawn: false,

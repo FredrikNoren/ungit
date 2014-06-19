@@ -63,7 +63,6 @@ function CredentialsDialogViewModel() {
   ]);
 }
 inherits(CredentialsDialogViewModel, FormDialogViewModel);
-exports.CredentialsDialogViewModel = CredentialsDialogViewModel;
 
 
 function AddRemoteDialogViewModel() {
@@ -78,7 +77,6 @@ function AddRemoteDialogViewModel() {
   ]);
 }
 inherits(AddRemoteDialogViewModel, FormDialogViewModel);
-exports.AddRemoteDialogViewModel = AddRemoteDialogViewModel;
 
 
 function PromptDialogViewModel(title, details) {
@@ -88,7 +86,6 @@ function PromptDialogViewModel(title, details) {
 }
 inherits(PromptDialogViewModel, DialogViewModel);
 PromptDialogViewModel.prototype.template = 'prompt';
-exports.PromptDialogViewModel = PromptDialogViewModel;
 
 function YesNoDialogViewModel(title, details) {
   PromptDialogViewModel.call(this, title, details);
@@ -101,4 +98,3 @@ function YesNoDialogViewModel(title, details) {
   ])
 }
 inherits(YesNoDialogViewModel, PromptDialogViewModel);
-exports.YesNoDialogViewModel = YesNoDialogViewModel;

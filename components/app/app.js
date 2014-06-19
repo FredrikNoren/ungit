@@ -48,7 +48,7 @@ var AppViewModel = function(appContainer, server) {
   }
 
 }
-module.exports = AppViewModel;
+
 AppViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('app', this, {}, parentElement);
 }

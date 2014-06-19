@@ -2,7 +2,6 @@
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
-var browserify = require('browserify');
 var express = require('express');
 var winston = require('winston');
 var config = require('./config');
@@ -59,31 +58,11 @@ UngitPlugin.prototype.compile = function(callback) {
   if (exports.javascript) {
     var js = assureArray(exports.javascript);
 
-    var b = browserify({
-      entries: js.map(function(jsSource) { return path.join(self.path, jsSource); })
-    });
-    b.external('ungit-components');
-    b.external('ungit-program-events');
-    b.external('ungit-navigation');
-    b.external('ungit-main');
-    b.external('ungit-vector2');
-    b.external('ungit-address-parser');
-    b.external('knockout');
-    b.external('lodash');
-    b.external('hasher');
-    b.external('crossroads');
-    b.external('async');
-    b.external('moment');
-    b.external('blueimp-md5');
-    tasks.push(function(callback) {
-      b.bundle(null, function(err, text) {
-        callback(err, '<script type="text/javascript">\n' +
-          '(function() {' +
-          text + '\n' +
-          '})();\n' +
-          '</script>\n');
+    js.forEach(function(filename) {
+      tasks.push(function(callback) {
+        callback(null, '<script type="text/javascript" src="plugins/' + self.name + '/' + filename +'"></script>');
       });
-    })
+    });
   }
 
   if (exports.knockoutTemplates) {

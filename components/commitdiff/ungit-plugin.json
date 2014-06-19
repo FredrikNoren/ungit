@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "commitdiff": "commitdiff.html"
     },
-    "javascript": "commitdiff.js",
+    "javascript": "commitdiff.bundle.js",
     "css": "commitdiff.css"
   }
 }

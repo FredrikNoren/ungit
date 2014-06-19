@@ -3,6 +3,6 @@
     "knockoutTemplates": {
       "app": "app.html"
     },
-    "javascript": "app.js"
+    "javascript": "app.bundle.js"
   }
 }

@@ -3,6 +3,6 @@
     "knockoutTemplates": {
       "login": "login.html"
     },
-    "javascript": "login.js"
+    "javascript": "login.bundle.js"
   }
 }

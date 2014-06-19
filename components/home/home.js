@@ -50,7 +50,6 @@ function HomeViewModel(app) {
 HomeViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('home', this, {}, parentElement);
 }
-exports.HomeViewModel = HomeViewModel;
 HomeViewModel.prototype.template = 'home';
 HomeViewModel.prototype.shown = function() {
   this.update();

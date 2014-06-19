@@ -23,7 +23,6 @@ var LoginViewModel = function(server) {
     else self.status('login');
   });
 }
-exports.LoginViewModel = LoginViewModel;
 LoginViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('login', this, {}, parentElement);
 }
