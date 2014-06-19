@@ -4,6 +4,6 @@
       "staging": "staging.html"
     },
     "javascript": "staging.js",
-    "less": "staging.less"
+    "css": "staging.css"
   }
 }

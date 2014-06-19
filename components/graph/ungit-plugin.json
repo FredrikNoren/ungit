@@ -5,6 +5,6 @@
       "graphGraphics": "graph-graphics.html"
     },
     "javascript": "git-graph.js",
-    "less": "graph.less"
+    "css": "graph.css"
   }
 }

@@ -4,6 +4,6 @@
       "commitdiff": "commitdiff.html"
     },
     "javascript": "commitdiff.js",
-    "less": "commitdiff.less"
+    "css": "commitdiff.css"
   }
 }

@@ -31,3 +31,5 @@ report/
 /*.dll
 /nw.exe
 /nw.pak
+
+/components/**/*.css

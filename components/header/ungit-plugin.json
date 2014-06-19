@@ -4,6 +4,6 @@
       "header": "header.html"
     },
     "javascript": "header.js",
-    "less": "header.less"
+    "css": "header.css"
   }
 }

@@ -17,7 +17,15 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"]
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"],
+          "components/commitdiff/commitdiff.css": ["components/commitdiff/commitdiff.less"],
+          "components/graph/graph.css": ["components/graph/graph.less"],
+          "components/header/header.css": ["components/header/header.less"],
+          "components/home/home.css": ["components/home/home.less"],
+          "components/imagediff/imagediff.css": ["components/imagediff/imagediff.less"],
+          "components/repository/repository.css": ["components/repository/repository.less"],
+          "components/staging/staging.css": ["components/staging/staging.less"],
+          "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
         }
       }
     },
@@ -60,7 +68,7 @@ module.exports = function(grunt) {
         },
       },
       less: {
-        files: ['public/less/*.less', 'public/styles/*.less'],
+        files: ['public/less/*.less', 'public/styles/*.less', 'components/**/*.less'],
         tasks: ['less:production'],
         options: {
           spawn: false,

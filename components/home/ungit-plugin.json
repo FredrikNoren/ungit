@@ -4,6 +4,6 @@
       "home": "home.html"
     },
     "javascript": "home.js",
-    "less": "home.less"
+    "css": "home.css"
   }
 }

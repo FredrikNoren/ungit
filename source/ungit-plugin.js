@@ -1,7 +1,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var less = require('less');
 var async = require('async');
 var browserify = require('browserify');
 var express = require('express');
@@ -105,21 +104,6 @@ UngitPlugin.prototype.compile = function(callback) {
       tasks.push(function(callback) {
         fs.readFile(path.join(self.path, cssSource), function(err, text) {
           callback(err, '<style>\n' + text + '\n</style>\n');
-        });
-      });
-    });
-  }
-
-  if (exports.less) {
-    var lessSources = assureArray(exports.less);
-    lessSources.forEach(function(lessSource) {
-      var parser = new(less.Parser)({ paths: ['.', path.join(__dirname, '..')], filename: lessSource });
-      tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, lessSource), function(err, text) {
-          if (err) return callback(err);
-          parser.parse(text.toString(), function (e, tree) {
-            callback(e, e ? '' : ('<style>\n' + tree.toCSS({ compress: true }) + '\n</style>\n'));
-          });
         });
       });
     });

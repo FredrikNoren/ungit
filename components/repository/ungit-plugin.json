@@ -4,6 +4,6 @@
       "repository": "repository.html"
     },
     "javascript": "repository.js",
-    "less": "repository.less"
+    "css": "repository.css"
   }
 }

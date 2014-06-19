@@ -4,6 +4,6 @@
       "textdiff": "textdiff.html"
     },
     "javascript": "textdiff.js",
-    "less": "textdiff.less"
+    "css": "textdiff.css"
   }
 }
