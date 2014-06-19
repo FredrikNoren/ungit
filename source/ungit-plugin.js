@@ -88,7 +88,7 @@ UngitPlugin.prototype.compile = function(callback) {
 
   async.parallel(tasks, function(err, result) {
     if (err) throw err;
-    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join(''))
+    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join('\n'))
   });
 }
 
