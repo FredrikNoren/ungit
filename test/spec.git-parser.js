@@ -25,20 +25,20 @@ describe('git-parse diff on big change', function() {
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
 
-    var res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 50});
+    var res = gitParser.parseGitDiff(sampleText, { maxNLines: 50});
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(50);
     expect(res[0].totalNumberOfLines).to.be(63);
 
 
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'true', initialDisplayLineLimit: 50});
+    res = gitParser.parseGitDiff(sampleText, { });
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(63);
     expect(res[0].totalNumberOfLines).to.be(63);
 
-    res = gitParser.parseGitDiff(sampleText, {isLoadingAllLines: 'false', initialDisplayLineLimit: 100});
+    res = gitParser.parseGitDiff(sampleText, { });
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(63);
@@ -47,11 +47,27 @@ describe('git-parse diff on big change', function() {
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     sampleText += '1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n';
     
-    res = gitParser.parseGitDiff(sampleText);
+    res = gitParser.parseGitDiff(sampleText, { maxNLines: 100 });
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
     expect(res[0].lines.length).to.be(100);
     expect(res[0].totalNumberOfLines).to.be(123);
   });
-});
 
+  describe('git-parser parseGitLog', function () {
+    it('should work with branch name with ()', function() {
+      var refs = gitParser.parseGitLog('commit AAA BBB (HEAD, (test), fw(4rw), 5), ((, ()')[0].refs;
+
+      if(refs.length != 6) {
+        throw new Error('Failed to parse git log with branch name with ().');
+      }
+    });
+    it('should work with no branch name', function() {
+      var refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
+
+      if(refs.length != 0) {
+        throw new Error('Failed to parse git log without branches.');
+      }
+    });
+  });
+});

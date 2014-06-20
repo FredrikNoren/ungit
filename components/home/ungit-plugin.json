@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "home": "home.html"
     },
-    "javascript": "home.js",
-    "less": "home.less"
+    "javascript": "home.bundle.js",
+    "css": "home.css"
   }
 }

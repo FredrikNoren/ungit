@@ -46,8 +46,6 @@
     "npm-registry-client": "~1.0.0",
     "npmconf": "~1.0.0",
     "mkdirp": "~0.5.0",
-    "less": "~1.7.0",
-    "browserify": "~3.38.0",
     "body-parser": "~1.2.0",
     "cookie-parser": "~1.1.0",
     "express-session": "~1.1.0",

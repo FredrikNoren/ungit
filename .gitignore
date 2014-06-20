@@ -31,3 +31,6 @@ report/
 /*.dll
 /nw.exe
 /nw.pak
+
+/components/**/*.css
+/components/**/*.bundle.js

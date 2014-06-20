@@ -1,9 +1,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var less = require('less');
 var async = require('async');
-var browserify = require('browserify');
 var express = require('express');
 var winston = require('winston');
 var config = require('./config');
@@ -60,31 +58,11 @@ UngitPlugin.prototype.compile = function(callback) {
   if (exports.javascript) {
     var js = assureArray(exports.javascript);
 
-    var b = browserify({
-      entries: js.map(function(jsSource) { return path.join(self.path, jsSource); })
-    });
-    b.external('ungit-components');
-    b.external('ungit-program-events');
-    b.external('ungit-navigation');
-    b.external('ungit-main');
-    b.external('ungit-vector2');
-    b.external('ungit-address-parser');
-    b.external('knockout');
-    b.external('lodash');
-    b.external('hasher');
-    b.external('crossroads');
-    b.external('async');
-    b.external('moment');
-    b.external('blueimp-md5');
-    tasks.push(function(callback) {
-      b.bundle(null, function(err, text) {
-        callback(err, '<script type="text/javascript">\n' +
-          '(function() {' +
-          text + '\n' +
-          '})();\n' +
-          '</script>\n');
+    js.forEach(function(filename) {
+      tasks.push(function(callback) {
+        callback(null, '<script type="text/javascript" src="plugins/' + self.name + '/' + filename +'"></script>');
       });
-    })
+    });
   }
 
   if (exports.knockoutTemplates) {
@@ -103,31 +81,14 @@ UngitPlugin.prototype.compile = function(callback) {
     var css = assureArray(exports.css);
     css.forEach(function(cssSource) {
       tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, cssSource), function(err, text) {
-          callback(err, '<style>\n' + text + '\n</style>\n');
-        });
-      });
-    });
-  }
-
-  if (exports.less) {
-    var lessSources = assureArray(exports.less);
-    lessSources.forEach(function(lessSource) {
-      var parser = new(less.Parser)({ paths: ['.', path.join(__dirname, '..')], filename: lessSource });
-      tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, lessSource), function(err, text) {
-          if (err) return callback(err);
-          parser.parse(text.toString(), function (e, tree) {
-            callback(e, e ? '' : ('<style>\n' + tree.toCSS({ compress: true }) + '\n</style>\n'));
-          });
-        });
+        callback(null, '<link rel="stylesheet" type="text/css" href="/plugins/' + self.name + '/' + cssSource + '" />');
       });
     });
   }
 
   async.parallel(tasks, function(err, result) {
     if (err) throw err;
-    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join(''))
+    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join('\n'))
   });
 }
 

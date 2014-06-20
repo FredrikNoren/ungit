@@ -25,10 +25,13 @@ exports.parseGitStatus = function(text) {
 exports.parseGitDiff = function(text, args) {
   var lines = text.split("\n");
   var diffs = [];
-  var isLoadingAllLines = args && args.isLoadingAllLines ? args.isLoadingAllLines : false;
-  var initialDisplayLineLimit = args && args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
+  args = args || {};
 
-  while(lines.length && lines[0] && isLoadMore(isLoadingAllLines, diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0, initialDisplayLineLimit)) {
+  while(lines.length && lines[0]) {
+    if (args.maxNLines) {
+      var nLines = diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0;
+      if (nLines >= args.maxNLines) break;
+    }
     var diff = {};
     var path = /^diff\s--git\s\w\/(.+?)\s\w\/(.+)$/.exec(lines.shift());
     diff.aPath = path[1];
@@ -74,7 +77,10 @@ exports.parseGitDiff = function(text, args) {
     lines.shift();
     var diff_lines = [];
     var originalLine, newLine;
-    while(lines[0] && !/^diff/.test(lines[0]) && isLoadMore(isLoadingAllLines, diff_lines.length, initialDisplayLineLimit)) {
+    while(lines[0] && !/^diff/.test(lines[0])) {
+      if (args.maxNLines) {
+        if (diff_lines.length >= args.maxNLines) break;
+      }
       var line = lines.shift();
       if (line.indexOf('@@ ') == 0) {
         var changeGroup = /@@ -(\d+)(,\d+)? [+](\d+)(,\d+)?/.exec(line);
@@ -106,10 +112,6 @@ exports.parseGitDiff = function(text, args) {
 
   return diffs;
 }
-
-var isLoadMore = function(isLoadingAllLines, lineCount, initialDisplayLineLimit) {
-  return isLoadingAllLines === 'true' || lineCount < initialDisplayLineLimit;
-};
 
 var authorRegexp = /([^<]+)<([^>]+)>/;
 var gitLogHeaders = {
@@ -155,12 +157,12 @@ exports.parseGitLog = function(data) {
   var parseCommitLine = function(row) {
     if (!row.trim()) return;
     currentCommmit = { refs: [], fileLineDiffs: [] };
-    var ss = row.split('(');
-    var sha1s = ss[0].split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
+    var refStartIndex = row.indexOf('(');
+    var sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
     currentCommmit.parents = sha1s.slice(1);
-    if (ss[1]) {
-      var refs = ss[1].slice(0, ss[1].length - 1);
+    if (refStartIndex > 0) {
+      var refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(', ');
     }
     commits.push(currentCommmit);

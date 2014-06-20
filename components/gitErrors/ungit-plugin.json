@@ -3,6 +3,6 @@
     "knockoutTemplates": {
       "gitErrors": "gitErrors.html"
     },
-    "javascript": "gitErrors.js"
+    "javascript": "gitErrors.bundle.js"
   }
 }

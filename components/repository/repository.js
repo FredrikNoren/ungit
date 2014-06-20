@@ -26,7 +26,6 @@ var RepositoryViewModel = function(server, repoPath) {
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
 }
-exports.RepositoryViewModel = RepositoryViewModel;
 RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (this.gitErrors.onProgramEvent) this.gitErrors.onProgramEvent(event);
   if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);

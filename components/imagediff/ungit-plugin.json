@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "imagediff": "imagediff.html"
     },
-    "javascript": "imagediff.js",
-    "less": "imagediff.less"
+    "javascript": "imagediff.bundle.js",
+    "css": "imagediff.css"
   }
 }

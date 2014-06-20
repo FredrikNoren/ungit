@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "stash": "stash.html"
     },
-    "javascript": "stash.js",
+    "javascript": "stash.bundle.js",
     "css": "stash.css"
   }
 }

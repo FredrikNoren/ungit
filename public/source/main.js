@@ -38,9 +38,6 @@ var navigation = require('./navigation');
     };
 }());
 
-
-var requestAnimationFrame = window.requestAnimationFrame;
-
 ko.bindingHandlers.autocomplete = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     var handleKeyEvent = function(event) {

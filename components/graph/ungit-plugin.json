@@ -4,7 +4,7 @@
       "graph": "graph.html",
       "graphGraphics": "graph-graphics.html"
     },
-    "javascript": "git-graph.js",
-    "less": "graph.less"
+    "javascript": "graph.bundle.js",
+    "css": "graph.css"
   }
 }

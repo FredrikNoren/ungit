@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "repository": "repository.html"
     },
-    "javascript": "repository.js",
-    "less": "repository.less"
+    "javascript": "repository.bundle.js",
+    "css": "repository.css"
   }
 }

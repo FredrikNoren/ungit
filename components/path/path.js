@@ -33,7 +33,6 @@ var PathViewModel = function(server, path) {
   this.cloneDestination = ko.observable();
   this.repository = ko.observable();
 }
-exports.PathViewModel = PathViewModel;
 PathViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('path', this, {}, parentElement);
 }

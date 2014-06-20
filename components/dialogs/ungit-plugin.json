@@ -4,6 +4,6 @@
       "formDialog": "formDialog.html",
       "prompt": "prompt.html"
     },
-    "javascript": "dialogs.js"
+    "javascript": "dialogs.bundle.js"
   }
 }

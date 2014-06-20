@@ -17,50 +17,85 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"]
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"],
+          "components/commitdiff/commitdiff.css": ["components/commitdiff/commitdiff.less"],
+          "components/graph/graph.css": ["components/graph/graph.less"],
+          "components/header/header.css": ["components/header/header.less"],
+          "components/home/home.css": ["components/home/home.less"],
+          "components/imagediff/imagediff.css": ["components/imagediff/imagediff.less"],
+          "components/repository/repository.css": ["components/repository/repository.less"],
+          "components/staging/staging.css": ["components/staging/staging.less"],
+          "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
         }
       }
     },
     browserify: {
-      options: {
-        noParse: ['public/vendor/js/superagent.js'],
-        debug: true,
-        // Make these globally requireable, for use in plugins
-        alias: [
-          'public/source/components.js:ungit-components',
-          'public/source/program-events.js:ungit-program-events',
-          'public/source/navigation.js:ungit-navigation',
-          'public/source/main.js:ungit-main',
-          'source/utils/vector2.js:ungit-vector2',
-          'source/address-parser.js:ungit-address-parser',
-          'knockout:',
-          'lodash:',
-          'hasher:',
-          'crossroads:',
-          'async:',
-          'moment:',
-          'blueimp-md5:',
-          'color:',
-          'signals:'
-        ]
-      },
-      dist: {
+      common: {
+        options: {
+          noParse: ['public/vendor/js/superagent.js'],
+          debug: true,
+          // Make these globally requireable, for use in plugins
+          alias: [
+            'public/source/components.js:ungit-components',
+            'public/source/program-events.js:ungit-program-events',
+            'public/source/navigation.js:ungit-navigation',
+            'public/source/main.js:ungit-main',
+            'source/utils/vector2.js:ungit-vector2',
+            'source/address-parser.js:ungit-address-parser',
+            'knockout:',
+            'lodash:',
+            'hasher:',
+            'crossroads:',
+            'async:',
+            'moment:',
+            'blueimp-md5:',
+            'color:',
+            'signals:'
+          ]
+        },
         files: {
           'public/js/ungit.js': ['public/source/main.js'],
           'public/js/devStyling.js': ['public/devStyling/devStyling.js']
         }
+      },
+      components: {
+        options: {
+          external: [
+            'ungit-components',
+            'ungit-program-events',
+            'ungit-navigation',
+            'ungit-main',
+            'ungit-vector2',
+            'ungit-address-parser',
+            'knockout',
+            'lodash',
+            'hasher',
+            'crossroads',
+            'async',
+            'moment',
+            'blueimp-md5',
+          ],
+          debug: true
+        },
+        files: (function() {
+          var files = {};
+          fs.readdirSync('components').forEach(function(component) {
+            files['components/' + component + '/' + component + '.bundle.js'] = ['components/' + component + '/' + component + '.js'];
+          });
+          return files;
+        })()
       }
     },
     watch: {
       scripts: {
-        files: ['public/source/**/*.js', 'source/**/*.js'],
+        files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
         tasks: ['browserify'],
         options: {
           spawn: false,
         },
       },
       less: {
-        files: ['public/less/*.less', 'public/styles/*.less'],
+        files: ['public/less/*.less', 'public/styles/*.less', 'components/**/*.less'],
         tasks: ['less:production'],
         options: {
           spawn: false,

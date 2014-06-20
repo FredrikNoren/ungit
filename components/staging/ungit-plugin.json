@@ -3,7 +3,7 @@
     "knockoutTemplates": {
       "staging": "staging.html"
     },
-    "javascript": "staging.js",
-    "less": "staging.less"
+    "javascript": "staging.bundle.js",
+    "css": "staging.css"
   }
 }

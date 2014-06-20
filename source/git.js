@@ -238,7 +238,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines, initialDisplayLineLimit) {
+git.diffFile = function(repoPath, filename, sha1, maxNLines) {
   var task = new GitTask();
 
   git.status(repoPath)
@@ -259,7 +259,7 @@ git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines, initialDisp
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
         git(gitCommand, repoPath, null)
-          .parser(gitParser.parseGitDiff, { isLoadingAllLines: isLoadingAllLines, initialDisplayLineLimit: initialDisplayLineLimit })
+          .parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
           .always(task.setResult);
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
@@ -267,7 +267,10 @@ git.diffFile = function(repoPath, filename, sha1, isLoadingAllLines, initialDisp
           var diffs = [];
           var diff = { };
           text = text.toString();
-          diff.lines = text.split('\n').map(function(line, i) { return [null, i, '+' + line]; });
+          var lines = text.split('\n');
+          diff.totalNumberOfLines = lines.length;
+          if (maxNLines) lines = lines.slice(0, maxNLines);
+          diff.lines = lines.map(function(line, i) { return [null, i, '+' + line]; });
           diffs.push(diff);
           task.setResult(null, diffs);
         });
