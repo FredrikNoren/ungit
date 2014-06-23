@@ -154,8 +154,12 @@ module.exports = function(grunt) {
     // Embed images in css
     imageEmbed: {
       default: {
-        src: [ "public/css/styles.css" ],
-        dest: "public/css/styles.css",
+        files: {
+          "public/css/styles.css": [ "public/css/styles.css" ],
+          "components/graph/graph.css": ["components/graph/graph.css"],
+          "components/header/header.css": ["components/header/header.css"],
+          "components/staging/staging.css": ["components/staging/staging.css"],
+        },
         options: {
           deleteAfterEncoding: false
         }
@@ -181,7 +185,13 @@ module.exports = function(grunt) {
             'Raven': true
           }
         },
-        src: ['public/source/**/*.js', 'components/**/*.js']
+        files: [
+          {
+            src: ['public/source/**/*.js', 'components/**/*.js'],
+            // Filter out the "compiled" components files; see the browserify task for components
+            filter: function(src) { return src.indexOf('bundle.js') == -1; }
+          }
+        ]
       },
       phantomjs: {
         options: {

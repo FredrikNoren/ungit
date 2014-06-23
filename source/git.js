@@ -5,9 +5,9 @@ var path = require('path');
 var fs = require('fs');
 var config = require('./config');
 var winston = require('winston');
-var signals = require('signals');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
+var GitTask = require('./git-task');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
@@ -24,57 +24,6 @@ var git = function(command, repoPath, sendToQueue) {
   return task;
 }
 
-var GitTask = function() {
-  var self = this;
-  this._completed = false;
-  this._started = false;
-  this.onDone = new signals.Signal();
-  this.onFail = new signals.Signal();
-  this.onStarted = new signals.Signal();
-  this.always = function(callback) {
-    if (self._completed) callback(self.error, self.result);
-    else {
-      self.onDone.add(callback.bind(null, null));
-      self.onFail.add(callback);
-    }
-    return self;
-  }
-  this.done = function(callback) {
-    if (self._completed) {
-      if (!self.error) callback(self.result);
-    }
-    else self.onDone.add(callback);
-    return self;
-  }
-  this.fail = function(callback) {
-    if (self._completed) {
-      if (self.error) callback(self.error, self.result);
-    }
-    else self.onFail.add(callback);
-    return self;
-  }
-  this.started = function(callback) {
-    if (self._started) callback(self._process);
-    else self.onStarted.add(callback);
-    return self;
-  }
-  this.setStarted = function(process) {
-    self._started = true;
-    self._process = process;
-    self.onStarted.dispatch(process);
-    return self;
-  }
-  this.setResult = function(err, result) {
-    self.error = err;
-    self.result = result;
-    self._completed = true;
-    if (err)
-      self.onFail.dispatch(err, result);
-    else
-      self.onDone.dispatch(result);
-    return self;
-  }
-}
 
 var GitExecutionTask = function(command, repoPath) {
   GitTask.call(this);
@@ -427,6 +376,26 @@ git.resolveConflicts = function(repoPath, files) {
 
   });
 
+  return task;
+}
+
+git.getCurrentBranch = function(repoPath) {
+  var task = new GitTask();
+  git('rev-parse --show-toplevel', repoPath)
+    .fail(task.setResult)
+    .done(function(rootRepoPath) {
+
+      var HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
+      if (!fs.existsSync(HEADFile))
+        return task.setResult({ errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile });
+      fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
+        if (err) return task.setResult(err);
+        text = text.toString();
+        var rows = text.split('\n');
+        var branch = rows[0].slice('ref: refs/heads/'.length);
+        task.setResult(null, branch);
+      });
+    });
   return task;
 }
 

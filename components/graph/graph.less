@@ -34,7 +34,7 @@
               display: block;
             }
             .arrow {
-              background: url('../images/logBoxHoverArrowRight.png');
+              background: url('images/logBoxHoverArrowRight.png');
             }
           }
         }
@@ -46,6 +46,21 @@
         height: 140px;
       }
 
+      .logEntryBox {
+        .arrowRight {
+          position: absolute;
+          right: 0px;
+          top: 5px;
+          .shadow {
+            display: none;
+            background: url('images/shadowArrowRight.png');
+          }
+          .arrow {
+            background: url('images/panelArrowRight.png');
+          }
+        }
+      }
+
       .logEntryBox > .panel-body {
         position: relative;
 
@@ -53,14 +68,6 @@
         margin-bottom: 0px;
         width: @log-width-small;
         min-height: 85px;
-        .arrowRight {
-          position: absolute;
-          right: 0px;
-          top: 5px;
-          .shadow {
-            display: none;
-          }
-        }
 
         .gravatar {
           display: none;
@@ -208,6 +215,28 @@
       top: -150px;
       margin-left: (@log-width-small);
     }
+  }
+
+
+  .remote-icon {
+    background: url('images/remoteIcon.png');
+    width: 12px;
+    height: 10px;
+    display: inline-block;
+  }
+
+  .branch-icon {
+    background: url('images/branchIcon.png');
+    width: 9px;
+    height: 10px;
+    display: inline-block;
+  }
+
+  .tag-icon {
+    background: url('images/tagIcon.png');
+    width: 5px;
+    height: 10px;
+    display: inline-block;
   }
 
 }
