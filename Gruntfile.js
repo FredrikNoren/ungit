@@ -154,8 +154,12 @@ module.exports = function(grunt) {
     // Embed images in css
     imageEmbed: {
       default: {
-        src: [ "public/css/styles.css" ],
-        dest: "public/css/styles.css",
+        files: {
+          "public/css/styles.css": [ "public/css/styles.css" ],
+          "components/graph/graph.css": ["components/graph/graph.css"],
+          "components/header/header.css": ["components/header/header.css"],
+          "components/staging/staging.css": ["components/staging/staging.css"],
+        },
         options: {
           deleteAfterEncoding: false
         }
