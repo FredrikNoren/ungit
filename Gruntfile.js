@@ -181,7 +181,13 @@ module.exports = function(grunt) {
             'Raven': true
           }
         },
-        src: ['public/source/**/*.js', 'components/**/*.js']
+        files: [
+          {
+            src: ['public/source/**/*.js', 'components/**/*.js'],
+            // Filter out the "compiled" components files; see the browserify task for components
+            filter: function(src) { return src.indexOf('bundle.js') == -1; }
+          }
+        ]
       },
       phantomjs: {
         options: {
