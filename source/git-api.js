@@ -361,16 +361,8 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-    var HEADFile = path.join(req.param('path'), '.git', 'HEAD');
-    if (!fs.existsSync(HEADFile)) 
-      return res.json(400, { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile });
-    fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
-      if (err) res.json(400, err);
-      text = text.toString();
-      var rows = text.split('\n');
-      var branch = rows[0].slice('ref: refs/heads/'.length);
-      res.json(branch);
-    });
+    git.getCurrentBranch(req.param('path'))
+      .always(jsonResultOrFail.bind(null, res));
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){

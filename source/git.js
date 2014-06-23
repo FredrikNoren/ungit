@@ -430,4 +430,24 @@ git.resolveConflicts = function(repoPath, files) {
   return task;
 }
 
+git.getCurrentBranch = function(repoPath) {
+  var task = new GitTask();
+  git('rev-parse --show-toplevel', repoPath)
+    .fail(task.setResult)
+    .done(function(rootRepoPath) {
+
+      var HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
+      if (!fs.existsSync(HEADFile))
+        return task.setResult({ errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile });
+      fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
+        if (err) return task.setResult(err);
+        text = text.toString();
+        var rows = text.split('\n');
+        var branch = rows[0].slice('ref: refs/heads/'.length);
+        task.setResult(null, branch);
+      });
+    });
+  return task;
+}
+
 module.exports = git;
