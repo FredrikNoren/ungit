@@ -12,7 +12,8 @@ var AppViewModel = function(appContainer, server) {
   var self = this;
   this.appContainer = appContainer;
   this.server = server;
-  this.header = components.create('header', { app: this });
+  if (window.location.search.indexOf('noheader=true') < 0)
+    this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);
 
   this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
@@ -83,7 +84,7 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 
   if (this.content() && this.content().onProgramEvent)
     this.content().onProgramEvent(event);
-  if (this.header.onProgramEvent) this.header.onProgramEvent(event);
+  if (this.header && this.header.onProgramEvent) this.header.onProgramEvent(event);
 }
 AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   var repoPath = event.repoPath;
