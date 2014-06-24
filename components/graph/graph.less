@@ -24,7 +24,9 @@
       &.highlighted {
         z-index: 2;
         .logEntryBox {
-          box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+          -webkit-box-shadow: 2px 2px 0px 5px rgba(0, 0, 0, 0.4);
+          -moz-box-shadow: 2px 2px 0px 5px rgba(0, 0, 0, 0.4);
+          box-shadow: 2px 2px 0px 5px rgba(0, 0, 0, 0.4);
           background: #4B5766;
           left: -5px;
           .arrowRight {
@@ -39,6 +41,9 @@
       }
       &.hover {
         z-index: 3;
+        margin-left: -20px;
+        width: 580px;
+        height: 140px;
       }
 
       .logEntryBox {
