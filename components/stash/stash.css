@@ -1,4 +1,6 @@
-
+.stashShowing {
+  top: 35px;
+}
 .stash {
   z-index: 4;
   position: relative;
@@ -6,4 +8,14 @@
   margin-right: 20px;
   top: 30px;
   background: #55323C;
+}
+.stashToggle {
+  width: 180px;
+  height: 30px;
+  position: relative;
+  background: none repeat scroll 0% 0% #55323C;
+  left: 20px;
+  border-radius: 5px;
+  padding-top: 5px;
+  text-align: center;
 }
