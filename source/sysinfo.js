@@ -36,15 +36,12 @@ sysinfo.getUngitLatestVersion = function(callback) {
   if (!RegClient) RegClient = require('npm-registry-client');
   npmconf.load({}, function(err, config) {
     if (err) return callback(err);
-    var client = new RegClient({
-      registry: 'https://registry.npmjs.org',
-      cache: config.get('cache'),
-      log: { error: noop, warn: noop, info: noop,
+    config.log = { error: noop, warn: noop, info: noop,
              verbose: noop, silly: noop, http: noop,
-             pause: noop, resume: noop }
-    });
+             pause: noop, resume: noop };
+    var client = new RegClient(config);
 
-    client.get('ungit', 'latest', 1000, function (err, data, raw, res) {
+    client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, function (err, data, raw, res) {
       if (err) return callback(err);
       var versions = Object.keys(data.versions);
       callback(null, versions[versions.length - 1]);
