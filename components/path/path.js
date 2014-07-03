@@ -93,7 +93,7 @@ PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
   this.server.post('/createDir',  {dir: this.path }, function() {
-    self.status('uninited');
+    self.updateStatus();
   });
 }
 
