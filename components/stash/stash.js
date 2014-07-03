@@ -35,7 +35,8 @@ function StashViewModel(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
-  this.visible = ko.computed(function() { return self.stashedChanges().length > 0; });
+  this.isShow = ko.observable(true);
+  this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow(); });
   this.refresh();
 }
 StashViewModel.prototype.updateNode = function(parentElement) {
@@ -54,5 +55,6 @@ StashViewModel.prototype.refresh = function() {
     self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
   });
 }
-
-
+StashViewModel.prototype.toggleShowStash = function() {
+  this.isShow(!this.isShow());
+}
