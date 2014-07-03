@@ -104,7 +104,7 @@ GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
     if (err) {
       self.nodesLoader.stop();
       if (callback) callback();
-      return;
+      return err.errorCode == 'no-such-path';
     }
     self.setNodesFromLog(logEntries);
     self.nodesLoader.stop();

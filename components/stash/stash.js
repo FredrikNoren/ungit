@@ -50,7 +50,10 @@ StashViewModel.prototype.onProgramEvent = function(event) {
 StashViewModel.prototype.refresh = function() {
   var self = this;
   this.server.get('/stashes', { path: this.repoPath }, function(err, stashes) {
-    if (err) return;
+    if (err) {
+      if (err.errorCode == 'no-such-path') return true;
+      return;
+    }
     self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
   });
 }
