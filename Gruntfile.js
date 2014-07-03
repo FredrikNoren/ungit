@@ -339,8 +339,6 @@ module.exports = function(grunt) {
         async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
-          // Hold back grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved
-          if (dep == 'grunt-browserify') return callback();
           // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
           if (dep == 'supertest') return callback();
 
