@@ -28,6 +28,7 @@ HeaderViewModel.prototype.submitPath = function() {
 HeaderViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'navigation-changed') {
     this.showBackButton(event.path != '');
+    if (event.path == '') this.path('');
   } else if (event.event == 'navigated-to-path') {
     this.path(event.path);
   }

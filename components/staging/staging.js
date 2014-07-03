@@ -89,7 +89,8 @@ StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
   this.server.get('/head', { path: this.repoPath, limit: 1 }, function(err, log) {
     if (err) {
-      return err.errorCode == 'must-be-in-working-tree';
+      return err.errorCode == 'must-be-in-working-tree' ||
+        err.errorCode == 'no-such-path';
     }
     if (log.length > 0) {
       var array = log[0].message.split('\n');
@@ -100,7 +101,8 @@ StagingViewModel.prototype.refreshContent = function(callback) {
   this.server.get('/status', { path: this.repoPath }, function(err, status) {
     if (err) {
       if (callback) callback(err);
-      return err.errorCode == 'must-be-in-working-tree';
+      return err.errorCode == 'must-be-in-working-tree' ||
+        err.errorCode == 'no-such-path';
     }
     self.setFiles(status.files);
     self.inRebase(!!status.inRebase);

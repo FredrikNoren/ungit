@@ -51,11 +51,14 @@ PathViewModel.prototype.updateStatus = function() {
     if (err) return;
     if (status == 'inited') {
       self.status('repository');
-      self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
+      if (!self.repository())
+        self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
     } else if (status == 'uninited') {
       self.status('uninited');
+      self.repository(null);
     } else if (status == 'no-such-path') {
       self.status('invalidpath');
+      self.repository(null);
     }
   });
 }
@@ -69,6 +72,8 @@ PathViewModel.prototype.initRepository = function() {
 PathViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-credentials') this.cloningProgressBar.pause();
   else if (event.event == 'request-credentials-response') this.cloningProgressBar.unpause();
+  else if (event.event == 'working-tree-changed') this.updateStatus();
+  else if (event.event == 'request-app-content-refresh') this.updateStatus();
 
   if (this.repository()) this.repository().onProgramEvent(event);
 }
@@ -88,7 +93,7 @@ PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
   this.server.post('/createDir',  {dir: this.path }, function() {
-    self.status('uninited');
+    self.updateStatus();
   });
 }
 

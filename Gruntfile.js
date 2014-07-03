@@ -32,7 +32,9 @@ module.exports = function(grunt) {
     browserify: {
       common: {
         options: {
-          noParse: ['public/vendor/js/superagent.js'],
+          browserifyOptions: {
+            noParse: ['public/vendor/js/superagent.js'],
+          },
           debug: true,
           // Make these globally requireable, for use in plugins
           alias: [
@@ -42,15 +44,16 @@ module.exports = function(grunt) {
             'public/source/main.js:ungit-main',
             'source/utils/vector2.js:ungit-vector2',
             'source/address-parser.js:ungit-address-parser',
-            'knockout:',
-            'lodash:',
-            'hasher:',
-            'crossroads:',
-            'async:',
-            'moment:',
-            'blueimp-md5:',
-            'color:',
-            'signals:'
+            'knockout:knockout',
+            'lodash:lodash',
+            'hasher:hasher',
+            'crossroads:crossroads',
+            'async:async',
+            'moment:moment',
+            'blueimp-md5:blueimp-md5',
+            'color:color',
+            'signals:signals',
+            'util:util'
           ]
         },
         files: {
@@ -60,6 +63,9 @@ module.exports = function(grunt) {
       },
       components: {
         options: {
+          browserifyOptions: {
+            bundleExternal: false
+          },
           external: [
             'ungit-components',
             'ungit-program-events',
@@ -327,16 +333,12 @@ module.exports = function(grunt) {
           if (dep == 'forever-monitor') return callback();
           // Socket.io 1.0.0-pre didn't work with phantomjs, so keep it at 0.9.16 for now
           if (dep == 'socket.io') return callback();
-          // Hold back browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved (peer dep to grunt-browserify)
-          if (dep == 'browserify') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
         async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
-          // Hold back grunt-browserify until https://github.com/jmreidy/grunt-browserify/issues/196 is resolved
-          if (dep == 'grunt-browserify') return callback();
           // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
           if (dep == 'supertest') return callback();
 
