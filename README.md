@@ -69,6 +69,7 @@ Known issues
 ------------
 
 * If you're running MacOSX Mavericks and Ungit crashes after a few seconds; try updating npm and node. See [#259](https://github.com/FredrikNoren/ungit/issues/259) and [#249](https://github.com/FredrikNoren/ungit/issues/249) for details.
+* Ubuntu users may have trouble installing because the node executable is named differently on Ubuntu, see https://github.com/FredrikNoren/ungit/issues/401
 
 License (MIT)
 -------------
