@@ -1,5 +1,5 @@
 <div class="stashToggle" data-bind="click: toggleShowStash, css: {stashShowing: isShow}" >
-Toggle show stash
+Toggle show stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
 <div class="panel panel-default stash" data-bind="visible: visible">
   <div class="panel-body">
