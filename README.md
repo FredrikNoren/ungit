@@ -69,8 +69,8 @@ Known issues
 ------------
 
 * If you're running MacOSX Mavericks and Ungit crashes after a few seconds; try updating npm and node. See [#259](https://github.com/FredrikNoren/ungit/issues/259) and [#249](https://github.com/FredrikNoren/ungit/issues/249) for details.
-* Ubuntu users may have trouble installing because the node executable is named differently on Ubuntu, see https://github.com/FredrikNoren/ungit/issues/401
-* Debian Wheezy's version of git and nodejs are too old, therefore build nodejs manually from source and start ungit with the `--gitVersionCheckOverride` argument
+* Ubuntu users may have trouble installing because the node executable is named differently on Ubuntu, see [#401](https://github.com/FredrikNoren/ungit/issues/401)
+* Debian Wheezy's supported git and nodejs packages are too old, therefore build nodejs manually from source ([GUIDE](http://www.control-escape.com/linux/lx-swinstall-tar.html)) and start ungit with the `--gitVersionCheckOverride` argument. See [#406](https://github.com/FredrikNoren/ungit/issues/406) and [#142](https://github.com/FredrikNoren/ungit/issues/142) for details.
 
 License (MIT)
 -------------
