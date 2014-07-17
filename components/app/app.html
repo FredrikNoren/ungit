@@ -1,6 +1,8 @@
 
 <!-- ko component: header --><!-- /ko -->
 
+<div class="app-wrapper">
+
 <div class="container" data-bind="shown: shown" data-ta-container="app">
   <div class="alert alert-info" data-bind="visible: newVersionAvailable">
     A new version of ungit (<span data-bind="text: latestVersion"></span>) is available! Run <code data-bind="text: newVersionInstallCommand"></code> to install. (You are currently running version <span data-bind="text: currentVersion"></span>.)
@@ -47,6 +49,7 @@
 <div class="container container-wide" data-bind="component: content"></div>
 <!-- /ko -->
 
+</div>
 
 <!-- ko if: dialog -->
 <!-- ko template: { name: templateChooser, data: dialog } --><!-- /ko -->
