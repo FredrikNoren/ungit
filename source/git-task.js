@@ -39,6 +39,9 @@ var GitTask = function() {
     self.onStarted.dispatch();
     return self;
   }
+  this.start = function() {
+    self.setStarted();
+  }
   this.setResult = function(err, result) {
     self.error = err;
     self.result = result;

@@ -3,7 +3,7 @@
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
   "version": "0.8.2",
-  "ungitPluginApiVersion": "0.1.0",
+  "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "grunt test"
