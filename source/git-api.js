@@ -392,8 +392,8 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
     git('commit --file=- ', req.param('path'))
-      .started(function(process) {
-        process.stdin.end(req.param('message'));
+      .started(function() {
+        this.process.stdin.end(req.param('message'));
       })
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))

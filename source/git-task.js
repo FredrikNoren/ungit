@@ -30,14 +30,13 @@ var GitTask = function() {
     return self;
   }
   this.started = function(callback) {
-    if (self._started) callback(self._process);
-    else self.onStarted.add(callback);
+    if (self._started) callback.call(this);
+    else self.onStarted.add(callback.bind(this));
     return self;
   }
-  this.setStarted = function(process) {
+  this.setStarted = function() {
     self._started = true;
-    self._process = process;
-    self.onStarted.dispatch(process);
+    self.onStarted.dispatch();
     return self;
   }
   this.setResult = function(err, result) {

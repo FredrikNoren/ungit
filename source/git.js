@@ -116,7 +116,8 @@ var gitQueue = async.queue(function (task, callback) {
       }
     });
 
-  task.setStarted(process);
+  task.process = process;
+  task.setStarted();
 }, config.maxConcurrentGitOperations);
 
 git.queueTask = function(task) {
@@ -298,9 +299,9 @@ git.updateIndexFromFileList = function(repoPath, files) {
           else {
             git('update-index --add --stdin', repoPath)
               .always(done)
-              .started(function(process) {
+              .started(function() {
                 var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-                process.stdin.end(filesToAdd);
+                this.process.stdin.end(filesToAdd);
               });
           }
         },
@@ -309,9 +310,9 @@ git.updateIndexFromFileList = function(repoPath, files) {
           else {
             git('update-index --remove --stdin', repoPath)
               .always(done)
-              .started(function(process) {
+              .started(function() {
                 var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-                process.stdin.end(filesToRemove);
+                this.process.stdin.end(filesToRemove);
               });
           }
         }
@@ -339,8 +340,8 @@ git.commit = function(repoPath, amend, message, files) {
     .done(function() {
       git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
         .always(task.setResult)
-        .started(function(process) {
-          process.stdin.end(message);
+        .started(function() {
+          this.process.stdin.end(message);
         });
     });
 
