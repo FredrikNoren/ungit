@@ -18,7 +18,6 @@ exports.registerApi = function(env) {
   var app = env.app;
   var server = env.server;
   var ensureAuthenticated = env.ensureAuthenticated || function(req, res, next) { next(); };
-  var ensurePathExists = env.ensurePathExists || function(req, res, next) { next(); };
   var config = env.config;
   var io = env.socketIO;
   var socketsById = env.socketsById || {};
@@ -60,6 +59,15 @@ exports.registerApi = function(env) {
         if (callback) callback();
       });
     });
+  }
+  
+  var ensurePathExists = function(req, res, next) {
+    var path = req.param('path');
+    if (!fs.existsSync(path)) {
+      res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
+    } else {
+      next();
+    }
   }
 
   var ensureValidSocketId = function(req, res, next) {

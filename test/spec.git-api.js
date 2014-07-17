@@ -49,7 +49,7 @@ describe('git-api', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('not-a-repository');
 				done();
 			}));
@@ -70,7 +70,7 @@ describe('git-api', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('no-such-path');
 				done();
 			}));

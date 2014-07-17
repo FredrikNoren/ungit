@@ -103,15 +103,6 @@ if (config.autoShutdownTimeout) {
   refreshAutoShutdownTimeout();
 }
 
-var ensurePathExists = function(req, res, next) {
-  var path = req.param('path');
-  if (!fs.existsSync(path)) {
-    res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
-  } else {
-    next();
-  }
-}
-
 var ensureAuthenticated = function(req, res, next) { next(); };
 
 if (config.authentication) {
@@ -205,7 +196,6 @@ var apiEnvironment = {
   app: app,
   server: server,
   ensureAuthenticated: ensureAuthenticated,
-  ensurePathExists: ensurePathExists,
   git: require('./git'),
   config: config,
   pathPrefix: gitApi.pathPrefix,
