@@ -92,7 +92,11 @@ var defaultConfig = {
   pluginConfigs: {},
 
   // Git version check override
-  gitVersionCheckOverride: false
+  gitVersionCheckOverride: false,
+
+  // Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick. This makes it
+  // possible to perform those actions even when you have a dirty working directory.
+  autoStashAndPop: true,
 };
 
 function getUserHome() {

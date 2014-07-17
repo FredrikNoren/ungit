@@ -106,6 +106,8 @@ var gitQueue = async.queue(function (task, callback) {
           err.errorCode = 'merge-failed';
         else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
           err.errorCode = 'must-be-in-working-tree';
+        else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
+          err.errorCode = 'local-changes-would-be-overwritten';
         task.setResult(err);
         callback(err);
       }

@@ -11,7 +11,7 @@ var wrapErrorHandler = common.wrapErrorHandler;
 var app = express();
 app.use(require('body-parser')());
 
-restGit.registerApi({ app: app, config: { dev: true } });
+restGit.registerApi({ app: app, config: { dev: true, autoStashAndPop: true } });
 
 var testDir;
 
@@ -50,7 +50,7 @@ describe('git-api conflict rebase', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
@@ -118,7 +118,7 @@ describe('git-api conflict checkout', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
@@ -174,7 +174,7 @@ describe('git-api conflict merge', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
@@ -245,7 +245,7 @@ describe('git-api conflict solve by deleting', function () {
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(400)
-			.end(wrapErrorHandler(done, function(err, res) {
+			.end(wrapErrorHandler(function(err, res) {
 				expect(res.body.errorCode).to.be('merge-failed');
 				done();
 			}));
@@ -279,4 +279,5 @@ describe('git-api conflict solve by deleting', function () {
 		common.post(req, '/rebase/continue', { path: testDir }, done);
 	});
 
-})
+});
+

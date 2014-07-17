@@ -86,6 +86,11 @@ exports.registerApi = function(env) {
     }
   }
 
+  function autoStashAndPop(path, gitTask) {
+    if (config.autoStashAndPop) return git.stashAndPop(path, gitTask);
+    else return gitTask;
+  }
+
   var jsonFail = function(res, err) {
     res.json(400, err);
   }
@@ -164,7 +169,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.stashAndPop(req.param('path'), git('reset --' + req.param('mode') + ' "' + req.body.to + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git('reset --' + req.param('mode') + ' "' + req.body.to + '"', req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -370,7 +375,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.stashAndPop(req.param('path'), git('checkout "' + req.body.name.trim() + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git('checkout "' + req.body.name.trim() + '"', req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -378,7 +383,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.stashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
