@@ -35,10 +35,11 @@ function StashViewModel(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
-  this.isShow = ko.observable(true);
-  this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow(); });
+  this.isShow = ko.observable(localStorage['showStash']);
+  this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow() === 'true'; });
   this.refresh();
 }
+
 StashViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('stash', this, {}, parentElement);
 }
@@ -59,5 +60,13 @@ StashViewModel.prototype.refresh = function() {
   });
 }
 StashViewModel.prototype.toggleShowStash = function() {
-  this.isShow(!this.isShow());
+  var newValue;
+
+  if ('true' === this.isShow()) {
+    newValue = 'false';
+  } else {
+    newValue = 'true';
+  }
+  this.isShow(newValue);
+  localStorage['showStash'] = newValue;
 }
