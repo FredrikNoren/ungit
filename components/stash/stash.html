@@ -1,4 +1,4 @@
-<div class="stashToggle" data-bind="click: toggleShowStash, visible: isShow() === 'false'" >
+<div class="stashToggle" data-bind="click: toggleShowStash, visible: !isShow()" >
   <span class="glyphicon glyphicon-eye-open"></span>
   Stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
