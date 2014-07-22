@@ -18,7 +18,7 @@ var AppViewModel = function(appContainer, server) {
 
   this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
-  
+
   this.content = ko.observable(components.create('home', { app: this }));
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
@@ -26,10 +26,7 @@ var AppViewModel = function(appContainer, server) {
   this.newVersionInstallCommand = (ungit.platform == 'win32' ? '' : 'sudo -H ') + 'npm update -g ungit';
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
 
-  this.bugtrackingNagscreenDismissed = ko.computed({
-    read: function() { return localStorage.getItem('bugtrackingNagscreenDismissed'); },
-    write: function(value) { localStorage.setItem('bugtrackingNagscreenDismissed', value); }
-  })
+  this.bugtrackingNagscreenDismissed = ko.observable(localStorage.getItem('bugtrackingNagscreenDismissed'));
   this.showBugtrackingNagscreen = ko.computed(function() {
     return !self.bugtrackingEnabled() && !self.bugtrackingNagscreenDismissed();
   });
@@ -141,6 +138,7 @@ AppViewModel.prototype.enableBugtracking = function() {
   });
 }
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
+  localStorage.setItem('bugtrackingNagscreenDismissed', true);
   this.bugtrackingNagscreenDismissed(true);
 }
 AppViewModel.prototype.dismissNPSSurvey = function() {
@@ -151,6 +149,3 @@ AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
   return data.template;
 };
-
-
-
