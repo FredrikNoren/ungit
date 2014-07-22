@@ -3,7 +3,8 @@
   position: relative;
   margin-left: 20px;
   margin-right: 20px;
-  top: 20px;
+  top: 0px;
+  margin-bottom: -20px;
   background: #55323C;
 }
 .stashToggle {
