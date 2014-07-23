@@ -1,11 +1,11 @@
-<div class="stashToggle" data-bind="click: toggleShowStash, visible: !isShow()" >
-  <span class="glyphicon glyphicon-eye-open"></span>
+<div class="stash-toggle stash-toggle-text" data-bind="click: toggleShowStash, visible: !isShow()" >
+  <span class="glyphicon glyphicon-chevron-up"></span>
   Stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
 <div class="panel panel-default stash" data-bind="visible: visible">
   <div class="panel-body">
-    <h4 class="inline-block" data-bind="click: toggleShowStash">
-      <span class="glyphicon glyphicon-eye-close"></span>
+    <h4 class="stash-toggle-text" data-bind="click: toggleShowStash">
+      <span class="glyphicon glyphicon-chevron-down"></span>
       Stashed changes (<span data-bind="text: stashedChanges().length"></span>)
     </h4>
     <div class="list-group" data-bind="foreach: stashedChanges">
