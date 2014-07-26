@@ -8,7 +8,7 @@ function Server() {
 }
 module.exports = Server;
 
-Server.prototype.initSocket = function(callback) {
+Server.prototype.initSocket = function() {
   var self = this;
   this.socket = io.connect();
   this.socket.on('error', function(err) {
@@ -22,7 +22,7 @@ Server.prototype.initSocket = function(callback) {
   });
   this.socket.on('connected', function (data) {
     self.socketId = data.socketId;
-    callback();
+    programEvents.dispatch({ event: 'connected' });
   });
   this.socket.on('working-tree-changed', function () {
     programEvents.dispatch({ event: 'working-tree-changed' });

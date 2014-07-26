@@ -108,11 +108,16 @@ exports.start = function() {
   appContainer = new AppContainerViewModel();
   app = components.create('app', { appContainer: appContainer, server: server });
   programEvents.add(function(event) {
-    if (event.event == 'disconnected') {
-      appContainer.crash({ title: 'Connection lost', details: 'Refresh the page to try to reconnect' });
-    } else if (event.event  == 'git-crash-error') {
+    if (event.event  == 'git-crash-error') {
       appContainer.crash(DEFAULT_UNKOWN_CRASH);
-    } else if (app.onProgramEvent) {
+    } else if (event.event == 'disconnected') {
+      appContainer.crash({ title: 'Connection lost', details: 'Refresh the page to try to reconnect' });
+    } else if (event.event == 'connected') {
+      appContainer.crash(null);
+      appContainer.content(app);
+    }
+
+    if (app.onProgramEvent) {
       app.onProgramEvent(event);
     }
   });
@@ -120,14 +125,10 @@ exports.start = function() {
     var authenticationScreen = components.create('login', { server: server });
     appContainer.content(authenticationScreen);
     authenticationScreen.loggedIn.add(function() {
-      server.initSocket(function() {
-        appContainer.content(app);
-      });
+      server.initSocket();
     });
   } else {
-    server.initSocket(function() {
-      appContainer.content(app);
-    });
+    server.initSocket();
   }
 
   Raven.TraceKit.report.subscribe(function(err) {
