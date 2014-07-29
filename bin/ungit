@@ -86,7 +86,7 @@ function verifyGitVersion(callback) {
       }
       var version = versionSearch[1];
       if (!semver.satisfies(version, requiredVersion)) {
-        callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version);
+        callback('Ungit requires git version ' + requiredVersion + ', you are currently running ' + version +'. Start ungit with --gitVersionCheckOverride (or set that option to true in your .ungitrc) to override this check. ');
       } else {
         callback();
       }
