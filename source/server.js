@@ -265,6 +265,12 @@ app.get('/api/ping', function(req, res) {
   res.json({});
 });
 
+app.get('/api/gitversion', function(req, res) {
+  sysinfo.getGitVersionInfo(function(result) {
+    res.json(result);
+  });
+});
+
 function getUserHome() {
   return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || "/tmp";
 }

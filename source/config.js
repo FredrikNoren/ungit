@@ -92,7 +92,7 @@ var defaultConfig = {
   // "pluginConfigs": { "gerrit": { "disabled": true } }
   pluginConfigs: {},
 
-  // Git version check override
+  // Don't show errors when the user is using a bad or undecidable git version
   gitVersionCheckOverride: false,
 
   // Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick. This makes it
@@ -102,19 +102,6 @@ var defaultConfig = {
 
 function getUserHome() {
   return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-}
-
-function getInvalidOption() {
-  for (var key in argv) {
-    if (key === '$0' || key === '_') {
-      // do nothing
-    } else {
-      if (!defaultConfig[key]) {
-        return key;
-      }
-    }
-  }
-  return null;
 }
 
 // Works for now but should be moved to bin/ungit
@@ -128,8 +115,6 @@ var argv = optimist
   .describe('v', 'Display ungit versions')
   .argv;
 
-var invalidOption = getInvalidOption();
-
 if (argv.help) {
   optimist.showHelp();
   process.exit(0);
@@ -142,9 +127,6 @@ if (argv.help) {
     defaultConfig,
     argv
   ]);
-} else if (invalidOption) {
-  console.log('unknown option(s) for ungit: ' + invalidOption);
-  process.exit(0);
-}else {
+} else {
   module.exports = rc('ungit', defaultConfig, argv);
 }

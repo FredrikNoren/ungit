@@ -31,6 +31,12 @@ var AppViewModel = function(appContainer, server) {
     return !self.bugtrackingEnabled() && !self.bugtrackingNagscreenDismissed();
   });
 
+  this.gitVersionErrorDismissed = ko.observable(localStorage.getItem('gitVersionErrorDismissed'));
+  this.gitVersionError = ko.observable();
+  this.gitVersionErrorVisible = ko.computed(function() {
+    return !ungit.config.gitVersionCheckOverride && self.gitVersionError() && !self.gitVersionErrorDismissed();
+  });
+
   var NPSSurveyLastDismissed = parseInt(localStorage.getItem('NPSSurveyLastDismissed') || '0');
   var monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
   this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
@@ -69,6 +75,11 @@ AppViewModel.prototype.shown = function() {
     self.currentVersion(version.currentVersion);
     self.latestVersion(version.latestVersion);
     self.newVersionAvailable(version.outdated);
+  });
+  this.server.get('/gitversion', undefined, function(err, gitversion) {
+    if (!gitversion.satisfied) {
+      self.gitVersionError(gitversion.error);
+    }
   });
 }
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
@@ -140,6 +151,10 @@ AppViewModel.prototype.enableBugtracking = function() {
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
   localStorage.setItem('bugtrackingNagscreenDismissed', true);
   this.bugtrackingNagscreenDismissed(true);
+}
+AppViewModel.prototype.dismissGitVersionError = function() {
+  localStorage.setItem('gitVersionErrorDismissed', true);
+  this.gitVersionErrorDismissed(true);
 }
 AppViewModel.prototype.dismissNPSSurvey = function() {
   this.showNPSSurvey(false);
