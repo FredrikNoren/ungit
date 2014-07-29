@@ -81,7 +81,10 @@ Server.prototype.query = function(method, path, body, callback) {
     if (error || !res.ok) {
       // superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
       if (error && error.crossDomain) {
-        self._onDisconnect();
+        self._isConnected(function(connected) {
+          if (connected) callback({ errorCode: 'cross-domain-error', error: error });
+          else self._onDisconnect();
+        });
         return;
       }
       var errorSummary = 'unknown';
