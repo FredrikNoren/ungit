@@ -1,6 +1,7 @@
 var rc = require('rc');
 var optimist = require('optimist');
 var path = require('path');
+var fs = require('fs');
 
 var defaultConfig = {
 
@@ -103,16 +104,37 @@ function getUserHome() {
   return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 }
 
+function getInvalidOption() {
+  for (var key in argv) {
+    if (key === '$0' || key === '_') {
+      // do nothing
+    } else {
+      if (!defaultConfig[key]) {
+        return key;
+      }
+    }
+  }
+  return null;
+}
+
 // Works for now but should be moved to bin/ungit
 var argv = optimist
-  .usage('ungit [-b] [--cliconfigonly]')
+  .usage('ungit [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
   .alias('b', 'launchBrowser')
+  .alias('v', 'version')
+  .describe('gitVersionCheckOverride', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
   .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this.')
   .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
+  .describe('v', 'Display ungit versions')
   .argv;
+
+var invalidOption = getInvalidOption();
 
 if (argv.help) {
   optimist.showHelp();
+  process.exit(0);
+} else if (argv.v) {
+  console.log('ungit version: ' + JSON.parse(fs.readFileSync('../package.json')).version);
   process.exit(0);
 } else if (argv.cliconfigonly) {
   var deepExtend = require('deep-extend');
@@ -120,6 +142,9 @@ if (argv.help) {
     defaultConfig,
     argv
   ]);
-} else {
+} else if (invalidOption) {
+  console.log('unknown option(s) for ungit: ' + invalidOption);
+  process.exit(0);
+}else {
   module.exports = rc('ungit', defaultConfig, argv);
 }
