@@ -85,8 +85,18 @@ ko.bindingHandlers.autocomplete = {
   });
 })();
 
+function WindowTitle() {
+  this.path = 'ungit';
+  this.disconnected = false;
+}
+WindowTitle.prototype.update = function() {
+  var title = this.path.replace('\\', '/').split('/').filter(function(x) { return x; }).reverse().join(' < ');
+  if (this.disconnected) title = ':( ' + title;
+  document.title = title;
+}
 
-
+var windowTitle = new WindowTitle();
+windowTitle.update();
 
 var AppContainerViewModel = function() {
   var self = this;
@@ -112,9 +122,13 @@ exports.start = function() {
       appContainer.crash(DEFAULT_UNKOWN_CRASH);
     } else if (event.event == 'disconnected') {
       appContainer.crash({ title: 'Connection lost', details: 'Refresh the page to try to reconnect' });
+      windowTitle.disconnected = true;
+      windowTitle.update();
     } else if (event.event == 'connected') {
       appContainer.crash(null);
       appContainer.content(app);
+      windowTitle.disconnected = false;
+      windowTitle.update();
     }
 
     if (app.onProgramEvent) {
@@ -150,12 +164,16 @@ exports.start = function() {
   // routing
   navigation.crossroads.addRoute('/', function() {
     app.content(components.create('home', { app: app }));
+    windowTitle.path = 'ungit';
+    windowTitle.update();
   });
 
   navigation.crossroads.addRoute('/repository{?query}', function(query) {
     programEvents.dispatch({ event: 'navigated-to-path', path: query.path });
     app.content(components.create('path', { server: server, path: query.path }));
-  })
+    windowTitle.path = query.path;
+    windowTitle.update();
+  });
 
   navigation.init();
 }
