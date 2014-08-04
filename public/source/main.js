@@ -5,6 +5,7 @@ var $ = require('../vendor/js/jquery-2.0.0.min');
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
+require('../vendor/js/bootstrap/tooltip');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
 require('./knockout-bindings');
 var components = require('./components');
@@ -26,7 +27,7 @@ var navigation = require('./navigation');
     window.requestAnimationFrame = function(callback, element) {
       var currTime = new Date().getTime();
       var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+      var id = window.setTimeout(function() { callback(currTime + timeToCall); },
         timeToCall);
       lastTime = currTime + timeToCall;
       return id;
@@ -36,6 +37,12 @@ var navigation = require('./navigation');
     window.cancelAnimationFrame = function(id) {
       clearTimeout(id);
     };
+
+  programEvents.add(function(event) {
+    if (event.event == 'init-tooltip') {
+      $('.bootstrap-tooltip').tooltip();
+    }
+  });
 }());
 
 ko.bindingHandlers.autocomplete = {
@@ -71,7 +78,7 @@ ko.bindingHandlers.autocomplete = {
 };
 
 
-// Used to catch when a user was tabbed away and re-visits the page. 
+// Used to catch when a user was tabbed away and re-visits the page.
 // If fs.watch worked better on Windows (i.e. on subdirectories) we wouldn't need this
 (function detectReActivity() {
   var lastMoved = Date.now();
