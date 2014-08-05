@@ -18,7 +18,7 @@
                   </span>
                   <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-        
+
         <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
@@ -42,18 +42,18 @@
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="col-lg-9 file-area">
-        <div class="commands btn-group btn-group-sm"> 
+        <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
           <button class="btn btn-default" data-bind="click: toogleAllStages">
-            <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span> 
+            <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
             Toggle all
           </button>
           <button class="btn btn-default" data-bind="click: discardAllChanges">
-            <span class="glyphicon glyphicon-trash"></span> 
+            <span class="glyphicon glyphicon-trash"></span>
             Discard all
           </button>
           <button class="btn btn-default" data-bind="click: stashAll, css: { disabled: !canStashAll() }">
-            <span class="glyphicon glyphicon-paperclip"></span> 
+            <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
@@ -71,8 +71,10 @@
             <span class="new" data-bind="visible: isNew">New</span>
             <span class="deleted" data-bind="visible: removed">Removed</span>
             <span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
-            <span class="ignore" data-ta-clickable="ignore-file" data-bind="click: ignoreFile">i<span class="explanation">&nbsp;Add to .gitignore</span></span>
-            <span class="discard" data-ta-clickable="discard-file" data-bind="click: discardChanges">&#x2716;<span class="explanation">&nbsp;Discard changes</span></span>
+            <span class="ignore bootstrap-tooltip" data-ta-clickable="ignore-file" data-bind="click: ignoreFile"
+                data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
+            <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
+                data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
             <!-- ko if: showingDiffs -->
             <div class="diffContainer" data-bind="component: diff"></div>
             <!-- /ko -->

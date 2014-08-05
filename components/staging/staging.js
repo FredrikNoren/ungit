@@ -128,6 +128,7 @@ StagingViewModel.prototype.setFiles = function(files) {
     newFiles.push(fileViewModel);
   }
   this.files(newFiles);
+  programEvents.dispatch({ event: 'init-tooltip' });
 }
 StagingViewModel.prototype.toogleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
@@ -135,7 +136,7 @@ StagingViewModel.prototype.toogleAmend = function() {
     this.commitMessageBody(this.HEAD().body);
   }
   else if(this.amend()) {
-    var isPrevDefaultMsg = 
+    var isPrevDefaultMsg =
       this.commitMessageTitle() == this.HEAD().title &&
       this.commitMessageBody() == this.HEAD().body;
     if (isPrevDefaultMsg) {
@@ -194,7 +195,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   this.mergeAbortProgressBar.start();
   this.server.post('/merge/abort', { path: this.repoPath }, function(err, res) {
     self.mergeAbortProgressBar.stop();
-  }); 
+  });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -263,7 +264,7 @@ FileViewModel.prototype.ignoreFile = function() {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
       return true;
-    } 
+    }
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
@@ -286,5 +287,3 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
     });
   }
 }
-
- 
