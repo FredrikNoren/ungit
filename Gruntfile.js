@@ -26,6 +26,7 @@ module.exports = function(grunt) {
           "components/repository/repository.css": ["components/repository/repository.less"],
           "components/staging/staging.css": ["components/staging/staging.less"],
           "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
+          "components/stash/stash.css": ["components/stash/stash.less"],
         }
       }
     },
@@ -178,7 +179,7 @@ module.exports = function(grunt) {
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation        
+        '-W069': true, // ignore ['HEAD'] is better written in dot notation
       },
       web: {
         options: {
@@ -336,7 +337,7 @@ module.exports = function(grunt) {
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
-        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {          
+        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
           // Same with imagemin, something with 0.5.0 doesn't work on mac
           if (dep == 'grunt-contrib-imagemin') return callback();
           // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
@@ -349,7 +350,7 @@ module.exports = function(grunt) {
         grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
         done();
       });
-      
+
     });
   });
 
