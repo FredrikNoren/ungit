@@ -282,6 +282,18 @@ exports.registerApi = function(env) {
       .start();
   });
 
+  app.get(exports.pathPrefix + '/show/file', ensureAuthenticated, ensurePathExists, function(req, res) {
+    git('show ' + req.query.sha1 + ':' + req.param('filePath'), req.param('path'))
+      .always(function(err, file) {
+        if (err) {
+          res.json(400, err);
+        } else {
+          res.json(file);
+        }
+      })
+      .start();
+  });
+
   app.get(exports.pathPrefix + '/show', ensureAuthenticated, function(req, res){
     git('show --numstat ' + req.query.sha1, req.param('path'))
       .parser(gitParser.parseGitLog)
