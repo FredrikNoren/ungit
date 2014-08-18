@@ -18,7 +18,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.sha1 = sha1;
 
   this.isInited = false;
-  
+
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
@@ -197,4 +197,7 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
+}
+GitNodeViewModel.prototype.getDetailedDiffLink = function() {
+  return '/detaileddiff?sha1right=' + this.sha1 + '&path=' + this.graph.repoPath;
 }
