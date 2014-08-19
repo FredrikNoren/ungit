@@ -29,6 +29,7 @@ function DialogViewModel(title) {
   this.title = ko.observable(title);
   this.taDialogName = ko.observable('');
 }
+exports.DialogViewModel = DialogViewModel;
 DialogViewModel.prototype.setCloser = function(closer) {
   this.close = closer;
 }

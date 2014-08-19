@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "detailedDiff": "detaileddiff.html"
+    },
+    "javascript": "detaileddiff.bundle.js",
+    "css": "detaileddiff.css"
+  }
+}

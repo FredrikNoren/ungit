@@ -7,6 +7,7 @@ var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
+var programEvents = require('ungit-program-events');
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -200,4 +201,9 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
 }
 GitNodeViewModel.prototype.getDetailedDiffLink = function() {
   return '/detaileddiff?sha1right=' + this.sha1 + '&path=' + this.graph.repoPath;
+}
+GitNodeViewModel.prototype.detailedDiffClick = function() {
+  var diag = components.create('detaileddiff', { });
+
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }

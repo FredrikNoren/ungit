@@ -27,7 +27,7 @@
                    |
                   <span data-bind="text: sha1.substr(0, 8)"></span>
                    |
-                  <span><a data-bind="attr: {'href': getDetailedDiffLink() }, text: 'Detailed Diff'" target="_blank"></a></span>
+                  <span data-bind="text: 'Detailed Diff', click: detailedDiffClick" ></span>
                 </div>
               </div>
             </div>
