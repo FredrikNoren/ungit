@@ -203,7 +203,7 @@ GitNodeViewModel.prototype.getDetailedDiffLink = function() {
   return '/detaileddiff?sha1right=' + this.sha1 + '&path=' + this.graph.repoPath;
 }
 GitNodeViewModel.prototype.detailedDiffClick = function() {
-  var diag = components.create('detaileddiff', { });
+  var diag = components.create('detaileddiff', { 'repoPath': this.graph.repoPath, 'server': this.server, 'sha1Right': this.sha1 });
 
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  programEvents.dispatch({ 'event': 'request-show-dialog', 'dialog': diag });
 }
