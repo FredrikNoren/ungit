@@ -12,13 +12,33 @@ var DetailedDiff = function(repoPath, server, sha1Right, sha1Left) {
   this.repoPath = repoPath;
   this.server = server;
   this.sha1Right = ko.observable(sha1Right);
+  this.fileNames = ko.observable();
 
-  // If left is not defined, assume immediately previous sha1
+  // If left is not defined, assume compare against immediately previous sha1
   if (sha1Left) {
     this.sha1Left = ko.observable(sha1Left);
   } else {
     this.sha1Left = ko.observable(sha1Right + "~1");
   }
+
+  var self = this;
+
+  // get fileNames
+  this.server.get('/show', { path: this.repoPath, sha1: this.sha1Right() }, function(err, logEntries) {
+    if (err || !logEntries || !logEntries[0] || logEntries[0].fileLineDiffs.length === 0) {
+      return;
+    }
+
+    var fileNames = [];
+
+    // ignoring first item as it is contains total line diff info
+    for(var n = 1; n < logEntries[0].fileLineDiffs.length; n++) {
+      // Only extract file names.
+      fileNames.push(logEntries[0].fileLineDiffs[n][2]);
+    }
+
+    self.fileNames(fileNames);
+  });
 }
 inherits(DetailedDiff, DialogViewModel);
 DetailedDiff.prototype.template = 'detailedDiff';
