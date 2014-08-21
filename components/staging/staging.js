@@ -9,6 +9,10 @@ components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
 });
 
+components.register('fileViewModel', function(args) {
+  return new FileViewModel(args.server, args.repoPath, args.name, args.type, args.sha1);
+});
+
 var StagingViewModel = function(server, repoPath) {
   var self = this;
   this.server = server;
@@ -121,7 +125,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self.server, self.repoPath, file, files[file].type);
     }
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
@@ -226,10 +230,11 @@ StagingViewModel.prototype.toggleAllStages = function() {
   self.allStageFlag(!self.allStageFlag());
 }
 
-var FileViewModel = function(staging, name, type) {
+var FileViewModel = function(server, repoPath, name, type, sha1) {
   var self = this;
-  this.staging = staging;
-  this.server = staging.server;
+  this.server = server;
+  this.repoPath = repoPath;
+  this.sha1 = sha1;
   this.type = ko.observable(type);
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
@@ -237,11 +242,12 @@ var FileViewModel = function(staging, name, type) {
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
-  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.repoPath, temporary: true });
   this.diff = ko.observable(components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
       filename: this.name(),
-      repoPath: this.staging.repoPath,
-      server: this.server
+      repoPath: this.repoPath,
+      server: this.server,
+      sha1: this.sha1
     }));
 }
 FileViewModel.prototype.setState = function(state) {
@@ -255,11 +261,11 @@ FileViewModel.prototype.toggleStaged = function() {
   this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
-  this.server.post('/discardchanges', { path: this.staging.repoPath, file: this.name() });
+  this.server.post('/discardchanges', { path: this.repoPath, file: this.name() });
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.server.post('/ignorefile', { path: this.staging.repoPath, file: this.name() }, function(err) {
+  this.server.post('/ignorefile', { path: this.repoPath, file: this.name() }, function(err) {
     if (err && err.errorCode == 'file-already-git-ignored') {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
@@ -268,7 +274,7 @@ FileViewModel.prototype.ignoreFile = function() {
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
-  this.server.post('/resolveconflicts', { path: this.staging.repoPath, files: [this.name()] });
+  this.server.post('/resolveconflicts', { path: this.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toggleDiffs = function() {
   var self = this;

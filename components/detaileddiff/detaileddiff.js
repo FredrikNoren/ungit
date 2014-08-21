@@ -12,7 +12,7 @@ var DetailedDiff = function(repoPath, server, sha1Right, sha1Left) {
   this.repoPath = repoPath;
   this.server = server;
   this.sha1Right = ko.observable(sha1Right);
-  this.fileNames = ko.observable();
+  this.files = ko.observable();
 
   // If left is not defined, assume compare against immediately previous sha1
   if (sha1Left) {
@@ -29,15 +29,18 @@ var DetailedDiff = function(repoPath, server, sha1Right, sha1Left) {
       return;
     }
 
-    var fileNames = [];
-
+    var files = [];
     // ignoring first item as it is contains total line diff info
     for(var n = 1; n < logEntries[0].fileLineDiffs.length; n++) {
-      // Only extract file names.
-      fileNames.push(logEntries[0].fileLineDiffs[n][2]);
+      files.push(components.create('fileViewModel', { server: self.server,
+                                                      repoPath: self.repoPath,
+                                                      name: logEntries[0].fileLineDiffs[n][2],
+                                                      type: 'textdiff',
+                                                      sha1: self.sha1Right() }
+      ));
     }
 
-    self.fileNames(fileNames);
+    self.files(files);
   });
 }
 inherits(DetailedDiff, DialogViewModel);
