@@ -3,9 +3,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title" data-bind="text: title"></h4>
+        <span data-bind="text: '[' + sha1Left() + ']'"></span>
+        <span class="weak-text" data-bind="text: '>'"></span>
+        <span data-bind="text: '[' + sha1Right() + ']'"></span>
       </div>
       <div class="modal-body">
-        <p data-bind="text: 'body'"></p>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: close" data-ta-clickable="close">close</button>
