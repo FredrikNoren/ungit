@@ -6,7 +6,6 @@ require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/bootstrap/tooltip');
-require('../vendor/js/bootstrap/transition');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
 require('./knockout-bindings');
 var components = require('ungit-components');
