@@ -10,7 +10,7 @@
       <div class="modal-body">
 
         <!-- ko foreach: files -->
-          <div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
+          <div class="file" data-bind="css: { showingDiffs: showingDiffs }">
             <button class="name btn btn-default" data-bind="click: toogleDiffs">
               <span data-bind="text: name"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
