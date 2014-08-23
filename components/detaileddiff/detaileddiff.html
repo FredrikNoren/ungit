@@ -10,11 +10,11 @@
       <div class="modal-body">
 
         <!-- ko foreach: files -->
-          <div class="file" data-bind="css: { showingDiffs: showingDiffs }">
-            <button class="name btn btn-default" data-bind="click: toogleDiffs">
+          <div class="file" data-bind="css: { showingDiffs: showingDiffs}">
+            <div class="name" data-bind="click: toogleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}">
               <span data-bind="text: name"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
-            </button>
+            </div>
             <!-- ko if: showingDiffs -->
             <div class="diffContainer" data-bind="component: diff"></div>
             <!-- /ko -->
