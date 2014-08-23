@@ -3,12 +3,16 @@ var components = require('ungit-components');
 var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
 
+components.register('getFileType', function(args) {
+  return getFileType(args.fileName);
+});
+
 var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
-  this.specificDiff = ko.observable(components.create(this.type(), {
+  this.specificDiff = ko.observable(components.create(getFileType(this.fileName()), {
       filename: this.fileName(),
       repoPath: args.repoPath,
       server: args.server,
@@ -30,8 +34,8 @@ CommitLineDiff.prototype.fileNameClick = function(data, event) {
   event.stopImmediatePropagation();
 };
 
-CommitLineDiff.prototype.type = function() {
-  if (!this.fileName()) {
+var getFileType = function(fileName) {
+  if (!fileName) {
     return 'textdiff';
   }
   return fileType(this.fileName()) + 'diff';

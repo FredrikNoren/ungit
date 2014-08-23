@@ -32,10 +32,11 @@ var DetailedDiff = function(repoPath, server, sha1Right, sha1Left) {
     var files = [];
     // ignoring first item as it is contains total line diff info
     for(var n = 1; n < logEntries[0].fileLineDiffs.length; n++) {
+      var fileName = logEntries[0].fileLineDiffs[n][2];
       files.push(components.create('fileViewModel', { server: self.server,
                                                       repoPath: self.repoPath,
-                                                      name: logEntries[0].fileLineDiffs[n][2],
-                                                      type: 'textdiff',
+                                                      name: fileName,
+                                                      type: components.create('getFileType', {fileName: fileName}),
                                                       sha1: self.sha1Right() }
       ));
     }
