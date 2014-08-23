@@ -1,7 +1,6 @@
 
 var signals = require('signals');
-var programEvents = require('./program-events');
-var superagent = require('../vendor/js/superagent');
+var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 
 function Server() {
@@ -36,13 +35,46 @@ Server.prototype.initSocket = function() {
     });
   });
 }
+Server.prototype._queryToString = function(query) {
+  var str = [];
+  for(var p in query)
+    if (query.hasOwnProperty(p)) {
+      str.push(encodeURIComponent(p) + "=" + encodeURIComponent(query[p]));
+    }
+  return str.join("&");
+}
+Server.prototype._httpJsonRequest = function(request, callback) {
+  var httpRequest = new XMLHttpRequest();
+  httpRequest.onreadystatechange = function() {
+    if (httpRequest.readyState === 0) {
+      callback({ error: 'connection-lost' });
+    } else if (httpRequest.readyState === 4) {
+      var body;
+      try {
+        body = JSON.parse(httpRequest.responseText);
+      } catch(ex) { body = null; }
+      if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, text: httpRequest.responseText });
+      else callback(null, body);
+    }
+  }
+  var url = request.url;
+  if (request.query) {
+    url += '?' + this._queryToString(request.query);
+  }
+  httpRequest.open(request.method, url, true);
+  httpRequest.setRequestHeader('Accept', 'application/json');
+  if (request.body) {
+    httpRequest.setRequestHeader('Content-Type', 'application/json');
+    httpRequest.send(JSON.stringify(request.body));
+  } else {
+    httpRequest.send(null);
+  }
+}
 // Check if the server is still alive
 Server.prototype._isConnected = function(callback) {
-  superagent('GET', '/api/ping')
-    .set('Accept', 'application/json')
-    .end(function(error, res) {
-      callback(!error && res && res.ok);
-    });
+  this._httpJsonRequest({ method: 'GET', url: '/api/ping' }, function(err, res) {
+    callback(!err && res && res.ok);
+  });
 }
 Server.prototype._onDisconnect = function() {
   programEvents.dispatch({ event: 'disconnected' });
@@ -72,15 +104,16 @@ Server.prototype.del = function(path, query, callback) {
 Server.prototype.query = function(method, path, body, callback) {
   var self = this;
   if (body) body.socketId = this.socketId;
-  var q = superagent(method, '/api' + path);
-  if (method == 'GET' || method == 'DELETE') q.query(body);
-  else q.send(body);
-  q.set('Accept', 'application/json');
+  var request = {
+    method: method,
+    url: '/api' + path,
+  }
+  if (method == 'GET' || method == 'DELETE') request.query = body;
+  else request.body = body;
   var precreatedError = new Error(); // Capture stack-trace
-  q.end(function(error, res) {
-    if (error || !res.ok) {
-      // superagent faultly thinks connection lost == crossDomain error, both probably look the same in xhr
-      if (error && error.crossDomain) {
+  this._httpJsonRequest(request, function(error, res) {
+    if (error) {
+      if (error.error == 'connection-lost') {
         self._isConnected(function(connected) {
           if (connected) callback({ errorCode: 'cross-domain-error', error: error });
           else self._onDisconnect();
@@ -88,20 +121,25 @@ Server.prototype.query = function(method, path, body, callback) {
         return;
       }
       var errorSummary = 'unknown';
-      if (res) {
-        if (res.body) {
-          if (res.body.errorCode && res.body.errorCode != 'unknown') errorSummary = res.body.errorCode;
-          else if (typeof(res.body.error) == 'string') errorSummary = res.body.error.split('\n')[0];
-          else errorSummary = JSON.stringify(res.body.error);
-        }
-        else errorSummary = res.xhr.statusText + ' ' + res.xhr.status;
+      if (error.body) {
+        if (error.body.errorCode && error.body.errorCode != 'unknown') errorSummary = error.body.errorCode;
+        else if (typeof(error.body.error) == 'string') errorSummary = error.body.error.split('\n')[0];
+        else errorSummary = JSON.stringify(error.body.error);
       }
-      var err = { errorSummary: errorSummary, error: error, path: path, res: res, errorCode: res && res.body ? res.body.errorCode : 'unknown' };
+      else errorSummary = error.statusText + ' ' + error.status;
+
+      var err = {
+        errorSummary: errorSummary,
+        error: error,
+        path: path,
+        res: error,
+        errorCode: error && error.body ? error.body.errorCode : 'unknown'
+      };
       if (callback && callback(err)) return;
       else self._onUnhandledBadBackendResponse(err, precreatedError);
     }
     else if (callback)
-      callback(null, res.body);
+      callback(null, res);
   });
 };
 

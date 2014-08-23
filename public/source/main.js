@@ -8,10 +8,10 @@ require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/bootstrap/tooltip');
 require('../vendor/js/jquery-ui-1.10.3.custom.js');
 require('./knockout-bindings');
-var components = require('./components');
+var components = require('ungit-components');
 var Server = require('./server');
-var programEvents = require('./program-events');
-var navigation = require('./navigation');
+var programEvents = require('ungit-program-events');
+var navigation = require('ungit-navigation');
 
 // Request animation frame polyfill
 (function() {

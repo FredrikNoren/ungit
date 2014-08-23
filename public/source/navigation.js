@@ -1,5 +1,5 @@
 
-var programEvents = require('./program-events');
+var programEvents = require('ungit-program-events');
 
 var navigation = {};
 module.exports = navigation;

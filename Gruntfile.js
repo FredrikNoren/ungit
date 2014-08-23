@@ -39,12 +39,12 @@ module.exports = function(grunt) {
           debug: true,
           // Make these globally requireable, for use in plugins
           alias: [
-            'public/source/components.js:ungit-components',
-            'public/source/program-events.js:ungit-program-events',
-            'public/source/navigation.js:ungit-navigation',
-            'public/source/main.js:ungit-main',
-            'source/utils/vector2.js:ungit-vector2',
-            'source/address-parser.js:ungit-address-parser',
+            './public/source/components.js:ungit-components',
+            './public/source/program-events.js:ungit-program-events',
+            './public/source/navigation.js:ungit-navigation',
+            './public/source/main.js:ungit-main',
+            './source/utils/vector2.js:ungit-vector2',
+            './source/address-parser.js:ungit-address-parser',
             'knockout:knockout',
             'lodash:lodash',
             'hasher:hasher',
