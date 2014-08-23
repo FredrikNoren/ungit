@@ -8,7 +8,7 @@ var restGit = require('../source/git-api');
 var common = require('./common.js');
 
 var app = express();
-app.use(require('body-parser')());
+app.use(require('body-parser').json());
 
 restGit.registerApi({ app: app, config: { dev: true } });
 

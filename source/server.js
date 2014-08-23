@@ -85,7 +85,7 @@ var noCache = function(req, res, next) {
 }
 app.use(noCache);
 
-app.use(bodyParser());
+app.use(require('body-parser').json());
 
 if (config.autoShutdownTimeout) {
   var autoShutdownTimeout;
