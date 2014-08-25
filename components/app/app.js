@@ -72,11 +72,13 @@ AppViewModel.prototype.shown = function() {
   }
 
   this.server.get('/latestversion', undefined, function(err, version) {
+    if (!version) return;
     self.currentVersion(version.currentVersion);
     self.latestVersion(version.latestVersion);
     self.newVersionAvailable(version.outdated);
   });
   this.server.get('/gitversion', undefined, function(err, gitversion) {
+    if (!gitversion) return;
     if (!gitversion.satisfied) {
       self.gitVersionError(gitversion.error);
     }
