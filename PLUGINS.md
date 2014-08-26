@@ -41,11 +41,37 @@ components.register('graph', function(args) {
 ```
 
 ### 3. Done!
-Just restart Ungit, or if you have `"dev": true` in your `.ungitrc` you can just refresh your browser.
-
-### More examples
-
-All the components in Ungit is built as plugins, take a look in the `components` directory for inspiration. Or take a look at the [gerrit plugin](https://github.com/FredrikNoren/ungit-gerrit) which is a complete example of how a plugin can look.
+Just restart Ungit, or if you have `"dev": true` in your `.ungitrc` you can just refresh your browser.  A [gerrit plugin example](https://github.com/FredrikNoren/ungit-gerrit) can be found here.
 
 ### Ungit Plugin API version
 The Ungit Plugin API follows semver, and the current version can be found in the package.json (ungitPluginApiVersion). On the frontend it can be accessed from `ungit.pluginApiVersion` and on the backend `env.pluginApiVersion`.
+
+### Components
+
+Each functionalities within ungit is built as components.  Each components is an ungit plugin that is checked into main repository.  All the components in Ungit is built as plugins, take a look in the [components](https://github.com/FredrikNoren/ungit/tree/master/components) directory for inspiration. 
+
+An [example](https://github.com/FredrikNoren/ungit/tree/master/components/staging) of ungit component with view can be seen below.
+
+```JSON
+{
+  "exports": {
+    "knockoutTemplates": {
+      "staging": "staging.html"
+    },
+    "javascript": "staging.bundle.js",
+    "css": "staging.css"
+  }
+}
+```
+
+#### Views(html) for Component
+
+Each component can have multiple views as exampled [here](https://github.com/FredrikNoren/ungit/tree/master/components/dialogs).
+
+#### CSS for Component
+
+In above example, `staging.less` file will be compiled to `staging.css` and it will be imported into ungit.  But in order for this to work, one must include `staging.less` file to grunt's less job in (Gruntfile.js)[https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js] file
+
+#### JS for Component
+
+Each component gets to have one javascipt files.  But each javasciprt file can require other javascript in it's directory or other libraries.
