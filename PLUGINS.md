@@ -66,12 +66,12 @@ An [example](https://github.com/FredrikNoren/ungit/tree/master/components/stagin
 
 * Views(html) for Component
 
-Each component can have multiple views as exampled [here](https://github.com/FredrikNoren/ungit/tree/master/components/dialogs).
+   Each component can have multiple views as exampled [here](https://github.com/FredrikNoren/ungit/tree/master/components/dialogs).
 
 * CSS for Component
 
-In above example, `staging.less` file will be compiled to `staging.css` and it will be imported into ungit.  But in order for this to work, one must include `staging.less` file to grunt's less job in [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js) file
+   In above example, `staging.less` file will be compiled to `staging.css` and it will be imported into ungit.  But in order for this to work, one must include `staging.less` file to grunt's less job in [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js) file
 
 * JS for Component
 
-Each component gets to have one javascipt files.  But each javasciprt file can require other javascript in it's directory or other libraries.
+   Each component gets to have one javascipt files.  But each javasciprt file can require other javascript in it's directory or other libraries.
