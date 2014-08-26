@@ -1,4 +1,4 @@
-<div class="modal fade detailed-diff" data-bind="modal: { onclose: onclose, closer: setCloser }, attr: { 'data-ta-container': 'detailed-diff' }" >
+<div class="modal fade detailed-diff" data-bind="modal: { onclose: onclose, closer: setCloser }" data-ta-container="detailed-diff-container">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -11,12 +11,12 @@
 
         <!-- ko foreach: files -->
           <div class="file" data-bind="css: { showingDiffs: showingDiffs}">
-            <div class="name" data-bind="click: toogleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}">
+            <div class="name" data-bind="click: toogleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}" data-ta-clickable="detailed-diff-file-name-clickable">
               <span data-bind="text: name"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
             </div>
             <!-- ko if: showingDiffs -->
-            <div class="diffContainer" data-bind="component: diff"></div>
+            <div class="diffContainer" data-bind="component: diff" data-ta-container="detailed-diff-file-diff-container"></div>
             <!-- /ko -->
           </div>
         <!-- /ko -->

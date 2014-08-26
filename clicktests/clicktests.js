@@ -98,7 +98,7 @@ test('Clicking logo should bring you to home screen', function(done) {
 test('Entering an invalid path and create directory in that location', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, testRootPath + '/not/existing\n');
-  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {  
+  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {
     helpers.click(page, '[data-ta-clickable="create-dir"]');
     helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
       done();
@@ -171,7 +171,7 @@ test('Should be able to add a new file to .gitignore', function(done) {
       // add "addMeToIgnore.txt" to .gitignore
       helpers.click(page, '[data-ta-clickable="ignore-file"]');
       // add ".gitignore" to .gitignore
-      //TODO I'm not sure what is the best way to detect page refresh, so currently wait for 1 sec and then click ignore-file. 
+      //TODO I'm not sure what is the best way to detect page refresh, so currently wait for 1 sec and then click ignore-file.
       setTimeout(function() {
         helpers.click(page, '[data-ta-clickable="ignore-file"]');
         helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
@@ -191,6 +191,22 @@ test('Test commit diff between git commit', function(done) {
       done();
     }, 1000);
   });
+});
+
+test('Should be possible to open a detailed diff', function(done) {
+  helpers.click(page, '[data-ta-clickable="detailed-diff-clickable"]');
+
+  helpers.waitForElement(page, '[data-ta-container="detailed-diff-container"]', function() {
+    setTimeout(function() {
+
+      helpers.click(page, '[data-ta-clickable="detailed-diff-file-name-clickable"]');
+      helpers.waitForElement(page, '[data-ta-container="detailed-diff-file-diff-container"]', function() {
+        helpers.click(page, '[data-ta-clickable="close"]');   // close opened dialog
+        done();
+      }, 1000);
+    }, 1000);
+  }, 1000);
+
 });
 
 test('Should be possible to discard a created file', function(done) {
@@ -425,7 +441,6 @@ test('Should be possible to force push a branch', function(done) {
     }, 200);
   });
 });
-
 
 // Shutdown
 
