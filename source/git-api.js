@@ -60,11 +60,11 @@ exports.registerApi = function(env) {
       });
     });
   }
-  
+
   var ensurePathExists = function(req, res, next) {
     var path = req.param('path');
     if (!fs.existsSync(path)) {
-      res.json(400, { error: 'No such path: ' + path, errorCode: 'no-such-path' });
+      res.status(400).json({ error: 'No such path: ' + path, errorCode: 'no-such-path' });
     } else {
       next();
     }
@@ -75,7 +75,7 @@ exports.registerApi = function(env) {
     if (socketId == 'ignore') return next(); // Used in unit tests
     var socket = socketsById[socketId];
     if (!socket) {
-      res.json(400, { error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });
+      res.status(400).json({ error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });
     } else {
       next();
     }
@@ -100,11 +100,11 @@ exports.registerApi = function(env) {
   }
 
   var jsonFail = function(res, err) {
-    res.json(400, err);
+    res.status(400).json(err);
   }
 
   var jsonResultOrFail = function(res, err, result) {
-    if (err) res.json(400, err);
+    if (err) res.status(400).json(err);
     else res.json(result || {});
   }
 
@@ -154,7 +154,7 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' + 
+    git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' +
         (req.param('ref') ? req.param('ref') : '') + (config.autoPruneOnFetch ? ' --prune' : ''),
         req.param('path'))
       .timeout(10 * 60 * 1000)
@@ -195,7 +195,7 @@ exports.registerApi = function(env) {
       git.binaryFileContent(req.query.path, req.query.filename, req.query.version)
         .always(function(err, result) {
           res.type(path.extname(req.query.filename));
-          if (err) res.json(400, err); 
+          if (err) res.status(400).json(err);
           else res.send(new Buffer(result, 'binary'));
         })
         .start();
@@ -223,26 +223,26 @@ exports.registerApi = function(env) {
 
     if (!fs.existsSync(gitIgnoreFile)) fs.writeFileSync(gitIgnoreFile, '');
 
-    fs.readFile(gitIgnoreFile, function(err, data) { 
+    fs.readFile(gitIgnoreFile, function(err, data) {
 
       var arrayOfLines = data.toString().match(/[^\r\n]+/g);
       if(arrayOfLines != null){
         for (var n = 0; n < arrayOfLines.length; n++) {
           if (arrayOfLines[n].trim() == ignoreFile) {
-            return res.json(400, { errorCode: 'file-already-git-ignored', error: ignoreFile + ' already exist in .gitignore' });
+            return res.status(400).json({ errorCode: 'file-already-git-ignored', error: ignoreFile + ' already exist in .gitignore' });
           }
         }
       }
 
       fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile, function(err) {
         if(err) {
-          return res.json(400, { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
+          return res.status(400).json({ errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
         } else {
           if(socket)
             socket.emit('working-tree-changed', { repository: currentPath });
           return res.json({});
         }
-      }); 
+      });
     });
   });
 
@@ -274,7 +274,7 @@ exports.registerApi = function(env) {
           else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
             res.json([]);
           else
-            res.json(400, err);
+            res.status(400).json(err);
         } else {
           res.json(log);
         }
@@ -287,7 +287,7 @@ exports.registerApi = function(env) {
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
-          res.json(400, err);
+          res.status(400).json(err);
         } else {
           res.json(log);
         }
@@ -305,7 +305,7 @@ exports.registerApi = function(env) {
           else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
             res.json([]);
           else
-            res.json(400, err);
+            res.status(400).json(err);
         } else {
           res.json(log);
         }
@@ -353,7 +353,7 @@ exports.registerApi = function(env) {
     git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ' + req.param('remote'), req.param('path'))
       .parser(gitParser.parseGitLsRemote)
       .always(function(err, result) {
-        if (err) return res.json(400, err);
+        if (err) return res.status(400).json(err);
         result.forEach(function(r) { r.remote = req.param('remote'); });
         res.json(result);
       })
@@ -374,7 +374,7 @@ exports.registerApi = function(env) {
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
-  
+
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
     git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' :"refs/tags/' + req.param('name').trim() + '"', req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
@@ -512,7 +512,7 @@ exports.registerApi = function(env) {
     git('stash list --decorate=full --pretty=fuller', req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, items) {
-        if (err) return res.json(400, err);
+        if (err) return res.status(400).json(err);
         res.json(items.map(function(item, index) {
           return {
             id: index,
@@ -558,7 +558,7 @@ exports.registerApi = function(env) {
     // on the same machine that we're running ungit on
     if (req.ip != '127.0.0.1') {
       winston.info('Trying to get credentials from unathorized ip: ' + req.ip);
-      res.json(400, { errorCode: 'request-from-unathorized-location' });
+      res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
     var socket = socketsById[req.param('socketId')];
@@ -566,7 +566,7 @@ exports.registerApi = function(env) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
       winston.info('Trying to get credentials from unavailable socket: ' + req.param('socketId'));
-      res.json(400, { errorCode: 'socket-unavailable' });
+      res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', function(data) {
         res.json(data);
@@ -578,11 +578,11 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
     var dir = req.param('dir');
     if (!dir) {
-      return res.json(400, { errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
+      return res.status(400).json({ errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
     }
 
     mkdirp(dir, function(err) {
-      if (err) return res.json(400, err);
+      if (err) return res.status(400).json(err);
       else return res.json({});
     });
   });
