@@ -73,4 +73,4 @@ An [example](https://github.com/FredrikNoren/ungit/tree/master/components/stagin
 
 * JS for Component
 
-   Each component gets to have one javascipt files.  But each javasciprt file can require other javascript in it's directory or other libraries.
+   Each component gets to have one javascipt files.  However each javasciprt file can require other javascript in it's directory or other libraries.  If you are doing require by relative pass as exampled in [graph.js](https://github.com/FredrikNoren/ungit/blob/master/components/graph/graph.js), you wouldn't have to include the js in browserify job in [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js).
