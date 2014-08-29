@@ -48,7 +48,7 @@ The Ungit Plugin API follows semver, and the current version can be found in the
 
 ### Components
 
-Each functionalities within ungit is built as components.  Each components is an ungit plugin that is checked into main repository.  All the components in Ungit is built as plugins, take a look in the [components](https://github.com/FredrikNoren/ungit/tree/master/components) directory for inspiration. 
+Each functionalities within ungit is built as components.  Each components is an ungit plugin that is checked into main repository.  All the components in Ungit is built as plugins, take a look in the [components](https://github.com/FredrikNoren/ungit/tree/master/components) directory for inspiration.
 
 An [example](https://github.com/FredrikNoren/ungit/tree/master/components/staging) of ungit component with view can be seen below.
 
@@ -69,8 +69,7 @@ An [example](https://github.com/FredrikNoren/ungit/tree/master/components/stagin
    Each component can have multiple views as exampled [here](https://github.com/FredrikNoren/ungit/tree/master/components/dialogs).
 
 * CSS for Component
-
-   In above example, `staging.less` file will be compiled to `staging.css` and it will be imported into ungit.  But in order for this to work, one must include `staging.less` file to grunt's less job in [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js) file
+   css file can be easily defined per components and in above example we can see that `staging.less` file is compiled into `staging.css` via grunt job.  If you are using less file please modify [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js) file to include new less file.
 
 * JS for Component
 
