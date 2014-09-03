@@ -13,7 +13,15 @@ var PathViewModel = function(server, path) {
   this.server = server;
   this.path = path;
   var pathParts = path.replace('\\', '/').split('/');
-  this.dirName = pathParts[pathParts.length - 1];
+  
+  if (pathParts[pathParts.length - 1]) {
+    this.dirName = pathParts[pathParts.length - 1];
+  } else if (pathParts.length > 2 && pathParts[pathParts.length - 2]) {
+    this.dirName = pathParts[pathParts.length - 2];
+  } else {
+    this.dirName = '/';
+  }
+  
   this.status = ko.observable('loading');
   this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
   this.loadingProgressBar.start();
