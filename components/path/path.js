@@ -12,16 +12,11 @@ var PathViewModel = function(server, path) {
   var self = this;
   this.server = server;
   this.path = path;
-  var pathParts = path.replace('\\', '/').split('/');
-  
-  if (pathParts[pathParts.length - 1]) {
-    this.dirName = pathParts[pathParts.length - 1];
-  } else if (pathParts.length > 2 && pathParts[pathParts.length - 2]) {
-    this.dirName = pathParts[pathParts.length - 2];
-  } else {
-    this.dirName = '/';
-  }
-  
+  this.dirName = this.path.replace('\\', '/')
+                   .split('/')
+                   .filter(function(s) { return s; })
+                   .slice(-1)[0] || '/';
+
   this.status = ko.observable('loading');
   this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
   this.loadingProgressBar.start();
