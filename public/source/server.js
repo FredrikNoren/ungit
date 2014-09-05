@@ -53,7 +53,7 @@ Server.prototype._httpJsonRequest = function(request, callback) {
       try {
         body = JSON.parse(httpRequest.responseText);
       } catch(ex) { body = null; }
-      if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, text: httpRequest.responseText });
+      if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, httpRequest: httpRequest });
       else callback(null, body);
     }
   }
@@ -126,7 +126,7 @@ Server.prototype.query = function(method, path, body, callback) {
         else if (typeof(error.body.error) == 'string') errorSummary = error.body.error.split('\n')[0];
         else errorSummary = JSON.stringify(error.body.error);
       }
-      else errorSummary = error.statusText + ' ' + error.status;
+      else errorSummary = error.httpRequest.statusText + ' ' + error.status;
 
       var err = {
         errorSummary: errorSummary,
