@@ -245,30 +245,6 @@
     .nodeContainer {
       .log {
         .logEntryBox > .panel-body {
-          width: @log-width-medium;
-          .gravatar {
-            display: block;
-          }
-        }
-      }
-      .node {
-        margin-left: (@log-width-medium + 30px);
-      }
-      .rightSideContainer {
-        margin-left: (@log-width-medium + 40px);
-      }
-    }
-    .graphLog {
-      left: (@log-width-medium + 25px);
-    }
-  }
-}
-
-@media (min-width: @screen-lg-min) {
-  .graph {
-    .nodeContainer {
-      .log {
-        .logEntryBox > .panel-body {
           width: @log-width-large;
           .gravatar {
             display: block;
@@ -286,6 +262,9 @@
       left: (@log-width-large + 25px);
     }
   }
+}
+
+@media (min-width: @screen-lg-min) {
 }
 
 .nodeSummaryContainer {
