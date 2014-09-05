@@ -72,7 +72,7 @@ if (config.allowedIPs) {
   app.use(function(req, res, next) {
     var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
-    else res.send(403, '<h3>This host is not authorized to connect</h3>' +
+    else res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
       '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
   });
 }
@@ -117,7 +117,7 @@ if (config.authentication) {
     passport.authenticate('local', function(err, user, info) {
       if (err) { return next(err) }
       if (!user) {
-        res.json(401, { errorCode: 'authentication-failed', error: info.message });
+        res.status(401).json({ errorCode: 'authentication-failed', error: info.message });
         return;
       }
       req.logIn(user, function(err) {
@@ -140,7 +140,7 @@ if (config.authentication) {
 
   ensureAuthenticated = function(req, res, next) {
     if (req.isAuthenticated()) { return next(); }
-    res.json(401, { errorCode: 'authentication-required', error: 'You have to authenticate to access this resource' });
+    res.status(401).json({ errorCode: 'authentication-required', error: 'You have to authenticate to access this resource' });
   };
 }
 
@@ -291,13 +291,13 @@ function writeUserConfig(configContent, callback) {
 
 app.get('/api/userconfig', ensureAuthenticated, function(req, res) {
   readUserConfig(function(err, userConfig) {
-    if (err) res.json(400, err);
+    if (err) res.status(400).json(err);
     else res.json(userConfig);
   });
 });
 app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
   writeUserConfig(req.body, function(err) {
-    if (err) res.json(400, err);
+    if (err) res.status(400).json(err);
     else res.json({});
   })
 });
@@ -309,13 +309,13 @@ app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
   var dir = req.query.term.trim();
-  
+
   readUserConfig(function(err, userconfig) {
-    if (err) res.json(400, err);
+    if (err) res.status(400).json(err);
     else if (dir) {
       fs.readdir(dir, function(err, files) {
         if (err) {
-          res.json(400, { errorCode: 'read-dir-failed', error: err });
+          res.status(400).json({ errorCode: 'read-dir-failed', error: err });
         } else {
           var absolutePaths = files.map(function(file) {
             return path.join(dir, file);
@@ -338,7 +338,7 @@ app.use(function(err, req, res, next) {
   bugtracker.notify(err, 'ungit-node');
   usageStatistics.addEvent('server-exception');
   winston.error(err.stack);
-  res.send(500, { error: err.message, errorType: err.name, stack: err.stack });
+  res.status(500).send({ error: err.message, errorType: err.name, stack: err.stack });
 });
 
 exports.started = new signals.Signal();
