@@ -69,7 +69,7 @@ BranchesViewModel.prototype.updateBranches = function() {
       return {
         name: branch.name,
         current: branch.current,
-        changeBranch: function() { self.currentBranch(branch) }
+        changeBranch: function() { self.currentBranch(branch.name) }
       }
     });
     self.branches(branches);
