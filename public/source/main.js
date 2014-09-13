@@ -39,7 +39,7 @@ var navigation = require('ungit-navigation');
     };
 
   programEvents.add(function(event) {
-    if (event.event == 'init-tooltip') {
+    if (event.event === 'init-tooltip') {
       $('.bootstrap-tooltip').tooltip();
     }
   });

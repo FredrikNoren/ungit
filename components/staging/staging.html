@@ -44,15 +44,15 @@
       <div class="col-lg-9 file-area">
         <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
-          <button class="btn btn-default" data-bind="click: toogleAllStages">
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toogleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"2000", "hide":"0"}'>
             <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
             Toggle all
           </button>
-          <button class="btn btn-default" data-bind="click: discardAllChanges">
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" data-original-title="Discard all uncommited file changes" data-delay='{"show":"2000", "hide":"0"}'>
             <span class="glyphicon glyphicon-trash"></span>
             Discard all
           </button>
-          <button class="btn btn-default" data-bind="click: stashAll, css: { disabled: !canStashAll() }">
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes" data-delay='{"show":"2000", "hide":"0"}'>
             <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
