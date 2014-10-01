@@ -54,7 +54,8 @@ module.exports = function(grunt) {
             'blueimp-md5:blueimp-md5',
             'color:color',
             'signals:signals',
-            'util:util'
+            'util:util',
+            'path:path'
           ]
         },
         files: {

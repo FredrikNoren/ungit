@@ -1,8 +1,7 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
-
-var imageFileExtensions = ['PNG', 'JPG', 'BMP', 'GIF', 'JPEG'];
+var fileType = require('../../source/utils/file-type.js');
 
 var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
@@ -35,7 +34,5 @@ CommitLineDiff.prototype.type = function() {
   if (!this.fileName()) {
     return 'textdiff';
   }
-  var splited = this.fileName().split('.');
-  var ext = splited[splited.length - 1];
-  return imageFileExtensions.indexOf(ext.toUpperCase()) != -1 ? 'imagediff' : 'textdiff';
+  return fileType(this.fileName()) + 'diff';
 };

@@ -10,9 +10,9 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
+var fileType = require('./utils/file-type.js');
 
 exports.pathPrefix = '';
-var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF', '.JPEG'];
 
 exports.registerApi = function(env) {
   var app = env.app;
@@ -119,7 +119,7 @@ exports.registerApi = function(env) {
       .always(function(err, result) {
         if(result) {
           for(var file in result.files) {
-            result.files[file].type = imageFileExtensions.indexOf(path.extname(file).toUpperCase()) != -1 ? 'image' : 'text';
+            result.files[file].type = fileType(file);
           }
         }
         jsonResultOrFail(res, err, result);
