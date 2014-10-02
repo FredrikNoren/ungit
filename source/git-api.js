@@ -390,6 +390,13 @@ exports.registerApi = function(env) {
       .start();
   });
 
+  app.post(exports.pathPrefix + '/checkout/file', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('checkout ' + req.param('sha1').trim() + ' ' + req.param('fileName').trim(), req.param('path'))
+      .always(jsonResultOrFail.bind(null, res))
+      .always(emitWorkingTreeChanged.bind(null, req.param('path')))
+      .start();
+  });
+
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
     autoStashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path')))
       .always(jsonResultOrFail.bind(null, res))

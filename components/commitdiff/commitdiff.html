@@ -8,6 +8,9 @@
         <span data-bind="text: removed"></span>
         )
       </span>
+      <span class="file-operations">
+        <span class="glyphicon glyphicon-new-window" data-bind="click: checkoutFile"></span>
+      </span>
     </div>
     <div class="diff" data-bind="visible: showSpecificDiff" data-ta-container="commitLineDiffs">
       <div class="diffContainer" data-bind="component: specificDiff"></div>

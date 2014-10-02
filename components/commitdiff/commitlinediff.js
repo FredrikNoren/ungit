@@ -8,11 +8,14 @@ var CommitLineDiff = function(args) {
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
+  this.path = args.repoPath;
+  this.server = args.server;
+  this.sha1 = args.sha1;
   this.specificDiff = ko.observable(components.create(this.type(), {
       filename: this.fileName(),
-      repoPath: args.repoPath,
-      server: args.server,
-      sha1: args.sha1,
+      repoPath: this.path,
+      server: this.server,
+      sha1: this.sha1,
       initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
     }));
 };
@@ -36,3 +39,8 @@ CommitLineDiff.prototype.type = function() {
   }
   return fileType(this.fileName()) + 'diff';
 };
+
+CommitLineDiff.prototype.checkoutFile = function(data, event) {
+  this.server.post('/checkout/file', { path: this.path, sha1: this.sha1, fileName: this.fileName() });
+  event.stopImmediatePropagation();
+}
