@@ -38,5 +38,5 @@ var getFileType = function(fileName) {
   if (!fileName) {
     return 'textdiff';
   }
-  return fileType(this.fileName()) + 'diff';
+  return fileType(fileName) + 'diff';
 };
