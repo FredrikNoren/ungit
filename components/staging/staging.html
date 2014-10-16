@@ -5,7 +5,7 @@
       <div class="arrow"></div>
     </div>
     <div data-bind="visible: showNux" class="nux">
-      Nothing to commit. <a href="#" data-bind="click: toogleAmend, visible: canAmend">Amend previous commit?</a>
+      Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>
     <div class="row" data-bind="visible: !showNux()">
       <div class="col-lg-3">
@@ -14,7 +14,7 @@
         <div>
           <span class="amend" data-bind="visible: canAmend">
                   <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-                          <a href="#" data-bind="click: toogleAmend">Amend last commit</a>
+                          <a href="#" data-bind="click: toggleAmend">Amend last commit</a>
                   </span>
                   <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
@@ -44,7 +44,7 @@
       <div class="col-lg-9 file-area">
         <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toogleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"2000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"2000", "hide":"0"}'>
             <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
             Toggle all
           </button>
@@ -61,10 +61,10 @@
 
         <div class="files" data-bind="foreach: files">
           <div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
-            <div class="checkmark" data-bind="click: toogleStaged, css: { checked: staged }">
+            <div class="checkmark" data-bind="click: toggleStaged, css: { checked: staged }">
               <span class="glyphicon" data-bind="css: { 'glyphicon-check': staged, 'glyphicon-unchecked': !staged() }"></span>
             </div>
-            <button class="name btn btn-default" data-bind="click: toogleDiffs">
+            <button class="name btn btn-default" data-bind="click: toggleDiffs">
               <span data-bind="text: name"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
             </button>

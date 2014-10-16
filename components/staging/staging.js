@@ -130,7 +130,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   this.files(newFiles);
   programEvents.dispatch({ event: 'init-tooltip' });
 }
-StagingViewModel.prototype.toogleAmend = function() {
+StagingViewModel.prototype.toggleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
     this.commitMessageTitle(this.HEAD().title);
     this.commitMessageBody(this.HEAD().body);
@@ -217,7 +217,7 @@ StagingViewModel.prototype.stashAll = function() {
     self.stashProgressBar.stop();
   });
 }
-StagingViewModel.prototype.toogleAllStages = function() {
+StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
   for (var n in self.files()){
     self.files()[n].staged(self.allStageFlag());
@@ -251,7 +251,7 @@ FileViewModel.prototype.setState = function(state) {
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
-FileViewModel.prototype.toogleStaged = function() {
+FileViewModel.prototype.toggleStaged = function() {
   this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
@@ -270,7 +270,7 @@ FileViewModel.prototype.ignoreFile = function() {
 FileViewModel.prototype.resolveConflict = function() {
   this.server.post('/resolveconflicts', { path: this.staging.repoPath, files: [this.name()] });
 }
-FileViewModel.prototype.toogleDiffs = function() {
+FileViewModel.prototype.toggleDiffs = function() {
   var self = this;
   if (this.showingDiffs()) this.showingDiffs(false);
   else {
