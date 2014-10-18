@@ -128,12 +128,11 @@ module.exports = function(grunt) {
       }
     },
     // Run mocha tests
-    simplemocha: {
+    mochaTest: {
       options: {
         reporter: 'spec'
       },
-
-      all: { src: 'test/*.js' }
+      src: 'test/*.js'
     },
     // Plato code analysis
     plato: {
@@ -360,7 +359,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
-  grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-plato');
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
@@ -373,7 +372,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
-  grunt.registerTask('unittest', ['simplemocha']);
+  grunt.registerTask('unittest', ['mochaTest']);
   grunt.registerTask('test', ['unittest', 'clicktest']);
 
   // Create desktop (node-webkit) release
