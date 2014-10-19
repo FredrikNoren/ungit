@@ -11,7 +11,7 @@
 
         <!-- ko foreach: files -->
           <div class="file" data-bind="css: { showingDiffs: showingDiffs}">
-            <div class="name" data-bind="click: toogleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}" data-ta-clickable="detailed-diff-file-name-clickable">
+            <div class="name" data-bind="click: toggleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}" data-ta-clickable="detailed-diff-file-name-clickable">
               <span data-bind="text: name"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
             </div>
