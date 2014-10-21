@@ -17,6 +17,7 @@
 
   .nodeContainer {
     position: absolute;
+    width: 100%;
 
     .log {
       position: absolute;
@@ -57,11 +58,12 @@
       }
 
       &.expanded {
-        .log {
-          width: 100%;
-        }
+        width: 100%;
         .logEntryBox > .panel-body {
           width: 100%;
+          .arrowRight {
+            display: none;
+          }
         }
       }
 
