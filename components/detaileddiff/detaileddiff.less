@@ -1,0 +1,86 @@
+.detailed-diff {
+
+  .modal-dialog {
+    width: 95%;
+    height: 95%;
+    display: table;
+    table-layout: fixed;
+    margin: 15px auto;
+
+    .modal-content{
+      display: table-cell;
+
+      .modal-header {
+
+        h4 {
+          display: table-cell;
+          padding-right: 10px;
+        }
+
+        span {
+          color: #707a85;
+          display: table-cell;
+          padding-right: 5px;
+        }
+
+        .weak-text{
+          font-size: smaller;
+        }
+      }
+
+      .modal-body {
+        margin-bottom: 70px;
+
+        .diffContainer {
+          margin-top: 0px;
+          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file {
+
+          .name {
+            border-radius: 3px;
+            width: 100%;
+            text-align: left;
+            display: inline-block;
+            position: relative;
+            padding: 2px 6px 2px 8px;
+            margin-top: 2px;
+            vertical-align: middle;
+            height: 25px;
+            white-space: nowrap;
+            cursor: pointer;
+            color: #E4E4E4;
+
+            .progress {
+              margin-top: -20px;
+              margin-left: -5px;
+            }
+          }
+
+          &:nth-child(odd) {
+
+            > .name {
+              background-color: rgba(255, 255, 255, 0.25);
+            }
+          }
+
+          &:nth-child(even) {
+
+            > .name {
+              background-color: rgba(0, 0, 0, 0.25);
+            }
+          }
+        }
+      }
+
+      .modal-footer {
+
+        position: absolute;
+        width: 100%;
+        bottom: 0px;
+      }
+    }
+  }
+}

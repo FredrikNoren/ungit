@@ -7,6 +7,9 @@ var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
+var programEvents = require('ungit-program-events');
+
+var mergeTitlePrefix= "Merge pull request";
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -18,7 +21,8 @@ var GitNodeViewModel = function(graph, sha1) {
   this.sha1 = sha1;
 
   this.isInited = false;
-  
+  this.isMergeNode = ko.observable(false);
+
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
@@ -143,6 +147,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
   this.commitDiff(components.create('commitDiff', {fileLineDiffs: args.fileLineDiffs, sha1: this.sha1, repoPath: this.graph.repoPath, server: this.server }));
   this.isInited = true;
+  this.isMergeNode(this.title().slice(0, mergeTitlePrefix.length) === mergeTitlePrefix);
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
@@ -197,4 +202,12 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
+}
+GitNodeViewModel.prototype.getDetailedDiffLink = function() {
+  return '/detaileddiff?sha1right=' + this.sha1 + '&path=' + this.graph.repoPath;
+}
+GitNodeViewModel.prototype.detailedDiffClick = function() {
+  var diag = components.create('detaileddiff', { 'repoPath': this.graph.repoPath, 'server': this.server, 'sha1Right': this.sha1 });
+
+  programEvents.dispatch({ 'event': 'request-show-dialog', 'dialog': diag });
 }

@@ -1,0 +1,29 @@
+<div class="modal fade detailed-diff" data-bind="modal: { onclose: onclose, closer: setCloser }" data-ta-container="detailed-diff-container">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" data-bind="text: title"></h4>
+        <span data-bind="text: '[' + sha1Left() + ']'"></span>
+        <span class="weak-text" data-bind="text: '>'"></span>
+        <span data-bind="text: '[' + sha1Right() + ']'"></span>
+      </div>
+      <div class="modal-body">
+
+        <!-- ko foreach: files -->
+          <div class="file" data-bind="css: { showingDiffs: showingDiffs}">
+            <div class="name" data-bind="click: toggleDiffs, css: {odd: $index %2 === 0, even: $index %2 === 1}" data-ta-clickable="detailed-diff-file-name-clickable">
+              <span data-bind="text: name"></span>
+              <!-- ko component: diffsProgressBar --><!-- /ko -->
+            </div>
+            <!-- ko if: showingDiffs -->
+            <div class="diffContainer" data-bind="component: diff" data-ta-container="detailed-diff-file-diff-container"></div>
+            <!-- /ko -->
+          </div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: close" data-ta-clickable="close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

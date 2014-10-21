@@ -27,6 +27,7 @@ module.exports = function(grunt) {
           "components/staging/staging.css": ["components/staging/staging.less"],
           "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
           "components/stash/stash.css": ["components/stash/stash.less"],
+          "components/detaileddiff/detaileddiff.css": ["components/detaileddiff/detaileddiff.less"],
         }
       }
     },
