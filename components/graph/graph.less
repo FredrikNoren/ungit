@@ -56,6 +56,15 @@
         }
       }
 
+      &.expanded {
+        .log {
+          width: 100%;
+        }
+        .logEntryBox > .panel-body {
+          width: 100%;
+        }
+      }
+
       .logEntryBox > .panel-body {
         position: relative;
 
@@ -79,6 +88,10 @@
           white-space: pre-wrap;
           word-wrap: break-word;
           color: #8F9FA6;
+        }
+
+        .expand {
+          float: right;
         }
       }
     }
