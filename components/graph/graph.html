@@ -4,7 +4,7 @@
 
   <div class="nodes" data-bind="foreach: nodes">
     <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
-      <div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { highlighted: highlighted, hover: nodeIsMousehover }">
+      <div class="log" data-bind="visible: logBoxVisible, style: { left: logBoxX() + 'px' }, css: { highlighted: highlighted, hover: nodeIsMousehover, expanded: expanded }">
         <div class="logEntryBox panel panel-default">
           <div class="panel-body">
             <div class="arrowContainer arrowRight">
@@ -15,6 +15,7 @@
               <img class="pull-left img-circle gravatar"
                 data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
                 onerror="this.style.display='none';">
+              <a href="#" class="expand" data-bind="click: toggleExpanded"><span class="glyphicon glyphicon-resize-full"></span></a>
               <div>
                 <div>
                   <span class="title" data-bind="text: title"></span>
