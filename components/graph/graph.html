@@ -15,7 +15,9 @@
               <img class="pull-left img-circle gravatar"
                 data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
                 onerror="this.style.display='none';">
-              <a href="#" class="expand" data-bind="click: toggleExpanded"><span class="glyphicon glyphicon-resize-full"></span></a>
+              <a href="#" class="expand" data-bind="click: toggleExpanded">
+                <span class="glyphicon" data-bind="css: { 'glyphicon-resize-full': !expanded(), 'glyphicon-resize-small': expanded }"></span>
+              </a>
               <div>
                 <div>
                   <span class="title" data-bind="text: title"></span>
