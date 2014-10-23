@@ -18,7 +18,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.sha1 = sha1;
 
   this.isInited = false;
-  
+
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
@@ -201,4 +201,5 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
 }
 GitNodeViewModel.prototype.toggleExpanded = function() {
   this.expanded(!this.expanded());
+  this.selected(this.expanded());
 }
