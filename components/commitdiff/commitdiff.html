@@ -1,16 +1,16 @@
 <div data-bind="foreach: commitLineDiffs" class="commitdiff">
-  <div class="file"> 
+  <div class="file">
     <div class="head" data-bind="click: fileNameClick" data-ta-clickable="commitDiffFileName">
       <span data-bind="text: fileName"></span>
       <span class="file-stats" data-bind="visible: added() != '-'">
         (
-        <span data-bind="text: added"></span> 
+        <span data-bind="text: added"></span>
         <span data-bind="text: removed"></span>
         )
       </span>
     </div>
     <div class="diff" data-bind="visible: showSpecificDiff" data-ta-container="commitLineDiffs">
-      <div class="diffContainer" data-bind="component: specificDiff"></div>
+      <div class="diffContainer" data-bind="component: specificDiff, event: { mouseover: diffMouseover, mouseout: diffMouseout }"></div>
     </div>
   </div>
 </div>

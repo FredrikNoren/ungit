@@ -43,6 +43,16 @@ var navigation = require('ungit-navigation');
       $('.bootstrap-tooltip').tooltip();
     }
   });
+
+  programEvents.add(function(event) {
+    if (event.event === 'body-scroll') {
+      if (event.scroll) {
+        $('body').css('overflow','auto');
+      } else {
+        $('body').css('overflow','hidden');
+      }
+    }
+  });
 }());
 
 ko.bindingHandlers.autocomplete = {
