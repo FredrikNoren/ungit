@@ -19,6 +19,12 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.isInited = false;
 
+  this.selected.subscribe(function(newValue) {
+    // when selected is calculated to false, turn off expanded also
+    if (!newValue) {
+      self.expanded(false);
+    }
+  });
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
