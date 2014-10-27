@@ -46,6 +46,7 @@ Server.prototype._queryToString = function(query) {
 Server.prototype._httpJsonRequest = function(request, callback) {
   var httpRequest = new XMLHttpRequest();
   httpRequest.onreadystatechange = function() {
+    // It seems like you can get both readyState == 0, and readyState == 4 && status == 0 when you lose connection to the server
     if (httpRequest.readyState === 0) {
       callback({ error: 'connection-lost' });
     } else if (httpRequest.readyState === 4) {
@@ -53,7 +54,8 @@ Server.prototype._httpJsonRequest = function(request, callback) {
       try {
         body = JSON.parse(httpRequest.responseText);
       } catch(ex) { body = null; }
-      if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, httpRequest: httpRequest });
+      if (httpRequest.status == 0) callback({ error: 'connection-lost' });
+      else if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, httpRequest: httpRequest });
       else callback(null, body);
     }
   }
