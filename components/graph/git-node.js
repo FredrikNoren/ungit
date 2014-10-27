@@ -26,7 +26,7 @@ var GitNodeViewModel = function(graph, sha1) {
     }
   });
   this.boxDisplayX = ko.computed(function() {
-    return self.x();
+    return self.expanded && self.expanded() ? 30 : self.x();
   });
   this.boxDisplayY = ko.computed(function() {
     return self.y();
