@@ -187,6 +187,16 @@ test('Test commit diff between git commit', function(done) {
   helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
   helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
     setTimeout(function() {                           // let it finish making api call
+      done();
+    }, 1000);
+  });
+});
+
+test('Test expanded commit diff between git commit', function(done) {
+  helpers.click(page, '[data-ta-clickable="expandCommitDiff"]');
+  helpers.waitForElement(page, '.log.expanded.highlighted', function() {
+    setTimeout(function() {                           // let it finish making api call
+      helpers.click(page, '[data-ta-clickable="expandCommitDiff"]');
       helpers.click(page, '[class="graph"]');   // close opened sub diff by clicking away
       done();
     }, 1000);
