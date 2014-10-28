@@ -46,10 +46,19 @@ var navigation = require('ungit-navigation');
 
   programEvents.add(function(event) {
     if (event.event === 'body-scroll') {
-      if (event.scroll) {
-        $('body').css('overflow','auto');
-      } else {
+      // Hide body scroll bar when scroll bar hide is wanted and diffContainer scroll bar is visible
+      var diffContainers = $('.expanded').find('.diffContainer');
+      var isScrollable = false;
+      diffContainers.each(function(n, e) {
+        if (e.scrollHeight > 600) {
+          isScrollable = true;
+        }
+      });
+      
+      if (!event.scroll && isScrollable) {
         $('body').css('overflow','hidden');
+      } else {
+        $('body').css('overflow','auto');
       }
     }
   });
