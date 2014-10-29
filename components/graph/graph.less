@@ -17,6 +17,7 @@
 
   .nodeContainer {
     position: absolute;
+    width: 100%;
 
     .log {
       position: absolute;
@@ -56,6 +57,17 @@
         }
       }
 
+      &.expanded {
+        width: 100%;
+        z-index: 1;
+        .logEntryBox > .panel-body {
+          width: 100%;
+          .arrowRight {
+            display: none;
+          }
+        }
+      }
+
       .logEntryBox > .panel-body {
         position: relative;
 
@@ -79,6 +91,10 @@
           white-space: pre-wrap;
           word-wrap: break-word;
           color: #8F9FA6;
+        }
+
+        .expand {
+          float: right;
         }
       }
     }

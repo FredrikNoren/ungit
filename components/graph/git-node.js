@@ -18,9 +18,15 @@ var GitNodeViewModel = function(graph, sha1) {
   this.sha1 = sha1;
 
   this.isInited = false;
-  
+
+  this.selected.subscribe(function(newValue) {
+    // when selected is calculated to false, turn off expanded also
+    if (!newValue) {
+      self.expanded(false);
+    }
+  });
   this.boxDisplayX = ko.computed(function() {
-    return self.x();
+    return self.expanded && self.expanded() ? 30 : self.x();
   });
   this.boxDisplayY = ko.computed(function() {
     return self.y();
@@ -74,7 +80,8 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.showBody = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
-  })
+  });
+  this.expanded = ko.observable(false);
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
@@ -197,4 +204,8 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
+}
+GitNodeViewModel.prototype.toggleExpanded = function() {
+  this.expanded(!this.expanded());
+  this.selected(this.expanded());
 }
