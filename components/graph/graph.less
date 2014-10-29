@@ -41,6 +41,17 @@
       &.hover {
         z-index: 3;
       }
+      &.selected {
+        .details {
+          .diff-wrapper {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+            .diff-inner {
+              box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+              padding: 10px;
+            }
+          }
+        }
+      }
 
       .logEntryBox {
         .arrowRight {
@@ -53,17 +64,6 @@
           }
           .arrow {
             background: url('images/panelArrowRight.png');
-          }
-        }
-      }
-
-      &.expanded {
-        width: 100%;
-        z-index: 1;
-        .logEntryBox > .panel-body {
-          width: 100%;
-          .arrowRight {
-            display: none;
           }
         }
       }
@@ -86,15 +86,20 @@
           word-wrap: break-word;
           display: block;
         }
-
-        .body {
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          color: #8F9FA6;
-        }
-
-        .expand {
-          float: right;
+        .details {
+          .body {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #8F9FA6;
+          }
+          .diff-wrapper { 
+            position: relative;
+            margin: 0px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background: #4B5766;
+            border-radius: 3px;
+          }
         }
       }
     }

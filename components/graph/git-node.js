@@ -7,6 +7,7 @@ var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
+var Vector2 = require('ungit-vector2');
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -19,14 +20,9 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.isInited = false;
 
-  this.selected.subscribe(function(newValue) {
-    // when selected is calculated to false, turn off expanded also
-    if (!newValue) {
-      self.expanded(false);
-    }
-  });
+  this.logBoxElement = ko.observable();
   this.boxDisplayX = ko.computed(function() {
-    return self.expanded && self.expanded() ? 30 : self.x();
+    return self.x();
   });
   this.boxDisplayY = ko.computed(function() {
     return self.y();
@@ -49,6 +45,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.nodeHeight = ko.computed(function() {
     return self.radius()*2;
   });
+  this.aboveNode = null; // The node directly above this, graphically
 
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();
@@ -61,6 +58,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.authorName = ko.observable();
   this.authorEmail = ko.observable();
   this.commitDiff = ko.observable();
+  this.showCommitDiff = ko.observable();
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
@@ -78,10 +76,11 @@ var GitNodeViewModel = function(graph, sha1) {
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });
-  this.showBody = ko.computed(function() {
-    return self.nodeIsMousehover() || self.selected();
+  this.screenWidth = ko.observable();
+  this.diffStyle = ko.computed(function() {
+    if (self.selected()) return { left: -self.boxDisplayX() + 'px', width: (self.screenWidth() - 60) + 'px' };
+    else return { left: 'inherit', width: 'inherit' };
   });
-  this.expanded = ko.observable(false);
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
@@ -148,6 +147,7 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.authorEmail(args.authorEmail);
   this.numberOfAddedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][0] : 0);
   this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
+  this.showCommitDiff(args.fileLineDiffs.length > 0);
   this.commitDiff(components.create('commitDiff', {fileLineDiffs: args.fileLineDiffs, sha1: this.sha1, repoPath: this.graph.repoPath, server: this.server }));
   this.isInited = true;
 }
@@ -162,6 +162,31 @@ GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
 GitNodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.updateLastAuthorDateFromNow(deltaT);
   GitNodeViewModel.super_.prototype.updateAnimationFrame.call(this, deltaT);
+
+  this.updateGoalPosition();
+}
+GitNodeViewModel.prototype.updateGoalPosition = function() {
+  var goalPosition = new Vector2();
+  if (this.ancestorOfHEAD()) {
+    if (!this.aboveNode)
+      goalPosition.y = 120;
+    else if (this.aboveNode.ancestorOfHEAD())
+      goalPosition.y = this.aboveNode.y() + 120;
+    else
+      goalPosition.y = this.aboveNode.y() + 60;
+    goalPosition.x = 30;
+    this.setRadius(30);
+  } else {
+    goalPosition.y = this.aboveNode.y() + 60;
+    goalPosition.x = 30 + 90 * this.branchOrder;
+    this.setRadius(15);
+  }
+  if (this.aboveNode && this.aboveNode.selected()) {
+    goalPosition.y = this.aboveNode.y() + this.aboveNode.logBoxElement().offsetHeight + 30;
+  }
+  var dw = window.innerWidth;
+  if (this.screenWidth() != dw) this.screenWidth(dw);
+  this.setPosition(goalPosition);
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
@@ -204,7 +229,4 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
-}
-GitNodeViewModel.prototype.toggleExpanded = function() {
-  this.expanded(!this.expanded());
 }

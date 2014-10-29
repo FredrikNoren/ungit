@@ -125,7 +125,12 @@ ko.bindingHandlers.shown = {
   }
 };
 
-
+ko.bindingHandlers.element = {
+  init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+    var observable = valueAccessor();
+    observable(element);
+  }
+};
 
 (function scrollToEndBinding() {
   ko.bindingHandlers.scrolledToEnd = {

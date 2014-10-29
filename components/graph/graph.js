@@ -263,7 +263,6 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
   //var concurrentBranches = { };
 
   var branchSlots = [];
-  var y = 30; // Leave room for the "commit node" (see logrednerer.js)
 
   // Then iterate from the bottom to fix the orders of the branches
   for (var i = nodes.length - 1; i >= 0; i--) {
@@ -295,26 +294,10 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 
   var prevNode;
   nodes.forEach(function(node) {
-    var goalPosition = new Vector2();
-    if (node.ancestorOfHEADTimeStamp == updateTimeStamp) {
-      if (!prevNode)
-        y += 90;
-      else if (prevNode.ancestorOfHEADTimeStamp == updateTimeStamp)
-        y += 120;
-      else
-        y += 60;
-      goalPosition.x = 30;
-      node.setRadius(30);
-      node.ancestorOfHEAD(true);
-    } else {
-      y += 60;
-      goalPosition.x = 30 + 90 * (branchSlots.length - node.branchOrder);
-      node.setRadius(15);
-      node.ancestorOfHEAD(false);
-    }
-    goalPosition.y = y;
-    node.setPosition(goalPosition);
-
+    node.branchOrder = branchSlots.length - node.branchOrder;
+    node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
+    node.aboveNode = prevNode;
+    node.updateGoalPosition();
     prevNode = node;
   });
 
