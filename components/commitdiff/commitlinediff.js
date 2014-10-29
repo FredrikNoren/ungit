@@ -38,8 +38,8 @@ CommitLineDiff.prototype.type = function() {
   return fileType(this.fileName()) + 'diff';
 };
 
-CommitLineDiff.prototype.diffMouseover = function() {
-  programEvents.dispatch({ event: 'body-scroll', scroll: false });
+CommitLineDiff.prototype.diffMouseover = function(data, event) {
+  programEvents.dispatch({ event: 'body-scroll', scroll: false, scrollHeight: event.target.parentElement.parentElement.parentElement.scrollHeight});
 }
 
 CommitLineDiff.prototype.diffMouseout = function() {

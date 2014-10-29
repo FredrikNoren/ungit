@@ -47,15 +47,8 @@ var navigation = require('ungit-navigation');
   programEvents.add(function(event) {
     if (event.event === 'body-scroll') {
       // Hide body scroll bar when scroll bar hide is wanted and diffContainer scroll bar is visible
-      var diffContainers = $('.expanded').find('.diffContainer');
-      var isScrollable = false;
-      diffContainers.each(function(n, e) {
-        if (e.scrollHeight > 600) {
-          isScrollable = true;
-        }
-      });
-      
-      if (!event.scroll && isScrollable) {
+      var isDiffScrollShowing = event.scrollHeight > 600;
+      if (!event.scroll && isDiffScrollShowing) {
         $('body').css('overflow','hidden');
       } else {
         $('body').css('overflow','auto');
