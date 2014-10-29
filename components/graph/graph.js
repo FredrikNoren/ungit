@@ -308,6 +308,10 @@ GitGraphViewModel.prototype.handleBubbledClick = function(elem, event) {
   // If the clicked element is bound to the current action context,
   // then let's not deselect it.
   if (ko.dataFor(event.target) === this.currentActionContext()) return;
+  if (this.currentActionContext() && this.currentActionContext() instanceof GitNodeViewModel) {
+    var cr = this.currentActionContext().logBoxElement().getBoundingClientRect();
+    if (cr.top < 0) window.scrollBy(0, cr.top - 150);
+  }
   this.currentActionContext(null);
   // If the click was on an input element, then let's allow the default action to proceed.
   // This is especially needed since for some strange reason any submit (ie. enter in a textbox)
