@@ -2,7 +2,6 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
-var programEvents = require('ungit-program-events');
 
 var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
@@ -37,11 +36,3 @@ CommitLineDiff.prototype.type = function() {
   }
   return fileType(this.fileName()) + 'diff';
 };
-
-CommitLineDiff.prototype.diffMouseover = function() {
-  programEvents.dispatch({ event: 'body-scroll', scroll: false });
-}
-
-CommitLineDiff.prototype.diffMouseout = function() {
-  programEvents.dispatch({ event: 'body-scroll', scroll: true });
-}

@@ -207,5 +207,4 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
 }
 GitNodeViewModel.prototype.toggleExpanded = function() {
   this.expanded(!this.expanded());
-  this.selected(this.expanded());
 }
