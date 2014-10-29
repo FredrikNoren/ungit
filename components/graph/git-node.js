@@ -230,3 +230,18 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
+GitNodeViewModel.prototype.onBubbleClickDeselect = function() {
+  var self = this;
+  // Auto scroll to the top when the node is deselected by clicking outside of it
+  var cr = this.logBoxElement().getBoundingClientRect();
+  if (cr.top < 0) window.scrollBy(0, cr.top - 150);
+  // Then reset positions of all nodes so we don't have to wait for them to move around
+  setTimeout(function() {
+    self.graph.nodes().forEach(function(node) {
+      node.updateGoalPosition();
+    });
+    self.graph.nodes().forEach(function(node) {
+      node.position(node.goalPosition());
+    });
+  }, 0);
+}
