@@ -39,7 +39,7 @@ CommitLineDiff.prototype.type = function() {
 };
 
 CommitLineDiff.prototype.diffMouseover = function(data, event) {
-  programEvents.dispatch({ event: 'body-scroll', scroll: false, scrollHeight: event.target.parentElement.parentElement.parentElement.scrollHeight});
+  programEvents.dispatch({ event: 'body-scroll', scroll: false, eventTarget: event.target});
 }
 
 CommitLineDiff.prototype.diffMouseout = function() {
