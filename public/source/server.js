@@ -75,7 +75,7 @@ Server.prototype._httpJsonRequest = function(request, callback) {
 // Check if the server is still alive
 Server.prototype._isConnected = function(callback) {
   this._httpJsonRequest({ method: 'GET', url: '/api/ping' }, function(err, res) {
-    callback(!err && res && res.ok);
+    callback(!err && res);
   });
 }
 Server.prototype._onDisconnect = function() {
