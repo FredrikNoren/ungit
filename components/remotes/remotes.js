@@ -35,11 +35,6 @@ function RemotesViewModel(server, repoPath) {
 RemotesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('remotes', this, {}, parentElement);
 }
-RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-app-content-refresh' ||
-    event.event == 'working-tree-changed')
-    this.updateRemotes();
-}
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-credentials') this.fetchingProgressBar.pause();
@@ -98,4 +93,3 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
-
