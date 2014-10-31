@@ -177,7 +177,12 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     goalPosition.x = 30;
     this.setRadius(30);
   } else {
-    goalPosition.y = this.aboveNode.y() + 60;
+    if (this.aboveNode) {
+      goalPosition.y = this.aboveNode.y() + 60;
+    } else {
+      goalPosition.y = 120;
+    }
+    
     goalPosition.x = 30 + 90 * this.branchOrder;
     this.setRadius(15);
   }
