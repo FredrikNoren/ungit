@@ -236,19 +236,33 @@ GitNodeViewModel.prototype.toggleSelected = function() {
   if (this.belowNode)
     beforeBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
   
-  
+  var prevSelected  = this.graph.currentActionContext();
+  if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
+  var prevSelectedCR = null;
+  if (prevSelected) prevSelectedCR = prevSelected.logBoxElement().getBoundingClientRect();
   this.selected(!this.selected());
 
   setTimeout(function(){
     self.graph.instantUpdatePositions();
-    if (beforeThisCR.top < 0 && beforeBelowCR) {
-      var afterBelowCR = self.belowNode.logBoxElement().getBoundingClientRect();
-      // If the next node is showing, try to keep it in the screen (no jumping)
-      if (beforeBelowCR.top < window.innerHeight) {
-        window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
-      // Otherwise just try to bring them to the middle of the screen
-      } else {
-        window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
+    // If we are deselecting
+    if (!self.selected()) {
+      if (beforeThisCR.top < 0 && beforeBelowCR) {
+        var afterBelowCR = self.belowNode.logBoxElement().getBoundingClientRect();
+        // If the next node is showing, try to keep it in the screen (no jumping)
+        if (beforeBelowCR.top < window.innerHeight) {
+          window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
+        // Otherwise just try to bring them to the middle of the screen
+        } else {
+          window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
+        }
+      }
+    // If we are selecting
+    } else {
+      var afterThisCR = self.logBoxElement().getBoundingClientRect();
+      if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
+        afterThisCR.top != beforeThisCR.top) {
+        window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
+        console.log('Fix')
       }
     }
   }, 0);
