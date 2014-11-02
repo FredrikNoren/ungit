@@ -229,6 +229,9 @@ GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
     path.push(thisNode);
   return path;
 }
+GitNodeViewModel.prototype.toggleSelected = function() {
+  this.selected(!this.selected());
+}
 GitNodeViewModel.prototype.nodeMouseover = function() {
   this.nodeIsMousehover(true);
 }

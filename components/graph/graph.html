@@ -1,4 +1,4 @@
-<div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick">
+<div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
 
   <!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
 
@@ -29,18 +29,20 @@
                 </div>
               </div>
             </div>
-            <div class="details" data-bind="visible: selected() || nodeIsMousehover()">
+            <!-- ko if: selected() || nodeIsMousehover() -->
+            <div class="details">
               <div class="body" data-bind="text: body"></div>
               <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle">
                 <div class="diff-inner" data-bind="component: commitDiff"></div>
               </div>
             </div>
+            <!-- /ko -->
           </div>
         </div>
       </div>
 
       <div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
-        click: selected,
+        click: toggleSelected,
         style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }"
         data-ta-clickable="node-clickable">
       </div>

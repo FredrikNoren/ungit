@@ -182,24 +182,17 @@ test('Should be able to add a new file to .gitignore', function(done) {
   });
 });
 
-test('Test commit diff between git commit', function(done) {
+test('Test showing commit diff between two commits', function(done) {
   helpers.click(page, '[data-ta-clickable="node-clickable"]');
-  helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
   helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
-    setTimeout(function() {                           // let it finish making api call
-      done();
-    }, 1000);
-  });
-});
-
-test('Test expanded commit diff between git commit', function(done) {
-  helpers.click(page, '[data-ta-clickable="expandCommitDiff"]');
-  helpers.waitForElement(page, '.log.expanded.highlighted', function() {
-    setTimeout(function() {                           // let it finish making api call
-      helpers.click(page, '[data-ta-clickable="expandCommitDiff"]');
-      helpers.click(page, '[class="graph"]');   // close opened sub diff by clicking away
-      done();
-    }, 1000);
+    helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
+    helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
+      setTimeout(function() {                           // let it finish making api call
+        helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
+        page.render('clicktestout/lol.png');
+        done();
+      }, 1000);
+    });
   });
 });
 
@@ -217,10 +210,15 @@ test('Should be possible to discard a created file', function(done) {
 
 var createRef = function(name, type, callback) {
   helpers.log('Createing branch ' + name);
+  page.render('clicktestout/1.png');
   helpers.click(page, '[data-ta-clickable="show-new-branch-form"]');
+  page.render('clicktestout/2.png');
   helpers.click(page, '[data-ta-input="new-branch-name"]');
+  page.render('clicktestout/3.png');
   helpers.write(page, name);
+  page.render('clicktestout/4.png');
   setTimeout(function() {
+    page.render('clicktestout/5.png');
     helpers.click(page, '[data-ta-clickable="create-' + type + '"]');
     helpers.waitForElement(page, '[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]', function() {
       callback();
