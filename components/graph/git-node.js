@@ -230,26 +230,32 @@ GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
   return path;
 }
 GitNodeViewModel.prototype.toggleSelected = function() {
+  var self = this;
+  var beforeThisCR = this.logBoxElement().getBoundingClientRect();
+  var beforeBelowCR = null;
+  if (this.belowNode)
+    beforeBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
+  
+  
   this.selected(!this.selected());
+
+  setTimeout(function(){
+    self.graph.instantUpdatePositions();
+    if (beforeThisCR.top < 0 && beforeBelowCR) {
+      var afterBelowCR = self.belowNode.logBoxElement().getBoundingClientRect();
+      // If the next node is showing, try to keep it in the screen (no jumping)
+      if (beforeBelowCR.top < window.innerHeight) {
+        window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
+      // Otherwise just try to bring them to the middle of the screen
+      } else {
+        window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
+      }
+    }
+  }, 0);
 }
 GitNodeViewModel.prototype.nodeMouseover = function() {
   this.nodeIsMousehover(true);
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
-}
-GitNodeViewModel.prototype.onBubbleClickDeselect = function() {
-  var self = this;
-  // Auto scroll to the top when the node is deselected by clicking outside of it
-  var cr = this.logBoxElement().getBoundingClientRect();
-  if (cr.top < 0) window.scrollBy(0, cr.top - 150);
-  // Then reset positions of all nodes so we don't have to wait for them to move around
-  setTimeout(function() {
-    self.graph.nodes().forEach(function(node) {
-      node.updateGoalPosition();
-    });
-    self.graph.nodes().forEach(function(node) {
-      node.position(node.goalPosition());
-    });
-  }, 0);
 }

@@ -297,6 +297,7 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
     node.branchOrder = branchSlots.length - node.branchOrder;
     node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
     node.aboveNode = prevNode;
+    if (prevNode) prevNode.belowNode = node;
     node.updateGoalPosition();
     prevNode = node;
   });
@@ -304,14 +305,22 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
   this.nodes(nodes);
 }
 
+GitGraphViewModel.prototype.instantUpdatePositions = function() {
+  this.nodes().forEach(function(node) {
+    node.updateGoalPosition();
+    node.position(node.goalPosition());
+  });
+}
+
 GitGraphViewModel.prototype.handleBubbledClick = function(elem, event) {
   // If the clicked element is bound to the current action context,
   // then let's not deselect it.
   if (ko.dataFor(event.target) === this.currentActionContext()) return;
   if (this.currentActionContext() && this.currentActionContext() instanceof GitNodeViewModel) {
-    this.currentActionContext().onBubbleClickDeselect();
+    this.currentActionContext().toggleSelected();
+  } else {
+    this.currentActionContext(null);
   }
-  this.currentActionContext(null);
   // If the click was on an input element, then let's allow the default action to proceed.
   // This is especially needed since for some strange reason any submit (ie. enter in a textbox)
   // will trigger a click event on the submit input of the form, which will end up here,
