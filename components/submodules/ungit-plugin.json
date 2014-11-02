@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "submodules": "submodules.html"
+    },
+    "javascript": "submodules.bundle.js"
+  }
+}

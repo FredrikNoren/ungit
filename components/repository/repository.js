@@ -16,6 +16,7 @@ var RepositoryViewModel = function(server, repoPath) {
   this.gitErrors = components.create('gitErrors', { server: server, repoPath: repoPath });
   this.graph = components.create('graph', { server: server, repoPath: repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
+  this.submodules = components.create('submodules', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
   this.staging = components.create('staging', { server: server, repoPath: repoPath });
   this.showLog = ko.computed(function() {
