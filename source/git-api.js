@@ -327,6 +327,23 @@ exports.registerApi = function(env) {
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
+  
+  app.get(exports.pathPrefix + '/submodule', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('submodule', req.param('path'))
+      .always(gitParser.parseGitSubmodule)
+      .always(jsonResultOrFail.bind(null, res))
+      .start();
+  });
+  
+  app.post(exports.pathPrefix + '/submodule', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('submodule init', req.param('path'))
+      .always(function() {
+        return git('submodule update', req.param('path'))
+        .always(jsonResultOrFail.bind(null, res))
+        .start();
+      })
+      .start();
+  });
 
   app.delete(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
     git('branch -D "' + req.param('name').trim() + '"', req.param('path'))
