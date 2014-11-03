@@ -330,7 +330,7 @@ exports.registerApi = function(env) {
   
   app.get(exports.pathPrefix + '/submodule', ensureAuthenticated, ensurePathExists, function(req, res){
     git('submodule', req.param('path'))
-      .always(gitParser.parseGitSubmodule)
+      .parser(gitParser.parseGitSubmodule)
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
