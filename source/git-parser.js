@@ -275,3 +275,15 @@ exports.parseGitStashShow = function(text) {
     }
   });
 }
+
+exports.parseGitSubmodule = function(text) {
+  var lines = text.split('\n').filter(function(item) {
+    return item;
+  });
+  
+  return lines.map(function(line) {
+    var values = lines.split(' ');
+    
+    return { sha1: values[0], name: values[1] };
+  });
+}
