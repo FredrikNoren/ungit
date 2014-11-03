@@ -327,23 +327,6 @@ exports.registerApi = function(env) {
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
-  
-  app.get(exports.pathPrefix + '/submodule', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('submodule', req.param('path'))
-      .parser(gitParser.parseGitSubmodule)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
-  });
-  
-  app.post(exports.pathPrefix + '/submodule', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('submodule init', req.param('path'))
-      .always(function() {
-        return git('submodule update', req.param('path'))
-        .always(jsonResultOrFail.bind(null, res))
-        .start();
-      })
-      .start();
-  });
 
   app.delete(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
     git('branch -D "' + req.param('name').trim() + '"', req.param('path'))
@@ -500,8 +483,25 @@ exports.registerApi = function(env) {
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
       .start();
   });
+  
+  app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('submodule', req.param('path'))
+      .parser(gitParser.parseGitSubmodule)
+      .always(jsonResultOrFail.bind(null, res))
+      .start();
+  });
+  
+  app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('submodule init', req.param('path'))
+      .always(function() {
+        return git('submodule update', req.param('path'))
+        .always(jsonResultOrFail.bind(null, res))
+        .start();
+      })
+      .start();
+  });
 
-  app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
+  app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
     git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))

@@ -38,7 +38,7 @@ describe('git-api submodule', function () {
 	var submodulePath = 'sub';
 
 	it('submodule add should work', function(done) {
-		common.post(req, '/submodules', { path: testDirMain, submodulePath: submodulePath, submoduleUrl: testDirSecondary }, done);
+		common.post(req, '/submodules/add', { path: testDirMain, submodulePath: submodulePath, submoduleUrl: testDirSecondary }, done);
 	});
 
 	it('submodule should show up in status', function(done) {
