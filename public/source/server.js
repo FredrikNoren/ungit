@@ -174,22 +174,6 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
     // It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
     var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
     if (!shouldSkipReport) {
-      if (ungit.config.bugtracking) {
-
-        var extra = {
-          stdout: err.res.body.stdout.slice(0, 100),
-          stderr: err.res.body.stderr.slice(0, 100),
-          path: err.path,
-          summary: err.errorSummary,
-          stacktrace: err.res.body.stackAtCall.slice(0, 300),
-          lineNumber: err.res.body.lineAtCall,
-          command: err.res.body.command
-        }
-
-        var name = 'GitError: ' + (err.res.body.stackAtCall || '').split('\n')[3] + err.errorSummary;
-
-        Raven.captureException(name, { extra: extra, tags: { subsystem: 'git' } });
-      }
       if (ungit.config.sendUsageStatistics) {
         Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
       }
