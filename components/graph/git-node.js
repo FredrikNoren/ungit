@@ -177,14 +177,14 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     if (!this.aboveNode)
       goalPosition.y = 120;
     else if (this.aboveNode.ancestorOfHEAD())
-      goalPosition.y = this.aboveNode.y() + 120;
+      goalPosition.y = this.aboveNode.goalPosition().y + 120;
     else
-      goalPosition.y = this.aboveNode.y() + 60;
+      goalPosition.y = this.aboveNode.goalPosition().y + 60;
     goalPosition.x = 30;
     this.setRadius(30);
   } else {
     if (this.aboveNode) {
-      goalPosition.y = this.aboveNode.y() + 60;
+      goalPosition.y = this.aboveNode.goalPosition().y + 60;
     } else {
       goalPosition.y = 120;
     }
@@ -193,7 +193,7 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     this.setRadius(15);
   }
   if (this.aboveNode && this.aboveNode.selected()) {
-    goalPosition.y = this.aboveNode.y() + this.aboveNode.logBoxElement().offsetHeight + 30;
+    goalPosition.y = this.aboveNode.goalPosition().y + this.aboveNode.logBoxElement().offsetHeight + 30;
   }
   var dw = window.innerWidth;
   if (this.screenWidth() != dw) this.screenWidth(dw);
