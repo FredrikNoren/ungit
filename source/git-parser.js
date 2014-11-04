@@ -281,7 +281,7 @@ exports.parseGitSubmodule = function(text, args) {
     return {};
   }
   
-  var lines = text.split('\n').filter(function(item) {
+  var lines = text.trim().split('\n').filter(function(item) {
     return item;
   });
   
