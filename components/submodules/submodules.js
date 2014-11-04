@@ -6,18 +6,30 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 
 components.register('submodules', function(args) {
-  return new SubmdoulesViewModel(args.server, args.repoPath);
+  return new SubmodulesViewModel(args.server, args.repoPath);
 });
 
-function SubmdoulesViewModel(server, repoPath) {
+function SubmodulesViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
-  this.submodules = ko.observableArray();
   
-  this.submodules.push({ name: 'test1' });
-  this.submodules.push({ name: 'test2' });
+  this.submodules = ko.observableArray();
 }
-SubmdoulesViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('submodules', this, {}, parentElement);
+
+SubmodulesViewModel.prototype.updateNode = function(parentElement) {
+  var self = this;
+  
+  this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
+    // if returned is not array, don't render submodules module
+    if (!submodules || Object.prototype.toString.call(submodules) !== '[object Array]') {
+      return;
+    }
+    
+    self.submodules(submodules);
+    
+    if (self.submodules().length > 0) {
+      ko.renderTemplate('submodules', self, {}, parentElement);
+    }
+  });
 }
