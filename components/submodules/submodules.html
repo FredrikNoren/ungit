@@ -1,5 +1,5 @@
 <div class="btn-group fetchButton">
-	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="">
+	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="click: function() {}">
 		<span class="glyphicon glyphicon-download-alt"></span>
 		<span data-bind="text: 'Submodules'"></span>
 	</button>
@@ -8,7 +8,7 @@
 	</button>
 	<ul class="dropdown-menu" role="menu" data-ta-container="submodules">
 		<!-- ko foreach: submodules -->
-		<li><a href="#" data-bind="text: name, attr: { 'data-ta-clickable': name }"></a></li>
+		<li><a href="#" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a></li>
 		<!-- /ko -->
 		<li class="divider"></li>
 		<li><a href="#" data-bind="" data-ta-clickable="show-add-remote-dialog">Update Submodules</a></li>
