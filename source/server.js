@@ -209,8 +209,11 @@ gitApi.registerApi(apiEnvironment);
 function loadPlugins(plugins, pluginBasePath) {
   fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
     var pluginPath = path.join(pluginBasePath, pluginDir);
-    // if not a directory, just skip it.
-    if (!fs.lstatSync(pluginPath).isDirectory())  return;
+    // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
+    if (!fs.lstatSync(pluginPath).isDirectory() ||
+      !fs.existsSync(path.join(pluginPath, 'ungit-plugin.json'))) {
+      return;
+    }
     winston.info('Loading plugin: ' + pluginPath);
     var plugin = new UngitPlugin({
       dir: pluginDir,
