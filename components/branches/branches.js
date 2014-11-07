@@ -16,10 +16,6 @@ function BranchesViewModel(server, repoPath) {
   this.branches = ko.observable([]);
   this.currentBranch = ko.observable(null);
 
-  this.currentBranch.subscribe(function(value) {
-    programEvents.dispatch({ event: 'current-branch-changed', newBranch: value });
-  });
-
   this.checkoutLabel = ko.computed(function() {
     if (self.currentBranch()) return 'Checkout ' + self.currentBranch();
     else return 'No branches specified';
@@ -31,32 +27,28 @@ function BranchesViewModel(server, repoPath) {
     return self.branches().length > 0;
   });
   
-  this.shouldAutoCheckout = false;
+  this.shouldAutoCheckout = true;
   this.updateBranches(); 
+
 }
 
 BranchesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('branches', this, {}, parentElement);
 }
 BranchesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-app-content-refresh' ||
-    event.event == 'working-tree-changed')
     this.updateBranches();
 }
 BranchesViewModel.prototype.clickCheckout = function() { this.checkout({ nodes: true, tags: true }); }
-BranchesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-credentials') this.checkoutingProgressBar.pause();
-  else if (event.event == 'request-credentials-response') this.checkoutingProgressBar.unpause();
-  else if (event.event == 'request-checkout-tags') this.checkout({ tags: true });
-}
+
 BranchesViewModel.prototype.checkout = function(options) {
   if (this.checkoutingProgressBar.running()) return;
   var self = this;
-
   this.checkoutingProgressBar.start();
-  var jobs = [];
-  async.parallel(jobs, function(err, result) {
-    self.checkoutingProgressBar.stop();
+  
+  this.server.post('/checkout', { path: self.repoPath, name: self.currentBranch()}, function(err){
+    if(!err) {
+      self.checkoutingProgressBar.stop();
+    }
   });
 }
 
@@ -74,7 +66,8 @@ BranchesViewModel.prototype.updateBranches = function() {
     });
     self.branches(branches);
     if (!self.currentBranch() && branches.length > 0) {
-      if (branch = _.find(branches, { 'current': true }))
+      var branch = _.find(branches, { 'current': true })
+      if (branch)
         self.currentBranch(branch.name);
       else
         self.currentBranch(branches[0].name);
@@ -84,18 +77,5 @@ BranchesViewModel.prototype.updateBranches = function() {
     }
     self.shouldAutoCheckout = false;
   });
-}
-BranchesViewModel.prototype.showAddBranchDialog = function() {
-  var self = this;
-  var diag = components.create('addbranchdialog');
-  diag.closed.add(function() {
-    if (diag.isSubmitted()) {
-      self.server.post('/branches/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {
-        if (err) return;
-        self.updatebranches();
-      })
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
