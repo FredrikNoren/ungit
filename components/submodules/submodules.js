@@ -13,35 +13,45 @@ function SubmodulesViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
-  
   this.submodules = ko.observableArray();
-  
+
   this.updateProgressBar = components.create('progressBar', { predictionMemoryKey: 'Updating Submodules', temporary: true });
+  this.addProgressBar = components.create('progressBar', { predictionMemoryKey: 'Adding Submodule', temporary: true });
 }
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
   var self = this;
-  
+
   this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
     // if returned is not array, don't render submodules module
     if (!submodules || Object.prototype.toString.call(submodules) !== '[object Array]') {
       return;
     }
-    
+
     self.submodules(submodules);
-    
+
     if (self.submodules().length > 0) {
       ko.renderTemplate('submodules', self, {}, parentElement);
     }
   });
 }
 
-SubmodulesViewModel.prototype.updateSubmodules = function(parentElement) {
-  if (this.updateProgressBar.running()) return;
+SubmodulesViewModel.prototype.updateSubmodules = function() {
+  if (this.updateProgressBar.running() || this.addProgressBar.running()) return;
   var self = this;
-  
+
   this.updateProgressBar.start();
   this.server.post('/submodules/update', { path: this.repoPath }, function(err, result) {
     self.updateProgressBar.stop();
+  });
+}
+
+SubmodulesViewModel.prototype.addSubmodules = function(submoduleUrl, submodulePath) {
+  if (this.updateProgressBar.running() || this.addProgressBar.running()) return;
+  var self = this;
+
+  this.addProgressBar.start();
+  this.server.post('/submodules/add', { path: this.repoPath, submoduleUrl: submoduleUrl, submodulePath: submodulePath }, function(err, result) {
+    self.addProgressBar.stop();
   });
 }

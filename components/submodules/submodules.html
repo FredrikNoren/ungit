@@ -3,6 +3,7 @@
 		<span class="glyphicon glyphicon-download-alt"></span>
 		<span data-bind="text: 'Submodules'"></span>
 		<!-- ko component: updateProgressBar --><!-- /ko -->
+		<!-- ko component: addProgressBar --><!-- /ko -->
 	</button>
 	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="submodules-menu">
 		<span class="caret"></span>
@@ -12,6 +13,8 @@
 		<li><a href="#" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a></li>
 		<!-- /ko -->
 		<li class="divider"></li>
-		<li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="show-add-remote-dialog">Update Submodules</a></li>
+		<li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="update-submodule">Update Submodules</a></li>
+		<li class="divider"></li>
+		<li><a href="#" data-bind="click: addSubmodules" data-ta-clickable="add-submodule">Add Submodules</a></li>
 	</ul>
 </div>
