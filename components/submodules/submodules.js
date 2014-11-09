@@ -24,15 +24,11 @@ SubmodulesViewModel.prototype.updateNode = function(parentElement) {
 
   this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
     // if returned is not array, don't render submodules module
-    if (!submodules || Object.prototype.toString.call(submodules) !== '[object Array]') {
-      return;
+    if (submodules && Object.prototype.toString.call(submodules) === '[object Array]') {
+      self.submodules(submodules);
     }
 
-    self.submodules(submodules);
-
-    if (self.submodules().length > 0) {
-      ko.renderTemplate('submodules', self, {}, parentElement);
-    }
+    ko.renderTemplate('submodules', self, {}, parentElement);
   });
 }
 
