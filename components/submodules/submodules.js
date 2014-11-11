@@ -1,6 +1,7 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
+var programEvents = require('ungit-program-events');
 
 components.register('submodules', function(args) {
   return new SubmodulesViewModel(args.server, args.repoPath);
@@ -43,12 +44,16 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
   });
 }
 
-SubmodulesViewModel.prototype.addSubmodules = function(submoduleUrl, submodulePath) {
-  if (this.isRunning()) return;
+SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   var self = this;
-
-  this.addProgressBar.start();
-  this.server.post('/submodules/add', { path: this.repoPath, submoduleUrl: submoduleUrl, submodulePath: submodulePath }, function(err, result) {
-    self.addProgressBar.stop();
+  var diag = components.create('addsubmoduledialog');
+  diag.closed.add(function() {
+    if (diag.isSubmitted()) {
+      self.addProgressBar.start();
+      self.server.post('/submodules/add', { path: self.repoPath, submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
+        self.addProgressBar.stop();
+      });
+    }
   });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
