@@ -1,9 +1,6 @@
 
 var ko = require('knockout');
-var _ = require('lodash');
-var async = require('async');
 var components = require('ungit-components');
-var programEvents = require('ungit-program-events');
 
 components.register('submodules', function(args) {
   return new SubmodulesViewModel(args.server, args.repoPath);
@@ -32,8 +29,12 @@ SubmodulesViewModel.prototype.updateNode = function(parentElement) {
   });
 }
 
+SubmodulesViewModel.prototype.isRunning = function() {
+  return (this.updateProgressBar.running() || this.addProgressBar.running());
+}
+
 SubmodulesViewModel.prototype.updateSubmodules = function() {
-  if (this.updateProgressBar.running() || this.addProgressBar.running()) return;
+  if (this.isRunning()) return;
   var self = this;
 
   this.updateProgressBar.start();
@@ -43,7 +44,7 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
 }
 
 SubmodulesViewModel.prototype.addSubmodules = function(submoduleUrl, submodulePath) {
-  if (this.updateProgressBar.running() || this.addProgressBar.running()) return;
+  if (this.isRunning()) return;
   var self = this;
 
   this.addProgressBar.start();
