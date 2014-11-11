@@ -16,6 +16,10 @@ components.register('addremotedialog', function(args) {
   return new AddRemoteDialogViewModel();
 });
 
+components.register('addsubmoduledialog', function(args) {
+  return new AddSubmoduleDialogViewModel();
+});
+
 components.register('promptdialog', function(args) {
   return new PromptDialogViewModel(args.title, args.details);
 });
@@ -78,6 +82,18 @@ function AddRemoteDialogViewModel() {
 }
 inherits(AddRemoteDialogViewModel, FormDialogViewModel);
 
+function AddSubmoduleDialogViewModel() {
+  FormDialogViewModel.call(this);
+  this.title('Add new submodule');
+  this.taDialogName('add-submodule');
+  this.path = ko.observable();
+  this.url = ko.observable();
+  this.items([
+    { name: 'Path', value: this.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
+    { name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+  ]);
+}
+inherits(AddSubmoduleDialogViewModel, FormDialogViewModel);
 
 function PromptDialogViewModel(title, details) {
   DialogViewModel.call(this, title);
