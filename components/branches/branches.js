@@ -36,7 +36,10 @@ BranchesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('branches', this, {}, parentElement);
 }
 BranchesViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'current-branch-changer' ||
+      event.event == 'git-directory-changed') {
     this.updateBranches();
+  }
 }
 BranchesViewModel.prototype.clickCheckout = function() { this.checkout({ nodes: true, tags: true }); }
 
