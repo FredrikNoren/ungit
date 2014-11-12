@@ -68,7 +68,7 @@ BranchesViewModel.prototype.updateBranches = function() {
       }
     });
     self.branches(branches);
-    if (!self.currentBranch() && branches.length > 0) {
+    if (branches.length > 0) {
       var branch = _.find(branches, { 'current': true })
       if (branch)
         self.currentBranch(branch.name);
