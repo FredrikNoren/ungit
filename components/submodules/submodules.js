@@ -17,7 +17,17 @@ function SubmodulesViewModel(server, repoPath) {
   this.addProgressBar = components.create('progressBar', { predictionMemoryKey: 'Adding Submodule', temporary: true });
 }
 
+SubmodulesViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'submodule-added') this.fetchSubmodules();
+}
+
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
+  this.fetchSubmodules(function(submoduleViewModel) {
+    ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
+  });
+}
+
+SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
   var self = this;
 
   this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
@@ -26,7 +36,9 @@ SubmodulesViewModel.prototype.updateNode = function(parentElement) {
       self.submodules(submodules);
     }
 
-    ko.renderTemplate('submodules', self, {}, parentElement);
+    if (callback) {
+      callback(self);
+    }
   });
 }
 
@@ -51,6 +63,12 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
     if (diag.isSubmitted()) {
       self.addProgressBar.start();
       self.server.post('/submodules/add', { path: self.repoPath, submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        programEvents.dispatch({ event: 'submodule-added' });
         self.addProgressBar.stop();
       });
     }

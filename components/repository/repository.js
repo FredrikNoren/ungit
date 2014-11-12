@@ -33,6 +33,7 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
   if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);
   if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
+  if (this.submodules.onProgramEvent) this.submodules.onProgramEvent(event);
 
   // If we get a reconnect event it's usually because the server crashed and then restarted
   // or something like that, so we need to tell it to start watching the path again
@@ -43,6 +44,3 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
 }
-
-
- 
