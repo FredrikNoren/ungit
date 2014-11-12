@@ -98,7 +98,7 @@ test('Clicking logo should bring you to home screen', function(done) {
 test('Entering an invalid path and create directory in that location', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, testRootPath + '/not/existing\n');
-  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {  
+  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {
     helpers.click(page, '[data-ta-clickable="create-dir"]');
     helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
       done();
@@ -171,7 +171,7 @@ test('Should be able to add a new file to .gitignore', function(done) {
       // add "addMeToIgnore.txt" to .gitignore
       helpers.click(page, '[data-ta-clickable="ignore-file"]');
       // add ".gitignore" to .gitignore
-      //TODO I'm not sure what is the best way to detect page refresh, so currently wait for 1 sec and then click ignore-file. 
+      //TODO I'm not sure what is the best way to detect page refresh, so currently wait for 1 sec and then click ignore-file.
       setTimeout(function() {
         helpers.click(page, '[data-ta-clickable="ignore-file"]');
         helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
@@ -340,6 +340,18 @@ function moveRef(page, ref, targetNodeCommitTitle, callback) {
 test('Should be possible to move a branch', function(done) {
   createBranch('movebranch', function() {
     moveRef(page, 'movebranch', 'Init', done);
+  });
+});
+
+// ---- Submodules ----
+
+test('Submodule view check', function(done) {
+  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+  helpers.click(page, '[data-ta-clickable="update-submodule"]');
+  helpers.waitForElement(page, '[data-ta-element="progress-bar"]', function() {
+    helpers.waitForNotElement(page, '[data-ta-element="progress-bar"]', function() {
+      done();
+    });
   });
 });
 
