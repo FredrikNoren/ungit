@@ -355,6 +355,26 @@ test('Submodule view check', function(done) {
   });
 });
 
+test('Submodule add', function(done) {
+  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+  helpers.click(page, '[data-ta-clickable="add-submodule"]');
+  helpers.waitForElement(page, '[data-ta-container="add-submodule"]', function() {
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="path"]');
+    helpers.write(page, 'ungit');
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="url"]');
+    helpers.write(page, 'https://github.com/FredrikNoren/ungit.git');
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-clickable="submit"]');
+
+    // It take awhile to clone git repo...
+    setTimeout(function() {
+      helpers.waitForElement(page, '[data-ta-container="submodules"] [data-ta-clickable="ungit"]', function() {
+        done();
+      });
+    }, 3000);
+  });
+});
+
+
 // --- Adding remotes ---
 
 var bareRepoPath;
