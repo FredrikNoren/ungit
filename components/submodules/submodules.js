@@ -32,7 +32,7 @@ SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
 
   this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
     // if returned is not array, don't render submodules module
-    if (submodules && Object.prototype.toString.call(submodules) === '[object Array]') {
+    if (submodules && Array.isArray(submodules)) {
       self.submodules(submodules);
     }
 
