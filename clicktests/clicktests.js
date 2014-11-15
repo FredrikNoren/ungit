@@ -343,38 +343,6 @@ test('Should be possible to move a branch', function(done) {
   });
 });
 
-// ---- Submodules ----
-
-test('Submodule view check', function(done) {
-  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
-  helpers.click(page, '[data-ta-clickable="update-submodule"]');
-  helpers.waitForElement(page, '[data-ta-element="progress-bar"]', function() {
-    helpers.waitForNotElement(page, '[data-ta-element="progress-bar"]', function() {
-      done();
-    });
-  });
-});
-
-test('Submodule add', function(done) {
-  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
-  helpers.click(page, '[data-ta-clickable="add-submodule"]');
-  helpers.waitForElement(page, '[data-ta-container="add-submodule"]', function() {
-    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="path"]');
-    helpers.write(page, 'ungit');
-    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="url"]');
-    helpers.write(page, 'https://github.com/FredrikNoren/ungit.git');
-    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-clickable="submit"]');
-
-    // It take awhile to clone git repo...
-    setTimeout(function() {
-      helpers.waitForElement(page, '[data-ta-container="submodules"] [data-ta-clickable="ungit"]', function() {
-        done();
-      });
-    }, 3000);
-  });
-});
-
-
 // --- Adding remotes ---
 
 var bareRepoPath;
@@ -432,6 +400,36 @@ test('Clone repository should bring you to repo page', function(done) {
     setTimeout(function() { // Let animations finish
       done();
     }, 1000);
+  });
+});
+
+// ---- Submodules ----
+test('Submodule view check', function(done) {
+  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+  helpers.click(page, '[data-ta-clickable="update-submodule"]');
+  helpers.waitForElement(page, '[data-ta-element="progress-bar"]', function() {
+    helpers.waitForNotElement(page, '[data-ta-element="progress-bar"]', function() {
+      done();
+    });
+  });
+});
+
+// DEPENDENT ON CLONE TEST ABOVE.  (Adds cloned repo above as a submodule)
+test('Submodule add', function(done) {
+  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+  helpers.click(page, '[data-ta-clickable="add-submodule"]');
+  helpers.waitForElement(page, '[data-ta-container="add-submodule"]', function() {
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="path"]');
+    helpers.write(page, 'ungit');
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="url"]');
+    helpers.write(page, testRootPath + '/testclone');
+    helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-clickable="submit"]');
+
+    setTimeout(function() {
+      helpers.waitForElement(page, '[data-ta-container="submodules"] [data-ta-clickable="ungit"]', function() {
+        done();
+      });
+    }, 3000);
   });
 });
 
