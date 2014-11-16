@@ -103,8 +103,12 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
   return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-  var remoteRef = this.graph.currentActionContext().getRemoteRef(this.graph.currentRemote());
-  this.server.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
+  if(window.confirm('Are you sure?')) {
+    var remoteRef = this.graph.currentActionContext().getRemoteRef(this.graph.currentRemote());
+    this.server.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
+  } else {
+	  callback();
+  }
 }
 
 
@@ -270,7 +274,11 @@ GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.icon = 'glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
-  this.graph.currentActionContext().remove(callback);
+  if(window.confirm('Are you sure?')) {
+	  this.graph.currentActionContext().remove(callback);
+  } else {
+	  callback();
+  }
 }
 
 
