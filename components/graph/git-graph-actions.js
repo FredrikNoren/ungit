@@ -103,8 +103,20 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
   return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-  var remoteRef = this.graph.currentActionContext().getRemoteRef(this.graph.currentRemote());
-  this.server.post('/reset', { path: this.graph.repoPath, to: remoteRef.name, mode: 'hard' }, callback);
+  var server = this.server;
+  var context = this.graph.currentActionContext();
+  var remote = this.graph.currentRemote();
+  var repoPath = this.graph.repoPath;
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+		var remoteRef = context.getRemoteRef(remote);
+        server.post('/reset', { path: repoPath, to: remoteRef.name, mode: 'hard' }, callback);
+	} else {
+		callback();
+	}
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
 
@@ -270,7 +282,16 @@ GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.icon = 'glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
-  this.graph.currentActionContext().remove(callback);
+  var context = this.graph.currentActionContext();
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+		context.remove(callback);
+	} else {
+		callback();
+	}
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
 

@@ -241,8 +241,11 @@ test('Should be possible to create and destroy a branch', function(done) {
   createBranch('willbedeleted', function() {
     helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
     helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]', function() {
-      done();
+    helpers.waitForElement(page, '[data-ta-container="yes-no-dialog"]', function() {
+      helpers.click(page, '[data-ta-clickable="yes"]');
+      helpers.waitForNotElement(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]', function() {
+        done();
+      });
     });
   });
 });
@@ -251,8 +254,11 @@ test('Should be possible to create and destroy a tag', function(done) {
   createTag('tagwillbedeleted', function() {
     helpers.click(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
     helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]', function() {
-      done();
+    helpers.waitForElement(page, '[data-ta-container="yes-no-dialog"]', function() {
+      helpers.click(page, '[data-ta-clickable="yes"]');
+      helpers.waitForNotElement(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]', function() {
+        done();
+      });
     });
   });
 });
