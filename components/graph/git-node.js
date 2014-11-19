@@ -137,6 +137,7 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Uncommit(this.graph, this),
     new GraphActions.Revert(this.graph, this)
   ];
+  this.diffDisplayType = ko.observable("default");
 }
 inherits(GitNodeViewModel, NodeViewModel);
 exports.GitNodeViewModel = GitNodeViewModel;
@@ -188,7 +189,7 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     } else {
       goalPosition.y = 120;
     }
-    
+
     goalPosition.x = 30 + 90 * this.branchOrder;
     this.setRadius(15);
   }
@@ -241,7 +242,7 @@ GitNodeViewModel.prototype.toggleSelected = function() {
   var beforeBelowCR = null;
   if (this.belowNode)
     beforeBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
-  
+
   var prevSelected  = this.graph.currentActionContext();
   if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
   var prevSelectedCR = null;
@@ -278,4 +279,13 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
+}
+GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
+  if (this.diffDisplayType() === "default") {
+    this.diffDisplayType("side-by-side");
+  } else {
+    this.diffDisplayType("default");
+  }
+
+  console.log(this.diffDisplayType());
 }
