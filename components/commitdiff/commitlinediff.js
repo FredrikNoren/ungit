@@ -8,7 +8,6 @@ var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
-  this.diffTextDisplayType = args.diffTextDisplayType ? args.diffTextDisplayType : ko.observable('textidff');
   this.showSpecificDiff = ko.observable(false);
   this.type = ko.computed(function() {
     if (!self.fileName()) {
@@ -16,7 +15,7 @@ var CommitLineDiff = function(args) {
     }
 
     if (fileType(self.fileName()) == 'text') {
-      return 'textdiff'//self.diffTextDisplayType();
+      return 'textdiff'//args.diffTextDisplayType()
     } else {
       return 'imagediff';
     }
@@ -29,7 +28,7 @@ var CommitLineDiff = function(args) {
     initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
   }));
 
-  this.diffTextDisplayType.subscribe(function() {
+  args.diffTextDisplayType.subscribe(function() {
     if (self.showSpecificDiff()) {
       self.refreshAndShow();
     }
