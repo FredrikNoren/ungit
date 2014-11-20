@@ -8,7 +8,7 @@ components.register('commitDiff', function(args) {
 
 var CommitDiff = function(args) {
   this.totalLineDiffs = ko.observable();
-  this.commitLineDiffs = ko.observable([]);
+  this.commitLineDiffs = ko.observableArray();
   this.showLoadMore = ko.observable();
   this.server = args.server;
   this.sha1 = args.sha1;

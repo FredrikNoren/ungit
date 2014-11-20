@@ -61,6 +61,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
+  this.diffTextDisplayType = ko.observable('textdiff');
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -77,7 +78,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.commitDiff = ko.computed(function() {
     if ((self.selected() || self.highlighted()) && self.fileLineDiffs()) return components.create('commitDiff', {
-      fileLineDiffs: self.fileLineDiffs().slice(), sha1: self.sha1, repoPath: self.graph.repoPath, server: self.server });
+      fileLineDiffs: self.fileLineDiffs().slice(), sha1: self.sha1, repoPath: self.graph.repoPath, server: self.server, diffTextDisplayType: self.diffTextDisplayType });
     else return null;
   });
   this.showCommitDiff = ko.computed(function() {
@@ -137,7 +138,6 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Uncommit(this.graph, this),
     new GraphActions.Revert(this.graph, this)
   ];
-  this.diffDisplayType = ko.observable("default");
 }
 inherits(GitNodeViewModel, NodeViewModel);
 exports.GitNodeViewModel = GitNodeViewModel;
@@ -281,11 +281,9 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
 GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
-  if (this.diffDisplayType() === "default") {
-    this.diffDisplayType("side-by-side");
+  if (this.diffTextDisplayType() === 'textdiff') {
+    this.diffTextDisplayType('sidebysidediff');
   } else {
-    this.diffDisplayType("default");
+    this.diffTextDisplayType('textdiff');
   }
-
-  console.log(this.diffDisplayType());
 }

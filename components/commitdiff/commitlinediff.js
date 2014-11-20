@@ -4,17 +4,36 @@ var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
 
 var CommitLineDiff = function(args) {
+  var self = this;
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
+  this.diffTextDisplayType = args.diffTextDisplayType ? args.diffTextDisplayType : ko.observable('textidff');
   this.showSpecificDiff = ko.observable(false);
+  this.type = ko.computed(function() {
+    if (!self.fileName()) {
+      return 'textdiff';
+    }
+
+    if (fileType(self.fileName()) == 'text') {
+      return 'textdiff'//self.diffTextDisplayType();
+    } else {
+      return 'imagediff';
+    }
+  });
   this.specificDiff = ko.observable(components.create(this.type(), {
-      filename: this.fileName(),
-      repoPath: args.repoPath,
-      server: args.server,
-      sha1: args.sha1,
-      initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
-    }));
+    filename: this.fileName(),
+    repoPath: args.repoPath,
+    server: args.server,
+    sha1: args.sha1,
+    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+  }));
+
+  this.diffTextDisplayType.subscribe(function() {
+    if (self.showSpecificDiff()) {
+      self.refreshAndShow();
+    }
+  });
 };
 exports.CommitLineDiff = CommitLineDiff;
 
@@ -22,17 +41,14 @@ CommitLineDiff.prototype.fileNameClick = function(data, event) {
   if (this.showSpecificDiff()) {
     this.showSpecificDiff(false);
   } else {
-    var self = this;
-    this.specificDiff().invalidateDiff(function() {
-      self.showSpecificDiff(true);
-    });
+    this.refreshAndShow();
   }
   event.stopImmediatePropagation();
 };
 
-CommitLineDiff.prototype.type = function() {
-  if (!this.fileName()) {
-    return 'textdiff';
-  }
-  return fileType(this.fileName()) + 'diff';
-};
+CommitLineDiff.prototype.refreshAndShow = function() {
+  var self = this;
+  this.specificDiff().invalidateDiff(function() {
+    self.showSpecificDiff(true);
+  });
+}
