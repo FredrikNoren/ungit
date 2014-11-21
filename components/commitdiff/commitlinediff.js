@@ -15,7 +15,7 @@ var CommitLineDiff = function(args) {
     }
 
     if (fileType(self.fileName()) == 'text') {
-      return 'textdiff'//args.diffTextDisplayType()
+      return args.diffTextDisplayType();
     } else {
       return 'imagediff';
     }
