@@ -9,6 +9,7 @@ var CommitLineDiff = function(args) {
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
+  this.args = args;
   this.type = ko.computed(function() {
     if (!self.fileName()) {
       return 'textdiff';
@@ -20,21 +21,26 @@ var CommitLineDiff = function(args) {
       return 'imagediff';
     }
   });
-  this.specificDiff = ko.observable(components.create(this.type(), {
-    filename: this.fileName(),
-    repoPath: args.repoPath,
-    server: args.server,
-    sha1: args.sha1,
-    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
-  }));
+  this.specificDiff = ko.observable(this.getSpecificDiff());
 
   args.diffTextDisplayType.subscribe(function() {
+    self.specificDiff(self.getSpecificDiff());
     if (self.showSpecificDiff()) {
       self.refreshAndShow();
     }
   });
 };
 exports.CommitLineDiff = CommitLineDiff;
+
+CommitLineDiff.prototype.getSpecificDiff = function() {
+  return components.create(this.type(), {
+    filename: this.fileName(),
+    repoPath: this.args.repoPath,
+    server: this.args.server,
+    sha1: this.args.sha1,
+    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+  });
+}
 
 CommitLineDiff.prototype.fileNameClick = function(data, event) {
   if (this.showSpecificDiff()) {
