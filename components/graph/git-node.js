@@ -289,3 +289,10 @@ GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
     this.diffTextDisplayType('textdiff');
   }
 }
+GitNodeViewModel.prototype.getDiffDisplayTypeText = function() {
+  if (this.diffTextDisplayType() === 'textdiff') {
+    return 'Side-By-Side Diff';
+  } else {
+    return 'Default Diff';
+  }
+}

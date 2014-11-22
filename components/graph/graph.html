@@ -34,7 +34,7 @@
               <div class="body" data-bind="text: body"></div>
               <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle">
                 <div class="diff-inner" data-bind="visible: selected">
-                  <a href="#" class="" data-ta-clickable="" data-bind="click: toggleDiffDisplayType">Side by Side</a>
+                  <a href="#" class="" data-ta-clickable="" data-bind="click: toggleDiffDisplayType, text: getDiffDisplayTypeText()"></a>
                 </div>
                 <div class="diff-inner" data-bind="component: commitDiff"></div>
               </div>
