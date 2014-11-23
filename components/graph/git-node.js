@@ -9,6 +9,9 @@ var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
 var Vector2 = require('ungit-vector2');
 
+var textDiffOptions = [ { name: 'Default Diff', component: 'textdiff', nextIndex: 1 },
+                        { name: 'Side-by-Side Diff', component: 'sidebysidediff', nextIndex: 0 }];
+
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
   Selectable.call(this, graph);
@@ -61,7 +64,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.diffTextDisplayType = ko.observable('textdiff');
+  this.diffTextDisplayType = ko.observable(textDiffOptions[0]);
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -283,16 +286,8 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
 GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
-  if (this.diffTextDisplayType() === 'textdiff') {
-    this.diffTextDisplayType('sidebysidediff');
-  } else {
-    this.diffTextDisplayType('textdiff');
-  }
+  this.diffTextDisplayType(textDiffOptions[this.diffTextDisplayType().nextIndex]);
 }
-GitNodeViewModel.prototype.getDiffDisplayTypeText = function() {
-  if (this.diffTextDisplayType() === 'textdiff') {
-    return 'Side-By-Side Diff';
-  } else {
-    return 'Default Diff';
-  }
+GitNodeViewModel.prototype.getNextDiffDisplayTypeText = function() {
+  return textDiffOptions[this.diffTextDisplayType().nextIndex].name;
 }
