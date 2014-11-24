@@ -29,6 +29,7 @@ module.exports = function(grunt) {
           "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
           "components/stash/stash.css": ["components/stash/stash.less"],
           "components/submodules/submodules.css": ["components/submodules/submodules.less"],
+          "components/sidebysidediff/sidebysidediff.css": ["components/sidebysidediff/sidebysidediff.less"],
         }
       }
     },
