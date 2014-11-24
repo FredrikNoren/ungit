@@ -11,7 +11,7 @@ function StashItemViewModel(stash, data) {
   this.stash = stash;
   this.server = stash.server;
   this.id = data.id;
-  this.title = data.name + ' ' + moment(data.date).fromNow();
+  this.title = data.name + ' ' + moment(new Date(data.date)).fromNow();
   this.body = data.title;
   this.stashPopProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-pop', temporary: true });
 }

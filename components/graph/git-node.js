@@ -141,14 +141,14 @@ var GitNodeViewModel = function(graph, sha1) {
 inherits(GitNodeViewModel, NodeViewModel);
 exports.GitNodeViewModel = GitNodeViewModel;
 GitNodeViewModel.prototype.setData = function(args) {
-  this.commitTime(moment(args.commitDate));
-  this.authorTime(moment(args.authorDate));
+  this.commitTime(moment(new Date(args.commitDate)));
+  this.authorTime(moment(new Date(args.authorDate)));
   this.parents(args.parents || []);
   var message = args.message.split('\n');
   this.message(args.message);
   this.title(message[0]);
   this.body(message.slice(2).join('\n'));
-  this.authorDate(moment(args.authorDate));
+  this.authorDate(moment(new Date(args.authorDate)));
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
   this.authorEmail(args.authorEmail);
