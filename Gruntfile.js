@@ -310,10 +310,12 @@ module.exports = function(grunt) {
 
   function bumpDependency(packageJson, dependencyType, packageName, callback) {
     var currentVersion = packageJson[dependencyType][packageName];
-    if (currentVersion[0] == '~') currentVersion = currentVersion.slice(1);
+    if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
     npm.commands.show([packageName, 'versions'], true, function(err, data) {
       if(err) return callback(err);
-      var versions = data[Object.keys(data)[0]].versions;
+      var versions = data[Object.keys(data)[0]].versions.filter(function(v) {
+        return v.indexOf('alpha') == -1;
+      });
       var latestVersion = versions[versions.length - 1];
       if (semver.gt(latestVersion, currentVersion)) {
         packageJson[dependencyType][packageName] = '~' + latestVersion;
