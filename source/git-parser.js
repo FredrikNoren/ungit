@@ -1,4 +1,5 @@
 var moment = require('moment');
+var fs = require('fs');
 
 exports.parseGitStatus = function(text) {
   var result = {};
@@ -280,13 +281,37 @@ exports.parseGitSubmodule = function(text, args) {
   if (!text) {
     return {};
   }
-  
-  var lines = text.trim().split('\n').filter(function(item) {
-    return item;
+
+  var lines = text.trim().split('\n').filter(function(line) {
+    return line;
   });
-  
-  return lines.map(function(line) {
-    var values = line.split(' ');
-    return { sha1: values[0], name: values[1] };
+
+  var submodule = {};
+  var submodules = [];
+
+  var getSubmoduleName = function(line) {
+    submodule.name = line.match(/"(.*?)"/)[1];
+    parser = getPath;
+  };
+
+  var getPath = function(line) {
+    submodule.path = line.substr(line.indexOf("= ") + 1).trim();
+    parser = getUrl;
+  };
+
+  var getUrl = function(line) {
+    submodule.url = line.substr(line.indexOf("= ") + 1).trim();
+    parser = getSubmoduleName;
+
+    submodules.push(submodule);
+    submodule = {};
+  };
+
+  var parser = getSubmoduleName;
+
+  lines.forEach(function(line) {
+    parser(line);
   });
+
+  return submodules;
 }
