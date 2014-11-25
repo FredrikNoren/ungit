@@ -483,14 +483,26 @@ exports.registerApi = function(env) {
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
       .start();
   });
-  
+
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('submodule', req.param('path'))
-      .parser(gitParser.parseGitSubmodule)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    var filename = path.join(req.param('path'), '.gitmodules');
+
+    fs.exists(filename, function(exists) {
+      if (!exists) {
+        res.json({});
+        return;
+      }
+
+      fs.readFile(filename, {encoding: 'utf8'}, function (err, data) {
+        if (err) {
+          res.json({});
+        } else {
+          res.json(gitParser.parseGitSubmodule(data));
+        }
+      });
+    });
   });
-  
+
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
     git('submodule init', req.param('path'))
       .always(function() {
