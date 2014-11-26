@@ -300,7 +300,15 @@ exports.parseGitSubmodule = function(text, args) {
   };
 
   var getUrl = function(line) {
-    submodule.url = line.substr(line.indexOf("= ") + 1).trim();
+    var url = line.substr(line.indexOf("= ") + 1).trim();
+
+    // When a repo is checkout with ssh instead of an url
+    if (line.indexOf('http') < 0) {
+      url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+    }
+
+    submodule.url = url;
+
     parser = getSubmoduleName;
 
     submodules.push(submodule);

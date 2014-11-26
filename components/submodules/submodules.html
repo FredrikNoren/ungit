@@ -10,7 +10,10 @@
 	</button>
 	<ul class="dropdown-menu" role="menu" data-ta-container="submodules">
 		<!-- ko foreach: submodules -->
-		<li><a href="#" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a></li>
+		<li>
+			<a href="#" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a>
+			<a href="#" data-bind="text: '@', click: $parent.submoduleClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
+		</li>
 		<!-- /ko -->
 		<li class="divider"></li>
 		<li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="update-submodule">Update Submodules</a></li>

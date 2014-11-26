@@ -75,3 +75,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
+
+SubmodulesViewModel.prototype.submoduleClick = function(submodule) {
+  window.location.href = submodule.url;
+}
