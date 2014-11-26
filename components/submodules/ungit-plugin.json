@@ -3,6 +3,7 @@
     "knockoutTemplates": {
       "submodules": "submodules.html"
     },
-    "javascript": "submodules.bundle.js"
+    "javascript": "submodules.bundle.js",
+    "css": "submodules.css"
   }
 }

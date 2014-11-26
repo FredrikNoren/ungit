@@ -11,8 +11,8 @@
 	<ul class="dropdown-menu" role="menu" data-ta-container="submodules">
 		<!-- ko foreach: submodules -->
 		<li>
-			<a href="#" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a>
-			<a href="#" data-bind="text: '@', click: $parent.submoduleClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
+			<a href="#" class="submodule-link" data-bind="text: name, click: function() {}, attr: { 'data-ta-clickable': name }"></a>
+			<a href="#" class="submodule-link submodule-url" data-bind="text: '@', click: $parent.submoduleClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
 		</li>
 		<!-- /ko -->
 		<li class="divider"></li>
