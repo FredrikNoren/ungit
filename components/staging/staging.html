@@ -4,6 +4,7 @@
     <div class="arrowContainer arrowDown">
       <div class="arrow"></div>
     </div>
+    <span data-bind="visible: isSubmodule">This is a submodule and it is discouraged to modifiy.</span>
     <div data-bind="visible: showNux" class="nux">
       Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>

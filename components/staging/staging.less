@@ -10,10 +10,14 @@
 
   .arrowDown {
     position: absolute;
-    left: (@log-width-small + 45px);
+    left: (@log-width-small + 40px);
     bottom: 0px;
     .arrow {
-      background: url('stagingArrowDown.png');
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid #643A44;
     }
   }
 
@@ -136,7 +140,7 @@
 @media (min-width: @screen-md-min) {
   .staging {
     .arrowDown {
-      left: (@log-width-large + 45px);
+      left: (@log-width-large + 40px);
     }
   }
 }
