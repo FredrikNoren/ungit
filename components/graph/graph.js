@@ -77,7 +77,6 @@ var GitGraphViewModel = function(server, repoPath) {
   this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
   this.loadNodesFromApiThrottled();
   this.updateBranchesThrottled();
-  this.isSubmodule = ko.observable(false);
 }
 GitGraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
@@ -110,19 +109,6 @@ GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {
     self.setNodesFromLog(logEntries);
     self.nodesLoader.stop();
     if (callback) callback();
-  });
-
-  // If current dir's name is in parent dir's .gitmodules path, then current dir is a submodule
-  this.server.get('/submodules', { path: this.repoPath, pathToJoin: '..' }, function(err, submodules) {
-    var currentDirName = self.repoPath.replace(/^.*[\\\/]/, '');
-
-    if (submodules && Array.isArray(submodules)) {
-      submodules.forEach(function(submodule) {
-        if(submodule.path === currentDirName) {
-          self.isSubmodule(true);
-        }
-      });
-    }
   });
 }
 GitGraphViewModel.prototype.updateBranches = function() {
