@@ -485,7 +485,8 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
-    var filename = path.join(req.param('path'), '.gitmodules');
+    var pathToJoin = req.param('pathToJoin');
+    var filename = path.join(req.param('path'), pathToJoin ? pathToJoin : '', '.gitmodules');
 
     fs.exists(filename, function(exists) {
       if (!exists) {
