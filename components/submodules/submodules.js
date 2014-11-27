@@ -76,6 +76,10 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
-SubmodulesViewModel.prototype.submoduleClick = function(submodule) {
+SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
   window.location.href = submodule.url;
+}
+
+SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
+  window.location.href = document.URL + '/' + submodule.path;
 }
