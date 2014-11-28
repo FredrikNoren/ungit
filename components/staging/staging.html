@@ -1,10 +1,10 @@
 
-<div class="staging panel panel-default" data-bind="css: { commitValidationError: commitValidationError }">
+<div class="staging panel panel-default" data-bind="css: { commitValidationError: commitValidationError, submodule: isSubmodule }">
   <div class="panel-body">
     <div class="arrowContainer arrowDown">
       <div class="arrow"></div>
     </div>
-    <span data-bind="visible: isSubmodule">This is a submodule and it is discouraged to modifiy.</span>
+    <span class="warningTextColor" data-bind="visible: isSubmodule">This is a submodule and it is discouraged to modifiy.</span>
     <div data-bind="visible: showNux" class="nux">
       Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>
