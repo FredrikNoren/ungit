@@ -55,8 +55,8 @@ var gitQueue = async.queue(function (task, callback) {
   git.runningTasks.push(task);
   task.startTime = Date.now();
   var process = child_process.exec(
-    task.command, 
-    { 
+    task.command,
+    {
       cwd: task.repoPath,
       maxBuffer: 1024 * 1024 * 100,
       encoding: task._encoding,
@@ -190,7 +190,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, maxNLines) {
+git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
   var task = new GitTask();
 
   var statusTask = git.status(repoPath)
@@ -210,7 +210,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
         git(gitCommand, repoPath)
-          .parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
+          .parser(gitParser.parseGitDiff, { maxNLines: maxNLines, isGetRaw: isGetRaw })
           .always(task.setResult)
           .start();
       } else {
@@ -228,6 +228,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
         });
       }
     });
+
   task.started(statusTask.start);
 
   return task;
@@ -235,7 +236,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
 
 git.discardAllChanges = function(repoPath) {
   var task = new GitTask();
-  
+
   var gitTask = git('reset --hard HEAD', repoPath)
     .fail(task.setResult)
     .done(function() {

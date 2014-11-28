@@ -8,6 +8,12 @@ components.register('sidebysidediff', function(args) {
 });
 
 var SideBySideDiffViewModel = function(args) {
+  this.filename = args.filename;
+  this.repoPath = args.repoPath;
+  this.server = args.server;
+  this.diffs = ko.observable();
+  this.sha1 = args.sha1;
+  this.totalNumberOfLines = ko.observable(0);
 }
 
 SideBySideDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -18,11 +24,28 @@ SideBySideDiffViewModel.prototype.updateNode = function(parentElement) {
   document.getElementById('side-by-side').innerHTML = sidebyside;
 }
 
+SideBySideDiffViewModel.prototype.getDiffArguments = function() {
+  var args = {};
+
+  args.file = this.filename;
+  args.path = this.repoPath;
+  args.sha1 = this.sha1 ? this.sha1 : '';
+  args.isGetRaw = true;
+
+  return args;
+}
+
 SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  if (callback) callback();
+  self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
+    console.log(diffs);
+
+    if (callback) callback();
+  });
 }
+
+
 
 var lineDiffExample = 'diff --git a/src/attributes/attr.js b/src/attributes/attr.js\n' +
 'index facdd41..b627fe8 100644\n' +

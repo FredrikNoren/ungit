@@ -28,6 +28,10 @@ exports.parseGitDiff = function(text, args) {
   var diffs = [];
   args = args || {};
 
+  if (args.isGetRaw) {
+    return text;
+  }
+
   while(lines.length && lines[0]) {
     if (args.maxNLines) {
       var nLines = diffs.length > 0 ? diffs[diffs.length - 1].lines.length : 0;
