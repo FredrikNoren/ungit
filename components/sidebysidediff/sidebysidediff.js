@@ -13,8 +13,6 @@ var SideBySideDiffViewModel = function(args) {
   this.server = args.server;
   this.diffs = ko.observable();
   this.sha1 = args.sha1;
-  this.totalNumberOfLines = ko.observable(0);
-  this.diffJson = ko.observable();
   this.parentElement = null;
 }
 
@@ -37,8 +35,8 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-    self.diffJson(Diff2Html.getJsonFromDiff(diffs));
-    self.parentElement.innerHTML = Diff2Html.getPrettySideBySideHtmlFromJson(self.diffJson());
+    var diffJson = Diff2Html.getJsonFromDiff(diffs);
+    self.parentElement.innerHTML = Diff2Html.getPrettySideBySideHtmlFromJson(diffJson;
 
     if (callback) callback();
   });
