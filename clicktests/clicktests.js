@@ -196,6 +196,21 @@ test('Test showing commit diff between two commits', function(done) {
   });
 });
 
+test('Test showing commit side by side diff between two commits', function(done) {
+  helpers.click(page, '[data-ta-clickable="node-clickable"]');
+  helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
+    helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
+    helpers.click(page, '[data-ta-clickable="toggleDiffDisplay"]');
+    helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
+      setTimeout(function() {                           // let it finish making api call
+        helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
+        page.render('clicktestout/lol.png');
+        done();
+      }, 1000);
+    });
+  });
+});
+
 test('Should be possible to discard a created file', function(done) {
   createTestFile(testRepoPath + '/testfile2.txt', function(err) {
     if (err) return done(err);
