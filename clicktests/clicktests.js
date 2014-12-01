@@ -361,6 +361,37 @@ test('Fetch from newly added remote', function(done) {
   });
 });
 
+// --- branches component ---
+test('A new branch should apparead in the dropdown menu', function(done){
+  var branch = 'testbranchdropdown';
+  createBranch(branch, function(){
+    helpers.waitForElement(page, '[data-ta-container="branches"] [data-ta-clickable="'+branch+'"]', function(){
+        done();
+    });
+  });
+});
+
+test('Checkout the newly created branch from the dropdown', function(done) {
+  var branch = 'testbranchdropdown';
+  helpers.click(page, '[data-ta-clickable="branches-menu"]');
+  helpers.click(page, '[data-ta-container="branches"] [data-ta-clickable="'+branch+'"]');
+  helpers.waitForElement(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
+    done();
+  });
+});
+
+test('A newly deleted branch should disappeared from the dropdown menu', function(done) {
+  checkout(page, 'master', function() {
+    var branch = 'testbranchdropdown';
+    helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="'+branch+'"]');
+    helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
+    helpers.waitForNotElement(page, '[data-ta-container="branches"] [data-ta-clickable="'+branch+'"]', function(){
+      done();
+    });
+  });
+});
+
+
 // ----------- CLONING -------------
 
 var testClonePath;
@@ -521,6 +552,5 @@ test('Cleanup and shutdown server', function(done) {
     });
   });
 });
-
 
 helpers.runTests(page);
