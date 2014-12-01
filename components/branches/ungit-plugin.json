@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "branches": "branches.html"
+    },
+    "javascript": "branches.bundle.js"
+  }
+}

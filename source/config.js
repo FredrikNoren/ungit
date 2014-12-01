@@ -12,7 +12,7 @@ var defaultConfig = {
   urlBase: "http://localhost",
 
   // Directory to output log files.
-  logDirectory: null,
+  logDirectory: "null",
 
   // Write REST requests to the log
   logRESTRequests: true,

@@ -95,6 +95,8 @@ GitGraphViewModel.prototype.onProgramEvent = function(event) {
     this.setRemoteTags(event.tags);
   } else if (event.event == 'current-remote-changed') {
     this.currentRemote(event.newRemote);
+  } else if (event.event == 'current-branch-changed') {
+    this.checkedOutBranch(event.newBranch);
   }
 }
 GitGraphViewModel.prototype.loadNodesFromApi = function(callback) {

@@ -1,0 +1,15 @@
+<div class="btn-group checkoutButton">
+    <button type="button" class="btn btn-default" data-ta-clickable="checkout" data-bind="click: clickCheckout, enable: checkoutEnabled">
+        <span class="glyphicon glyphicon-download-alt"></span>
+        <span data-bind="text: checkoutLabel"></span>
+        <!-- ko component: checkoutingProgressBar --><!-- /ko -->
+    </button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="branches-menu">
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu" data-ta-container="branches">
+        <!-- ko foreach: branches -->
+        <li><a href="#" data-bind="text: name, click: changeBranch, attr: { 'data-ta-clickable': name }"></a></li>
+        <!-- /ko -->
+    </ul>
+</div>

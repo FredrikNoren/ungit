@@ -16,6 +16,7 @@ var RepositoryViewModel = function(server, repoPath) {
   this.gitErrors = components.create('gitErrors', { server: server, repoPath: repoPath });
   this.graph = components.create('graph', { server: server, repoPath: repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
+  this.branches = components.create('branches', { server: server, repoPath: repoPath });
   this.stash = components.create('stash', { server: server, repoPath: repoPath });
   this.staging = components.create('staging', { server: server, repoPath: repoPath });
   this.showLog = ko.computed(function() {
@@ -32,6 +33,7 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
   if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);
   if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
+  if (this.branches.onProgramEvent) this.branches.onProgramEvent(event);
 
   // If we get a reconnect event it's usually because the server crashed and then restarted
   // or something like that, so we need to tell it to start watching the path again
