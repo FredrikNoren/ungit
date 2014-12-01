@@ -6,16 +6,16 @@ var fs = require('fs');
 var defaultConfig = {
 
   // The port ungit is exposed on.
-  port: 8449,
+  port: 8448,
 
   // The base URL ungit will be accessible from.
   urlBase: "http://localhost",
 
   // Directory to output log files.
-  logDirectory: "/home/green/dev/ungit/ungit-anbuf/log/",
+  logDirectory: "null"
 
   // Write REST requests to the log
-  logRESTRequests: false,
+  logRESTRequests: true,
 
   // Write git commands issued to the log
   logGitCommands: false,
@@ -24,10 +24,10 @@ var defaultConfig = {
   logGitOutput: false,
 
   // This will automatically send anonymous bug reports.
-  bugtracking: true,
+  bugtracking: false,
 
   // Google analytics for usage statistics.
-  sendUsageStatistics: true,
+  sendUsageStatistics: false,
 
   // True to enable authentication. Users are defined in the users configuration property.
   authentication: false,
@@ -42,7 +42,7 @@ var defaultConfig = {
   maxConcurrentGitOperations: 4,
 
   // Launch a browser window with ungit when ungit is started
-  launchBrowser: false,
+  launchBrowser: true,
 
   // Instead of launching ungit with the current folder force a different path to be used. Can be set to null to force the home screen.
   forcedLaunchPath: undefined,
@@ -60,7 +60,7 @@ var defaultConfig = {
   autoFetch: true,
 
   // Used for development purposes.
-  dev: true,
+  dev: false,
 
   // Specify a custom command to launch. `%U` will be replaced with the URL
   //  that corresponds with the working git directory.
