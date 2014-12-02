@@ -1,7 +1,7 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
-var Diff2Html = require('../../node_modules/diff2html/src/diff2html.js');
+var diff2html = require('diff2html');
 
 components.register('sidebysidediff', function(args) {
   return new SideBySideDiffViewModel(args);
@@ -35,8 +35,8 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-    var diffJson = Diff2Html.getJsonFromDiff(diffs);
-    self.parentElement.innerHTML = Diff2Html.getPrettySideBySideHtmlFromJson(diffJson);
+    var diffJson = diff2html.getJsonFromDiff(diffs);
+    self.parentElement.innerHTML = diff2html.getPrettySideBySideHtmlFromJson(diffJson);
 
     if (callback) callback();
   });

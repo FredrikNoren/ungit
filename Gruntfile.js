@@ -59,7 +59,8 @@ module.exports = function(grunt) {
             'color:color',
             'signals:signals',
             'util:util',
-            'path:path'
+            'path:path',
+            'diff2html:diff2html'
           ]
         },
         files: {
