@@ -23,6 +23,10 @@ var RepositoryViewModel = function(server, repoPath) {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
   this.server.watchRepository(repoPath);
+  this.isSubmodule = ko.observable(false);
+  this.parentModulePath = ko.observable();
+  this.parentModuleLink = ko.observable();
+  this.refreshSubmoduleStatus();
 }
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
@@ -39,8 +43,23 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
   // or something like that, so we need to tell it to start watching the path again
   if (event.event == 'connected') {
     this.server.watchRepository(this.repoPath);
+  } else if (event.event == 'request-app-content-refresh') {
+    
   }
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
+}
+RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
+  var self = this;
+  this.server.get('/baserepopath', { path: this.repoPath }, function(err, baseRepoPath) {
+    if (err) {
+      self.isSubmodule(false);
+      return true;
+    } else {
+      self.isSubmodule(true);
+      self.parentModulePath(baseRepoPath.path);
+      self.parentModuleLink('/#/repository?path=' + encodeURIComponent(baseRepoPath.path));
+    }
+  });
 }

@@ -1,22 +1,8 @@
 
 @import "public/less/variables.less";
-@warningTextColor: #D6542D;
 
 .staging {
   background: #643A44;
-
-  .warningTextColor {
-    color: @warningTextColor;
-  }
-
-  &.submodule {
-    background: #343E73;
-
-    .arrowDown > .arrow {
-      border-top: 20px solid #343E73;
-    }
-  }
-
   box-shadow: 0px -1px 15px #252833;
   color: #B8A5A5;
   z-index: 5;
@@ -24,14 +10,10 @@
 
   .arrowDown {
     position: absolute;
-    left: (@log-width-small + 40px);
+    left: (@log-width-small + 45px);
     bottom: 0px;
     .arrow {
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 20px solid #643A44;
+      background: url('stagingArrowDown.png');
     }
   }
 
@@ -41,7 +23,7 @@
 
   .validationError {
     display: none;
-    color: @warningTextColor;
+    color: #D6542D;
     padding: 0.25em;
   }
   &:hover .validationError {
@@ -154,7 +136,7 @@
 @media (min-width: @screen-md-min) {
   .staging {
     .arrowDown {
-      left: (@log-width-large + 40px);
+      left: (@log-width-large + 45px);
     }
   }
 }

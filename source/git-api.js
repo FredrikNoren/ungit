@@ -484,9 +484,19 @@ exports.registerApi = function(env) {
       .start();
   });
 
+  app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
+    var currentPath = path.resolve(path.join(req.param('path'), '..'));
+    while (currentPath != '/' && 
+      (!fs.existsSync(path.join(currentPath, '.git')) || 
+      !fs.statSync(path.join(currentPath, '.git')).isDirectory())) {
+      currentPath = path.resolve(path.join(currentPath, '..'));
+    }
+    if (currentPath != '/') res.json({ path: currentPath });
+    else res.status(404).json({});
+  });
+
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
-    var pathToJoin = req.param('pathToJoin');
-    var filename = path.join(req.param('path'), pathToJoin ? pathToJoin : '', '.gitmodules');
+    var filename = path.join(req.param('path'), '.gitmodules');
 
     fs.exists(filename, function(exists) {
       if (!exists) {

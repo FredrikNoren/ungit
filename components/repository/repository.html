@@ -2,6 +2,13 @@
 
   <!-- ko component: gitErrors --><!-- /ko -->
 
+  <!-- ko if: isSubmodule -->
+  <div class="submodule alert alert-warning">
+    <h4>This is a submodule</h4>
+    Base repository: <a data-bind="text: parentModulePath, attr: { href: parentModuleLink}"></a>
+  </div>
+  <!-- /ko -->
+
   <!-- ko component: stash --><!-- /ko -->
 
   <!-- ko component: staging --><!-- /ko -->
