@@ -3,7 +3,6 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var async = require('async');
 var _ = require('lodash');
-var path = require('path');
 
 components.register('repository', function(args) {
   return new RepositoryViewModel(args.server, args.repoPath);
@@ -61,7 +60,7 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
 
     self.server.get('/submodules', { path: baseRepoPath.path }, function(err, submodules) {
       if (!err && Array.isArray(submodules)) {
-        var baseName = path.basename(self.repoPath);
+        var baseName = self.repoPath.replace(/^.*[\\\/]/, '');
 
         for (var n = 0; n < submodules.length; n++) {
           if (submodules[n].path === baseName) {
