@@ -1,4 +1,5 @@
 var moment = require('moment');
+var fs = require('fs');
 
 exports.parseGitStatus = function(text) {
   var result = {};
@@ -274,4 +275,51 @@ exports.parseGitStashShow = function(text) {
       filename: line.substring(0, split).trim()
     }
   });
+}
+
+exports.parseGitSubmodule = function(text, args) {
+  if (!text) {
+    return {};
+  }
+
+  var lines = text.trim().split('\n').filter(function(line) {
+    return line;
+  });
+
+  var submodule = {};
+  var submodules = [];
+
+  var getSubmoduleName = function(line) {
+    submodule.name = line.match(/"(.*?)"/)[1];
+    parser = getPath;
+  };
+
+  var getPath = function(line) {
+    submodule.path = line.substr(line.indexOf("= ") + 1).trim();
+    parser = getUrl;
+  };
+
+  var getUrl = function(line) {
+    var url = line.substr(line.indexOf("= ") + 1).trim();
+
+    // When a repo is checkout with ssh instead of an url
+    if (line.indexOf('http') < 0) {
+      url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+    }
+
+    submodule.url = url;
+
+    parser = getSubmoduleName;
+
+    submodules.push(submodule);
+    submodule = {};
+  };
+
+  var parser = getSubmoduleName;
+
+  lines.forEach(function(line) {
+    parser(line);
+  });
+
+  return submodules;
 }

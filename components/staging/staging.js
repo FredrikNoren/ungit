@@ -71,6 +71,7 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
+  this.isSubmodule = ko.observable(false);
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -113,6 +114,18 @@ StagingViewModel.prototype.refreshContent = function(callback) {
       self.commitMessageBody(lines.slice(1).join('\n'));
     }
     if (callback) callback();
+  });
+  // If current dir's name is in parent dir's .gitmodules path, then current dir is a submodule
+  this.server.get('/submodules', { path: this.repoPath, pathToJoin: '..' }, function(err, submodules) {
+    var currentDirName = self.repoPath.replace(/^.*[\\\/]/, '');
+
+    if (submodules && Array.isArray(submodules)) {
+      submodules.forEach(function(submodule) {
+        if(submodule.path === currentDirName) {
+          self.isSubmodule(true);
+        }
+      });
+    }
   });
 }
 StagingViewModel.prototype.setFiles = function(files) {

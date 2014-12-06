@@ -484,7 +484,37 @@ exports.registerApi = function(env) {
       .start();
   });
 
-  app.post(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
+  app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
+    var pathToJoin = req.param('pathToJoin');
+    var filename = path.join(req.param('path'), pathToJoin ? pathToJoin : '', '.gitmodules');
+
+    fs.exists(filename, function(exists) {
+      if (!exists) {
+        res.json({});
+        return;
+      }
+
+      fs.readFile(filename, {encoding: 'utf8'}, function (err, data) {
+        if (err) {
+          res.json({});
+        } else {
+          res.json(gitParser.parseGitSubmodule(data));
+        }
+      });
+    });
+  });
+
+  app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
+    git('submodule init', req.param('path'))
+      .always(function() {
+        return git('submodule update', req.param('path'))
+        .always(jsonResultOrFail.bind(null, res))
+        .start();
+      })
+      .start();
+  });
+
+  app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
     git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
