@@ -3,6 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var async = require('async');
 var _ = require('lodash');
+var path = require('path');
 
 components.register('repository', function(args) {
   return new RepositoryViewModel(args.server, args.repoPath);
@@ -44,7 +45,7 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'connected') {
     this.server.watchRepository(this.repoPath);
   } else if (event.event == 'request-app-content-refresh') {
-    
+
   }
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
@@ -56,10 +57,24 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
     if (err) {
       self.isSubmodule(false);
       return true;
-    } else {
-      self.isSubmodule(true);
-      self.parentModulePath(baseRepoPath.path);
-      self.parentModuleLink('/#/repository?path=' + encodeURIComponent(baseRepoPath.path));
     }
+
+    self.server.get('/submodules', { path: baseRepoPath.path }, function(err, submodules) {
+      if (!err && Array.isArray(submodules)) {
+        var baseName = path.basename(self.repoPath);
+
+        for (var n = 0; n < submodules.length; n++) {
+          if (submodules[n].path === baseName) {
+            self.isSubmodule(true);
+            self.parentModulePath(baseRepoPath.path);
+            self.parentModuleLink('/#/repository?path=' + encodeURIComponent(baseRepoPath.path));
+            return;
+          }
+        }
+      }
+
+      self.isSubmodule(false);
+      return true;
+    });
   });
 }
