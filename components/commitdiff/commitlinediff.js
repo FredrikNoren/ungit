@@ -16,14 +16,14 @@ var CommitLineDiff = function(args) {
     }
 
     if (fileType(self.fileName()) == 'text') {
-      return args.diffTextDisplayType().component;
+      return args.textDiffType().component;
     } else {
       return 'imagediff';
     }
   });
   this.specificDiff = ko.observable(this.getSpecificDiff());
 
-  args.diffTextDisplayType.subscribe(function() {
+  args.textDiffType.subscribe(function() {
     self.specificDiff(self.getSpecificDiff());
     if (self.showSpecificDiff()) {
       self.refreshAndShow();

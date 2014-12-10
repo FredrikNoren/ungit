@@ -61,7 +61,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.textDiffOptions = ko.observable(components.create('textDiffOptions', {}));
+  this.textDiffType = ko.observable(components.create('textDiffType', {}));
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -158,7 +158,7 @@ GitNodeViewModel.prototype.setData = function(args) {
     sha1: self.sha1,
     repoPath: self.graph.repoPath,
     server: self.server,
-    diffTextDisplayType: self.textDiffOptions().textDiffType }));
+    textDiffType: self.textDiffType().textDiffType }));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
