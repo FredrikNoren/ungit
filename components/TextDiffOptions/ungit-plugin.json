@@ -1,0 +1,6 @@
+{
+  "exports": {
+    "knockoutTemplates": {},
+    "javascript": "TextDiffOptions.bundle.js"
+  }
+}
