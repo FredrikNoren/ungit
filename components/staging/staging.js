@@ -71,6 +71,7 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
+  this.diffTypeText = ko.observable("Side-by-Side");
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -224,6 +225,13 @@ StagingViewModel.prototype.toggleAllStages = function() {
   }
 
   self.allStageFlag(!self.allStageFlag());
+}
+StagingViewModel.prototype.toggleDiffType = function() {
+  if (this.diffTypeText() === 'Default') {
+    this.diffTypeText('Side-bySide');
+  } else {
+    this.diffTypeText('Default');
+  }
 }
 
 var FileViewModel = function(staging, name, type) {
