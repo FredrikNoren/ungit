@@ -57,9 +57,11 @@
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleDiffType" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle diff type" data-delay='{"show":"2000", "hide":"0"}'>
-            <span data-bind="text: diffTypeText"></span>
+          <!-- ko with: textDiffType -->
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleDiffDisplayType" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle diff type" data-delay='{"show":"2000", "hide":"0"}'>
+            <span data-bind="text: getNextDiffDisplayTypeText()"></span>
           </button>
+          <!-- /ko -->
         </div>
 
         <div class="files" data-bind="foreach: files">
