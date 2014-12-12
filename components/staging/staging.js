@@ -244,7 +244,7 @@ var FileViewModel = function(staging, name, fileType, textDiffType) {
     }
 
     if (fileType === 'text') {
-      return textDiffType().component;
+      return self.isNew() ? 'textdiff' : textDiffType().component ;
     } else {
       return 'imagediff';
     }
