@@ -35,8 +35,7 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-    var diffJson = diff2html.getJsonFromDiff(diffs);
-    self.parentElement.innerHTML = diff2html.getPrettySideBySideHtmlFromJson(diffJson);
+    self.parentElement.innerHTML = diff2html.getPrettySideBySideHtmlFromDiff(diffs);
 
     if (callback) callback();
   });
