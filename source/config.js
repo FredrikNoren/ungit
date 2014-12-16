@@ -1,5 +1,4 @@
 var rc = require('rc');
-var optimist = require('optimist');
 var path = require('path');
 var fs = require('fs');
 var yargs = require('yargs');
