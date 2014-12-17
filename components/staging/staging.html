@@ -59,7 +59,7 @@
           </button>
           <!-- ko with: textDiffType -->
           <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleDiffDisplayType" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle diff type" data-delay='{"show":"2000", "hide":"0"}'>
-            <span data-bind="text: getNextDiffDisplayTypeText()"></span>
+            <span data-bind="text: 'Show ' + getNextDiffDisplayTypeText()"></span>
           </button>
           <!-- /ko -->
         </div>
