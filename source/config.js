@@ -110,6 +110,7 @@ var argv = yargs
   .alias('b', 'launchBrowser')
   .alias('v', 'version')
   .alias('h', 'help')
+  .alias('o', 'gitVersionCheckOverride')
   .describe('gitVersionCheckOverride', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
   .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this.')
   .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
