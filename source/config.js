@@ -106,29 +106,54 @@ function getUserHome() {
 
 // Works for now but should be moved to bin/ungit
 var argv = yargs
-  .usage('ungit [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
-  .alias('b', 'launchBrowser')
-  .alias('v', 'version')
-  .alias('h', 'help')
-  .alias('o', 'gitVersionCheckOverride')
-  .describe('gitVersionCheckOverride', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
-  .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this.')
-  .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
-  .describe('v', 'Display ungit versions')
-  .argv;
+.usage('$0 [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
+.example('$0 --port=8888', 'Run Ungit on port 8888')
+.example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
+.help('help')
+.version('ungit version: ' + JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version + '\n', 'version')
+.strict()
+.alias('b', 'launchBrowser')
+.alias('h', 'help')
+.alias('o', 'gitVersionCheckOverride')
+.alias('v', 'version')
+.describe('o', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
+.describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this')
+.describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
+.describe('port', 'The port ungit is exposed on')
+.describe('urlBase', 'The base URL ungit will be accessible from')
+.describe('logDirectory', 'Directory to output log files')
+.describe('logRESTRequests', 'Write REST requests to the log')
+.describe('logGitCommands', 'Write git commands issued to the log')
+.describe('logGitOutput', 'Write the result of git commands issued to the log')
+.describe('bugtracking', 'This will automatically send anonymous bug reports')
+.describe('sendUsageStatistics', 'Google analytics for usage statistics')
+.describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
+.describe('users', 'Map of username/passwords which are granted access')
+.describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')
+.describe('maxConcurrentGitOperations', 'Maximum number of concurrent git operations')
+.describe('forcedLaunchPath', 'Define path to be used on open. Can be set to null to force the home screen')
+.describe('autoShutdownTimeout', 'Closes the server after x ms of inactivity. Mainly used by the clicktesting')
+.describe('maxNAutoRestartOnCrash', 'Maximum number of automatic restarts after a crash. Undefined == unlimited')
+.describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')
+.describe('autoFetch', 'Automatically fetch from remote when entering a repository using ungit')
+.describe('dev', 'Used for development purposes')
+.describe('launchCommand', 'Specify a custom command to launch. `%U` will be replaced with the URL that corresponds with the working git directory.')
+.describe('allowCheckoutNodes', 'Allow checking out nodes (which results in a detached head)')
+.describe('allowedIPs', 'An array of ip addresses that can connect to ungit. All others are denied')
+.describe('autoPruneOnFetch', 'Automatically remove remote tracking branches that have been removed on the server when fetching. (git fetch -p)')
+.describe('pluginDirectory', 'Directory to look for plugins')
+// --pluginConfigs doesn't work...  Probably only works in .ungitrc as a json file
+.describe('pluginConfigs', 'No supported as a command line argument, use ungitrc config file.  See README.md')
+.describe('autoStashAndPop', 'Used for development purposes')
+.describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
+.argv;
 
-if (argv.help) {
+// In case of `ungit abcd`, strict() doesn't catch that as an error
+if (argv._.length > 0) {
   yargs.showHelp();
   process.exit(0);
-} else if (argv.v) {
-  console.log('ungit version: ' + JSON.parse(fs.readFileSync('../package.json')).version);
-  process.exit(0);
 } else if (argv.cliconfigonly) {
-  var deepExtend = require('deep-extend');
-  module.exports = deepExtend.apply(null, [
-    defaultConfig,
-    argv
-  ]);
+  module.exports = argv;
 } else {
   module.exports = rc('ungit', defaultConfig, argv);
 }
