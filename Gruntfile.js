@@ -7,6 +7,7 @@ var semver = require('semver');
 var async = require('async');
 var nodeWebkitBuilds = require('node-webkit-builds');
 var unzip = require('unzip');
+var ungitMain = path.resolve('./public/source/main.js');
 
 module.exports = function(grunt) {
 
@@ -43,7 +44,8 @@ module.exports = function(grunt) {
             './public/source/components.js:ungit-components',
             './public/source/program-events.js:ungit-program-events',
             './public/source/navigation.js:ungit-navigation',
-            './public/source/main.js:ungit-main',
+            ungitMain + ':ungit-main',
+            // './public/source/main.js:ungit-main',
             './source/utils/vector2.js:ungit-vector2',
             './source/address-parser.js:ungit-address-parser',
             'knockout:knockout',
