@@ -1,7 +1,7 @@
 var rc = require('rc');
-var optimist = require('optimist');
 var path = require('path');
 var fs = require('fs');
+var yargs = require('yargs');
 
 var defaultConfig = {
 
@@ -105,10 +105,12 @@ function getUserHome() {
 }
 
 // Works for now but should be moved to bin/ungit
-var argv = optimist
+var argv = yargs
   .usage('ungit [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
   .alias('b', 'launchBrowser')
   .alias('v', 'version')
+  .alias('h', 'help')
+  .alias('o', 'gitVersionCheckOverride')
   .describe('gitVersionCheckOverride', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
   .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this.')
   .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
@@ -116,7 +118,7 @@ var argv = optimist
   .argv;
 
 if (argv.help) {
-  optimist.showHelp();
+  yargs.showHelp();
   process.exit(0);
 } else if (argv.v) {
   console.log('ungit version: ' + JSON.parse(fs.readFileSync('../package.json')).version);
