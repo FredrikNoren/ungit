@@ -145,15 +145,15 @@ var argv = yargs
 // --pluginConfigs doesn't work...  Probably only works in .ungitrc as a json file
 .describe('pluginConfigs', 'No supported as a command line argument, use ungitrc config file.  See README.md')
 .describe('autoStashAndPop', 'Used for development purposes')
-.describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
-.argv;
+.describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick');
 
-// In case of `ungit abcd`, strict() doesn't catch that as an error
-if (argv._.length > 0) {
+// For testing, $0 is grunt.  For credential-parser test, $0 is node
+// When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
+if (argv.$0 === 'ungit' && argv._.length > 0) {
   yargs.showHelp();
   process.exit(0);
 } else if (argv.cliconfigonly) {
-  module.exports = argv;
+  module.exports = argv.default(defaultConfig).argv;
 } else {
-  module.exports = rc('ungit', defaultConfig, argv);
+  module.exports = rc('ungit', defaultConfig, argv.argv);
 }
