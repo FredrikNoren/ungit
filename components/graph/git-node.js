@@ -81,7 +81,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.screenWidth = ko.observable();
   this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: -self.boxDisplayX() + 'px', width: (self.screenWidth() - 60) + 'px' };
+    if (self.selected()) return { left: -self.boxDisplayX() + 'px', width: (self.screenWidth() - 120) + 'px' };
     else return { left: '0px', width: self.logBoxElement() ? ((self.logBoxElement().clientWidth - 20) + 'px') : 'inherit' };
   });
   // These are split up like this because branches and local tags can be found in the git log,
