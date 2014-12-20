@@ -209,10 +209,14 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
         } else {
           gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
         }
-        git(gitCommand, repoPath)
-          .parser(gitParser.parseGitDiff, { maxNLines: maxNLines, isGetRaw: isGetRaw })
-          .always(task.setResult)
-          .start();
+
+        var gitJob = git(gitCommand, repoPath).always(task.setResult);
+        
+        if (!isGetRaw) {
+          gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
+        }
+
+        gitJob.start();
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
