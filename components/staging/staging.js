@@ -5,6 +5,9 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 
+var textDiffOptions = [ { name: 'Default Diff', component: 'textdiff', nextIndex: 1 },
+                        { name: 'Side-by-Side Diff', component: 'sidebysidediff', nextIndex: 0 }];
+
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
 });
@@ -71,7 +74,7 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffType = ko.observable(components.create('textDiffType', {}));
+  this.textDiffType = ko.observable(textDiffOptions[0]);
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -122,7 +125,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type, self.textDiffType().textDiffType);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type, self.textDiffType);
     }
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
@@ -226,6 +229,13 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
+StagingViewModel.prototype.toggleDiffDisplayType = function() {
+  this.textDiffType(textDiffOptions[this.textDiffType().nextIndex]);
+}
+StagingViewModel.prototype.getNextDiffDisplayTypeText = function() {
+  return textDiffOptions[this.textDiffType().nextIndex].name;
+}
+
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
   var self = this;

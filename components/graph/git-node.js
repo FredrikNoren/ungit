@@ -9,6 +9,9 @@ var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
 var Vector2 = require('ungit-vector2');
 
+var textDiffOptions = [ { name: 'Default Diff', component: 'textdiff', nextIndex: 1 },
+                        { name: 'Side-by-Side Diff', component: 'sidebysidediff', nextIndex: 0 }];
+
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
   Selectable.call(this, graph);
@@ -61,7 +64,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.textDiffType = ko.observable(components.create('textDiffType', {}));
+  this.textDiffType = ko.observable(textDiffOptions[0]);
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -158,7 +161,7 @@ GitNodeViewModel.prototype.setData = function(args) {
     sha1: self.sha1,
     repoPath: self.graph.repoPath,
     server: self.server,
-    textDiffType: self.textDiffType().textDiffType }));
+    textDiffType: self.textDiffType }));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
@@ -281,4 +284,10 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 }
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
+}
+GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
+  this.textDiffType(textDiffOptions[this.textDiffType().nextIndex]);
+}
+GitNodeViewModel.prototype.getNextDiffDisplayTypeText = function() {
+  return textDiffOptions[this.textDiffType().nextIndex].name;
 }
