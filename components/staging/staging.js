@@ -5,8 +5,6 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 
-var textDiffOptions = [ { name: 'Default Diff', component: 'textdiff', nextIndex: 1 },
-                        { name: 'Side-by-Side Diff', component: 'sidebysidediff', nextIndex: 0 }];
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -74,7 +72,12 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffType = ko.observable(textDiffOptions[0]);
+  this.textDiffTypeIndex = ko.observable(0);
+  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
+                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
+  this.textDiffType = ko.computed(function() {
+    return this.textDiffOptions[this.textDiffTypeIndex()];
+  }, this);
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -229,11 +232,8 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
-StagingViewModel.prototype.toggleDiffDisplayType = function() {
-  this.textDiffType(textDiffOptions[this.textDiffType().nextIndex]);
-}
-StagingViewModel.prototype.getNextDiffDisplayTypeText = function() {
-  return textDiffOptions[this.textDiffType().nextIndex].name;
+StagingViewModel.prototype.viewTypeChangeClick = function(index) {
+  this.textDiffTypeIndex(index);
 }
 
 
