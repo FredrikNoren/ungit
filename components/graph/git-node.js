@@ -64,7 +64,12 @@ var GitNodeViewModel = function(graph, sha1) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.textDiffType = ko.observable(textDiffOptions[0]);
+  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
+                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
+  this.textDiffTypeIndex = ko.observable(0);
+  this.textDiffType = ko.computed(function() {
+    return this.textDiffOptions[this.textDiffTypeIndex()];
+  }, this);
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -285,9 +290,7 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
-GitNodeViewModel.prototype.toggleDiffDisplayType = function() {
-  this.textDiffType(textDiffOptions[this.textDiffType().nextIndex]);
-}
-GitNodeViewModel.prototype.getNextDiffDisplayTypeText = function() {
-  return textDiffOptions[this.textDiffType().nextIndex].name;
+
+GitNodeViewModel.prototype.viewTypeChangeClick = function(index) {
+  this.textDiffTypeIndex(index);
 }

@@ -33,8 +33,13 @@
             <div class="details">
               <div class="body" data-bind="text: body"></div>
               <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle">
-                <div class="diff-inner" data-bind="visible: selected">
-                  <a href="#" class="" data-ta-clickable="toggleDiffDisplay" data-bind="click: toggleDiffDisplayType, text: 'Show ' + getNextDiffDisplayTypeText(), clickBubble: false"></a>
+                <div class="btn-group btn-group-xs" data-bind="visible: selected">
+                  <button class="btn btn-default bootstrap-tooltip pull-right" data-bind="click: viewTypeChangeClick.bind($data, 1), css: {active: textDiffTypeIndex() === 1}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+                    <span data-bind="text: textDiffOptions[1].name"></span>
+                  </button>
+                  <button class="btn btn-default bootstrap-tooltip pull-right" data-bind="click: viewTypeChangeClick.bind($data, 0), css: {active: textDiffTypeIndex() === 0}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+                    <span data-bind="text: textDiffOptions[0].name"></span>
+                  </button>
                 </div>
                 <div class="diff-inner" data-bind="component: commitDiff"></div>
               </div>
