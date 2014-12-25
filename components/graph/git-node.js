@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var md5 = require('blueimp-md5').md5;
 var moment = require('moment');
@@ -188,7 +187,7 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     } else {
       goalPosition.y = 120;
     }
-    
+
     goalPosition.x = 30 + 90 * this.branchOrder;
     this.setRadius(15);
   }
@@ -241,37 +240,35 @@ GitNodeViewModel.prototype.toggleSelected = function() {
   var beforeBelowCR = null;
   if (this.belowNode)
     beforeBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
-  
+
   var prevSelected  = this.graph.currentActionContext();
   if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
   var prevSelectedCR = null;
   if (prevSelected) prevSelectedCR = prevSelected.logBoxElement().getBoundingClientRect();
   this.selected(!this.selected());
 
-  setTimeout(function(){
-    self.graph.instantUpdatePositions();
-    // If we are deselecting
-    if (!self.selected()) {
-      if (beforeThisCR.top < 0 && beforeBelowCR) {
-        var afterBelowCR = self.belowNode.logBoxElement().getBoundingClientRect();
-        // If the next node is showing, try to keep it in the screen (no jumping)
-        if (beforeBelowCR.top < window.innerHeight) {
-          window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
-        // Otherwise just try to bring them to the middle of the screen
-        } else {
-          window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
-        }
-      }
-    // If we are selecting
-    } else {
-      var afterThisCR = self.logBoxElement().getBoundingClientRect();
-      if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
-        afterThisCR.top != beforeThisCR.top) {
-        window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
-        console.log('Fix')
+  this.graph.instantUpdatePositions();
+  // If we are deselecting
+  if (!this.selected()) {
+    if (beforeThisCR.top < 0 && beforeBelowCR) {
+      var afterBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
+      // If the next node is showing, try to keep it in the screen (no jumping)
+      if (beforeBelowCR.top < window.innerHeight) {
+        window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
+      // Otherwise just try to bring them to the middle of the screen
+      } else {
+        window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
       }
     }
-  }, 0);
+  // If we are selecting
+  } else {
+    var afterThisCR = this.logBoxElement().getBoundingClientRect();
+    if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
+      afterThisCR.top != beforeThisCR.top) {
+      window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
+      console.log('Fix')
+    }
+  }
 }
 GitNodeViewModel.prototype.nodeMouseover = function() {
   this.nodeIsMousehover(true);
