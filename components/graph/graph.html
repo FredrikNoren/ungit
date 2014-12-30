@@ -13,7 +13,7 @@
             </div>
             <div class="clearfix">
               <img class="pull-left img-circle gravatar"
-                data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }" 
+                data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }"
                 onerror="this.style.display='none';">
               <div>
                 <div>
@@ -21,10 +21,10 @@
                   <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
                 </div>
                 <div class="text-muted nodeSummaryContainer">
-                  <span data-bind="text: authorDateFromNow"></span> | 
+                  <span data-bind="text: authorDateFromNow"></span> |
                   +<span data-bind="text: numberOfAddedLines"></span>,
                   -<span data-bind="text: numberOfRemovedLines"></span>
-                   | 
+                   |
                   <span data-bind="text: sha1.substr(0, 8)"></span>
                 </div>
               </div>
@@ -33,6 +33,14 @@
             <div class="details">
               <div class="body" data-bind="text: body"></div>
               <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle">
+                <div class="btn-group btn-group-xs" data-bind="visible: selected">
+                  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphDefaultView" data-bind="click: viewTypeChangeClick.bind($data, 1), css: {active: textDiffTypeIndex() === 1}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+                    <span data-bind="text: textDiffOptions[1].name"></span>
+                  </button>
+                  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphSideBySideView" data-bind="click: viewTypeChangeClick.bind($data, 0), css: {active: textDiffTypeIndex() === 0}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+                    <span data-bind="text: textDiffOptions[0].name"></span>
+                  </button>
+                </div>
                 <div class="diff-inner" data-bind="component: commitDiff"></div>
               </div>
             </div>
@@ -49,8 +57,8 @@
 
       <div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
         <!-- ko foreach: branches -->
-        <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1" 
-            data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected }, 
+        <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1"
+            data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
           <div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
@@ -60,8 +68,8 @@
         <!-- /ko -->
 
         <!-- ko foreach: tags -->
-        <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0" 
-            data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected }, 
+        <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0"
+            data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
           <div class="remote-icon" data-bind="visible: isRemote"></div>
@@ -77,7 +85,7 @@
           <div class="dropmask" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
           <!-- ko component: performProgressBar --><!-- /ko -->
         </span>
-        
+
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->

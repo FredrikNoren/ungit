@@ -5,6 +5,7 @@ var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 
+
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
 });
@@ -71,6 +72,12 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
+  this.textDiffTypeIndex = ko.observable(0);
+  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
+                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
+  this.textDiffType = ko.computed(function() {
+    return this.textDiffOptions[this.textDiffTypeIndex()];
+  }, this);
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -121,7 +128,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, files[file].type, self.textDiffType);
     }
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
@@ -225,12 +232,15 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
+StagingViewModel.prototype.viewTypeChangeClick = function(index) {
+  this.textDiffTypeIndex(index);
+}
 
-var FileViewModel = function(staging, name, type) {
+
+var FileViewModel = function(staging, name, fileType, textDiffType) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
-  this.type = ko.observable(type);
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
   this.isNew = ko.observable(false);
@@ -238,11 +248,31 @@ var FileViewModel = function(staging, name, type) {
   this.conflict = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
-  this.diff = ko.observable(components.create(this.type() == 'image' ? 'imagediff' : 'textdiff', {
-      filename: this.name(),
-      repoPath: this.staging.repoPath,
-      server: this.server
-    }));
+  this.diffType = ko.computed(function() {
+    if (!self.name()) {
+      return 'textdiff';
+    }
+
+    if (fileType === 'text') {
+      return self.isNew() ? 'textdiff' : textDiffType().component ;
+    } else {
+      return 'imagediff';
+    }
+  });
+  this.diff = ko.observable(self.getSpecificDiff());
+
+  textDiffType.subscribe(function() {
+    self.diff(self.getSpecificDiff());
+    self.invalidateDiff(true);
+  });
+}
+FileViewModel.prototype.getSpecificDiff = function() {
+  return components.create(this.diffType(), {
+    filename: this.name(),
+    repoPath: this.staging.repoPath,
+    server: this.server,
+    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+  });
 }
 FileViewModel.prototype.setState = function(state) {
   this.isNew(state.isNew);

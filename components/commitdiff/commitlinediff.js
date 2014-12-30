@@ -4,35 +4,56 @@ var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
 
 var CommitLineDiff = function(args) {
+  var self = this;
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
-  this.specificDiff = ko.observable(components.create(this.type(), {
-      filename: this.fileName(),
-      repoPath: args.repoPath,
-      server: args.server,
-      sha1: args.sha1,
-      initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
-    }));
+  this.args = args;
+  this.type = ko.computed(function() {
+    if (!self.fileName()) {
+      return 'textdiff';
+    }
+
+    if (fileType(self.fileName()) == 'text') {
+      return args.textDiffType().component;
+    } else {
+      return 'imagediff';
+    }
+  });
+  this.specificDiff = ko.observable(this.getSpecificDiff());
+
+  args.textDiffType.subscribe(function() {
+    self.specificDiff(self.getSpecificDiff());
+    if (self.showSpecificDiff()) {
+      self.refreshAndShow();
+    }
+  });
 };
 exports.CommitLineDiff = CommitLineDiff;
+
+CommitLineDiff.prototype.getSpecificDiff = function() {
+  return components.create(this.type(), {
+    filename: this.fileName(),
+    repoPath: this.args.repoPath,
+    server: this.args.server,
+    sha1: this.args.sha1,
+    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+  });
+}
 
 CommitLineDiff.prototype.fileNameClick = function(data, event) {
   if (this.showSpecificDiff()) {
     this.showSpecificDiff(false);
   } else {
-    var self = this;
-    this.specificDiff().invalidateDiff(function() {
-      self.showSpecificDiff(true);
-    });
+    this.refreshAndShow();
   }
   event.stopImmediatePropagation();
 };
 
-CommitLineDiff.prototype.type = function() {
-  if (!this.fileName()) {
-    return 'textdiff';
-  }
-  return fileType(this.fileName()) + 'diff';
-};
+CommitLineDiff.prototype.refreshAndShow = function() {
+  var self = this;
+  this.specificDiff().invalidateDiff(function() {
+    self.showSpecificDiff(true);
+  });
+}
