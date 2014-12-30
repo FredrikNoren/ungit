@@ -74,11 +74,6 @@ var GitNodeViewModel = function(graph, sha1) {
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });
-  this.commitDiff = ko.computed(function() {
-    if ((self.selected() || self.highlighted()) && self.fileLineDiffs()) return components.create('commitDiff', {
-      fileLineDiffs: self.fileLineDiffs().slice(), sha1: self.sha1, repoPath: self.graph.repoPath, server: self.server });
-    else return null;
-  });
   this.showCommitDiff = ko.computed(function() {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
   });
@@ -155,6 +150,12 @@ GitNodeViewModel.prototype.setData = function(args) {
   this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
   this.fileLineDiffs(args.fileLineDiffs);
   this.isInited = true;
+  this.commitDiff = ko.observable(components.create('commitDiff',
+    { fileLineDiffs: this.fileLineDiffs().slice(),
+      sha1: this.sha1,
+      repoPath: this.graph.repoPath,
+      server: this.server,
+      textDiffType: this.textDiffType }));
 }
 GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
