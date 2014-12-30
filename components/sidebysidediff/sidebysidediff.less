@@ -51,7 +51,6 @@
 .d2h-file-name {
   display: inline;
   height: 33px;
-  line-height: 33px;
   max-width: 80%;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -62,8 +61,7 @@
   border-collapse: collapse;
   font-family: 'Source Code Pro';
   font-size: 12px;
-  height: 18px;
-  line-height: 18px;
+  height: 19px;
   width: 100%;
   tbody > tr > td {
     padding: 0px;
@@ -90,8 +88,7 @@
   white-space: pre;
   padding-left: 10px;
   padding-right: 10px;
-  height: 18px;
-  line-height: 18px;
+  height: 19px;
   margin-left: 80px;
 }
 
@@ -99,8 +96,7 @@
   white-space: pre;
   padding-left: 5px;
   padding-right: 5px;
-  height: 18px;
-  line-height: 18px;
+  height: 19px;
   margin-left: 50px;
 }
 
@@ -142,8 +138,7 @@
   min-width: 65px;
   padding-left: 10px;
   padding-right: 10px;
-  height: 18px;
-  line-height: 18px;
+  height: 19px;
   background-color: #fff;
   color: rgba(0, 0, 0, 0.3);
   text-align: right;
@@ -152,20 +147,22 @@
   cursor: pointer;
 }
 
+.d2h-cntx {
+  color: rgba(255, 255, 255, 0.3);
+}
+
 .d2h-code-side-linenumber {
   position: absolute;
-  width: 50px;
+  width: 52px;
   text-align: center;
-  height: 18px;
-  line-height: 18px;
+  height: 19px;
   background-color: rgba(255, 255, 255, 0.15);
-  color: rgba(0, 0, 0, 1);
+  color: rgba(0, 0, 0, 0.5);
   border-width: 0 1px 0 1px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-right: 1px solid rgba(0, 0, 0, 0.5);
-  border-left: 1px solid rgba(0, 0, 0, 0.5);
+  border-right: 1px solid rgba(0, 0, 0, 0.34);
 }
 
 .d2h-del {
@@ -184,10 +181,6 @@
   &.d2h-code-side-linenumber {
     color: rgba(0, 0, 0, 0.5);
   }
-}
-
-.d2h-cntx {
-  color: rgba(255, 255, 255, 0.3);
 }
 
 .d2h-info {

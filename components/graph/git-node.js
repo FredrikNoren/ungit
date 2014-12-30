@@ -8,9 +8,6 @@ var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
 var Vector2 = require('ungit-vector2');
 
-var textDiffOptions = [ { name: 'Default Diff', component: 'textdiff', nextIndex: 1 },
-                        { name: 'Side-by-Side Diff', component: 'sidebysidediff', nextIndex: 0 }];
-
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
   Selectable.call(this, graph);
