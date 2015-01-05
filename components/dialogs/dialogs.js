@@ -28,6 +28,10 @@ components.register('yesnodialog', function(args) {
   return new YesNoDialogViewModel(args.title, args.details);
 });
 
+components.register('warningdialog', function(args) {
+  return new WarningDialogViewModel(args.title, args.details);
+});
+
 function DialogViewModel(title) {
   this.closed = new signals.Signal();
   this.title = ko.observable(title);
@@ -114,3 +118,13 @@ function YesNoDialogViewModel(title, details) {
   ])
 }
 inherits(YesNoDialogViewModel, PromptDialogViewModel);
+
+function WarningDialogViewModel(title, details) {
+  PromptDialogViewModel.call(this, title, details);
+  var self = this;
+  this.taDialogName('warning-dialog');
+  this.alternatives([
+    { label: 'Close', primary: false, taId: 'close', click: function() { self.close(); } },
+  ]);
+}
+inherits(WarningDialogViewModel, PromptDialogViewModel);
