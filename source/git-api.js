@@ -108,6 +108,16 @@ exports.registerApi = function(env) {
     else res.json(result || {});
   }
 
+  var inputSanityCheck = function(req, res, inputs) {
+    for (var n = 0; n < inputs.length; n++) {
+      if (req.param(inputs[n]).match(/[&]/)) {
+        res.status(400).json({ isGitError: false, error: "invalid input", errorCode: 'invalid-input' });
+        return false;
+      }
+    }
+    return true;
+  }
+
   function credentialsOption(socketId) {
     var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
     return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + ' ' + config.port + '" ';
@@ -419,9 +429,11 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('remote add ' + req.param('name') + ' ' + req.param('url'), req.param('path'))
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    if (inputSanityCheck(req, res, ['name', 'url'])) {
+      git('remote add ' + req.param('name') + ' ' + req.param('url'), req.param('path'))
+        .always(jsonResultOrFail.bind(null, res))
+        .start();
+    }
   });
 
   app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -487,8 +499,8 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.param('path'), '..'));
-    while (currentPath != '/' && 
-      (!fs.existsSync(path.join(currentPath, '.git')) || 
+    while (currentPath != '/' &&
+      (!fs.existsSync(path.join(currentPath, '.git')) ||
       !fs.statSync(path.join(currentPath, '.git')).isDirectory())) {
       currentPath = path.resolve(path.join(currentPath, '..'));
     }
