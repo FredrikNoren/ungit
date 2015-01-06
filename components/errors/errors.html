@@ -1,0 +1,12 @@
+
+<!-- ko foreach: errors -->
+<div class="alert alert-warning">
+  <button type="button" class="close" data-bind="click: dismiss">&times;</button>
+  <h3><span class="glyphicon glyphicon-warning-sign"></span> Execution error!</h3>
+  <p data-bind="visible: showEnableBugtracking">
+    <button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button> to automatically report bugs, and/or <a href="https://github.com/FredrikNoren/ungit/issues" target="_blank">file an issue on the ungit issue tracker</a>.
+  </p>
+  <h4>message</h4>
+  <pre data-bind="text: message"></pre>
+</div>
+<!-- /ko -->
