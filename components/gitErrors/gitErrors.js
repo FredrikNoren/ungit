@@ -12,7 +12,7 @@ var GitErrorsViewModel = function(server, repoPath) {
   var self = this;
   this.server = server;
   this.repoPath = repoPath;
-  this.gitErrors = ko.observable([]);
+  this.gitErrors = ko.observableArray();
 }
 GitErrorsViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('gitErrors', this, {}, parentElement);
@@ -22,9 +22,7 @@ GitErrorsViewModel.prototype.onProgramEvent = function(event) {
 }
 GitErrorsViewModel.prototype._handleGitError = function(event) {
   if (event.data.repoPath != this.repoPath) return;
-  var gitErrors = this.gitErrors();
-  gitErrors.push(new GitErrorViewModel(this, this.server, event.data));
-  this.gitErrors(gitErrors);
+  this.gitErrors.push(new GitErrorViewModel(this, this.server, event.data));
 }
 
 function GitErrorViewModel(gitErrors, server, data) {
@@ -47,10 +45,7 @@ function GitErrorViewModel(gitErrors, server, data) {
   }
 }
 GitErrorViewModel.prototype.dismiss = function() {
-  var self = this;
-  var gitErrors = this.gitErrors.gitErrors();
-  gitErrors = gitErrors.filter(function(e) { return e != self; });
-  this.gitErrors.gitErrors(gitErrors);
+  this.gitErrors.gitErrors.remove(this);
 }
 GitErrorViewModel.prototype.enableBugtrackingAndStatistics = function() {
   var self = this;
@@ -64,4 +59,3 @@ GitErrorViewModel.prototype.enableBugtrackingAndStatistics = function() {
     });
   });
 }
-
