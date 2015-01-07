@@ -111,7 +111,7 @@ exports.registerApi = function(env) {
   var inputSanityCheck = function(req, res, inputs) {
     for (var n = 0; n < inputs.length; n++) {
       if (req.param(inputs[n]).match(/[&]/)) {
-        res.status(400).json({ isGitError: false, error: "Invalid input!", errorCode: 'invalid-input', message: req.param(inputs[n]) + " is an invalid input." });
+        res.status(400).json({ isGitError: false, error: "invalid input", errorCode: 'invalid-input' });
         return false;
       }
     }

@@ -1,7 +1,6 @@
 
 var signals = require('signals');
 var programEvents = require('ungit-program-events');
-var components = require('ungit-components');
 var _ = require('lodash');
 
 function Server() {
@@ -189,11 +188,9 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
       shouldSkipReport: shouldSkipReport,
       repoPath: err.res.body.workingDirectory
     } });
-  } else if (err.errorCode === 'invalid-input') {
-    var error = err.error.body;
-    programEvents.dispatch({ event: 'request-show-dialog', dialog: components.create('warningdialog', {title: error.error, details: error.message}) });
-  } else {
-    // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
+  }
+  // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
+  else {
     precreatedError.message = 'Backend error: ' + err.errorSummary;
     console.error(err.errorSummary);
     console.log(precreatedError.stack);
