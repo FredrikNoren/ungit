@@ -15,7 +15,7 @@ var gitConfigCliPager = '-c core.pager=cat';
 var isWindows = /^win/.test(process.platform);
 
 var git = function(command, repoPath) {
-  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+  command = gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
 
   return new GitExecutionTask(command, repoPath);
 }
@@ -54,69 +54,74 @@ var gitQueue = async.queue(function (task, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
   git.runningTasks.push(task);
   task.startTime = Date.now();
-  var process = child_process.exec(
-    task.command,
+
+  var process = child_process.spawn(
+    'git',
+    task.command.split(" "),
     {
       cwd: task.repoPath,
       maxBuffer: 1024 * 1024 * 100,
       encoding: task._encoding,
       timeout: task._timeout
-    },
-    function (error, stdout, stderr) {
-      git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
-      stdout = stdout.toString(); // Convert Buffers to strings
-      stderr = stderr.toString();
-      if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
-      if (error !== null) {
-        var err = {};
-        err.isGitError = true;
-        err.errorCode = 'unknown';
-        err.stackAtCall = task.potentialError.stack;
-        err.lineAtCall = task.potentialError.lineNumber;
-        err.command = task.command;
-        err.workingDirectory = task.repoPath;
-        err.error = error.toString();
-        err.message = err.error.split('\n')[0];
-        err.stderr = stderr;
-        err.stdout = stdout;
-        if (stderr.indexOf('Not a git repository') >= 0)
-          err.errorCode = 'not-a-repository';
-        else if (err.stderr.indexOf('Connection timed out') != -1)
-          err.errorCode = 'remote-timeout';
-        else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
-          err.errorCode = 'permision-denied-publickey';
-        else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
-          err.errorCode = 'ssh-bad-file-number';
-        else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
-          err.errorCode = 'no-remote-configured';
-        else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
-          (err.stderr.indexOf('Could not resolve hostname') != -1))
-          err.errorCode = 'offline';
-        else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
-          err.errorCode = 'proxy-authentication-required';
-        else if (err.stderr.indexOf('Please tell me who you are') != -1)
-          err.errorCode = 'no-git-name-email-configured';
-        else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
-          err.errorCode = 'no-supported-authentication-provided';
-        else if (stderr.indexOf('fatal: No remote repository specified.') == 0)
-          err.errorCode = 'no-remote-specified';
-        else if (err.stderr.indexOf('non-fast-forward') != -1)
-          err.errorCode = 'non-fast-forward';
-        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
-          err.errorCode = 'merge-failed';
-        else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
-          err.errorCode = 'must-be-in-working-tree';
-        else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
-          err.errorCode = 'local-changes-would-be-overwritten';
-        task.setResult(err);
-        callback(err);
-      }
-      else {
-        var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
-        task.setResult(null, result);
-        callback();
-      }
     });
+
+  process.stdout.on('data', function(data) {
+    data = data.toString();
+    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
+    if (config.logGitOutput) winston.info('git stdout result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
+
+    var result = task._parser ? task._parser(data, task.parseArgs) : data;
+    task.setResult(null, result);
+    callback();
+  });
+  process.stderr.on('data', function(data) {
+    data = data.toString();
+    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
+    winston.info('git stderr result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
+
+    var err = {};
+    err.isGitError = true;
+    err.errorCode = 'unknown';
+    err.stackAtCall = task.potentialError.stack;
+    err.lineAtCall = task.potentialError.lineNumber;
+    err.command = task.command;
+    err.workingDirectory = task.repoPath;
+    err.error = data.toString();
+    err.message = err.error.split('\n')[0];
+    err.stderr = data;
+    err.stdout = "";
+    if (err.stderr.indexOf('Not a git repository') >= 0)
+      err.errorCode = 'not-a-repository';
+    else if (err.stderr.indexOf('Connection timed out') != -1)
+      err.errorCode = 'remote-timeout';
+    else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
+      err.errorCode = 'permision-denied-publickey';
+    else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
+      err.errorCode = 'ssh-bad-file-number';
+    else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
+      err.errorCode = 'no-remote-configured';
+    else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
+      (err.stderr.indexOf('Could not resolve hostname') != -1))
+      err.errorCode = 'offline';
+    else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
+      err.errorCode = 'proxy-authentication-required';
+    else if (err.stderr.indexOf('Please tell me who you are') != -1)
+      err.errorCode = 'no-git-name-email-configured';
+    else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
+      err.errorCode = 'no-supported-authentication-provided';
+    else if (err.stderr.indexOf('fatal: No remote repository specified.') == 0)
+      err.errorCode = 'no-remote-specified';
+    else if (err.stderr.indexOf('non-fast-forward') != -1)
+      err.errorCode = 'non-fast-forward';
+    else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
+      err.errorCode = 'merge-failed';
+    else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
+      err.errorCode = 'must-be-in-working-tree';
+    else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
+      err.errorCode = 'local-changes-would-be-overwritten';
+      task.setResult(err);
+      callback(err);
+  });
 
   task.process = process;
   task.setStarted();
@@ -211,7 +216,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
         }
 
         var gitJob = git(gitCommand, repoPath).always(task.setResult);
-        
+
         if (!isGetRaw) {
           gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
         }
