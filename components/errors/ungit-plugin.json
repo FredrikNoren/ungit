@@ -1,8 +1,0 @@
-{
-  "exports": {
-    "knockoutTemplates": {
-      "errors": "errors.html"
-    },
-    "javascript": "errors.bundle.js"
-  }
-}
