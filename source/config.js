@@ -149,7 +149,7 @@ var argv = yargs
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
-if (argv.$0 === 'ungit' && argv._.length > 0) {
+if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
   yargs.showHelp();
   process.exit(0);
 } else if (argv.cliconfigonly) {
