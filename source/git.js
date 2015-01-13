@@ -8,24 +8,23 @@ var winston = require('winston');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
+var Q = require('Q');
 
 var gitConfigNoColors = '-c color.ui=false';
 var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
 var gitConfigCliPager = '-c core.pager=cat';
 var isWindows = /^win/.test(process.platform);
 
-var git = function(command, repoPath) {
-  command = gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
-
-  return new GitExecutionTask(command, repoPath);
+var git = function(commands, repoPath) {
+  return new GitExecutionTask([gitConfigNoColors, gitConfigNoSlashesInFiles, gitConfigCliPager].concat(commands), repoPath);
 }
 
 
-var GitExecutionTask = function(command, repoPath) {
+var GitExecutionTask = function(commands, repoPath) {
   GitTask.call(this);
   var self = this;
   this.repoPath = repoPath;
-  this.command = command;
+  this.commands = commands;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
   this.start = function() {
@@ -57,13 +56,15 @@ var gitQueue = async.queue(function (task, callback) {
 
   var process = child_process.spawn(
     'git',
-    task.command.split(" "),
+    task.commands,
     {
       cwd: task.repoPath,
       maxBuffer: 1024 * 1024 * 100,
       encoding: task._encoding,
       timeout: task._timeout
     });
+
+  var deferred = Q.defer();
 
   process.stdout.on('data', function(data) {
     data = data.toString();
@@ -72,10 +73,11 @@ var gitQueue = async.queue(function (task, callback) {
 
     var result = task._parser ? task._parser(data, task.parseArgs) : data;
     task.setResult(null, result);
-    callback();
+    deferred.resolve();
   });
   process.stderr.on('data', function(data) {
     data = data.toString();
+    console.log('!!!', data);
     git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
     winston.info('git stderr result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
 
@@ -119,9 +121,14 @@ var gitQueue = async.queue(function (task, callback) {
       err.errorCode = 'must-be-in-working-tree';
     else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
       err.errorCode = 'local-changes-would-be-overwritten';
-      task.setResult(err);
-      callback(err);
+    task.setResult(err);
+    deferred.reject(err);
   });
+
+  deferred.promise.fin(function(err) {
+    console.log('$$$', err, task.command.split(" "));
+    callback(err);
+  }).done();
 
   task.process = process;
   task.setStarted();
@@ -133,7 +140,7 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  var gitTask = git('status -s -b -u ' + (file ? '"' + file + '"' : ''), repoPath)
+  var gitTask = git(['status', '-s', '-b', 'u', (file ? '"' + file + '"' : '')], repoPath)
     .parser(gitParser.parseGitStatus)
     .fail(task.setResult)
     .done(function(status) {
@@ -154,7 +161,7 @@ git.status = function(repoPath, file) {
 }
 
 git.getRemoteAddress = function(repoPath, remoteName) {
-  return git('config --get remote.' + remoteName + '.url', repoPath)
+  return git(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
     .parser(function(text) {
       return addressParser.parseAddress(text.split('\n')[0]);
     });
@@ -163,7 +170,7 @@ git.getRemoteAddress = function(repoPath, remoteName) {
 git.stashAndPop = function(repoPath, wrappedTask) {
   var task = new GitTask();
 
-  var gitTask = git('stash', repoPath)
+  var gitTask = git(['statsh'], repoPath)
     .always(function(err, res) {
       var hadLocalChanges = true;
       if (err) {
@@ -178,7 +185,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
           hadLocalChanges = false;
       }
       if (hadLocalChanges) {
-        var popTask = git('stash pop', repoPath).always(task.setResult);
+        var popTask = git(['statsh', 'pop'], repoPath).always(task.setResult);
         wrappedTask.always(function() { popTask.start(); });
       } else {
         wrappedTask.always(task.setResult);
@@ -190,7 +197,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 }
 
 git.binaryFileContent = function(repoPath, filename, version) {
-  return git('show ' + version + ':' + filename, repoPath)
+  return git(['show' + version + ':' + filename], repoPath)
         .encoding('binary');
 }
 
@@ -208,14 +215,14 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
         // If the file is new or if it's a directory, i.e. a submodule
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
-        var gitCommand;
+        var gitCommands;
         if (sha1) {
-          gitCommand = 'diff ' + sha1  + (isWindows ? '^^' : '^') + '! -- "' + filename.trim() + '"';
+          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', '"' + filename.tri() +'"'];
         } else {
-          gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
+          gitCommands = ['diff', 'HEAD', '--', '"' + filename.trim() + '"'];
         }
 
-        var gitJob = git(gitCommand, repoPath).always(task.setResult);
+        var gitJob = git(gitCommands, repoPath).always(task.setResult);
 
         if (!isGetRaw) {
           gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
@@ -246,7 +253,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
 git.discardAllChanges = function(repoPath) {
   var task = new GitTask();
 
-  var gitTask = git('reset --hard HEAD', repoPath)
+  var gitTask = git(['reset', '--hard', 'HEAD'], repoPath)
     .fail(task.setResult)
     .done(function() {
       git('clean -fd', repoPath).always(task.setResult).start();
@@ -276,12 +283,12 @@ git.discardChangesInFile = function(repoPath, filename) {
           });
         // If it's a changed file, reset the changes
         } else {
-          git('checkout HEAD -- "' + filename.trim() + '"', repoPath)
+          git(['checkout', 'HEAD', '--', '"' + filename.trim() +'"'], repoPath)
             .always(task.setResult)
             .start();
         }
       } else {
-        git('rm -f "' + filename + '"', repoPath).always(task.setResult).start();
+        git(['rm', '-f', '"' + filename + '"'], repoPath).always(task.setResult).start();
       }
     });
   task.started(statusTask.start);
@@ -312,7 +319,7 @@ git.updateIndexFromFileList = function(repoPath, files) {
         function(done) {
           if (toAdd.length == 0) done();
           else {
-            git('update-index --add --stdin', repoPath)
+            git(['update-index', '--add', '--stdin'], repoPath)
               .always(done)
               .started(function() {
                 var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
@@ -324,7 +331,7 @@ git.updateIndexFromFileList = function(repoPath, files) {
         function(done) {
           if (toRemove.length == 0) done();
           else {
-            git('update-index --remove --stdin', repoPath)
+            git(['update-index', '--remove', '--stdin'], repoPath)
               .always(done)
               .started(function() {
                 var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
@@ -356,7 +363,7 @@ git.commit = function(repoPath, amend, message, files) {
   var updateIndexTask = git.updateIndexFromFileList(repoPath, files)
     .fail(task.setResult)
     .done(function() {
-      git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
+      git(['commit', (amend ? '--amend' : ''), '--file=- '], repoPath)
         .always(task.setResult)
         .started(function() {
           this.process.stdin.end(message);
@@ -384,13 +391,13 @@ git.resolveConflicts = function(repoPath, files) {
       async.parallel([
         function(done) {
           if (toAdd.length == 0) return done();
-          git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          git(['add', toAdd.map(function(file) { return '"' + file + '"'; })], repoPath)
             .always(done)
             .start();
         },
         function(done) {
           if (toRemove.length == 0) return done();
-          git('rm ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          git(['rm', toAdd.map(function(file) { return '"' + file + '"'; })], repoPath)
             .always(done)
             .start();
         },
@@ -407,7 +414,7 @@ git.resolveConflicts = function(repoPath, files) {
 
 git.getCurrentBranch = function(repoPath) {
   var task = new GitTask();
-  var gitTask = git('rev-parse --show-toplevel', repoPath)
+  var gitTask = git(['rev-parse', '--show-toplevel'], repoPath)
     .fail(task.setResult)
     .done(function(rootRepoPath) {
 
