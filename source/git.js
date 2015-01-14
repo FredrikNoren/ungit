@@ -10,13 +10,15 @@ var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 var Q = require('Q');
 
-var gitConfigNoColors = '-c color.ui=false';
-var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
-var gitConfigCliPager = '-c core.pager=cat';
+var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var isWindows = /^win/.test(process.platform);
 
 var git = function(commands, repoPath) {
-  return new GitExecutionTask([gitConfigNoColors, gitConfigNoSlashesInFiles, gitConfigCliPager].concat(commands), repoPath);
+  commands = gitConfigArguments.concat(commands).filter(function(element) {
+    return element;
+  });
+
+  return new GitExecutionTask(commands, repoPath);
 }
 
 
@@ -50,7 +52,7 @@ GitExecutionTask.prototype.timeout = function(timeout) {
 git.runningTasks = [];
 
 var gitQueue = async.queue(function (task, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.commands);
   git.runningTasks.push(task);
   task.startTime = Date.now();
 
@@ -77,7 +79,6 @@ var gitQueue = async.queue(function (task, callback) {
   });
   process.stderr.on('data', function(data) {
     data = data.toString();
-    console.log('!!!', data);
     git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
     winston.info('git stderr result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
 
@@ -126,7 +127,6 @@ var gitQueue = async.queue(function (task, callback) {
   });
 
   deferred.promise.fin(function(err) {
-    console.log('$$$', err, task.command.split(" "));
     callback(err);
   }).done();
 

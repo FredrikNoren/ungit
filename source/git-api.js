@@ -110,7 +110,7 @@ exports.registerApi = function(env) {
 
   function credentialsOption(socketId) {
     var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-    return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + ' ' + config.port + '" ';
+    return ['-c', 'credential.helper="' + credentialsHelperPath + ' ' + socketId + ' ' + config.port + '"'];
   }
 
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -141,7 +141,7 @@ exports.registerApi = function(env) {
 
     var url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-    git([credentialsOption(req.param('socketId')), 'clone "' + url + '"', '"' + req.param('destinationDir').trim() + '"'], req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['clone "' + url + '"', '"' + req.param('destinationDir').trim() + '"']), req.param('path'))
       .timeout(timeoutMs)
       .fail(jsonFail.bind(null, res))
       .done(function(result) { res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) }); })
@@ -154,10 +154,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git([credentialsOption(req.param('socketId')),
-        'fetch ' + req.param('remote'),
+    git(credentialsOption(req.param('socketId')).concat([
+        'fetch',
+        req.param('remote'),
         req.param('ref') ? req.param('ref') : '',
-        config.autoPruneOnFetch ? '--prune' : ''], req.param('path'))
+        config.autoPruneOnFetch ? '--prune' : '']), req.param('path'))
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
@@ -169,11 +170,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git([credentialsOption(req.param('socketId')),
+    git(credentialsOption(req.param('socketId')).concat([,
         'push', req.param('force') ? '-f' : '',
         req.param('remote'),
         req.body.refSpec ? req.body.refSpec : 'HEAD',
-        req.body.remoteBranch ? ':' + req.body.remoteBranch : ''], req.param('path'))
+        req.body.remoteBranch ? ':' + req.body.remoteBranch : '']), req.param('path'))
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
@@ -302,7 +303,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['log', '--decorate=full', '--pretty-fuller', '--parents', '--max-count=1'], req.param('path'))
+    git(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -341,7 +342,7 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git([credentialsOption(req.param('socketId')), 'push', req.param('remote') + ' :"' + req.param('name').trim() + '"'], req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote') + ' :"' + req.param('name').trim() + '"']), req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
@@ -355,7 +356,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git([credentialsOption(req.param('socketId')), 'ls-remote', '--tags', req.param('remote')], req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['ls-remote', '--tags', req.param('remote')]), req.param('path'))
       .parser(gitParser.parseGitLsRemote)
       .always(function(err, result) {
         if (err) return res.status(400).json(err);
@@ -382,7 +383,7 @@ exports.registerApi = function(env) {
 
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
 
-    git([credentialsOption(req.param('socketId')), 'push', req.param('remote') + ' :"refs/tags' + req.param('name').trim() + '"'], req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote') + ' :"refs/tags' + req.param('name').trim() + '"']), req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
