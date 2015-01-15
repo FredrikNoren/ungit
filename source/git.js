@@ -56,7 +56,8 @@ var gitQueue = async.queue(function (task, callback) {
   git.runningTasks.push(task);
   task.startTime = Date.now();
 
-  var process = child_process.spawn(
+  task.setStarted();
+  var gitProcess = child_process.spawn(
     'git',
     task.commands,
     {
@@ -65,23 +66,34 @@ var gitQueue = async.queue(function (task, callback) {
       encoding: task._encoding,
       timeout: task._timeout
     });
+  task.process = gitProcess;
 
   var deferred = Q.defer();
+  var promise = deferred.promise;
+  var stdout = '';
+  var stderr = '';
 
-  process.stdout.on('data', function(data) {
-    data = data.toString();
-    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
-    if (config.logGitOutput) winston.info('git stdout result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
-
-    var result = task._parser ? task._parser(data, task.parseArgs) : data;
-    task.setResult(null, result);
-    deferred.resolve();
+  gitProcess.stdout.on('data', function(data) {
+    stdout += data.toString();
   });
-  process.stderr.on('data', function(data) {
-    data = data.toString();
-    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
-    winston.info('git stderr result (first 400 bytes): ' + task.command + '\n' + data.slice(0, 400));
+  gitProcess.stderr.on('data', function(data) {
+    stderr += data.toString();
+  });
 
+  gitProcess.on('close', function (code) {
+    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+
+    if (code != 0) {
+      deferred.reject(stderr);
+    } else {
+      var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
+      task.setResult(null, result);
+      callback();
+      deferred.resolve();
+    }
+  });
+
+  promise.fail(function(stderr) {
     var err = {};
     err.isGitError = true;
     err.errorCode = 'unknown';
@@ -89,11 +101,11 @@ var gitQueue = async.queue(function (task, callback) {
     err.lineAtCall = task.potentialError.lineNumber;
     err.command = task.command;
     err.workingDirectory = task.repoPath;
-    err.error = data.toString();
+    err.error = stderr.toString();
     err.message = err.error.split('\n')[0];
-    err.stderr = data;
-    err.stdout = "";
-    if (err.stderr.indexOf('Not a git repository') >= 0)
+    err.stderr = stderr;
+    err.stdout = stdout;
+    if (stderr.indexOf('Not a git repository') >= 0)
       err.errorCode = 'not-a-repository';
     else if (err.stderr.indexOf('Connection timed out') != -1)
       err.errorCode = 'remote-timeout';
@@ -112,7 +124,7 @@ var gitQueue = async.queue(function (task, callback) {
       err.errorCode = 'no-git-name-email-configured';
     else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
       err.errorCode = 'no-supported-authentication-provided';
-    else if (err.stderr.indexOf('fatal: No remote repository specified.') == 0)
+    else if (stderr.indexOf('fatal: No remote repository specified.') == 0)
       err.errorCode = 'no-remote-specified';
     else if (err.stderr.indexOf('non-fast-forward') != -1)
       err.errorCode = 'non-fast-forward';
@@ -122,16 +134,12 @@ var gitQueue = async.queue(function (task, callback) {
       err.errorCode = 'must-be-in-working-tree';
     else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
       err.errorCode = 'local-changes-would-be-overwritten';
+
     task.setResult(err);
-    deferred.reject(err);
-  });
-
-  deferred.promise.fin(function(err) {
     callback(err);
+  }).fin(function() {
+    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
   }).done();
-
-  task.process = process;
-  task.setStarted();
 }, config.maxConcurrentGitOperations);
 
 git.queueTask = function(task) {
@@ -140,7 +148,7 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  var gitTask = git(['status', '-s', '-b', 'u', (file ? '"' + file + '"' : '')], repoPath)
+  var gitTask = git(['status', '-s', '-b', '-u', (file ? '"' + file + '"' : '')], repoPath)
     .parser(gitParser.parseGitStatus)
     .fail(task.setResult)
     .done(function(status) {
@@ -217,7 +225,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
         var gitCommands;
         if (sha1) {
-          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', '"' + filename.tri() +'"'];
+          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', '"' + filename.trim() +'"'];
         } else {
           gitCommands = ['diff', 'HEAD', '--', '"' + filename.trim() + '"'];
         }
