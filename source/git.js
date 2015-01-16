@@ -56,7 +56,6 @@ var gitQueue = async.queue(function (task, callback) {
   git.runningTasks.push(task);
   task.startTime = Date.now();
 
-  task.setStarted();
   var gitProcess = child_process.spawn(
     'git',
     task.commands,
@@ -67,6 +66,7 @@ var gitQueue = async.queue(function (task, callback) {
       timeout: task._timeout
     });
   task.process = gitProcess;
+  task.setStarted();
 
   var deferred = Q.defer();
   var promise = deferred.promise;
@@ -148,7 +148,7 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  var gitTask = git(['status', '-s', '-b', '-u', (file ? '"' + file + '"' : '')], repoPath)
+  var gitTask = git(['status', '-s', '-b', '-u', (file ? file : '')], repoPath)
     .parser(gitParser.parseGitStatus)
     .fail(task.setResult)
     .done(function(status) {
@@ -225,9 +225,9 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
         var gitCommands;
         if (sha1) {
-          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', '"' + filename.trim() +'"'];
+          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', filename.trim()];
         } else {
-          gitCommands = ['diff', 'HEAD', '--', '"' + filename.trim() + '"'];
+          gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
         var gitJob = git(gitCommands, repoPath).always(task.setResult);
@@ -291,12 +291,12 @@ git.discardChangesInFile = function(repoPath, filename) {
           });
         // If it's a changed file, reset the changes
         } else {
-          git(['checkout', 'HEAD', '--', '"' + filename.trim() +'"'], repoPath)
+          git(['checkout', 'HEAD', '--', filename.trim()], repoPath)
             .always(task.setResult)
             .start();
         }
       } else {
-        git(['rm', '-f', '"' + filename + '"'], repoPath).always(task.setResult).start();
+        git(['rm', '-f', filename], repoPath).always(task.setResult).start();
       }
     });
   task.started(statusTask.start);
@@ -399,13 +399,13 @@ git.resolveConflicts = function(repoPath, files) {
       async.parallel([
         function(done) {
           if (toAdd.length == 0) return done();
-          git(['add', toAdd.map(function(file) { return '"' + file + '"'; })], repoPath)
+          git(['add', toAdd.map(function(file) { return file; })], repoPath)
             .always(done)
             .start();
         },
         function(done) {
           if (toRemove.length == 0) return done();
-          git(['rm', toAdd.map(function(file) { return '"' + file + '"'; })], repoPath)
+          git(['rm', toAdd.map(function(file) { return file; })], repoPath)
             .always(done)
             .start();
         },
