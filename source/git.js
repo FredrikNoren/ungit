@@ -29,6 +29,7 @@ var GitExecutionTask = function(commands, repoPath) {
   this.commands = commands;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
+  this.potentialError.commmands = commands;
   this.start = function() {
     git.queueTask(self);
   }
@@ -86,8 +87,7 @@ var gitQueue = async.queue(function (task, callback) {
     if (code != 0) {
       deferred.reject(stderr);
     } else {
-      var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
-      task.setResult(null, result);
+      task.setResult(null, task._parser ? task._parser(stdout, task.parseArgs) : stdout);
       callback();
       deferred.resolve();
     }
@@ -99,7 +99,7 @@ var gitQueue = async.queue(function (task, callback) {
     err.errorCode = 'unknown';
     err.stackAtCall = task.potentialError.stack;
     err.lineAtCall = task.potentialError.lineNumber;
-    err.command = task.command;
+    err.commands = task.commands;
     err.workingDirectory = task.repoPath;
     err.error = stderr.toString();
     err.message = err.error.split('\n')[0];
@@ -371,7 +371,7 @@ git.commit = function(repoPath, amend, message, files) {
   var updateIndexTask = git.updateIndexFromFileList(repoPath, files)
     .fail(task.setResult)
     .done(function() {
-      git(['commit', (amend ? '--amend' : ''), '--file=- '], repoPath)
+      git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath)
         .always(task.setResult)
         .started(function() {
           this.process.stdin.end(message);
