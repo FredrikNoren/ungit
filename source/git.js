@@ -405,7 +405,7 @@ git.resolveConflicts = function(repoPath, files) {
         },
         function(done) {
           if (toRemove.length == 0) return done();
-          git(['rm', toAdd.map(function(file) { return file; })], repoPath)
+          git(['rm', toRemove.map(function(file) { return file; })], repoPath)
             .always(done)
             .start();
         },
