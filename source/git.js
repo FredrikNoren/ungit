@@ -178,7 +178,7 @@ git.getRemoteAddress = function(repoPath, remoteName) {
 git.stashAndPop = function(repoPath, wrappedTask) {
   var task = new GitTask();
 
-  var gitTask = git(['statsh'], repoPath)
+  var gitTask = git(['stash'], repoPath)
     .always(function(err, res) {
       var hadLocalChanges = true;
       if (err) {
