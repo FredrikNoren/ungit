@@ -193,7 +193,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
           hadLocalChanges = false;
       }
       if (hadLocalChanges) {
-        var popTask = git(['statsh', 'pop'], repoPath).always(task.setResult);
+        var popTask = git(['stash', 'pop'], repoPath).always(task.setResult);
         wrappedTask.always(function() { popTask.start(); });
       } else {
         wrappedTask.always(task.setResult);
@@ -205,7 +205,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 }
 
 git.binaryFileContent = function(repoPath, filename, version) {
-  return git(['show' + version + ':' + filename], repoPath)
+  return git(['show', version + ':' + filename], repoPath)
         .encoding('binary');
 }
 

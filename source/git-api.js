@@ -175,7 +175,7 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.param('socketId')).concat([,
+    git(credentialsOption(req.param('socketId')).concat([
         'push', req.param('force') ? '-f' : '',
         req.param('remote'),
         req.body.refSpec ? req.body.refSpec : 'HEAD',
