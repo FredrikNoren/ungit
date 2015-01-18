@@ -128,7 +128,12 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['init', (req.param('bare') ? ' --bare --shared' : '')], req.param('path'))
+    var arg = ['init'];
+    if (req.param('bare')) {
+      arg.concat(['--bare', '--shared']);
+    }
+
+    git(arg, req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
