@@ -210,7 +210,7 @@ exports.registerApi = function(env) {
         })
         .start();
     } else {
-      res.sendfile(path.join(req.query.path, req.query.filename));
+      res.sendFile(path.join(req.query.path, req.query.filename));
     }
   });
 
