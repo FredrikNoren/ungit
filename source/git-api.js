@@ -130,9 +130,8 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
     var arg = ['init'];
     if (req.param('bare')) {
-      arg.concat(['--bare', '--shared']);
+      arg = arg.concat(['--bare', '--shared']);
     }
-
     git(arg, req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
@@ -177,9 +176,9 @@ exports.registerApi = function(env) {
 
     git(credentialsOption(req.param('socketId')).concat([
         'push',
-        (req.param('force') ? '-f' : ''),
         req.param('remote'),
-        (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : '')]), req.param('path'))
+        (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''),
+        (req.param('force') ? '-f' : '')]), req.param('path'))
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
