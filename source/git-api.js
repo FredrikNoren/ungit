@@ -130,7 +130,7 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
     var arg = ['init'];
     if (req.param('bare')) {
-      arg = arg.concat(['--bare', '--shared']);
+      arg.push('--bare', '--shared');
     }
     git(arg, req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
