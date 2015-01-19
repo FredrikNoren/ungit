@@ -30,7 +30,7 @@ function GitErrorViewModel(gitErrors, server, data) {
   this.gitErrors = gitErrors;
   this.server = server;
   this.tip = data.tip;
-  this.command = data.commands.join(" ");
+  this.command = data.command;
   this.error = data.error;
   this.stdout = data.stdout;
   this.stderr = data.stderr;
