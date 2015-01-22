@@ -255,7 +255,7 @@ git.discardAllChanges = function(repoPath) {
   var gitTask = git(['reset', '--hard', 'HEAD'], repoPath)
     .fail(task.setResult)
     .done(function() {
-      git('clean -fd', repoPath).always(task.setResult).start();
+      git(['clean', '-fd'], repoPath).always(task.setResult).start();
     });
   task.started(gitTask.start);
 
