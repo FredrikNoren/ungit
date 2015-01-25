@@ -4,12 +4,16 @@ var helpers = require('./helpers');
 
 var config = helpers.config;
 
+var getRestSetting = function(method, body) {
+  return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
+}
+
 var backgroundAction = function(method, url, callback, body) {
   var tempPage = helpers.createPage(function(err) {
     console.error('Caught error');
     phantom.exit(1);
   });
-  tempPage.open(url, { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body) }, function(status) {
+  tempPage.open(url, getRestSetting(method, body), function(status) {
     if (status == 'fail') return callback({ status: status, content: tempPage.plainText });
     tempPage.close();
     callback();
@@ -65,7 +69,7 @@ var testRepoPath;
 test('Create test directory', function(done) {
   testRepoPath = testRootPath + '/testrepo';
   console.log(testRepoPath);
-  page.open('http://localhost:' + config.port + '/api/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
+  page.open('http://localhost:' + config.port + '/api/createdir', getRestSetting('POST', {dir: testRepoPath}), function(status) {
     if (status == 'fail') return done({ status: status, content: page.plainText });
     done();
   });
