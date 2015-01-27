@@ -9,25 +9,26 @@ var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 
-var gitConfigNoColors = '-c color.ui=false';
-var gitConfigNoSlashesInFiles = '-c core.quotepath=false';
-var gitConfigCliPager = '-c core.pager=cat';
+var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var isWindows = /^win/.test(process.platform);
 
-var git = function(command, repoPath) {
-  command = 'git ' + gitConfigNoColors + ' ' + gitConfigNoSlashesInFiles + ' ' + gitConfigCliPager + ' ' + command;
+var git = function(commands, repoPath) {
+  commands = gitConfigArguments.concat(commands).filter(function(element) {
+    return element;
+  });
 
-  return new GitExecutionTask(command, repoPath);
+  return new GitExecutionTask(commands, repoPath);
 }
 
 
-var GitExecutionTask = function(command, repoPath) {
+var GitExecutionTask = function(commands, repoPath) {
   GitTask.call(this);
   var self = this;
   this.repoPath = repoPath;
-  this.command = command;
+  this.commands = commands;
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
+  this.potentialError.commmands = commands;
   this.start = function() {
     git.queueTask(self);
   }
@@ -51,75 +52,85 @@ GitExecutionTask.prototype.timeout = function(timeout) {
 git.runningTasks = [];
 
 var gitQueue = async.queue(function (task, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.command);
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.commands);
   git.runningTasks.push(task);
   task.startTime = Date.now();
-  var process = child_process.exec(
-    task.command,
+
+  var gitProcess = child_process.spawn(
+    'git',
+    task.commands,
     {
       cwd: task.repoPath,
       maxBuffer: 1024 * 1024 * 100,
       encoding: task._encoding,
       timeout: task._timeout
-    },
-    function (error, stdout, stderr) {
-      git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
-      stdout = stdout.toString(); // Convert Buffers to strings
-      stderr = stderr.toString();
-      if (config.logGitOutput) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
-      if (error !== null) {
-        var err = {};
-        err.isGitError = true;
-        err.errorCode = 'unknown';
-        err.stackAtCall = task.potentialError.stack;
-        err.lineAtCall = task.potentialError.lineNumber;
-        err.command = task.command;
-        err.workingDirectory = task.repoPath;
-        err.error = error.toString();
-        err.message = err.error.split('\n')[0];
-        err.stderr = stderr;
-        err.stdout = stdout;
-        if (stderr.indexOf('Not a git repository') >= 0)
-          err.errorCode = 'not-a-repository';
-        else if (err.stderr.indexOf('Connection timed out') != -1)
-          err.errorCode = 'remote-timeout';
-        else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
-          err.errorCode = 'permision-denied-publickey';
-        else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
-          err.errorCode = 'ssh-bad-file-number';
-        else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
-          err.errorCode = 'no-remote-configured';
-        else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
-          (err.stderr.indexOf('Could not resolve hostname') != -1))
-          err.errorCode = 'offline';
-        else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
-          err.errorCode = 'proxy-authentication-required';
-        else if (err.stderr.indexOf('Please tell me who you are') != -1)
-          err.errorCode = 'no-git-name-email-configured';
-        else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
-          err.errorCode = 'no-supported-authentication-provided';
-        else if (stderr.indexOf('fatal: No remote repository specified.') == 0)
-          err.errorCode = 'no-remote-specified';
-        else if (err.stderr.indexOf('non-fast-forward') != -1)
-          err.errorCode = 'non-fast-forward';
-        else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
-          err.errorCode = 'merge-failed';
-        else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
-          err.errorCode = 'must-be-in-working-tree';
-        else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
-          err.errorCode = 'local-changes-would-be-overwritten';
-        task.setResult(err);
-        callback(err);
-      }
-      else {
-        var result = task._parser ? task._parser(stdout, task.parseArgs) : stdout;
-        task.setResult(null, result);
-        callback();
-      }
     });
-
-  task.process = process;
+  task.process = gitProcess;
   task.setStarted();
+
+  var stdout = '';
+  var stderr = '';
+
+  gitProcess.stdout.on('data', function(data) {
+    stdout += data.toString();
+  });
+  gitProcess.stderr.on('data', function(data) {
+    stderr += data.toString();
+  });
+
+  gitProcess.on('close', function (code) {
+    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+
+    if (code != 0) {
+      var err = {};
+      err.isGitError = true;
+      err.errorCode = 'unknown';
+      err.stackAtCall = task.potentialError.stack;
+      err.lineAtCall = task.potentialError.lineNumber;
+      err.command = task.commands.join(' ');
+      err.workingDirectory = task.repoPath;
+      err.error = stderr.toString();
+      err.message = err.error.split('\n')[0];
+      err.stderr = stderr;
+      err.stdout = stdout;
+      if (stderr.indexOf('Not a git repository') >= 0)
+        err.errorCode = 'not-a-repository';
+      else if (err.stderr.indexOf('Connection timed out') != -1)
+        err.errorCode = 'remote-timeout';
+      else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
+        err.errorCode = 'permision-denied-publickey';
+      else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
+        err.errorCode = 'ssh-bad-file-number';
+      else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
+        err.errorCode = 'no-remote-configured';
+      else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
+        (err.stderr.indexOf('Could not resolve hostname') != -1))
+        err.errorCode = 'offline';
+      else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
+        err.errorCode = 'proxy-authentication-required';
+      else if (err.stderr.indexOf('Please tell me who you are') != -1)
+        err.errorCode = 'no-git-name-email-configured';
+      else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
+        err.errorCode = 'no-supported-authentication-provided';
+      else if (stderr.indexOf('fatal: No remote repository specified.') == 0)
+        err.errorCode = 'no-remote-specified';
+      else if (err.stderr.indexOf('non-fast-forward') != -1)
+        err.errorCode = 'non-fast-forward';
+      else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
+        err.errorCode = 'merge-failed';
+      else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
+        err.errorCode = 'must-be-in-working-tree';
+      else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
+        err.errorCode = 'local-changes-would-be-overwritten';
+
+      task.setResult(err);
+      callback(err);
+    } else {
+      task.setResult(null, task._parser ? task._parser(stdout, task.parseArgs) : stdout);
+      callback();
+    }
+    git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
+  });
 }, config.maxConcurrentGitOperations);
 
 git.queueTask = function(task) {
@@ -128,7 +139,7 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  var gitTask = git('status -s -b -u ' + (file ? '"' + file + '"' : ''), repoPath)
+  var gitTask = git(['status', '-s', '-b', '-u', (file ? file : '')], repoPath)
     .parser(gitParser.parseGitStatus)
     .fail(task.setResult)
     .done(function(status) {
@@ -149,7 +160,7 @@ git.status = function(repoPath, file) {
 }
 
 git.getRemoteAddress = function(repoPath, remoteName) {
-  return git('config --get remote.' + remoteName + '.url', repoPath)
+  return git(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
     .parser(function(text) {
       return addressParser.parseAddress(text.split('\n')[0]);
     });
@@ -158,7 +169,7 @@ git.getRemoteAddress = function(repoPath, remoteName) {
 git.stashAndPop = function(repoPath, wrappedTask) {
   var task = new GitTask();
 
-  var gitTask = git('stash', repoPath)
+  var gitTask = git(['stash'], repoPath)
     .always(function(err, res) {
       var hadLocalChanges = true;
       if (err) {
@@ -173,7 +184,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
           hadLocalChanges = false;
       }
       if (hadLocalChanges) {
-        var popTask = git('stash pop', repoPath).always(task.setResult);
+        var popTask = git(['stash', 'pop'], repoPath).always(task.setResult);
         wrappedTask.always(function() { popTask.start(); });
       } else {
         wrappedTask.always(task.setResult);
@@ -185,7 +196,7 @@ git.stashAndPop = function(repoPath, wrappedTask) {
 }
 
 git.binaryFileContent = function(repoPath, filename, version) {
-  return git('show ' + version + ':' + filename, repoPath)
+  return git(['show', version + ':' + filename], repoPath)
         .encoding('binary');
 }
 
@@ -203,15 +214,15 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
         // If the file is new or if it's a directory, i.e. a submodule
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
-        var gitCommand;
+        var gitCommands;
         if (sha1) {
-          gitCommand = 'diff ' + sha1  + (isWindows ? '^^' : '^') + '! -- "' + filename.trim() + '"';
+          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', filename.trim()];
         } else {
-          gitCommand = 'diff HEAD -- "' + filename.trim() + '"';
+          gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        var gitJob = git(gitCommand, repoPath).always(task.setResult);
-        
+        var gitJob = git(gitCommands, repoPath).always(task.setResult);
+
         if (!isGetRaw) {
           gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
         }
@@ -241,10 +252,10 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
 git.discardAllChanges = function(repoPath) {
   var task = new GitTask();
 
-  var gitTask = git('reset --hard HEAD', repoPath)
+  var gitTask = git(['reset', '--hard', 'HEAD'], repoPath)
     .fail(task.setResult)
     .done(function() {
-      git('clean -fd', repoPath).always(task.setResult).start();
+      git(['clean', '-fd'], repoPath).always(task.setResult).start();
     });
   task.started(gitTask.start);
 
@@ -271,12 +282,12 @@ git.discardChangesInFile = function(repoPath, filename) {
           });
         // If it's a changed file, reset the changes
         } else {
-          git('checkout HEAD -- "' + filename.trim() + '"', repoPath)
+          git(['checkout', 'HEAD', '--', filename.trim()], repoPath)
             .always(task.setResult)
             .start();
         }
       } else {
-        git('rm -f "' + filename + '"', repoPath).always(task.setResult).start();
+        git(['rm', '-f', filename], repoPath).always(task.setResult).start();
       }
     });
   task.started(statusTask.start);
@@ -307,7 +318,7 @@ git.updateIndexFromFileList = function(repoPath, files) {
         function(done) {
           if (toAdd.length == 0) done();
           else {
-            git('update-index --add --stdin', repoPath)
+            git(['update-index', '--add', '--stdin'], repoPath)
               .always(done)
               .started(function() {
                 var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
@@ -319,7 +330,7 @@ git.updateIndexFromFileList = function(repoPath, files) {
         function(done) {
           if (toRemove.length == 0) done();
           else {
-            git('update-index --remove --stdin', repoPath)
+            git(['update-index', '--remove', '--stdin'], repoPath)
               .always(done)
               .started(function() {
                 var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
@@ -351,7 +362,7 @@ git.commit = function(repoPath, amend, message, files) {
   var updateIndexTask = git.updateIndexFromFileList(repoPath, files)
     .fail(task.setResult)
     .done(function() {
-      git('commit ' + (amend ? '--amend' : '') + ' --file=- ', repoPath)
+      git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath)
         .always(task.setResult)
         .started(function() {
           this.process.stdin.end(message);
@@ -379,13 +390,13 @@ git.resolveConflicts = function(repoPath, files) {
       async.parallel([
         function(done) {
           if (toAdd.length == 0) return done();
-          git('add ' + toAdd.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          git(['add', toAdd.map(function(file) { return file; })], repoPath)
             .always(done)
             .start();
         },
         function(done) {
           if (toRemove.length == 0) return done();
-          git('rm ' + toRemove.map(function(file) { return '"' + file + '"'; }).join(' '), repoPath)
+          git(['rm', toRemove.map(function(file) { return file; })], repoPath)
             .always(done)
             .start();
         },
@@ -402,7 +413,7 @@ git.resolveConflicts = function(repoPath, files) {
 
 git.getCurrentBranch = function(repoPath) {
   var task = new GitTask();
-  var gitTask = git('rev-parse --show-toplevel', repoPath)
+  var gitTask = git(['rev-parse', '--show-toplevel'], repoPath)
     .fail(task.setResult)
     .done(function(rootRepoPath) {
 

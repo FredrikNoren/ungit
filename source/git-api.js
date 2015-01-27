@@ -110,7 +110,7 @@ exports.registerApi = function(env) {
 
   function credentialsOption(socketId) {
     var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-    return '-c credential.helper="' + credentialsHelperPath + ' ' + socketId + ' ' + config.port + '" ';
+    return ['-c', 'credential.helper="' + credentialsHelperPath + ' ' + socketId + ' ' + config.port + '"'];
   }
 
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -128,7 +128,11 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('init' + (req.param('bare') ? ' --bare --shared' : ''), req.param('path'))
+    var arg = ['init'];
+    if (req.param('bare')) {
+      arg.push('--bare', '--shared');
+    }
+    git(arg, req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
@@ -141,7 +145,7 @@ exports.registerApi = function(env) {
 
     var url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-    git(credentialsOption(req.param('socketId')) + ' clone "' + url + '" ' + '"' + req.param('destinationDir').trim() + '"', req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['clone', url, req.param('destinationDir').trim()]), req.param('path'))
       .timeout(timeoutMs)
       .fail(jsonFail.bind(null, res))
       .done(function(result) { res.json({ path: path.resolve(req.param('path'), req.param('destinationDir')) }); })
@@ -154,9 +158,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.param('socketId')) + ' fetch ' + req.param('remote') + ' ' +
-        (req.param('ref') ? req.param('ref') : '') + (config.autoPruneOnFetch ? ' --prune' : ''),
-        req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat([
+        'fetch',
+        req.param('remote'),
+        req.param('ref') ? req.param('ref') : '',
+        config.autoPruneOnFetch ? '--prune' : '']), req.param('path'))
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
@@ -168,8 +174,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.param('socketId')) + ' push ' + (req.param('force') ? ' -f ' : '') + req.param('remote') + ' ' + (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-      (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat([
+        'push',
+        req.param('remote'),
+        (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''),
+        (req.param('force') ? '-f' : '')]), req.param('path'))
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
@@ -177,7 +186,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-    autoStashAndPop(req.param('path'), git('reset --' + req.param('mode') + ' "' + req.body.to + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git(['reset', '--' + req.param('mode'), req.body.to], req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -201,7 +210,7 @@ exports.registerApi = function(env) {
         })
         .start();
     } else {
-      res.sendfile(path.join(req.query.path, req.query.filename));
+      res.sendFile(path.join(req.query.path, req.query.filename));
     }
   });
 
@@ -256,7 +265,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('revert ' + req.param('commit'), req.param('path'))
+    git(['revert', req.param('commit')], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -266,7 +275,8 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git('log --decorate=full --date=default --pretty=fuller --all --parents --numstat --topo-order ' + limit, req.param('path'))
+
+    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--all', '--parents', '--numstat', '--topo-order', limit], req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -284,7 +294,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/show', ensureAuthenticated, function(req, res){
-    git('show --numstat ' + req.query.sha1, req.param('path'))
+    git(['show', '--numstat', req.query.sha1], req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -297,7 +307,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('log --decorate=full --pretty=fuller --parents --max-count=1', req.param('path'))
+    git(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -315,43 +325,42 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('branch', req.param('path'))
+    git(['branch'], req.param('path'))
       .parser(gitParser.parseGitBranches)
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() +
-      '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'))
+    git(['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('branch -D "' + req.param('name').trim() + '"', req.param('path'))
+    git(['branch', '-D', req.param('name').trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' :"' + req.param('name').trim() + '"', req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote'), ':' + req.param('name').trim()]), req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.get(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('tag -l', req.param('path'))
+    git(['tag', '-l'], req.param('path'))
       .parser(gitParser.parseGitTags)
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 
   app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git(credentialsOption(req.param('socketId')) + ' ls-remote --tags ' + req.param('remote'), req.param('path'))
+    git(credentialsOption(req.param('socketId')).concat(['ls-remote', '--tags', req.param('remote')]), req.param('path'))
       .parser(gitParser.parseGitLsRemote)
       .always(function(err, result) {
         if (err) return res.status(400).json(err);
@@ -362,29 +371,30 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' +
-      req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.param('path'))
+    git(['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m',
+        req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('tag -d "' + req.param('name').trim() + '"', req.param('path'))
+    git(['tag', '-d', req.param('name').trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(credentialsOption(req.param('socketId')) + ' push ' + req.param('remote') + ' :"refs/tags/' + req.param('name').trim() + '"', req.param('path'))
+
+    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote') + ' :"refs/tags' + req.param('name').trim() + '"']), req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .start();
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-    autoStashAndPop(req.param('path'), git('checkout "' + req.body.name.trim() + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git(['checkout', req.body.name.trim()], req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -392,7 +402,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-    autoStashAndPop(req.param('path'), git('cherry-pick "' + req.param('name').trim() + '"', req.param('path')))
+    autoStashAndPop(req.param('path'), git(['cherry-pick', req.param('name').trim()], req.param('path')))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -406,7 +416,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('remote', req.param('path'))
+    git(['remote'], req.param('path'))
       .parser(gitParser.parseGitRemotes)
       .always(jsonResultOrFail.bind(null, res))
       .start();
@@ -419,7 +429,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('remote add ' + req.param('name') + ' ' + req.param('url'), req.param('path'))
+    git(['remote', 'add', req.param('name'), req.param('url')], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
@@ -427,7 +437,7 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
     var noFF = '';
     if (config.noFFMerge) noFF = '--no-ff';
-    git('merge ' + noFF +' "' + req.body.with.trim() + '"', req.param('path'))
+    git(['merge', noFF, req.body.with.trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -435,7 +445,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('commit --file=- ', req.param('path'))
+    git(['commit', '--file=-'], req.param('path'))
       .started(function() {
         this.process.stdin.end(req.param('message'));
       })
@@ -446,7 +456,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('merge --abort', req.param('path'))
+    git(['merge', '--abort'], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -455,7 +465,7 @@ exports.registerApi = function(env) {
 
 
   app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('rebase "' + req.body.onto.trim() + '"', req.param('path'))
+    git(['rebase', req.body.onto.trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -463,7 +473,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/rebase/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('rebase --continue', req.param('path'))
+    git(['rebase', '--continue'], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -471,7 +481,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/rebase/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('rebase --abort', req.param('path'))
+    git(['rebase', '--abort'], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -487,8 +497,8 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.param('path'), '..'));
-    while (currentPath != '/' && 
-      (!fs.existsSync(path.join(currentPath, '.git')) || 
+    while (currentPath != '/' &&
+      (!fs.existsSync(path.join(currentPath, '.git')) ||
       !fs.statSync(path.join(currentPath, '.git')).isDirectory())) {
       currentPath = path.resolve(path.join(currentPath, '..'));
     }
@@ -516,9 +526,9 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('submodule init', req.param('path'))
+    git(['submodule', 'init'], req.param('path'))
       .always(function() {
-        return git('submodule update', req.param('path'))
+        return git(['submodule', 'update'], req.param('path'))
         .always(jsonResultOrFail.bind(null, res))
         .start();
       })
@@ -526,7 +536,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.param('path'))
+    git(['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -540,7 +550,7 @@ exports.registerApi = function(env) {
         return;
       }
 
-      git('rev-parse --is-inside-work-tree', req.param('path'))
+      git(['rev-parse', '--is-inside-work-tree'], req.param('path'))
         .always(function(err, result) {
           if (err || result.toString().indexOf('true') == -1) res.json('uninited');
           else res.json('inited');
@@ -550,7 +560,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
-    git('stash list --decorate=full --pretty=fuller', req.param('path'))
+    git(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.param('path'))
       .parser(gitParser.parseGitLog)
       .always(function(err, items) {
         if (err) return res.status(400).json(err);
@@ -569,7 +579,7 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
     var message = '';
     if (req.param('message')) message = req.param('message');
-    git('stash save --include-untracked ' + message, req.param('path'))
+    git(['stash', 'save', '--include-untracked', message ], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -579,7 +589,7 @@ exports.registerApi = function(env) {
   app.delete(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
     var type = 'drop';
     if (req.query.pop === 'true') type = 'pop';
-    git('stash ' + type +' stash@{' + req.param('id') + '}' , req.param('path'))
+    git(['stash', type, 'stash@{' + req.param('id') + '}'], req.param('path'))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.param('path')))
       .always(emitWorkingTreeChanged.bind(null, req.param('path')))
@@ -587,7 +597,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
-    git('config --list')
+    git(['config', '--list'])
       .parser(gitParser.parseGitConfig)
       .always(jsonResultOrFail.bind(null, res))
       .start();
