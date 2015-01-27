@@ -10,13 +10,21 @@
   <p data-bind="visible: showEnableBugtracking">
     <button class="btn btn-primary" data-bind="click: enableBugtrackingAndStatistics">Enable bugtracking + usage statistics</button> to automatically report bugs, and/or <a href="https://github.com/FredrikNoren/ungit/issues" target="_blank">file an issue on the ungit issue tracker</a>.
   </p>
-  <h4>Command</h4>
-  <pre data-bind="text: command"></pre>
-  <h4>Error</h4>
-  <pre data-bind="text: error"></pre>
-  <h4>Stderr</h4>
-  <pre data-bind="text: stderr"></pre>
-  <h4>Stdout</h4>
-  <pre data-bind="text: stdout"></pre>
+  <div data-bind="visible: command">
+    <h4>Command</h4>
+    <pre data-bind="text: command"></pre>
+  </div>
+  <div data-bind="visible: error">
+    <h4>Error</h4>
+    <pre data-bind="text: error"></pre>
+  </div>
+  <div data-bind="visible: stderr">
+    <h4>Stderr</h4>
+    <pre data-bind="text: stderr"></pre>
+  </div>
+  <div data-bind="visible: stdout">
+    <h4>Stdout</h4>
+    <pre data-bind="text: stdout"></pre>
+  </div>
 </div>
 <!-- /ko -->

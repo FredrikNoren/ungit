@@ -135,6 +135,18 @@ StagingViewModel.prototype.setFiles = function(files) {
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
     newFiles.push(fileViewModel);
+    if (newFiles.length > 100) {
+      programEvents.dispatch({ event: 'git-error', data: {
+        tip: 'There are too many files in stage, only first 100 files are displayed and it is recommended to use git command line.',
+        command: '',
+        error: '',
+        stdout: '',
+        stderr: '',
+        shouldSkipReport: true,
+        repoPath: this.repoPath
+      } });
+      break;  // Eww... I'm using a "B" word...
+    }
   }
   this.files(newFiles);
   programEvents.dispatch({ event: 'init-tooltip' });
