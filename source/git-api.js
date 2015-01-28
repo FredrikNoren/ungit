@@ -128,15 +128,11 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
     var arg = ['init'];
-    if (req.param('bare')) {
+    if (req.body['bare']) {
       arg.push('--bare', '--shared');
     }
-    git(arg, req.param('path'))
-=======
-    git('init' + (req.body['bare'] ? ' --bare --shared' : ''), req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(arg, req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .start();
@@ -149,11 +145,7 @@ exports.registerApi = function(env) {
 
     var url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-<<<<<<< HEAD
-    git(credentialsOption(req.param('socketId')).concat(['clone', url, req.param('destinationDir').trim()]), req.param('path'))
-=======
-    git(credentialsOption(req.body['socketId']) + ' clone "' + url + '" ' + '"' + req.body['destinationDir'].trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(credentialsOption(req.body['socketId']).concat(['clone', url, req.body['destinationDir'].trim()]), req.body['path'])
       .timeout(timeoutMs)
       .fail(jsonFail.bind(null, res))
       .done(function(result) { res.json({ path: path.resolve(req.body['path'], req.body['destinationDir']) }); })
@@ -166,17 +158,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-<<<<<<< HEAD
-    git(credentialsOption(req.param('socketId')).concat([
+    git(credentialsOption(req.body['socketId']).concat([
         'fetch',
-        req.param('remote'),
-        req.param('ref') ? req.param('ref') : '',
-        config.autoPruneOnFetch ? '--prune' : '']), req.param('path'))
-=======
-    git(credentialsOption(req.body['socketId']) + ' fetch ' + req.body['remote'] + ' ' +
-        (req.body['ref'] ? req.body['ref'] : '') + (config.autoPruneOnFetch ? ' --prune' : ''),
-        req.body['path'])
->>>>>>> Removing deprecated req.param()
+        req.body['remote'],
+        req.body['ref'] ? req.body['ref'] : '',
+        config.autoPruneOnFetch ? '--prune' : '']), req.body['path'])
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
@@ -188,16 +174,11 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-<<<<<<< HEAD
-    git(credentialsOption(req.param('socketId')).concat([
+    git(credentialsOption(req.body['socketId']).concat([
         'push',
-        req.param('remote'),
+        req.body['remote'],
         (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''),
-        (req.param('force') ? '-f' : '')]), req.param('path'))
-=======
-    git(credentialsOption(req.body['socketId']) + ' push ' + (req.body['force'] ? ' -f ' : '') + req.body['remote'] + ' ' + (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-      (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''), req.body['path'])
->>>>>>> Removing deprecated req.param()
+        (req.body['force'] ? '-f' : '')]), req.body['path'])
       .timeout(10 * 60 * 1000)
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
@@ -205,11 +186,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    autoStashAndPop(req.param('path'), git(['reset', '--' + req.param('mode'), req.body.to], req.param('path')))
-=======
-    autoStashAndPop(req.body['path'], git('reset --' + req.body['mode'] + ' "' + req.body.to + '"', req.body['path']))
->>>>>>> Removing deprecated req.param()
+    autoStashAndPop(req.body['path'], git(['reset', '--' + req.body['mode'], req.body.to], req.body['path']))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -288,11 +265,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['revert', req.param('commit')], req.param('path'))
-=======
-    git('revert ' + req.body['commit'], req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['revert', req.body['commit']], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -302,12 +275,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-<<<<<<< HEAD
-
-    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--all', '--parents', '--numstat', '--topo-order', limit], req.param('path'))
-=======
-    git('log --decorate=full --date=default --pretty=fuller --all --parents --numstat --topo-order ' + limit, req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--all', '--parents', '--numstat', '--topo-order', limit], req.query['path'])
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -325,11 +293,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/show', ensureAuthenticated, function(req, res){
-<<<<<<< HEAD
-    git(['show', '--numstat', req.query.sha1], req.param('path'))
-=======
-    git('show --numstat ' + req.query.sha1, req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['show', '--numstat', req.query.sha1], req.query['path'])
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -342,11 +306,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.param('path'))
-=======
-    git('log --decorate=full --pretty=fuller --parents --max-count=1', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query['path'])
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
@@ -364,67 +324,43 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['branch'], req.param('path'))
-=======
-    git('branch', req.query['path'])
->>>>>>> Removing deprecated req.param()
+
+    git(['branch'], req.query['path'])
       .parser(gitParser.parseGitBranches)
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.param('path'))
-=======
-    git('branch ' + (req.body.force ? '-f' : '') + ' "' + req.body.name.trim() +
-      '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['branch', '-D', req.param('name').trim()], req.param('path'))
-=======
-    git('branch -D "' + req.query['name'].trim() + '"', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['branch', '-D', req.query['name'].trim()], req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-<<<<<<< HEAD
-    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote'), ':' + req.param('name').trim()]), req.param('path'))
-=======
-    git(credentialsOption(req.query['socketId']) + ' push ' + req.query['remote'] + ' :"' + req.query['name'].trim() + '"', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(credentialsOption(req.query['socketId']).concat(['push', req.query['remote'], ':' + req.query['name'].trim()]), req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .start();
   });
 
   app.get(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['tag', '-l'], req.param('path'))
-=======
-    git('tag -l', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['tag', '-l'], req.query['path'])
       .parser(gitParser.parseGitTags)
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 
   app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-<<<<<<< HEAD
-    git(credentialsOption(req.param('socketId')).concat(['ls-remote', '--tags', req.param('remote')]), req.param('path'))
-=======
-    git(credentialsOption(req.query['socketId']) + ' ls-remote --tags ' + req.query['remote'], req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(credentialsOption(req.query['socketId']).concat(['ls-remote', '--tags', req.query['remote']]), req.query['path'])
       .parser(gitParser.parseGitLsRemote)
       .always(function(err, result) {
         if (err) return res.status(400).json(err);
@@ -435,47 +371,29 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
     git(['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m',
-        req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.param('path'))
-=======
-    git('tag ' + (req.body.force ? '-f' : '') + ' -a "' + req.body.name.trim() + '" -m "' +
-      req.body.name.trim() + '" "' + (req.body.startPoint || 'HEAD').trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+        req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['tag', '-d', req.param('name').trim()], req.param('path'))
-=======
-    git('tag -d "' + req.query['name'].trim() + '"', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['tag', '-d', req.query['name'].trim()], req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .start();
   });
 
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-
-    git(credentialsOption(req.param('socketId')).concat(['push', req.param('remote') + ' :"refs/tags' + req.param('name').trim() + '"']), req.param('path'))
-=======
-    git(credentialsOption(req.query['socketId']) + ' push ' + req.query['remote'] + ' :"refs/tags/' + req.query['name'].trim() + '"', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(credentialsOption(req.query['socketId']).concat(['push', req.query['remote'] + ' :"refs/tags' + req.query['name'].trim() + '"']), req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .start();
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    autoStashAndPop(req.param('path'), git(['checkout', req.body.name.trim()], req.param('path')))
-=======
-    autoStashAndPop(req.body['path'], git('checkout "' + req.body.name.trim() + '"', req.body['path']))
->>>>>>> Removing deprecated req.param()
+    autoStashAndPop(req.body['path'], git(['checkout', req.body.name.trim()], req.body['path']))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -483,11 +401,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    autoStashAndPop(req.param('path'), git(['cherry-pick', req.param('name').trim()], req.param('path')))
-=======
-    autoStashAndPop(req.body['path'], git('cherry-pick "' + req.body['name'].trim() + '"', req.body['path']))
->>>>>>> Removing deprecated req.param()
+    autoStashAndPop(req.body['path'], git(['cherry-pick', req.body['name'].trim()], req.body['path']))
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -501,11 +415,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['remote'], req.param('path'))
-=======
-    git('remote', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['remote'], req.query['path'])
       .parser(gitParser.parseGitRemotes)
       .always(jsonResultOrFail.bind(null, res))
       .start();
@@ -518,11 +428,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['remote', 'add', req.param('name'), req.param('url')], req.param('path'))
-=======
-    git('remote add ' + req.params['name'] + ' ' + req.body['url'], req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['remote', 'add', req.params['name'], req.body['url']], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
@@ -530,11 +436,7 @@ exports.registerApi = function(env) {
   app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
     var noFF = '';
     if (config.noFFMerge) noFF = '--no-ff';
-<<<<<<< HEAD
-    git(['merge', noFF, req.body.with.trim()], req.param('path'))
-=======
-    git('merge ' + noFF +' "' + req.body.with.trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['merge', noFF, req.body.with.trim()], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -542,11 +444,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['commit', '--file=-'], req.param('path'))
-=======
-    git('commit --file=- ', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['commit', '--file=-'], req.body['path'])
       .started(function() {
         this.process.stdin.end(req.body['message']);
       })
@@ -557,11 +455,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['merge', '--abort'], req.param('path'))
-=======
-    git('merge --abort', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['merge', '--abort'], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -570,11 +464,7 @@ exports.registerApi = function(env) {
 
 
   app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['rebase', req.body.onto.trim()], req.param('path'))
-=======
-    git('rebase "' + req.body.onto.trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['rebase', req.body.onto.trim()], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -582,11 +472,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/rebase/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['rebase', '--continue'], req.param('path'))
-=======
-    git('rebase --continue', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['rebase', '--continue'], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -594,11 +480,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/rebase/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['rebase', '--abort'], req.param('path'))
-=======
-    git('rebase --abort', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['rebase', '--abort'], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -613,11 +495,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    var currentPath = path.resolve(path.join(req.param('path'), '..'));
-=======
     var currentPath = path.resolve(path.join(req.query['path'], '..'));
->>>>>>> Removing deprecated req.param()
     while (currentPath != '/' &&
       (!fs.existsSync(path.join(currentPath, '.git')) ||
       !fs.statSync(path.join(currentPath, '.git')).isDirectory())) {
@@ -647,15 +525,9 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['submodule', 'init'], req.param('path'))
+    git(['submodule', 'init'], req.body['path'])
       .always(function() {
-        return git(['submodule', 'update'], req.param('path'))
-=======
-    git('submodule init', req.body['path'])
-      .always(function() {
-        return git('submodule update', req.body['path'])
->>>>>>> Removing deprecated req.param()
+        return git(['submodule', 'update'], req.body['path'])
         .always(jsonResultOrFail.bind(null, res))
         .start();
       })
@@ -663,11 +535,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
-<<<<<<< HEAD
-    git(['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()], req.param('path'))
-=======
-    git('submodule add "' + req.body.submoduleUrl.trim() + '" "' + req.body.submodulePath.trim() + '"', req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -681,11 +549,7 @@ exports.registerApi = function(env) {
         return;
       }
 
-<<<<<<< HEAD
-      git(['rev-parse', '--is-inside-work-tree'], req.param('path'))
-=======
-      git('rev-parse --is-inside-work-tree', req.query['path'])
->>>>>>> Removing deprecated req.param()
+      git(['rev-parse', '--is-inside-work-tree'], req.query['path'])
         .always(function(err, result) {
           if (err || result.toString().indexOf('true') == -1) res.json('uninited');
           else res.json('inited');
@@ -695,11 +559,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
-<<<<<<< HEAD
-    git(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.param('path'))
-=======
-    git('stash list --decorate=full --pretty=fuller', req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query['path'])
       .parser(gitParser.parseGitLog)
       .always(function(err, items) {
         if (err) return res.status(400).json(err);
@@ -717,13 +577,8 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
     var message = '';
-<<<<<<< HEAD
-    if (req.param('message')) message = req.param('message');
-    git(['stash', 'save', '--include-untracked', message ], req.param('path'))
-=======
     if (req.body['message']) message = req.body['message'];
-    git('stash save --include-untracked ' + message, req.body['path'])
->>>>>>> Removing deprecated req.param()
+    git(['stash', 'save', '--include-untracked', message ], req.body['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
@@ -733,11 +588,7 @@ exports.registerApi = function(env) {
   app.delete(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
     var type = 'drop';
     if (req.query.pop === 'true') type = 'pop';
-<<<<<<< HEAD
-    git(['stash', type, 'stash@{' + req.param('id') + '}'], req.param('path'))
-=======
-    git('stash ' + type +' stash@{' + req.params['id'] + '}' , req.query['path'])
->>>>>>> Removing deprecated req.param()
+    git(['stash', type, 'stash@{' + req.params['id'] + '}'], req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .always(emitWorkingTreeChanged.bind(null, req.query['path']))
