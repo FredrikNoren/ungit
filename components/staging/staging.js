@@ -4,6 +4,8 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var filesToDisplayIncrmentBy = 50;
+var filesToDisplayLimit = filesToDisplayIncrmentBy;
 
 
 components.register('staging', function(args) {
@@ -111,7 +113,7 @@ StagingViewModel.prototype.refreshContent = function(callback) {
       return err.errorCode == 'must-be-in-working-tree' ||
         err.errorCode == 'no-such-path';
     }
-    self.setFiles(status.files);
+    self.setFiles(status.files.splice(filesToDisplayLimit));
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
@@ -133,18 +135,6 @@ StagingViewModel.prototype.setFiles = function(files) {
     fileViewModel.setState(files[file]);
     fileViewModel.invalidateDiff();
     newFiles.push(fileViewModel);
-    if (newFiles.length > 100) {
-      programEvents.dispatch({ event: 'git-error', data: {
-        tip: 'There are too many files in stage, only first 100 files are displayed and it is recommended to use git command line.',
-        command: '',
-        error: '',
-        stdout: '',
-        stderr: '',
-        shouldSkipReport: true,
-        repoPath: this.repoPath
-      } });
-      break;  // Eww... I'm using a "B" word...
-    }
   }
   this.files(newFiles);
   programEvents.dispatch({ event: 'init-tooltip' });
