@@ -109,13 +109,13 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
     else self.HEAD(null);
   });
-  this.server.get('/status', { path: this.repoPath }, function(err, status) {
+  this.server.get('/status', { path: this.repoPath, limit: filesToDisplayLimit }, function(err, status) {
     if (err) {
       if (callback) callback(err);
       return err.errorCode == 'must-be-in-working-tree' ||
         err.errorCode == 'no-such-path';
     }
-    self.setFiles(status.files.splice(filesToDisplayLimit));
+    self.setFiles(status.files);
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
