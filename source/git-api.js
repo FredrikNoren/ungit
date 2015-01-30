@@ -114,7 +114,7 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
     var repoPath = req.query['path'];
-    git.status(repoPath)
+    git.status(repoPath, null, req.query['fileLimit'] || 50)
       .always(function(err, result) {
         jsonResultOrFail(res, err, result);
       }).start();
