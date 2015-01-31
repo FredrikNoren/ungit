@@ -14,10 +14,10 @@ function HeaderViewModel(app) {
   this.showBackButton = ko.observable(false);
   this.path = ko.observable();
   this.currentVersion = ungit.version;
+  this.refreshButton = components.create('refreshButton');
   this.showAddToRepoListButton = ko.computed(function() {
     return self.path() && self.app.repoList().indexOf(self.path()) == -1;
   });
-  this.refreshingProgressBar = components.create('progressBar', { predictionMemoryKey: 'refreshing-content', temporary: true });
 }
 HeaderViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('header', this, {}, parentElement);
@@ -35,14 +35,5 @@ HeaderViewModel.prototype.onProgramEvent = function(event) {
 }
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
   programEvents.dispatch({ event: 'request-remember-repo', repoPath: this.path() });
-  return true;
-}
-HeaderViewModel.prototype.refresh = function() {
-  var self = this;
-  programEvents.dispatch({ event: 'request-app-content-refresh' });
-  this.refreshingProgressBar.start();
-  setTimeout(function() { // Fake the progress bar, for now (since we don't really know who and when this message will be handled)
-    self.refreshingProgressBar.stop();
-  }, 100);
   return true;
 }
