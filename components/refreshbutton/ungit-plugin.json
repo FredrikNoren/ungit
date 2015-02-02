@@ -1,9 +1,9 @@
 {
   "exports": {
     "knockoutTemplates": {
-      "refreshButton": "refreshButton.html"
+      "refreshbutton": "refreshbutton.html"
     },
-    "javascript": "refreshButton.bundle.js",
-    "css": "refreshButton.css"
+    "javascript": "refreshbutton.bundle.js",
+    "css": "refreshbutton.css"
   }
 }
