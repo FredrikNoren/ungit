@@ -17,7 +17,7 @@ var StagingViewModel = function(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.filesByPath = {};
-  this.files = ko.observable([]);
+  this.files = ko.observableArray();
   this.commitMessageTitleCount = ko.observable(0);
   this.commitMessageTitle = ko.observable();
   this.commitMessageTitle.subscribe(function(value) {
@@ -115,7 +115,12 @@ StagingViewModel.prototype.refreshContent = function(callback) {
       return err.errorCode == 'must-be-in-working-tree' ||
         err.errorCode == 'no-such-path';
     }
+
     self.setFiles(status.files);
+    if (self.files().length === filesToDisplayLimit) {
+      // Still more to load, show errror
+      console.log("yolo");
+    }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
