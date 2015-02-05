@@ -80,6 +80,12 @@ var StagingViewModel = function(server, repoPath) {
   this.textDiffType = ko.computed(function() {
     return this.textDiffOptions[this.textDiffTypeIndex()];
   }, this);
+<<<<<<< HEAD
+=======
+  if (window.location.search.indexOf('noheader=true') >= 0)
+    this.refreshButton = components.create('refreshButton');
+  this.isMoreToLoad = ko.observable(false);
+>>>>>>> /status to return isMoreToLoad
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -115,7 +121,8 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
 
     self.setFiles(status.files);
-    if (self.files().length === filesToDisplayLimit) {
+    if (status.isMoreToLoad) {
+      self.isMoreToLoad(true);
       // Still more to load, show errror
       programEvents.dispatch({ event: 'git-error', data: {
         tip: "There are too many unstaged files and it is recommended to use git command line.",
