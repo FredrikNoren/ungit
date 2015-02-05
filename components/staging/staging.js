@@ -122,12 +122,12 @@ StagingViewModel.prototype.refreshContent = function(callback) {
       programEvents.dispatch({ event: 'git-error', data: {
         tip: "There are too many unstaged files and it is recommended to use git command line.",
         command: null,
-        error: null,
+        error: 'too-many-unstaged-files',
         stdout: null,
         stderr: null,
         shouldSkipReport: true,
         repoPath: self.repoPath
-      } });
+      }, unique: true });
     }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
