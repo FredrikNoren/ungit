@@ -22,6 +22,15 @@ GitErrorsViewModel.prototype.onProgramEvent = function(event) {
 }
 GitErrorsViewModel.prototype._handleGitError = function(event) {
   if (event.data.repoPath != this.repoPath) return;
+
+  if (event.unique) {
+    // Don push error if error already exists
+    for (var i = 0; i < this.gitErrors().length; i++) {
+      if (event.data.error === this.gitErrors()[i].error) {
+        return;
+      }
+    }
+  }
   this.gitErrors.push(new GitErrorViewModel(this, this.server, event.data));
 }
 
