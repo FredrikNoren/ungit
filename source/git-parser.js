@@ -3,15 +3,18 @@ var fs = require('fs');
 var fileType = require('./utils/file-type.js');
 
 exports.parseGitStatus = function(text, args) {
-  var result = {};
+  var result = { isMoreToLoad: false };
   var lines = text.split('\n');
   var fileLimit = args.fileLimit || Number.MAX_VALUE;
   var fileCount = 0;
   result.branch = lines[0].split(' ').pop();
   result.inited = true;
   result.files = {};
-  lines.slice(1).forEach(function(line) {
-    if (line == '') return;
+
+  // skipping first line...
+  for(var i = 1; i < lines.length; i++) {
+    var line = lines[i];
+    if (line == '') continue;
     var status = line.slice(0, 2);
     var filename = line.slice(3).trim();
     if (filename[0] == '"' && filename[filename.length - 1] == '"')
@@ -25,8 +28,12 @@ exports.parseGitStatus = function(text, args) {
       file.type = fileType(filename);
       result.files[filename] = file;
       fileCount++;
+    } else {
+      result.isMoreToLoad = true;
+      break;
     }
-  });
+  }
+
   return result;
 };
 
