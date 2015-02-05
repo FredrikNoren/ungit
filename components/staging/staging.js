@@ -117,7 +117,15 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     self.setFiles(status.files);
     if (self.files().length === filesToDisplayLimit) {
       // Still more to load, show errror
-      console.log("yolo");
+      programEvents.dispatch({ event: 'git-error', data: {
+        tip: "There are too many unstaged files and it is recommended to use git command line.",
+        command: null,
+        error: null,
+        stdout: null,
+        stderr: null,
+        shouldSkipReport: true,
+        repoPath: self.repoPath
+      } });
     }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
