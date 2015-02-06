@@ -127,7 +127,7 @@ StagingViewModel.prototype.refreshContent = function(callback) {
       programEvents.dispatch({ event: 'git-error', data: {
         tip: "There are too many unstaged files and it is recommended to use git command line.",
         command: null,
-        error: 'too-many-unstaged-files',
+        error: 'Too many unstaged files to display all.',
         stdout: null,
         stderr: null,
         shouldSkipReport: true,
@@ -257,7 +257,10 @@ StagingViewModel.prototype.toggleAllStages = function() {
 StagingViewModel.prototype.viewTypeChangeClick = function(index) {
   this.textDiffTypeIndex(index);
 }
-
+StagingViewModel.prototype.loadMore = function() {
+  filesToDisplayLimit += filesToDisplayIncrmentBy;
+  programEvents.dispatch({ event: 'request-app-content-refresh' });
+}
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
   var self = this;
