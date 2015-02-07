@@ -38,13 +38,21 @@ function GitErrorViewModel(gitErrors, server, data) {
   var self = this;
   this.gitErrors = gitErrors;
   this.server = server;
-  this.tip = data.tip;
+  this.tip = data.tip || "Ungit tried to run a git command that resulted in an unhandled error.";
   this.command = data.command;
   this.error = data.error;
   this.stdout = data.stdout;
   this.stderr = data.stderr;
   this.showEnableBugtracking = ko.observable(false);
   this.bugReportWasSent = ungit.config.bugtracking;
+  this.type = ko.observable(data.type || 'error');
+  this.title = data.title || 'Unhandled git error!';
+
+  if (typeof data.closeable !== 'undefined') {
+    this.closeable = data.closeable;
+  } else {
+    this.closeable = true;
+  }
 
   if (!data.shouldSkipReport && !ungit.config.bugtracking) {
     this.server.get('/userconfig', undefined, function(err, userConfig) {
