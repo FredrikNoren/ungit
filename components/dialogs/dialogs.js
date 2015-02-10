@@ -42,7 +42,7 @@ DialogViewModel.prototype.onclose = function() {
 
 function FormDialogViewModel(title) {
   DialogViewModel.call(this, title);
-  this.items = ko.observable([]);
+  this.items = ko.observableArray();
   this.isSubmitted = ko.observable(false);
   this.showCancel = ko.observable(true);
 }
