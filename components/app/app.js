@@ -16,7 +16,7 @@ var AppViewModel = function(appContainer, server) {
     this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);
 
-  this.repoList = ko.observable(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
+  this.repoList = ko.observableArray(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
 
   this.content = ko.observable(components.create('home', { app: this }));
@@ -98,10 +98,8 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 }
 AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   var repoPath = event.repoPath;
-  var repos = this.repoList();
-  if (repos.indexOf(repoPath) != -1) return;
-  repos.push(repoPath);
-  this.repoList(repos);
+  if (this.repoList.indexOf(repoPath) != -1) return;
+  this.repoList.push(repoPath);
 }
 AppViewModel.prototype._handleCredentialsRequested = function() {
   var self = this;
