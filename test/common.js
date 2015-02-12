@@ -62,7 +62,7 @@ common.delete = function(req, path, payload, callback) {
 		.del(restGit.pathPrefix + path);
 	if (payload) {
 		payload.socketId = 'ignore';
-		r.send(payload);
+		r.query(payload);
 	}
 	r
 		.set('Accept', 'application/json')

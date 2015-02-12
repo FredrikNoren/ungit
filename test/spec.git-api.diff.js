@@ -70,9 +70,9 @@ describe('git-api diff', function () {
 
 	it('diff on image file should work', function(done) {
 		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' }, function(err, res) {
-			
+
 			if (err) return done(err);
-			expect(res.text).to.be('png');
+			expect(res.body.toString()).to.be('png');
 			done();
 		});
 	});
@@ -95,9 +95,9 @@ describe('git-api diff', function () {
 
 	it('diff on commited image file should work', function(done) {
 		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' }, function(err, res) {
-			
+
 			if (err) return done(err);
-			expect(res.text).to.be('png');
+			expect(res.body.toString()).to.be('png');
 			done();
 		});
 	});
@@ -133,16 +133,16 @@ describe('git-api diff', function () {
 	it('getting current image file should work', function(done) {
 		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' }, function(err, res) {
 			if (err) return done(err);
-			expect(res.text).to.be('png ~~');
-			done();	
+			expect(res.body.toString()).to.be('png ~~');
+			done();
 		});
 	});
 
 	it('getting previous image file should work', function(done) {
 		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' }, function(err, res) {
 			if (err) return done(err);
-			done();	
-			expect(res.text).to.be('png');
+			expect(res.body.toString()).to.be('png');
+			done();
 		});
 	});
 
@@ -175,8 +175,8 @@ describe('git-api diff', function () {
 	it('getting previous image file should work', function(done) {
 		common.getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' }, function(err, res) {
 			if (err) return done(err);
-			done();	
-			expect(res.text).to.be('png ~~');
+			expect(res.body.toString()).to.be('png ~~');
+			done();
 		});
 	});
 

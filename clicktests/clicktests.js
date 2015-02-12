@@ -4,12 +4,16 @@ var helpers = require('./helpers');
 
 var config = helpers.config;
 
-var backgroundAction = function(method, url, callback) {
+var getRestSetting = function(method, body) {
+  return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
+}
+
+var backgroundAction = function(method, url, callback, body) {
   var tempPage = helpers.createPage(function(err) {
     console.error('Caught error');
     phantom.exit(1);
   });
-  tempPage.open(url, method, function(status) {
+  tempPage.open(url, getRestSetting(method, body), function(status) {
     if (status == 'fail') return callback({ status: status, content: tempPage.plainText });
     tempPage.close();
     callback();
@@ -17,11 +21,11 @@ var backgroundAction = function(method, url, callback) {
 }
 
 var createTestFile = function(filename, callback) {
-  backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/createfile?file=' + encodeURIComponent(filename), callback);
+  backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/createfile', callback, { file: filename });
 }
 
 var changeTestFile = function(filename, callback) {
-  backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/changefile?file=' + encodeURIComponent(filename), callback);
+  backgroundAction('POST', 'http://localhost:' + config.port + '/api/testing/changefile', callback, { file: filename });
 }
 
 var shutdownServer = function(callback) {
@@ -65,7 +69,7 @@ var testRepoPath;
 test('Create test directory', function(done) {
   testRepoPath = testRootPath + '/testrepo';
   console.log(testRepoPath);
-  page.open('http://localhost:' + config.port + '/api/createdir?dir=' + encodeURIComponent(testRepoPath), 'POST', function(status) {
+  page.open('http://localhost:' + config.port + '/api/createdir', getRestSetting('POST', {dir: testRepoPath}), function(status) {
     if (status == 'fail') return done({ status: status, content: page.plainText });
     done();
   });
@@ -364,9 +368,9 @@ var bareRepoPath;
 
 test('Create a bare repo (not in ui)', function(done) {
   bareRepoPath = testRootPath + '/barerepo';
-  backgroundAction('POST', 'http://localhost:' + config.port + '/api/createdir?dir=' + encodeURIComponent(bareRepoPath), function() {
-    backgroundAction('POST', 'http://localhost:' + config.port + '/api/init?bare=true&path=' + encodeURIComponent(bareRepoPath), done);
-  });
+  backgroundAction('POST', 'http://localhost:' + config.port + '/api/createdir', function() {
+    backgroundAction('POST', 'http://localhost:' + config.port + '/api/init', done, { bare: true, path: bareRepoPath});
+  }, { dir: bareRepoPath});
 });
 
 test('Adding a remote', function(done) {
