@@ -48,7 +48,6 @@ CommitLineDiff.prototype.fileNameClick = function(data, event) {
   } else {
     this.refreshAndShow();
   }
-  event.stopImmediatePropagation();
 };
 
 CommitLineDiff.prototype.refreshAndShow = function() {

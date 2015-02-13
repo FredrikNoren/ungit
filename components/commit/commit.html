@@ -1,0 +1,44 @@
+<div class="commit" data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }">
+  <div class="commit-box panel panel-default" data-bind="element: element, click: stopClickPropagation">
+    <div class="panel-body">
+      <div class="arrowContainer arrowRight">
+        <div class="shadow"></div>
+        <div class="arrow"></div>
+      </div>
+      <div class="clearfix">
+        <img class="pull-left img-circle gravatar"
+          data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }"
+          onerror="this.style.display='none';">
+        <div>
+          <div>
+            <span class="title" data-bind="text: title"></span>
+            <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+          </div>
+          <div class="text-muted nodeSummaryContainer">
+            <span data-bind="text: authorDateFromNow"></span> |
+            +<span data-bind="text: numberOfAddedLines"></span>,
+            -<span data-bind="text: numberOfRemovedLines"></span>
+             |
+            <span data-bind="text: sha1.substr(0, 8)"></span>
+          </div>
+        </div>
+      </div>
+      <!-- ko if: selected() || nodeIsMousehover() -->
+      <div class="details">
+        <div class="body" data-bind="text: body"></div>
+        <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle, click: stopClickPropagation">
+          <div class="btn-group btn-group-xs" data-bind="visible: selected">
+            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphDefaultView" data-bind="click: showSideBySideDiff, css: {active: textDiffTypeIndex() === 1}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: textDiffOptions[1].name"></span>
+            </button>
+            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphSideBySideView" data-bind="click: showDefaultDiff, css: {active: textDiffTypeIndex() === 0}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: textDiffOptions[0].name"></span>
+            </button>
+          </div>
+          <div class="diff-inner" data-bind="component: commitDiff"></div>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+  </div>
+</div>

@@ -1,6 +1,4 @@
 var ko = require('knockout');
-var md5 = require('blueimp-md5').md5;
-var moment = require('moment');
 var inherits = require('util').inherits;
 var Selectable = require('./git-selectable').Selectable;
 var GraphActions = require('./git-graph-actions');
@@ -19,14 +17,13 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.isInited = false;
 
-  this.logBoxElement = ko.observable();
   this.boxDisplayX = ko.computed(function() {
     return self.x();
   });
   this.boxDisplayY = ko.computed(function() {
     return self.y();
   });
-  this.logBoxX = ko.computed(function() {
+  this.commitContainerX = ko.computed(function() {
     return -self.radius();
   })
   this.refsX = ko.computed(function() {
@@ -46,26 +43,19 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.aboveNode = null; // The node directly above this, graphically
 
-  this.commitTime = ko.observable();
-  this.authorTime = ko.observable();
   this.parents = ko.observable([]);
-  this.message = ko.observable();
   this.title = ko.observable();
-  this.body = ko.observable();
-  this.authorDate = ko.observable(0);
-  this.authorDateFromNow = ko.observable();
-  this.authorName = ko.observable();
-  this.authorEmail = ko.observable();
-  this.fileLineDiffs = ko.observable();
-  this.numberOfAddedLines = ko.observable();
-  this.numberOfRemovedLines = ko.observable();
-  this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
-                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
-  this.textDiffTypeIndex = ko.observable(0);
-  this.textDiffType = ko.computed(function() {
-    return this.textDiffOptions[this.textDiffTypeIndex()];
-  }, this);
+  this.commitTime = ko.observable();
+
+  this.commitComponent = components.create('commit', {
+    sha1: sha1,
+    repoPath: this.graph.repoPath,
+    server: graph.server
+  });
+
+  this.boxDisplayX.subscribe(function(value) {
+    self.commitComponent.selectedDiffLeftPosition(-value);
+  });
 
   this.index = ko.observable();
   this.ideologicalBranch = ko.observable();
@@ -74,19 +64,20 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
-  this.logBoxVisible = ko.computed(function() {
+  this.nodeIsMousehover.subscribe(function(value) {
+    self.commitComponent.nodeIsMousehover(value);
+  });
+  this.commitContainerVisible = ko.computed(function() {
     return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover() || self.selected();
   });
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });
-  this.showCommitDiff = ko.computed(function() {
-    return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
+  this.highlighted.subscribe(function(value) {
+    self.commitComponent.highlighted(value);
   });
-  this.screenWidth = ko.observable();
-  this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: -self.boxDisplayX() + 'px', width: (self.screenWidth() - 120) + 'px' };
-    else return { left: '0px', width: self.logBoxElement() ? ((self.logBoxElement().clientWidth - 20) + 'px') : 'inherit' };
+  this.selected.subscribe(function(value) {
+    self.commitComponent.selected(value);
   });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
@@ -142,38 +133,13 @@ inherits(GitNodeViewModel, NodeViewModel);
 exports.GitNodeViewModel = GitNodeViewModel;
 GitNodeViewModel.prototype.setData = function(args) {
   var self = this;
-  this.commitTime(moment(new Date(args.commitDate)));
-  this.authorTime(moment(new Date(args.authorDate)));
   this.parents(args.parents || []);
-  var message = args.message.split('\n');
-  this.message(args.message);
-  this.title(message[0]);
-  this.body(message.slice(2).join('\n'));
-  this.authorDate(moment(new Date(args.authorDate)));
-  this.authorDateFromNow(this.authorDate().fromNow());
-  this.authorName(args.authorName);
-  this.authorEmail(args.authorEmail);
-  this.numberOfAddedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][0] : 0);
-  this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
-  this.fileLineDiffs(args.fileLineDiffs);
-  this.isInited = true;
-  this.commitDiff = ko.observable(components.create('commitDiff',
-    { fileLineDiffs: this.fileLineDiffs().slice(),
-      sha1: this.sha1,
-      repoPath: this.graph.repoPath,
-      server: this.server,
-      textDiffType: this.textDiffType }));
-}
-GitNodeViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
-  this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
-  this.lastUpdatedAuthorDateFromNow += deltaT;
-  if(this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
-    this.lastUpdatedAuthorDateFromNow = 0;
-    this.authorDateFromNow(this.authorDate().fromNow());
-  }
+  this.commitTime(args.commitDate);
+  this.title(args.message.split('\n')[0]);
+  this.commitComponent.setData(args);
 }
 GitNodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
-  this.updateLastAuthorDateFromNow(deltaT);
+  this.commitComponent.updateAnimationFrame(deltaT);
   GitNodeViewModel.super_.prototype.updateAnimationFrame.call(this, deltaT);
 
   this.updateGoalPosition();
@@ -200,10 +166,8 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     this.setRadius(15);
   }
   if (this.aboveNode && this.aboveNode.selected()) {
-    goalPosition.y = this.aboveNode.goalPosition().y + this.aboveNode.logBoxElement().offsetHeight + 30;
+    goalPosition.y = this.aboveNode.goalPosition().y + this.aboveNode.commitComponent.element().offsetHeight + 30;
   }
-  var dw = window.innerWidth;
-  if (this.screenWidth() != dw) this.screenWidth(dw);
   this.setPosition(goalPosition);
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
@@ -244,22 +208,22 @@ GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
 }
 GitNodeViewModel.prototype.toggleSelected = function() {
   var self = this;
-  var beforeThisCR = this.logBoxElement().getBoundingClientRect();
+  var beforeThisCR = this.commitComponent.element().getBoundingClientRect();
   var beforeBelowCR = null;
   if (this.belowNode)
-    beforeBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
+    beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
 
   var prevSelected  = this.graph.currentActionContext();
   if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
   var prevSelectedCR = null;
-  if (prevSelected) prevSelectedCR = prevSelected.logBoxElement().getBoundingClientRect();
+  if (prevSelected) prevSelectedCR = prevSelected.commitComponent.element().getBoundingClientRect();
   this.selected(!this.selected());
 
   this.graph.instantUpdatePositions();
   // If we are deselecting
   if (!this.selected()) {
     if (beforeThisCR.top < 0 && beforeBelowCR) {
-      var afterBelowCR = this.belowNode.logBoxElement().getBoundingClientRect();
+      var afterBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
       // If the next node is showing, try to keep it in the screen (no jumping)
       if (beforeBelowCR.top < window.innerHeight) {
         window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
@@ -270,7 +234,7 @@ GitNodeViewModel.prototype.toggleSelected = function() {
     }
   // If we are selecting
   } else {
-    var afterThisCR = this.logBoxElement().getBoundingClientRect();
+    var afterThisCR = this.commitComponent.element().getBoundingClientRect();
     if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
       afterThisCR.top != beforeThisCR.top) {
       window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
@@ -285,6 +249,3 @@ GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
 
-GitNodeViewModel.prototype.viewTypeChangeClick = function(index) {
-  this.textDiffTypeIndex(index);
-}

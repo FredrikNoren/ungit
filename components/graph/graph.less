@@ -19,96 +19,9 @@
     position: absolute;
     width: 100%;
 
-    .log {
+    .commit-container {
       position: absolute;
       top: -43px;
-      &.highlighted {
-        z-index: 2;
-        .logEntryBox {
-          box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
-          background: #4B5766;
-          left: -5px;
-          .arrowRight {
-            .shadow {
-              display: block;
-            }
-            .arrow {
-              background: url('images/logBoxHoverArrowRight.png');
-            }
-          }
-        }
-      }
-      &.hover {
-        z-index: 3;
-      }
-      &.selected {
-        .details {
-          .diff-wrapper {
-            transition:width 0.1s, left 0.05s;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
-            .diff-inner {
-              box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
-              padding: 10px;
-              padding-top: 0px;
-            }
-            .btn-group {
-              padding: 2px;
-              margin: 10px;
-              margin-bottom: 0px;
-            }
-          }
-        }
-      }
-
-      .logEntryBox {
-        .arrowRight {
-          position: absolute;
-          right: 0px;
-          top: 5px;
-          .shadow {
-            display: none;
-            background: url('images/shadowArrowRight.png');
-          }
-          .arrow {
-            background: url('images/panelArrowRight.png');
-          }
-        }
-      }
-
-      .logEntryBox > .panel-body {
-        position: relative;
-
-        padding: 10px;
-        margin-bottom: 0px;
-        width: @log-width-small;
-        min-height: 85px;
-
-        .gravatar {
-          display: none;
-          margin-right: 10px;
-        }
-
-        .title {
-          font-size: 1.3em;
-          word-wrap: break-word;
-          display: block;
-        }
-        .details {
-          .body {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #8F9FA6;
-          }
-          .diff-wrapper {
-            position: relative;
-            margin: 0px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            background: #4B5766;
-            border-radius: 3px;
-          }
-        }
-      }
     }
 
     .node {
@@ -271,14 +184,6 @@
 @media (min-width: @screen-md-min) {
   .graph {
     .nodeContainer {
-      .log {
-        .logEntryBox > .panel-body {
-          width: @log-width-large;
-          .gravatar {
-            display: block;
-          }
-        }
-      }
       .node {
         margin-left: (@log-width-large + 30px);
       }
@@ -290,9 +195,6 @@
       left: (@log-width-large + 25px);
     }
   }
-}
-
-@media (min-width: @screen-lg-min) {
 }
 
 .nodeSummaryContainer {

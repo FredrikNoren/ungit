@@ -216,7 +216,7 @@ GitGraphViewModel.markNodesIdeologicalBranches = function(refs, nodes, nodesById
     if (a.isStash && !b.isStash) return 1;
     if (b.isStash && !a.isStash) return -1;
     if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
-      return a.node().commitTime().unix() - b.node().commitTime().unix();
+      return a.node().commitTime() - b.node().commitTime();
     return a.refName < b.refName ? -1 : 1;
   });
   var stamp = GitGraphViewModel._markIdeologicalStamp++;

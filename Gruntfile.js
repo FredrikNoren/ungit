@@ -19,6 +19,7 @@ module.exports = function(grunt) {
       production: {
         files: {
           "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"],
+          "components/commit/commit.css": ["components/commit/commit.less"],
           "components/commitdiff/commitdiff.css": ["components/commitdiff/commitdiff.less"],
           "components/graph/graph.css": ["components/graph/graph.less"],
           "components/header/header.css": ["components/header/header.less"],
