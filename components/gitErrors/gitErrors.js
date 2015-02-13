@@ -22,15 +22,6 @@ GitErrorsViewModel.prototype.onProgramEvent = function(event) {
 }
 GitErrorsViewModel.prototype._handleGitError = function(event) {
   if (event.data.repoPath != this.repoPath) return;
-
-  if (event.unique) {
-    // Don push error if error already exists
-    for (var i = 0; i < this.gitErrors().length; i++) {
-      if (event.data.error === this.gitErrors()[i].error) {
-        return;
-      }
-    }
-  }
   this.gitErrors.push(new GitErrorViewModel(this, this.server, event.data));
 }
 
@@ -38,21 +29,13 @@ function GitErrorViewModel(gitErrors, server, data) {
   var self = this;
   this.gitErrors = gitErrors;
   this.server = server;
-  this.tip = data.tip || "Ungit tried to run a git command that resulted in an unhandled error.";
+  this.tip = data.tip;
   this.command = data.command;
   this.error = data.error;
   this.stdout = data.stdout;
   this.stderr = data.stderr;
   this.showEnableBugtracking = ko.observable(false);
   this.bugReportWasSent = ungit.config.bugtracking;
-  this.type = ko.observable(data.type || 'error');
-  this.title = data.title || 'Unhandled git error!';
-
-  if (typeof data.closeable !== 'undefined') {
-    this.closeable = data.closeable;
-  } else {
-    this.closeable = true;
-  }
 
   if (!data.shouldSkipReport && !ungit.config.bugtracking) {
     this.server.get('/userconfig', undefined, function(err, userConfig) {
