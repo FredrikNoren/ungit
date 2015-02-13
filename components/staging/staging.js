@@ -166,6 +166,7 @@ StagingViewModel.prototype.commit = function() {
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
   this.server.post('/commit', { path: this.repoPath, message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
+    self.committingProgressBar.stop();
     if (err) {
       return;
     }
@@ -173,7 +174,6 @@ StagingViewModel.prototype.commit = function() {
     self.commitMessageBody('');
     self.amend(false);
     self.files([]);
-    self.committingProgressBar.stop();
   });
 }
 StagingViewModel.prototype.rebaseContinue = function() {
