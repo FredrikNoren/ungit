@@ -213,6 +213,7 @@ module.exports = function(grunt) {
           browser: true,
           globals: {
             '$': true,
+            'module': true,
           }
         },
         src: ['clicktests/**/*.js']
@@ -303,7 +304,7 @@ module.exports = function(grunt) {
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
-    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'clicktests.js')]);
+    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'test.all.js')]);
     child.stdout.on('data', function(data) {
       grunt.log.write(data);
     });
