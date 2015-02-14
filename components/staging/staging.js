@@ -78,8 +78,6 @@ var StagingViewModel = function(server, repoPath) {
   this.textDiffType = ko.computed(function() {
     return this.textDiffOptions[this.textDiffTypeIndex()];
   }, this);
-  if (window.location.search.indexOf('noheader=true') >= 0)
-    this.refreshButton = components.create('refreshButton');
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);

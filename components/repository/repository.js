@@ -27,6 +27,11 @@ var RepositoryViewModel = function(server, repoPath) {
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();
   this.refreshSubmoduleStatus();
+  if (window.location.search.indexOf('noheader=true') >= 0) {
+    this.refreshButton = components.create('refreshButton');
+  } else {
+    this.refreshButton = false;
+  }
 }
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
