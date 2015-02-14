@@ -6,13 +6,14 @@ var helpers = require('./helpers');
 
 module.exports = Environment;
 
+// Environment provides 
 function Environment(page, config) {
   this.page = page;
   this.config = config || {};
   this.config.port = this.config.port || 8449;
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
-  this.config.showServerOutput = this.config.showServerOutput || true;
+  this.config.showServerOutput = this.config.showServerOutput || false;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
   this.url = 'http://localhost:' + this.config.port;
 }

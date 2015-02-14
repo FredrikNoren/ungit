@@ -304,7 +304,7 @@ module.exports = function(grunt) {
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
-    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'test.all.js')]);
+    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'test.all.js')], { maxBuffer: 10*1024*1024});
     child.stdout.on('data', function(data) {
       grunt.log.write(data);
     });
@@ -312,6 +312,7 @@ module.exports = function(grunt) {
       grunt.log.error(data);
     })
     child.on('exit', function(code) {
+      grunt.log.writeln('Clicktests exited with code ' + code);
       done(code == 0);
     });
   });
