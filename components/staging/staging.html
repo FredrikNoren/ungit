@@ -18,7 +18,6 @@
                   </span>
                   <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-
         <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
@@ -39,7 +38,6 @@
           Abort merge
           <!-- ko component: mergeAbortProgressBar --><!-- /ko -->
         </button>
-        <!-- ko component: refreshButton --><!-- /ko -->
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="col-lg-9 file-area">

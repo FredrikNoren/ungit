@@ -20,5 +20,5 @@ RefreshButton.prototype.refresh = function() {
   return true;
 }
 RefreshButton.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('refreshbutton', this, {}, parentElement);
+  ko.renderTemplate('refreshButton', this, {}, parentElement);
 }
