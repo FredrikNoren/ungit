@@ -195,6 +195,11 @@ suite.test('Should be possible to move a branch', function(done) {
   });
 });
 
+suite.test('Should be possible to click refresh button', function(done) {
+  helpers.click(page, 'button.refresh-button');
+  done();
+});
+
 // Shutdown
 
 suite.test('Go to home screen', function(done) {
