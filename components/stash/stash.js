@@ -34,7 +34,7 @@ function StashViewModel(server, repoPath) {
   var self = this;
   this.server = server;
   this.repoPath = repoPath;
-  this.stashedChanges = ko.observable([]);
+  this.stashedChanges = ko.observableArray();
   this.isShow = ko.observable(localStorage['showStash'] === 'true');
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow(); });
   this.refresh();
