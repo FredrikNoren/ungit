@@ -4,9 +4,7 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
-var filesToDisplayIncrmentBy = 50;
-var filesToDisplayLimit = filesToDisplayIncrmentBy;
-
+var filesToDisplayLimit = 1000;
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -244,10 +242,6 @@ StagingViewModel.prototype.toggleAllStages = function() {
 }
 StagingViewModel.prototype.viewTypeChangeClick = function(index) {
   this.textDiffTypeIndex(index);
-}
-StagingViewModel.prototype.loadMore = function() {
-  filesToDisplayLimit += filesToDisplayIncrmentBy;
-  programEvents.dispatch({ event: 'request-app-content-refresh' });
 }
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
