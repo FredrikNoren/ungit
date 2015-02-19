@@ -169,11 +169,17 @@ exports.start = function() {
 
   ko.applyBindings(appContainer);
 
+  programEvents.add(function(event) {
+    if (event.event === 'nvigate-to-home') {
+      app.content(components.create('home', { app: app }));
+      windowTitle.path = 'ungit';
+      windowTitle.update();
+    }
+  });
+
   // routing
   navigation.crossroads.addRoute('/', function() {
-    app.content(components.create('home', { app: app }));
-    windowTitle.path = 'ungit';
-    windowTitle.update();
+    programEvents.dispatch({ event: 'nvigate-to-home' });
   });
 
   navigation.crossroads.addRoute('/repository{?query}', function(query) {
