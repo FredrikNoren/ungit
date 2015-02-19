@@ -50,7 +50,7 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 }
 ```
 
-Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [optimist](https://github.com/substack/node-optimist) for command line arguments. See corresponding documentations for more details.
+Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [yargs](https://github.com/chevex/yargs) for command line arguments. See corresponding documentations for more details.
 
 Plugins
 -------
