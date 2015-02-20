@@ -137,10 +137,10 @@ git.queueTask = function(task) {
   gitQueue.push(task);
 }
 
-git.status = function(repoPath, file, fileLimit) {
+git.status = function(repoPath, file) {
   var task = new GitTask();
   var gitTask = git(['status', '-s', '-b', '-u', (file ? file : '')], repoPath)
-    .parser(gitParser.parseGitStatus, { fileLimit: fileLimit })
+    .parser(gitParser.parseGitStatus)
     .fail(task.setResult)
     .done(function(status) {
       // From http://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
