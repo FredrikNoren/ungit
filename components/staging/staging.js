@@ -4,7 +4,9 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
-var filesToDisplayLimit = 1000;
+var filesToDisplayIncrmentBy = 50;
+var filesToDisplayLimit = filesToDisplayIncrmentBy;
+
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -78,12 +80,9 @@ var StagingViewModel = function(server, repoPath) {
   this.textDiffType = ko.computed(function() {
     return this.textDiffOptions[this.textDiffTypeIndex()];
   }, this);
-<<<<<<< HEAD
-=======
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshButton');
   this.isMoreToLoad = ko.observable(false);
->>>>>>> /status to return isMoreToLoad
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -119,7 +118,19 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
 
     self.setFiles(status.files);
-    self.isMoreToLoad(status.isMoreToLoad);
+    if (status.isMoreToLoad) {
+      self.isMoreToLoad(true);
+      // Still more to load, show errror
+      programEvents.dispatch({ event: 'git-error', data: {
+        tip: "There are too many unstaged files and it is recommended to use git command line.",
+        command: null,
+        error: 'too-many-unstaged-files',
+        stdout: null,
+        stderr: null,
+        shouldSkipReport: true,
+        repoPath: self.repoPath
+      }, unique: true });
+    }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
@@ -243,6 +254,7 @@ StagingViewModel.prototype.toggleAllStages = function() {
 StagingViewModel.prototype.viewTypeChangeClick = function(index) {
   this.textDiffTypeIndex(index);
 }
+
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
   var self = this;

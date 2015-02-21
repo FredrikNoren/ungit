@@ -111,6 +111,17 @@ function YesNoDialogViewModel(title, details) {
   this.alternatives([
     { label: 'Yes', primary: true, taId: 'yes', click: function() { self.result(true); self.close(); } },
     { label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } },
-  ])
+  ]);
 }
-inherits(YesNoDialogViewModel, PromptDialogViewModel);
+
+function TooManyFilesDialogViewModel(title, details) {
+  PromptDialogViewModel.call(this, title, details);
+  var self = this;
+  this.taDialogName('yes-no-dialog');
+  this.result = ko.observable(false);
+  this.alternatives([
+    { label: "Don't load", primary: true, taId: 'noLoad', click: function() { self.result(true); self.close(); } },
+    { label: 'Load anyway', primary: false, taId: 'load', click: function() { self.result(false); self.close(); } },
+  ]);
+}
+inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
