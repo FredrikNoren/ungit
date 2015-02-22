@@ -117,19 +117,20 @@ StagingViewModel.prototype.refreshContent = function(callback) {
         err.errorCode == 'no-such-path';
     }
 
-    self.setFiles(status.files);
-    if (status.isMoreToLoad) {
-      self.isMoreToLoad(true);
-      // Still more to load, show errror
-      programEvents.dispatch({ event: 'git-error', data: {
-        tip: "There are too many unstaged files and it is recommended to use git command line.",
-        command: null,
-        error: 'too-many-unstaged-files',
-        stdout: null,
-        stderr: null,
-        shouldSkipReport: true,
-        repoPath: self.repoPath
-      }, unique: true });
+    if (status.files.length > filesToDisplayLimit) {
+      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line.'});
+
+      diag.closed.add(function() {
+        if (diag.result()) {
+          self.loadStatus(status, callback);
+        } else {
+          programEvents.dispatch({ event: 'nvigate-to-home' });
+        }
+      })
+
+      programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    } else {
+      self.loadStatus(status, callback);
     }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);

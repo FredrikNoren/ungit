@@ -120,8 +120,8 @@ function TooManyFilesDialogViewModel(title, details) {
   this.taDialogName('yes-no-dialog');
   this.result = ko.observable(false);
   this.alternatives([
-    { label: "Don't load", primary: true, taId: 'noLoad', click: function() { self.result(true); self.close(); } },
-    { label: 'Load anyway', primary: false, taId: 'load', click: function() { self.result(false); self.close(); } },
+    { label: "Don't load", primary: true, taId: 'noLoad', click: function() { self.result(false); self.close(); } },
+    { label: 'Load anyway', primary: false, taId: 'loadAnyway', click: function() { self.result(true); self.close(); } },
   ]);
 }
 inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
