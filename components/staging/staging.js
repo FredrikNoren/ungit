@@ -82,7 +82,7 @@ var StagingViewModel = function(server, repoPath) {
   }, this);
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshButton');
-  this.isMoreToLoad = ko.observable(false);
+  this.loadAnyway = false;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -117,11 +117,12 @@ StagingViewModel.prototype.refreshContent = function(callback) {
         err.errorCode == 'no-such-path';
     }
 
-    if (status.files.length > filesToDisplayLimit) {
-      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line.'});
+    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
 
       diag.closed.add(function() {
         if (diag.result()) {
+          self.loadAnyway = true;
           self.loadStatus(status, callback);
         } else {
           programEvents.dispatch({ event: 'nvigate-to-home' });

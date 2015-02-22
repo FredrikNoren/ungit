@@ -28,6 +28,10 @@ components.register('yesnodialog', function(args) {
   return new YesNoDialogViewModel(args.title, args.details);
 });
 
+components.register('TooManyFilesDialogViewModel', function(args) {
+  return new TooManyFilesDialogViewModel(args.title, args.details);
+});
+
 function DialogViewModel(title) {
   this.closed = new signals.Signal();
   this.title = ko.observable(title);
