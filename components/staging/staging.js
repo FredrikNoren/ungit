@@ -4,6 +4,8 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var filesToDisplayIncrmentBy = 50;
+var filesToDisplayLimit = filesToDisplayIncrmentBy;
 
 
 components.register('staging', function(args) {
@@ -15,7 +17,7 @@ var StagingViewModel = function(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.filesByPath = {};
-  this.files = ko.observable([]);
+  this.files = ko.observableArray();
   this.commitMessageTitleCount = ko.observable(0);
   this.commitMessageTitle = ko.observable();
   this.commitMessageTitle.subscribe(function(value) {
@@ -80,6 +82,7 @@ var StagingViewModel = function(server, repoPath) {
   }, this);
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshButton');
+  this.isMoreToLoad = ko.observable(false);
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -107,13 +110,15 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
     else self.HEAD(null);
   });
-  this.server.get('/status', { path: this.repoPath }, function(err, status) {
+  this.server.get('/status', { path: this.repoPath, fileLimit: filesToDisplayLimit }, function(err, status) {
     if (err) {
       if (callback) callback(err);
       return err.errorCode == 'must-be-in-working-tree' ||
         err.errorCode == 'no-such-path';
     }
+
     self.setFiles(status.files);
+    self.isMoreToLoad(status.isMoreToLoad);
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
@@ -237,7 +242,10 @@ StagingViewModel.prototype.toggleAllStages = function() {
 StagingViewModel.prototype.viewTypeChangeClick = function(index) {
   this.textDiffTypeIndex(index);
 }
-
+StagingViewModel.prototype.loadMore = function() {
+  filesToDisplayLimit += filesToDisplayIncrmentBy;
+  programEvents.dispatch({ event: 'request-app-content-refresh' });
+}
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
   var self = this;

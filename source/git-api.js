@@ -10,7 +10,6 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
-var fileType = require('./utils/file-type.js');
 
 exports.pathPrefix = '';
 
@@ -115,16 +114,10 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
     var repoPath = req.query['path'];
-    git.status(repoPath)
+    git.status(repoPath, null, req.query['fileLimit'] || 50)
       .always(function(err, result) {
-        if(result) {
-          for(var file in result.files) {
-            result.files[file].type = fileType(file);
-          }
-        }
         jsonResultOrFail(res, err, result);
-      })
-      .start();
+      }).start();
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
