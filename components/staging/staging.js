@@ -125,7 +125,7 @@ StagingViewModel.prototype.refreshContent = function(callback) {
           self.loadAnyway = true;
           self.loadStatus(status, callback);
         } else {
-          programEvents.dispatch({ event: 'nvigate-to-home' });
+          window.location.href = '/#/';
         }
       })
 
