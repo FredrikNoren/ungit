@@ -117,6 +117,7 @@ function YesNoDialogViewModel(title, details) {
     { label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } },
   ]);
 }
+inherits(YesNoDialogViewModel, PromptDialogViewModel);
 
 function TooManyFilesDialogViewModel(title, details) {
   PromptDialogViewModel.call(this, title, details);
