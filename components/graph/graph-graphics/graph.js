@@ -5,16 +5,28 @@ var EdgeViewModel = require('./edge').EdgeViewModel;
 
 var GraphViewModel = function() {
   var self = this;
-  this.nodes = ko.observableArray();
+  this.nodes = ko.observable([]);
   this.commitNode = new CommitNodeViewModel(this);
   this.commitNodeEdge = new EdgeViewModel(this.commitNode);
   this.offset = ko.observable(new Vector2(0, 0));
-  this.edges = ko.observableArray();
+  this.edges = ko.observable([]);
   this.showCommitNode = ko.observable();
   this.dimCommit = ko.observable(false);
   this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
-  this.graphWidth = ko.observable();
-  this.graphHeight = ko.observable();
+  this.graphWidth = ko.computed(function() {
+    var width = 0;
+    self.nodes().forEach(function(node) {
+      width = Math.max(width, node.x() + node.radius() + self.offset().x + 200);
+    });
+    return width;
+  });
+  this.graphHeight = ko.computed(function() {
+    var height = 0;
+    self.nodes().forEach(function(node) {
+      height = Math.max(height, node.y() + node.radius() + self.offset().y + 5);
+    });
+    return height;
+  });
 
   this.hoverGraphActionGraphic = ko.observable();
   var prevHoverGraphic;

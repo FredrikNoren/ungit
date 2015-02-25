@@ -43,10 +43,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.aboveNode = null; // The node directly above this, graphically
 
-  this.commitTime = ko.observable();
-  this.authorTime = ko.observable();
-  this.parents = ko.observableArray();
-  this.message = ko.observable();
+  this.parents = ko.observable([]);
   this.title = ko.observable();
   this.commitTime = ko.observable();
 
@@ -84,8 +81,8 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
-  this.branchesAndLocalTags = ko.observableArray();
-  this.remoteTags = ko.observableArray();
+  this.branchesAndLocalTags = ko.observable([]);
+  this.remoteTags = ko.observable([]);
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
@@ -251,3 +248,4 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
+

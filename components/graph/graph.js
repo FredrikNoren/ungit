@@ -20,7 +20,7 @@ var GitGraphViewModel = function(server, repoPath) {
   this.repoPath = repoPath;
   this.currentRemote = ko.observable();
   this.maxNNodes = 25;
-  this.nodes = ko.observableArray();
+  this.nodes = ko.observable([]);
   this.edgesById = {};
   this.refs = ko.observableArray();
   this.nodesById = {};
@@ -55,19 +55,13 @@ var GitGraphViewModel = function(server, repoPath) {
 
   this.nodes.subscribe(function(nodes) {
     var edges = [];
-    var height = 0;
-    var width = 0;
     nodes.forEach(function(node) {
       node.parents().forEach(function(parentSha1) {
         edges.push(self.getEdge(node.sha1, parentSha1));
       });
-      height = Math.max(height, node.y() + node.radius() + self.graphic.offset().y + 5);
-      width = Math.max(width, node.x() + node.radius() + self.graphic.offset().x + 200);
     });
     self.graphic.nodes(nodes);
     self.graphic.edges(edges);
-    self.graphic.graphHeight(height);
-    self.graphic.graphWidth(width);
   });
 
   this.hoverGraphAction.subscribe(function(value) {
