@@ -13,7 +13,7 @@ function RemotesViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
-  this.remotes = ko.observableArray();
+  this.remotes = ko.observable([]);
   this.currentRemote = ko.observable(null);
   this.currentRemote.subscribe(function(value) {
     programEvents.dispatch({ event: 'current-remote-changed', newRemote: value });

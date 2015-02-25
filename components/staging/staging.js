@@ -15,7 +15,7 @@ var StagingViewModel = function(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.filesByPath = {};
-  this.files = ko.observableArray();
+  this.files = ko.observable([]);
   this.commitMessageTitleCount = ko.observable(0);
   this.commitMessageTitle = ko.observable();
   this.commitMessageTitle.subscribe(function(value) {
@@ -173,7 +173,7 @@ StagingViewModel.prototype.commit = function() {
     self.commitMessageTitle('');
     self.commitMessageBody('');
     self.amend(false);
-    self.files.removeAll();
+    self.files([]);
   });
 }
 StagingViewModel.prototype.rebaseContinue = function() {
