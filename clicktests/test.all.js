@@ -5,3 +5,4 @@ require('./test.remotes');
 require('./test.screens');
 require('./test.submodules');
 require('./test.generic');
+require('./test.noheader');
