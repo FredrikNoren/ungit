@@ -341,19 +341,12 @@ module.exports = function(grunt) {
 
       async.parallel([
         async.map.bind(null, Object.keys(tempPackageJson.dependencies), function(dep, callback) {
-          // Keep forever-monitor at 1.1.0 until https://github.com/nodejitsu/forever-monitor/issues/38 is fixed
-          if (dep == 'forever-monitor') return callback();
           // Socket.io 1.0.0-pre didn't work with phantomjs, so keep it at 0.9.16 for now
           if (dep == 'socket.io') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
         async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
-          // Same with imagemin, something with 0.5.0 doesn't work on mac
-          if (dep == 'grunt-contrib-imagemin') return callback();
-          // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
-          if (dep == 'supertest') return callback();
-
           bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
         })
       ], function() {
