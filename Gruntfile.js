@@ -25,7 +25,6 @@ module.exports = function(grunt) {
           "components/imagediff/imagediff.css": ["components/imagediff/imagediff.less"],
           "components/repository/repository.css": ["components/repository/repository.less"],
           "components/staging/staging.css": ["components/staging/staging.less"],
-          "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
           "components/stash/stash.css": ["components/stash/stash.less"],
           "components/sidebysidediff/sidebysidediff.css": ["components/sidebysidediff/sidebysidediff.less"],
           "components/refreshbutton/refreshbutton.css": ["components/refreshbutton/refreshbutton.less"],
