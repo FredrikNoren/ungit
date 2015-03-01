@@ -200,7 +200,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
+git.diffFile = function(repoPath, filename, sha1, maxNLines) {
   var task = new GitTask();
 
   var statusTask = git.status(repoPath)
@@ -220,13 +220,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        var gitJob = git(gitCommands, repoPath).always(task.setResult);
-
-        if (!isGetRaw) {
-          gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
-        }
-
-        gitJob.start();
+        git(gitCommands, repoPath).always(task.setResult).start();
       } else {
         fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
           if (err) return task.setResult({ error: err });
