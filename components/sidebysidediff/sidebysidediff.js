@@ -36,7 +36,7 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
     if (typeof diffs === "string") {
-      var html = diff2html.getPrettyHtmlFromDiff(diffs);
+      var html = diff2html.getPrettySideBySideHtmlFromDiff(diffs);
 
       if (html.length === 33) {
         var index = html.indexOf('\n');
@@ -44,6 +44,8 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
       }
 
       self.parentElement.innerHTML = html;
+    } else {
+      self.parentElement.innerHTML = '<div class="d2h-wrapper">&nbsp;New...</div>'
     }
 
     if (callback) callback();

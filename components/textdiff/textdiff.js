@@ -47,6 +47,8 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
       }
 
       self.parentElement.innerHTML = html;
+    } else {
+      self.parentElement.innerHTML = '<div class="d2h-wrapper">&nbsp;New...</div>'
     }
 
     if (callback) callback();
