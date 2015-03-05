@@ -143,6 +143,17 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     if (callback) callback();
   });
 }
+StagingViewModel.prototype.loadStatus = function(status, callback) {
+  this.setFiles(status.files);
+  this.inRebase(!!status.inRebase);
+  this.inMerge(!!status.inMerge);
+  if (status.inMerge) {
+    var lines = status.commitMessage.split('\n');
+    this.commitMessageTitle(lines[0]);
+    this.commitMessageBody(lines.slice(1).join('\n'));
+  }
+  if (callback) callback();
+}
 StagingViewModel.prototype.setFiles = function(files) {
   var self = this;
   var newFiles = [];
