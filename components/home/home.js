@@ -31,18 +31,14 @@ HomeRepositoryViewModel.prototype.updateState = function() {
   });
 }
 HomeRepositoryViewModel.prototype.remove = function() {
-  var repos = this.app.repoList();
-  var i;
-  while((i = repos.indexOf(this.path)) != -1)
-    repos.splice(i, 1);
-  this.app.repoList(repos);
+  this.app.repoList.remove(this.path);
   this.home.update();
 }
 
 function HomeViewModel(app) {
   var self = this;
   this.app = app;
-  this.repos = ko.observable([]);
+  this.repos = ko.observableArray();
   this.showNux = ko.computed(function() {
     return self.repos().length == 0;
   });
@@ -64,5 +60,3 @@ HomeViewModel.prototype.update = function() {
     return reposByPath[path];
   }));
 }
-
- 
