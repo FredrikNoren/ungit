@@ -23,10 +23,13 @@
   <!-- ko if: showLog -->
 
   <div class="repository-actions">
+    <!-- ko if: refreshButton -->
+      <!-- ko component: refreshButton --><!-- /ko -->
+    <!-- /ko -->
     <!-- ko component: remotes --><!-- /ko -->
     <!-- ko component: submodules --><!-- /ko -->
   </div>
-  
+
   <!-- ko component: graph --><!-- /ko -->
 
   <!-- /ko -->

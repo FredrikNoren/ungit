@@ -31,6 +31,15 @@ suite.test('Open repo screen', function(done) {
   });
 });
 
+suite.test('Check for refresh button', function(done) {
+  helpers.waitForElement(page, '[data-ta-clickable="refresh-button"]', function(err) {
+    helpers.click(page, '[data-ta-clickable="refresh-button"]');
+    setTimeout(function() {
+      done();
+    }, 500);
+  });
+});
+
 suite.test('Should be possible to create and commit a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
@@ -156,7 +165,6 @@ suite.test('Commit changes to a file', function(done) {
     });
   });
 });
-
 
 suite.test('Checkout a branch', function(done) {
   uiInteractions.checkout(page, 'testbranch', done);
