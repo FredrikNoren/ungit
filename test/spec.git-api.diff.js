@@ -114,18 +114,8 @@ describe('git-api diff', function () {
 	it('diff on modified file should work', function(done) {
 		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines).to.eql([
-				[ null, null, '@@ -1,5 +1,6 @@' ],
-				[ 1, 1, ' A' ],
-				[ 2, 2, ' few' ],
-				[ null, 3, '+more' ],
-				[ 3, 4, ' lines' ],
-				[ 4, 5, ' of' ],
-				[ 5, 6, ' content' ]
-			]);
+			expect(res.body.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
+			expect(res.body.indexOf('+more')).to.be.above(-1);
 			done();
 		});
 	});
@@ -164,10 +154,8 @@ describe('git-api diff', function () {
 	it('diff on removed file should work', function(done) {
 		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be.greaterThan(0);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be.greaterThan(0);
+			expect(res.body.indexOf('deleted file')).to.be.above(-1);
+			expect(res.body.indexOf("@@ -1,6 +0,0 @@")).to.be.above(-1);
 			done();
 		});
 	});
