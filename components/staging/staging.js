@@ -235,6 +235,18 @@ StagingViewModel.prototype.toggleAllStages = function() {
 StagingViewModel.prototype.viewTypeChangeClick = function(index) {
   this.textDiffTypeIndex(index);
 }
+StagingViewModel.prototype.onEnter = function(d, e){
+    if (e.keyCode === 13 && !this.commitValidationError()) {
+      this.commit();
+    }
+    return true;
+};
+StagingViewModel.prototype.onAltEnter = function(d, e){
+    if (e.keyCode === 13 && e.altKey && !this.commitValidationError) {
+      this.commit();
+    }
+    return true;
+};
 
 
 var FileViewModel = function(staging, name, fileType, textDiffType) {
