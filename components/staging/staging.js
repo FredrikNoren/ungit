@@ -242,7 +242,7 @@ StagingViewModel.prototype.onEnter = function(d, e){
     return true;
 };
 StagingViewModel.prototype.onAltEnter = function(d, e){
-    if (e.keyCode === 13 && e.altKey && !this.commitValidationError) {
+    if (e.keyCode === 13 && e.altKey && !this.commitValidationError()) {
       this.commit();
     }
     return true;
