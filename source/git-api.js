@@ -10,6 +10,8 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
+var fileType = require('./utils/file-type.js');
+var rimraf = require('rimraf');
 
 exports.pathPrefix = '';
 
@@ -532,6 +534,15 @@ exports.registerApi = function(env) {
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
+      .start();
+  });
+
+  app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
+    git(['submodule', 'deinit', req.query.name], req.body['path'])
+      .done(function() {
+        rimraf.sync(path.join(req.query.path, req.query.submodulePath));
+      })
+      .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 
