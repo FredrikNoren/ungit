@@ -174,7 +174,7 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
     // It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
     var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
     if (!shouldSkipReport) {
-      if (ungit.config.sendUsageStatistics) {
+      if (ungit.config && ungit.config.sendUsageStatistics) {
         Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
       }
       console.log('git-error', err); // Used by the clicktests
