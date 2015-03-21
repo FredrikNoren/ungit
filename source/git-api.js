@@ -538,9 +538,10 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['submodule', 'deinit', req.query.name], req.body['path'])
+    git(['submodule', 'deinit', "-f", req.query.submoduleName], req.query['path']) // -f, for when not checked in...
       .done(function() {
-        rimraf.sync(path.join(req.query.path, req.query.submodulePath));
+        git(['rm', req.query.submoduleName], req.query['path']).start(); // Remove in git
+        rimraf.sync(path.join(req.query.path, req.query.submodulePath)); // Remove in  working dir
       })
       .always(jsonResultOrFail.bind(null, res))
       .start();
