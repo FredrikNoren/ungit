@@ -538,12 +538,18 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['submodule', 'deinit', "-f", req.query.submoduleName], req.query['path']) // -f, for when not checked in...
+    // -f is needed for the cases when added submodule change is not in the staging or committed
+    git(['submodule', 'deinit', "-f", req.query.submoduleName], req.query['path'])
       .done(function() {
-        git(['rm', req.query.submoduleName], req.query['path']).start(); // Remove in git
-        rimraf.sync(path.join(req.query.path, req.query.submodulePath)); // Remove in  working dir
+        // remove from working directory and git completely
+        git(['rm', '-f', req.query.submoduleName], req.query['path'])
+          .done(function() {
+            rimraf.sync(path.join(req.query.path, req.query.submodulePath));
+            rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
+          })
+          .always(jsonResultOrFail.bind(null, res))
+          .start();
       })
-      .always(jsonResultOrFail.bind(null, res))
       .start();
   });
 

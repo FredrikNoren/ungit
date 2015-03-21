@@ -34,6 +34,8 @@ SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
     // if returned is not array, don't render submodules module
     if (submodules && Array.isArray(submodules)) {
       self.submodules(submodules);
+    } else {
+      self.submodules([]);
     }
 
     if (callback) {
