@@ -4,6 +4,8 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var filesToDisplayIncrmentBy = 50;
+var filesToDisplayLimit = filesToDisplayIncrmentBy;
 
 
 components.register('staging', function(args) {
@@ -15,7 +17,7 @@ var StagingViewModel = function(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.filesByPath = {};
-  this.files = ko.observable([]);
+  this.files = ko.observableArray();
   this.commitMessageTitleCount = ko.observable(0);
   this.commitMessageTitle = ko.observable();
   this.commitMessageTitle.subscribe(function(value) {
@@ -78,6 +80,9 @@ var StagingViewModel = function(server, repoPath) {
   this.textDiffType = ko.computed(function() {
     return this.textDiffOptions[this.textDiffTypeIndex()];
   }, this);
+  if (window.location.search.indexOf('noheader=true') >= 0)
+    this.refreshButton = components.create('refreshButton');
+  this.loadAnyway = false;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -105,13 +110,29 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
     else self.HEAD(null);
   });
-  this.server.get('/status', { path: this.repoPath }, function(err, status) {
+  this.server.get('/status', { path: this.repoPath, fileLimit: filesToDisplayLimit }, function(err, status) {
     if (err) {
       if (callback) callback(err);
       return err.errorCode == 'must-be-in-working-tree' ||
         err.errorCode == 'no-such-path';
     }
-    self.setFiles(status.files);
+
+    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
+
+      diag.closed.add(function() {
+        if (diag.result()) {
+          self.loadAnyway = true;
+          self.loadStatus(status, callback);
+        } else {
+          window.location.href = '/#/';
+        }
+      })
+
+      programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    } else {
+      self.loadStatus(status, callback);
+    }
     self.inRebase(!!status.inRebase);
     self.inMerge(!!status.inMerge);
     if (status.inMerge) {
@@ -121,6 +142,17 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     }
     if (callback) callback();
   });
+}
+StagingViewModel.prototype.loadStatus = function(status, callback) {
+  this.setFiles(status.files);
+  this.inRebase(!!status.inRebase);
+  this.inMerge(!!status.inMerge);
+  if (status.inMerge) {
+    var lines = status.commitMessage.split('\n');
+    this.commitMessageTitle(lines[0]);
+    this.commitMessageBody(lines.slice(1).join('\n'));
+  }
+  if (callback) callback();
 }
 StagingViewModel.prototype.setFiles = function(files) {
   var self = this;

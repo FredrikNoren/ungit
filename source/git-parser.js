@@ -1,14 +1,18 @@
 var moment = require('moment');
 var fs = require('fs');
+var fileType = require('./utils/file-type.js');
 
-exports.parseGitStatus = function(text) {
-  var result = {};
+exports.parseGitStatus = function(text, args) {
+  var result = { isMoreToLoad: false };
   var lines = text.split('\n');
   result.branch = lines[0].split(' ').pop();
   result.inited = true;
   result.files = {};
-  lines.slice(1).forEach(function(line) {
-    if (line == '') return;
+
+  // skipping first line...
+  for(var i = 1; i < lines.length; i++) {
+    var line = lines[i];
+    if (line == '') continue;
     var status = line.slice(0, 2);
     var filename = line.slice(3).trim();
     if (filename[0] == '"' && filename[filename.length - 1] == '"')
@@ -18,8 +22,10 @@ exports.parseGitStatus = function(text) {
     file.removed = status[0] == 'D' || status[1] == 'D';
     file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
     file.conflict = (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U';
+    file.type = fileType(filename);
     result.files[filename] = file;
-  });
+  }
+
   return result;
 };
 
