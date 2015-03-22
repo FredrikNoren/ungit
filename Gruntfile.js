@@ -290,6 +290,8 @@ module.exports = function(grunt) {
           if (dep == 'forever-monitor') return callback();
           // Socket.io 1.0.0-pre didn't work with phantomjs, so keep it at 0.9.16 for now
           if (dep == 'socket.io') return callback();
+          // Superagent 1.x has a new api, need to upgrade to that if we want to bump
+          if (dep == 'superagent') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
