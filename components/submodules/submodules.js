@@ -18,7 +18,7 @@ function SubmodulesViewModel(server, repoPath) {
 }
 
 SubmodulesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'submodule-added') this.fetchSubmodules();
+  if (event.event == 'submodule-fetch') this.fetchSubmodules();
 }
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
@@ -70,7 +70,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
           return;
         }
 
-        programEvents.dispatch({ event: 'submodule-added' });
+        programEvents.dispatch({ event: 'submodule-fetch' });
         self.addProgressBar.stop();
       });
     }
@@ -98,7 +98,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
           return;
         }
 
-        programEvents.dispatch({ event: 'submodule-added' });
+        programEvents.dispatch({ event: 'submodule-fetch' });
         self.addProgressBar.stop();
       });
     }
