@@ -61,6 +61,19 @@ suite.test('Submodule view check', function(done) {
   });
 });
 
+suite.test('Submodule delete check', function(done) {
+  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+  helpers.click(page, '[data-ta-clickable="subrepo-remove"]');
+  helpers.waitForElement(page, '[data-ta-container="yes-no-dialog"]', function() {
+    helpers.click(page, '[data-ta-clickable="yes"]');
+    helpers.waitForElement(page, '[data-ta-element="progress-bar"]', function() {
+      helpers.waitForNotElement(page, '[data-ta-element="progress-bar"]', function() {
+        done();
+      });
+    });
+  });
+});
+
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
 });
