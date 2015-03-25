@@ -14,7 +14,7 @@ function SubmodulesViewModel(server, repoPath) {
   this.submodules = ko.observableArray();
 
   this.updateProgressBar = components.create('progressBar', { predictionMemoryKey: 'Updating Submodules', temporary: true });
-  this.addProgressBar = components.create('progressBar', { predictionMemoryKey: 'Adding Submodule', temporary: true });
+  this.fetchProgressBar = components.create('progressBar', { predictionMemoryKey: 'Adding Submodule', temporary: true });
 }
 
 SubmodulesViewModel.prototype.onProgramEvent = function(event) {
@@ -45,7 +45,7 @@ SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
 }
 
 SubmodulesViewModel.prototype.isRunning = function() {
-  return (this.updateProgressBar.running() || this.addProgressBar.running());
+  return (this.updateProgressBar.running() || this.fetchProgressBar.running());
 }
 
 SubmodulesViewModel.prototype.updateSubmodules = function() {
@@ -63,7 +63,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   var diag = components.create('addsubmoduledialog');
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
-      self.addProgressBar.start();
+      self.fetchProgressBar.start();
       self.server.post('/submodules/add', { path: self.repoPath, submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
         if (err) {
           console.log(err);
@@ -71,7 +71,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
         }
 
         programEvents.dispatch({ event: 'submodule-fetch' });
-        self.addProgressBar.stop();
+        self.fetchProgressBar.stop();
       });
     }
   });
@@ -91,7 +91,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-      self.addProgressBar.start();
+      self.fetchProgressBar.start();
       self.server.del('/submodules', { path: self.repoPath, submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
         if (err) {
           console.log(err);
@@ -99,7 +99,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
         }
 
         programEvents.dispatch({ event: 'submodule-fetch' });
-        self.addProgressBar.stop();
+        self.fetchProgressBar.stop();
       });
     }
   });
