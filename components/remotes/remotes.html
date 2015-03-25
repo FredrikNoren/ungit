@@ -9,7 +9,10 @@
 	</button>
 	<ul class="dropdown-menu" role="menu" data-ta-container="remotes">
 		<!-- ko foreach: remotes -->
-		<li><a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a></li>
+		<li>
+			<a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a>
+			<a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+		</li>
 		<!-- /ko -->
 		<li class="divider"></li>
 		<li><a href="#" data-bind="click: showAddRemoteDialog" data-ta-clickable="show-add-remote-dialog">Add a new remote</a></li>

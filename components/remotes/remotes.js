@@ -93,3 +93,23 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
+
+RemotesViewModel.prototype.remoteRemove = function(remote) {
+  var self = this;
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+      self.fetchingProgressBar.start();
+      self.server.del('/remotes/' + remote.name, { path: self.repoPath }, function(err, result) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        self.updateRemotes();
+        self.fetchingProgressBar.stop();
+      });
+    }
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+}
