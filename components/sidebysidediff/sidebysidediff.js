@@ -36,16 +36,7 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
     if (typeof diffs === "string") {
-      var html = diff2html.getPrettySideBySideHtmlFromDiff(diffs);
-
-      if (html.length === 33) {
-        var index = html.indexOf('\n');
-        html = [html.slice(0, index), '&nbsp;Deleted...', html.slice(index)].join('\n');
-      }
-
-      self.parentElement.innerHTML = html;
-    } else {
-      self.parentElement.innerHTML = '<div class="d2h-wrapper">&nbsp;New...</div>'
+      self.parentElement.innerHTML = diff2html.getPrettySideBySideHtmlFromDiff(diffs);
     }
 
     if (callback) callback();
