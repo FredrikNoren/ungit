@@ -55,14 +55,8 @@ describe('git-api diff', function () {
 	it('diff on created file should work', function(done) {
 		common.get(req, '/diff', { path: testDir, file: testFile }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.an('array');
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be(content.length);
-			for(var i = 0; i < res.body[0].lines.length; i++) {
-				var contentLine = content[i];
-				var diffLine = res.body[0].lines[i];
-				expect(diffLine).to.eql([null, i, '+' + contentLine]);
+			for(var i = 0; i < content.length; i++) {
+				expect(res.body.indexOf(content[i])).to.be.above(-1);
 			}
 			done();
 		});
