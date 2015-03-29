@@ -60,7 +60,7 @@ suite.test('Fetch from newly added remote', function(done) {
   });
 });
 
-suite.test('Submodule delete check', function(done) {
+suite.test('Remote delete check', function(done) {
   helpers.click(page, '[data-ta-clickable="remotes-menu"]');
   helpers.waitForElement(page, '[data-ta-container="remotes"]', function() {
     helpers.click(page, '[data-ta-clickable="myremote-remove"]');
