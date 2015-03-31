@@ -677,6 +677,18 @@ exports.registerApi = function(env) {
     });
   });
 
+  app.get(exports.pathPrefix + '/behind', ensureAuthenticated, function(req, res) {
+    git(['rev-list', "HEAD..master"], req.query['path'])
+      .always(jsonResultOrFail.bind(null, res))
+      .start();
+  });
+
+  app.get(exports.pathPrefix + '/ahead', ensureAuthenticated, function(req, res) {
+    git(['rev-list', "master..HEAD"], req.query['path'])
+      .always(jsonResultOrFail.bind(null, res))
+      .start();
+  });
+
   if (config.dev) {
 
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
