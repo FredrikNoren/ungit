@@ -81,6 +81,26 @@ var StagingViewModel = function(server, repoPath) {
   this.loadAnyway = false;
   this.isDiagOpen = false;
   this.mutedTime = null;
+  this.ahead = ko.observable([]);
+  this.behind = ko.observable([]);
+}
+StagingViewModel.prototype.setAheadAndBehind = function() {
+  var self = this;
+  this.server.get('/ahead', { path: this.repoPath }, function(err, ahead) {
+    if (err) {
+      console.log("error while acquiring ahead info", err);
+      return;
+    }
+    self.ahead(ahead ? ahead.split('\n') : []);
+  });
+  this.server.get('/behind', { path: this.repoPath }, function(err, behind) {
+    if (err) {
+      console.log("error while acquiring behind info", err);
+      return;
+    }
+    console.log(behind);
+    self.behind(behind ? behind.split('\n') : []);
+  });
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -97,6 +117,7 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
+  this.setAheadAndBehind();
   this.server.get('/head', { path: this.repoPath, limit: 1 }, function(err, log) {
     if (err) {
       return err.errorCode == 'must-be-in-working-tree' ||
