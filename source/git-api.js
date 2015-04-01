@@ -679,13 +679,15 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/behind', ensureAuthenticated, function(req, res) {
     git(['rev-list', "HEAD..master"], req.query['path'])
-      .always(jsonResultOrFail.bind(null, res))
+      .fail(jsonFail.bind(null, res))
+      .done(function(result) { res.json(result.trim()); })
       .start();
   });
 
   app.get(exports.pathPrefix + '/ahead', ensureAuthenticated, function(req, res) {
     git(['rev-list', "master..HEAD"], req.query['path'])
-      .always(jsonResultOrFail.bind(null, res))
+      .fail(jsonFail.bind(null, res))
+      .done(function(result) { res.json(result.trim()); })
       .start();
   });
 
