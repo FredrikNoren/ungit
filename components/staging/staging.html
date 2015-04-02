@@ -13,12 +13,14 @@
         <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
         <div>
           <span class="amend" data-bind="visible: canAmend">
-                  <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-                          <a href="#" data-bind="click: toggleAmend">Amend last commit</a>
-                  </span>
-                  <span class="commit-message-title-counter" data-bind="text: '#' + commitMessageTitleCount()"/>
-                  <span class="commit-message-title-counter ahead" data-bind="text: '&#9650;' + ahead().length"/>
-                  <span class="commit-message-title-counter behind" data-bind="text: '&#9660;' + behind().length"/>
+            <div>
+              <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+                <a href="#" data-bind="click: toggleAmend">Amend last commit</a>
+              </span>
+              <span class="commit-message-title" data-bind="text: '#' + commitMessageTitleCount()"/>
+              <span class="commit-message-title" data-bind="text: '&#9650;' + ahead().length"/>
+              <span class="commit-message-title" data-bind="text: '&#9660;' + behind().length"/>
+            </div>
         </div>
         <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
           Commit
