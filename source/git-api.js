@@ -623,7 +623,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/credentials', function(req, res) {
     // this endpoint can only be invoked from localhost, since the credentials-helper is always
     // on the same machine that we're running ungit on
-    if (req.ip != '127.0.0.1') {
+    if (req.ip != '127.0.0.1' && req.ip != '::ffff:127.0.0.1') {
       winston.info('Trying to get credentials from unathorized ip: ' + req.ip);
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
