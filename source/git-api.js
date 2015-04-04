@@ -10,6 +10,8 @@ var winston = require('winston');
 var usageStatistics = require('./usage-statistics');
 var os = require('os');
 var mkdirp = require('mkdirp');
+var fileType = require('./utils/file-type.js');
+var rimraf = require('rimraf');
 
 exports.pathPrefix = '';
 
@@ -532,6 +534,22 @@ exports.registerApi = function(env) {
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.body['path']))
       .always(emitWorkingTreeChanged.bind(null, req.body['path']))
+      .start();
+  });
+
+  app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
+    // -f is needed for the cases when added submodule change is not in the staging or committed
+    git(['submodule', 'deinit', "-f", req.query.submoduleName], req.query['path'])
+      .done(function() {
+        // remove from working directory and git completely
+        git(['rm', '-f', req.query.submoduleName], req.query['path'])
+          .done(function() {
+            rimraf.sync(path.join(req.query.path, req.query.submodulePath));
+            rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
+          })
+          .always(jsonResultOrFail.bind(null, res))
+          .start();
+      })
       .start();
   });
 

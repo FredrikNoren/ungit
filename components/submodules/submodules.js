@@ -18,7 +18,7 @@ function SubmodulesViewModel(server, repoPath) {
 }
 
 SubmodulesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'submodule-added') this.fetchSubmodules();
+  if (event.event == 'submodule-fetch') this.fetchSubmodules();
 }
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
@@ -34,6 +34,8 @@ SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
     // if returned is not array, don't render submodules module
     if (submodules && Array.isArray(submodules)) {
       self.submodules(submodules);
+    } else {
+      self.submodules([]);
     }
 
     if (callback) {
@@ -68,7 +70,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
           return;
         }
 
-        programEvents.dispatch({ event: 'submodule-added' });
+        programEvents.dispatch({ event: 'submodule-fetch' });
         self.addProgressBar.stop();
       });
     }
@@ -82,4 +84,24 @@ SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
 
 SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
   window.location.href = document.URL + '/' + submodule.path;
+}
+
+SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
+  var self = this;
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+      self.addProgressBar.start();
+      self.server.del('/submodules', { path: self.repoPath, submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        programEvents.dispatch({ event: 'submodule-fetch' });
+        self.addProgressBar.stop();
+      });
+    }
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }

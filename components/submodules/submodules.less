@@ -2,7 +2,22 @@
   display: inline;
 }
 
-.submodule-url {
-  float: right;
-  margin-top: -25px;
+.dropdown-menu {
+  li {
+    a {
+      &.submodule-url {
+        float: right;
+        margin-top: -25px;
+        padding: 0px 4px 0px 4px;
+        margin-right: 30px;
+      }
+
+      &.submodule-remove {
+        float: right;
+        margin-top: -25px;
+        padding: 0px 4px 0px 4px;
+        margin-right: 10px;
+      }
+    }
+  }
 }
