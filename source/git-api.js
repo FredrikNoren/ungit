@@ -428,6 +428,12 @@ exports.registerApi = function(env) {
       .start();
   });
 
+  app.delete(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
+    git(['remote', 'remove', req.params['name']], req.query['path'])
+      .always(jsonResultOrFail.bind(null, res))
+      .start();
+  });
+
   app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
     var noFF = '';
     if (config.noFFMerge) noFF = '--no-ff';
