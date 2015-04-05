@@ -81,7 +81,7 @@ var StagingViewModel = function(server, repoPath) {
     return this.textDiffOptions[this.textDiffTypeIndex()];
   }, this);
   if (window.location.search.indexOf('noheader=true') >= 0)
-    this.refreshButton = components.create('refreshButton');
+    this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {

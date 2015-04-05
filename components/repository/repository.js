@@ -28,7 +28,7 @@ var RepositoryViewModel = function(server, repoPath) {
   this.parentModuleLink = ko.observable();
   this.refreshSubmoduleStatus();
   if (window.location.search.indexOf('noheader=true') >= 0) {
-    this.refreshButton = components.create('refreshButton');
+    this.refreshButton = components.create('refreshbutton');
   } else {
     this.refreshButton = false;
   }
