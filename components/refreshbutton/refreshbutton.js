@@ -3,7 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 
-components.register('refreshButton', function() {
+components.register('refreshbutton', function() {
   return new RefreshButton();
 });
 
@@ -20,5 +20,5 @@ RefreshButton.prototype.refresh = function() {
   return true;
 }
 RefreshButton.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('refreshButton', this, {}, parentElement);
+  ko.renderTemplate('refreshbutton', this, {}, parentElement);
 }
