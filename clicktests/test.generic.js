@@ -112,6 +112,7 @@ suite.test('Should be possible to discard a created file', function(done) {
     if (err) return done(err);
     helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
       helpers.click(page, '[data-ta-clickable="discard-file"]');
+      helpers.click(page, '[data-ta-clickable="yes"]');
       helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
         done();
       });
