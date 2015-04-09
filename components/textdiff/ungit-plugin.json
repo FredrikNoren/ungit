@@ -1,5 +1,8 @@
 {
   "exports": {
+    "knockoutTemplates": {
+      "textdiff": "textdiff.html"
+    },
     "javascript": "textdiff.bundle.js"
   }
 }
