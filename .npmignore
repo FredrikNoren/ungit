@@ -16,6 +16,7 @@ npm-debug.log
 node_modules/
 
 .ungitrc
+.travis.yml
 Gruntfile.js
 
 assets/
