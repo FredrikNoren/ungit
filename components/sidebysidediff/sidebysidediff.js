@@ -14,6 +14,9 @@ var SideBySideDiffViewModel = function(args) {
   this.diffs = ko.observable();
   this.sha1 = args.sha1;
   this.parentElement = null;
+  this.diffJson = null;
+  this.diffHtml = ko.observable();
+  this.loadLimit = 100;
 }
 
 SideBySideDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -36,9 +39,28 @@ SideBySideDiffViewModel.prototype.invalidateDiff = function(callback) {
 
   self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
     if (typeof diffs === "string") {
-      self.parentElement.innerHTML = diff2html.getPrettySideBySideHtmlFromDiff(diffs);
+      self.diffJson = diff2html.getJsonFromDiff(diffs);
+      self.render();
     }
 
     if (callback) callback();
   });
+}
+
+SideBySideDiffViewModel.prototype.render = function() {
+  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson));
+  var diffLines = diffJsonCopy[0].blocks[0].lines;
+
+  if (diffLines.length > this.loadLimit) {
+    diffJsonCopy[0].blocks[0].lines = diffLines.slice(0, this.loadLimit);
+    this.isMoreToLoad(true);
+  } else {
+    this.isMoreToLoad(false);
+  }
+  this.diffHtml(diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy));
+};
+
+SideBySideDiffViewModel.prototype.loadMore = function(callback) {
+  this.loadLimit += 100;
+  this.render();
 }
