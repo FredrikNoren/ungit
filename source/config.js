@@ -155,5 +155,5 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
 } else if (argv.cliconfigonly) {
   module.exports = argv.default(defaultConfig).argv;
 } else {
-  module.exports = rc('ungit', defaultConfig, argv.argv);
+  module.exports = rc('ungit', argv.default(defaultConfig).argv);
 }

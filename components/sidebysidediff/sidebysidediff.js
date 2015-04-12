@@ -1,7 +1,7 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
-var diff2html = require('diff2html');
+var diff2html = require('diff2html').Diff2Html;
 
 components.register('sidebysidediff', function(args) {
   return new SideBySideDiffViewModel(args);
