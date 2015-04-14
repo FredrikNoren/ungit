@@ -35,12 +35,7 @@ function CommitViewModel(args) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
-  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
-                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
-  this.textDiffTypeIndex = ko.observable(0);
-  this.textDiffType = ko.computed(function() {
-    return this.textDiffOptions[this.textDiffTypeIndex()];
-  }, this);
+  this.textDiffType = ko.observable('textdiff');
 
   this.showCommitDiff = ko.computed(function() {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
@@ -88,11 +83,8 @@ CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
 CommitViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.updateLastAuthorDateFromNow(deltaT);
 }
-CommitViewModel.prototype.showSideBySideDiff = function() {
-  this.textDiffTypeIndex(1);
-}
-CommitViewModel.prototype.showDefaultDiff = function() {
-  this.textDiffTypeIndex(0);
+CommitViewModel.prototype.textDiffTypeChange = function(type) {
+  this.textDiffType(type);
 }
 CommitViewModel.prototype.stopClickPropagation = function(data, event) {
   event.stopImmediatePropagation();

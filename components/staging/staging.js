@@ -74,12 +74,7 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffTypeIndex = ko.observable(0);
-  this.textDiffOptions = [ { name: 'Default Diff', component: 'textdiff' },
-                           { name: 'Side-by-Side Diff', component: 'sidebysidediff' } ];
-  this.textDiffType = ko.computed(function() {
-    return this.textDiffOptions[this.textDiffTypeIndex()];
-  }, this);
+  this.textDiffType = ko.observable('textdiff');
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
@@ -267,8 +262,8 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
-StagingViewModel.prototype.viewTypeChangeClick = function(index) {
-  this.textDiffTypeIndex(index);
+StagingViewModel.prototype.textDiffTypeChange = function(type) {
+  this.textDiffType(type);
 }
 StagingViewModel.prototype.onEnter = function(d, e){
     if (e.keyCode === 13 && !this.commitValidationError()) {
@@ -303,7 +298,7 @@ var FileViewModel = function(staging, name, fileType, textDiffType) {
     }
 
     if (fileType === 'text') {
-      return self.isNew() ? 'textdiff' : textDiffType().component ;
+      return self.isNew() ? 'textdiff' : textDiffType();
     } else {
       return 'imagediff';
     }

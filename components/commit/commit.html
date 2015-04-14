@@ -28,11 +28,11 @@
         <div class="body" data-bind="text: body"></div>
         <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle, click: stopClickPropagation">
           <div class="btn-group btn-group-xs" data-bind="visible: selected">
-            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphDefaultView" data-bind="click: showSideBySideDiff, css: {active: textDiffTypeIndex() === 1}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: textDiffOptions[1].name"></span>
+            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff')" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: 'Siede by Side'"></span>
             </button>
-            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="graphSideBySideView" data-bind="click: showDefaultDiff, css: {active: textDiffTypeIndex() === 0}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: textDiffOptions[0].name"></span>
+            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="defaultDiff" data-bind="click: textDiffTypeChange.bind($data, 'textdiff')" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: 'Default'"></span>
             </button>
           </div>
           <div class="diff-inner" data-bind="component: commitDiff"></div>

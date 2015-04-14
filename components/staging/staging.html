@@ -56,11 +56,11 @@
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
-          <button class="btn btn-default bootstrap-tooltip pull-right" data-bind="click: viewTypeChangeClick.bind($data, 1), css: {active: textDiffTypeIndex() === 1}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"1000", "hide":"0"}'>
-            <span data-bind="text: textDiffOptions[1].name"></span>
+          <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff')" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+            <span data-bind="text: 'Siede by Side'"></span>
           </button>
-          <button class="btn btn-default bootstrap-tooltip pull-right" data-bind="click: viewTypeChangeClick.bind($data, 0), css: {active: textDiffTypeIndex() === 0}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"1000", "hide":"0"}'>
-            <span data-bind="text: textDiffOptions[0].name"></span>
+          <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="defaultDiff" data-bind="click: textDiffTypeChange.bind($data, 'textdiff')" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+            <span data-bind="text: 'Default'"></span>
           </button>
         </div>
 
