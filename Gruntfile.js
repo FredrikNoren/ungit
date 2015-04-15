@@ -26,7 +26,6 @@ module.exports = function(grunt) {
           "components/repository/repository.css": ["components/repository/repository.less"],
           "components/staging/staging.css": ["components/staging/staging.less"],
           "components/stash/stash.css": ["components/stash/stash.less"],
-          "components/sidebysidediff/sidebysidediff.css": ["components/sidebysidediff/sidebysidediff.less"],
           "components/refreshbutton/refreshbutton.css": ["components/refreshbutton/refreshbutton.less"],
         }
       }

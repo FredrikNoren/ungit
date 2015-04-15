@@ -8,13 +8,10 @@ components.register('textdiff', function(args) {
 });
 
 var TextDiffViewModel = function(args) {
-  var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
   this.server = args.server;
-  this.diffs = ko.observable();
   this.sha1 = args.sha1;
-  this.initialDisplayLineLimit = args.initialDisplayLineLimit ? args.initialDisplayLineLimit : 100;
   this.isMoreToLoad = ko.observable(false);
   this.diffJson = null;
   this.diffHtml = ko.observable();
@@ -22,11 +19,6 @@ var TextDiffViewModel = function(args) {
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
-}
-TextDiffViewModel.prototype.loadAllLines = function(data, event) {
-  event.stopImmediatePropagation();
-  this.isLoadingAllLines(true);
-  this.invalidateDiff();
 }
 TextDiffViewModel.prototype.getDiffArguments = function() {
   var args = {};

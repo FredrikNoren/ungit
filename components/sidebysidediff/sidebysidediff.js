@@ -11,16 +11,15 @@ var SideBySideDiffViewModel = function(args) {
   this.filename = args.filename;
   this.repoPath = args.repoPath;
   this.server = args.server;
-  this.diffs = ko.observable();
   this.sha1 = args.sha1;
-  this.parentElement = null;
+  this.isMoreToLoad = ko.observable(false);
   this.diffJson = null;
   this.diffHtml = ko.observable();
   this.loadLimit = 100;
 }
 
 SideBySideDiffViewModel.prototype.updateNode = function(parentElement) {
-  this.parentElement = parentElement;
+  ko.renderTemplate('sidebysidediff', this, {}, parentElement);
 }
 
 SideBySideDiffViewModel.prototype.getDiffArguments = function() {
