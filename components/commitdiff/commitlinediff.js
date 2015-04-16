@@ -23,8 +23,9 @@ var CommitLineDiff = function(args) {
   });
   this.specificDiff = ko.observable(this.getSpecificDiff());
 
-  args.textDiffType.subscribe(function() {
+  args.textDiffType.subscribe(function(diffType) {
     self.specificDiff(self.getSpecificDiff());
+    self.specificDiff().diffType(diffType);
     self.refreshAndShow();
   });
 };
@@ -35,8 +36,7 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
     filename: this.fileName(),
     repoPath: this.args.repoPath,
     server: this.args.server,
-    sha1: this.args.sha1,
-    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+    sha1: this.args.sha1
   });
 }
 

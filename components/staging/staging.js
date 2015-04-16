@@ -305,8 +305,9 @@ var FileViewModel = function(staging, name, fileType, textDiffType) {
   });
   this.diff = ko.observable(self.getSpecificDiff());
 
-  textDiffType.subscribe(function() {
+  textDiffType.subscribe(function(diffType) {
     self.diff(self.getSpecificDiff());
+    self.specificDiff().diffType(diffType);
     self.invalidateDiff(true);
   });
 }

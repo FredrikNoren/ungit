@@ -16,6 +16,7 @@ var TextDiffViewModel = function(args) {
   this.diffJson = null;
   this.diffHtml = ko.observable();
   this.loadLimit = 100;
+  this.diffType = ko.observable('textdiff');
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
