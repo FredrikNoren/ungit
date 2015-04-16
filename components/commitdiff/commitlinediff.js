@@ -25,9 +25,7 @@ var CommitLineDiff = function(args) {
 
   args.textDiffType.subscribe(function() {
     self.specificDiff(self.getSpecificDiff());
-    if (self.showSpecificDiff()) {
-      self.refreshAndShow();
-    }
+    self.refreshAndShow();
   });
 };
 exports.CommitLineDiff = CommitLineDiff;
@@ -52,7 +50,9 @@ CommitLineDiff.prototype.fileNameClick = function(data, event) {
 
 CommitLineDiff.prototype.refreshAndShow = function() {
   var self = this;
-  this.specificDiff().invalidateDiff(function() {
-    self.showSpecificDiff(true);
-  });
+  if (this.showSpecificDiff()) {
+    this.specificDiff().invalidateDiff(function() {
+      self.showSpecificDiff(true);
+    });
+  }
 }
