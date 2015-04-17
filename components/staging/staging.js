@@ -345,11 +345,28 @@ FileViewModel.prototype.resolveConflict = function() {
   this.server.post('/resolveconflicts', { path: this.staging.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toggleDiffs = function() {
+<<<<<<< HEAD
   if (this.renamed()) return; // do not show diffs for renames
   if (this.isShowingDiffs()) {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
     this.diff().invalidateDiff();
+=======
+  if (this.showingDiffs()) {
+    this.showingDiffs(false);
+  } else {
+    this.showingDiffs(true);
+    this.invalidateDiff(true);
+  }
+}
+FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
+  var self = this;
+  if (this.showingDiffs() && (drawProgressBar || this.type != 'image')) {
+    this.diffsProgressBar.start();
+    this.diff().invalidateDiff(function() {
+      self.diffsProgressBar.stop();
+    });
+>>>>>>> Refactor and fix commitline diff
   }
 }

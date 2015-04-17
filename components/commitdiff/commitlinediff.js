@@ -14,6 +14,10 @@ var CommitLineDiff = function(args) {
   this.sha1 = args.sha1;
   this.textDiffType = args.textDiffType;
   this.specificDiff = ko.observable(this.getSpecificDiff());
+  args.textDiffType.subscribe(function(diffType) {
+    self.specificDiff().diffType(diffType);
+    self.specificDiff().invalidateDiff();
+  });
 };
 exports.CommitLineDiff = CommitLineDiff;
 
