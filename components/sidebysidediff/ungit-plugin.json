@@ -1,9 +1,0 @@
-{
-  "exports": {
-    "knockoutTemplates": {
-      "sidebysidediff": "sidebysidediff.html"
-    },
-    "javascript": "sidebysidediff.bundle.js",
-    "css": "sidebysidediff.css"
-  }
-}
