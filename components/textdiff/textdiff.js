@@ -54,7 +54,12 @@ TextDiffViewModel.prototype.render = function() {
   } else {
     this.isMoreToLoad(false);
   }
-  this.diffHtml(diff2html.getPrettyHtmlFromJson(diffJsonCopy));
+
+  if (this.diffType() === 'sidebysidediff') {
+    this.diffHtml(diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy));
+  } else {
+    this.diffHtml(diff2html.getPrettyHtmlFromJson(diffJsonCopy));
+  }
 };
 
 TextDiffViewModel.prototype.loadMore = function(callback) {

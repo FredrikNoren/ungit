@@ -11,12 +11,8 @@ var CommitLineDiff = function(args) {
   this.showSpecificDiff = ko.observable(false);
   this.args = args;
   this.type = ko.computed(function() {
-    if (!self.fileName()) {
+    if (!self.fileName() || fileType(self.fileName()) == 'text') {
       return 'textdiff';
-    }
-
-    if (fileType(self.fileName()) == 'text') {
-      return args.textDiffType();
     } else {
       return 'imagediff';
     }
@@ -24,7 +20,6 @@ var CommitLineDiff = function(args) {
   this.specificDiff = ko.observable(this.getSpecificDiff());
 
   args.textDiffType.subscribe(function(diffType) {
-    self.specificDiff(self.getSpecificDiff());
     self.specificDiff().diffType(diffType);
     self.refreshAndShow();
   });
