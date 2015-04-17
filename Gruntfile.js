@@ -5,7 +5,7 @@ var fs = require('fs');
 var npm = require('npm');
 var semver = require('semver');
 var async = require('async');
-var ungitMain = path.resolve('./public/source/main.js');
+var browserify = require('browserify');
 
 module.exports = function(grunt) {
 
@@ -32,76 +32,10 @@ module.exports = function(grunt) {
         }
       }
     },
-    browserify: {
-      common: {
-        options: {
-          browserifyOptions: {
-            noParse: ['public/vendor/js/superagent.js'],
-          },
-          debug: true,
-          // Make these globally requireable, for use in plugins
-          alias: [
-            './public/source/components.js:ungit-components',
-            './public/source/program-events.js:ungit-program-events',
-            './public/source/navigation.js:ungit-navigation',
-            ungitMain + ':ungit-main',
-            // './public/source/main.js:ungit-main',
-            './source/utils/vector2.js:ungit-vector2',
-            './source/address-parser.js:ungit-address-parser',
-            'knockout:knockout',
-            'lodash:lodash',
-            'hasher:hasher',
-            'crossroads:crossroads',
-            'async:async',
-            'moment:moment',
-            'blueimp-md5:blueimp-md5',
-            'color:color',
-            'signals:signals',
-            'util:util',
-            'path:path',
-            'diff2html:diff2html'
-          ]
-        },
-        files: {
-          'public/js/ungit.js': ['public/source/main.js'],
-          'public/js/devStyling.js': ['public/devStyling/devStyling.js']
-        }
-      },
-      components: {
-        options: {
-          browserifyOptions: {
-            bundleExternal: false
-          },
-          external: [
-            'ungit-components',
-            'ungit-program-events',
-            'ungit-navigation',
-            'ungit-main',
-            'ungit-vector2',
-            'ungit-address-parser',
-            'knockout',
-            'lodash',
-            'hasher',
-            'crossroads',
-            'async',
-            'moment',
-            'blueimp-md5',
-          ],
-          debug: true
-        },
-        files: (function() {
-          var files = {};
-          fs.readdirSync('components').forEach(function(component) {
-            files['components/' + component + '/' + component + '.bundle.js'] = ['components/' + component + '/' + component + '.js'];
-          });
-          return files;
-        })()
-      }
-    },
     watch: {
       scripts: {
         files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
-        tasks: ['browserify'],
+        tasks: ['browserify-common', 'browserify-components'],
         options: {
           spawn: false,
         },
@@ -245,6 +179,72 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('browserify-common', '', function() {
+    var done = this.async();
+    var b = browserify({
+      noParse: ['public/vendor/js/superagent.js'],
+      debug: true
+    });
+    b.add('./public/source/main.js');
+    b.require('./public/source/main.js', { expose: 'ungit-main' });
+    
+    b.require('./public/source/components.js', { expose: 'ungit-components' });
+    b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
+    b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
+    b.require('./public/source/main.js', { expose: 'ungit-main' });
+    b.require('./source/utils/vector2.js', { expose: 'ungit-vector2' });
+    b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
+    b.require('knockout', { expose: 'knockout' });
+    b.require('lodash', { expose: 'lodash' });
+    b.require('hasher', { expose: 'hasher' });
+    b.require('crossroads', { expose: 'crossroads' });
+    b.require('async', { expose: 'async' });
+    b.require('moment', { expose: 'moment' });
+    b.require('blueimp-md5', { expose: 'blueimp-md5' });
+    b.require('color', { expose: 'color' });
+    b.require('signals', { expose: 'signals' });
+    b.require('util', { expose: 'util' });
+    b.require('path', { expose: 'path' });
+    b.require('diff2html', { expose: 'diff2html' });
+    var outFile = fs.createWriteStream('./public/js/ungit.js');
+    outFile.on('close', function() {
+      done();
+    });
+    b.bundle().pipe(outFile);
+  });
+
+  grunt.registerTask('browserify-components', '',  function() {
+    var done = this.async();
+    async.forEach(fs.readdirSync('components'), function(component, callback) {
+      var b = browserify({
+        bundleExternal: false,
+        debug: true
+      });
+      b.add('./components/' + component + '/' + component + '.js');
+      b.external(['ungit-components',
+              'ungit-program-events',
+              'ungit-navigation',
+              'ungit-main',
+              'ungit-vector2',
+              'ungit-address-parser',
+              'knockout',
+              'lodash',
+              'hasher',
+              'crossroads',
+              'async',
+              'moment',
+              'blueimp-md5']);
+
+      var outFile = fs.createWriteStream('./components/' + component + '/' + component + '.bundle.js');
+      outFile.on('close', function() {
+        callback();
+      });
+      b.bundle().pipe(outFile);
+    }, function() {
+      done();
+    });
+  });
+
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
@@ -312,7 +312,6 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
@@ -323,7 +322,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
 
   // Run tests
   grunt.registerTask('unittest', ['mochaTest']);

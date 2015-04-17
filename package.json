@@ -56,7 +56,6 @@
     "ansi-color": "~0.2.1",
     "expect.js": "~0.3.1",
     "grunt": "~0.4.5",
-    "grunt-browserify": "~3.7.0",
     "grunt-contrib-imagemin": "~0.5.0",
     "grunt-contrib-jshint": "~0.11.1",
     "grunt-contrib-less": "~1.0.1",
@@ -69,7 +68,8 @@
     "mocha": "~2.2.4",
     "npm": "~2.8.0",
     "phantomjs": "~1.9.16",
-    "supertest": "~0.15.0"
+    "supertest": "~0.15.0",
+    "browserify": "~9.0.8"
   },
   "engines": {
     "node": ">=0.10"
