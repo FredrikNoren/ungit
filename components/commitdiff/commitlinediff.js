@@ -10,24 +10,17 @@ var CommitLineDiff = function(args) {
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
   this.args = args;
-  this.type = ko.computed(function() {
-    if (!self.fileName() || fileType(self.fileName()) == 'text') {
-      return 'textdiff';
-    } else {
-      return 'imagediff';
-    }
-  });
   this.specificDiff = ko.observable(this.getSpecificDiff());
 
   args.textDiffType.subscribe(function(diffType) {
     self.specificDiff().diffType(diffType);
-    self.refreshAndShow();
+    self.specificDiff().invalidateDiff();
   });
 };
 exports.CommitLineDiff = CommitLineDiff;
 
 CommitLineDiff.prototype.getSpecificDiff = function() {
-  return components.create(this.type(), {
+  return components.create(!this.fileName() || fileType(this.fileName()) == 'text' ? 'textdiff' : 'imagediff', {
     filename: this.fileName(),
     repoPath: this.args.repoPath,
     server: this.args.server,
@@ -35,19 +28,11 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
   });
 }
 
-CommitLineDiff.prototype.fileNameClick = function(data, event) {
+CommitLineDiff.prototype.fileNameClick = function() {
   if (this.showSpecificDiff()) {
     this.showSpecificDiff(false);
   } else {
-    this.refreshAndShow();
+    this.showSpecificDiff(true);
+    this.specificDiff().invalidateDiff();
   }
 };
-
-CommitLineDiff.prototype.refreshAndShow = function() {
-  var self = this;
-  if (this.showSpecificDiff()) {
-    this.specificDiff().invalidateDiff(function() {
-      self.showSpecificDiff(true);
-    });
-  }
-}
