@@ -26,7 +26,7 @@
     "diff2html": "~0.2.0-7",
     "express": "~4.12.3",
     "express-session": "~1.11.1",
-    "forever-monitor": "~1.5.2",
+    "forever-monitor": "~1.1.0",
     "getmac": "~1.0.7",
     "hasher": "~1.2.0",
     "keen.io": "~0.1.3",
