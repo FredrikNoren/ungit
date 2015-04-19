@@ -23,7 +23,8 @@ var TextDiffViewModel = function(args) {
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
 
-  this.textDiffType.subscribe(function() {
+  this.textDiffType.subscribe(function(diffType) {
+    self.diffType(diffType);
     self.invalidateDiff();
   });
 }
