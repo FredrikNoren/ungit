@@ -19,7 +19,7 @@ var TextDiffViewModel = function(args) {
   this.loadLimit = 100;
   this.diffType = ko.observable('textdiff');
   this.textDiffType = args.textDiffType;
-  this.showingDiffs = args.showingDiffs;
+  this.isShowingDiffs = args.isShowingDiffs;
 
   this.textDiffType.subscribe(function(diffType) {
     self.diffType(diffType);
@@ -42,7 +42,7 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  if (this.showingDiffs()) {
+  if (this.isShowingDiffs()) {
     self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
       if (typeof diffs === "string") {
         self.diffJson = diff2html.getJsonFromDiff(diffs);

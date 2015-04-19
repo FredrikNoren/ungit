@@ -65,7 +65,7 @@
         </div>
 
         <div class="files" data-bind="foreach: files">
-          <div class="file" data-bind="css: { showingDiffs: showingDiffs }" data-ta-container="staging-file">
+          <div class="file" data-bind="css: { showingDiffs: isShowingDiffs }" data-ta-container="staging-file">
             <div class="checkmark" data-bind="click: toggleStaged, css: { checked: staged }">
               <span class="glyphicon" data-bind="css: { 'glyphicon-check': staged, 'glyphicon-unchecked': !staged() }"></span>
             </div>
@@ -80,9 +80,7 @@
                 data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
             <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
                 data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
-            <!-- ko if: showingDiffs -->
-            <div class="diffContainer" data-bind="component: diff"></div>
-            <!-- /ko -->
+            <div class="diffContainer" data-bind="component: diff" data-ta-container="stageDiffs"></div>
           </div>
         </div>
       </div>

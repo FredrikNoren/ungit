@@ -8,7 +8,7 @@ var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
-  this.showSpecificDiff = ko.observable(false);
+  this.isShowingDiffs = ko.observable(false);
   this.repoPath = args.repoPath;
   this.server = args.server;
   this.sha1 = args.sha1;
@@ -24,15 +24,15 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
     server: this.server,
     sha1: this.sha1,
     textDiffType: this.textDiffType,
-    showingDiffs: this.showSpecificDiff
+    isShowingDiffs: this.isShowingDiffs
   });
 }
 
 CommitLineDiff.prototype.fileNameClick = function() {
-  if (this.showSpecificDiff()) {
-    this.showSpecificDiff(false);
+  if (this.isShowingDiffs()) {
+    this.isShowingDiffs(false);
   } else {
-    this.showSpecificDiff(true);
+    this.isShowingDiffs(true);
     this.specificDiff().invalidateDiff();
   }
 };
