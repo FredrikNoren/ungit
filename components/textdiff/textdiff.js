@@ -8,6 +8,7 @@ components.register('textdiff', function(args) {
 });
 
 var TextDiffViewModel = function(args) {
+  var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
   this.server = args.server;
@@ -20,9 +21,9 @@ var TextDiffViewModel = function(args) {
   this.textDiffType = args.textDiffType;
   this.showingDiffs = args.showingDiffs;
 
-  textDiffType.subscribe(function(diffType) {
-    self.diff().diffType(diffType);
-    self.invalidateDiff(true);
+  this.textDiffType.subscribe(function(diffType) {
+    self.diffType(diffType);
+    self.invalidateDiff();
   });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -50,6 +51,8 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
 
       if (callback) callback();
     });
+  } else {
+    if (callback) callback();
   }
 }
 

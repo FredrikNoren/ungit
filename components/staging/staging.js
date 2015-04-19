@@ -290,8 +290,8 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.renamed = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
-  this.diff = ko.observable(self.getSpecificDiff());
   this.textDiffType = textDiffType;
+  this.diff = ko.observable(self.getSpecificDiff());
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
@@ -341,7 +341,7 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.showingDiffs(false);
   } else {
     this.showingDiffs(true);
-    this.invalidateDiff();
+    this.invalidateDiff(true);
   }
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {

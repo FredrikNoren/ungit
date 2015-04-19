@@ -9,11 +9,11 @@ var CommitLineDiff = function(args) {
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
-  this.specificDiff = ko.observable(this.getSpecificDiff());
   this.repoPath = args.repoPath;
   this.server = args.server;
   this.sha1 = args.sha1;
   this.textDiffType = args.textDiffType;
+  this.specificDiff = ko.observable(this.getSpecificDiff());
 };
 exports.CommitLineDiff = CommitLineDiff;
 
