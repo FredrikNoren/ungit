@@ -286,9 +286,14 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.isNew = ko.observable(false);
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
+<<<<<<< HEAD
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+=======
+  this.isShowingDiffs = ko.observable(false);
+  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+>>>>>>> Refactoring naming and diff visibility
   this.textDiffType = textDiffType;
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
@@ -300,8 +305,12 @@ FileViewModel.prototype.getSpecificDiff = function() {
     repoPath: this.staging.repoPath,
     server: this.server,
     textDiffType: this.textDiffType,
+<<<<<<< HEAD
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar
+=======
+    isShowingDiffs: this.isShowingDiffs
+>>>>>>> Refactoring naming and diff visibility
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -350,7 +359,7 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
-    this.diff().invalidateDiff();
+    this.invalidateDiff(true);
   }
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
