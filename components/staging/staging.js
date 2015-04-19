@@ -291,17 +291,15 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.diff = ko.observable(self.getSpecificDiff());
-
-  textDiffType.subscribe(function(diffType) {
-    self.diff().diffType(diffType);
-    self.invalidateDiff(true);
-  });
+  this.textDiffType = textDiffType;
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
     filename: this.name(),
     repoPath: this.staging.repoPath,
-    server: this.server
+    server: this.server,
+    textDiffType: this.textDiffType,
+    showingDiffs: this.showingDiffs
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -343,12 +341,12 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.showingDiffs(false);
   } else {
     this.showingDiffs(true);
-    this.invalidateDiff(true);
+    this.invalidateDiff();
   }
 }
 FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   var self = this;
-  if (this.showingDiffs() && (drawProgressBar || this.type != 'image')) {
+  if (drawProgressBar || this.type != 'image') {
     this.diffsProgressBar.start();
     this.diff().invalidateDiff(function() {
       self.diffsProgressBar.stop();

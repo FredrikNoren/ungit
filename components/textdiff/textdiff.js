@@ -17,6 +17,13 @@ var TextDiffViewModel = function(args) {
   this.diffHtml = ko.observable();
   this.loadLimit = 100;
   this.diffType = ko.observable('textdiff');
+  this.textDiffType = args.textDiffType;
+  this.showingDiffs = args.showingDiffs;
+
+  textDiffType.subscribe(function(diffType) {
+    self.diff().diffType(diffType);
+    self.invalidateDiff(true);
+  });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -34,14 +41,16 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
-  self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-    if (typeof diffs === "string") {
-      self.diffJson = diff2html.getJsonFromDiff(diffs);
-      self.render();
-    }
+  if (this.showingDiffs()) {
+    self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
+      if (typeof diffs === "string") {
+        self.diffJson = diff2html.getJsonFromDiff(diffs);
+        self.render();
+      }
 
-    if (callback) callback();
-  });
+      if (callback) callback();
+    });
+  }
 }
 
 TextDiffViewModel.prototype.render = function() {

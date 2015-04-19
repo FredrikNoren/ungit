@@ -9,22 +9,22 @@ var CommitLineDiff = function(args) {
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
   this.showSpecificDiff = ko.observable(false);
-  this.args = args;
   this.specificDiff = ko.observable(this.getSpecificDiff());
-
-  args.textDiffType.subscribe(function(diffType) {
-    self.specificDiff().diffType(diffType);
-    self.specificDiff().invalidateDiff();
-  });
+  this.repoPath = args.repoPath;
+  this.server = args.server;
+  this.sha1 = args.sha1;
+  this.textDiffType = args.textDiffType;
 };
 exports.CommitLineDiff = CommitLineDiff;
 
 CommitLineDiff.prototype.getSpecificDiff = function() {
   return components.create(!this.fileName() || fileType(this.fileName()) == 'text' ? 'textdiff' : 'imagediff', {
     filename: this.fileName(),
-    repoPath: this.args.repoPath,
-    server: this.args.server,
-    sha1: this.args.sha1
+    repoPath: this.repoPath,
+    server: this.server,
+    sha1: this.sha1,
+    textDiffType: this.textDiffType,
+    showingDiffs: this.showSpecificDiff
   });
 }
 
