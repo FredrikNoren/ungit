@@ -66,6 +66,8 @@ ko.bindingHandlers.autocomplete = {
             $(element).autocomplete("search", $(element).val());
           }
         });
+      } else if(event.keyCode == 39){
+      	$('.ui-autocomplete-input').val($(element).val()+'/');
       } else if(event.keyCode == 13){
         event.preventDefault();
         var url = '/#/repository?path=' + encodeURI($(element).val());
