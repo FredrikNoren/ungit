@@ -292,8 +292,12 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
 =======
   this.isShowingDiffs = ko.observable(false);
+<<<<<<< HEAD
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
 >>>>>>> Refactoring naming and diff visibility
+=======
+  this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+>>>>>>> Refactor to use more ubiquitous names
   this.textDiffType = textDiffType;
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
@@ -306,11 +310,16 @@ FileViewModel.prototype.getSpecificDiff = function() {
     server: this.server,
     textDiffType: this.textDiffType,
 <<<<<<< HEAD
+<<<<<<< HEAD
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar
 =======
     isShowingDiffs: this.isShowingDiffs
 >>>>>>> Refactoring naming and diff visibility
+=======
+    isShowingDiffs: this.isShowingDiffs,
+    diffProgressBar: this.diffProgressBar
+>>>>>>> Refactor to use more ubiquitous names
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -359,6 +368,7 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
+<<<<<<< HEAD
     this.invalidateDiff(true);
   }
 }
@@ -369,5 +379,8 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
     this.diff().invalidateDiff(function() {
       self.diffsProgressBar.stop();
     });
+=======
+    this.diff().invalidateDiff();
+>>>>>>> Refactor to use more ubiquitous names
   }
 }
