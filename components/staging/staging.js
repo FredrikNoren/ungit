@@ -234,7 +234,7 @@ StagingViewModel.prototype.mergeAbort = function() {
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
-    file.invalidateDiff(false);
+    file.diff().invalidateDiff();
   });
 }
 StagingViewModel.prototype.discardAllChanges = function() {
@@ -289,7 +289,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.conflict = ko.observable(false);
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
-  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+  this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.textDiffType = textDiffType;
   this.diff = ko.observable(self.getSpecificDiff());
 }
@@ -299,7 +299,8 @@ FileViewModel.prototype.getSpecificDiff = function() {
     repoPath: this.staging.repoPath,
     server: this.server,
     textDiffType: this.textDiffType,
-    isShowingDiffs: this.isShowingDiffs
+    isShowingDiffs: this.isShowingDiffs,
+    diffProgressBar: this.diffProgressBar
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -341,15 +342,6 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
-    this.invalidateDiff(true);
-  }
-}
-FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-  var self = this;
-  if (drawProgressBar || this.type != 'image') {
-    this.diffsProgressBar.start();
-    this.diff().invalidateDiff(function() {
-      self.diffsProgressBar.stop();
-    });
+    this.diff().invalidateDiff();
   }
 }

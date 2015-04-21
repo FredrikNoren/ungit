@@ -17,12 +17,11 @@ var TextDiffViewModel = function(args) {
   this.diffJson = null;
   this.diffHtml = ko.observable();
   this.loadLimit = 100;
-  this.diffType = ko.observable('textdiff');
   this.textDiffType = args.textDiffType;
   this.isShowingDiffs = args.isShowingDiffs;
+  this.diffProgressBar = args.diffProgressBar;
 
-  this.textDiffType.subscribe(function(diffType) {
-    self.diffType(diffType);
+  this.textDiffType.subscribe(function() {
     self.invalidateDiff();
   });
 }
@@ -30,25 +29,24 @@ TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
 }
 TextDiffViewModel.prototype.getDiffArguments = function() {
-  var args = {};
-  args.file = this.filename;
-  args.path = this.repoPath;
-  args.sha1 = this.sha1 ? this.sha1 : '';
-  args.isGetRaw = true;
-
-  return args;
+  return {
+    file: this.filename,
+    path: this.repoPath,
+    sha1: this.sha1 ? this.sha1 : ''
+  };
 }
 
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
 
   if (this.isShowingDiffs()) {
-    self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-      if (typeof diffs === "string") {
-        self.diffJson = diff2html.getJsonFromDiff(diffs);
-        self.render();
-      }
+    if (this.diffProgressBar) this.diffProgressBar.start();
 
+    self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
+      self.diffJson = diff2html.getJsonFromDiff(diffs);
+      self.render();
+
+      if (self.diffProgressBar) self.diffProgressBar.stop();
       if (callback) callback();
     });
   } else {
@@ -57,7 +55,7 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
 }
 
 TextDiffViewModel.prototype.render = function() {
-  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson));
+  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
   var diffLines = diffJsonCopy[0].blocks[0].lines;
 
   if (diffLines.length > this.loadLimit) {
@@ -67,7 +65,7 @@ TextDiffViewModel.prototype.render = function() {
     this.isMoreToLoad(false);
   }
 
-  if (this.diffType() === 'sidebysidediff') {
+  if (this.textDiffType() === 'sidebysidediff') {
     this.diffHtml(diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy));
   } else {
     this.diffHtml(diff2html.getPrettyHtmlFromJson(diffJsonCopy));
