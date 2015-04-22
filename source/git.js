@@ -217,9 +217,10 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
       } else {
         var gitCommands;
         var allowedCodes = null;  // default is [0]
+        var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
 
         if (file && file.isNew) {
-          gitCommands = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+          gitCommands = gitNewFileCompare;
           allowedCodes =  [0, 1];
         } else if (sha1) {
           gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', filename.trim()];
@@ -227,7 +228,14 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        git(gitCommands, repoPath, allowedCodes).always(task.setResult).start();
+        git(gitCommands, repoPath, allowedCodes).always(function(err, result) {
+          // when result is blank, it means it's the very first commit and need to compare with blank file
+          if (result === '') {
+            git(gitNewFileCompare, repoPath, [0, 1]).always(task.setResult).start();
+          } else {
+            task.setResult(err, result);
+          }
+        }).start();
       }
     });
 
