@@ -313,11 +313,15 @@ FileViewModel.prototype.toggleStaged = function() {
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
-  diag.closed.add(function() {
-    if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  if (ungit.config.disableDiscardWarning) {
+    self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
+  } else {
+    var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
+    diag.closed.add(function() {
+      if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
+    });
+    programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  }
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
