@@ -230,7 +230,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines) {
 
         git(gitCommands, repoPath, allowedCodes).always(function(err, result) {
           // when result is blank, it means it's the very first commit and need to compare with blank file
-          if (result === '') {
+          if (result === '' || err.message.indexOf('bad revision') > -1) {
             git(gitNewFileCompare, repoPath, [0, 1]).always(task.setResult).start();
           } else {
             task.setResult(err, result);
