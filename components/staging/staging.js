@@ -83,6 +83,7 @@ var StagingViewModel = function(server, repoPath) {
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
+  this.isDiagOpen = false;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -117,10 +118,12 @@ StagingViewModel.prototype.refreshContent = function(callback) {
         err.errorCode == 'no-such-path';
     }
 
-    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway && !self.isDiagOpen) {
+      self.isDiagOpen = true;
       var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
 
       diag.closed.add(function() {
+        self.isDiagOpen = false;
         if (diag.result()) {
           self.loadAnyway = true;
           self.loadStatus(status, callback);
