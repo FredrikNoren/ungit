@@ -1,0 +1,17 @@
+<div class="btn-group">
+	<button type="button" class="btn btn-default" data-ta-clickable="updateBranches" data-bind="click: updateBranches">
+		<span class="glyphicon glyphicon-download-alt"></span>
+		<span data-bind="text: fetchLabel"></span>
+		<!-- ko component: fetchingProgressBar --><!-- /ko -->
+	</button>
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="remotes-menu">
+		<span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu" data-ta-container="branches">
+		<!-- ko foreach: branches -->
+		<li>
+			<a href="#" data-bind="text: name, click: checkoutBranch, attr: { 'data-ta-clickable': 'checkout' + name }"></a>
+		</li>
+		<!-- /ko -->
+	</ul>
+</div>
