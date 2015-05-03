@@ -29,7 +29,11 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
-  // checkout branch
+  var self = this;
+  this.fetchingProgressBar.start();
+  this.server.post('/checkout', { path: this.repoPath, name: branch.name }, function(err) {
+    self.fetchingProgressBar.stop();
+  });
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
