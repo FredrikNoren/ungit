@@ -10,7 +10,7 @@
 	<ul class="dropdown-menu" role="menu" data-ta-container="branches">
 		<!-- ko foreach: branches -->
 		<li>
-			<a href="#" data-bind="text: name, click: checkoutBranch, attr: { 'data-ta-clickable': 'checkout' + name }"></a>
+			<a href="#" data-bind="text: name, click: $parent.checkoutBranch, attr: { 'data-ta-clickable': 'checkout' + name }"></a>
 		</li>
 		<!-- /ko -->
 	</ul>

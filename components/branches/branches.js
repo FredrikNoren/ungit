@@ -32,5 +32,10 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   // checkout branch
 }
 BranchesViewModel.prototype.updateBranches = function() {
-  // update branch list
+  var self = this;
+  this.fetchingProgressBar.start();
+  this.server.get('/branches', { path: this.repoPath }, function(err, branches) {
+    self.branches(branches);
+    self.fetchingProgressBar.stop();
+  });
 }
