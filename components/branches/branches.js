@@ -16,7 +16,7 @@ function BranchesViewModel(server, repoPath) {
   this.branches = ko.observableArray();
   this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
   this.fetchEnabled = true;
-  this.fetchLabel = 'Branches';
+  this.fetchLabel = ko.observable();
   this.updateBranches();
 }
 BranchesViewModel.prototype.updateNode = function(parentElement) {
@@ -32,6 +32,8 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   var self = this;
   this.fetchingProgressBar.start();
   this.server.post('/checkout', { path: this.repoPath, name: branch.name }, function(err) {
+    if (err) return;
+    self.fetchLabel("@" + branch.name);
     self.fetchingProgressBar.stop();
   });
 }
@@ -39,7 +41,21 @@ BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
   this.fetchingProgressBar.start();
   this.server.get('/branches', { path: this.repoPath }, function(err, branches) {
-    self.branches(branches);
+    if (err) {
+      self.fetchLabel("{err fetching branches}");
+      return;
+    }
+
+    if (branches) {
+      self.branches(branches);
+      self.fetchLabel("@{headless}");
+      branches.map(function(branch) {
+        if (branch.current) {
+          self.fetchLabel("@" + branch.name);
+        }
+      });
+    }
+
     self.fetchingProgressBar.stop();
   });
 }
