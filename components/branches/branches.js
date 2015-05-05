@@ -16,7 +16,14 @@ function BranchesViewModel(server, repoPath) {
   this.branches = ko.observableArray();
   this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
   this.fetchEnabled = true;
-  this.fetchLabel = ko.observable();
+  this.current = ko.observable();
+  this.fetchLabel = ko.computed(function() {
+    if (self.current()) {
+      return "@" + self.current();
+    } else {
+      return "@~headless";
+    }
+  });
   this.updateBranches();
 }
 BranchesViewModel.prototype.updateNode = function(parentElement) {
@@ -33,7 +40,7 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   this.fetchingProgressBar.start();
   this.server.post('/checkout', { path: this.repoPath, name: branch.name }, function(err) {
     if (err) return;
-    self.fetchLabel("@" + branch.name);
+    self.current(branch.name);
     self.fetchingProgressBar.stop();
   });
 }
@@ -42,16 +49,23 @@ BranchesViewModel.prototype.updateBranches = function() {
   this.fetchingProgressBar.start();
   this.server.get('/branches', { path: this.repoPath }, function(err, branches) {
     if (err) {
-      self.fetchLabel("{err fetching branches}");
+      self.current("~error");
       return;
     }
 
     if (branches) {
-      self.branches(branches);
-      self.fetchLabel("@{headless}");
+      var sorted = branches.sort(function(a, b) {
+        if (a.name < b.name)
+           return -1;
+        if (a.name > b.name)
+          return 1;
+        return 0;
+      });
+      self.branches(sorted);
+      self.current(undefined);
       branches.map(function(branch) {
         if (branch.current) {
-          self.fetchLabel("@" + branch.name);
+          self.current(branch.name);
         }
       });
     }
