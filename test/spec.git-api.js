@@ -7,6 +7,7 @@ var fs = require('fs');
 var path = require('path');
 var restGit = require('../source/git-api');
 var common = require('./common.js');
+var mkdirp = require('mkdirp');
 var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
@@ -370,10 +371,19 @@ describe('git-api', function () {
 		});
 	});
 
+	it('get the baserepopath without base repo should work', function(done) {
+		var baseRepoPathTestDir = path.join(testDir, 'depth1', 'depth2');
+
+		mkdirp(baseRepoPathTestDir, function(err, res) {
+			common.get(req, '/baserepopath', { path: baseRepoPathTestDir }, function(err, res) {
+				if (err) return done(err);
+				expect(res.body.path).to.be(testDir);
+				done();
+			});
+		});
+	});
 
 	it('cleaning up test dir should work', function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);
 	});
-
-
 })
