@@ -60,13 +60,6 @@ StashViewModel.prototype.refresh = function() {
   });
 }
 StashViewModel.prototype.toggleShowStash = function() {
-  var newValue;
-
-  if (this.isShow()) {
-    newValue = false;
-  } else {
-    newValue = true;
-  }
-  this.isShow(newValue);
-  localStorage['showStash'] = newValue;
+  this.isShow(!this.isShow());
+  localStorage['showStash'] = this.isShow();
 }
