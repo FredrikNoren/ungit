@@ -82,7 +82,10 @@
                 data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
             <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
                 data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
-            <div class="diffContainer" data-bind="component: diff" data-ta-container="stageDiffs"></div>
+            <!-- ko if: showingDiffs -->
+            <span class="patch btn btn-sm btn-warning" data-bind="visible: isPatchable, click: patchClick">Patch</span>
+            <div class="diffContainer" data-bind="component: diff"></div>
+            <!-- /ko -->
           </div>
         </div>
       </div>

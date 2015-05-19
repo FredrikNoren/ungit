@@ -384,3 +384,9 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 >>>>>>> Refactor to use more ubiquitous names
   }
 }
+FileViewModel.prototype.isPatchable = function() {
+  return !this.isNew();
+}
+FileViewModel.prototype.patchClick = function() {
+  // TODOD
+}
