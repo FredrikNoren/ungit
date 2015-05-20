@@ -387,6 +387,3 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
 FileViewModel.prototype.isPatchable = function() {
   return !this.isNew();
 }
-FileViewModel.prototype.patchClick = function() {
-  // TODOD
-}
