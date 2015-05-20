@@ -385,5 +385,8 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
   }
 }
 FileViewModel.prototype.isPatchable = function() {
-  return !this.isNew();
+  return !this.isNew() && fileType(this.name()) === 'text';
+}
+FileViewModel.prototype.patchClick = function() {
+  this.diff().isPatching(!this.diff().isPatching());
 }

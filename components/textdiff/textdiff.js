@@ -22,9 +22,22 @@ var TextDiffViewModel = function(args) {
   this.textDiffType = args.textDiffType;
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
-
   this.textDiffType.subscribe(function() {
     self.invalidateDiff();
+  });
+  this.isPatching = ko.observable(false);
+  this.isPatching.subscribe(function(value) {
+    var html = self.diffHtml();
+    // this is sloppiest workaround hack to avoid specialize diff2html for ungit
+    if (value) {
+      html = html.replace(/<div class="d2h-code-line d2h-ins">\+/g, '<div class="d2h-code-line d2h-ins"><input type="checkbox" data-bind="visible: isPatching"></input>');
+      html = html.replace(/<div class="d2h-code-line d2h-del">\-/g, '<div class="d2h-code-line d2h-del"><input type="checkbox" data-bind="visible: isPatching"></input>');
+
+    } else {
+      html = html.replace(/<div class="d2h-code-line d2h-ins"><input type="checkbox" data-bind="visible: isPatching"><\/input>/g, '<div class="d2h-code-line d2h-ins">+');
+      html = html.replace(/<div class="d2h-code-line d2h-del"><input type="checkbox" data-bind="visible: isPatching"><\/input>/g, '<div class="d2h-code-line d2h-del">-');
+    }
+    self.diffHtml(html);
   });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
