@@ -156,7 +156,9 @@ describe('git-api', function () {
         removed: false,
         conflict: false,
         renamed: false,
-        type: 'text'
+        type: 'text',
+        additions: '-',
+        deletions: '-'
       });
       done();
     });
@@ -219,7 +221,9 @@ describe('git-api', function () {
         removed: false,
         conflict: false,
         renamed: false, 
-        type: 'text'
+        type: 'text',
+        additions: '1',
+        deletions: '1'
       });
       done();
     });
@@ -262,7 +266,9 @@ describe('git-api', function () {
         removed: false,
         conflict: false,
         renamed: false,
-        type: 'text'
+        type: 'text',
+        additions: '-',
+        deletions: '-'
       });
       done();
     });
@@ -305,7 +311,9 @@ describe('git-api', function () {
         removed: false,
         conflict: false,
         renamed: false,
-        type: 'text'
+        type: 'text',
+        additions: '-',
+        deletions: '-'
       });
       done();
     });
@@ -351,7 +359,9 @@ describe('git-api', function () {
         removed: true,
         conflict: false,
         renamed: false,
-        type: 'text'
+        type: 'text',
+        additions: '0',
+        deletions: '2'
       });
       done();
     });
@@ -388,7 +398,9 @@ describe('git-api', function () {
         removed: false,
         conflict: false,
         renamed: true,
-        type: 'text'
+        type: 'text',
+        additions: '2',
+        deletions: '0'
       });
       done();
     });

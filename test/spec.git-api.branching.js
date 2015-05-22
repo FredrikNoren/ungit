@@ -163,7 +163,9 @@ describe('git-api branching', function () {
 				removed: false,
 				conflict: false,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '1',
+				deletions: '1'
 			});
 			done();
 		});
