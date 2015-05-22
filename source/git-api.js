@@ -193,9 +193,13 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
+<<<<<<< HEAD
     git.diffFile(req.query['path'], req.query['file'], req.query['sha1'])
       .always(jsonResultOrFail.bind(null, res))
       .start();
+=======
+    git.diffFile(req.query['path'], req.query['file'], req.query['sha1'], parseInt(req.query['maxNLines'])).start();
+>>>>>>> Prevent /diff from returning an array for empty diff
   });
 
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
