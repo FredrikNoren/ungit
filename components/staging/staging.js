@@ -302,6 +302,9 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
   this.diff = ko.observable(self.getSpecificDiff());
+  this.isPatchable = ko.computed(function() {
+    return !self.isNew() && fileType(self.name()) === 'text';
+  });
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
@@ -383,9 +386,6 @@ FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
     this.diff().invalidateDiff();
 >>>>>>> Refactor to use more ubiquitous names
   }
-}
-FileViewModel.prototype.isPatchable = function() {
-  return !this.isNew() && fileType(this.name()) === 'text';
 }
 FileViewModel.prototype.patchClick = function() {
   this.diff().isPatching(!this.diff().isPatching());
