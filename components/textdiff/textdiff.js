@@ -43,6 +43,8 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     if (this.diffProgressBar) this.diffProgressBar.start();
 
     self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
+      if (typeof diffs != 'string') return;
+
       self.diffJson = diff2html.getJsonFromDiff(diffs);
       self.render();
 
