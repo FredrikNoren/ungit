@@ -90,8 +90,31 @@
   }
 
   .patch {
-    float: right;
-    margin-right: 20px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    &:hover {
+      background: #279124;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  .patch + .tooltip {
+    .tooltip-inner {
+      background: #279124;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .tooltip-arrow {
+      bottom: 0;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px 5px 0;
+      border-top-color: #279124;
+    }
   }
 
   .files {
