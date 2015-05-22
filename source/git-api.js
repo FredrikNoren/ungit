@@ -497,16 +497,15 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.query['path'], '..'));
-    function isRoot(path) {
-      if (os.platform().indexOf('win') == 0) return path.length > 3;
-      else return path.length > 1;
+    function isGitDirectory(currentPath) {
+      return fs.existsSync(path.join(currentPath, '.git')) && fs.statSync(path.join(currentPath, '.git')).isDirectory();
     }
-    while (!isRoot(currentPath) &&
-      (!fs.existsSync(path.join(currentPath, '.git')) ||
-      !fs.statSync(path.join(currentPath, '.git')).isDirectory())) {
+
+    while (currentPath.length > 1 && !isGitDirectory(currentPath)) {
       currentPath = path.resolve(path.join(currentPath, '..'));
     }
-    if (!isRoot(currentPath)) res.json({ path: currentPath });
+
+    if (currentPath.length > 1) res.json({ path: currentPath });
     else res.status(404).json({});
   });
 
