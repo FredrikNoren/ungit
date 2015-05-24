@@ -39,6 +39,7 @@ var TextDiffViewModel = function(args) {
     }
     self.diffHtml(html);
   });
+  this.patchLineList = args.patchLineList;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);

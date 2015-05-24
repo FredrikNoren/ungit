@@ -305,6 +305,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.isPatchable = ko.computed(function() {
     return !self.isNew() && fileType(self.name()) === 'text';
   });
+  this.patchLineList = ko.observableArray();
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
@@ -312,17 +313,9 @@ FileViewModel.prototype.getSpecificDiff = function() {
     repoPath: this.staging.repoPath,
     server: this.server,
     textDiffType: this.textDiffType,
-<<<<<<< HEAD
-<<<<<<< HEAD
     isShowingDiffs: this.isShowingDiffs,
-    diffProgressBar: this.diffProgressBar
-=======
-    isShowingDiffs: this.isShowingDiffs
->>>>>>> Refactoring naming and diff visibility
-=======
-    isShowingDiffs: this.isShowingDiffs,
-    diffProgressBar: this.diffProgressBar
->>>>>>> Refactor to use more ubiquitous names
+    diffProgressBar: this.diffProgressBar,
+    patchLineList: this.patchLineList
   });
 }
 FileViewModel.prototype.setState = function(state) {
