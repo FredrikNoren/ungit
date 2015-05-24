@@ -26,19 +26,7 @@ var TextDiffViewModel = function(args) {
     self.invalidateDiff();
   });
   this.isPatching = ko.observable(false);
-  this.isPatching.subscribe(function(value) {
-    var html = self.diffHtml();
-    // this is sloppiest workaround hack to avoid specialize diff2html for ungit
-    if (value) {
-      html = html.replace(/<div class="d2h-code-line d2h-ins">\+/g, '<div class="d2h-code-line d2h-ins"><input type="checkbox" data-bind="visible: isPatching"></input>');
-      html = html.replace(/<div class="d2h-code-line d2h-del">\-/g, '<div class="d2h-code-line d2h-del"><input type="checkbox" data-bind="visible: isPatching"></input>');
-
-    } else {
-      html = html.replace(/<div class="d2h-code-line d2h-ins"><input type="checkbox" data-bind="visible: isPatching"><\/input>/g, '<div class="d2h-code-line d2h-ins">+');
-      html = html.replace(/<div class="d2h-code-line d2h-del"><input type="checkbox" data-bind="visible: isPatching"><\/input>/g, '<div class="d2h-code-line d2h-del">-');
-    }
-    self.diffHtml(html);
-  });
+  this.dom = null;
   this.patchLineList = args.patchLineList;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
@@ -102,14 +90,30 @@ TextDiffViewModel.prototype.render = function() {
 
   this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
 
+  var html;
+
   if (this.textDiffType() === 'sidebysidediff') {
-    this.diffHtml(diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy));
+    html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
   } else {
-    this.diffHtml(diff2html.getPrettyHtmlFromJson(diffJsonCopy));
+    html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
   }
+
+  html = html.replace(/<div class="d2h-code-line d2h-ins">\+/g, '<div class="d2h-code-line d2h-ins"><span data-bind="visible: !isPatching()">+</span><input type="checkbox" data-bind="visible: isPatching"></input>');
+  html = html.replace(/<div class="d2h-code-line d2h-del">\-/g, '<div class="d2h-code-line d2h-del"><span data-bind="visible: !isPatching()">-</span><input type="checkbox" data-bind="visible: isPatching"></input>');
+
+  // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
+  // above data-bind going pass "html" binding.
+  // which is reason why manually updating the html content and refreshing kobinding to have it working...
+  this.dom.innerHTML = html;
+  ko.cleanNode(this.dom);
+  ko.applyBindings(this, this.dom);
 };
 
 TextDiffViewModel.prototype.loadMore = function(callback) {
   this.loadCount += this.loadMoreCount();
   this.render();
+}
+
+TextDiffViewModel.prototype.setDom = function(dom) {
+  this.dom = dom;
 }
