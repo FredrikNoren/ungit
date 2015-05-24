@@ -80,10 +80,10 @@
             <span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
             <span class="ignore bootstrap-tooltip" data-ta-clickable="ignore-file" data-bind="click: ignoreFile"
                 data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
+              <span class="patch bootstrap-tooltip" data-bind="visible: isPatchable, click: patchClick" 
+                  data-toggle="tooltip" data-placement="top" title="Patch changes">P</span>
             <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
                 data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
-            <span class="patch bootstrap-tooltip" data-bind="visible: isPatchable, click: patchClick" 
-                data-toggle="tooltip" data-placement="top" title="Patch changes">P</span>
             <!-- ko if: isShowingDiffs -->
             <div class="diffContainer" data-bind="component: diff"></div>
             <!-- /ko -->
