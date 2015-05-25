@@ -98,8 +98,8 @@ TextDiffViewModel.prototype.render = function() {
     html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
   }
 
-  html = html.replace(/<div class="d2h-code-line d2h-ins">\+/g, '<div class="d2h-code-line d2h-ins"><span data-bind="visible: !isPatching()">+</span><input type="checkbox" data-bind="visible: isPatching"></input>');
-  html = html.replace(/<div class="d2h-code-line d2h-del">\-/g, '<div class="d2h-code-line d2h-del"><span data-bind="visible: !isPatching()">-</span><input type="checkbox" data-bind="visible: isPatching"></input>');
+  html = html.replace(/<div class="d2h-code-line d2h-ins">\+/g, this.getPatchCheckBox('+'));
+  html = html.replace(/<div class="d2h-code-line d2h-del">\-/g, this.getPatchCheckBox('-'));
 
   // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
   // above data-bind going pass "html" binding.
@@ -116,4 +116,8 @@ TextDiffViewModel.prototype.loadMore = function(callback) {
 
 TextDiffViewModel.prototype.setDom = function(dom) {
   this.dom = dom;
+}
+
+TextDiffViewModel.prototype.getPatchCheckBox = function(symbol) {
+  return '<div class="d2h-code-line ' + (symbol === '-' ? 'd2h-del' : 'd2h-ins') + '"><span data-bind="visible: !isPatching()">' + symbol + '</span><input type="checkbox" data-bind="visible: isPatching, click: togglePatchLine($element)"></input>';
 }
