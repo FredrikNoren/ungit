@@ -56,35 +56,56 @@ var gitQueue = async.queue(function (task, callback) {
   git.runningTasks.push(task);
   task.startTime = Date.now();
 
-  var gitProcess = child_process.spawn(
-    'git',
-    task.commands,
-    {
-      cwd: task.repoPath,
-      maxBuffer: 1024 * 1024 * 100,
-      encoding: task._encoding,
-      timeout: task._timeout
+  var gitProcess;
+
+  if (isWindows) {
+    gitProcess = child_process.exec(
+      'git ' + task.commands.join(' '),
+      {
+        cwd: task.repoPath,
+        maxBuffer: 1024 * 1024 * 100,
+        encoding: task._encoding,
+        timeout: task._timeout
+      },
+      function(error, stdout, stderr) {
+        processFinished(error, stdout.toString(), stderr.toString());
+      });
+  } else {
+    gitProcess = child_process.spawn(
+      'git',
+      task.commands,
+      {
+        cwd: task.repoPath,
+        maxBuffer: 1024 * 1024 * 100,
+        encoding: task._encoding,
+        timeout: task._timeout
+      });
+
+    var stdout = '';
+    var stderr = '';
+
+    gitProcess.stdout.on('data', function(data) {
+      stdout += data.toString();
     });
+    gitProcess.stderr.on('data', function(data) {
+      stderr += data.toString();
+    });
+
+    gitProcess.on('close', function(code) {
+      processFinished(code, stdout, stderr);
+    });
+  }
+
   task.process = gitProcess;
   task.setStarted();
 
-  var stdout = '';
-  var stderr = '';
-
-  gitProcess.stdout.on('data', function(data) {
-    stdout += data.toString();
-  });
-  gitProcess.stderr.on('data', function(data) {
-    stderr += data.toString();
-  });
-
-  gitProcess.on('close', function (code) {
+  function processFinished(errorCode, stdout, stderr) {
     if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
 
-    if (code != 0) {
+    if (errorCode) {
       var err = {};
       err.isGitError = true;
-      err.errorCode = 'unknown';
+      err.errorCode = errorCode;
       err.stackAtCall = task.potentialError.stack;
       err.lineAtCall = task.potentialError.lineNumber;
       err.command = task.commands.join(' ');
@@ -130,7 +151,8 @@ var gitQueue = async.queue(function (task, callback) {
       callback();
     }
     git.runningTasks.splice(git.runningTasks.indexOf(task), 1);
-  });
+  }
+
 }, config.maxConcurrentGitOperations);
 
 git.queueTask = function(task) {
