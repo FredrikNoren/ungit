@@ -100,6 +100,7 @@ TextDiffViewModel.prototype.render = function() {
 
   var index = 0;
   html = html.replace(/<div class="d2h-code-line (d2h-ins|d2h-del)">[+-]/g, function (match, capture) {
+    self.patchLineList.push(true);
     return self.getPatchCheckBox(capture, index++);
   });
 
@@ -121,9 +122,9 @@ TextDiffViewModel.prototype.setDom = function(dom) {
 }
 
 TextDiffViewModel.prototype.getPatchCheckBox = function(symbol, index) {
-  return '<div class="d2h-code-line ' + symbol + '"><span data-bind="visible: !isPatching()">' + (symbol === 'd2h-ins' ? '+' : '-') + '</span><input type="checkbox" data-bind="visible: isPatching, click: togglePatchLine(' + index + ')"></input>';
+  return '<div class="d2h-code-line ' + symbol + '"><span data-bind="visible: !isPatching()">' + (symbol === 'd2h-ins' ? '+' : '-') + '</span><input checked type="checkbox" data-bind="visible: isPatching, click: togglePatchLine(' + index + ')"></input>';
 }
 
 TextDiffViewModel.prototype.togglePatchLine = function(index) {
-  console.log(index);
+  this.patchLineList[index] = !this.patchLineList[index];
 }
