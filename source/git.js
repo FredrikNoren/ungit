@@ -10,7 +10,6 @@ var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var isWindows = /^win/.test(process.platform);
 
 var git = function(commands, repoPath) {
   commands = gitConfigArguments.concat(commands).filter(function(element) {
@@ -216,7 +215,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
       } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
         var gitCommands;
         if (sha1) {
-          gitCommands = ['diff', sha1 + (isWindows ? '^^' : '^') + '!', '--', filename.trim()];
+          gitCommands = ['diff', sha1 + '^!', '--', filename.trim()];
         } else {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
