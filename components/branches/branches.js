@@ -15,7 +15,6 @@ function BranchesViewModel(server, repoPath) {
   this.server = server;
   this.branches = ko.observableArray();
   this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
-  this.fetchEnabled = true;
   this.current = ko.observable();
   this.fetchLabel = ko.computed(function() {
     if (self.current()) {
@@ -63,7 +62,7 @@ BranchesViewModel.prototype.updateBranches = function() {
       });
       self.branches(sorted);
       self.current(undefined);
-      branches.map(function(branch) {
+      branches.forEach(function(branch) {
         if (branch.current) {
           self.current(branch.name);
         }
