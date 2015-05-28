@@ -7,16 +7,18 @@ components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
 });
 
+var loadLimit = 100;
+
 var TextDiffViewModel = function(args) {
   var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
   this.server = args.server;
   this.sha1 = args.sha1;
-  this.isMoreToLoad = ko.observable(false);
+  this.loadMoreCount = ko.observable(0);
   this.diffJson = null;
   this.diffHtml = ko.observable();
-  this.loadLimit = 100;
+  this.loadCount = loadLimit;
   this.textDiffType = args.textDiffType;
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
@@ -57,15 +59,23 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
 }
 
 TextDiffViewModel.prototype.render = function() {
-  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
-  var diffLines = diffJsonCopy[0].blocks[0].lines;
+  if (this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
-  if (diffLines.length > this.loadLimit) {
-    diffJsonCopy[0].blocks[0].lines = diffLines.slice(0, this.loadLimit);
-    this.isMoreToLoad(true);
-  } else {
-    this.isMoreToLoad(false);
-  }
+  var self = this;
+  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
+  var lineCount = 0;
+
+  diffJsonCopy[0].blocks = diffJsonCopy[0].blocks.reduce(function(blocks, block) {
+    var length = block.lines.length;
+    if (lineCount < self.loadCount) {
+      block.lines = block.lines.slice(0, self.loadCount - lineCount);
+      blocks.push(block);
+    }
+    lineCount += length;
+    return blocks;
+  }, []);
+
+  this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
 
   if (this.textDiffType() === 'sidebysidediff') {
     this.diffHtml(diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy));
@@ -75,6 +85,6 @@ TextDiffViewModel.prototype.render = function() {
 };
 
 TextDiffViewModel.prototype.loadMore = function(callback) {
-  this.loadLimit += 100;
+  this.loadCount += this.loadMoreCount();
   this.render();
 }

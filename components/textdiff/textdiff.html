@@ -1,8 +1,8 @@
 <!-- ko if: isShowingDiffs -->
 <div>
 	<div data-bind="html: diffHtml"></div>
-	<div class="btn-load-more" data-bind="visible: isMoreToLoad">
-	  <span class="btn btn-warning" data-bind="click: loadMore">Load 100 more lines</span>
+	<div class="btn-load-more" data-bind="visible: loadMoreCount() > 0">
+	  <span class="btn btn-warning" data-bind="click: loadMore, text: 'Load ' + loadMoreCount() + ' more lines'"></span>
 	</div>
 </div>
 <!-- /ko -->
