@@ -202,7 +202,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, maxNLines) {
+git.diffFile = function(repoPath, filename, sha1) {
   var task = new GitTask();
 
   var statusTask = git.status(repoPath)

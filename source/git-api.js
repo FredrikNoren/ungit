@@ -189,7 +189,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.diffFile(req.query['path'], req.query['file'], req.query['sha1'], parseInt(req.query['maxNLines']))
+    git.diffFile(req.query['path'], req.query['file'], req.query['sha1'])
       .always(jsonResultOrFail.bind(null, res))
       .start();
   });
