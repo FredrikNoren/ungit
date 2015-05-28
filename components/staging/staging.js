@@ -323,8 +323,6 @@ FileViewModel.prototype.discardChanges = function() {
     diag.closed.add(function() {
       if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
       if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
-
-      console.log(self.staging.mutedTime);
     });
     programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
   }
