@@ -211,9 +211,8 @@ git.diffFile = function(repoPath, filename, sha1) {
       var file = status.files[filename];
       var filePath = path.join(repoPath, filename);
       if (!file && !sha1) {
-        if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
-        else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
-        // If the file is new or if it's a directory, i.e. a submodule
+        // if file or folder doesn't exist or sha hasn't been passed in.
+        task.setResult(null, []);
       } else {
         var gitCommands;
         var allowedCodes = null;  // default is [0]
