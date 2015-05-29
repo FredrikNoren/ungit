@@ -7,7 +7,7 @@
 	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="branch-menu">
 		<span class="caret"></span>
 	</button>
-	<ul class="dropdown-menu" role="menu" data-ta-container="branches">
+	<ul class="dropdown-menu pull-left" role="menu" data-ta-container="branches">
 		<!-- ko foreach: branches -->
 		<li>
 			<a href="#" data-bind="text: name, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
