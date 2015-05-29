@@ -30,7 +30,7 @@ BranchesViewModel.prototype.updateNode = function(parentElement) {
 }
 BranchesViewModel.prototype.clickFetch = function() { this.updateBranches(); }
 BranchesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event === 'working-tree-changed' || event.event == 'request-app-content-refresh') {
+  if (event.event === 'working-tree-changed' || event.event == 'request-app-content-refresh' || event.event == 'branch-updated') {
     this.updateBranches();
   }
 }

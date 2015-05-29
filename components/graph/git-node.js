@@ -5,6 +5,7 @@ var GraphActions = require('./git-graph-actions');
 var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
 var Vector2 = require('ungit-vector2');
+var programEvents = require('ungit-program-events');
 
 var GitNodeViewModel = function(graph, sha1) {
   NodeViewModel.call(this);
@@ -176,7 +177,9 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
-  this.server.post('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
+  this.server.post('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 }, function() {
+    programEvents.dispatch({ event: 'branch-updated' });
+  });
   this.branchingFormVisible(false);
   this.newBranchName('');
 }
@@ -248,4 +251,3 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
-
