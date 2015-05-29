@@ -72,3 +72,18 @@ BranchesViewModel.prototype.updateBranches = function() {
     self.fetchingProgressBar.stop();
   });
 }
+
+BranchesViewModel.prototype.branchRemove = function(branch) {
+  var self = this;
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+      self.server.del('/branches', { name: branch.name, path: self.repoPath }, function(err) {
+        if (!err) {
+          programEvents.dispatch({ event: 'working-tree-changed' });
+        }
+      });
+    }
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+}
