@@ -4,10 +4,9 @@ var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
 
-var muteGraceTimeDuration = 60 * 1000 * 5;
+var muteGraceTimeDuration = 2000;
 
 var page = webpage.create();
-// var suite = testsuite.newSuite('discardwarn', page, { timeout: muteGraceTimeDuration + 5000 });
 var suite = testsuite.newSuite('discard', page);
 
 var environment;
@@ -71,8 +70,7 @@ suite.test('Shutdown', function(done) {
 
 // reinit with disableDiscardWarning is false, strangely port is not released and need investigation
 suite.test('Init', function(done) {
-  // environment = new Environment(page, { port: 8500, serverStartupOptions: ['--no-disableDiscardWarning'], serverTimeout: muteGraceTimeDuration + 5000 });
-  environment = new Environment(page, { port: 8500, serverStartupOptions: ['--no-disableDiscardWarning'], serverTimeout: 15000 });
+  environment = new Environment(page, { port: 8500, serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';
@@ -102,11 +100,11 @@ suite.test('Should be possible to discard a created file and disable warn for aw
   createAndDiscard(function(err) {
     if (err) done(err);
     createAndDiscard(function(err) {
-      done(err);
-      // we could do below and wait for 5 minutes and see warning message pop up again but let's not....
-      // setTimeout(function() {
-      //   createAndDiscard(done, 'yes');
-      // }, muteGraceTimeDuration + 500);
+      if (err) done(err);
+      setTimeout(function(err) {
+        if (err) done(err);
+        createAndDiscard(done, 'yes');
+      }, muteGraceTimeDuration + 500);
     });
   }, 'mute');
 });
