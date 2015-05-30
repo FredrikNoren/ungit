@@ -316,7 +316,7 @@ FileViewModel.prototype.toggleStaged = function() {
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
-  if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < muteGraceTimeDuration) {
+  if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
     self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
   } else {
     var diag = components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});

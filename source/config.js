@@ -103,7 +103,10 @@ var defaultConfig = {
   fileSeparator: path.sep,
 
   // disable warning popup at discard
-  disableDiscardWarning: false
+  disableDiscardWarning: false,
+
+  // Duration of discard warning dialog mute time should it be muted.
+  disableDiscardMuteTime: 60 * 1000 * 5  // 5 mins
 };
 
 // Works for now but should be moved to bin/ungit
@@ -149,7 +152,8 @@ var argv = yargs
 .describe('autoStashAndPop', 'Used for development purposes')
 .describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
 .describe('fileSeparator', 'OS dependent file separator')
-.describe('disableDiscardWarning', 'disable warning popup at discard');
+.describe('disableDiscardWarning', 'disable warning popup at discard')
+.describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
