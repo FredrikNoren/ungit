@@ -91,14 +91,14 @@ StagingViewModel.prototype.setAheadAndBehind = function() {
       console.log("error while acquiring ahead info", err);
       return;
     }
-    self.ahead(ahead ? ahead.split('\n') : []);
+    self.ahead(ahead);
   });
   this.server.get('/behind', { path: this.repoPath }, function(err, behind) {
     if (err) {
       console.log("error while acquiring behind info", err);
       return;
     }
-    self.behind(behind ? behind.split('\n') : []);
+    self.behind(behind);
   });
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
