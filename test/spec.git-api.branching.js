@@ -96,6 +96,22 @@ describe('git-api branching', function () {
 			done();
 		});
 	});
+	
+	it('HEAD should not be before master branch', function(done) {
+		common.get(req, '/ahead', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
+
+	it('HEAD should not be behind master branch', function(done) {
+		common.get(req, '/behind', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
 
 	var commitMessage3 = 'Commit 3';
 	var testFile2 = "testfile2.txt";
@@ -105,6 +121,22 @@ describe('git-api branching', function () {
 			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }, done); },
 			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [testFile2] }, done); }
 		], done);
+	});
+
+	it('HEAD should be one commit ahead of master branch', function(done) {
+		common.get(req, '/ahead', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
+	it('HEAD should not be behind master branch', function(done) {
+		common.get(req, '/behind', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(0);
+			done();
+		});
 	});
 
 	it('log should show both branches and all commits', function(done) {
@@ -171,6 +203,31 @@ describe('git-api branching', function () {
 		});
 	});
 
+	var commitMessage2 = 'Commit 2';
+
+	it('should be possible to commit and checkout the previous commit', function(done) {
+		async.series([
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage2, files: [testFile1] }, done); },
+			function(done) { common.post(req, '/checkout', { path: testDir, name: 'HEAD~1' }, done); }
+		], done);
+	});
+
+	it('HEAD should not be ahead of master branch', function(done) {
+		common.get(req, '/ahead', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(0);
+			done();
+		});
+	});
+
+	it('HEAD should be one commit behind master branch', function(done) {
+		common.get(req, '/behind', { path: testDir }, function(err, res) {
+			if (err) return done(err);
+			expect(res.body.length).to.be(1);
+			done();
+		});
+	});
+
 
 	it('should be possible to create a tag', function(done) {
 		common.post(req, '/tags', { path: testDir, name: 'v1.0' }, done);
@@ -201,11 +258,16 @@ describe('git-api branching', function () {
 	});
 
 	it('branch should be removed', function(done) {
-		common.get(req, '/branches', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			done();
-		});
+		async.series([
+			function(done) { common.post(req, '/checkout', { path: testDir, name: 'master' }, done); },
+			function(done) {
+				common.get(req, '/branches', { path: testDir }, function(err, res) {
+					if (err) return done(err);
+					expect(res.body.length).to.be(1);
+					done();
+				});
+			}
+		], done);
 	});
 
 	after(function(done) {
