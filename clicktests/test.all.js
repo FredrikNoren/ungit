@@ -6,4 +6,4 @@ require('./test.screens');
 require('./test.submodules');
 require('./test.generic');
 require('./test.noheader');
-require('./test.discardwarn');
+require('./test.discard');
