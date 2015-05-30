@@ -45,10 +45,21 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     if (this.diffProgressBar) this.diffProgressBar.start();
 
     self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-      if (typeof diffs != 'string') return;
+      if (err) {
+        if (self.diffProgressBar) self.diffProgressBar.stop();
+        if (err.errorCode == 'no-such-file') {
+          // The file existed before but has been removed, but we're trying to get a diff for it
+          // Most likely it will just disappear with the next refresh of the staging area
+          // so we just ignore the error here
+          return true;
+        }
+        return callback ? callback(err) : null;
+      }
 
-      self.diffJson = diff2html.getJsonFromDiff(diffs);
-      self.render();
+      if (typeof diffs == 'string') {
+        self.diffJson = diff2html.getJsonFromDiff(diffs);
+        self.render();
+      }
 
       if (self.diffProgressBar) self.diffProgressBar.stop();
       if (callback) callback();
