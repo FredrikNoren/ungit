@@ -67,7 +67,7 @@ ko.bindingHandlers.autocomplete = {
           }
         });
       } else if(event.keyCode == 39){
-        $(element).val($(element).val() + ungit.config.fileSeperator);
+        $(element).val($(element).val() + ungit.config.fileSeparator);
       } else if(event.keyCode == 13){
         event.preventDefault();
         var url = '/#/repository?path=' + encodeURI($(element).val());
