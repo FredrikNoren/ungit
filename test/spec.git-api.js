@@ -150,10 +150,12 @@ describe('git-api', function () {
       if (err) return done(err);
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
+        displayName: testFile,
         isNew: true,
         staged: false,
         removed: false,
         conflict: false,
+        renamed: false,
         type: 'text'
       });
       done();
@@ -211,10 +213,12 @@ describe('git-api', function () {
       if (err) return done(err);
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
+        displayName: testFile,
         isNew: false,
         staged: false,
         removed: false,
         conflict: false,
+        renamed: false, 
         type: 'text'
       });
       done();
@@ -252,10 +256,12 @@ describe('git-api', function () {
       if (err) return done(err);
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile2]).to.eql({
+        displayName: testFile2,
         isNew: true,
         staged: false,
         removed: false,
         conflict: false,
+        renamed: false,
         type: 'text'
       });
       done();
@@ -293,10 +299,12 @@ describe('git-api', function () {
       if (err) return done(err);
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile3]).to.eql({
+        displayName: testFile3,
         isNew: true,
         staged: false,
         removed: false,
         conflict: false,
+        renamed: false,
         type: 'text'
       });
       done();
@@ -337,10 +345,12 @@ describe('git-api', function () {
     common.get(req, '/status', { path: testDir }, done, function(err, res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
+        displayName: testFile,
         isNew: false,
         staged: false,
         removed: true,
         conflict: false,
+        renamed: false,
         type: 'text'
       });
       done();
@@ -361,6 +371,28 @@ describe('git-api', function () {
     });
   });
 
+  var testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
+
+  it('renaming a file should work', function(done) {
+    common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile3, testFile4] }, done);
+  });
+
+  it('status should list the renamed file', function(done) {
+    common.get(req, '/status', { path: testDir }, function(err, res) {
+      if (err) return done(err);
+      expect(Object.keys(res.body.files).length).to.be(1);
+      expect(res.body.files[testFile4]).to.eql({
+        displayName: testFile3 + ' -> ' + testFile4,
+        isNew: false,
+        staged: false,
+        removed: false,
+        conflict: false,
+        renamed: true,
+        type: 'text'
+      });
+      done();
+    });
+  });
 
   it('log with limit should only return specified number of items', function(done) {
     common.get(req, '/log', { path: testDir, limit: 1 }, function(err, res) {
