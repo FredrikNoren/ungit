@@ -18,10 +18,14 @@ exports.parseGitStatus = function(text, args) {
     if (filename[0] == '"' && filename[filename.length - 1] == '"')
       filename = filename.slice(1, filename.length - 1);
     var file = {};
+    file.displayName = filename;
     file.staged = status[0] == 'A' || status[0] == 'M';
     file.removed = status[0] == 'D' || status[1] == 'D';
     file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
     file.conflict = (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U';
+    file.renamed = status[0] == 'R';
+    if (file.renamed)
+      filename = filename.slice(filename.indexOf('>') + 2);
     file.type = fileType(filename);
     result.files[filename] = file;
   }

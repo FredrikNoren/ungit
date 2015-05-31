@@ -290,9 +290,11 @@ var FileViewModel = function(staging, name, fileType, textDiffType) {
   this.server = staging.server;
   this.staged = ko.observable(true);
   this.name = ko.observable(name);
+  this.displayName = ko.observable(name);
   this.isNew = ko.observable(false);
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
+  this.renamed = ko.observable(false);
   this.showingDiffs = ko.observable(false);
   this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.diffType = ko.computed(function() {
@@ -322,9 +324,11 @@ FileViewModel.prototype.getSpecificDiff = function() {
   });
 }
 FileViewModel.prototype.setState = function(state) {
+  this.displayName(state.displayName);
   this.isNew(state.isNew);
   this.removed(state.removed);
   this.conflict(state.conflict);
+  this.renamed(state.renamed);
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
@@ -353,7 +357,7 @@ FileViewModel.prototype.resolveConflict = function() {
   this.server.post('/resolveconflicts', { path: this.staging.repoPath, files: [this.name()] });
 }
 FileViewModel.prototype.toggleDiffs = function() {
-  var self = this;
+  if (this.renamed()) return; // do not show diffs for renames
   if (this.showingDiffs()) this.showingDiffs(false);
   else {
     this.showingDiffs(true);
