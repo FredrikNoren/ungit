@@ -278,6 +278,7 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
 
 var FileViewModel = function(staging, name, textDiffType) {
   var self = this;
+  this.patchLineList = ko.observableArray();
   this.staging = staging;
   this.server = staging.server;
   this.staged = ko.observable(true);

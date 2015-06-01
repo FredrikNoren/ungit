@@ -99,15 +99,18 @@ TextDiffViewModel.prototype.render = function() {
 
   var index = 0;
 
-  html = html.replace(/<div class="d2h-code-line (d2h-ins|d2h-del)">[+-]/g, function (match, capture) {
-    index++;
+  // if self.patchLineList is null then patching is not avaliable so skip this expensive op.x
+  if (self.patchLineList) {
+    html = html.replace(/<div class="d2h-code-line (d2h-ins|d2h-del)">[+-]/g, function (match, capture) {
+      index++;
 
-    if (self.patchLineList()[index] === undefined) {
-      self.patchLineList()[index] = true;
-    }
+      if (self.patchLineList()[index] === undefined) {
+        self.patchLineList()[index] = true;
+      }
 
-    return self.getPatchCheckBox(capture, index, self.patchLineList()[index]);
-  });
+      return self.getPatchCheckBox(capture, index, self.patchLineList()[index]);
+    });
+  }
 
   // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
   // above data-bind going pass "html" binding.
