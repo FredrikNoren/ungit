@@ -302,7 +302,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
   this.diff = ko.observable(self.getSpecificDiff());
-  this.patchLineList = [];
+  this.patchLineList = ko.observableArray();
   this.isPatchable = ko.computed(function() {
     return !self.isNew() && fileType(self.name()) === 'text';
   });
