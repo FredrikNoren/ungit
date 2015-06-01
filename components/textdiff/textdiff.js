@@ -17,7 +17,6 @@ var TextDiffViewModel = function(args) {
   this.sha1 = args.sha1;
   this.loadMoreCount = ko.observable(0);
   this.diffJson = null;
-  this.diffHtml = ko.observable();
   this.loadCount = loadLimit;
   this.textDiffType = args.textDiffType;
   this.isShowingDiffs = args.isShowingDiffs;
