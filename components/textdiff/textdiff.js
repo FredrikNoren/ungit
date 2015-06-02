@@ -21,12 +21,14 @@ var TextDiffViewModel = function(args) {
   this.textDiffType = args.textDiffType;
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
+  this.staged = args.staged;
   this.textDiffType.subscribe(function() {
     self.invalidateDiff();
   });
   this.isPatching = ko.observable(false);
   this.dom = null;
   this.patchLineList = args.patchLineList;
+  this.numberOfSelectedPatchLines = 0;
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -98,6 +100,7 @@ TextDiffViewModel.prototype.render = function() {
   }
 
   var index = 0;
+  this.numberOfSelectedPatchLines = 0;
 
   // if self.patchLineList is null then patching is not avaliable so skip this expensive op.x
   if (self.patchLineList) {
@@ -130,10 +133,27 @@ TextDiffViewModel.prototype.setDom = function(dom) {
 }
 
 TextDiffViewModel.prototype.getPatchCheckBox = function(symbol, index, isActive) {
+  if (isActive) {
+    this.numberOfSelectedPatchLines++;
+  }
+
   return '<div class="d2h-code-line ' + symbol + '"><span data-bind="visible: !isPatching()">' + (symbol === 'd2h-ins' ? '+' : '-') + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-bind="visible: isPatching, click: togglePatchLine.bind($data, ' + index + ')"></input>';
 }
 
 TextDiffViewModel.prototype.togglePatchLine = function(index) {
   this.patchLineList()[index] = !this.patchLineList()[index];
+
+  if (this.patchLineList()[index]) {
+    this.numberOfSelectedPatchLines++;
+  } else {
+    this.numberOfSelectedPatchLines--;
+  }
+
+  if (this.numberOfSelectedPatchLines === 0) {
+    this.staged(false);
+  } else if (this.numberOfSelectedPatchLines > 0 && !this.staged()) {
+    this.staged(true);
+  }
+
   return true;
 }

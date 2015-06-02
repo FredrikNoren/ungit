@@ -317,7 +317,8 @@ FileViewModel.prototype.getSpecificDiff = function() {
     textDiffType: this.textDiffType,
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar,
-    patchLineList: this.patchLineList
+    patchLineList: this.patchLineList,
+    staged: this.staged
   });
 }
 FileViewModel.prototype.setState = function(state) {
