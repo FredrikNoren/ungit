@@ -307,7 +307,7 @@ app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
 
 
 app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
-  res.json(fs.existsSync(req.param('path')));
+  res.json(fs.existsSync(req.query['path']));
 });
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
