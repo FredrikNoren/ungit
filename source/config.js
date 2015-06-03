@@ -99,7 +99,7 @@ var defaultConfig = {
   // possible to perform those actions even when you have a dirty working directory.
   autoStashAndPop: true,
 
-  fileSeperator: path.sep
+  fileSeparator: path.sep
 };
 
 function getUserHome() {
@@ -148,7 +148,7 @@ var argv = yargs
 .describe('pluginConfigs', 'No supported as a command line argument, use ungitrc config file.  See README.md')
 .describe('autoStashAndPop', 'Used for development purposes')
 .describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
-.describe('fileSeperator', 'OS dependent file seperator');
+.describe('fileSeparator', 'OS dependent file separator');
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
