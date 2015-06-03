@@ -62,7 +62,7 @@ describe('git-api diff', function () {
 			for(var i = 0; i < res.body[0].lines.length; i++) {
 				var contentLine = content[i];
 				var diffLine = res.body[0].lines[i];
-				expect(diffLine).to.eql([null, i, '+' + contentLine]);
+				expect(diffLine).to.eql([null, i + 1, '+' + contentLine]);
 			}
 			done();
 		});
