@@ -46,17 +46,21 @@ describe('git-api submodule', function () {
 			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(2);
 			expect(res.body.files[submodulePath]).to.eql({
+				displayName: submodulePath,
 				isNew: true,
 				staged: true,
 				removed: false,
 				conflict: false,
+				renamed: false,
 				type: 'text'
 			});
 			expect(res.body.files['.gitmodules']).to.eql({
+				displayName: '.gitmodules',
 				isNew: true,
 				staged: true,
 				removed: false,
 				conflict: false,
+				renamed: false,
 				type: 'text'
 			});
 			done();
@@ -86,10 +90,12 @@ describe('git-api submodule', function () {
 			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[submodulePath]).to.eql({
+				displayName: submodulePath,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: false,
+				renamed: false,
 				type: 'text'
 			});
 			done();

@@ -62,10 +62,12 @@ describe('git-api conflict rebase', function () {
 			expect(res.body.inRebase).to.be(true);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
+				displayName: testFile1,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: true,
+				renamed: false,
 				type: 'text'
 			});
 			done();
@@ -130,10 +132,12 @@ describe('git-api conflict checkout', function () {
 			expect(res.body.inRebase).to.be(false);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
+				displayName: testFile1,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: true,
+				renamed: false,
 				type: 'text'
 			});
 			done();
@@ -187,10 +191,12 @@ describe('git-api conflict merge', function () {
 			expect(res.body.commitMessage).to.be.ok();
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
+				displayName: testFile1,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: true,
+				renamed: false,
 				type: 'text'
 			});
 			done();
@@ -257,10 +263,12 @@ describe('git-api conflict solve by deleting', function () {
 			expect(res.body.inRebase).to.be(true);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
+				displayName: testFile1,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: true,
+				renamed: false,
 				type: 'text'
 			});
 			done();

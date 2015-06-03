@@ -157,10 +157,12 @@ describe('git-api branching', function () {
 			if (err) return done(err);
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[testFile1]).to.eql({
+				displayName: testFile1,
 				isNew: false,
 				staged: false,
 				removed: false,
 				conflict: false,
+				renamed: false,
 				type: 'text'
 			});
 			done();

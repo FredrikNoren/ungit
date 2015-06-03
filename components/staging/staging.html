@@ -70,7 +70,7 @@
               <span class="glyphicon" data-bind="css: { 'glyphicon-check': staged, 'glyphicon-unchecked': !staged() }"></span>
             </div>
             <button class="name btn btn-default" data-bind="click: toggleDiffs">
-              <span data-bind="text: name"></span>
+              <span data-bind="text: displayName"></span>
               <!-- ko component: diffsProgressBar --><!-- /ko -->
             </button>
             <span class="new" data-bind="visible: isNew">New</span>
