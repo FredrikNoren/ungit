@@ -312,9 +312,16 @@ exports.parseGitSubmodule = function(text, args) {
   var getUrl = function(line) {
     var url = line.substr(line.indexOf("= ") + 1).trim();
 
-    // When a repo is checkout with ssh instead of an url
-    if (line.indexOf('http') < 0) {
-      url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+    // keep a reference to the raw url
+    submodule.rawUrl = url;
+
+    // When a repo is checkout with ssh or git instead of an url
+    if (url.indexOf('http') != 0) {
+      if (url.indexOf('git:') == 0) { // git
+        url = 'http' + url.substr(url.indexOf(':'));
+      } else { // ssh
+        url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+      }
     }
 
     submodule.url = url;
