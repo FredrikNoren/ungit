@@ -7,12 +7,12 @@ helpers.log = function(text) {
 helpers.waitForElement = function(page, selector, callback) {
   var tryFind = function() {
     helpers.log('Trying to find element: ' + selector);
-    var found = page.evaluate(function(selector) {
-      return !!document.querySelector(selector);
+    var element = page.evaluate(function(selector) {
+      return document.querySelector(selector);
     }, selector);
-    if (found) {
+    if (element) {
       helpers.log('Found element: ' + selector);
-      callback();
+      callback(element);
     }
     else setTimeout(tryFind, 500);
   }
