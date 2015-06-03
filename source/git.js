@@ -236,7 +236,7 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
           var lines = text.split('\n');
           diff.totalNumberOfLines = lines.length;
           if (maxNLines) lines = lines.slice(0, maxNLines);
-          diff.lines = lines.map(function(line, i) { return [null, i, '+' + line]; });
+          diff.lines = [[null, null, "@@ -0,0 +1," + diff.totalNumberOfLines + " @@"]].concat(lines.map(function(line, i) { return [null, i + 1, '+' + line]; }));
           diffs.push(diff);
           task.setResult(null, diffs);
         });
