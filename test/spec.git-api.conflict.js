@@ -287,5 +287,8 @@ describe('git-api conflict solve by deleting', function () {
 		common.post(req, '/rebase/continue', { path: testDir }, done);
 	});
 
-});
+	after(function(done) {
+		common.post(req, '/testing/cleanup', undefined, done);
+	});
 
+});

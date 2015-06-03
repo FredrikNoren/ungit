@@ -135,4 +135,9 @@ describe('git-api discardchanges', function() {
       ], done);
     });
   });*/
-})
+
+  after(function(done) {
+    common.post(req, '/testing/cleanup', undefined, done);
+  });
+
+});

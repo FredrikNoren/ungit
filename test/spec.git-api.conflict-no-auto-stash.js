@@ -64,4 +64,8 @@ describe('git-api conflict checkout', function () {
 		});
 	});
 
+	after(function(done) {
+		common.post(req, '/testing/cleanup', undefined, done);
+	});
+
 });

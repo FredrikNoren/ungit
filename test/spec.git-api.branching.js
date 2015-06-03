@@ -206,4 +206,8 @@ describe('git-api branching', function () {
 		});
 	});
 
-})
+	after(function(done) {
+		common.post(req, '/testing/cleanup', undefined, done);
+	});
+
+});
