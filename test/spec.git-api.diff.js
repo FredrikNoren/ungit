@@ -58,11 +58,11 @@ describe('git-api diff', function () {
 			expect(res.body).to.be.an('array');
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].lines).to.be.an('array');
-			expect(res.body[0].lines.length).to.be(content.length);
-			for(var i = 0; i < res.body[0].lines.length; i++) {
-				var contentLine = content[i];
+			expect(res.body[0].lines.length).to.be(content.length + 1);
+			for(var i = 1; i < res.body[0].lines.length; i++) {
+				var contentLine = content[i - 1];
 				var diffLine = res.body[0].lines[i];
-				expect(diffLine).to.eql([null, i + 1, '+' + contentLine]);
+				expect(diffLine).to.eql([null, i, '+' + contentLine]);
 			}
 			done();
 		});
