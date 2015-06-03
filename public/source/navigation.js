@@ -20,6 +20,7 @@ navigation.init = function() {
   }
   hasher.initialized.add(parseHash); //parse initial hash
   hasher.changed.add(parseHash); //parse hash changes
+  hasher.raw = true;
 
   hasher.init();
 

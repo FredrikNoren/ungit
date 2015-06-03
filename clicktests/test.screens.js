@@ -86,6 +86,19 @@ suite.test('Entering a path to a repo should bring you to that repo', function(d
   enterRepoByTypingPath(testRepoPath, done);
 });
 
+suite.test('Create test directory with ampersand and open it', function(done) {
+  var specialRepoPath = environment.path + '/test & repo';
+  environment.createFolder(specialRepoPath, function() {
+    page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
+      page.open(environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath), function () {
+        helpers.waitForElement(page, '[data-ta-container="uninited-path-page"]', function() {
+          done();
+        });
+      });
+    });
+  });
+});
+
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
 });
