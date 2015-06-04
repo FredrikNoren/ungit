@@ -8,6 +8,7 @@ var winston = require('winston');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
+var isWindows = /^win/.test(process.platform);
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
