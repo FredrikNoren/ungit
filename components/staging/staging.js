@@ -287,18 +287,10 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.isNew = ko.observable(false);
   this.removed = ko.observable(false);
   this.conflict = ko.observable(false);
-<<<<<<< HEAD
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
-=======
   this.isShowingDiffs = ko.observable(false);
-<<<<<<< HEAD
-  this.diffsProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
->>>>>>> Refactoring naming and diff visibility
-=======
-  this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
->>>>>>> Refactor to use more ubiquitous names
   this.textDiffType = textDiffType;
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
@@ -367,20 +359,7 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
-<<<<<<< HEAD
-    this.invalidateDiff(true);
-  }
-}
-FileViewModel.prototype.invalidateDiff = function(drawProgressBar) {
-  var self = this;
-  if (this.showingDiffs() && (drawProgressBar || this.type != 'image')) {
-    this.diffsProgressBar.start();
-    this.diff().invalidateDiff(function() {
-      self.diffsProgressBar.stop();
-    });
-=======
     this.diff().invalidateDiff();
->>>>>>> Refactor to use more ubiquitous names
   }
 }
 FileViewModel.prototype.patchClick = function() {
