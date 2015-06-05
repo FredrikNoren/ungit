@@ -12,6 +12,7 @@ var os = require('os');
 var mkdirp = require('mkdirp');
 var fileType = require('./utils/file-type.js');
 var rimraf = require('rimraf');
+var _ = require('lodash');
 
 exports.pathPrefix = '';
 
@@ -43,13 +44,16 @@ exports.registerApi = function(env) {
         }
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
+        var workingTreeChanged = _.debounce(function() {
+          socket.emit('working-tree-changed', { repository: data.path });
+        }, 200);
         try {
           socket.watcher = fs.watch(data.path, function(event, filename) {
             // The .git dir changes on for instance 'git status', so we
             // can't trigger a change here (since that would lead to an endless
             // loop of the client getting the change and then requesting the new data)
             if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-              socket.emit('working-tree-changed', { repository: data.path });
+              workingTreeChanged();
           });
           winston.info('Start watching ' + socket.watcherPath);
         } catch(err) {
