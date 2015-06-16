@@ -66,8 +66,8 @@
 
         <div class="files" data-bind="foreach: files">
           <div class="file" data-bind="css: { showingDiffs: isShowingDiffs }" data-ta-container="staging-file">
-            <div class="checkmark" data-bind="click: toggleStaged, css: { checked: staged }">
-              <span class="glyphicon" data-bind="css: { 'glyphicon-check': staged, 'glyphicon-unchecked': !staged() }"></span>
+            <div class="checkmark" data-bind="click: toggleStaged, css: { checked: editState() !== 'none' }">
+              <span class="glyphicon" data-bind="css: { 'glyphicon-check': editState() === 'staged', 'glyphicon-unchecked': editState() === 'none', 'glyphicon-list-alt': editState() === 'patched'}"></span>
             </div>
             <button class="name btn btn-default" data-bind="click: toggleDiffs">
               <span data-bind="text: displayName"></span>

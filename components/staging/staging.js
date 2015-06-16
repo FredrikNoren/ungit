@@ -36,7 +36,7 @@ var StagingViewModel = function(server, repoPath) {
     return self.files().length;
   });
   this.nStagedFiles = ko.computed(function() {
-    return self.files().filter(function(f) { return f.staged(); }).length;
+    return self.files().filter(function(f) { return f.editState() === 'staged'; }).length;
   });
   this.stats = ko.computed(function() {
     return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
@@ -58,7 +58,7 @@ var StagingViewModel = function(server, repoPath) {
   this.mergeAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-abort-' + this.repoPath, temporary: true });
   this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + this.repoPath, temporary: true });
   this.commitValidationError = ko.computed(function() {
-    if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
+    if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged'; }))
       return "No files to commit";
 
     if (self.files().some(function(file) { return file.conflict(); }))
@@ -184,7 +184,7 @@ StagingViewModel.prototype.commit = function() {
   var self = this;
   this.committingProgressBar.start();
   var files = this.files().filter(function(file) {
-    return file.staged();
+    return file.editState() === 'staged';
   }).map(function(file) {
     return file.name();
   });
@@ -281,7 +281,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.patchLineList = ko.observableArray();
   this.staging = staging;
   this.server = staging.server;
-  this.staged = ko.observable(true);
+  this.editState = ko.observable('staged'); // staged, patched and none
   this.name = ko.observable(name);
   this.displayName = ko.observable(name);
   this.isNew = ko.observable(false);
@@ -300,6 +300,14 @@ var FileViewModel = function(staging, name, textDiffType) {
     return !self.isNew() && fileType(self.name()) === 'text' && self.isShowingDiffs();
   });
   this.diff = ko.observable(self.getSpecificDiff());
+
+  this.editState.subscribe(function (value) {
+    if (value === 'none') {
+      self.patchLineList([]);
+    } else if (value === 'patched') {
+      if (self.diff().render) self.diff().render();
+    }
+  });
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
@@ -310,7 +318,7 @@ FileViewModel.prototype.getSpecificDiff = function() {
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar,
     patchLineList: this.patchLineList,
-    staged: this.staged
+    editState: this.editState
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -325,10 +333,11 @@ FileViewModel.prototype.setState = function(state) {
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
 FileViewModel.prototype.toggleStaged = function() {
-  if (this.diff().isPatching()) {
-    this.patchClick();
+  if (this.editState() === 'none') {
+    this.editState('staged');
+  } else {
+  this.editState('none');
   }
-  this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
@@ -366,15 +375,11 @@ FileViewModel.prototype.toggleDiffs = function() {
   }
 }
 FileViewModel.prototype.patchClick = function() {
-  if (!this.staged()) return;
   if (!this.isShowingDiffs()) return;
 
-  this.diff().isPatching(!this.diff().isPatching());
-
-  if (!this.diff().isPatching()) {
-    // if patching is turned off remove patch line list
-    this.patchLineList([]);
+  if (this.editState() === 'patched') {
+    this.editState('staged');
   } else {
-    if (this.diff().render) this.diff().render();
+    this.editState('patched');
   }
 }
