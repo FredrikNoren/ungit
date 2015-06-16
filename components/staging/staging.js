@@ -325,6 +325,9 @@ FileViewModel.prototype.setState = function(state) {
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
 FileViewModel.prototype.toggleStaged = function() {
+  if (this.diff().isPatching()) {
+    this.patchClick();
+  }
   this.staged(!this.staged());
 }
 FileViewModel.prototype.discardChanges = function() {
@@ -363,6 +366,8 @@ FileViewModel.prototype.toggleDiffs = function() {
   }
 }
 FileViewModel.prototype.patchClick = function() {
+  if (!this.staged()) return;
+
   this.diff().isPatching(!this.diff().isPatching());
 
   if (!this.diff().isPatching()) {
