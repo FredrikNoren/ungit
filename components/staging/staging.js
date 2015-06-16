@@ -364,4 +364,9 @@ FileViewModel.prototype.toggleDiffs = function() {
 }
 FileViewModel.prototype.patchClick = function() {
   this.diff().isPatching(!this.diff().isPatching());
+
+  if (!this.diff().isPatching()) {
+    this.patchLineList([]);
+    if (this.diff().render) this.diff().render();
+  }
 }
