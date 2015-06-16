@@ -297,7 +297,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.diff = ko.observable(self.getSpecificDiff());
   this.patchLineList = ko.observableArray();
   this.isPatchable = ko.computed(function() {
-    return !self.isNew() && fileType(self.name()) === 'text';
+    return !self.isNew() && fileType(self.name()) === 'text' && self.isShowingDiffs();
   });
   this.diff = ko.observable(self.getSpecificDiff());
 }
