@@ -372,7 +372,9 @@ FileViewModel.prototype.patchClick = function() {
   this.diff().isPatching(!this.diff().isPatching());
 
   if (!this.diff().isPatching()) {
+    // if patching is turned off remove patch line list
     this.patchLineList([]);
+  } else {
     if (this.diff().render) this.diff().render();
   }
 }
