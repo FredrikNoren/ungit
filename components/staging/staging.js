@@ -336,8 +336,9 @@ FileViewModel.prototype.toggleStaged = function() {
   if (this.editState() === 'none') {
     this.editState('staged');
   } else {
-  this.editState('none');
+    this.editState('none');
   }
+  this.patchLineList([]);
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
