@@ -254,7 +254,7 @@ StagingViewModel.prototype.stashAll = function() {
 StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
   for (var n in self.files()){
-    self.files()[n].staged(self.allStageFlag());
+    self.files()[n].editState(self.allStageFlag() ? 'staged' : 'none');
   }
 
   self.allStageFlag(!self.allStageFlag());
