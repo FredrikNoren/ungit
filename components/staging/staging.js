@@ -184,9 +184,9 @@ StagingViewModel.prototype.commit = function() {
   var self = this;
   this.committingProgressBar.start();
   var files = this.files().filter(function(file) {
-    return file.editState() === 'staged';
+    return file.editState() !== 'none';
   }).map(function(file) {
-    return file.name();
+    return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
   });
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();

@@ -346,15 +346,19 @@ git.updateIndexFromFileList = function(repoPath, files) {
     .done(function(status) {
       var toAdd = [];
       var toRemove = [];
+      var toPatch = [];
+
       for(var v in files) {
         var file = files[v];
-        var fileStatus = status.files[file] || status.files[path.relative(repoPath, file)];
+        var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
         if (!fileStatus) {
-          task.setResult({ error: 'No such file in staging: ' + file });
+          task.setResult({ error: 'No such file in staging: ' + file.name });
           return;
         }
-        if (fileStatus.removed) toRemove.push(file);
-        else toAdd.push(file);
+
+        if (fileStatus.removed) toRemove.push(file.name);
+        else if (files[v].patchLineList) toPatch.push(file)
+        else toAdd.push(file.name);
       }
 
       async.series([
@@ -381,7 +385,8 @@ git.updateIndexFromFileList = function(repoPath, files) {
               })
               .start();
           }
-        }
+        },
+        // add a function to do interactive add
       ], function(err) {
         if (err) return task.setResult(err);
         task.setResult();
