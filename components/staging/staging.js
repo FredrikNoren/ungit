@@ -58,7 +58,7 @@ var StagingViewModel = function(server, repoPath) {
   this.mergeAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-abort-' + this.repoPath, temporary: true });
   this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + this.repoPath, temporary: true });
   this.commitValidationError = ko.computed(function() {
-    if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged'; }))
+    if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
       return "No files to commit";
 
     if (self.files().some(function(file) { return file.conflict(); }))
