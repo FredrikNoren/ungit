@@ -28,6 +28,11 @@ var TextDiffViewModel = function(args) {
   this.dom = null;
   this.patchLineList = args.patchLineList;
   this.numberOfSelectedPatchLines = 0;
+  this.htmlSrc = undefined;
+  this.isParsed = ko.observable(false);
+  this.isShowingDiffs.subscribe(function(newValue) {
+    if (!newValue) self.isParsed(false);
+  });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -115,9 +120,8 @@ TextDiffViewModel.prototype.render = function() {
   // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
   // above data-bind going pass "html" binding.
   // which is reason why manually updating the html content and refreshing kobinding to have it working...
-  this.dom.innerHTML = html;
-  ko.cleanNode(this.dom);
-  ko.applyBindings(this, this.dom);
+  this.htmlSrc = html;
+  this.isParsed(true);
 };
 
 TextDiffViewModel.prototype.loadMore = function(callback) {
