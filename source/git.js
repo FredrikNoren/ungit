@@ -31,6 +31,8 @@ var GitExecutionTask = function(commands, repoPath, allowedCodes) {
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
   this.potentialError.commmands = commands;
   this.allowedCodes = allowedCodes;
+  this.stdoutListener = undefined;
+  this.stderrListener = undefined;
   this.start = function() {
     git.queueTask(self);
   }
@@ -47,6 +49,14 @@ GitExecutionTask.prototype.encoding = function(encoding) {
 }
 GitExecutionTask.prototype.timeout = function(timeout) {
   this._timeout = timeout;
+  return this;
+}
+GitExecutionTask.prototype.setStdoutListener = function(stdoutListener) {
+  this.stdoutListener = stdoutListener;
+  return this;
+}
+GitExecutionTask.prototype.setStderrListener = function(stderrListener) {
+  this.stderrListener = stderrListener;
   return this;
 }
 
@@ -76,9 +86,11 @@ var gitQueue = async.queue(function (task, callback) {
 
   gitProcess.stdout.on('data', function(data) {
     stdout += data.toString();
+    if (task.stdoutListener) task.stdoutListener(data.toString());
   });
   gitProcess.stderr.on('data', function(data) {
     stderr += data.toString();
+    if (task.stderrListener) task.stderrListener(data.toString());
   });
   gitProcess.on('error', function (error) {
       callback(error);
@@ -386,7 +398,23 @@ git.updateIndexFromFileList = function(repoPath, files) {
               .start();
           }
         },
-        // add a function to do interactive add
+        function(done) {
+          if (toPatch.length == 0) done();
+          else {
+            git(['add', '--patch'], repoPath)
+              .always(done)
+              .setStdoutListener(function(str) {
+                console.log(555, str);
+              })
+              .setStderrListener(function(str) {
+                console.log(222, str);
+              })
+              .started(function() {
+                console.log(111);
+              })
+              .start();
+          }
+        }
       ], function(err) {
         if (err) return task.setResult(err);
         task.setResult();
