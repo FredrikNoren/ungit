@@ -273,7 +273,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
     var limit = '';
     if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--all', '--parents', '--numstat', '--topo-order', limit], req.query['path'])
+    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--topo-order', limit], req.query['path'])
       .parser(gitParser.parseGitLog)
       .always(function(err, log) {
         if (err) {
