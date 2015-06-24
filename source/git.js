@@ -53,7 +53,7 @@ GitExecutionTask.prototype.timeout = function(timeout) {
 git.runningTasks = [];
 
 var gitQueue = async.queue(function (task, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.commands);
+  if (config.logGitCommands) winston.info('git executing: ' + task.repoPath + ' ' + task.commands.join(' '));
   git.runningTasks.push(task);
   task.startTime = Date.now();
 
@@ -81,7 +81,7 @@ var gitQueue = async.queue(function (task, callback) {
   });
 
   gitProcess.on('close', function (code) {
-    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
 
     if (allowedCodes.indexOf(code) < 0) {
       var err = {};
