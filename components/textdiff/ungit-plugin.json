@@ -3,7 +3,6 @@
     "knockoutTemplates": {
       "textdiff": "textdiff.html"
     },
-    "javascript": "textdiff.bundle.js",
-    "css": "textdiff.css"
+    "javascript": "textdiff.bundle.js"
   }
 }

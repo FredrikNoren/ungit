@@ -24,12 +24,13 @@ var ImageDiffViewModel = function(args) {
   this.newImageSrc = ko.computed(function() {
     return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
   });
+  this.isShowingDiffs = args.isShowingDiffs;
 }
 ImageDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('imagediff', this, {}, parentElement);
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(callback) {
-  callback();
+  if (callback) callback();
 }
 ImageDiffViewModel.prototype.newImageError = function(data, event) {
   this.isRemoved(true);

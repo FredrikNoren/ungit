@@ -16,7 +16,7 @@ module.exports = function(grunt) {
     less: {
       production: {
         files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css"],
+          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/less/d2h.less"],
           "components/commit/commit.css": ["components/commit/commit.less"],
           "components/commitdiff/commitdiff.css": ["components/commitdiff/commitdiff.less"],
           "components/graph/graph.css": ["components/graph/graph.less"],
@@ -25,9 +25,7 @@ module.exports = function(grunt) {
           "components/imagediff/imagediff.css": ["components/imagediff/imagediff.less"],
           "components/repository/repository.css": ["components/repository/repository.less"],
           "components/staging/staging.css": ["components/staging/staging.less"],
-          "components/textdiff/textdiff.css": ["components/textdiff/textdiff.less"],
           "components/stash/stash.css": ["components/stash/stash.less"],
-          "components/sidebysidediff/sidebysidediff.css": ["components/sidebysidediff/sidebysidediff.less"],
           "components/refreshbutton/refreshbutton.css": ["components/refreshbutton/refreshbutton.less"],
         }
       }

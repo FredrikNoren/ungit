@@ -119,9 +119,6 @@ GraphActions.Reset.prototype.perform = function(callback) {
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 
-
-
-
 GraphActions.Rebase = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);

@@ -8,19 +8,20 @@ var winston = require('winston');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
+var isWindows = /^win/.test(process.platform);
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-var git = function(commands, repoPath) {
+var git = function(commands, repoPath, allowedCodes) {
   commands = gitConfigArguments.concat(commands).filter(function(element) {
     return element;
   });
 
-  return new GitExecutionTask(commands, repoPath);
+  return new GitExecutionTask(commands, repoPath, allowedCodes);
 }
 
 
-var GitExecutionTask = function(commands, repoPath) {
+var GitExecutionTask = function(commands, repoPath, allowedCodes) {
   GitTask.call(this);
   var self = this;
   this.repoPath = repoPath;
@@ -28,6 +29,7 @@ var GitExecutionTask = function(commands, repoPath) {
   this._timeout = 2*60*1000; // Default timeout tasks after 2 min
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
   this.potentialError.commmands = commands;
+  this.allowedCodes = allowedCodes;
   this.start = function() {
     git.queueTask(self);
   }
@@ -66,6 +68,7 @@ var gitQueue = async.queue(function (task, callback) {
     });
   task.process = gitProcess;
   task.setStarted();
+  var allowedCodes = task.allowedCodes || [0];
 
   var stdout = '';
   var stderr = '';
@@ -80,7 +83,7 @@ var gitQueue = async.queue(function (task, callback) {
   gitProcess.on('close', function (code) {
     if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.command + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
 
-    if (code != 0) {
+    if (allowedCodes.indexOf(code) < 0) {
       var err = {};
       err.isGitError = true;
       err.errorCode = 'unknown';
@@ -200,7 +203,7 @@ git.binaryFileContent = function(repoPath, filename, version) {
 }
 
 
-git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
+git.diffFile = function(repoPath, filename, sha1) {
   var task = new GitTask();
 
   var statusTask = git.status(repoPath)
@@ -212,34 +215,29 @@ git.diffFile = function(repoPath, filename, sha1, maxNLines, isGetRaw) {
         if (fs.existsSync(path.join(repoPath, filename))) task.setResult(null, []);
         else task.setResult({ error: 'No such file: ' + filename, errorCode: 'no-such-file' });
         // If the file is new or if it's a directory, i.e. a submodule
-      } else if (sha1 || !file.isNew || fs.lstatSync(filePath).isDirectory()) {
+      } else {
         var gitCommands;
-        if (sha1) {
-          gitCommands = ['diff', sha1 + '^!', '--', filename.trim()];
+        var allowedCodes = null;  // default is [0]
+        var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+
+        if (file && file.isNew) {
+          gitCommands = gitNewFileCompare;
+          allowedCodes =  [0, 1];
+        } else if (sha1) {
+          gitCommands = ['diff', sha1 + "^", sha1, "--", filename.trim()];
         } else {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        var gitJob = git(gitCommands, repoPath).always(task.setResult);
-
-        if (!isGetRaw) {
-          gitJob.parser(gitParser.parseGitDiff, { maxNLines: maxNLines })
-        }
-
-        gitJob.start();
-      } else {
-        fs.readFile(filePath, { encoding: 'utf8' }, function(err, text) {
-          if (err) return task.setResult({ error: err });
-          var diffs = [];
-          var diff = { };
-          text = text.toString();
-          var lines = text.split('\n');
-          diff.totalNumberOfLines = lines.length;
-          if (maxNLines) lines = lines.slice(0, maxNLines);
-          diff.lines = lines.map(function(line, i) { return [null, i, '+' + line]; });
-          diffs.push(diff);
-          task.setResult(null, diffs);
-        });
+        git(gitCommands, repoPath, allowedCodes).always(function(err, result) {
+          // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
+          // it will error out with invalid object name error
+          if (sha1 && err && err.error.indexOf('bad revision') > -1) {
+            git(gitNewFileCompare, repoPath, [0, 1]).always(task.setResult).start();
+          } else {
+            task.setResult(err, result);
+          }
+        }).start();
       }
     });
 

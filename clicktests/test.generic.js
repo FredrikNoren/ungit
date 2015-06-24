@@ -97,7 +97,7 @@ suite.test('Test showing commit side by side diff between two commits', function
   helpers.click(page, '[data-ta-clickable="node-clickable"]');
   helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
     helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
-    helpers.click(page, '[data-ta-clickable="graphSideBySideView"]');
+    helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
     helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
       setTimeout(function() {                           // let it finish making api call
         helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again

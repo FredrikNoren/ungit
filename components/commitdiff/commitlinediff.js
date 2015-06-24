@@ -8,51 +8,31 @@ var CommitLineDiff = function(args) {
   this.added = ko.observable(args.fileLineDiff[0]);
   this.removed = ko.observable(args.fileLineDiff[1]);
   this.fileName = ko.observable(args.fileLineDiff[2]);
-  this.showSpecificDiff = ko.observable(false);
-  this.args = args;
-  this.type = ko.computed(function() {
-    if (!self.fileName()) {
-      return 'textdiff';
-    }
-
-    if (fileType(self.fileName()) == 'text') {
-      return args.textDiffType().component;
-    } else {
-      return 'imagediff';
-    }
-  });
+  this.isShowingDiffs = ko.observable(false);
+  this.repoPath = args.repoPath;
+  this.server = args.server;
+  this.sha1 = args.sha1;
+  this.textDiffType = args.textDiffType;
   this.specificDiff = ko.observable(this.getSpecificDiff());
-
-  args.textDiffType.subscribe(function() {
-    self.specificDiff(self.getSpecificDiff());
-    if (self.showSpecificDiff()) {
-      self.refreshAndShow();
-    }
-  });
 };
 exports.CommitLineDiff = CommitLineDiff;
 
 CommitLineDiff.prototype.getSpecificDiff = function() {
-  return components.create(this.type(), {
+  return components.create(!this.fileName() || fileType(this.fileName()) == 'text' ? 'textdiff' : 'imagediff', {
     filename: this.fileName(),
-    repoPath: this.args.repoPath,
-    server: this.args.server,
-    sha1: this.args.sha1,
-    initialDisplayLineLimit: 50     //Image diff doesn't use this so it doesn't matter.
+    repoPath: this.repoPath,
+    server: this.server,
+    sha1: this.sha1,
+    textDiffType: this.textDiffType,
+    isShowingDiffs: this.isShowingDiffs
   });
 }
 
-CommitLineDiff.prototype.fileNameClick = function(data, event) {
-  if (this.showSpecificDiff()) {
-    this.showSpecificDiff(false);
+CommitLineDiff.prototype.fileNameClick = function() {
+  if (this.isShowingDiffs()) {
+    this.isShowingDiffs(false);
   } else {
-    this.refreshAndShow();
+    this.isShowingDiffs(true);
+    this.specificDiff().invalidateDiff();
   }
 };
-
-CommitLineDiff.prototype.refreshAndShow = function() {
-  var self = this;
-  this.specificDiff().invalidateDiff(function() {
-    self.showSpecificDiff(true);
-  });
-}
