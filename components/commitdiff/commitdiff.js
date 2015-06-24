@@ -13,6 +13,7 @@ var CommitDiff = function(args) {
   this.server = args.server;
   this.sha1 = args.sha1;
   this.repoPath = args.repoPath;
+  this.textDiffType = args.textDiffType;
   this.maxNumberOfFilesShown = 50;
 
   var totalLineDiffs = args.fileLineDiffs.shift();
@@ -63,6 +64,7 @@ CommitDiff.prototype.loadMore = function(data, event) {
       repoPath: self.repoPath,
       server: self.server,
       sha1: self.sha1,
+      textDiffType: self.textDiffType,
       fileLineDiffs: logEntries[0].fileLineDiffs
     });
   });
