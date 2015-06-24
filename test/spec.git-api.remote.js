@@ -229,11 +229,8 @@ describe('git-api remote', function () {
 		});
 	});
 
-	it('cleaning up test dir should work', function(done) {
-		req
-			.post(restGit.pathPrefix + '/testing/cleanup')
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
+	after(function(done) {
+		common.post(req, '/testing/cleanup', undefined, done);
 	});
+
 });

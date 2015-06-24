@@ -51,5 +51,9 @@ describe('git-api conflict rebase', function () {
 	it('should be possible to drop stash', function(done) {
 		common.delete(req, '/stashes/0', { path: testDir }, done);
 	});
+	
+	after(function(done) {
+		common.post(req, '/testing/cleanup', undefined, done);
+	});
 
-})
+});

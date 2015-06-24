@@ -415,7 +415,8 @@ describe('git-api', function () {
     });
   });
 
-  it('cleaning up test dir should work', function(done) {
+  after(function(done) {
     common.post(req, '/testing/cleanup', undefined, done);
   });
+
 })

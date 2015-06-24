@@ -22,7 +22,7 @@ describe('git-api: test ignorefile call', function () {
       var testFile = 'test.txt';
 
       // Create .gitignore file prior to append
-      fs.writeFileSync(dir + '.gitignore', 'test git ignore file...');
+      fs.writeFileSync(path.join(dir, '.gitignore'), 'test git ignore file...');
 
       async.series([
 
@@ -32,7 +32,7 @@ describe('git-api: test ignorefile call', function () {
           common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
-            fs.readFile(dir + '/.gitignore', function (err, data) {
+            fs.readFile(path.join(dir, '.gitignore'), function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
@@ -59,7 +59,7 @@ describe('git-api: test ignorefile call', function () {
           common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
-            fs.readFile(dir + '/.gitignore', function (err, data) {
+            fs.readFile(path.join(dir, '.gitignore'), function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
@@ -78,7 +78,7 @@ describe('git-api: test ignorefile call', function () {
       var testFile = 'test.txt';
 
       // Add file to .gitignore
-      fs.appendFileSync(dir + '/.gitignore', testFile);
+      fs.appendFileSync(path.join(dir, '.gitignore'), testFile);
 
       async.series([
 
@@ -103,7 +103,7 @@ describe('git-api: test ignorefile call', function () {
       var testFile = 'test.txt';
 
       // add part of file name to gitignore
-      fs.appendFileSync(dir + '/.gitignore', testFile.split('.')[0]);
+      fs.appendFileSync(path.join(dir, '.gitignore'), testFile.split('.')[0]);
 
       async.series([
 
@@ -113,7 +113,7 @@ describe('git-api: test ignorefile call', function () {
           common.get(req, '/status', { path: dir }, function (err, res) {
             if (err) return done(err);
             expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
-            fs.readFile(dir + '/.gitignore', function (err, data) {
+            fs.readFile(path.join(dir, '.gitignore'), function (err, data) {
               if (data.toString().indexOf(testFile) > 0) {
                 done();
               } else {
@@ -125,4 +125,9 @@ describe('git-api: test ignorefile call', function () {
       ], done);
     });
   });
+
+  after(function(done) {
+    common.post(req, '/testing/cleanup', undefined, done);
+  });
+
 });
