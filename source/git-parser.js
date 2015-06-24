@@ -83,7 +83,7 @@ exports.parseGitLog = function(data) {
     currentCommmit.parents = sha1s.slice(1);
     if (refStartIndex > 0) {
       var refs = row.substring(refStartIndex + 1, row.length - 1);
-      currentCommmit.refs = refs.split(', ');
+      currentCommmit.refs = refs.split(/ -> |, /g);
     }
     commits.push(currentCommmit);
     parser = parseHeaderLine;
