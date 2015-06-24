@@ -112,7 +112,11 @@ StagingViewModel.prototype.refreshContent = function(callback) {
         err.errorCode == 'no-such-path';
     }
 
-    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway && !self.isDiagOpen) {
+    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+      if (self.isDiagOpen) {
+        if (callback) callback();
+        return;
+      }
       self.isDiagOpen = true;
       var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
 
@@ -130,14 +134,6 @@ StagingViewModel.prototype.refreshContent = function(callback) {
     } else {
       self.loadStatus(status, callback);
     }
-    self.inRebase(!!status.inRebase);
-    self.inMerge(!!status.inMerge);
-    if (status.inMerge) {
-      var lines = status.commitMessage.split('\n');
-      self.commitMessageTitle(lines[0]);
-      self.commitMessageBody(lines.slice(1).join('\n'));
-    }
-    if (callback) callback();
   });
 }
 StagingViewModel.prototype.loadStatus = function(status, callback) {
