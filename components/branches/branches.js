@@ -18,7 +18,7 @@ function BranchesViewModel(server, repoPath) {
   this.current = ko.observable();
   this.fetchLabel = ko.computed(function() {
     if (self.current()) {
-      return "@" + self.current();
+      return self.current();
     }
   });
   this.updateBranches();
