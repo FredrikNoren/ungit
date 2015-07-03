@@ -2,6 +2,7 @@ var rc = require('rc');
 var path = require('path');
 var fs = require('fs');
 var yargs = require('yargs');
+var homedir = require('os-homedir')();
 
 var defaultConfig = {
 
@@ -86,7 +87,7 @@ var defaultConfig = {
   autoPruneOnFetch: true,
 
   // Directory to look for plugins
-  pluginDirectory: path.join(getUserHome(), '.ungit', 'plugins'),
+  pluginDirectory: path.join(homedir, '.ungit', 'plugins'),
 
   // Name-object pairs of configurations for plugins. To disable a plugin, use "disabled": true, for example:
   // "pluginConfigs": { "gerrit": { "disabled": true } }
@@ -101,10 +102,6 @@ var defaultConfig = {
 
   fileSeparator: path.sep
 };
-
-function getUserHome() {
-  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-}
 
 // Works for now but should be moved to bin/ungit
 var argv = yargs
@@ -160,3 +157,4 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
 } else {
   module.exports = rc('ungit', argv.default(defaultConfig).argv);
 }
+module.exports.homedir = homedir;

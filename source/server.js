@@ -274,10 +274,7 @@ app.get('/api/gitversion', function(req, res) {
   });
 });
 
-function getUserHome() {
-  return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || "/tmp";
-}
-var userConfigPath = path.join(getUserHome(), '.ungitrc');
+var userConfigPath = path.join(config.homedir, '.ungitrc');
 function readUserConfig(callback) {
   fs.exists(userConfigPath, function(hasConfig) {
     if (!hasConfig) return callback(null, {});
