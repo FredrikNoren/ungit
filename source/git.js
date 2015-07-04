@@ -397,27 +397,35 @@ git.updateIndexFromFileList = function(repoPath, files) {
               })
               .start();
           }
-        },
-        function(done) {
-          if (toPatch.length == 0) done();
-          else {
-            git(['add', '--patch'], repoPath)
-              .always(done)
-              .setStdoutListener(function(str) {
-                console.log(555, str);
-              })
-              .setStderrListener(function(str) {
-                console.log(222, str);
-              })
-              .started(function() {
-                console.log(111);
-              })
-              .start();
-          }
         }
       ], function(err) {
         if (err) return task.setResult(err);
         task.setResult();
+
+        var parseDiffPatch = function(patchLineList, err, result) {
+          console.log(123, err, result, patchLineList);
+        };
+
+        // handle patchings per file bases
+        for (var n = 0; n < toPatch.length; n++) {
+          // Realy need bluebird or q to better manage async...  for laterz...
+          git(['diff', '-U0', toPatch[n].name], repoPath)
+            .done(parseDiffPatch.bind(null, toPatch[n].patchLineList))
+            .start();
+        }
+
+
+        // git(['add', '--patch'], repoPath)
+        //   .setStdoutListener(function(str) {
+        //     console.log(555, str);
+        //   })
+        //   .setStderrListener(function(str) {
+        //     console.log(222, str);
+        //   })
+        //   .started(function() {
+        //     console.log(111);
+        //   })
+        //   .start();
       });
 
     });
