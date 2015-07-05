@@ -10,6 +10,7 @@ var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
+var Promise = require("bluebird");
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
@@ -352,83 +353,81 @@ git.discardChangesInFile = function(repoPath, filename) {
 
 git.updateIndexFromFileList = function(repoPath, files) {
   var task = new GitTask();
+  var statusTask;
 
-  var statusTask = git.status(repoPath)
-    .fail(task.setResult)
-    .done(function(status) {
-      var toAdd = [];
-      var toRemove = [];
-      var toPatch = [];
+  new Promise(function (resolve, reject) {
+    statusTask = git.status(repoPath)
+      .fail(reject)
+      .done(resolve);
+  }).then(function(status) {
+    var toAdd = [];
+    var toRemove = [];
+    var toPatch = [];
 
-      for(var v in files) {
-        var file = files[v];
-        var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
-        if (!fileStatus) {
-          task.setResult({ error: 'No such file in staging: ' + file.name });
-          return;
-        }
-
-        if (fileStatus.removed) toRemove.push(file.name);
-        else if (files[v].patchLineList) toPatch.push(file)
-        else toAdd.push(file.name);
+    for(var v in files) {
+      var file = files[v];
+      var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+      if (!fileStatus) {
+        task.setResult({ error: 'No such file in staging: ' + file.name });
+        return;
       }
 
-      async.series([
-        function(done) {
-          if (toAdd.length == 0) done();
-          else {
-            git(['update-index', '--add', '--stdin'], repoPath)
-              .always(done)
-              .started(function() {
-                var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-                this.process.stdin.end(filesToAdd);
-              })
-              .start();
-          }
-        },
-        function(done) {
-          if (toRemove.length == 0) done();
-          else {
-            git(['update-index', '--remove', '--stdin'], repoPath)
-              .always(done)
-              .started(function() {
-                var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-                this.process.stdin.end(filesToRemove);
-              })
-              .start();
-          }
-        }
-      ], function(err) {
-        if (err) return task.setResult(err);
-        task.setResult();
+      if (fileStatus.removed) toRemove.push(file.name);
+      else if (files[v].patchLineList) toPatch.push(file)
+      else toAdd.push(file.name);
+    }
 
-        var parseDiffPatch = function(patchLineList, err, result) {
-          console.log(123, err, result, patchLineList);
-        };
-
-        // handle patchings per file bases
-        for (var n = 0; n < toPatch.length; n++) {
-          // Realy need bluebird or q to better manage async...  for laterz...
-          git(['diff', '-U0', toPatch[n].name], repoPath)
-            .done(parseDiffPatch.bind(null, toPatch[n].patchLineList))
-            .start();
-        }
-
-
-        // git(['add', '--patch'], repoPath)
-        //   .setStdoutListener(function(str) {
-        //     console.log(555, str);
-        //   })
-        //   .setStderrListener(function(str) {
-        //     console.log(222, str);
-        //   })
-        //   .started(function() {
-        //     console.log(111);
-        //   })
-        //   .start();
-      });
-
+    var addPromise = new Promise(function (resolve) {
+      if (toAdd.length == 0) {
+        resolve();
+        return;
+      }
+      git(['update-index', '--add', '--stdin'], repoPath)
+        .done(resolve)
+        .started(function() {
+          var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+          this.process.stdin.end(filesToAdd);
+        }).start();
     });
+
+    var removePromise = new Promise(function (resolve) {
+      if (toRemove.length == 0) {
+        resolve();
+        return;
+      }
+      git(['update-index', '--remove', '--stdin'], repoPath)
+        .done(resolve)
+        .started(function() {
+          var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+          this.process.stdin.end(filesToRemove);
+        }).start();
+    });
+
+    var patchPromise = new Promise(function (resolve) {
+      if (toPatch.length == 0) {
+        resolve();
+        return;
+      }
+      var parseDiffPatch = function(patchLineList, err, result) {
+        console.log(123, err, result, patchLineList);
+      };
+
+      // handle patchings per file bases
+      for (var n = 0; n < toPatch.length; n++) {
+        // Realy need bluebird or q to better manage async...  for laterz...
+        git(['diff', '-U0', toPatch[n].name], repoPath)
+          .done(resolve)
+          .done(parseDiffPatch.bind(null, toPatch[n].patchLineList))
+          .start();
+      }
+    });
+
+    Promise.join(addPromise, removePromise, patchPromise)
+      .catch(function(err) { task.setResult(err); })
+      .done(function() { task.setResult(); });
+  }).catch(function(err) {
+    task.setResult(err);
+  });
   task.started(statusTask.start);
 
   return task;
