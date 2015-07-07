@@ -433,9 +433,8 @@ git.updateIndexFromFileList = function(repoPath, files) {
         .done(resolve);
     });
 
-    Promise.join(addPromise, removePromise, patchPromise)
-      .catch(task.setResult)
-      .done(function() { task.setResult(); });
+    Promise.join(addPromise, removePromise, patchPromise, function() { task.setResult(); })
+      .catch(task.setResult);
   }).catch(task.setResult);
 
   task.started(statusTask.start);
