@@ -351,6 +351,16 @@ git.discardChangesInFile = function(repoPath, filename) {
   return task;
 }
 
+
+var parseDiffpatch = function (toPatch, repoPath, resolve, reject) {
+  git(['diff', '-U0', toPatch.name], repoPath)
+    .fail(reject)
+    .done(function(result) {
+      console.log(123, result, toPatch.patchLineList);
+      resolve();
+    }).start();
+}
+
 git.updateIndexFromFileList = function(repoPath, files) {
   var task = new GitTask();
   var statusTask;
@@ -377,59 +387,58 @@ git.updateIndexFromFileList = function(repoPath, files) {
       else toAdd.push(file.name);
     }
 
-    var addPromise = new Promise(function (resolve) {
+    var addPromise = new Promise(function (resolve, reject) {
       if (toAdd.length == 0) {
         resolve();
         return;
       }
       git(['update-index', '--add', '--stdin'], repoPath)
         .done(resolve)
+        .fail(reject)
         .started(function() {
           var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
           this.process.stdin.end(filesToAdd);
         }).start();
     });
 
-    var removePromise = new Promise(function (resolve) {
+    var removePromise = new Promise(function (resolve, reject) {
       if (toRemove.length == 0) {
         resolve();
         return;
       }
       git(['update-index', '--remove', '--stdin'], repoPath)
         .done(resolve)
+        .fail(reject)
         .started(function() {
           var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
           this.process.stdin.end(filesToRemove);
         }).start();
     });
 
-    var patchPromise = new Promise(function (resolve) {
+    var patchPromise = new Promise(function (resolve, reject) {
       if (toPatch.length == 0) {
         resolve();
         return;
       }
-      var parseDiffPatch = function(patchLineList, err, result) {
-        console.log(123, err, result, patchLineList);
-      };
 
+      var diffPatchArray = [];
       // handle patchings per file bases
       for (var n = 0; n < toPatch.length; n++) {
         // Realy need bluebird or q to better manage async...  for laterz...
-        git(['diff', '-U0', toPatch[n].name], repoPath)
-          .done(resolve)
-          .done(parseDiffPatch.bind(null, toPatch[n].patchLineList))
-          .start();
+        diffPatchArray.push(new Promise(parseDiffpatch.bind(null, toPatch[n], repoPath)));
       }
+
+      Promise.all(diffPatchArray)
+        .catch(reject)
+        .done(resolve);
     });
 
     Promise.join(addPromise, removePromise, patchPromise)
-      .catch(function(err) { task.setResult(err); })
+      .catch(task.setResult)
       .done(function() { task.setResult(); });
-  }).catch(function(err) {
-    task.setResult(err);
-  });
-  task.started(statusTask.start);
+  }).catch(task.setResult);
 
+  task.started(statusTask.start);
   return task;
 }
 
