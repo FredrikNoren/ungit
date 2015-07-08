@@ -266,3 +266,75 @@ exports.parseGitSubmodule = function(text, args) {
 
   return submodules;
 }
+
+var updatePatchHeader = function(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) {
+  var splitedHeader = result[lastHeaderIndex].split(' ');
+  var start = splitedHeader[1].split(','); // start of block
+  var end = splitedHeader[2].split(',');   // end of block
+  var startLeft = Math.abs(start[0]);
+  var startRight = Math.abs(start[1]);
+  var endLeft = end[0];
+  var endRight = end[1];
+
+  splitedHeader[1] = '-' + (startLeft - ignoredDiffCountTotal) + ',' + startRight;
+  splitedHeader[2] = '+' + (endLeft - ignoredDiffCountTotal) + ',' + (endRight - ignoredDiffCountCurrent);
+
+  result[lastHeaderIndex] = splitedHeader.join(' ');
+}
+
+exports.parsePatchDiffResult = function(text, patchLineList) {
+  if (!text) return {};
+
+  var lines = text.trim().split('\n');
+  var result = [];
+  var ignoredDiffCountTotal = 0;
+  var ignoredDiffCountCurrent = 0;
+  var headerIndex = null;
+  var lastHeaderIndex = -1;
+  var n = 0;
+
+  // first add all lines untill diff block header is found
+  while (!/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/.test(lines[n])) {
+    result.push(lines[n]);
+    n++;
+  }
+
+  // per rest of the lines
+  while (n < lines.length) {
+    var line = lines[n];
+
+    if (/^[\-\+]/.test(line)) {
+      // Modified line
+      if (patchLineList.shift()) {
+        // diff is selected tobe committed
+        result.push(line);
+      } else if (line[0] === '+') {
+        // added line diff is selected tobe ignored
+        ignoredDiffCountCurrent++;
+      } else { // lines[0] === '-'
+        // deleted line diff is selected tobe ignored
+        ignoredDiffCountCurrent--;
+        result.push(' ' + line.slice(1));
+      }
+    } else {
+      // none modified line or diff block header
+      if (/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/.test(line)) {
+        // update previous header to match line numbers
+        if (lastHeaderIndex > -1) {
+          updatePatchHeader(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent);
+        }
+        // diff block header
+        ignoredDiffCountTotal += ignoredDiffCountCurrent;
+        ignoredDiffCountCurrent = 0;
+        lastHeaderIndex = result.length;
+      }
+      result.push(line);
+    }
+    n++;
+  }
+
+  // We don't want to leave out last diff block header...
+  updatePatchHeader(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent);
+
+  return result.join('\n');
+}
