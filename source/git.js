@@ -351,14 +351,24 @@ git.discardChangesInFile = function(repoPath, filename) {
   return task;
 }
 
+var parseDiffForPatch = function (patch, repoPath) {
+  return new Promise(function (resolve, reject) {
+    git(['diff', '-U7', patch.name], repoPath) // `add -e` uses U7, which is little annoying but understandable
+      .fail(reject)
+      .done(resolve).start();
+  });
+}
 
-var parseDiffpatch = function (toPatch, repoPath, resolve, reject) {
-  git(['diff', '-U0', toPatch.name], repoPath)
-    .fail(reject)
-    .done(function(result) {
-      console.log(123, result, toPatch.patchLineList);
-      resolve();
-    }).start();
+var addPatchedDiff = function(patch, repoPath, patchedDiff) {
+  return new Promise(function (resolve, reject) {
+    git(['add', '-e', patch.name], repoPath)
+      .fail(reject)
+      .done(resolve)
+      .started(function() {
+        // There has to be a better way...
+        this.process.stdin.end('dGa' + patchedDiff + "\033ZZ");
+      }).start();
+  });
 }
 
 git.updateIndexFromFileList = function(repoPath, files) {
@@ -424,8 +434,9 @@ git.updateIndexFromFileList = function(repoPath, files) {
       var diffPatchArray = [];
       // handle patchings per file bases
       for (var n = 0; n < toPatch.length; n++) {
-        // Realy need bluebird or q to better manage async...  for laterz...
-        diffPatchArray.push(new Promise(parseDiffpatch.bind(null, toPatch[n], repoPath)));
+        diffPatchArray.push(parseDiffForPatch(toPatch[n], repoPath)
+          .then(gitParser.parsePatchDiffResult.bind(null, toPatch[n].patchLineList))
+          .then(addPatchedDiff.bind(null, toPatch[n], repoPath)));
       }
 
       Promise.all(diffPatchArray)

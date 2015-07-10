@@ -282,7 +282,7 @@ var updatePatchHeader = function(result, lastHeaderIndex, ignoredDiffCountTotal,
   result[lastHeaderIndex] = splitedHeader.join(' ');
 }
 
-exports.parsePatchDiffResult = function(text, patchLineList) {
+exports.parsePatchDiffResult = function(patchLineList, text) {
   if (!text) return {};
 
   var lines = text.trim().split('\n');
