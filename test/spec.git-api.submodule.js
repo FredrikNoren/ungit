@@ -72,7 +72,7 @@ describe('git-api submodule', function () {
 	});
 
 	it('commit should succeed', function(done) {
-		common.post(req, '/commit', { path: testDirMain, message: 'Add submodule', files: [submodulePath, '.gitmodules'] }, done);
+		common.post(req, '/commit', { path: testDirMain, message: 'Add submodule', files: [{ name: submodulePath }, { name: '.gitmodules' }] }, done);
 	});
 
 	it('status should be empty after commit', function(done) {

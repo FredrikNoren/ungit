@@ -32,13 +32,13 @@ describe('git-api conflict rebase', function () {
 
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/checkout', { path: testDir, name: testBranch }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); }
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); }
 			], done);
 		});
 	});
@@ -103,10 +103,10 @@ describe('git-api conflict checkout', function () {
 			testDir = dir;
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }, done); },
 			], done);
 		});
 	});
@@ -164,13 +164,13 @@ describe('git-api conflict merge', function () {
 			testDir = dir;
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/checkout', { path: testDir, name: testBranch }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'c', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'c', files: [{ name: testFile1 }] }, done); },
 			], done);
 		});
 	});
@@ -239,13 +239,13 @@ describe('git-api conflict solve by deleting', function () {
 
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/checkout', { path: testDir, name: testBranch }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); }
+				function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); }
 			], done);
 		});
 	});

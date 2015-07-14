@@ -41,7 +41,7 @@ describe('git-api branching', function () {
 	it('should be possible to commit to master', function(done) {
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [testFile1] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); }
 		], done);
 	});
 
@@ -103,7 +103,7 @@ describe('git-api branching', function () {
 	it('should be possible to commit to the branch', function(done) {
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [testFile2] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }, done); }
 		], done);
 	});
 

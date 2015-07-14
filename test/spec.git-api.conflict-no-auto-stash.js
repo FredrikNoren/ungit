@@ -31,10 +31,10 @@ describe('git-api conflict checkout', function () {
 			testDir = dir;
 			async.series([
 				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }, done); },
 				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
 				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [testFile1] }, done); },
+				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }, done); },
 			], done);
 		});
 	});
