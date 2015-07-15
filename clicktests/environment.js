@@ -6,7 +6,7 @@ var helpers = require('./helpers');
 
 module.exports = Environment;
 
-// Environment provides 
+// Environment provides
 function Environment(page, config) {
   this.page = page;
   this.config = config || {};
@@ -49,7 +49,7 @@ Environment.prototype.createRepos = function(config, callback) {
               self.backgroundAction('POST', self.url + '/api/commit', {
                 path: conf.path,
                 message: 'Init Commit ' + x,
-                files: ['testy' + x]
+                files: [{ name: 'testy' + x }]
               }, callback);
             });
           }, callback);
@@ -103,21 +103,21 @@ Environment.prototype.startServer = function(callback) {
   var self = this;
   helpers.log('Starting ungit server...', this.config.serverStartupOptions);
   var hasStarted = false;
-  var options = ['bin/ungit', 
+  var options = ['bin/ungit',
     '--cliconfigonly',
-    '--port=' + this.config.port, 
-    '--no-launchBrowser', 
-    '--dev', 
+    '--port=' + this.config.port,
+    '--no-launchBrowser',
+    '--dev',
     '--no-bugtracking',
     '--no-sendUsageStatistics',
-    '--autoShutdownTimeout=' + this.config.serverTimeout, 
-    '--maxNAutoRestartOnCrash=0', 
+    '--autoShutdownTimeout=' + this.config.serverTimeout,
+    '--maxNAutoRestartOnCrash=0',
     '--logGitCommands']
     .concat(this.config.serverStartupOptions);
   var ungitServer = child_process.spawn('node', options);
   ungitServer.stdout.on("data", function (data) {
     if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
-    
+
     if (data.toString().indexOf('Ungit server already running') >= 0) {
       callback('server-already-running');
     }
