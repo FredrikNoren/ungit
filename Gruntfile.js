@@ -218,7 +218,13 @@ module.exports = function(grunt) {
         bundleExternal: false,
         debug: true
       });
-      b.add('./components/' + component + '/' + component + '.js');
+      var src = './components/' + component + '/' + component + '.js';
+      if (!fs.existsSync(src)) {
+        grunt.log.error(src + ' does not exist. If this component is obsolete, ' +
+          'please remove that directory or perform a clean build.');
+        return;
+      }
+      b.add(src);
       b.external(['ungit-components',
               'ungit-program-events',
               'ungit-navigation',
