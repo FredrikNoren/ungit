@@ -37,6 +37,7 @@
     "npm-registry-client": "~6.3.0",
     "npmconf": "~2.1.1",
     "open": "~0.0.5",
+    "os-homedir": "^1.0.0",
     "passport": "~0.2.1",
     "passport-local": "~1.0.0",
     "raven": "~0.7.3",
