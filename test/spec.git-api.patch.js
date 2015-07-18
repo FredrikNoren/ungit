@@ -68,7 +68,7 @@ describe('git-api', function () {
   // Single diff block diff, (git apply uses diff -U3)  //
   /////////////////////////////////////////////////////////
   
-  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.', function(done) {
+  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.', function(complete) {
     var content = '';
     var changedContent = '';
     var testFileName = uuid();
@@ -85,10 +85,10 @@ describe('git-api', function () {
     }
     
     testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
-      .done(done.bind(null, null), done);
+      .done(complete.bind(null, null), complete); 
   });
   
-  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.', function(done) {
+  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.', function(complete) {
     var content = '';
     var changedContent = '';
     var testFileName = uuid();
@@ -101,10 +101,10 @@ describe('git-api', function () {
     }
     
     testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
-      .done(done.bind(null, null), done);
+      .done(complete.bind(null, null), complete);
   });
   
-  it('10 lines, 10 diff, 0~2 selected', function(done) {
+  it('10 lines, 10 diff, 0~2 selected', function(complete) {
     var content = '';
     var changedContent = '';
     var testFileName = uuid();
@@ -117,7 +117,7 @@ describe('git-api', function () {
     }
     
     testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
-      .done(done.bind(null, null), done);
+      .done(complete.bind(null, null), complete);
   });
   
   // 10 lines, 10 diff, 8~9 selected
