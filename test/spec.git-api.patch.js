@@ -35,6 +35,20 @@ var testPatch = function(req, testDir, testFileName, content, changedContent, fi
   .then(promisifiedPost.bind(null, req, '/commit', { path: testDir, message: 'patched commit ' + testFileName, files: files }));
 }
 
+var getPatchLineList = function(size, notSelected) {
+  var patchLineList = [];
+  for (var n = 0; n < size; n++) {
+    patchLineList.push(false);
+  }
+  
+  if (notSelected) {
+    for (var n = 0; n < notSelected.length; n++) {
+      patchLineList[notSelected[n]] = true;
+    }
+  }
+  return patchLineList;
+}
+
 describe('git-api', function () {
   it('creating test dir should work', function(done) {
     common.post(req, '/testing/createtempdir', undefined, function(err, res) {
@@ -54,34 +68,57 @@ describe('git-api', function () {
   // Single diff block diff, (git apply uses diff -U3)  //
   /////////////////////////////////////////////////////////
   
-  // Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.
-  // (patchLineList is size fo 20 due to 10 deleted and 10 added according to git diff)
-  it('create and commit test file should work', function(done) {
+  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.', function(done) {
     var content = '';
     var changedContent = '';
     var testFileName = uuid();
     var testFileSize = 10;
     var patchLineList = [];
     
+    for (var n = 0; n < testFileSize; n++) {
+      content += (n + '\n');
+      changedContent += (n + '!\n');
+    }
+    
     for (var n = 0; n < testFileSize * 2; n++) {
-      if (n < testFileSize) {
-        content += (n + '\n');
-        changedContent += (n + '!\n');
-      }
       patchLineList.push(true);
     }
     
     testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
-    .catch(function(err) {
-      done(err);
-    }).done(function(err, res) {
-      done(null, res);
-    });
+      .done(done.bind(null, null), done);
   });
   
-  // Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.
+  it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.', function(done) {
+    var content = '';
+    var changedContent = '';
+    var testFileName = uuid();
+    var testFileSize = 10;
+    var patchLineList = getPatchLineList(testFileSize * 2);
+    
+    for (var n = 0; n < testFileSize; n++) {
+      content += (n + '\n');
+      changedContent += (n + '!\n');
+    }
+    
+    testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(done.bind(null, null), done);
+  });
   
-  // 10 lines, 10 diff, 0~2 selected
+  it('10 lines, 10 diff, 0~2 selected', function(done) {
+    var content = '';
+    var changedContent = '';
+    var testFileName = uuid();
+    var testFileSize = 10;
+    var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2]);
+    
+    for (var n = 0; n < testFileSize; n++) {
+      content += (n + '\n');
+      changedContent += (n + '!\n');
+    }
+    
+    testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(done.bind(null, null), done);
+  });
   
   // 10 lines, 10 diff, 8~9 selected
   
