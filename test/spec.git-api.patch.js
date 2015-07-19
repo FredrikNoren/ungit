@@ -28,10 +28,10 @@ var promisifiedPost = function(req, route, args) {
   });
 }
 
-var testPatch = function(req, testDir, testFileName, content, changedContent, files) {
-  return promisifiedPost(req, '/testing/createfile', { file: path.join(testDir, testFileName), content: content })
+var testPatch = function(req, testDir, testFileName, contentsToPatch, files) {
+  return promisifiedPost(req, '/testing/createfile', { file: path.join(testDir, testFileName), content: contentsToPatch[0] })
   .then(promisifiedPost.bind(null, req, '/commit', { path: testDir, message: 'a commit for ' + testFileName, files: [{ name: testFileName }] }))
-  .then(promisifiedPost.bind(null, req, '/testing/changefile', { file: path.join(testDir, testFileName), content: changedContent }))
+  .then(promisifiedPost.bind(null, req, '/testing/changefile', { file: path.join(testDir, testFileName), content: contentsToPatch[1] }))
   .then(promisifiedPost.bind(null, req, '/commit', { path: testDir, message: 'patched commit ' + testFileName, files: files }));
 }
 
@@ -42,11 +42,25 @@ var getPatchLineList = function(size, notSelected) {
   }
   
   if (notSelected) {
-    for (var n = 0; n < notSelected.length; n++) {
-      patchLineList[notSelected[n]] = true;
+    for (var m = 0; m < notSelected.length; m++) {
+      patchLineList[notSelected[m]] = true;
     }
   }
   return patchLineList;
+}
+
+var getContentsToPatch = function(size, toChange) {
+  var content = '';
+  var changedContent = '';
+
+  for (var n = 0; n < size; n++) {
+    content += (n + '\n');
+    if (!toChange || toChange.indexOf(n) > -1) {
+      changedContent += (n + '!\n');
+    }
+  }
+  
+  return [content, changedContent];
 }
 
 describe('git-api', function () {
@@ -64,59 +78,41 @@ describe('git-api', function () {
   });
   
   
-  /////////////////////////////////////////////////////////
-  // Single diff block diff, (git apply uses diff -U3)  //
-  /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  // Single diff block diff, (git apply uses diff -U3) //
+  ///////////////////////////////////////////////////////
   
   it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.', function(complete) {
-    var content = '';
-    var changedContent = '';
     var testFileName = uuid();
     var testFileSize = 10;
     var patchLineList = [];
-    
-    for (var n = 0; n < testFileSize; n++) {
-      content += (n + '\n');
-      changedContent += (n + '!\n');
-    }
+    var contentsToPatch = getContentsToPatch(testFileSize);
     
     for (var n = 0; n < testFileSize * 2; n++) {
       patchLineList.push(true);
     }
     
-    testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
       .done(complete.bind(null, null), complete); 
   });
   
   it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.', function(complete) {
-    var content = '';
-    var changedContent = '';
     var testFileName = uuid();
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2);
+    var contentsToPatch = getContentsToPatch(testFileSize);
     
-    for (var n = 0; n < testFileSize; n++) {
-      content += (n + '\n');
-      changedContent += (n + '!\n');
-    }
-    
-    testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
       .done(complete.bind(null, null), complete);
   });
   
   it('10 lines, 10 diff, 0~2 selected', function(complete) {
-    var content = '';
-    var changedContent = '';
     var testFileName = uuid();
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
     
-    for (var n = 0; n < testFileSize; n++) {
-      content += (n + '\n');
-      changedContent += (n + '!\n');
-    }
-    
-    testPatch(req, testDir, testFileName, content, changedContent, [{ name: testFileName, patchLineList: patchLineList }])
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
       .done(complete.bind(null, null), complete);
   });
   
@@ -136,9 +132,9 @@ describe('git-api', function () {
   
   
   
-  ///////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////
   // Multi diff block diff, (git apply uses diff -U3) //
-  ///////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////
   
   // 30 lines, 12~19 diff, 12~15 and 17~19 selected  
   
