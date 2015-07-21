@@ -361,12 +361,16 @@ var parseDiffForPatch = function (patch, repoPath) {
 
 var applyPatchedDiff = function(patch, repoPath, patchedDiff) {
   return new Promise(function (resolve, reject) {
-    git(['apply', '--cached'], repoPath)
-      .fail(reject)
-      .done(resolve)
-      .started(function() {
-        this.process.stdin.end(patchedDiff + '\n');
-      }).start();
+    if (patchedDiff) {
+      git(['apply', '--cached'], repoPath)
+        .fail(reject)
+        .done(resolve)
+        .started(function() {
+          this.process.stdin.end(patchedDiff + '\n');
+        }).start();
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -464,7 +468,14 @@ git.commit = function(repoPath, amend, message, files) {
     .fail(task.setResult)
     .done(function() {
       git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath)
-        .always(task.setResult)
+        .always(function(err) {
+          // ignore the case where nothing were added to be committed
+          if (!err || err.stdout.indexOf("Changes not staged for commit") > -1) {
+            task.setResult();
+          } else {
+            task.setResult(err);
+          }
+        })
         .started(function() {
           this.process.stdin.end(message);
         })
