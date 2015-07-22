@@ -107,6 +107,24 @@ suite.test('Test showing commit side by side diff between two commits', function
   });
 });
 
+suite.test('Should be possible to discard a created file and ensure patching is not avaliable for new file', function(done) {
+  environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
+    if (err) return done(err);
+    helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+      helpers.click(page, '[data-ta-clickable="show-stage-diffs"]');
+      setTimeout(function() {
+        helpers.waitForNotElement(page, '[data-ta-container="patch-file"]', function() {
+          helpers.click(page, '[data-ta-clickable="discard-file"]');
+          helpers.click(page, '[data-ta-clickable="yes"]');
+          helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+            done();
+          });
+        });
+      }, 1000);
+    });
+  });
+});
+
 suite.test('Should be possible to create a branch', function(done) {
   uiInteractions.createBranch(page, 'testbranch', done);
 });
