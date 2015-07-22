@@ -79,6 +79,9 @@ var gitQueue = async.queue(function (task, callback) {
   gitProcess.stderr.on('data', function(data) {
     stderr += data.toString();
   });
+  gitProcess.on('error', function (error) {
+      callback(error);
+  });
 
   gitProcess.on('close', function (code) {
     if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
@@ -353,7 +356,7 @@ git.commit = function(repoPath, amend, message, files) {
   if (message === undefined)
     return task.setResult({ error: 'Must specify commit message' });
 
-  if ((!(files instanceof Array) || files.length == 0) && !amend)
+  if ((!(Object.prototype.toString.call(files) === '[object Array]') || files.length == 0) && !amend)
     return task.setResult({ error: 'Must specify files or amend to commit' });
 
   var updateIndexTask = git.updateIndexFromFileList(repoPath, files)
