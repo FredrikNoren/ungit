@@ -170,6 +170,13 @@ suite.test('Show stats for changed file and discard it', function(done) {
         helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
           done();
         });
+
+suite.test('Should be possible to patch a file', function(done) {
+  environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
+    if (err) return done(err);
+    uiInteractions.patch(page, 'Patch', function() {
+      helpers.waitForElement(page, '[data-ta-container="node"]', function() {
+        done();
       });
     });
   });
