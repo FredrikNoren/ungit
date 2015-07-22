@@ -29,6 +29,7 @@ var promisifiedPost = function(req, route, args) {
 }
 
 var testPatch = function(req, testDir, testFileName, contentsToPatch, files) {
+  testDir = '/Users/junkkim/github/testdir';
   return promisifiedPost(req, '/testing/createfile', { file: path.join(testDir, testFileName), content: contentsToPatch[0] })
   .then(promisifiedPost.bind(null, req, '/commit', { path: testDir, message: 'a commit for ' + testFileName, files: [{ name: testFileName }] }))
   .then(promisifiedPost.bind(null, req, '/testing/changefile', { file: path.join(testDir, testFileName), content: contentsToPatch[1] }))
@@ -116,21 +117,75 @@ describe('git-api', function () {
       .done(complete.bind(null, null), complete);
   });
   
-  // 10 lines, 10 diff, 8~9 selected
+  it('10 lines, 10 diff, 18~19 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 10;
+    var patchLineList = getPatchLineList(testFileSize * 2, [18, 19]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 10 lines, 10 diff, 0~2 and 8 ~ 9 selected
+  it('10 lines, 10 diff, 0~2 and 18~19 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 10;
+    var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 18, 19]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 10 lines, 10 diff, 5~7 selected
+  it('10 lines, 10 diff, 5~7 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 10;
+    var patchLineList = getPatchLineList(testFileSize * 2, [5, 6, 7]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 30 lines, 30 diff, 0~2 and 28 ~ 29 selected
+  it('30 lines, 30 diff, 0~2 and 28 ~ 29 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 30;
+    var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 28, 29]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 30 lines, 30 diff, 16~18 and 27 selected
+  it('30 lines, 30 diff, 0~2, 28~29, 58~59 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 30;
+    var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 28, 29, 57, 58, 59]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 30 lines, 30 diff, 6~8, 16~18 and 27 selected
+  it('30 lines, 30 diff, 6~8, 16~18 and 58 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 30;
+    var patchLineList = getPatchLineList(testFileSize * 2, [6, 7, 8, 16, 17, 18, 58]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
-  // 30 lines, 30 diff, 12~15 and 17~19 selected
-  
-  
+  it('30 lines, 30 diff, 12~15 and 17~19 selected', function(complete) {
+    var testFileName = uuid();
+    var testFileSize = 30;
+    var patchLineList = getPatchLineList(testFileSize * 2, [12, 13, 14, 15, 17, 18, 19]);
+    var contentsToPatch = getContentsToPatch(testFileSize);
+    
+    testPatch(req, testDir, testFileName, contentsToPatch, [{ name: testFileName, patchLineList: patchLineList }])
+      .done(complete.bind(null, null), complete);
+  });
   
   //////////////////////////////////////////////////////
   // Multi diff block diff, (git apply uses diff -U3) //
