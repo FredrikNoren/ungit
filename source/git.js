@@ -356,7 +356,7 @@ git.commit = function(repoPath, amend, message, files) {
   if (message === undefined)
     return task.setResult({ error: 'Must specify commit message' });
 
-  if ((!(Object.prototype.toString.call(files) === '[object Array]') || files.length == 0) && !amend)
+  if ((!(Array.isArray(files)) || files.length == 0) && !amend)
     return task.setResult({ error: 'Must specify files or amend to commit' });
 
   var updateIndexTask = git.updateIndexFromFileList(repoPath, files)
