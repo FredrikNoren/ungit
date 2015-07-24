@@ -442,14 +442,11 @@ git.updateIndexFromFileList = function(repoPath, files) {
           .then(applyPatchedDiff.bind(null, toPatch[n], repoPath)));
       }
 
-      Promise.all(diffPatchArray)
-        .catch(reject)
-        .done(resolve);
+      Promise.all(diffPatchArray).then(resolve, reject);
     });
 
-    Promise.join(addPromise, removePromise, patchPromise, function() { task.setResult(); })
-      .catch(task.setResult);
-  }).catch(task.setResult);
+    return Promise.join(addPromise, removePromise, patchPromise);
+  }).then(task.setResult.bind(null, null), task.setResult);
 
   task.started(statusTask.start);
   return task;
