@@ -117,8 +117,8 @@ TextDiffViewModel.prototype.render = function() {
   }
 
   // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
-  // above data-bind going pass "html" binding.
-  // which is reason why manually updating the html content and refreshing kobinding to have it working...
+  // data bind at getPatchCheckBox that is rendered with "html" binding.
+  // which is reason why manually updating the html content and refreshing kobinding to have it render...
   this.htmlSrc = html;
   this.isParsed(true);
 };

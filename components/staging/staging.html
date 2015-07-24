@@ -78,8 +78,8 @@
             <span class="additions" data-bind="text: additions"></span>
             <span class="deletions" data-bind="text: deletions"></span>
             <span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
-            <span class="patch bootstrap-tooltip" data-bind="visible: isPatchable, click: patchClick"
-                data-toggle="tooltip" data-placement="top" data-ta-clickable="patch-file" title="Patch changes">Patch Lines</span>
+            <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
+                data-toggle="tooltip" data-placement="top" data-ta-clickable="patch-file" title="Patch changes">Patch</span>
             <span class="ignore bootstrap-tooltip" data-ta-clickable="ignore-file" data-bind="click: ignoreFile"
                 data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
             <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
