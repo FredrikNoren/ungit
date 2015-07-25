@@ -65,6 +65,12 @@ var StagingViewModel = function(server, repoPath) {
       return "Files in conflict";
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
+    
+    if (self.textDiffType() === 'sidebysidediff') {
+      var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
+      if (patchFiles.length > 0) return "Cannot patch with side by side view."
+    }
+
     return "";
   });
   this.toggleSelectAllGlyphClass = ko.computed(function() {
