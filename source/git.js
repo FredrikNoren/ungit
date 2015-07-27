@@ -356,7 +356,7 @@ var applyPatchedDiff = function(patch, repoPath, patchedDiff) {
         .fail(reject)
         .done(resolve)
         .started(function() {
-          this.process.stdin.end(patchedDiff + '\n');
+          this.process.stdin.end(patchedDiff + '\n\n');
         }).start();
     } else {
       resolve();
