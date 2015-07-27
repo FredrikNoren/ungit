@@ -65,7 +65,6 @@ CommitViewModel.prototype.setData = function(args) {
   this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
   this.fileLineDiffs(args.fileLineDiffs);
   this.isInited = true;
-  this.textDiffType = ko.observable('textdiff');
   this.commitDiff = ko.observable(components.create('commitDiff',
     { fileLineDiffs: this.fileLineDiffs().slice(),
       sha1: this.sha1,

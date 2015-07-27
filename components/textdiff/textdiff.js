@@ -25,7 +25,6 @@ var TextDiffViewModel = function(args) {
   this.textDiffType.subscribe(function() {
     self.invalidateDiff();
   });
-  this.dom = null;
   this.patchLineList = args.patchLineList;
   this.numberOfSelectedPatchLines = 0;
   this.htmlSrc = undefined;
@@ -126,10 +125,6 @@ TextDiffViewModel.prototype.render = function() {
 TextDiffViewModel.prototype.loadMore = function(callback) {
   this.loadCount += this.loadMoreCount();
   this.render();
-}
-
-TextDiffViewModel.prototype.setDom = function(dom) {
-  this.dom = dom;
 }
 
 TextDiffViewModel.prototype.getPatchCheckBox = function(symbol, index, isActive) {

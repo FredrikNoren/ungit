@@ -10,7 +10,7 @@ var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
-var Promise = require("bluebird");
+var Promise = require('bluebird');
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
@@ -52,14 +52,6 @@ GitExecutionTask.prototype.timeout = function(timeout) {
   this._timeout = timeout;
   return this;
 }
-GitExecutionTask.prototype.setStdoutListener = function(stdoutListener) {
-  this.stdoutListener = stdoutListener;
-  return this;
-}
-GitExecutionTask.prototype.setStderrListener = function(stderrListener) {
-  this.stderrListener = stderrListener;
-  return this;
-}
 
 
 git.runningTasks = [];
@@ -87,11 +79,9 @@ var gitQueue = async.queue(function (task, callback) {
 
   gitProcess.stdout.on('data', function(data) {
     stdout += data.toString();
-    if (task.stdoutListener) task.stdoutListener(data.toString());
   });
   gitProcess.stderr.on('data', function(data) {
     stderr += data.toString();
-    if (task.stderrListener) task.stderrListener(data.toString());
   });
   gitProcess.on('error', function (error) {
       callback(error);
