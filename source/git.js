@@ -460,7 +460,12 @@ git.commit = function(repoPath, amend, message, files) {
           if (!err || err.stdout.indexOf("Changes not staged for commit") > -1) {
             task.setResult();
           } else {
-            task.setResult(err);
+            try {
+              task.setResult(err);
+            } catch (e) {
+              // log if json resons is already sent...  should be fixed with promise impl
+              console.log(e);
+            }
           }
         })
         .started(function() {
