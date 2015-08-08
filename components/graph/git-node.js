@@ -141,9 +141,6 @@ GitNodeViewModel.prototype.setData = function(args) {
 }
 GitNodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.commitComponent.updateAnimationFrame(deltaT);
-  GitNodeViewModel.super_.prototype.updateAnimationFrame.call(this, deltaT);
-
-  this.updateGoalPosition();
 }
 GitNodeViewModel.prototype.updateGoalPosition = function() {
   var goalPosition = new Vector2();
