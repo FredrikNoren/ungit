@@ -308,7 +308,6 @@ GitGraphViewModel.prototype.setNodes = function(nodes) {
 GitGraphViewModel.prototype.instantUpdatePositions = function() {
   this.nodes().forEach(function(node) {
     node.updateGoalPosition();
-    node.position(node.goalPosition());
   });
 }
 

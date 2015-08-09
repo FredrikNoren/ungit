@@ -69,7 +69,7 @@ var GitNodeViewModel = function(graph, sha1) {
     self.commitComponent.nodeIsMousehover(value);
   });
   this.commitContainerVisible = ko.computed(function() {
-    return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover() || self.selected();
+    return self.ancestorOfHEAD() || self.nodeIsMousehover() || self.selected();
   });
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
@@ -148,14 +148,14 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     if (!this.aboveNode)
       goalPosition.y = 120;
     else if (this.aboveNode.ancestorOfHEAD())
-      goalPosition.y = this.aboveNode.goalPosition().y + 120;
+      goalPosition.y = this.aboveNode.position().y + 120;
     else
-      goalPosition.y = this.aboveNode.goalPosition().y + 60;
+      goalPosition.y = this.aboveNode.position().y + 60;
     goalPosition.x = 30;
     this.setRadius(30);
   } else {
     if (this.aboveNode) {
-      goalPosition.y = this.aboveNode.goalPosition().y + 60;
+      goalPosition.y = this.aboveNode.position().y + 60;
     } else {
       goalPosition.y = 120;
     }
@@ -164,7 +164,7 @@ GitNodeViewModel.prototype.updateGoalPosition = function() {
     this.setRadius(15);
   }
   if (this.aboveNode && this.aboveNode.selected()) {
-    goalPosition.y = this.aboveNode.goalPosition().y + this.aboveNode.commitComponent.element().offsetHeight + 30;
+    goalPosition.y = this.aboveNode.position().y + this.aboveNode.commitComponent.element().offsetHeight + 30;
   }
   this.setPosition(goalPosition);
 }
