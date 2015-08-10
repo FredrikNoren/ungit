@@ -43,9 +43,6 @@ var GraphViewModel = function() {
 }
 exports.GraphViewModel = GraphViewModel;
 GraphViewModel.prototype.updateAnimationFrame = function(deltaT) {
-  if (this.hoverGraphActionGraphic() && this.hoverGraphActionGraphic().updateAnimationFrame) {
-    this.hoverGraphActionGraphic().updateAnimationFrame(deltaT);
-  }
   this.nodes().forEach(function(node) {
     node.updateAnimationFrame(deltaT);
   });

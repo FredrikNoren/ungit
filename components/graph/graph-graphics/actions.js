@@ -77,12 +77,6 @@ RebaseViewModel.prototype.destroy = function() {
     node.color(node.savedColor);
   });
 }
-RebaseViewModel.prototype.updateAnimationFrame = function(deltaT) {
-  this.nodes.forEach(function(node) {
-    node.updateAnimationFrame(deltaT);
-  });
-}
-
 
 function ResetViewModel(nodes) {
   this.nodes = nodes;
