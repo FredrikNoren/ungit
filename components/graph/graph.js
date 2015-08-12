@@ -2,6 +2,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var Promise = require("bluebird");
 var d3 = require("d3");
+var GitNodeViewModel = require('./git-node');
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -43,7 +44,10 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.getServer('/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(logEntries) {
-      self.logEntries(self.logEntries().concat(logEntries));
+      self.logEntries(self.logEntries().concat(logEntries.map(function(logEntry) {
+          return new GitNodeViewModel(self.server, logEntry);
+        })
+      ));
       self.setNodesFromLog(logEntries);
     })
     .finally(function(){
@@ -65,5 +69,6 @@ GraphViewModel.prototype.setNodesFromLog = function() {
     .append("svg:circle")
     .attr("r", 30)
     .attr("cx", function(d) { return self.cx; })
-    .attr("cy", function(d) { self.cy += 160; return self.cy; }) 
+    .attr("cy", function(d) { self.cy += 160; return self.cy; })
+    .on('click', function(d) { console.log(d); });
 }
