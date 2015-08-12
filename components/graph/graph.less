@@ -1,7 +1,18 @@
 
 @import "public/less/variables.less";
 
-.graph {
-  position: absolute;
-  top: 280px;
+.graph {    
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  
+  .graphLog {
+    left: 575px;
+  }
+  
+  .nodeContainer {
+    position: absolute;
+    left: 30px;
+    top: 120px;
+  }
 }
