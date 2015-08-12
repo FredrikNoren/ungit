@@ -1,2 +1,14 @@
 
 <div id="graph-svg"></div>
+
+
+<div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
+  <div class="nodes" data-bind="foreach: nodes">
+    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: cx + 'px', top: cy + 'px' }">
+      <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: cx - 300 + 'px' }">
+        <!-- ko component: commitComponent -->
+        <!-- /ko -->
+      </div>
+    </div>
+  </div>
+</div>

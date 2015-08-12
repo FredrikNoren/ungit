@@ -13,7 +13,7 @@ function GraphViewModel(server, repoPath) {
   this.maxNNodes = 25;
   this.server = server;
   this.loadNodesFromApi();
-  this.logEntries = ko.observableArray();
+  this.nodes = ko.observableArray();
   
   this.svg = null;
   this.cx = 610;
@@ -43,12 +43,11 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
 
   // this.nodesLoader.start();
   this.getServer('/log', { path: this.repoPath(), limit: this.maxNNodes })
-    .then(function(logEntries) {
-      self.logEntries(self.logEntries().concat(logEntries.map(function(logEntry) {
-          return new GitNodeViewModel(self.server, logEntry);
+    .then(function(nodes) {
+      self.setNodesFromLog(self.nodes().concat(nodes.map(function(node) {
+          return new GitNodeViewModel(self, node);
         })
       ));
-      self.setNodesFromLog(logEntries);
     })
     .finally(function(){
       // self.nodesLoader.stop();
@@ -56,7 +55,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
     });
 }
 
-GraphViewModel.prototype.setNodesFromLog = function() {
+GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   var self = this;
   
   if (!this.svg) {
@@ -65,10 +64,19 @@ GraphViewModel.prototype.setNodesFromLog = function() {
       .attr("height", 2000);
   }
   
-  this.svg.selectAll("circle").data(this.logEntries()).enter()
+  this.svg.selectAll("circle").data(nodes).enter()
     .append("svg:circle")
-    .attr("r", 30)
-    .attr("cx", function(d) { return self.cx; })
-    .attr("cy", function(d) { self.cy += 160; return self.cy; })
-    .on('click', function(d) { console.log(d); });
+      .attr("r", function(d) { d.r = 30; return 30; })
+      .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
+      .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
+      .on('click', function(d) { console.log(d); });
+  this.nodes(nodes);
+}
+
+GraphViewModel.prototype.scrolledToEnd = function() {
+  
+}
+
+GraphViewModel.prototype.handleBubbledClick = function() {
+  
 }
