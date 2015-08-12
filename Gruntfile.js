@@ -249,6 +249,7 @@ module.exports = function(grunt) {
     b.require('util', { expose: 'util' });
     b.require('path', { expose: 'path' });
     b.require('diff2html', { expose: 'diff2html' });
+    b.require('bluebird', { expose: 'bluebird' });
     var outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', function() {
       done();
