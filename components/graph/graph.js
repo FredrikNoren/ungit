@@ -69,7 +69,7 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
       .attr("r", function(d) { d.r = 30; return 30; })
       .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
       .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
-      .on('click', function(d) { console.log(d); });
+      .on('click', function(d) { console.log(d); d.click(); });
   this.nodes(nodes);
 }
 
