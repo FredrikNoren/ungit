@@ -4,6 +4,7 @@ var Promise = require("bluebird");
 var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
 
+
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
 });
@@ -14,7 +15,9 @@ function GraphViewModel(server, repoPath) {
   this.server = server;
   this.loadNodesFromApi();
   this.nodes = ko.observableArray();
-  this.nodesById = {}
+  this.refs = ko.observableArray();
+  this.nodesById = {};
+  this.refsByRefName = {};
   
   this.svg = null;
   this.cx = 610;
@@ -51,13 +54,13 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.getServer('/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(nodes) {
-      self.setNodesFromLog(self.nodes().concat(nodes.map(function(node, index) {
-          var nodeVm = self.getNode(node);
-          
-          
-          return nodeVm;
-        })
-      ));
+      
+      var nodeVMs = nodes.map(function(node, index) {
+        var nodeVm = self.getNode(node);
+        return nodeVm;
+      });
+      
+      self.setNodesFromLog(nodeVMs);
     })
     .finally(function(){
       // self.nodesLoader.stop();
