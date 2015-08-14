@@ -14,6 +14,7 @@ function GraphViewModel(server, repoPath) {
   this.server = server;
   this.loadNodesFromApi();
   this.nodes = ko.observableArray();
+  this.nodesById = {}
   
   this.svg = null;
   this.cx = 610;
@@ -38,14 +39,23 @@ GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
 }
 
+GraphViewModel.prototype.getNode = function(node) {
+  var nodeViewModel = this.nodesById[node.sha1];
+  if (!nodeViewModel) nodeViewModel = this.nodesById[node.sha1] = new GitNodeViewModel(this, node);
+  return nodeViewModel;
+}
+
 GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   // this.nodesLoader.start();
   this.getServer('/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(nodes) {
-      self.setNodesFromLog(self.nodes().concat(nodes.map(function(node) {
-          return new GitNodeViewModel(self, node);
+      self.setNodesFromLog(self.nodes().concat(nodes.map(function(node, index) {
+          var nodeVm = self.getNode(node);
+          
+          
+          return nodeVm;
         })
       ));
     })
