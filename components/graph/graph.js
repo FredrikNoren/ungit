@@ -3,6 +3,7 @@ var components = require('ungit-components');
 var Promise = require("bluebird");
 var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
+var _ = require('lodash');
 
 
 components.register('graph', function(args) {
@@ -10,6 +11,7 @@ components.register('graph', function(args) {
 });
 
 function GraphViewModel(server, repoPath) {
+  var self = this;
   this.repoPath = ko.observable(repoPath);
   this.maxNNodes = 25;
   this.server = server;
@@ -18,6 +20,14 @@ function GraphViewModel(server, repoPath) {
   this.refs = ko.observableArray();
   this.nodesById = {};
   this.refsByRefName = {};
+  this.checkedOutBranch = ko.observable();
+  this.checkedOutRef = ko.computed(function() {
+    if (self.checkedOutBranch())
+      return self.getRef('refs/heads/' + self.checkedOutBranch());
+    else
+      return null;
+  });
+  this.HEAD = ko.observable();
   
   this.svg = null;
   this.cx = 610;
@@ -42,9 +52,9 @@ GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
 }
 
-GraphViewModel.prototype.getNode = function(node) {
+GraphViewModel.prototype.getNode = function(node, index) {
   var nodeViewModel = this.nodesById[node.sha1];
-  if (!nodeViewModel) nodeViewModel = this.nodesById[node.sha1] = new GitNodeViewModel(this, node);
+  if (!nodeViewModel) nodeViewModel = this.nodesById[node.sha1] = new GitNodeViewModel(this, node, index);
   return nodeViewModel;
 }
 
@@ -56,8 +66,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
     .then(function(nodes) {
       
       var nodeVMs = nodes.map(function(node, index) {
-        var nodeVm = self.getNode(node);
-        return nodeVm;
+        return self.getNode(node, index);
       });
       
       self.setNodesFromLog(nodeVMs);
@@ -69,6 +78,62 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
 }
 
 GraphViewModel.prototype.setNodesFromLog = function(nodes) {
+  var self = this;
+  
+  nodes = nodes.slice(0, this.maxNNodes);
+  
+  this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
+  this.HEAD(this.getHEAD(nodes));
+  var HEAD = this.HEAD();
+  
+  this.render(nodes);
+}
+
+GraphViewModel.prototype.getHEAD = function(nodes) {
+  return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
+}
+
+GraphViewModel._markIdeologicalStamp = 0;
+GraphViewModel.prototype.markNodesIdeologicalBranches = function(refs, nodes, nodesById) {
+  var self = this;
+  refs = refs.filter(function(r) { return !!r.node(); });
+  refs = refs.sort(function(a, b) {
+    if (a.isLocal && !b.isLocal) return -1;
+    if (b.isLocal && !a.isLocal) return 1;
+    if (a.isBranch && !b.isBranch) return -1;
+    if (b.isBranch && !a.isBranch) return 1;
+    if (a.isHead && !b.isHead) return 1;
+    if (!a.isHead && b.isHead) return -1;
+    if (a.isStash && !b.isStash) return 1;
+    if (b.isStash && !a.isStash) return -1;
+    if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
+      return a.node().commitTime() - b.node().commitTime();
+    return a.refName < b.refName ? -1 : 1;
+  });
+  var stamp = GraphViewModel._markIdeologicalStamp++;
+  refs.forEach(function(ref) {
+    self.traverseNodeParents(ref.node(), function(node) {
+      if (node.stamp == stamp) return false;
+      node.stamp = stamp;
+      node.ideologicalBranch(ref);
+      return true;
+    });
+  });
+}
+
+GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
+  if (node.index() >= this.maxNNodes) return false;
+  if (!callback(node)) return false;
+  for (var i = 0; i < node.parents().length; i++) {
+    // if parent, travers parent
+    var parent = this.nodesById[node.parents()[i]];
+    if (parent) {
+      this.traverseNodeParents(parent, callback);
+    }
+  }
+}
+
+GraphViewModel.prototype.render = function(nodes) {
   var self = this;
   
   if (!this.svg) {
@@ -83,7 +148,9 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
       .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
       .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
       .on('click', function(d) { console.log(d); d.click(); });
-  this.nodes(nodes);
+      
+      
+  this.nodes(this.nodes().concat(nodes));
 }
 
 GraphViewModel.prototype.scrolledToEnd = function() {
