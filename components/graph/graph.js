@@ -1,6 +1,5 @@
 var ko = require('knockout');
 var components = require('ungit-components');
-var Promise = require("bluebird");
 var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
 var _ = require('lodash');
@@ -34,20 +33,6 @@ function GraphViewModel(server, repoPath) {
   this.cy = -80;
 }
 
-// this function needs to be in the server itself.
-GraphViewModel.prototype.getServer = function(url, arg) {
-  var self = this;
-  return new Promise(function (resolve, reject) {
-    self.server.get(url, arg, function(err, result) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-}
-
 GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
 }
@@ -62,7 +47,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   // this.nodesLoader.start();
-  this.getServer('/log', { path: this.repoPath(), limit: this.maxNNodes })
+  this.server.queryPromise('GET', '/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(nodes) {
       
       var nodeVMs = nodes.map(function(node, index) {
@@ -77,6 +62,10 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
     });
 }
 
+GraphViewModel.prototype.getHEAD = function(nodes) {
+  return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
+}
+
 GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   var self = this;
   
@@ -89,8 +78,24 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   this.render(nodes);
 }
 
-GraphViewModel.prototype.getHEAD = function(nodes) {
-  return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
+GraphViewModel.prototype.render = function(nodes) {
+  var self = this;
+  
+  if (!this.svg) {
+    this.svg = d3.select("#graph-svg").append("svg:svg")
+      .attr("width", "100%")
+      .attr("height", 2000);
+  }
+  
+  this.svg.selectAll("circle").data(nodes).enter()
+    .append("svg:circle")
+      .attr("r", function(d) { d.r = 30; return 30; })
+      .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
+      .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
+      .on('click', function(d) { console.log(d); d.click(); });
+      
+      
+  this.nodes(this.nodes().concat(nodes));
 }
 
 GraphViewModel._markIdeologicalStamp = 0;
@@ -131,26 +136,6 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
       this.traverseNodeParents(parent, callback);
     }
   }
-}
-
-GraphViewModel.prototype.render = function(nodes) {
-  var self = this;
-  
-  if (!this.svg) {
-    this.svg = d3.select("#graph-svg").append("svg:svg")
-      .attr("width", "100%")
-      .attr("height", 2000);
-  }
-  
-  this.svg.selectAll("circle").data(nodes).enter()
-    .append("svg:circle")
-      .attr("r", function(d) { d.r = 30; return 30; })
-      .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
-      .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
-      .on('click', function(d) { console.log(d); d.click(); });
-      
-      
-  this.nodes(this.nodes().concat(nodes));
 }
 
 GraphViewModel.prototype.scrolledToEnd = function() {

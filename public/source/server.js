@@ -2,6 +2,7 @@
 var signals = require('signals');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var Promise = require("bluebird");
 
 function Server() {
 }
@@ -93,7 +94,18 @@ Server.prototype._getCredentials = function(callback) {
 Server.prototype.watchRepository = function(repositoryPath, callback) {
   this.socket.emit('watch', { path: repositoryPath }, callback);
 };
-
+Server.prototype.queryPromise = function(type, url, arg) {
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self.query(type, url, arg, function(err, result) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
 Server.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);
 }
