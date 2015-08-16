@@ -3,6 +3,7 @@ var components = require('ungit-components');
 var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
 var _ = require('lodash');
+var moment = require('moment');
 
 
 components.register('graph', function(args) {
@@ -66,6 +67,14 @@ GraphViewModel.prototype.getHEAD = function(nodes) {
   return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
 }
 
+GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
+  if (node.index() >= this.maxNNodes) return;
+  callback(node);
+  var parent = this.nodesById[node.parents()[0]];
+  if (parent)
+    this.traverseNodeLeftParents(parent, callback);
+}
+
 GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   var self = this;
   
@@ -75,8 +84,15 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   this.HEAD(this.getHEAD(nodes));
   var HEAD = this.HEAD();
   
+  var updateTimeStamp = moment().valueOf();
+  if (HEAD) {
+    this.traverseNodeLeftParents(HEAD, function(node) {
+      node.ancestorOfHEADTimeStamp = updateTimeStamp;
+    });
+  }
+  
   this.render(nodes);
-}
+} 
 
 GraphViewModel.prototype.render = function(nodes) {
   var self = this;
