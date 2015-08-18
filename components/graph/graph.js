@@ -91,6 +91,36 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     });
   }
   
+  // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
+  nodes = nodes.filter(function(node) { return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+
+  //var concurrentBranches = { };
+
+  var branchSlots = [undefined];
+  
+  // Then iterate from the bottom to fix the orders of the branches
+  for (var i = nodes.length - 1; i >= 0; i--) {
+    var node = nodes[i];
+    if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
+    var ideologicalBranch = node.ideologicalBranch();
+
+    // First occurence of the branch, find an empty slot for the branch
+    if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
+      ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
+      var slot = branchSlots.indexOf(undefined);
+      if (slot == branchSlots.length) {
+        branchSlots.push(ideologicalBranch);
+        slot = branchSlots.length - 1;
+      }
+      ideologicalBranch.branchOrder = slot;
+      branchSlots[slot] = slot;
+    }
+
+    node.branchOrder = ideologicalBranch.branchOrder;
+  }
+  
+  
+  
   this.render(nodes);
 } 
 
