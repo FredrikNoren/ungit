@@ -28,6 +28,7 @@ function GraphViewModel(server, repoPath) {
       return null;
   });
   this.HEAD = ko.observable();
+  this.currentActionContext = ko.observable();
   
   this.svg = null;
   this.cx = 610;
@@ -119,7 +120,14 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     node.branchOrder = ideologicalBranch.branchOrder;
   }
   
-  
+  var prevNode;
+  nodes.forEach(function(node) {
+    node.branchOrder = branchSlots.length - node.branchOrder;
+    node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
+    node.aboveNode = prevNode;
+    if (prevNode) prevNode.belowNode = node;
+    prevNode = node;
+  });
   
   this.render(nodes);
 } 
@@ -135,12 +143,34 @@ GraphViewModel.prototype.render = function(nodes) {
   
   this.svg.selectAll("circle").data(nodes).enter()
     .append("svg:circle")
-      .attr("r", function(d) { d.r = 30; return 30; })
-      .attr("cx", function(d) { d.cx = self.cx; return self.cx; })
-      .attr("cy", function(d) { self.cy += 160; d.cy = self.cy; return self.cy; })
-      .on('click', function(d) { console.log(d); d.click(); });
-      
-      
+      .attr("r", function(d) { 
+        d.r = d.ancestorOfHEAD() ? 30 : 15;
+        return d.r;
+      }).attr("cx", function(d) { 
+        d.cx = d.ancestorOfHEAD() ? 30 : 30 + 90 * d.branchOrder;
+        return d.cx;
+      }).attr("cy", function(d) { 
+        if (d.ancestorOfHEAD()) {
+          if (!d.aboveNode) {
+            d.cy = 120;
+          } else if (d.aboveNode.ancestorOfHEAD()) {
+            d.cy = d.aboveNode.cy + 120;
+          } else {
+            d.cy = d.aboveNode.cy + 60;
+          }
+        } else {
+          if (d.aboveNode) {
+            d.cy = d.aboveNode.cy + 60;
+          } else {
+            d.cy = 120;
+          }
+        }
+        if (d.aboveNode && d.aboveNode.selected()) {
+          d.cy = d.aboveNode.cy + d.aboveNode.commitComponent.element().offsetHeight + 30;
+        }
+        return d.cy;
+      }).on('click', function(d) { console.log(d); d.click(); });
+
   this.nodes(this.nodes().concat(nodes));
 }
 
