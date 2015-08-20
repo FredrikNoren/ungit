@@ -72,8 +72,9 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
   if (node.index() >= this.maxNNodes) return;
   callback(node);
   var parent = this.nodesById[node.parents()[0]];
-  if (parent)
+  if (parent) {
     this.traverseNodeLeftParents(parent, callback);
+  }
 }
 
 GraphViewModel.prototype.setNodesFromLog = function(nodes) {

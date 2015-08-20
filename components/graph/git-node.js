@@ -48,7 +48,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
     self.commitComponent.nodeIsMousehover(value);
   });
   this.commitContainerVisible = ko.computed(function() {
-    return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover() || self.selected();
+    return self.ancestorOfHEAD() || self.nodeIsMousehover() || self.selected();
   });
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
@@ -63,15 +63,6 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branchesAndLocalTags = ko.observable([]);
   this.remoteTags = ko.observable([]);
-  this.refs = ko.computed(function() {
-    var rs = self.branchesAndLocalTags().concat(self.remoteTags());
-    rs.sort(function(a, b) {
-      if (a.isLocal && !b.isLocal) return -1;
-      if (!a.isLocal && b.isLocal) return 1;
-      return a.refName < b.refName ? -1 : 1;
-    });
-    return rs;
-  });
   this.branches = ko.computed(function() {
     return self.refs().filter(function(r) { return r.isBranch; });
   });
