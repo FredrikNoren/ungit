@@ -4,7 +4,7 @@ var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
 var _ = require('lodash');
 var moment = require('moment');
-
+var EdgeViewModel = require('./edge');
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -29,6 +29,8 @@ function GraphViewModel(server, repoPath) {
   });
   this.HEAD = ko.observable();
   this.currentActionContext = ko.observable();
+  this.edges = ko.observableArray();
+  this.edgesById = {};
   
   this.svg = null;
   this.cx = 610;
@@ -39,9 +41,9 @@ GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
 }
 
-GraphViewModel.prototype.getNode = function(node, index) {
-  var nodeViewModel = this.nodesById[node.sha1];
-  if (!nodeViewModel) nodeViewModel = this.nodesById[node.sha1] = new GitNodeViewModel(this, node, index);
+GraphViewModel.prototype.getNode = function(logEntry, index) {
+  var nodeViewModel = this.nodesById[logEntry.sha1];
+  if (!nodeViewModel) nodeViewModel = this.nodesById[logEntry.sha1] = new GitNodeViewModel(this, logEntry, index);
   return nodeViewModel;
 }
 
@@ -131,7 +133,16 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   });
   
   this.render(nodes);
-} 
+}
+
+GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
+  var id = nodeAsha1 + '-' + nodeBsha1;
+  var edge = this.edgesById[id];
+  if (!edge) {
+    edge = this.edgesById[id] = new EdgeViewModel(this.nodesById[nodeAsha1], this.nodesById[nodeBsha1]);
+  }
+  return edge;
+}
 
 GraphViewModel.prototype.render = function(nodes) {
   var self = this;
@@ -141,40 +152,44 @@ GraphViewModel.prototype.render = function(nodes) {
       .attr("width", "100%");
   }
   
+  var edges = [];
+  nodes.forEach(function(node) {
+    node.updateLocation();
+    node.parents().forEach(function(parentSha1) {
+      edges.push(self.getEdge(node.logEntry.sha1, parentSha1));
+    });
+  });
+  
   this.svg.selectAll("circle").data(nodes).enter()
     .append("svg:circle")
-      .attr("r", function(d) { 
-        d.r = d.ancestorOfHEAD() ? 30 : 15;
+      .attr("r", function(d) {
         return d.r;
-      }).attr("cx", function(d) { 
-        d.cx = d.ancestorOfHEAD() ? 613 : 613 + 90 * d.branchOrder;
+      }).attr("cx", function(d) {
         return d.cx;
-      }).attr("cy", function(d) { 
-        if (d.ancestorOfHEAD()) {
-          if (!d.aboveNode) {
-            d.cy = 120;
-          } else if (d.aboveNode.ancestorOfHEAD()) {
-            d.cy = d.aboveNode.cy + 120;
-          } else {
-            d.cy = d.aboveNode.cy + 60;
-          }
-        } else {
-          if (d.aboveNode) {
-            d.cy = d.aboveNode.cy + 60;
-          } else {
-            d.cy = 120;
-          }
-        }
-        if (d.aboveNode && d.aboveNode.selected()) {
-          d.cy = d.aboveNode.cy + d.aboveNode.commitComponent.element().offsetHeight + 30;
-        }
+      }).attr("cy", function(d) {
         return d.cy;
       }).attr("fill", function(d){
         return d.color();
       }).on('click', function(d) { console.log(d); d.click(); });
+      
+  this.svg.selectAll("rect").data(edges).enter()
+    .append("svg:rect")
+      .attr("x", function(d) {
+        return d.x;
+      }).attr("y", function(d) {
+        return d.y;
+      }).attr("width", function(d) {
+        return d.width;
+      }).attr("height", function(d) {
+        return d.height;
+      }).on('click', function(d) {
+        console.log(d);
+      }).attr("fill", "#494949");
+      
   this.svg.attr('height', nodes[nodes.length - 1].cy + 20);
 
   this.nodes(this.nodes().concat(nodes));
+  this.edges(this.edges().concat(edges));
 }
 
 GraphViewModel._markIdeologicalStamp = 0;

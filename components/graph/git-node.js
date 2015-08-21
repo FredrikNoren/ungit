@@ -89,6 +89,31 @@ var GitNodeViewModel = function(graph, logEntry, index) {
 }
 module.exports = GitNodeViewModel;
 
+GitNodeViewModel.prototype.updateLocation = function() {
+  if (this.ancestorOfHEAD()) {
+    this.r = 30;
+    this.cx = 613;
+    if (!this.aboveNode) {
+      this.cy = 120;
+    } else if (this.aboveNode.ancestorOfHEAD()) {
+      this.cy = this.aboveNode.cy + 120;
+    } else {
+      this.cy = this.aboveNode.cy + 60;
+    }
+  } else {
+    this.r = 15;
+    this.cx = 613 + 90 * this.branchOrder;
+    if (this.aboveNode) {
+      this.cy = this.aboveNode.cy + 60;
+    } else {
+      this.cy = 120;
+    }
+  }
+  if (this.aboveNode && this.aboveNode.selected()) {
+    this.cy = this.aboveNode.cy + this.aboveNode.commitComponent.element().offsetHeight + 30;
+  }
+}
+
 GitNodeViewModel.prototype.click = function() {
   
 }
