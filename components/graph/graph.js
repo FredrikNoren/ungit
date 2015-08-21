@@ -138,8 +138,7 @@ GraphViewModel.prototype.render = function(nodes) {
   
   if (!this.svg) {
     this.svg = d3.select("#graph-svg").append("svg:svg")
-      .attr("width", "100%")
-      .attr("height", 2000);
+      .attr("width", "100%");
   }
   
   this.svg.selectAll("circle").data(nodes).enter()
@@ -148,7 +147,7 @@ GraphViewModel.prototype.render = function(nodes) {
         d.r = d.ancestorOfHEAD() ? 30 : 15;
         return d.r;
       }).attr("cx", function(d) { 
-        d.cx = d.ancestorOfHEAD() ? 30 : 30 + 90 * d.branchOrder;
+        d.cx = d.ancestorOfHEAD() ? 613 : 613 + 90 * d.branchOrder;
         return d.cx;
       }).attr("cy", function(d) { 
         if (d.ancestorOfHEAD()) {
@@ -170,7 +169,10 @@ GraphViewModel.prototype.render = function(nodes) {
           d.cy = d.aboveNode.cy + d.aboveNode.commitComponent.element().offsetHeight + 30;
         }
         return d.cy;
+      }).attr("fill", function(d){
+        return d.color();
       }).on('click', function(d) { console.log(d); d.click(); });
+  this.svg.attr('height', nodes[nodes.length - 1].cy + 20);
 
   this.nodes(this.nodes().concat(nodes));
 }
