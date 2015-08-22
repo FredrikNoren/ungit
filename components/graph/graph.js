@@ -130,6 +130,7 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     node.aboveNode = prevNode;
     if (prevNode) prevNode.belowNode = node;
     prevNode = node;
+    node.updateLocation();
   });
   
   this.render(nodes);
@@ -154,11 +155,24 @@ GraphViewModel.prototype.render = function(nodes) {
   
   var edges = [];
   nodes.forEach(function(node) {
-    node.updateLocation();
     node.parents().forEach(function(parentSha1) {
       edges.push(self.getEdge(node.logEntry.sha1, parentSha1));
     });
   });
+  
+  this.svg.selectAll("rect").data(edges).enter()
+  .append("svg:rect")
+    .attr("x", function(d) {
+      return d.x;
+    }).attr("y", function(d) {
+      return d.y;
+    }).attr("width", function(d) {
+      return d.width;
+    }).attr("height", function(d) {
+      return d.height;
+    }).on('click', function(d) {
+      console.log(d);
+    }).attr("fill", "#494949");
   
   this.svg.selectAll("circle").data(nodes).enter()
     .append("svg:circle")
@@ -171,20 +185,6 @@ GraphViewModel.prototype.render = function(nodes) {
       }).attr("fill", function(d){
         return d.color();
       }).on('click', function(d) { console.log(d); d.click(); });
-      
-  this.svg.selectAll("rect").data(edges).enter()
-    .append("svg:rect")
-      .attr("x", function(d) {
-        return d.x;
-      }).attr("y", function(d) {
-        return d.y;
-      }).attr("width", function(d) {
-        return d.width;
-      }).attr("height", function(d) {
-        return d.height;
-      }).on('click', function(d) {
-        console.log(d);
-      }).attr("fill", "#494949");
       
   this.svg.attr('height', nodes[nodes.length - 1].cy + 20);
 
