@@ -3,7 +3,7 @@ var ko = require('knockout');
 var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   var self = this;
   this.nodeA = graph.nodesById[nodeAsha1];
-  var pathPrefix = "M " + self.nodeA.cx + " " + self.nodeA.cy;
+  var pathPrefix = "M " + self.nodeA.cx() + " " + self.nodeA.cy();
   this.nodeB = graph.nodesById[nodeBsha1];
   this.path = pathPrefix + this.getPathToDest(this.nodeB);
   
@@ -23,7 +23,7 @@ module.exports = EdgeViewModel;
 
 EdgeViewModel.prototype.getPathToDest = function(nodeB) {
   if (nodeB) {
-    return " L " + this.nodeB.cx + " " + this.nodeB.cy;
+    return " L " + this.nodeB.cx() + " " + this.nodeB.cy();
   } else {
     return " l 0 99999";
   }

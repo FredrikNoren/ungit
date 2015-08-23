@@ -86,33 +86,36 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   this.canCreateRef = ko.computed(function() {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
   });
+  this.branchOrder = ko.observable();
+  this.aboveNode = ko.observable();
+  
+  this.r = ko.computed(function() {
+    return self.ancestorOfHEAD() ? 30 : 15;
+  })
+  
+  this.cx = ko.computed(function() {
+    return self.ancestorOfHEAD() ? 613 : 613 + (90 * self.branchOrder());
+  });
+  
+  this.cy = ko.computed(function() {
+    if (self.aboveNode() && self.aboveNode().selected()) {
+      return self.aboveNode().cy() + self.aboveNode().commitComponent.element().offsetHeight + 30;
+    }
+    
+    if (self.ancestorOfHEAD()) {
+      if (!self.aboveNode()) {
+        return 120;
+      } else if (self.aboveNode().ancestorOfHEAD()) {
+        return self.aboveNode().cy() + 120;
+      } else {
+        return self.aboveNode().cy() + 60;
+      }
+    } else {
+      return self.aboveNode() ? self.aboveNode().cy() + 60 : 120;
+    }
+  });
 }
 module.exports = GitNodeViewModel;
-
-GitNodeViewModel.prototype.updateLocation = function() {
-  if (this.ancestorOfHEAD()) {
-    this.r = 30;
-    this.cx = 613;
-    if (!this.aboveNode) {
-      this.cy = 120;
-    } else if (this.aboveNode.ancestorOfHEAD()) {
-      this.cy = this.aboveNode.cy + 120;
-    } else {
-      this.cy = this.aboveNode.cy + 60;
-    }
-  } else {
-    this.r = 15;
-    this.cx = 613 + (90 * this.branchOrder);
-    if (this.aboveNode) {
-      this.cy = this.aboveNode.cy + 60;
-    } else {
-      this.cy = 120;
-    }
-  }
-  if (this.aboveNode && this.aboveNode.selected()) {
-    this.cy = this.aboveNode.cy + this.aboveNode.commitComponent.element().offsetHeight + 30;
-  }
-}
 
 GitNodeViewModel.prototype.click = function() {
   

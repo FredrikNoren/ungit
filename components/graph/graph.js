@@ -122,17 +122,16 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
       branchSlots[slot] = slot;
     }
 
-    node.branchOrder = ideologicalBranch.branchOrder;
+    node.branchOrder(ideologicalBranch.branchOrder);
   }
   
   var prevNode;
   nodes.forEach(function(node) {
-    node.branchOrder = branchSlots.length - node.branchOrder;
+    node.branchOrder(branchSlots.length - node.branchOrder());
     node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
-    node.aboveNode = prevNode;
+    node.aboveNode(prevNode);
     if (prevNode) prevNode.belowNode = node;
     prevNode = node;
-    node.updateLocation();
   });
   
   this.render(nodes);
@@ -184,16 +183,16 @@ GraphViewModel.prototype.render = function(nodes) {
     });
   circle
     .attr("r", function(d) {
-      return d.r;
+      return d.r();
     }).attr("cx", function(d) {
-      return d.cx;
+      return d.cx();
     }).attr("cy", function(d) {
-      return d.cy;
+      return d.cy();
     }).attr("fill", function(d){
       return d.color();
     });
 
-  this.svg.attr('height', nodes[nodes.length - 1].cy + 80);
+  this.svg.attr('height', nodes[nodes.length - 1].cy() + 80);
 }
 
 GraphViewModel._markIdeologicalStamp = 0;
