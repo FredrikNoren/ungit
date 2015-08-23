@@ -31,6 +31,10 @@ function GraphViewModel(server, repoPath) {
   this.currentActionContext = ko.observable();
   this.edges = ko.observableArray();
   this.edgesById = {};
+  this.scrolledToEnd = _.debounce(function() {
+    self.maxNNodes = self.maxNNodes + 25;
+    self.loadNodesFromApi();
+  }, 500, true);
   
   this.svg = null;
   this.cx = 610;
@@ -228,10 +232,6 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
       this.traverseNodeParents(parent, callback);
     }
   }
-}
-
-GraphViewModel.prototype.scrolledToEnd = function() {
-  
 }
 
 GraphViewModel.prototype.handleBubbledClick = function() {
