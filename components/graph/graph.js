@@ -39,6 +39,7 @@ function GraphViewModel(server, repoPath) {
   this.svg = null;
   this.cx = 610;
   this.cy = -80;
+  this.heighstBranchOrder = 0;
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
@@ -57,12 +58,9 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.server.queryPromise('GET', '/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(nodes) {
-      
-      var nodeVMs = nodes.map(function(node, index) {
-        return self.getNode(node, index);
-      });
-      
-      self.setNodesFromLog(nodeVMs);
+      self.setNodesFromLog(nodes.map(function(node, index) {
+          return self.getNode(node, index);
+        }));
     })
     .finally(function(){
       // self.nodesLoader.stop();
@@ -123,6 +121,7 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     }
 
     node.branchOrder(ideologicalBranch.branchOrder);
+    self.heighstBranchOrder = Math.max(self.heighstBranchOrder, node.branchOrder());
   }
   
   var prevNode;
@@ -150,8 +149,7 @@ GraphViewModel.prototype.render = function(nodes) {
   var self = this;
   
   if (!this.svg) {
-    this.svg = d3.select("#graph-svg").append("svg:svg")
-      .attr("width", "100%");
+    this.svg = d3.select("#graph-svg").append("svg:svg");
   }
   
   var edges = [];
@@ -173,9 +171,9 @@ GraphViewModel.prototype.render = function(nodes) {
     }).attr("stroke", "#494949");
   path
     .attr("d", function(d) {
-      return d.path;
+      return d.path();
     });
-  
+
   var circle = this.svg.selectAll("circle").data(nodes);
   circle.enter().append("svg:circle")
     .on('click', function(d) { 
@@ -193,6 +191,7 @@ GraphViewModel.prototype.render = function(nodes) {
     });
 
   this.svg.attr('height', nodes[nodes.length - 1].cy() + 80);
+  this.svg.attr('width', 1000 + (this.heighstBranchOrder * 90));
 }
 
 GraphViewModel._markIdeologicalStamp = 0;
