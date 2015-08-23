@@ -155,16 +155,15 @@ GraphViewModel.prototype.render = function(nodes) {
       .attr("width", "100%");
   }
   
-  this.edges().forEach(function(edge) {
-    edge.updateLocation();
-  });
-  
   var edges = [];
   nodes.forEach(function(node) {
     node.parents().forEach(function(parentSha1) {
       edges.push(self.getEdge(node.logEntry.sha1, parentSha1));
     });
   });
+
+  this.nodes(this.nodes().concat(nodes));
+  this.edges(this.edges().concat(edges));
   
   var path = this.svg.selectAll("path").data(edges);
   path.enter().append("svg:path")
@@ -195,9 +194,6 @@ GraphViewModel.prototype.render = function(nodes) {
     });
 
   this.svg.attr('height', nodes[nodes.length - 1].cy + 80);
-
-  this.nodes(this.nodes().concat(nodes));
-  this.edges(this.edges().concat(edges));
 }
 
 GraphViewModel._markIdeologicalStamp = 0;
