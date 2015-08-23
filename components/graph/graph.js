@@ -157,6 +157,10 @@ GraphViewModel.prototype.render = function(nodes) {
       .attr("width", "100%");
   }
   
+  this.edges().forEach(function(edge) {
+    edge.updateLocation();
+  });
+  
   var edges = [];
   nodes.forEach(function(node) {
     node.parents().forEach(function(parentSha1) {
@@ -164,29 +168,33 @@ GraphViewModel.prototype.render = function(nodes) {
     });
   });
   
-  this.svg.selectAll("path").data(edges).enter()
-  .append("svg:path")
-    .attr("d", function(d) {
-      return d.path;
-    }).attr("stroke-width", function(d) {
+  var path = this.svg.selectAll("path").data(edges);
+  path.enter().append("svg:path")
+    .attr("stroke-width", function(d) {
       return 10;
     }).on('click', function(d) {
       console.log(d);
     }).attr("stroke", "#494949");
+  path
+    .attr("d", function(d) {
+      return d.path;
+    });
   
-  this.svg.selectAll("circle").data(nodes).enter()
-    .append("svg:circle")
-      .attr("r", function(d) {
-        return d.r;
-      }).attr("cx", function(d) {
-        return d.cx;
-      }).attr("cy", function(d) {
-        return d.cy;
-      }).attr("fill", function(d){
-        return d.color();
-      }).on('click', function(d) { 
-        console.log(d.legEntry.sha1, d); d.click();
-      });
+  var circle = this.svg.selectAll("circle").data(nodes);
+  circle.enter().append("svg:circle")
+    .on('click', function(d) { 
+      console.log(d.logEntry.sha1, d); d.click();
+    });
+  circle
+    .attr("r", function(d) {
+      return d.r;
+    }).attr("cx", function(d) {
+      return d.cx;
+    }).attr("cy", function(d) {
+      return d.cy;
+    }).attr("fill", function(d){
+      return d.color();
+    });
 
   this.svg.attr('height', nodes[nodes.length - 1].cy + 80);
 
