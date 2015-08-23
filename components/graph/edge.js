@@ -4,25 +4,28 @@ var EdgeViewModel = function(nodea, nodeb) {
   var self = this;
   this.nodea = ko.observable(nodea);
   this.nodeb = ko.observable(nodeb);
-  this.x = undefined;
-  this.y = undefined;
-  this.width = 10;
-  this.height = 80;
+  this.path = undefined;
   
   this.updateLocation();
 }
 module.exports = EdgeViewModel;
 
 EdgeViewModel.prototype.updateLocation = function() {
-  if (!this.nodea()) {
-    this.x = 607;
-    this.y = 120;
-  } else if (!this.nodeb()) {
-    this.x = this.nodea().cx - 4;
-    this.y = this.nodea().cy + 20;
-  } else {
-    this.x = this.nodea().cx - 4;
-    this.y = this.nodea().cy + 20;
+  var acx = 613;
+  var acy = 120;
+
+  if (this.nodea()) {
+    acx = this.nodea().cx;
+    acy = this.nodea().cy;
   }
-  console.log(this.x, this.y);
+  
+  var bcx = acx;
+  var bcy = bcy + 100;
+  
+  if (this.nodeb()) {
+    bcx = this.nodeb().cx;
+    bcy = this.nodeb().cy;
+  }
+  
+  this.path = "M " + acx + " " + acy +  " L " + bcx + " " + bcy;
 }

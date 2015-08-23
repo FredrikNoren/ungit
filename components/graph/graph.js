@@ -160,19 +160,15 @@ GraphViewModel.prototype.render = function(nodes) {
     });
   });
   
-  this.svg.selectAll("rect").data(edges).enter()
-  .append("svg:rect")
-    .attr("x", function(d) {
-      return d.x;
-    }).attr("y", function(d) {
-      return d.y;
-    }).attr("width", function(d) {
-      return d.width;
-    }).attr("height", function(d) {
-      return d.height;
+  this.svg.selectAll("path").data(edges).enter()
+  .append("svg:path")
+    .attr("d", function(d) {
+      return d.path;
+    }).attr("stroke-width", function(d) {
+      return 10;
     }).on('click', function(d) {
       console.log(d);
-    }).attr("fill", "#494949");
+    }).attr("stroke", "#494949");
   
   this.svg.selectAll("circle").data(nodes).enter()
     .append("svg:circle")
@@ -184,9 +180,11 @@ GraphViewModel.prototype.render = function(nodes) {
         return d.cy;
       }).attr("fill", function(d){
         return d.color();
-      }).on('click', function(d) { console.log(d); d.click(); });
+      }).on('click', function(d) { 
+        console.log(d); d.click();
+      });
       
-  this.svg.attr('height', nodes[nodes.length - 1].cy + 20);
+  this.svg.attr('height', nodes[nodes.length - 1].cy + 80);
 
   this.nodes(this.nodes().concat(nodes));
   this.edges(this.edges().concat(edges));
