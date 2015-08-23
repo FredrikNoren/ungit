@@ -1,31 +1,31 @@
 var ko = require('knockout');
 
-var EdgeViewModel = function(nodea, nodeb) {
+var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   var self = this;
-  this.nodea = ko.observable(nodea);
-  this.nodeb = ko.observable(nodeb);
+  this.graph = graph;
+  this.nodeAsha1 = nodeAsha1;
+  this.nodeBsha1 = nodeBsha1;
+  this.nodeA = this.graph.nodesById[nodeAsha1];
+  this.nodeB = undefined;
   this.path = undefined;
-  
+
   this.updateLocation();
 }
 module.exports = EdgeViewModel;
 
 EdgeViewModel.prototype.updateLocation = function() {
-  var acx = 613;
-  var acy = 120;
+  if (!this.nodeB) {
+    this.nodeB = this.graph.nodesById[this.nodeBsha1];
+  }
 
-  if (this.nodea()) {
-    acx = this.nodea().cx;
-    acy = this.nodea().cy;
+  var bcx = this.nodeB ? this.nodeB.cx : this.nodeA.cx;
+  var bcy = this.nodeB ? this.nodeB.cy : this.nodeA.cy + 180;
+
+  this.path = "M " + this.nodeA.cx + " " + this.nodeA.cy;
+
+  if (this.nodeB) {
+    this.path += " L " + bcx + " " + bcy;
+  } else {
+    this.path += " l 0 99999";
   }
-  
-  var bcx = acx;
-  var bcy = bcy + 100;
-  
-  if (this.nodeb()) {
-    bcx = this.nodeb().cx;
-    bcy = this.nodeb().cy;
-  }
-  
-  this.path = "M " + acx + " " + acy +  " L " + bcx + " " + bcy;
 }

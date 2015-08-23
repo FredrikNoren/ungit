@@ -144,7 +144,7 @@ GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
   var id = nodeAsha1 + '-' + nodeBsha1;
   var edge = this.edgesById[id];
   if (!edge) {
-    edge = this.edgesById[id] = new EdgeViewModel(this.nodesById[nodeAsha1], this.nodesById[nodeBsha1]);
+    edge = this.edgesById[id] = new EdgeViewModel(this, nodeAsha1, nodeBsha1);
   }
   return edge;
 }
@@ -185,9 +185,9 @@ GraphViewModel.prototype.render = function(nodes) {
       }).attr("fill", function(d){
         return d.color();
       }).on('click', function(d) { 
-        console.log(d); d.click();
+        console.log(d.legEntry.sha1, d); d.click();
       });
-      
+
   this.svg.attr('height', nodes[nodes.length - 1].cy + 80);
 
   this.nodes(this.nodes().concat(nodes));
