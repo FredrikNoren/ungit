@@ -21,11 +21,5 @@ EdgeViewModel.prototype.updateLocation = function() {
   var bcx = this.nodeB ? this.nodeB.cx : this.nodeA.cx;
   var bcy = this.nodeB ? this.nodeB.cy : this.nodeA.cy + 180;
 
-  this.path = "M " + this.nodeA.cx + " " + this.nodeA.cy;
-
-  if (this.nodeB) {
-    this.path += " L " + bcx + " " + bcy;
-  } else {
-    this.path += " l 0 99999";
-  }
+  this.path = "M " + this.nodeA.cx + " " + this.nodeA.cy + (this.nodeB ? (" L " + bcx + " " + bcy) : " l 0 99999");
 }

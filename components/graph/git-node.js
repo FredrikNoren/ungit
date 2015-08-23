@@ -102,7 +102,7 @@ GitNodeViewModel.prototype.updateLocation = function() {
     }
   } else {
     this.r = 15;
-    this.cx = 613 + 90 * this.branchOrder;
+    this.cx = 613 + (90 * this.branchOrder);
     if (this.aboveNode) {
       this.cy = this.aboveNode.cy + 60;
     } else {
