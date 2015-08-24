@@ -11,11 +11,12 @@ function Environment(page, config) {
   this.page = page;
   this.config = config || {};
   this.config.port = this.config.port || 8449;
+  this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '/ungit/12324';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
   this.config.showServerOutput = this.config.showServerOutput || false;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
-  this.url = 'http://localhost:' + this.config.port;
+  this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
 
 Environment.prototype.init = function(callback) {
@@ -106,6 +107,7 @@ Environment.prototype.startServer = function(callback) {
   var options = ['bin/ungit',
     '--cliconfigonly',
     '--port=' + this.config.port,
+    '--rootPath=' + this.config.rootPath,
     '--no-launchBrowser',
     '--dev',
     '--no-bugtracking',
@@ -170,7 +172,7 @@ Environment.prototype.createFolder = function(dir, callback) {
   this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', 'http://localhost:' + this.config.port + '/api/init', options, callback);
+  this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
 
 var prependLines = function(pre, text) {

@@ -60,7 +60,7 @@ UngitPlugin.prototype.compile = function(callback) {
 
     js.forEach(function(filename) {
       tasks.push(function(callback) {
-        callback(null, '<script type="text/javascript" src="plugins/' + self.name + '/' + filename +'"></script>');
+        callback(null, '<script type="text/javascript" src="' + config.rootPath + '/plugins/' + self.name + '/' + filename +'"></script>');
       });
     });
   }
@@ -81,7 +81,7 @@ UngitPlugin.prototype.compile = function(callback) {
     var css = assureArray(exports.css);
     css.forEach(function(cssSource) {
       tasks.push(function(callback) {
-        callback(null, '<link rel="stylesheet" type="text/css" href="/plugins/' + self.name + '/' + cssSource + '" />');
+        callback(null, '<link rel="stylesheet" type="text/css" href="' + config.rootPath + '/plugins/' + self.name + '/' + cssSource + '" />');
       });
     });
   }
