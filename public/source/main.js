@@ -70,8 +70,7 @@ ko.bindingHandlers.autocomplete = {
         $(element).val($(element).val() + ungit.config.fileSeparator);
       } else if(event.keyCode == 13){
         event.preventDefault();
-        var url = '/#/repository?path=' + encodeURIComponent($(element).val());
-        window.location = url;
+        navigation.browseTo('repository?path=' + encodeURIComponent($(element).val()));
       }
 
       return true;

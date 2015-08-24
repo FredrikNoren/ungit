@@ -2,6 +2,7 @@
 var signals = require('signals');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var rootPath = ungit.config && ungit.config.rootPath || '';
 
 function Server() {
 }
@@ -9,7 +10,9 @@ module.exports = Server;
 
 Server.prototype.initSocket = function() {
   var self = this;
-  this.socket = io.connect();
+  this.socket = io.connect('', {
+    path: rootPath + '/socket.io'
+  });
   this.socket.on('error', function(err) {
     self._isConnected(function(connected) {
       if (connected) throw err;
@@ -74,7 +77,7 @@ Server.prototype._httpJsonRequest = function(request, callback) {
 }
 // Check if the server is still alive
 Server.prototype._isConnected = function(callback) {
-  this._httpJsonRequest({ method: 'GET', url: '/api/ping' }, function(err, res) {
+  this._httpJsonRequest({ method: 'GET', url: rootPath + '/api/ping' }, function(err, res) {
     callback(!err && res);
   });
 }
@@ -108,7 +111,7 @@ Server.prototype.query = function(method, path, body, callback) {
   if (body) body.socketId = this.socketId;
   var request = {
     method: method,
-    url: '/api' + path,
+    url: rootPath + '/api' + path,
   }
   if (method == 'GET' || method == 'DELETE') request.query = body;
   else request.body = body;
