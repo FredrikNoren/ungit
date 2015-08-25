@@ -1,8 +1,10 @@
 var ko = require('knockout');
 var md5 = require('blueimp-md5').md5;
+var Selectable = require('./selectable');
 
 var RefViewModel = function(fullRefName, graph) {
   var self = this;
+  Selectable.call(this, graph);
   this.graph = graph;
   this.name = fullRefName;
   this.node = ko.observable();
@@ -55,4 +57,13 @@ module.exports = RefViewModel;
 
 RefViewModel.prototype._colorFromHashOfString = function(string) {
   return '#' + md5(string).toString().slice(0, 6);
+}
+RefViewModel.prototype.dragStart = function() {
+  this.graph.currentActionContext(this);
+  this.isDragging(true);
+  if (document.activeElement) document.activeElement.blur();
+}
+RefViewModel.prototype.dragEnd = function() {
+  this.graph.currentActionContext(null);
+  this.isDragging(false);
 }

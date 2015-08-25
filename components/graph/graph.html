@@ -2,11 +2,25 @@
 <div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
   <div id="graph-svg" class="graphLog"></div>
   <div class="nodes" data-bind="foreach: nodes">
-    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: '0px', top: cy() - 40 + 'px' }">
-      <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: cx() - 300 + 'px' }">
+    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }">
+      <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
         <!-- ko component: commitComponent -->
         <!-- /ko -->
       </div>
+      
+      <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
+        <!-- ko foreach: branches -->
+        <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1"
+            data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
+              click: selected,
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
+          <div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
+          <div class="branch-icon"></div>
+          <span class="name" data-bind="text: localRefName"></span>
+        </span>
+        <!-- /ko -->
+      </div>
+      
     </div>
   </div>
 </div>

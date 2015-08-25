@@ -1,9 +1,11 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var GitRefViewModel = require('./git-ref');
+var Selectable = require('./selectable');
 
 var GitNodeViewModel = function(graph, logEntry, index) {
   var self = this;
+  Selectable.call(this, graph);
   this.graph = graph;
   this.logEntry = logEntry;
   this.title = ko.observable(this.logEntry.message.split('\n')[0]);
@@ -11,7 +13,6 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   this.commitTime = ko.observable(this.logEntry.commitDate);
   this.index = ko.observable(index ? undefined : index);
   this.color = ko.observable();
-  this.selected = ko.observable(false);
   this.ideologicalBranch = ko.observable();
   this.ideologicalBranch.subscribe(function(value) {
     self.color(value ? value.color : '#666');
@@ -71,7 +72,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   });
   this.showNewRefAction = ko.computed(function() {
     return !graph.currentActionContext();
-  })
+  });
   this.newBranchName = ko.observable();
   this.newBranchNameHasFocus = ko.observable(true);
   this.newBranchNameHasFocus.subscribe(function(newValue) {
@@ -81,7 +82,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
         self.branchingFormVisible(false);
       }, 200);
     }
-  })
+  });
   this.branchingFormVisible = ko.observable(false);
   this.canCreateRef = ko.computed(function() {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
@@ -91,7 +92,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   
   this.r = ko.computed(function() {
     return self.ancestorOfHEAD() ? 30 : 15;
-  })
+  });
   
   this.cx = ko.computed(function() {
     return self.ancestorOfHEAD() ? 613 : 613 + (90 * self.branchOrder());

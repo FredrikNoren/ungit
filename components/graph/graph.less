@@ -14,5 +14,150 @@
     position: absolute;
     left: 30px;
     top: 120px;
+    width: 100%;
+    
+    .commit-container {
+      position: absolute;
+      top: -43px;
+    }
+    
+    .rightSideContainer {
+      position: absolute;
+      margin-left: (@log-width-small + 40px);
+      top: -25px;
+      white-space: nowrap;
+      height: 40px;
+    }
+    
+    .ref {
+      display: inline-block;
+      opacity: 0.6;
+      cursor: move;
+      margin-left: 0px;
+      margin-right: 0px;
+      margin-top: 9px;
+      outline: none;
+      padding: 2px 5px 2px 5px;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      transition: border-color 0.5s;
+      -webkit-transition: border-color 0.5s;
+
+      &.dragging.focused {
+        border-color: transparent;
+      }
+      &.focused {
+        border-color: #fff;
+      }
+
+      &.current {
+        font-weight: bold;
+        opacity: 1;
+      }
+      &.remote {
+        color: #89BCE8;
+        opacity: 0.3;
+      }
+      &.tag {
+        color: #EEF266;
+      }
+    }
+    .graphAction {
+      color: #fff;
+      cursor: pointer;
+      opacity: 1;
+      transition: opacity 0.2s;
+      -webkit-transition: opacity 0.2s;
+      &.dimmed {
+        opacity: 0.5;
+      }
+      &.push {
+        background: rgba(61, 139, 255, 0.9);
+      }
+      &.pull {
+        background: rgba(38, 189, 189, 0.9);
+      }
+      &.reset {
+        background: rgba(255, 129, 31, 0.9);
+      }
+      &.rebase {
+        background: rgba(65, 222, 60, 0.9);
+      }
+      &.move {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      &.merge {
+        background: rgba(208, 135, 212, 0.9);
+      }
+      &.checkout {
+        background: rgba(205, 219, 55, 0.9);
+      }
+      &.delete {
+        background: rgba(214, 77, 56, 0.9);
+      }
+      &.cherry-pick {
+        background: rgba(110, 156, 110, 0.9);
+      }
+      &.uncommit {
+        background: rgba(158, 53, 20, 0.9);
+      }
+      &.revert {
+        background: rgba(179, 135, 43, 0.9);
+      }
+    }
+    .newRef {
+      opacity: 1;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      margin-left: 5px;
+      .showBranchingForm {
+        background: transparent;
+        border: 0px;
+        cursor: pointer;
+        padding: 0px;
+        margin: 0px;
+        margin-top: 9px;
+        color: rgba(255, 255, 255, 0.1);
+        &:hover {
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+      .form-inline {
+        display: inline-block;
+      }
+      input.name {
+        width: 150px;
+      }
+    }
+  }
+  
+  .graphFooter {
+    height: 60px;
+    .progressBar {
+      position: relative;
+      top: -150px;
+      margin-left: (@log-width-small);
+    }
+  }
+  
+  .remote-icon {
+    background: url('images/remoteIcon.png');
+    width: 12px;
+    height: 10px;
+    display: inline-block;
+  }
+
+  .branch-icon {
+    background: url('images/branchIcon.png');
+    width: 9px;
+    height: 10px;
+    display: inline-block;
+  }
+
+  .tag-icon {
+    background: url('images/tagIcon.png');
+    width: 5px;
+    height: 10px;
+    display: inline-block;
   }
 }

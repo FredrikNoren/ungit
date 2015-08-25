@@ -37,8 +37,6 @@ function GraphViewModel(server, repoPath) {
   }, 500, true);
   
   this.svg = null;
-  this.cx = 610;
-  this.cy = -80;
   this.heighstBranchOrder = 0;
 }
 
