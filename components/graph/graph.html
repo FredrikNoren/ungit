@@ -19,6 +19,34 @@
           <span class="name" data-bind="text: localRefName"></span>
         </span>
         <!-- /ko -->
+        
+        <!-- ko foreach: tags -->
+        <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0"
+            data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
+              click: selected,
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
+          <div class="remote-icon" data-bind="visible: isRemote"></div>
+          <div class="tag-icon"></div>
+          <span class="name" data-bind="text: localRefName"></span>
+        </span>
+        <!-- /ko -->
+        
+        
+        
+        
+        <!-- ko if: showNewRefAction -->
+        <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+          <!-- ko if: branchingFormVisible -->
+          <div class="form-inline">
+            <input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
+            <button class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
+            <button class="btn btn-default" data-ta-clickable="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+          </div>
+          <!-- /ko -->
+        </span>
+        <!-- /ko -->
+        
       </div>
       
     </div>

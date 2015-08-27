@@ -38,7 +38,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   });
   this.commitComponent = components.create('commit', {
     sha1: logEntry.sha1,
-    repoPath: this.graph.repoPath(),
+    repoPath: this.graph.repoPath,
     server: this.graph.server
   });
   this.commitComponent.setData(this.logEntry);
@@ -129,4 +129,24 @@ GitNodeViewModel.prototype.getRef = function(ref) {
     this.graph.refs.push(refViewModel);
   }
   return refViewModel;
+}
+GitNodeViewModel.prototype.showBranchingForm = function() {
+  this.branchingFormVisible(true);
+  this.newBranchNameHasFocus(true);
+}
+GitNodeViewModel.prototype.createBranch = function() {
+  if (!this.canCreateRef()) return;
+  this.graph.server.queryPromise('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+    .finally(function() {
+      this.branchingFormVisible(false);
+      this.newBranchName('');
+    });
+}
+GitNodeViewModel.prototype.createTag = function() {
+  if (!this.canCreateRef()) return;
+  this.graph.server.queryPromise('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+    .finally(function() {
+      this.branchingFormVisible(false);
+      this.newBranchName('');
+    });
 }

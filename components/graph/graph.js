@@ -12,7 +12,7 @@ components.register('graph', function(args) {
 
 function GraphViewModel(server, repoPath) {
   var self = this;
-  this.repoPath = ko.observable(repoPath);
+  this.repoPath = repoPath;
   this.maxNNodes = 25;
   this.server = server;
   this.loadNodesFromApi();
@@ -38,6 +38,14 @@ function GraphViewModel(server, repoPath) {
   
   this.svg = null;
   this.heighstBranchOrder = 0;
+  this.hoverGraphAction = ko.observable();
+  this.hoverGraphAction.subscribe(function(value) {
+    if (value && value.createHoverGraphic) {
+      self.graphic.hoverGraphActionGraphic(value.createHoverGraphic());
+    } else {
+      self.graphic.hoverGraphActionGraphic(null);
+    }
+  });
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
@@ -54,7 +62,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   // this.nodesLoader.start();
-  this.server.queryPromise('GET', '/log', { path: this.repoPath(), limit: this.maxNNodes })
+  this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
       self.setNodesFromLog(nodes.map(function(node, index) {
           return self.getNode(node, index);
