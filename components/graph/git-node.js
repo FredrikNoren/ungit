@@ -2,15 +2,15 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var Selectable = require('./selectable');
 
-var GitNodeViewModel = function(graph, logEntry, index) {
+var GitNodeViewModel = function(graph, sha1) {
   var self = this;
   Selectable.call(this, graph);
   this.graph = graph;
-  this.logEntry = logEntry;
-  this.title = ko.observable(this.logEntry.message.split('\n')[0]);
-  this.parents = ko.observable(this.logEntry.parents || []);
-  this.commitTime = ko.observable(this.logEntry.commitDate);
-  this.index = ko.observable(index ? undefined : index);
+  this.sha1 = sha1;
+  this.isInited = false;
+  this.title = ko.observable();
+  this.parents = ko.observableArray();
+  this.commitTime = ko.observable();
   this.color = ko.observable();
   this.ideologicalBranch = ko.observable();
   this.ideologicalBranch.subscribe(function(value) {
@@ -18,14 +18,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   });
   this.remoteTags = ko.observable([]);
   this.branchesAndLocalTags = ko.observableArray();
-  if (this.logEntry.refs) {
-    var refVMs = this.logEntry.refs.map(function(ref) {
-      var refViewModel = self.graph.getRef(ref);
-      refViewModel.node(self);
-      return refViewModel;
-    });
-    this.branchesAndLocalTags(refVMs);
-  }
+  
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
@@ -36,11 +29,10 @@ var GitNodeViewModel = function(graph, logEntry, index) {
     return rs;
   });
   this.commitComponent = components.create('commit', {
-    sha1: logEntry.sha1,
+    sha1: this.sha1,
     repoPath: this.graph.repoPath,
     server: this.graph.server
   });
-  this.commitComponent.setData(this.logEntry);
   
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
@@ -61,8 +53,6 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
-  this.branchesAndLocalTags = ko.observable([]);
-  this.remoteTags = ko.observable([]);
   this.branches = ko.computed(function() {
     return self.refs().filter(function(r) { return r.isBranch; });
   });
@@ -117,6 +107,24 @@ var GitNodeViewModel = function(graph, logEntry, index) {
 }
 module.exports = GitNodeViewModel;
 
+GitNodeViewModel.prototype.setData = function(logEntry) {
+  var self = this;
+  this.title(logEntry.message.split('\n')[0]);
+  this.parents(logEntry.parents || []);
+  this.commitTime(logEntry.commitDate);
+  this.commitComponent.setData(logEntry);
+  
+  if (logEntry.refs) {
+    var refVMs = logEntry.refs.map(function(ref) {
+      var refViewModel = self.graph.getRef(ref);
+      refViewModel.node(self);
+      return refViewModel;
+    });
+    this.branchesAndLocalTags(refVMs);
+  }
+  
+  this.isInited = true;
+}
 GitNodeViewModel.prototype.click = function() {
   
 }

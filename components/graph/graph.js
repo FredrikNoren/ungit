@@ -61,9 +61,10 @@ GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
 }
 
-GraphViewModel.prototype.getNode = function(logEntry, index) {
-  var nodeViewModel = this.nodesById[logEntry.sha1];
-  if (!nodeViewModel) nodeViewModel = this.nodesById[logEntry.sha1] = new GitNodeViewModel(this, logEntry, index);
+GraphViewModel.prototype.getNode = function(sha1, logEntry) {
+  var nodeViewModel = this.nodesById[sha1];
+  if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
+  if (!nodeViewModel.isInited && logEntry) nodeViewModel.setData(logEntry);
   return nodeViewModel;
 }
 GraphViewModel.prototype.getRef = function(ref) {
@@ -81,8 +82,8 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
-      self.setNodesFromLog(nodes.map(function(node, index) {
-          return self.getNode(node, index);
+      self.setNodesFromLog(nodes.map(function(logEntry) {
+          return self.getNode(logEntry.sha1, logEntry);
         }));
     })
     .finally(function(){
@@ -96,7 +97,6 @@ GraphViewModel.prototype.getHEAD = function(nodes) {
 }
 
 GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
-  if (node.index() >= this.maxNNodes) return;
   callback(node);
   var parent = this.nodesById[node.parents()[0]];
   if (parent) {
@@ -176,7 +176,7 @@ GraphViewModel.prototype.render = function(nodes) {
   var edges = [];
   nodes.forEach(function(node) {
     node.parents().forEach(function(parentSha1) {
-      edges.push(self.getEdge(node.logEntry.sha1, parentSha1));
+      edges.push(self.getEdge(node.sha1, parentSha1));
     });
   });
 
@@ -198,7 +198,7 @@ GraphViewModel.prototype.render = function(nodes) {
   var circle = this.svg.selectAll("circle").data(nodes);
   circle.enter().append("svg:circle")
     .on('click', function(d) { 
-      console.log(d.logEntry.sha1, d); d.click();
+      console.log(d.sha1, d); d.click();
     });
   circle
     .attr("r", function(d) {
@@ -245,7 +245,6 @@ GraphViewModel.prototype.markNodesIdeologicalBranches = function(refs, nodes, no
 }
 
 GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
-  if (node.index() >= this.maxNNodes) return false;
   if (!callback(node)) return false;
   for (var i = 0; i < node.parents().length; i++) {
     // if parent, travers parent
@@ -288,8 +287,7 @@ GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
       var tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
       var name = 'remote-tag: ' + ref.remote + '/' + tagRef.split('/')[2];
       var refViewModel = self.getRef(name);
-      var node = self.nodesById[ref.sha1];
-      if (node)
+      var node = self.getNode(ref.sha1);
       refViewModel.node(node);
 
       nodeIdsToRemoteTags[ref.sha1] = nodeIdsToRemoteTags[ref.sha1] || [];
