@@ -1,6 +1,5 @@
 var ko = require('knockout');
 var components = require('ungit-components');
-var GitRefViewModel = require('./git-ref');
 var Selectable = require('./selectable');
 
 var GitNodeViewModel = function(graph, logEntry, index) {
@@ -21,7 +20,7 @@ var GitNodeViewModel = function(graph, logEntry, index) {
   this.branchesAndLocalTags = ko.observableArray();
   if (this.logEntry.refs) {
     var refVMs = this.logEntry.refs.map(function(ref) {
-      var refViewModel = self.getRef(ref);
+      var refViewModel = self.graph.getRef(ref);
       refViewModel.node(self);
       return refViewModel;
     });
@@ -120,15 +119,6 @@ module.exports = GitNodeViewModel;
 
 GitNodeViewModel.prototype.click = function() {
   
-}
-
-GitNodeViewModel.prototype.getRef = function(ref) {
-  var refViewModel = this.graph.refsByRefName[ref];
-  if (!refViewModel) {
-    refViewModel = this.graph.refsByRefName[ref] = new GitRefViewModel(ref, this.graph);
-    this.graph.refs.push(refViewModel);
-  }
-  return refViewModel;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);

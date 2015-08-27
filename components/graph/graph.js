@@ -2,6 +2,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
+var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
 var moment = require('moment');
 var EdgeViewModel = require('./edge');
@@ -16,6 +17,7 @@ function GraphViewModel(server, repoPath) {
   this.maxNNodes = 25;
   this.server = server;
   this.loadNodesFromApi();
+  this.currentRemote = ko.observable();
   this.nodes = ko.observableArray();
   this.refs = ko.observableArray();
   this.nodesById = {};
@@ -46,6 +48,13 @@ function GraphViewModel(server, repoPath) {
       self.graphic.hoverGraphActionGraphic(null);
     }
   });
+  
+  
+  
+  this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
+  this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
+  this.loadNodesFromApiThrottled();
+  this.updateBranchesThrottled();
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
@@ -56,6 +65,14 @@ GraphViewModel.prototype.getNode = function(logEntry, index) {
   var nodeViewModel = this.nodesById[logEntry.sha1];
   if (!nodeViewModel) nodeViewModel = this.nodesById[logEntry.sha1] = new GitNodeViewModel(this, logEntry, index);
   return nodeViewModel;
+}
+GraphViewModel.prototype.getRef = function(ref) {
+  var refViewModel = this.refsByRefName[ref];
+  if (!refViewModel) {
+    refViewModel = this.refsByRefName[ref] = new GitRefViewModel(ref, this);
+    this.refs.push(refViewModel);
+  }
+  return refViewModel;
 }
 
 GraphViewModel.prototype.loadNodesFromApi = function(callback) {
@@ -89,8 +106,6 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
 
 GraphViewModel.prototype.setNodesFromLog = function(nodes) {
   var self = this;
-  
-  nodes = nodes.slice(0, this.maxNNodes);
   
   this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
   this.HEAD(this.getHEAD(nodes));
@@ -243,4 +258,45 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
 
 GraphViewModel.prototype.handleBubbledClick = function() {
   
+}
+
+GraphViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'git-directory-changed') {
+    this.loadNodesFromApiThrottled();
+    this.updateBranchesThrottled();
+  } else if (event.event == 'request-app-content-refresh') {
+    this.loadNodesFromApiThrottled();
+  } else if (event.event == 'remote-tags-update') {
+    this.setRemoteTags(event.tags);
+  } else if (event.event == 'current-remote-changed') {
+    this.currentRemote(event.newRemote);
+  }
+}
+GraphViewModel.prototype.updateBranches = function() {
+  var self = this;
+  this.server.get('/checkout', { path: this.repoPath }, function(err, branch) {
+    if (err && err.errorCode == 'not-a-repository') return true;
+    if (err) return;
+    self.checkedOutBranch(branch);
+  });
+}
+GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
+  var self = this;
+  var nodeIdsToRemoteTags = {};
+  remoteTags.forEach(function(ref) {
+    if (ref.name.indexOf('^{}') != -1) {
+      var tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
+      var name = 'remote-tag: ' + ref.remote + '/' + tagRef.split('/')[2];
+      var refViewModel = self.getRef(name);
+      var node = self.nodesById[ref.sha1];
+      if (node)
+      refViewModel.node(node);
+
+      nodeIdsToRemoteTags[ref.sha1] = nodeIdsToRemoteTags[ref.sha1] || [];
+      nodeIdsToRemoteTags[ref.sha1].push(refViewModel);
+    }
+  });
+
+  for(var key in this.nodesById)
+    this.nodesById[key].remoteTags(nodeIdsToRemoteTags[key] || []);
 }
