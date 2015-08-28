@@ -22,7 +22,7 @@
             data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
-          <span class="octicon" data-bind="visible: isRemoteBranch, css: { 'octicon-broadcast': isOriginBranch, 'ocitcon-globe': !isOriginBranch }"></span>
+          <span class="octicon octicon-broadcast" data-bind="visible: isRemoteBranch"></span>
           <span class="octicon octicon-git-branch"></span>
           <span class="name" data-bind="text: localRefName"></span>
         </span>
