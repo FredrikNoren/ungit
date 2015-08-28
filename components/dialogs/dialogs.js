@@ -28,6 +28,10 @@ components.register('yesnodialog', function(args) {
   return new YesNoDialogViewModel(args.title, args.details);
 });
 
+components.register('yesnomutedialog', function(args) {
+  return new YesNoMuteDialogViewModel(args.title, args.details);
+});
+
 components.register('TooManyFilesDialogViewModel', function(args) {
   return new TooManyFilesDialogViewModel(args.title, args.details);
 });
@@ -118,6 +122,19 @@ function YesNoDialogViewModel(title, details) {
   ]);
 }
 inherits(YesNoDialogViewModel, PromptDialogViewModel);
+
+function YesNoMuteDialogViewModel(title, details) {
+  PromptDialogViewModel.call(this, title, details);
+  var self = this;
+  this.taDialogName('yes-no-mute-dialog');
+  this.result = ko.observable(false);
+  this.alternatives([
+    { label: 'Yes', primary: true, taId: 'yes', click: function() { self.result(true); self.close(); } },
+    { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click: function() { self.result("mute"); self.close(); } },
+    { label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } }
+  ]);
+}
+inherits(YesNoMuteDialogViewModel, PromptDialogViewModel);
 
 function TooManyFilesDialogViewModel(title, details) {
   PromptDialogViewModel.call(this, title, details);

@@ -13,7 +13,7 @@ var environment;
 var testRepoPath;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page);
+  environment = new Environment(page, { serverStartupOptions: ['--no-disableDiscardWarning'] });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';
@@ -103,19 +103,6 @@ suite.test('Test showing commit side by side diff between two commits', function
         helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
         done();
       }, 1000);
-    });
-  });
-});
-
-suite.test('Should be possible to discard a created file', function(done) {
-  environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
-    if (err) return done(err);
-    helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
-      helpers.click(page, '[data-ta-clickable="discard-file"]');
-      helpers.click(page, '[data-ta-clickable="yes"]');
-      helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
-        done();
-      });
     });
   });
 });

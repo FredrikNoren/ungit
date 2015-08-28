@@ -5,7 +5,7 @@ var Environment = require('./environment');
 var webpage = require('webpage');
 
 var page = webpage.create();
-var suite = testsuite.newSuite('plugins', page);
+var suite = testsuite.newSuite('noheader', page);
 
 var environment;
 var testRepoPath;
@@ -41,6 +41,11 @@ suite.test('Check for refresh button', function(done) {
       done();
     }, 500);
   });
+});
+
+
+suite.test('Shutdown', function(done) {
+  environment.shutdown(done);
 });
 
 

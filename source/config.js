@@ -100,7 +100,13 @@ var defaultConfig = {
   // possible to perform those actions even when you have a dirty working directory.
   autoStashAndPop: true,
 
-  fileSeparator: path.sep
+  fileSeparator: path.sep,
+
+  // disable warning popup at discard
+  disableDiscardWarning: false,
+
+  // Duration of discard warning dialog mute time should it be muted.
+  disableDiscardMuteTime: 60 * 1000 * 5  // 5 mins
 };
 
 // Works for now but should be moved to bin/ungit
@@ -145,7 +151,9 @@ var argv = yargs
 .describe('pluginConfigs', 'No supported as a command line argument, use ungitrc config file.  See README.md')
 .describe('autoStashAndPop', 'Used for development purposes')
 .describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
-.describe('fileSeparator', 'OS dependent file separator');
+.describe('fileSeparator', 'OS dependent file separator')
+.describe('disableDiscardWarning', 'disable warning popup at discard')
+.describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.

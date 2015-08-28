@@ -6,6 +6,8 @@ var _ = require('lodash');
 var filesToDisplayIncrmentBy = 50;
 var filesToDisplayLimit = filesToDisplayIncrmentBy;
 var fileType = require('../../source/utils/file-type.js');
+// when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
+var muteGraceTimeDuration = 60 * 1000 * 5;
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -78,6 +80,7 @@ var StagingViewModel = function(server, repoPath) {
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
   this.isDiagOpen = false;
+  this.mutedTime = null;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -313,11 +316,16 @@ FileViewModel.prototype.toggleStaged = function() {
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
-  diag.closed.add(function() {
-    if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
+    self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
+  } else {
+    var diag = components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
+    diag.closed.add(function() {
+      if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath, file: self.name() });
+      if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
+    });
+    programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  }
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
