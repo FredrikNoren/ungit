@@ -165,7 +165,7 @@ StagingViewModel.prototype.setFiles = function(files) {
       this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType);
     } else {
       // this is mainly for patching and it may not fire due to the fact that
-      // ''/commit' triggers working-tree-changed which triggers throttled refresh
+      // '/commit' triggers working-tree-changed which triggers throttled refresh
       fileViewModel.invalidateDiff();
     }
     fileViewModel.setState(files[file]);
