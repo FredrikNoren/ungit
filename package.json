@@ -36,6 +36,7 @@
     "moment": "~2.10.3",
     "npm-registry-client": "~6.5.1",
     "npmconf": "~2.1.2",
+    "octicons": "^2.2.0",
     "open": "~0.0.5",
     "os-homedir": "^1.0.0",
     "passport": "~0.2.2",

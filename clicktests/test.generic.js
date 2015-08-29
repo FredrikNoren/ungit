@@ -154,6 +154,27 @@ suite.test('Commit changes to a file', function(done) {
   });
 });
 
+suite.test('Show stats for changed file and discard it', function(done) {
+  environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
+    if (err) return done(err);
+    helpers.waitForElement(page, '[data-ta-container="staging-file"] .additions', function(element) {
+      if (element.textContent != '+1') {
+        return done(new Error('file additions do not match: expected: "+1" but was "' + element.textContent + '"'));
+      }
+      helpers.waitForElement(page, '[data-ta-container="staging-file"] .deletions', function(element) {
+        if (element.textContent != '-1') {
+          return done(new Error('file deletions do not match: expected: "-1" but was "' + element.textContent + '"'));
+        }
+        helpers.click(page, '[data-ta-clickable="discard-file"]');
+        helpers.click(page, '[data-ta-clickable="yes"]');
+        helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+          done();
+        });
+      });
+    });
+  });
+});
+
 suite.test('Checkout a branch', function(done) {
   uiInteractions.checkout(page, 'testbranch', done);
 });

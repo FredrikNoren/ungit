@@ -33,6 +33,23 @@ exports.parseGitStatus = function(text, args) {
   return result;
 };
 
+exports.parseGitStatusNumstat = function(text) {
+  var result = {};
+  var lines = text.split('\n');
+
+  for(var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (line == '') continue;
+    var parts = line.split('\t');
+    var file = {};
+    file.additions = parts[0];
+    file.deletions = parts[1];
+    result[parts[2]] = file;
+  }
+
+  return result;
+};
+
 var authorRegexp = /([^<]+)<([^>]+)>/;
 var gitLogHeaders = {
   'Author': function(currentCommmit, author) {

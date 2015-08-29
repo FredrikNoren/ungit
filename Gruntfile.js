@@ -177,6 +177,13 @@ module.exports = function(grunt) {
       }
     },
     copy: {
+      main: {
+        files: [
+          // includes files within path
+          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.ttf'], dest: 'public/css/' },
+          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.woff'], dest: 'public/css/' }
+        ]
+      },
       electron: {
         files: [
           { expand: true, src: ['public/**'], dest: 'build/resource/' },
@@ -203,8 +210,6 @@ module.exports = function(grunt) {
 	      asar: true,
 	      prune: true
 		}
-      }
-	}
   });
 
   grunt.registerTask('browserify-common', '', function() {
@@ -215,7 +220,6 @@ module.exports = function(grunt) {
     });
     b.add('./public/source/main.js');
     b.require('./public/source/main.js', { expose: 'ungit-main' });
-    
     b.require('./public/source/components.js', { expose: 'ungit-components' });
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
     b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
@@ -362,7 +366,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests
   grunt.registerTask('unittest', ['mochaTest']);

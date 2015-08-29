@@ -68,7 +68,9 @@ describe('git-api conflict rebase', function () {
 				removed: false,
 				conflict: true,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '4',
+				deletions: '0'
 			});
 			done();
 		});
@@ -138,7 +140,9 @@ describe('git-api conflict checkout', function () {
 				removed: false,
 				conflict: true,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '4',
+				deletions: '0'
 			});
 			done();
 		});
@@ -197,7 +201,9 @@ describe('git-api conflict merge', function () {
 				removed: false,
 				conflict: true,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '4',
+				deletions: '0'
 			});
 			done();
 		});
@@ -269,7 +275,9 @@ describe('git-api conflict solve by deleting', function () {
 				removed: false,
 				conflict: true,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '4',
+				deletions: '0'
 			});
 			done();
 		});

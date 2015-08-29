@@ -8,6 +8,7 @@ var winston = require('winston');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
+var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
@@ -144,23 +145,65 @@ git.queueTask = function(task) {
 
 git.status = function(repoPath, file) {
   var task = new GitTask();
-  var gitTask = git(['status', '-s', '-b', '-u', (file ? file : '')], repoPath)
-    .parser(gitParser.parseGitStatus)
-    .fail(task.setResult)
-    .done(function(status) {
-      // From http://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
-      status.inRebase = fs.existsSync(path.join(repoPath, '.git', 'rebase-merge')) ||
-        fs.existsSync(path.join(repoPath, '.git', 'rebase-apply'));
 
-      status.inMerge = fs.existsSync(path.join(repoPath, '.git', 'MERGE_HEAD'));
+  task.start = function() {
+    async.parallel([
+      function(done) {
+        git(['status', '-s', '-b', '-u', (file || '')], repoPath)
+          .parser(gitParser.parseGitStatus)
+          .fail(done)
+          .done(function(status) {
+            // From http://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
+            status.inRebase = fs.existsSync(path.join(repoPath, '.git', 'rebase-merge')) ||
+              fs.existsSync(path.join(repoPath, '.git', 'rebase-apply'));
 
-      if (status.inMerge) {
-        status.commitMessage = fs.readFileSync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' });
+            status.inMerge = fs.existsSync(path.join(repoPath, '.git', 'MERGE_HEAD'));
+
+            if (status.inMerge) {
+              status.commitMessage = fs.readFileSync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' });
+            }
+
+            done(null, status);
+          }).start();
+      },
+      function(done) {
+        // stats for staged files
+        git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
+          .parser(gitParser.parseGitStatusNumstat)
+          .always(function(err, numstats) {
+            done(null, numstats || {});
+          }).start();
+      },
+      function(done) {
+        // stats for unstaged files
+        git(['diff', '--numstat', '--', (file || '')], repoPath)
+          .parser(gitParser.parseGitStatusNumstat)
+          .always(function(err, numstats) {
+            done(null, numstats || {});
+          }).start();
       }
+    ], function(err, results) {
+      if (err) {
+        task.setResult(err);
+        return;
+      }
+
+      var status = results[0];
+      var numstats = results.slice(1).reduce(_.extend, {});
+
+      // merge numstats
+      Object.keys(status.files).forEach(function(filename) {
+        // git diff returns paths relative to git repo but git status does not
+        var absoluteFilename = filename.replace(/\.\.\//g, '');
+        var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
+        status.files[filename].additions = stats.additions;
+        status.files[filename].deletions = stats.deletions;
+      });
 
       task.setResult(null, status);
     });
-  task.started(gitTask.start);
+  };
+
   return task;
 }
 
