@@ -43,6 +43,8 @@ suite.test('Check for refresh button', function(done) {
 suite.test('Should be possible to create and commit a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
+    helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+    helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
     uiInteractions.commit(page, 'Init', function() {
       helpers.waitForElement(page, '[data-ta-container="node"]', function() {
         done();
@@ -54,6 +56,8 @@ suite.test('Should be possible to create and commit a file', function(done) {
 suite.test('Should be possible to amend a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
+    helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+    helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
     uiInteractions.amendCommit(page, function() {
       helpers.waitForElement(page, '[data-ta-container="node"]', function() {
         done();
@@ -182,12 +186,23 @@ suite.test('Checkout a branch', function(done) {
 suite.test('Create another commit', function(done) {
   environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
     if (err) return done(err);
+    helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+    helpers.assertText(page, '[data-ta-container="behind"]', '▼1');
     uiInteractions.commit(page, 'Branch commit', done);
   });
 });
 
 suite.test('Rebase', function(done) {
   uiInteractions.refAction(page, 'testbranch', true, 'rebase', done);
+});
+
+suite.test('Create one more commit', function(done) {
+  environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
+    if (err) return done(err);
+    helpers.assertText(page, '[data-ta-container="ahead"]', '▲1');
+    helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
+    uiInteractions.commit(page, 'Branch commit', done);
+  });
 });
 
 suite.test('Checkout master again', function(done) {
@@ -197,6 +212,8 @@ suite.test('Checkout master again', function(done) {
 suite.test('Create yet another commit', function(done) {
   environment.createTestFile(testRepoPath + '/testy3.txt', function(err) {
     if (err) return done(err);
+    helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+    helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
     uiInteractions.commit(page, 'Branch commit', done);
   });
 });
