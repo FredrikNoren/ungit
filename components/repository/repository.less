@@ -8,6 +8,11 @@
 
 .repository-actions {
   .btn-group {
+    &:hover {
+      .btn-main{
+        width: 150px;
+      }
+    }
     .btn-main {
       transition: width 0.25s linear;
       -moz-transition: width 0.25s linear; /* Firefox 4 */
@@ -16,9 +21,6 @@
       -ms-transition: width 0.25s linear; /* Explorer 10 */
       overflow: hidden;
       width: 30px;
-      &:hover {
-        width: 150px;
-      }
     }
   }
 }
