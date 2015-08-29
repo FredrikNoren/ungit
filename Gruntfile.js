@@ -6,6 +6,7 @@ var npm = require('npm');
 var semver = require('semver');
 var async = require('async');
 var browserify = require('browserify');
+var electronPackager = require('electron-packager');
 
 module.exports = function(grunt) {
 
@@ -174,7 +175,36 @@ module.exports = function(grunt) {
           'test/**/*.js',
         ]
       }
-    }
+    },
+    copy:{
+      electron: {
+       files: [
+        { expand: true, src: ['public/**'], dest: 'build/resource/' },
+        { expand: true, src: ['source/**'], dest: 'build/resource/' },
+        { expand: true, src: ['components/**'], dest: 'build/resource/' },
+        { expand: true, src: ['assets/**'], dest: 'build/resource/' },
+        { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
+        { expand: true, src: ['package.json'], dest: 'build/resource/'} 
+        ]
+      }
+    },
+    clean: {
+      electron: ['./build']
+    },
+    electron: {
+	  package: {
+	    options: {
+		  name: 'ungit',
+		  dir: './build/resource',
+		  out: './build',
+		  version: '0.31.1',
+		  platform: 'all',
+		  arch: 'all',
+	      asar: true,
+	      prune: true
+		}
+      }
+	}
   });
 
   grunt.registerTask('browserify-common', '', function() {
@@ -314,6 +344,10 @@ module.exports = function(grunt) {
 
     });
   });
+  
+  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
+		electronPackager(this.options(), this.async());
+  });
 
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -324,6 +358,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
@@ -338,4 +374,6 @@ module.exports = function(grunt) {
   // Same as publish but for minor version
   grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
 
+  // Create electron package
+  grunt.registerTask('package', ['clean:electron', 'copy:electron', 'electron']);
 };
