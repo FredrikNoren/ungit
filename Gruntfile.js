@@ -176,15 +176,15 @@ module.exports = function(grunt) {
         ]
       }
     },
-    copy:{
+    copy: {
       electron: {
-       files: [
-        { expand: true, src: ['public/**'], dest: 'build/resource/' },
-        { expand: true, src: ['source/**'], dest: 'build/resource/' },
-        { expand: true, src: ['components/**'], dest: 'build/resource/' },
-        { expand: true, src: ['assets/**'], dest: 'build/resource/' },
-        { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
-        { expand: true, src: ['package.json'], dest: 'build/resource/'} 
+        files: [
+          { expand: true, src: ['public/**'], dest: 'build/resource/' },
+          { expand: true, src: ['source/**'], dest: 'build/resource/' },
+          { expand: true, src: ['components/**'], dest: 'build/resource/' },
+          { expand: true, src: ['assets/**'], dest: 'build/resource/' },
+          { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
+          { expand: true, src: ['package.json'], dest: 'build/resource/'} 
         ]
       }
     },
@@ -192,7 +192,7 @@ module.exports = function(grunt) {
       electron: ['./build']
     },
     electron: {
-	  package: {
+      package: {
 	    options: {
 		  name: 'ungit',
 		  dir: './build/resource',
