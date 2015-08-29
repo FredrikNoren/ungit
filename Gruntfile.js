@@ -174,6 +174,15 @@ module.exports = function(grunt) {
           'test/**/*.js',
         ]
       }
+    },
+    copy: {
+      main: {
+        files: [
+          // includes files within path
+          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.ttf'], dest: 'public/css/' },
+          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.woff'], dest: 'public/css/' }
+        ]
+      }
     }
   });
 
@@ -185,7 +194,6 @@ module.exports = function(grunt) {
     });
     b.add('./public/source/main.js');
     b.require('./public/source/main.js', { expose: 'ungit-main' });
-    
     b.require('./public/source/components.js', { expose: 'ungit-components' });
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
     b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
@@ -324,9 +332,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imagemin:default', 'imageEmbed:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests
   grunt.registerTask('unittest', ['mochaTest']);
