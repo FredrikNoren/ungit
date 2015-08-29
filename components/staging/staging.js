@@ -306,8 +306,6 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.deletions = ko.observable('-');
   this.diff = ko.observable(self.getSpecificDiff());
   this.patchLineList = ko.observableArray();
-  this.isPatchable = ko.computed(function() {
-    return !self.isNew() && fileType(self.name()) === 'text' && self.isShowingDiffs();
   this.isShowPatch = ko.computed(function() {
     // if not new file
     // and if not merging

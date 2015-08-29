@@ -188,6 +188,10 @@ suite.test('Show stats for changed file and discard it', function(done) {
         helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
           done();
         });
+      });
+    });
+  });
+});
 
 suite.test('Should be possible to patch a file', function(done) {
   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
