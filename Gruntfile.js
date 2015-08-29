@@ -352,7 +352,7 @@ module.exports = function(grunt) {
   });
   
   grunt.registerMultiTask('electron', 'Package Electron apps', function () {
-		electronPackager(this.options(), this.async());
+    electronPackager(this.options(), this.async());
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
