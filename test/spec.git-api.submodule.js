@@ -52,7 +52,9 @@ describe('git-api submodule', function () {
 				removed: false,
 				conflict: false,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '1',
+				deletions: '0'
 			});
 			expect(res.body.files['.gitmodules']).to.eql({
 				displayName: '.gitmodules',
@@ -61,7 +63,9 @@ describe('git-api submodule', function () {
 				removed: false,
 				conflict: false,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '3',
+				deletions: '0'
 			});
 			done();
 		});
@@ -96,7 +100,9 @@ describe('git-api submodule', function () {
 				removed: false,
 				conflict: false,
 				renamed: false,
-				type: 'text'
+				type: 'text',
+				additions: '0',
+				deletions: '0'
 			});
 			done();
 		});
