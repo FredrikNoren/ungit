@@ -200,16 +200,18 @@ module.exports = function(grunt) {
     },
     electron: {
       package: {
-	    options: {
-		  name: 'ungit',
-		  dir: './build/resource',
-		  out: './build',
-		  version: '0.31.1',
-		  platform: 'all',
-		  arch: 'all',
-	      asar: true,
-	      prune: true
-		}
+        options: {
+          name: 'ungit',
+          dir: './build/resource',
+          out: './build',
+          version: '0.31.1',
+          platform: 'all',
+          arch: 'all',
+          asar: true,
+          prune: true
+        }
+      }
+    }
   });
 
   grunt.registerTask('browserify-common', '', function() {
