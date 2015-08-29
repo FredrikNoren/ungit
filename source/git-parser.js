@@ -294,7 +294,7 @@ exports.parsePatchDiffResult = function(patchLineList, text) {
   var n = 0;
   var selectedLines = 0;
 
-  // first add all lines untill diff block header is found
+  // first add all lines until diff block header is found
   while (!/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/.test(lines[n])) {
     result.push(lines[n]);
     n++;
@@ -308,13 +308,13 @@ exports.parsePatchDiffResult = function(patchLineList, text) {
       // Modified line
       if (patchLineList.shift()) {
         selectedLines++;
-        // diff is selected tobe committed
+        // diff is selected to be committed
         result.push(line);
       } else if (line[0] === '+') {
-        // added line diff is selected tobe ignored
+        // added line diff is selected to be ignored
         ignoredDiffCountCurrent++;
       } else { // lines[0] === '-'
-        // deleted line diff is selected tobe ignored
+        // deleted line diff is selected to be ignored
         ignoredDiffCountCurrent--;
         result.push(' ' + line.slice(1));
       }

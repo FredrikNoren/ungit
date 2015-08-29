@@ -311,7 +311,7 @@ var FileViewModel = function(staging, name, textDiffType) {
     // and if not merging
     // and if not rebasing
     // and if text file
-    // and if diff is whoing, display patch button
+    // and if diff is showing, display patch button
     return !self.isNew() && !staging.inMerge() && !staging.inRebase() && fileType(self.name()) === 'text' && self.isShowingDiffs();
   });
   this.diff = ko.observable(self.getSpecificDiff());

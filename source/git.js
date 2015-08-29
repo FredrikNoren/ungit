@@ -32,8 +32,6 @@ var GitExecutionTask = function(commands, repoPath, allowedCodes) {
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
   this.potentialError.commmands = commands;
   this.allowedCodes = allowedCodes;
-  this.stdoutListener = undefined;
-  this.stderrListener = undefined;
   this.start = function() {
     git.queueTask(self);
   }
@@ -463,7 +461,7 @@ git.commit = function(repoPath, amend, message, files) {
             try {
               task.setResult(err);
             } catch (e) {
-              // log if json resons is already sent...  should be fixed with promise impl
+              // log if json result is already sent...  should be fixed with promise impl
               console.log(e);
             }
           }
