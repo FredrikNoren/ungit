@@ -47,10 +47,4 @@ suite.test('Shutdown', function(done) {
   environment.shutdown(done);
 });
 
-
-suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
-});
-
-
 testsuite.runAllSuits();
