@@ -100,6 +100,8 @@ RefViewModel.prototype.remove = function(callback) {
     self.graph.loadNodesFromApi();
     if (url == '/remote/tags') {
       programEvents.dispatch({ event: 'request-fetch-tags' });
+    } else {
+      programEvents.dispatch({ event: 'branch-updated' });
     }
   });
 }

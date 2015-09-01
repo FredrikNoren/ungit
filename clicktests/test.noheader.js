@@ -43,10 +43,8 @@ suite.test('Check for refresh button', function(done) {
   });
 });
 
-
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
 });
-
 
 testsuite.runAllSuits();
