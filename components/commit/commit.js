@@ -43,7 +43,7 @@ function CommitViewModel(args) {
 
   this.selectedDiffLeftPosition = ko.observable();
   this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 120) + 'px' };
+    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 220) + 'px' };
     else return { left: '0px', width: self.element() ? ((self.element().clientWidth - 20) + 'px') : 'inherit' };
   });
 }

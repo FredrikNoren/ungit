@@ -197,8 +197,10 @@ GraphViewModel.prototype.render = function(nodes) {
 
   var circle = this.svg.selectAll("circle").data(nodes);
   circle.enter().append("svg:circle")
-    .on('click', function(d) { 
-      console.log(d.sha1, d); d.click();
+    .on('click', function(d) {
+      d3.event.stopPropagation();
+      console.log(d.sha1, d); 
+      d.toggleSelected();
     });
   circle
     .attr("r", function(d) {
@@ -256,7 +258,19 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
 }
 
 GraphViewModel.prototype.handleBubbledClick = function() {
-  
+  // If the clicked element is bound to the current action context,
+  // then let's not deselect it.
+  if (ko.dataFor(event.target) === this.currentActionContext()) return;
+  if (this.currentActionContext() && this.currentActionContext() instanceof GitNodeViewModel) {
+    this.currentActionContext().toggleSelected();
+  } else {
+    this.currentActionContext(null);
+  }
+  // If the click was on an input element, then let's allow the default action to proceed.
+  // This is especially needed since for some strange reason any submit (ie. enter in a textbox)
+  // will trigger a click event on the submit input of the form, which will end up here,
+  // and if we don't return true, then the submit event is never fired, breaking stuff.
+  if (event.target.nodeName === 'INPUT') return true;
 }
 
 GraphViewModel.prototype.onProgramEvent = function(event) {
@@ -295,6 +309,7 @@ GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
     }
   });
 
-  for(var key in this.nodesById)
+  for(var key in this.nodesById) {
     this.nodesById[key].remoteTags(nodeIdsToRemoteTags[key] || []);
+  }
 }
