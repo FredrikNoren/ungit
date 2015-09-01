@@ -19,7 +19,7 @@ function RemotesViewModel(server, repoPath) {
     programEvents.dispatch({ event: 'current-remote-changed', newRemote: value });
   });
   this.fetchLabel = ko.computed(function() {
-    if (self.currentRemote()) return 'Fetch nodes from ' + self.currentRemote();
+    if (self.currentRemote()) return 'Fetch from ' + self.currentRemote();
     else return 'No remotes specified';
   })
 

@@ -1,24 +1,24 @@
 <div class="btn-group fetchButton">
-	<button type="button" class="btn btn-default" data-ta-clickable="fetch" data-bind="click: function() {}">
-		<span class="glyphicon glyphicon-download-alt"></span>
-		<span data-bind="text: 'Submodules'"></span>
-		<!-- ko component: updateProgressBar --><!-- /ko -->
-		<!-- ko component: fetchProgressBar --><!-- /ko -->
-	</button>
-	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="submodules-menu">
-		<span class="caret"></span>
-	</button>
-	<ul class="dropdown-menu" role="menu" data-ta-container="submodules">
-		<!-- ko foreach: submodules -->
-		<li>
-			<a href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
-			<a href="#" class="list-link list-url" data-bind="text: '@', click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
-			<a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
-		</li>
-		<!-- /ko -->
-		<li class="divider"></li>
-		<li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="update-submodule">Update Submodules</a></li>
-		<li class="divider"></li>
-		<li><a href="#" data-bind="click: showAddSubmoduleDialog" data-ta-clickable="add-submodule">Add Submodules</a></li>
-	</ul>
+  <button type="button" class="btn btn-default btn-main" data-ta-clickable="fetch" data-bind="click: function() {}">
+    <span class="glyphicon glyphicon-th-large"></span>
+    <span data-bind="text: 'Submodules'"></span>
+    <!-- ko component: updateProgressBar --><!-- /ko -->
+    <!-- ko component: fetchProgressBar --><!-- /ko -->
+  </button>
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="submodules-menu">
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu pull-right" role="menu" data-ta-container="submodules">
+    <!-- ko foreach: submodules -->
+    <li>
+      <a href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
+      <a href="#" class="list-link list-url" data-bind="text: '@', click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
+      <a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+    </li>
+    <!-- /ko -->
+    <li class="divider"></li>
+    <li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="update-submodule">Update Submodules</a></li>
+    <li class="divider"></li>
+    <li><a href="#" data-bind="click: showAddSubmoduleDialog" data-ta-clickable="add-submodule">Add Submodules</a></li>
+  </ul>
 </div>
