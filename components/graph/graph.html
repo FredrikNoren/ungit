@@ -51,7 +51,7 @@
 
         <!-- ko if: showNewRefAction -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()" data-toggle="tooltip" data-placement="top" title="Create branch / tag at this commit">&#x271A;</button>
           <!-- ko if: branchingFormVisible -->
           <form class="form-inline" data-bind="submit: createBranch">
             <input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
