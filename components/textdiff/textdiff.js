@@ -22,6 +22,8 @@ var TextDiffViewModel = function(args) {
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
+  this.diffToggleCallback = args.diffToggleCallback;
+
   this.textDiffType.subscribe(function() {
     self.invalidateDiff();
   });
@@ -70,6 +72,7 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     });
   } else {
     if (callback) callback();
+    if (this.diffToggleCallback) this.diffToggleCallback();
   }
 }
 

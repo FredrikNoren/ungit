@@ -13,6 +13,7 @@ var CommitLineDiff = function(args) {
   this.server = args.server;
   this.sha1 = args.sha1;
   this.textDiffType = args.textDiffType;
+  this.diffToggleCallback = args.diffToggleCallback;
   this.specificDiff = ko.observable(this.getSpecificDiff());
 };
 exports.CommitLineDiff = CommitLineDiff;
@@ -24,13 +25,15 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
     server: this.server,
     sha1: this.sha1,
     textDiffType: this.textDiffType,
-    isShowingDiffs: this.isShowingDiffs
+    isShowingDiffs: this.isShowingDiffs,
+    diffToggleCallback: this.diffToggleCallback
   });
 }
 
 CommitLineDiff.prototype.fileNameClick = function() {
   if (this.isShowingDiffs()) {
     this.isShowingDiffs(false);
+    this.diffToggleCallback();
   } else {
     this.isShowingDiffs(true);
     this.specificDiff().invalidateDiff();

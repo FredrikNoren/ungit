@@ -31,7 +31,6 @@ function GraphViewModel(server, repoPath) {
   });
   this.HEAD = ko.observable();
   this.currentActionContext = ko.observable();
-  this.edges = ko.observableArray();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
     self.maxNNodes = self.maxNNodes + 25;
@@ -49,10 +48,9 @@ function GraphViewModel(server, repoPath) {
     }
   });
   
-  
-  
   this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
   this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
+  this.refreshGraph = _.debounce(this.render.bind(this), 20);
   this.loadNodesFromApiThrottled();
   this.updateBranchesThrottled();
 }
@@ -154,6 +152,7 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     prevNode = node;
   });
   
+  this.nodes(nodes);
   this.render(nodes);
 }
 
@@ -169,6 +168,10 @@ GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
 GraphViewModel.prototype.render = function(nodes) {
   var self = this;
   
+  if (!nodes || !Array.isArray(nodes)) {
+    nodes = this.nodes();
+  }
+  
   if (!this.svg) {
     this.svg = d3.select("#graph-svg").append("svg:svg");
   }
@@ -179,9 +182,6 @@ GraphViewModel.prototype.render = function(nodes) {
       edges.push(self.getEdge(node.sha1, parentSha1));
     });
   });
-
-  this.nodes(nodes);
-  this.edges(edges);
   
   var path = this.svg.selectAll("path").data(edges);
   path.enter().append("svg:path")
