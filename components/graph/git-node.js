@@ -1,6 +1,7 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var Selectable = require('./selectable');
+var programEvents = require('ungit-program-events');
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
@@ -136,18 +137,23 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
+  var self = this;
   this.graph.server.queryPromise('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
     .finally(function() {
-      this.branchingFormVisible(false);
-      this.newBranchName('');
+      self.branchingFormVisible(false);
+      self.branchesAndLocalTags.push(self.graph.getRef('refs/heads/' + self.newBranchName()));
+      self.newBranchName('');
+      programEvents.dispatch({ event: 'branch-updated' });
     });
 }
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
+  var self = this;
   this.graph.server.queryPromise('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
     .finally(function() {
-      this.branchingFormVisible(false);
-      this.newBranchName('');
+      self.branchingFormVisible(false);
+      self.branchesAndLocalTags.push(self.graph.getRef('tag: refs/tags/' + self.newBranchName()));
+      self.newBranchName('');
     });
 }
 GitNodeViewModel.prototype.toggleSelected = function() {

@@ -52,6 +52,9 @@ var RefViewModel = function(fullRefName, graph) {
   });
   this.color = this._colorFromHashOfString(this.name);
   
+  this.node.subscribe(function(oldNode) {
+    if (oldNode) oldNode.branchesAndLocalTags.remove(self);
+  }, null, "beforeChange");
 };
 module.exports = RefViewModel;
 
