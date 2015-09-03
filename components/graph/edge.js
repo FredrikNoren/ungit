@@ -9,7 +9,7 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
     if (self.nodeB()) {
       return pathPrefix + " L " + self.nodeB().cx() + " " + self.nodeB().cy();
     } else {
-      return pathPrefix + " l 0 99999";
+      return pathPrefix + " v 99999";
     }
   });
   

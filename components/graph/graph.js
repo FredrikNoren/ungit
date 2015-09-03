@@ -174,6 +174,19 @@ GraphViewModel.prototype.render = function(nodes) {
   
   if (!this.svg) {
     this.svg = d3.select("#graph-svg").append("svg:svg");
+    this.svg.append("path")
+      .attr("d", "M 610 68 v 99999")
+      .attr("stroke-width", 10)
+      .attr("stroke-dasharray", "10, 5")
+      .attr("stroke", "#494949");
+    this.svg.append("circle")
+      .attr("r", 30)
+      .attr("cx", 610)
+      .attr("cy", 35)
+      .attr("stroke-width", 10)
+      .attr("stroke-dasharray", "10, 7")
+      .attr("stroke", nodes[0].color())
+      .attr("fill", "transparent");
   }
   
   var edges = [];
@@ -183,11 +196,11 @@ GraphViewModel.prototype.render = function(nodes) {
     });
   });
   
-  var path = this.svg.selectAll("path").data(edges);
+  var path = this.svg.selectAll(".node-path-graph").data(edges);
   path.enter().append("svg:path")
-    .attr("stroke-width", function(d) {
-      return 10;
-    }).on('click', function(d) {
+    .attr('class', 'node-path-graph')
+    .attr("stroke-width", 10)
+    .on('click', function(d) {
       console.log(d);
     }).attr("stroke", "#494949");
   path
@@ -195,8 +208,9 @@ GraphViewModel.prototype.render = function(nodes) {
       return d.path();
     });
 
-  var circle = this.svg.selectAll("circle").data(nodes);
+  var circle = this.svg.selectAll(".nodes-graph").data(nodes);
   circle.enter().append("svg:circle")
+    .attr('class', 'nodes-graph')
     .on('click', function(d) {
       d3.event.stopPropagation();
       console.log(d.sha1, d); 

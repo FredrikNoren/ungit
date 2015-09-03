@@ -85,7 +85,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   
   this.cx = ko.computed(function() {
-    return self.ancestorOfHEAD() ? 613 : 613 + (90 * self.branchOrder());
+    return self.ancestorOfHEAD() ? 610 : 610 + (90 * self.branchOrder());
   });
   
   this.cy = ko.computed(function() {
