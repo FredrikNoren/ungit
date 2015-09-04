@@ -105,6 +105,10 @@ var GitNodeViewModel = function(graph, sha1) {
       return self.aboveNode() ? self.aboveNode().cy() + 60 : 120;
     }
   });
+  
+  this.cx.subscribe(function(value) {
+    self.commitComponent.selectedDiffLeftPosition(-(value - 600));
+  });
 }
 module.exports = GitNodeViewModel;
 
