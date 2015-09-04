@@ -75,7 +75,7 @@ CommitViewModel.prototype.setData = function(args) {
       diffToggleCallback: function() {
         // git-node.js's .cy() computable is dependent on element().offsetHeight 
         // however element() doesn't change and offsetHeight change doesn't trigger
-        // recompute, thus this callback needs to be called when recompute is needed
+        // recompute, thus this callback is needs after toggle to recompute node.cy()
         self.element.valueHasMutated();
       } }));
 }

@@ -1,6 +1,5 @@
 var ko = require('knockout');
 var components = require('ungit-components');
-var d3 = require("d3");
 var GitNodeViewModel = require('./git-node');
 var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
@@ -19,6 +18,7 @@ function GraphViewModel(server, repoPath) {
   this.loadNodesFromApi();
   this.currentRemote = ko.observable();
   this.nodes = ko.observableArray();
+  this.edges = ko.observableArray();
   this.refs = ko.observableArray();
   this.nodesById = {};
   this.refsByRefName = {};
@@ -50,9 +50,10 @@ function GraphViewModel(server, repoPath) {
   
   this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
   this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
-  this.refreshGraph = _.debounce(this.render.bind(this), 20);
   this.loadNodesFromApiThrottled();
   this.updateBranchesThrottled();
+  this.graphWidth = ko.observable();
+  this.graphHeight = ko.observable();
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
@@ -152,8 +153,18 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     prevNode = node;
   });
   
+  var edges = [];
+  nodes.forEach(function(node) {
+    node.parents().forEach(function(parentSha1) {
+      edges.push(self.getEdge(node.sha1, parentSha1));
+    });
+  });
+  
+  this.edges(edges);
   this.nodes(nodes);
-  this.render(nodes);
+  
+  this.graphHeight(nodes[nodes.length - 1].cy() + 80);
+  this.graphWidth(1000 + (this.heighstBranchOrder * 90));
 }
 
 GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
@@ -163,73 +174,6 @@ GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
     edge = this.edgesById[id] = new EdgeViewModel(this, nodeAsha1, nodeBsha1);
   }
   return edge;
-}
-
-GraphViewModel.prototype.render = function(nodes) {
-  var self = this;
-  
-  if (!nodes || !Array.isArray(nodes)) {
-    nodes = this.nodes();
-  }
-  
-  if (!this.svg) {
-    this.svg = d3.select("#graph-svg").append("svg:svg");
-    this.svg.append("path")
-      .attr("d", "M 610 68 v 99999")
-      .attr("stroke-width", 10)
-      .attr("stroke-dasharray", "10, 5")
-      .attr("stroke", "#494949");
-    this.svg.append("circle")
-      .attr("r", 30)
-      .attr("cx", 610)
-      .attr("cy", 35)
-      .attr("stroke-width", 10)
-      .attr("stroke-dasharray", "10, 7")
-      .attr("stroke", nodes[0].color())
-      .attr("fill", "transparent");
-  }
-  
-  var edges = [];
-  nodes.forEach(function(node) {
-    node.parents().forEach(function(parentSha1) {
-      edges.push(self.getEdge(node.sha1, parentSha1));
-    });
-  });
-  
-  var path = this.svg.selectAll(".node-path-graph").data(edges);
-  path.enter().append("svg:path")
-    .attr('class', 'node-path-graph')
-    .attr("stroke-width", 10)
-    .on('click', function(d) {
-      console.log(d);
-    }).attr("stroke", "#494949");
-  path
-    .attr("d", function(d) {
-      return d.path();
-    });
-
-  var circle = this.svg.selectAll(".nodes-graph").data(nodes);
-  circle.enter().append("svg:circle")
-    .attr('class', 'nodes-graph')
-    .on('click', function(d) {
-      d3.event.stopPropagation();
-      console.log(d.sha1, d); 
-      d.toggleSelected();
-    });
-  circle
-    .attr("r", function(d) {
-      return d.r();
-    }).attr("cx", function(d) {
-      return d.cx();
-    }).attr("cy", function(d) {
-      return d.cy();
-    }).attr("fill", function(d){
-      return d.color();
-    });
-
-  this.svg
-    .attr('height', nodes[nodes.length - 1].cy() + 80)
-    .attr('width', 1000 + (this.heighstBranchOrder * 90));
 }
 
 GraphViewModel._markIdeologicalStamp = 0;

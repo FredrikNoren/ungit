@@ -105,11 +105,6 @@ var GitNodeViewModel = function(graph, sha1) {
       return self.aboveNode() ? self.aboveNode().cy() + 60 : 120;
     }
   });
-  
-  // Since d3 does not observe on data change, refresh graphic when graphic values changes
-  this.r.subscribe(this.graph.refreshGraph);
-  this.cx.subscribe(this.graph.refreshGraph);
-  this.cy.subscribe(this.graph.refreshGraph);
 }
 module.exports = GitNodeViewModel;
 
@@ -190,9 +185,6 @@ GitNodeViewModel.prototype.toggleSelected = function() {
       console.log('Fix')
     }
   }
-  
-  // Strict graph refresh without debounce delay as window sizing is determined
-  this.graph.render();
   
   return false;
 }
