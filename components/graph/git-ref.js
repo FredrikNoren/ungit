@@ -1,6 +1,8 @@
 var ko = require('knockout');
 var md5 = require('blueimp-md5').md5;
 var Selectable = require('./selectable');
+var programEvents = require('ungit-program-events');
+var components = require('ungit-components');
 
 var RefViewModel = function(fullRefName, graph) {
   var self = this;
@@ -69,4 +71,52 @@ RefViewModel.prototype.dragStart = function() {
 RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
+}
+RefViewModel.prototype.moveTo = function(target, callback) {
+  var self = this;
+  
+  var callbackWithRefSet = function(err, res) {
+    if (err) {
+      callback(err, res);
+    } else {
+      // correctly re locate references for target node and this ref.
+      var targetNode = self.graph.getNode(target);
+      
+      if (self.isRemoteTag) {
+        targetNode.remoteTags.push(self);
+      } else {
+        targetNode.branchesAndLocalTags.push(self);
+      }
+      
+      self.node(targetNode);
+      callback();
+    }
+  }
+  
+  if (this.isLocal) {
+    if (this.current()) {
+      this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callbackWithRefSet);
+    } else if (this.isTag) {
+      this.server.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+    } else {
+      this.server.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+    }
+  } else {
+    var pushReq = { path: this.graph.repoPath, remote: this.remote, refSpec: target, remoteBranch: this.refName };
+    this.server.post('/push', pushReq, function(err, res) {
+        if (err) {
+          if (err.errorCode == 'non-fast-forward') {
+            var forcePushDialog = components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' });
+            forcePushDialog.closed.add(function() {
+              if (!forcePushDialog.result()) return callback();
+              pushReq.force = true;
+              self.server.post('/push', pushReq, callback);
+            });
+            programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
+            return true;
+          }
+        }
+        callbackWithRefSet(err, res);
+      });
+  }
 }

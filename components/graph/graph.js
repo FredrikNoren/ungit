@@ -37,14 +37,27 @@ function GraphViewModel(server, repoPath) {
     self.loadNodesFromApi();
   }, 500, true);
   
-  this.svg = null;
   this.heighstBranchOrder = 0;
+  
+  this.hoverGraphActionGraphic = ko.observable();
+  var prevHoverGraphic;
+  this.hoverGraphActionGraphic.subscribe(function(value) {
+    prevHoverGraphic = value;
+  }, null, 'beforeChange');
+  this.hoverGraphActionGraphic.subscribe(function(newValue) {
+    if (newValue != prevHoverGraphic && prevHoverGraphic && prevHoverGraphic.destroy)
+      prevHoverGraphic.destroy();
+  });
+  this.hoverGraphActionGraphicType = ko.computed(function() {
+    return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
+  })
+  
   this.hoverGraphAction = ko.observable();
   this.hoverGraphAction.subscribe(function(value) {
     if (value && value.createHoverGraphic) {
-      self.graphic.hoverGraphActionGraphic(value.createHoverGraphic());
+      self.hoverGraphActionGraphic(value.createHoverGraphic());
     } else {
-      self.graphic.hoverGraphActionGraphic(null);
+      self.hoverGraphActionGraphic(null);
     }
   });
   

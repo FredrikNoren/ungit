@@ -2,6 +2,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var Selectable = require('./selectable');
 var programEvents = require('ungit-program-events');
+var GraphActions = require('./git-graph-actions');
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
@@ -17,7 +18,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.ideologicalBranch.subscribe(function(value) {
     self.color(value ? value.color : '#666');
   });
-  this.remoteTags = ko.observable([]);
+  this.remoteTags = ko.observableArray();
   this.branchesAndLocalTags = ko.observableArray();
   
   this.refs = ko.computed(function() {
@@ -109,6 +110,19 @@ var GitNodeViewModel = function(graph, sha1) {
   this.cx.subscribe(function(value) {
     self.commitComponent.selectedDiffLeftPosition(-(value - 600));
   });
+
+  this.dropareaGraphActions = [
+    new GraphActions.Move(this.graph, this)
+    // new GraphActions.Rebase(this.graph, this),
+    // new GraphActions.Merge(this.graph, this),
+    // new GraphActions.Push(this.graph, this),
+    // new GraphActions.Reset(this.graph, this),
+    // new GraphActions.Checkout(this.graph, this),
+    // new GraphActions.Delete(this.graph, this),
+    // new GraphActions.CherryPick(this.graph, this),
+    // new GraphActions.Uncommit(this.graph, this),
+    // new GraphActions.Revert(this.graph, this)
+  ];
 }
 module.exports = GitNodeViewModel;
 
