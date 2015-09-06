@@ -120,3 +120,26 @@ RefViewModel.prototype.moveTo = function(target, callback) {
       });
   }
 }
+
+RefViewModel.prototype.remove = function(callback) {
+  var self = this;
+  var url = this.isTag ? '/tags' : '/branches';
+  if (this.isRemote) url = '/remote' + url;
+  this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
+    if (!err) {
+      if (self.isRemoteTag) {
+        self.node().remoteTags.remove(self);
+      } else {
+        self.node().branchesAndLocalTags.remove(self);
+      }
+    }
+    
+    callback();
+    self.graph.loadNodesFromApi();
+    if (url == '/remote/tags') {
+      programEvents.dispatch({ event: 'request-fetch-tags' });
+    } else {
+      programEvents.dispatch({ event: 'branch-updated' });
+    }
+  });
+}

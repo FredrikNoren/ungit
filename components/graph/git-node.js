@@ -112,16 +112,16 @@ var GitNodeViewModel = function(graph, sha1) {
   });
 
   this.dropareaGraphActions = [
-    new GraphActions.Move(this.graph, this)
+    new GraphActions.Move(this.graph, this),
     // new GraphActions.Rebase(this.graph, this),
     // new GraphActions.Merge(this.graph, this),
     // new GraphActions.Push(this.graph, this),
     // new GraphActions.Reset(this.graph, this),
-    // new GraphActions.Checkout(this.graph, this),
-    // new GraphActions.Delete(this.graph, this),
+    new GraphActions.Checkout(this.graph, this),
+    new GraphActions.Delete(this.graph, this),
     // new GraphActions.CherryPick(this.graph, this),
-    // new GraphActions.Uncommit(this.graph, this),
-    // new GraphActions.Revert(this.graph, this)
+    new GraphActions.Uncommit(this.graph, this),
+    new GraphActions.Revert(this.graph, this)
   ];
 }
 module.exports = GitNodeViewModel;
@@ -152,9 +152,10 @@ GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
   var self = this;
   this.graph.server.queryPromise('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
-    .finally(function() {
-      self.branchingFormVisible(false);
+    .then(function() {
       self.branchesAndLocalTags.push(self.graph.getRef('refs/heads/' + self.newBranchName()));
+    }).finally(function() {
+      self.branchingFormVisible(false);
       self.newBranchName('');
       programEvents.dispatch({ event: 'branch-updated' });
     });
@@ -163,9 +164,10 @@ GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
   var self = this;
   this.graph.server.queryPromise('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
-    .finally(function() {
-      self.branchingFormVisible(false);
+    .then(function() {
       self.branchesAndLocalTags.push(self.graph.getRef('tag: refs/tags/' + self.newBranchName()));
+    }).finally(function() {
+      self.branchingFormVisible(false);
       self.newBranchName('');
     });
 }

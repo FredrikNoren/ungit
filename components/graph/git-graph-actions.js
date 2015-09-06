@@ -223,73 +223,73 @@ GraphActions.Move.prototype.perform = function(callback) {
 //   else ref.createRemoteRef(onDone);
 // }
 // 
-// GraphActions.Checkout = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     if (self.graph.currentActionContext() instanceof RefViewModel)
-//       return self.graph.currentActionContext().node() == self.node &&
-//         !self.graph.currentActionContext().current();
-//     return ungit.config.allowCheckoutNodes &&
-//       self.graph.currentActionContext() == self.node;
-//   });
-// }
-// inherits(GraphActions.Checkout, GraphActions.ActionBase);
-// GraphActions.Checkout.prototype.text = 'Checkout';
-// GraphActions.Checkout.prototype.style = 'checkout';
-// GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
-// GraphActions.Checkout.prototype.perform = function(callback) {
-//   var self = this;
-//   var context = this.graph.currentActionContext();
-//   var refName;
-//   if (context instanceof RefViewModel) refName = context.refName;
-//   else refName = context.sha1;
-//   this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
-//     if (err && err.errorCode != 'merge-failed') {
-//       callback();
-//       return;
-//     }
-//     if (context instanceof RefViewModel && context.isRemoteBranch)
-//       self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
-//         callback();
-//         if (err && err.errorCode != 'merge-failed') return;
-//         return true;
-//       });
-//     else
-//       callback();
-//     return true;
-//   });
-// }
-// 
-// GraphActions.Delete = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() instanceof RefViewModel &&
-//       self.graph.currentActionContext().node() == self.node &&
-//       !self.graph.currentActionContext().current();
-//   });
-// }
-// inherits(GraphActions.Delete, GraphActions.ActionBase);
-// GraphActions.Delete.prototype.text = 'Delete';
-// GraphActions.Delete.prototype.style = 'delete';
-// GraphActions.Delete.prototype.icon = 'glyphicon-remove';
-// GraphActions.Delete.prototype.perform = function(callback) {
-//   var context = this.graph.currentActionContext();
-//   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
-//   diag.closed.add(function() {
-//     if (diag.result()) {
-// 		context.remove(callback);
-// 	} else {
-// 		callback();
-// 	}
-//   });
-//   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
-// }
+GraphActions.Checkout = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    if (self.graph.currentActionContext() instanceof RefViewModel)
+      return self.graph.currentActionContext().node() == self.node &&
+        !self.graph.currentActionContext().current();
+    return ungit.config.allowCheckoutNodes &&
+      self.graph.currentActionContext() == self.node;
+  });
+}
+inherits(GraphActions.Checkout, GraphActions.ActionBase);
+GraphActions.Checkout.prototype.text = 'Checkout';
+GraphActions.Checkout.prototype.style = 'checkout';
+GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
+GraphActions.Checkout.prototype.perform = function(callback) {
+  var self = this;
+  var context = this.graph.currentActionContext();
+  var refName;
+  if (context instanceof RefViewModel) refName = context.refName;
+  else refName = context.sha1;
+  this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
+    if (err && err.errorCode != 'merge-failed') {
+      callback();
+      return;
+    }
+    if (context instanceof RefViewModel && context.isRemoteBranch)
+      self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
+        callback();
+        if (err && err.errorCode != 'merge-failed') return;
+        return true;
+      });
+    else
+      callback();
+    return true;
+  });
+}
+
+GraphActions.Delete = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      self.graph.currentActionContext().node() == self.node &&
+      !self.graph.currentActionContext().current();
+  });
+}
+inherits(GraphActions.Delete, GraphActions.ActionBase);
+GraphActions.Delete.prototype.text = 'Delete';
+GraphActions.Delete.prototype.style = 'delete';
+GraphActions.Delete.prototype.icon = 'glyphicon-remove';
+GraphActions.Delete.prototype.perform = function(callback) {
+  var context = this.graph.currentActionContext();
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+		context.remove(callback);
+	} else {
+		callback();
+	}
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+}
 // 
 // 
 // GraphActions.CherryPick = function(graph, node) {
@@ -312,37 +312,37 @@ GraphActions.Move.prototype.perform = function(callback) {
 //   });
 // }
 // 
-// GraphActions.Uncommit = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() == self.node &&
-//       self.graph.HEAD() == self.node;
-//   });
-// }
-// inherits(GraphActions.Uncommit, GraphActions.ActionBase);
-// GraphActions.Uncommit.prototype.text = 'Uncommit';
-// GraphActions.Uncommit.prototype.style = 'uncommit';
-// GraphActions.Uncommit.prototype.perform = function(callback) {
-//   var self = this;
-//   this.server.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
-// }
-// 
-// GraphActions.Revert = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() == self.node;
-//   });
-// }
-// inherits(GraphActions.Revert, GraphActions.ActionBase);
-// GraphActions.Revert.prototype.text = 'Revert';
-// GraphActions.Revert.prototype.style = 'revert';
-// GraphActions.Revert.prototype.perform = function(callback) {
-//   var self = this;
-//   this.server.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
-// }
+GraphActions.Uncommit = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() == self.node &&
+      self.graph.HEAD() == self.node;
+  });
+}
+inherits(GraphActions.Uncommit, GraphActions.ActionBase);
+GraphActions.Uncommit.prototype.text = 'Uncommit';
+GraphActions.Uncommit.prototype.style = 'uncommit';
+GraphActions.Uncommit.prototype.perform = function(callback) {
+  var self = this;
+  this.server.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
+}
+
+GraphActions.Revert = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() == self.node;
+  });
+}
+inherits(GraphActions.Revert, GraphActions.ActionBase);
+GraphActions.Revert.prototype.text = 'Revert';
+GraphActions.Revert.prototype.style = 'revert';
+GraphActions.Revert.prototype.perform = function(callback) {
+  var self = this;
+  this.server.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
+}
