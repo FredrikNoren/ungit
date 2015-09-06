@@ -153,7 +153,9 @@ GitNodeViewModel.prototype.createBranch = function() {
   var self = this;
   this.graph.server.queryPromise('POST', '/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
     .then(function() {
-      self.branchesAndLocalTags.push(self.graph.getRef('refs/heads/' + self.newBranchName()));
+      var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
+      newRef.node(self);
+      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -165,7 +167,9 @@ GitNodeViewModel.prototype.createTag = function() {
   var self = this;
   this.graph.server.queryPromise('POST', '/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
     .then(function() {
-      self.branchesAndLocalTags.push(self.graph.getRef('tag: refs/tags/' + self.newBranchName()));
+      var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
+      newRef.node(self);
+      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
