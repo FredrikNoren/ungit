@@ -34,12 +34,12 @@ To get started developing on Ungit:
 Run ungit as standalone application
 -----------------------------------
 
-To provide easier access to launch ungit, very early stage of standalone application container using [election](http://electron.atom.io/) is available.
+To provide easier access to launch ungit, very early stage of standalone application container using [electron](http://electron.atom.io/) is available.
 Please note this is not yet ready for public release and being developed having several known & unknown limitations.
 
 To get started:
  1. Follow steps in 'Getting started' to get development environment is ready.
- 2. Run `grunt default && grunt package`. This'll compile latest ungit and will create standalone application package under `build/`
+ 2. Run `grunt default && grunt package`. This will compile latest ungit and will create a standalone application package under `build/`
 
 Known limitation:
  1. Current standalone application does not allow to execute more than one instance.
