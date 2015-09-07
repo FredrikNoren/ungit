@@ -30,6 +30,21 @@ To get started developing on Ungit:
  4. Run `grunt` to build (compile templates, css and js).
  5. Type `npm start` to start ungit, or `npm test` to run tests.
  6. (Optional). Run `grunt watch` to automatically rebuild stuff when you change files.
+ 
+Run ungit as standalone application
+-----------------------------------
+
+To provide easier access to launch ungit, very early stage of standalone application container using [electron](http://electron.atom.io/) is available.
+Please note this is not yet ready for public release and being developed having several known & unknown limitations.
+
+To get started:
+ 1. Follow steps in 'Getting started' to get a development environment ready.
+ 2. Run `grunt default && grunt package`. This will compile latest ungit and will create a standalone application package under `build/`
+
+Known limitation:
+ 1. Current standalone application does not allow to execute more than one instance.
+ 2. There is no installer package neither automatic update mechanism for standalone application in place yet.
+ 3. Icons, and other assets are not being updated for ungit but have default resources from electron. 
 
 Architecture overview
 ---------------------
