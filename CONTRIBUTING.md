@@ -38,7 +38,7 @@ To provide easier access to launch ungit, very early stage of standalone applica
 Please note this is not yet ready for public release and being developed having several known & unknown limitations.
 
 To get started:
- 1. Follow steps in 'Getting started' to get development environment is ready.
+ 1. Follow steps in 'Getting started' to get a development environment ready.
  2. Run `grunt default && grunt package`. This will compile latest ungit and will create a standalone application package under `build/`
 
 Known limitation:
