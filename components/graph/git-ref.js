@@ -79,16 +79,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     if (err) {
       callback(err, res);
     } else {
-      // correctly re locate references for target node and this ref.
-      var targetNode = self.graph.getNode(target);
-      
-      if (self.isRemoteTag) {
-        targetNode.remoteTags.push(self);
-      } else {
-        targetNode.branchesAndLocalTags.push(self);
-      }
-      
-      self.node(targetNode);
+      self.graph.moveRef(self, self.graph.getNode(target))
       callback();
     }
   }
@@ -127,11 +118,7 @@ RefViewModel.prototype.remove = function(callback) {
   if (this.isRemote) url = '/remote' + url;
   this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
     if (!err) {
-      if (self.isRemoteTag) {
-        self.node().remoteTags.remove(self);
-      } else {
-        self.node().branchesAndLocalTags.remove(self);
-      }
+      self.node().removeRef(self);
     }
     
     callback();

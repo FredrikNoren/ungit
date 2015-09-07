@@ -250,24 +250,20 @@ GraphActions.Checkout.prototype.perform = function(callback) {
       return;
     }
 
-    var callbackWithRefresh = function() {
-      var headRef = self.graph.HEADref();
-      var targetNode = context instanceof RefViewModel ? context.node() : context;
-      headRef.node().branchesAndLocalTags.remove(headRef);
-      headRef.node(targetNode);
-      targetNode.branchesAndLocalTags.push(headRef);
+    var callbackWithRefMove = function() {
+      self.graph.moveRef(self.graph.HEADref(), context instanceof RefViewModel ? context.node() : context);
       self.graph.computeNode();
       callback();
     }
 
     if (context instanceof RefViewModel && context.isRemoteBranch) {
       self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
-        callbackWithRefresh();
+        callbackWithRefMove();
         if (err && err.errorCode != 'merge-failed') return;
         return true;
       });
     } else {
-      callbackWithRefresh();
+      callbackWithRefMove();
     }
     return true;
   });

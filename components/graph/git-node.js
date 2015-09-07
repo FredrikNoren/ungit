@@ -212,3 +212,17 @@ GitNodeViewModel.prototype.toggleSelected = function() {
   
   return false;
 }
+GitNodeViewModel.prototype.removeRef = function(ref) {
+  if (ref.isRemoteTag) {
+    this.remoteTags.remove(ref);
+  } else {
+    this.branchesAndLocalTags.remove(ref);
+  }
+}
+GitNodeViewModel.prototype.pushRef = function(ref) {
+  if (ref.isRemoteTag) {
+    this.remoteTags.push(ref);
+  } else {
+    this.branchesAndLocalTags.push(ref);
+  }
+}
