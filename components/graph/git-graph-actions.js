@@ -243,22 +243,32 @@ GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
-  var refName;
-  if (context instanceof RefViewModel) refName = context.refName;
-  else refName = context.sha1;
+  var refName = context instanceof RefViewModel ? context.refName : context.sha1 ;
   this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
     if (err && err.errorCode != 'merge-failed') {
       callback();
       return;
     }
-    if (context instanceof RefViewModel && context.isRemoteBranch)
+
+    var callbackWithRefresh = function() {
+      var headRef = self.graph.HEADref();
+      var targetNode = context instanceof RefViewModel ? context.node() : context;
+      headRef.node().branchesAndLocalTags.remove(headRef);
+      headRef.node(targetNode);
+      targetNode.branchesAndLocalTags.push(headRef);
+      self.graph.computeNode();
+      callback();
+    }
+
+    if (context instanceof RefViewModel && context.isRemoteBranch) {
       self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
-        callback();
+        callbackWithRefresh();
         if (err && err.errorCode != 'merge-failed') return;
         return true;
       });
-    else
-      callback();
+    } else {
+      callbackWithRefresh();
+    }
     return true;
   });
 }

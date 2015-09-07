@@ -29,7 +29,10 @@ function GraphViewModel(server, repoPath) {
     else
       return null;
   });
-  this.HEAD = ko.observable();
+  this.HEADref = ko.observable();
+  this.HEAD = ko.computed(function() {
+    return self.HEADref() ? self.HEADref().node() : undefined;
+  })
   this.currentActionContext = ko.observable();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
@@ -84,6 +87,9 @@ GraphViewModel.prototype.getRef = function(ref) {
   if (!refViewModel) {
     refViewModel = this.refsByRefName[ref] = new GitRefViewModel(ref, this);
     this.refs.push(refViewModel);
+    if (refViewModel.name === 'HEAD') {
+      this.HEADref(refViewModel);
+    }
   }
   return refViewModel;
 }
@@ -94,18 +100,27 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
-      self.setNodesFromLog(nodes.map(function(logEntry) {
+      nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
         }));
+        
+      var edges = [];
+      nodes.forEach(function(node) {
+        node.parents().forEach(function(parentSha1) {
+          edges.push(self.getEdge(node.sha1, parentSha1));
+        });
+      });
+      
+      self.edges(edges);
+      self.nodes(nodes);
+      
+      self.graphHeight(nodes[nodes.length - 1].cy() + 80);
+      self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     })
     .finally(function(){
       // self.nodesLoader.stop();
       if (callback) callback();
     });
-}
-
-GraphViewModel.prototype.getHEAD = function(nodes) {
-  return _.find(nodes, function(node) { return _.find(node.refs(), 'isLocalHEAD'); });
 }
 
 GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
@@ -116,16 +131,18 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
   }
 }
 
-GraphViewModel.prototype.setNodesFromLog = function(nodes) {
+GraphViewModel.prototype.computeNode = function(nodes) {
   var self = this;
   
+  if (!nodes) {
+    nodes = this.nodes();
+  }
+
   this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
-  this.HEAD(this.getHEAD(nodes));
-  var HEAD = this.HEAD();
   
   var updateTimeStamp = moment().valueOf();
-  if (HEAD) {
-    this.traverseNodeLeftParents(HEAD, function(node) {
+  if (this.HEAD()) {
+    this.traverseNodeLeftParents(this.HEAD(), function(node) {
       node.ancestorOfHEADTimeStamp = updateTimeStamp;
     });
   }
@@ -166,18 +183,7 @@ GraphViewModel.prototype.setNodesFromLog = function(nodes) {
     prevNode = node;
   });
   
-  var edges = [];
-  nodes.forEach(function(node) {
-    node.parents().forEach(function(parentSha1) {
-      edges.push(self.getEdge(node.sha1, parentSha1));
-    });
-  });
-  
-  this.edges(edges);
-  this.nodes(nodes);
-  
-  this.graphHeight(nodes[nodes.length - 1].cy() + 80);
-  this.graphWidth(1000 + (this.heighstBranchOrder * 90));
+  return nodes;
 }
 
 GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
