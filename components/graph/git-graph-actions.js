@@ -257,8 +257,8 @@ GraphActions.Checkout.prototype.perform = function(callback) {
     if (context instanceof RefViewModel && context.isRemoteBranch) {
       this.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
         .then(moveRef)
-        .catch(function() {
-          return (err && err.errorCode != 'merge-failed') ? undefined : true;
+        .catch(function(err) {
+          return (err && err.errorCode == 'merge-failed') ? true : undefined;
         }).finally(callback);
     } else {
       moveRef();
@@ -295,28 +295,27 @@ GraphActions.Delete.prototype.perform = function(callback) {
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
-// 
-// 
-// GraphActions.CherryPick = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() == self.node
-//   });
-// }
-// inherits(GraphActions.CherryPick, GraphActions.ActionBase);
-// GraphActions.CherryPick.prototype.text = 'Cherry pick';
-// GraphActions.CherryPick.prototype.style = 'cherry-pick';
-// GraphActions.CherryPick.prototype.perform = function(callback) {
-//   var self = this;
-//   this.server.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
-//     callback();
-//     if (err && err.errorCode == 'merge-failed') return true;
-//   });
-// }
-// 
+
+GraphActions.CherryPick = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() == self.node
+  });
+}
+inherits(GraphActions.CherryPick, GraphActions.ActionBase);
+GraphActions.CherryPick.prototype.text = 'Cherry pick';
+GraphActions.CherryPick.prototype.style = 'cherry-pick';
+GraphActions.CherryPick.prototype.perform = function(callback) {
+  var self = this;
+  this.server.queryPromise('POST', '/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 })
+    .catch(function(err) {
+      return (err && err.errorCode == 'merge-failed') ? true : undefined;
+    }).finally(callback);
+}
+
 GraphActions.Uncommit = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);

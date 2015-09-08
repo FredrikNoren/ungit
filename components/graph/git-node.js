@@ -119,7 +119,7 @@ var GitNodeViewModel = function(graph, sha1) {
     // new GraphActions.Reset(this.graph, this),
     new GraphActions.Checkout(this.graph, this),
     new GraphActions.Delete(this.graph, this),
-    // new GraphActions.CherryPick(this.graph, this),
+    new GraphActions.CherryPick(this.graph, this),
     new GraphActions.Uncommit(this.graph, this),
     new GraphActions.Revert(this.graph, this)
   ];
