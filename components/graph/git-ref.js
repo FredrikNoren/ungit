@@ -79,7 +79,11 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     if (err) {
       callback(err, res);
     } else {
-      self.graph.moveRef(self, self.graph.getNode(target))
+      var targetNode = self.graph.getNode(target);
+      if (self.graph.checkedOutBranch() == self.refName) {
+        self.graph.moveRef(self.graph.HEADref(), targetNode);
+      }
+      self.graph.moveRef(self, targetNode);
       callback();
     }
   }
