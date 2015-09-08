@@ -24,10 +24,7 @@ function GraphViewModel(server, repoPath) {
   this.refsByRefName = {};
   this.checkedOutBranch = ko.observable();
   this.checkedOutRef = ko.computed(function() {
-    if (self.checkedOutBranch())
-      return self.getRef('refs/heads/' + self.checkedOutBranch());
-    else
-      return null;
+    return self.checkedOutBranch() ? self.getRef('refs/heads/' + self.checkedOutBranch()) : null;
   });
   this.HEADref = ko.observable();
   this.HEAD = ko.computed(function() {

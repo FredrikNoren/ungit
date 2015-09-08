@@ -250,20 +250,19 @@ GraphActions.Checkout.prototype.perform = function(callback) {
       return;
     }
 
-    var callbackWithRefMove = function() {
+    var moveRef = function() {
       self.graph.moveRef(self.graph.HEADref(), context instanceof RefViewModel ? context.node() : context);
-      self.graph.computeNode();
-      callback();
     }
 
     if (context instanceof RefViewModel && context.isRemoteBranch) {
-      self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
-        callbackWithRefMove();
-        if (err && err.errorCode != 'merge-failed') return;
-        return true;
-      });
+      this.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
+        .then(moveRef)
+        .catch(function() {
+          return (err && err.errorCode != 'merge-failed') ? undefined : true;
+        }).finally(callback);
     } else {
-      callbackWithRefMove();
+      moveRef();
+      callback();
     }
     return true;
   });
@@ -333,7 +332,12 @@ GraphActions.Uncommit.prototype.text = 'Uncommit';
 GraphActions.Uncommit.prototype.style = 'uncommit';
 GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
-  this.server.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
+  this.server.queryPromise('POST', '/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
+    .then(function() {
+      self.graph.moveRef(self.graph.HEADref(), self.graph.HEAD().belowNode);
+      self.graph.moveRef(self.graph.checkedOutRef(), self.graph.HEAD());
+      self.graph.computeNode();
+    }).finally(callback);
 }
 
 GraphActions.Revert = function(graph, node) {
@@ -350,5 +354,6 @@ GraphActions.Revert.prototype.text = 'Revert';
 GraphActions.Revert.prototype.style = 'revert';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
-  this.server.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
+  this.server.queryPromise('POST', '/revert', { path: this.graph.repoPath, commit: this.node.sha1 })
+    .finally(callback);
 }
