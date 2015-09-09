@@ -36,9 +36,9 @@ function GraphViewModel(server, repoPath) {
     self.maxNNodes = self.maxNNodes + 25;
     self.loadNodesFromApi();
   }, 500, true);
-  
+
   this.heighstBranchOrder = 0;
-  
+
   this.hoverGraphActionGraphic = ko.observable();
   var prevHoverGraphic;
   this.hoverGraphActionGraphic.subscribe(function(value) {
@@ -51,7 +51,7 @@ function GraphViewModel(server, repoPath) {
   this.hoverGraphActionGraphicType = ko.computed(function() {
     return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
   })
-  
+
   this.hoverGraphAction = ko.observable();
   this.hoverGraphAction.subscribe(function(value) {
     if (value && value.createHoverGraphic) {
@@ -60,7 +60,7 @@ function GraphViewModel(server, repoPath) {
       self.hoverGraphActionGraphic(null);
     }
   });
-  
+
   this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
   this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
   this.loadNodesFromApiThrottled();
@@ -100,17 +100,17 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
         }));
-        
+
       var edges = [];
       nodes.forEach(function(node) {
         node.parents().forEach(function(parentSha1) {
           edges.push(self.getEdge(node.sha1, parentSha1));
         });
       });
-      
+
       self.edges(edges);
       self.nodes(nodes);
-      
+
       self.graphHeight(nodes[nodes.length - 1].cy() + 80);
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     })
@@ -130,25 +130,25 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
 
 GraphViewModel.prototype.computeNode = function(nodes) {
   var self = this;
-  
+
   if (!nodes) {
     nodes = this.nodes();
   }
 
   this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
-  
+
   var updateTimeStamp = moment().valueOf();
   if (this.HEAD()) {
     this.traverseNodeLeftParents(this.HEAD(), function(node) {
       node.ancestorOfHEADTimeStamp = updateTimeStamp;
     });
   }
-  
+
   // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
   nodes = nodes.filter(function(node) { return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
 
   var branchSlots = [];
-  
+
   // Then iterate from the bottom to fix the orders of the branches
   for (var i = nodes.length - 1; i >= 0; i--) {
     var node = nodes[i];
@@ -170,7 +170,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
     node.branchOrder(ideologicalBranch.branchOrder);
     self.heighstBranchOrder = Math.max(self.heighstBranchOrder, node.branchOrder());
   }
-  
+
   var prevNode;
   nodes.forEach(function(node) {
     node.branchOrder(branchSlots.length - node.branchOrder());
@@ -179,7 +179,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
     if (prevNode) prevNode.belowNode = node;
     prevNode = node;
   });
-  
+
   return nodes;
 }
 

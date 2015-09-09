@@ -20,7 +20,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.remoteTags = ko.observableArray();
   this.branchesAndLocalTags = ko.observableArray();
-  
+
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
@@ -35,7 +35,7 @@ var GitNodeViewModel = function(graph, sha1) {
     repoPath: this.graph.repoPath,
     server: this.graph.server
   });
-  
+
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
   this.nodeIsMousehover.subscribe(function(value) {
@@ -80,20 +80,20 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.branchOrder = ko.observable();
   this.aboveNode = ko.observable();
-  
+
   this.r = ko.computed(function() {
     return self.ancestorOfHEAD() ? 30 : 15;
   });
-  
+
   this.cx = ko.computed(function() {
     return self.ancestorOfHEAD() ? 610 : 610 + (90 * self.branchOrder());
   });
-  
+
   this.cy = ko.computed(function() {
     if (self.aboveNode() && self.aboveNode().selected()) {
       return self.aboveNode().cy() + self.aboveNode().commitComponent.element().offsetHeight + 30;
     }
-    
+
     if (self.ancestorOfHEAD()) {
       if (!self.aboveNode()) {
         return 120;
@@ -106,7 +106,7 @@ var GitNodeViewModel = function(graph, sha1) {
       return self.aboveNode() ? self.aboveNode().cy() + 60 : 120;
     }
   });
-  
+
   this.cx.subscribe(function(value) {
     self.commitComponent.selectedDiffLeftPosition(-(value - 600));
   });
@@ -132,7 +132,7 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.parents(logEntry.parents || []);
   this.commitTime(logEntry.commitDate);
   this.commitComponent.setData(logEntry);
-  
+
   if (logEntry.refs) {
     var refVMs = logEntry.refs.map(function(ref) {
       var refViewModel = self.graph.getRef(ref);
@@ -141,7 +141,7 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
     });
     this.branchesAndLocalTags(refVMs);
   }
-  
+
   this.isInited = true;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
@@ -209,7 +209,7 @@ GitNodeViewModel.prototype.toggleSelected = function() {
       console.log('Fix')
     }
   }
-  
+
   return false;
 }
 GitNodeViewModel.prototype.removeRef = function(ref) {

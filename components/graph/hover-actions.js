@@ -6,9 +6,9 @@ var Color = require('color');
 
 // function MergeViewModel(graph, headNode, node) {
 //   var self = this;
-// 
+//
 //   this.graph = graph;
-// 
+//
 //   var newNode = {
 //     position: new Vector2(
 //       headNode.x(),
@@ -16,7 +16,7 @@ var Color = require('color');
 //     radius: Math.max(headNode.radius(), node.radius())
 //   };
 //   newNode.position.y -= newNode.radius*2;
-// 
+//
 //   this.newNode = new NodeViewModel(newNode.position, newNode.radius);
 //   this.edges = [
 //     new EdgeViewModel(headNode, this.newNode),
@@ -56,8 +56,8 @@ RebaseViewModel.prototype.destroy = function() {
 // }
 // exports.ResetViewModel = ResetViewModel;
 // ResetViewModel.prototype.type = 'reset';
-// 
-// 
+//
+//
 // function PushViewModel(fromNode, toNode) {
 //   this.fromPosition = fromNode.position().clone();
 //   this.toPosition = toNode.position().clone();

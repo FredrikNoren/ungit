@@ -12,12 +12,12 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
       return pathPrefix + " v 99999";
     }
   });
-  
+
   if (!this.nodeB()) {
     // if "to" node doesn't exist, watch for it and update and unsubscribe
     var nodeWatcher = graph.nodes.subscribe(function() {
       self.nodeB(graph.nodesById[nodeBsha1]);
-      
+
       if (!self.nodeB()) return;
       nodeWatcher.dispose();
     });

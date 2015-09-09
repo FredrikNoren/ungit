@@ -1,26 +1,26 @@
 
 @import "public/less/variables.less";
 
-.graph {    
+.graph {
   position: relative;
   display: inline-block;
   width: 100%;
-  
+
   .graphLog {
     left: 575px;
   }
-  
+
   .nodeContainer {
     position: absolute;
     left: 30px;
     top: 120px;
     width: 100%;
-    
+
     .commit-container {
       position: absolute;
       top: -43px;
     }
-    
+
     .rightSideContainer {
       position: absolute;
       margin-left: (@log-width-small + 40px);
@@ -28,7 +28,7 @@
       white-space: nowrap;
       height: 40px;
     }
-    
+
     .ref {
       display: inline-block;
       opacity: 0.6;
@@ -130,7 +130,7 @@
       }
     }
   }
-  
+
   .graphFooter {
     height: 60px;
     .progressBar {
@@ -139,7 +139,7 @@
       margin-left: (@log-width-small);
     }
   }
-  
+
   .remote-icon {
     background: url('images/remoteIcon.png');
     width: 12px;

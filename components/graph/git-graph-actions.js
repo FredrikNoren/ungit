@@ -74,7 +74,7 @@ GraphActions.Move.prototype.perform = function(callback) {
   this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
 
-// 
+//
 // GraphActions.Reset = function(graph, node) {
 //   var self = this;
 //   GraphActions.ActionBase.call(this, graph);
@@ -176,7 +176,7 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 //     if (err && err.errorCode == 'merge-failed') return true;
 //   });
 // }
-// 
+//
 // GraphActions.Push = function(graph, node) {
 //   var self = this;
 //   GraphActions.ActionBase.call(this, graph);
@@ -221,7 +221,7 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 //   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
 //   else ref.createRemoteRef(onDone);
 // }
-// 
+//
 GraphActions.Checkout = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);

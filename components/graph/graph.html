@@ -1,15 +1,15 @@
 
 <div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
-  
+
   <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
-  
+
   <div class="nodes" data-bind="foreach: nodes">
     <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }">
       <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
         <!-- ko component: commitComponent -->
         <!-- /ko -->
       </div>
-      
+
       <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
         <!-- ko foreach: branches -->
         <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1"
@@ -21,7 +21,7 @@
           <span class="name" data-bind="text: localRefName"></span>
         </span>
         <!-- /ko -->
-        
+
         <!-- ko foreach: tags -->
         <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0"
             data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
@@ -32,7 +32,7 @@
           <span class="name" data-bind="text: localRefName"></span>
         </span>
         <!-- /ko -->
-        
+
         <!-- ko foreach: dropareaGraphActions -->
         <span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
           <!-- ko if: icon --><span class="glyphicon" data-bind="css: icon"></span><!-- /ko -->
@@ -41,7 +41,7 @@
           <!-- ko component: performProgressBar --><!-- /ko -->
         </span>
         <!-- /ko -->
-        
+
         <!-- ko if: showNewRefAction -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
           <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
@@ -54,9 +54,9 @@
           <!-- /ko -->
         </span>
         <!-- /ko -->
-        
+
       </div>
-      
+
     </div>
   </div>
 </div>
