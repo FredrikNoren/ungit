@@ -3,8 +3,8 @@ var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
 var RefViewModel = require('./git-ref.js');
-// var graphGraphicsActions = require('./graph-graphics/actions');
-// var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
+var HoverActions = require('./hover-actions');
+var RebaseViewModel = HoverActions.RebaseViewModel;
 // var MergeViewModel = graphGraphicsActions.MergeViewModel;
 // var ResetViewModel = graphGraphicsActions.ResetViewModel;
 // var PushViewModel = graphGraphicsActions.PushViewModel;
@@ -118,37 +118,36 @@ GraphActions.Move.prototype.perform = function(callback) {
 //   });
 //   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 // }
-// 
-// GraphActions.Rebase = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() instanceof RefViewModel &&
-//       (!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
-//       self.graph.currentActionContext().current() &&
-//       self.graph.currentActionContext().node() != self.node;
-//   });
-// }
-// inherits(GraphActions.Rebase, GraphActions.ActionBase);
-// GraphActions.Rebase.prototype.text = 'Rebase';
-// GraphActions.Rebase.prototype.style = 'rebase';
-// GraphActions.Rebase.prototype.createHoverGraphic = function() {
-//   var onto = this.graph.currentActionContext();
-//   if (!onto) return;
-//   if (onto instanceof RefViewModel) onto = onto.node();
-//   var path = onto.getPathToCommonAncestor(this.node);
-//   return new RebaseViewModel(this.node, path);
-// }
-// GraphActions.Rebase.prototype.perform = function(callback) {
-//   this.server.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
-//     callback();
-//     if (err && err.errorCode == 'merge-failed') return true;
-//   });
-// }
-// 
-// 
+
+GraphActions.Rebase = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      (!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
+      self.graph.currentActionContext().current() &&
+      self.graph.currentActionContext().node() != self.node;
+  });
+}
+inherits(GraphActions.Rebase, GraphActions.ActionBase);
+GraphActions.Rebase.prototype.text = 'Rebase';
+GraphActions.Rebase.prototype.style = 'rebase';
+GraphActions.Rebase.prototype.createHoverGraphic = function() {
+  var onto = this.graph.currentActionContext();
+  if (!onto) return;
+  if (onto instanceof RefViewModel) onto = onto.node();
+  var path = onto.getPathToCommonAncestor(this.node);
+  return new RebaseViewModel(this.node, path);
+}
+GraphActions.Rebase.prototype.perform = function(callback) {
+  this.server.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 })
+    .catch(function(err) {
+      return (err && err.errorCode == 'merge-failed') ? true : undefined;
+    }).finally(callback);
+}
+
 // GraphActions.Merge = function(graph, node) {
 //   var self = this;
 //   GraphActions.ActionBase.call(this, graph);

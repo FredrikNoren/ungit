@@ -17,6 +17,15 @@
     </marker>
   </defs>
   <g>
+    <!-- ko if: hoverGraphActionGraphicType() == 'rebase' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: edges -->
+      <path data-bind="attr: { d: d }" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+      <!-- ko foreach: nodes -->
+      <circle data-bind="attr: { cx: cx, cy: cy }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
+
     <path d="M 610 68 v 99999" stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
     <circle cx="610" data-bind="attr: { stroke: '#4A4A4A' }" cy="35" r="30" stroke="#252833" stroke-dasharray="10, 7" stroke-width="10" fill="transparent"/>
 

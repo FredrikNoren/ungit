@@ -113,7 +113,7 @@ var GitNodeViewModel = function(graph, sha1) {
 
   this.dropareaGraphActions = [
     new GraphActions.Move(this.graph, this),
-    // new GraphActions.Rebase(this.graph, this),
+    new GraphActions.Rebase(this.graph, this),
     // new GraphActions.Merge(this.graph, this),
     // new GraphActions.Push(this.graph, this),
     // new GraphActions.Reset(this.graph, this),
@@ -225,4 +225,22 @@ GitNodeViewModel.prototype.pushRef = function(ref) {
   } else {
     this.branchesAndLocalTags.push(ref);
   }
+}
+GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
+  var path = [];
+  var thisNode = this;
+  while (thisNode && !node.isAncestor(thisNode)) {
+    path.push(thisNode);
+    thisNode = this.graph.nodesById[thisNode.parents()[0]];
+  }
+  if (thisNode) path.push(thisNode);
+  return path;
+}
+GitNodeViewModel.prototype.isAncestor = function(node) {
+  if (node == this) return true;
+  for (var v in this.parents()) {
+    var n = this.graph.nodesById[this.parents()[v]];
+    if (n && n.isAncestor(node)) return true;
+  }
+  return false;
 }

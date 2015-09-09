@@ -149,7 +149,7 @@ Server.prototype.query = function(method, path, body, callback) {
         res: error,
         errorCode: error && error.body ? error.body.errorCode : 'unknown'
       };
-      if (callback && callback(err)) return;
+      if (callback && callback(err) || err.isIgnore) return;
       else self._onUnhandledBadBackendResponse(err, precreatedError);
     }
     else if (callback)
