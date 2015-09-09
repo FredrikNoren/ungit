@@ -53,7 +53,7 @@ var RefViewModel = function(fullRefName, graph) {
     return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;
   });
   this.color = this._colorFromHashOfString(this.name);
-  
+
   this.node.subscribe(function(oldNode) {
     if (oldNode) oldNode.branchesAndLocalTags.remove(self);
   }, null, "beforeChange");
@@ -74,7 +74,7 @@ RefViewModel.prototype.dragEnd = function() {
 }
 RefViewModel.prototype.moveTo = function(target, callback) {
   var self = this;
-  
+
   var callbackWithRefSet = function(err, res) {
     if (err) {
       callback(err, res);
@@ -87,7 +87,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
       callback();
     }
   }
-  
+
   if (this.isLocal) {
     if (this.current()) {
       this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callbackWithRefSet);
@@ -105,7 +105,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
             forcePushDialog.closed.add(function() {
               if (!forcePushDialog.result()) return callback();
               pushReq.force = true;
-              self.server.post('/push', pushReq, callback);
+              self.server.post('/push', pushReq, callbackWithRefSet);
             });
             programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
             return true;
@@ -124,7 +124,7 @@ RefViewModel.prototype.remove = function(callback) {
     if (!err) {
       self.node().removeRef(self);
     }
-    
+
     callback();
     self.graph.loadNodesFromApi();
     if (url == '/remote/tags') {
