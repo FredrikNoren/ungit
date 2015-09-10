@@ -142,10 +142,10 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
   return new RebaseViewModel(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
-  this.server.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 })
-    .catch(function(err) {
-      return (err && err.errorCode == 'merge-failed') ? true : undefined;
-    }).finally(callback);
+  this.server.post('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 }, function(err) {
+    callback();
+    if (err && err.errorCode == 'merge-failed') return true;
+  });
 }
 
 // GraphActions.Merge = function(graph, node) {
@@ -309,10 +309,10 @@ GraphActions.CherryPick.prototype.text = 'Cherry pick';
 GraphActions.CherryPick.prototype.style = 'cherry-pick';
 GraphActions.CherryPick.prototype.perform = function(callback) {
   var self = this;
-  this.server.queryPromise('POST', '/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 })
-    .catch(function(err) {
-      return (err && err.errorCode == 'merge-failed') ? true : undefined;
-    }).finally(callback);
+  this.server.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
+    callback();
+    if (err && err.errorCode == 'merge-failed') return true;
+  });
 }
 
 GraphActions.Uncommit = function(graph, node) {
