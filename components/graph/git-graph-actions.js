@@ -5,9 +5,9 @@ var components = require('ungit-components');
 var RefViewModel = require('./git-ref.js');
 var HoverActions = require('./hover-actions');
 var RebaseViewModel = HoverActions.RebaseViewModel;
-// var MergeViewModel = graphGraphicsActions.MergeViewModel;
-// var ResetViewModel = graphGraphicsActions.ResetViewModel;
-// var PushViewModel = graphGraphicsActions.PushViewModel;
+// var MergeViewModel = HoverActions.MergeViewModel;
+var ResetViewModel = HoverActions.ResetViewModel;
+// var PushViewModel = HoverActions.PushViewModel;
 var programEvents = require('ungit-program-events');
 
 var GraphActions = {};
@@ -74,50 +74,50 @@ GraphActions.Move.prototype.perform = function(callback) {
   this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
 
-//
-// GraphActions.Reset = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.onto = ko.observable(this.node);
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
-//     var context = self.graph.currentActionContext();
-//     if (context.node() != self.node) return false;
-//     var remoteRef = context.getRemoteRef(self.graph.currentRemote());
-//     return remoteRef &&
-//       remoteRef.node() != context.node() &&
-//       remoteRef.node().commitTime() < context.node().commitTime();
-//   });
-// }
-// inherits(GraphActions.Reset, GraphActions.ActionBase);
-// GraphActions.Reset.prototype.text = 'Reset';
-// GraphActions.Reset.prototype.style = 'reset';
-// GraphActions.Reset.prototype.icon = 'glyphicon-trash';
-// GraphActions.Reset.prototype.createHoverGraphic = function() {
-//   var context = this.graph.currentActionContext();
-//   if (!context) return null;
-//   var remoteRef = context.getRemoteRef(this.graph.currentRemote());
-//   var nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
-//   return new ResetViewModel(nodes);
-// }
-// GraphActions.Reset.prototype.perform = function(callback) {
-//   var server = this.server;
-//   var context = this.graph.currentActionContext();
-//   var remote = this.graph.currentRemote();
-//   var repoPath = this.graph.repoPath;
-//   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
-//   diag.closed.add(function() {
-//     if (diag.result()) {
-// 		var remoteRef = context.getRemoteRef(remote);
-//         server.post('/reset', { path: repoPath, to: remoteRef.name, mode: 'hard' }, callback);
-// 	} else {
-// 		callback();
-// 	}
-//   });
-//   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
-// }
+GraphActions.Reset = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.onto = ko.observable(this.node);
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
+    var context = self.graph.currentActionContext();
+    if (context.node() != self.node) return false;
+    var remoteRef = context.getRemoteRef(self.graph.currentRemote());
+    return remoteRef &&
+      remoteRef.node() != context.node() &&
+      remoteRef.node().commitTime() < context.node().commitTime();
+  });
+}
+inherits(GraphActions.Reset, GraphActions.ActionBase);
+GraphActions.Reset.prototype.text = 'Reset';
+GraphActions.Reset.prototype.style = 'reset';
+GraphActions.Reset.prototype.icon = 'glyphicon-trash';
+GraphActions.Reset.prototype.createHoverGraphic = function() {
+  var context = this.graph.currentActionContext();
+  if (!context) return null;
+  var remoteRef = context.getRemoteRef(this.graph.currentRemote());
+  var nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
+  return new ResetViewModel(nodes);
+}
+GraphActions.Reset.prototype.perform = function(callback) {
+  var self = this;
+  var context = this.graph.currentActionContext();
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  diag.closed.add(function() {
+    if (diag.result()) {
+      var remoteRef = context.getRemoteRef(self.graph.currentRemote());
+      self.server.post('/reset', { path: self.graph.repoPath, to: remoteRef.name, mode: 'hard' }, function() {
+        self.graph.moveRef(context, remoteRef.node());
+        callback();
+      });
+    } else {
+      callback();
+    }
+  });
+  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+}
 
 GraphActions.Rebase = function(graph, node) {
   var self = this;
@@ -287,10 +287,10 @@ GraphActions.Delete.prototype.perform = function(callback) {
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-		context.remove(callback);
-	} else {
-		callback();
-	}
+      context.remove(callback);
+    } else {
+      callback();
+    }
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }

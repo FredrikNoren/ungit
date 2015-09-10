@@ -134,3 +134,13 @@ RefViewModel.prototype.remove = function(callback) {
     }
   });
 }
+
+RefViewModel.prototype.getRemoteRef = function(remote) {
+  return this.graph.getRef(this.getRemoteRefFullName(remote), false);
+}
+
+RefViewModel.prototype.getRemoteRefFullName = function(remote) {
+  if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
+  if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
+  return null;
+}

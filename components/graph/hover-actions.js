@@ -50,14 +50,12 @@ RebaseViewModel.prototype.type = 'rebase';
 RebaseViewModel.prototype.destroy = function() {
 }
 
+function ResetViewModel(nodes) {
+  this.nodes = nodes;
+}
+exports.ResetViewModel = ResetViewModel;
+ResetViewModel.prototype.type = 'reset';
 
-// function ResetViewModel(nodes) {
-//   this.nodes = nodes;
-// }
-// exports.ResetViewModel = ResetViewModel;
-// ResetViewModel.prototype.type = 'reset';
-//
-//
 // function PushViewModel(fromNode, toNode) {
 //   this.fromPosition = fromNode.position().clone();
 //   this.toPosition = toNode.position().clone();

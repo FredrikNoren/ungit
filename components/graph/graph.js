@@ -79,9 +79,10 @@ GraphViewModel.prototype.getNode = function(sha1, logEntry) {
   if (!nodeViewModel.isInited && logEntry) nodeViewModel.setData(logEntry);
   return nodeViewModel;
 }
-GraphViewModel.prototype.getRef = function(ref) {
+GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
+  if (constructIfUnavailable === undefined) constructIfUnavailable = true;
   var refViewModel = this.refsByRefName[ref];
-  if (!refViewModel) {
+  if (!refViewModel && constructIfUnavailable) {
     refViewModel = this.refsByRefName[ref] = new GitRefViewModel(ref, this);
     this.refs.push(refViewModel);
     if (refViewModel.name === 'HEAD') {
