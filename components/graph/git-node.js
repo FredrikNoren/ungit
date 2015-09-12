@@ -244,3 +244,9 @@ GitNodeViewModel.prototype.isAncestor = function(node) {
   }
   return false;
 }
+GitNodeViewModel.prototype.getRightToLeftStrike = function() {
+  return 'M ' + (this.cx() - 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() + 30) + ' ' + (this.cy() + 30);
+}
+GitNodeViewModel.prototype.getLeftToRightStrike = function() {
+  return 'M ' + (this.cx() + 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() - 30) + ' ' + (this.cy() + 30);
+}
