@@ -144,3 +144,20 @@ RefViewModel.prototype.getRemoteRefFullName = function(remote) {
   if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
   return null;
 }
+
+RefViewModel.prototype.canBePushed = function(remote) {
+  if (!this.isLocal) return false;
+  var remoteRef = this.getRemoteRef(remote);
+  if (!remoteRef) return true;
+  return this.node() != remoteRef.node();
+}
+
+RefViewModel.prototype.createRemoteRef = function(callback) {
+  var self = this;
+  this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.currentRemote(),
+      refSpec: this.refName, remoteBranch: this.refName }, function(err) {
+        var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
+        self.node().branchesAndLocalTags.push(newRef);
+        callback(err);
+      });
+}

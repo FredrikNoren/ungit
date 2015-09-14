@@ -115,7 +115,7 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Move(this.graph, this),
     new GraphActions.Rebase(this.graph, this),
     // new GraphActions.Merge(this.graph, this),
-    // new GraphActions.Push(this.graph, this),
+    new GraphActions.Push(this.graph, this),
     new GraphActions.Reset(this.graph, this),
     new GraphActions.Checkout(this.graph, this),
     new GraphActions.Delete(this.graph, this),
@@ -176,6 +176,7 @@ GitNodeViewModel.prototype.createTag = function() {
     });
 }
 GitNodeViewModel.prototype.toggleSelected = function() {
+  console.log(this);
   var self = this;
   var beforeThisCR = this.commitComponent.element().getBoundingClientRect();
   var beforeBelowCR = null;

@@ -7,7 +7,7 @@ var HoverActions = require('./hover-actions');
 var RebaseViewModel = HoverActions.RebaseViewModel;
 // var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
-// var PushViewModel = HoverActions.PushViewModel;
+var PushViewModel = HoverActions.PushViewModel;
 var programEvents = require('ungit-program-events');
 
 var GraphActions = {};
@@ -176,52 +176,49 @@ GraphActions.Rebase.prototype.perform = function(callback) {
 //     if (err && err.errorCode == 'merge-failed') return true;
 //   });
 // }
-//
-// GraphActions.Push = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     return self.graph.currentActionContext() instanceof RefViewModel &&
-//       self.graph.currentActionContext().node() == self.node &&
-//       self.graph.currentActionContext().canBePushed(self.graph.currentRemote());
-//   });
-// }
-// inherits(GraphActions.Push, GraphActions.ActionBase);
-// GraphActions.Push.prototype.text = 'Push';
-// GraphActions.Push.prototype.style = 'push';
-// GraphActions.Push.prototype.icon = 'glyphicon-open';
-// GraphActions.Push.prototype.createHoverGraphic = function() {
-//   var context = this.graph.currentActionContext();
-//   if (!context) return null;
-//   var remoteRef = context.getRemoteRef(this.graph.currentRemote());
-//   if (!remoteRef) return null;
-//   return new PushViewModel(remoteRef.node(), context.node());
-// }
-// GraphActions.Push.prototype.perform = function( callback) {
-//   var self = this;
-//   var programEventListener = function(event) {
-//     if (event.event == 'request-credentials') self.performProgressBar.pause();
-//     else if (event.event == 'request-credentials-response') self.performProgressBar.unpause();
-//   };
-//   programEvents.add(programEventListener);
-//   var ref = this.graph.currentActionContext();
-//   var onDone = function(err) {
-//     programEvents.remove(programEventListener);
-//     callback();
-//     if (!err) {
-//       self.graph.loadNodesFromApi();
-//       if (ref.isTag) {
-//         programEvents.dispatch({ event: 'request-fetch-tags' });
-//       }
-//     }
-//   }
-//   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
-//   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
-//   else ref.createRemoteRef(onDone);
-// }
-//
+
+GraphActions.Push = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      self.graph.currentActionContext().node() == self.node &&
+      self.graph.currentActionContext().canBePushed(self.graph.currentRemote());
+  });
+}
+inherits(GraphActions.Push, GraphActions.ActionBase);
+GraphActions.Push.prototype.text = 'Push';
+GraphActions.Push.prototype.style = 'push';
+GraphActions.Push.prototype.icon = 'glyphicon-open';
+GraphActions.Push.prototype.createHoverGraphic = function() {
+  var context = this.graph.currentActionContext();
+  if (!context) return null;
+  var remoteRef = context.getRemoteRef(this.graph.currentRemote());
+  if (!remoteRef) return null;
+  return new PushViewModel(remoteRef.node(), context.node());
+}
+GraphActions.Push.prototype.perform = function( callback) {
+  var self = this;
+  var programEventListener = function(event) {
+    if (event.event == 'request-credentials') self.performProgressBar.pause();
+    else if (event.event == 'request-credentials-response') self.performProgressBar.unpause();
+  };
+  programEvents.add(programEventListener);
+  var ref = this.graph.currentActionContext();
+  var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
+  var onDone = function(err) {
+    programEvents.remove(programEventListener);
+    callback();
+    self.graph.moveRef(self.graph.HEADref(), ref.node());
+    if (remoteRef) self.graph.moveRef(remoteRef, ref.node());
+  }
+  
+  if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
+  else ref.createRemoteRef(onDone);
+}
+
 GraphActions.Checkout = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);
