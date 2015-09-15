@@ -36,6 +36,9 @@ function RebaseViewModel(onto, nodesThatWillMove) {
   this.nodes = [];
   this.edges = [];
   nodesThatWillMove = nodesThatWillMove.slice(0, -1);
+
+  if (nodesThatWillMove.length == 0) return;
+
   this.edges.push({ d: "M " + onto.cx() + " " + onto.cy() + " L " + onto.cx() + " " + nodesThatWillMove[nodesThatWillMove.length - 1].cy() });
   nodesThatWillMove.forEach(function(node, i) {
     var cy = onto.cy() + (-90 * (i + 1));
