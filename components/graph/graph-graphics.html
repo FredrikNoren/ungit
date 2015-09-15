@@ -46,5 +46,11 @@
       <circle data-bind="attr: { cx: cx, cy: cy }" r="28" fill="transparent" stroke="#41DE3C" stroke-width="8" stroke-dasharray="10, 5" />
       <!-- /ko -->
     <!-- /ko --><!-- /ko -->
+
+    <!-- ko if: hoverGraphActionGraphicType() == 'push' --><!-- ko with: hoverGraphActionGraphic -->
+      <!-- ko foreach: edges -->
+        <path data-bind="attr: { d: d }" stroke="rgb(61, 139, 255)" stroke-width="15" stroke-dasharray="10, 5" marker-end="url(#pushArrowEnd)" />
+      <!-- /ko -->
+    <!-- /ko --><!-- /ko -->
   </g>
 </svg>

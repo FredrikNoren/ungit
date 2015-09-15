@@ -57,20 +57,7 @@ exports.ResetViewModel = ResetViewModel;
 ResetViewModel.prototype.type = 'reset';
 
 function PushViewModel(fromNode, toNode) {
-  // this.fromPosition = fromNode.position().clone();
-  // this.toPosition = toNode.position().clone();
-  // this.fromPosition.x += fromNode.radius() + 50;
-  // this.toPosition.x += toNode.radius() + 50;
-  // if (this.fromPosition.y > this.toPosition.y) {
-  //   this.fromPosition.y -= 20;
-  //   this.toPosition.y += 20;
-  // } else {
-  //   this.fromPosition.y += 20;
-  //   this.toPosition.y -= 20;
-  // }
-  // // adjust for the arrow
-  // var d = this.toPosition.sub(this.fromPosition).normalize();
-  // this.toPosition = this.toPosition.sub(d.mul(45));
+  this.edges = [{ d: "M " + fromNode.cx() + " " + fromNode.cy() + " L " + toNode.cx() + " " + (toNode.cy() + 40) }];
 }
 exports.PushViewModel = PushViewModel;
 PushViewModel.prototype.type = 'push';
