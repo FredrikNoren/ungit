@@ -36,8 +36,10 @@ function GraphViewModel(server, repoPath) {
     self.maxNNodes = self.maxNNodes + 25;
     self.loadNodesFromApi();
   }, 500, true);
-
+  this.dimCommit = ko.observable(false);
+  this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
   this.heighstBranchOrder = 0;
+  this.showCommitNode = ko.observable(true);
 
   this.hoverGraphActionGraphic = ko.observable();
   var prevHoverGraphic;

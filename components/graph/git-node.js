@@ -114,7 +114,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.dropareaGraphActions = [
     new GraphActions.Move(this.graph, this),
     new GraphActions.Rebase(this.graph, this),
-    // new GraphActions.Merge(this.graph, this),
+    new GraphActions.Merge(this.graph, this),
     new GraphActions.Push(this.graph, this),
     new GraphActions.Reset(this.graph, this),
     new GraphActions.Checkout(this.graph, this),

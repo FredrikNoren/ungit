@@ -5,7 +5,7 @@ var components = require('ungit-components');
 var RefViewModel = require('./git-ref.js');
 var HoverActions = require('./hover-actions');
 var RebaseViewModel = HoverActions.RebaseViewModel;
-// var MergeViewModel = HoverActions.MergeViewModel;
+var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
 var PushViewModel = HoverActions.PushViewModel;
 var programEvents = require('ungit-program-events');
@@ -148,34 +148,34 @@ GraphActions.Rebase.prototype.perform = function(callback) {
   });
 }
 
-// GraphActions.Merge = function(graph, node) {
-//   var self = this;
-//   GraphActions.ActionBase.call(this, graph);
-//   this.node = node;
-//   this.mergeWith = ko.observable(this.node);
-//   this.visible = ko.computed(function() {
-//     if (self.performProgressBar.running()) return true;
-//     if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
-//     return self.graph.currentActionContext() instanceof RefViewModel &&
-//       !self.graph.currentActionContext().current() &&
-//       self.graph.checkedOutRef().node() == self.node;
-//   });
-// }
-// inherits(GraphActions.Merge, GraphActions.ActionBase);
-// GraphActions.Merge.prototype.text = 'Merge';
-// GraphActions.Merge.prototype.style = 'merge';
-// GraphActions.Merge.prototype.createHoverGraphic = function() {
-//   var node = this.graph.currentActionContext();
-//   if (!node) return null;
-//   if (node instanceof RefViewModel) node = node.node();
-//   return new MergeViewModel(this.graph.graphic, this.node, node);
-// }
-// GraphActions.Merge.prototype.perform = function(callback) {
-//   this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().localRefName }, function(err) {
-//     callback();
-//     if (err && err.errorCode == 'merge-failed') return true;
-//   });
-// }
+GraphActions.Merge = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.mergeWith = ko.observable(this.node);
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      !self.graph.currentActionContext().current() &&
+      self.graph.checkedOutRef().node() == self.node;
+  });
+}
+inherits(GraphActions.Merge, GraphActions.ActionBase);
+GraphActions.Merge.prototype.text = 'Merge';
+GraphActions.Merge.prototype.style = 'merge';
+GraphActions.Merge.prototype.createHoverGraphic = function() {
+  var node = this.graph.currentActionContext();
+  if (!node) return null;
+  if (node instanceof RefViewModel) node = node.node();
+  return new MergeViewModel(this.graph, this.node, node);
+}
+GraphActions.Merge.prototype.perform = function(callback) {
+  this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().localRefName }, function(err) {
+    callback();
+    if (err && err.errorCode == 'merge-failed') return true;
+  });
+}
 
 GraphActions.Push = function(graph, node) {
   var self = this;
@@ -214,7 +214,7 @@ GraphActions.Push.prototype.perform = function( callback) {
     self.graph.moveRef(self.graph.HEADref(), ref.node());
     if (remoteRef) self.graph.moveRef(remoteRef, ref.node());
   }
-  
+
   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
   else ref.createRemoteRef(onDone);
 }

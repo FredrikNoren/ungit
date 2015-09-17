@@ -3,33 +3,21 @@ var NodeViewModel = require('./git-node');
 var EdgeViewModel = require('./edge');
 var Color = require('color');
 
+function MergeViewModel(graph, headNode, node) {
+  var self = this;
+  this.graph = graph;
 
-// function MergeViewModel(graph, headNode, node) {
-//   var self = this;
-//
-//   this.graph = graph;
-//
-//   var newNode = {
-//     position: new Vector2(
-//       headNode.x(),
-//       headNode.y() - 35),
-//     radius: Math.max(headNode.radius(), node.radius())
-//   };
-//   newNode.position.y -= newNode.radius*2;
-//
-//   this.newNode = new NodeViewModel(newNode.position, newNode.radius);
-//   this.edges = [
-//     new EdgeViewModel(headNode, this.newNode),
-//     new EdgeViewModel(node, this.newNode)
-//   ];
-//   graph.dimCommit(true)
-// }
-// exports.MergeViewModel = MergeViewModel;
-// MergeViewModel.prototype.type = 'merge';
-// MergeViewModel.prototype.destroy = function() {
-//   this.graph.dimCommit(false)
-// }
+  this.nodes = [{ cx: headNode.cx(), cy: headNode.cy() - 110, r: Math.max(headNode.r(), node.r()) }];
+  this.edges = [{ d: "M " + headNode.cx() + " " + (headNode.cy() - 110) + " L " + headNode.cx() + " " + headNode.cy() },
+                { d: "M " + headNode.cx() + " " + (headNode.cy() - 110) + " L " + node.cx() + " " + node.cy() }];
 
+  graph.dimCommit(true);
+}
+exports.MergeViewModel = MergeViewModel;
+MergeViewModel.prototype.type = 'merge';
+MergeViewModel.prototype.destroy = function() {
+  this.graph.dimCommit(false);
+}
 
 function RebaseViewModel(onto, nodesThatWillMove) {
   var self = this;
