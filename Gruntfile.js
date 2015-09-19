@@ -235,7 +235,6 @@ module.exports = function(grunt) {
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
     b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
-    b.require('./source/utils/vector2.js', { expose: 'ungit-vector2' });
     b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
     b.require('knockout', { expose: 'knockout' });
     b.require('lodash', { expose: 'lodash' });
@@ -275,7 +274,6 @@ module.exports = function(grunt) {
               'ungit-program-events',
               'ungit-navigation',
               'ungit-main',
-              'ungit-vector2',
               'ungit-address-parser',
               'knockout',
               'lodash',
