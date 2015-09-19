@@ -251,3 +251,9 @@ GitNodeViewModel.prototype.getRightToLeftStrike = function() {
 GitNodeViewModel.prototype.getLeftToRightStrike = function() {
   return 'M ' + (this.cx() + 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() - 30) + ' ' + (this.cy() + 30);
 }
+GitNodeViewModel.prototype.nodeMouseover = function() {
+  this.nodeIsMousehover(true);
+}
+GitNodeViewModel.prototype.nodeMouseout = function() {
+  this.nodeIsMousehover(false);
+}

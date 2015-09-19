@@ -35,7 +35,7 @@
     <!-- /ko -->
 
     <!-- ko foreach: nodes -->
-      <circle data-bind="attr: { cx: cx, cy: cy, r: r, fill: color }, click: toggleSelected" />
+      <circle data-bind="attr: { cx: cx, cy: cy, r: r, fill: color }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" />
       <!-- ko if: selected -->
         <circle data-bind="attr: { cx: cx, cy: cy, r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" />
       <!-- /ko -->
