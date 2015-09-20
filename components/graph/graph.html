@@ -16,8 +16,8 @@
             data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
-          <div class="remote-icon" data-bind="visible: isRemoteBranch"></div>
-          <div class="branch-icon"></div>
+          <span class="octicon octicon-broadcast" data-bind="visible: isRemoteBranch"></span>
+          <span class="octicon octicon-git-branch"></span>
           <span class="name" data-bind="text: localRefName"></span>
         </span>
         <!-- /ko -->
@@ -27,8 +27,8 @@
             data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
-          <div class="remote-icon" data-bind="visible: isRemote"></div>
-          <div class="tag-icon"></div>
+          <span class="octicon octicon-globe" data-bind="visible: isRemote"></span>
+          <span class="octicon octicon-tag"></span>
           <span class="name" data-bind="text: localRefName"></span>
         </span>
         <!-- /ko -->
