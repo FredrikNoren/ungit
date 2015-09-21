@@ -29,7 +29,15 @@ function GraphViewModel(server, repoPath) {
   this.HEADref = ko.observable();
   this.HEAD = ko.computed(function() {
     return self.HEADref() ? self.HEADref().node() : undefined;
-  })
+  });
+  this.commitNodeColor = ko.computed(function() {
+    return self.HEAD() ? self.HEAD().color() : '#4A4A4A';
+  });
+  this.commitNodeEdge = ko.computed(function() {
+    if (!self.HEAD() || !self.HEAD().cx()) return;
+    return "M 610 68 L " + self.HEAD().cx() + " " + self.HEAD().cy();
+  });
+  this.showCommitNode = ko.observable(false);
   this.currentActionContext = ko.observable();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
@@ -39,8 +47,6 @@ function GraphViewModel(server, repoPath) {
   this.dimCommit = ko.observable(false);
   this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
   this.heighstBranchOrder = 0;
-  this.showCommitNode = ko.observable(true);
-
   this.hoverGraphActionGraphic = ko.observable();
   var prevHoverGraphic;
   this.hoverGraphActionGraphic.subscribe(function(value) {
