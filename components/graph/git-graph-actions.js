@@ -210,11 +210,10 @@ GraphActions.Push.prototype.perform = function( callback) {
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
   var onDone = function(err) {
     programEvents.remove(programEventListener);
-    callback();
-    if (!err) {
+    if (!err && self.graph.HEAD().name == ref.name) {
       self.graph.moveRef(self.graph.HEADref(), ref.node());
-      if (remoteRef) self.graph.moveRef(remoteRef, ref.node());
     }
+    callback();
   }
 
   if (remoteRef) remoteRef.moveTo(ref.refName, onDone);

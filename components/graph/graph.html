@@ -4,7 +4,7 @@
   <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
 
   <div class="nodes" data-bind="foreach: nodes">
-    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }">
+    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
       <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
         <!-- ko component: commitComponent -->
         <!-- /ko -->

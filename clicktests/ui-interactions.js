@@ -40,15 +40,14 @@ uiInteractions.createTag = function(page, name, callback) {
 
 uiInteractions.moveRef = function(page, ref, targetNodeCommitTitle, callback) {
   helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + ref + '"]');
-  helpers.mousemove(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
-  setTimeout(function() { // Wait for next animation frame
+  helpers.waitForElement(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]', function() {
     helpers.click(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
     helpers.waitForNotElement(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
       setTimeout(function() {
         callback();
       }, 500);
-    })
-  }, 200);
+    });
+  });
 }
 
 
