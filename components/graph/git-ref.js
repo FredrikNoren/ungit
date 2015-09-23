@@ -123,6 +123,7 @@ RefViewModel.prototype.remove = function(callback) {
   this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
     if (!err) {
       self.node().removeRef(self);
+      self.graph.refsByRefName[self.name] = undefined;
     }
 
     callback();
