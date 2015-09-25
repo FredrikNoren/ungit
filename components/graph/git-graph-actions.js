@@ -199,25 +199,18 @@ GraphActions.Push.prototype.createHoverGraphic = function() {
   if (!remoteRef) return null;
   return new PushViewModel(remoteRef.node(), context.node());
 }
-GraphActions.Push.prototype.perform = function( callback) {
+GraphActions.Push.prototype.perform = function(callback) {
   var self = this;
-  var programEventListener = function(event) {
-    if (event.event == 'request-credentials') self.performProgressBar.pause();
-    else if (event.event == 'request-credentials-response') self.performProgressBar.unpause();
-  };
-  programEvents.add(programEventListener);
   var ref = this.graph.currentActionContext();
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
-  var onDone = function(err) {
-    programEvents.remove(programEventListener);
+
+  if (remoteRef) remoteRef.moveTo(ref.node().sha1, callback);
+  else ref.createRemoteRef(function(err) {
     if (!err && self.graph.HEAD().name == ref.name) {
       self.graph.moveRef(self.graph.HEADref(), ref.node());
     }
     callback();
-  }
-
-  if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
-  else ref.createRemoteRef(onDone);
+  });
 }
 
 GraphActions.Checkout = function(graph, node) {

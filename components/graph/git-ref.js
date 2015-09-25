@@ -157,9 +157,11 @@ RefViewModel.prototype.createRemoteRef = function(callback) {
   var self = this;
   this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.currentRemote(),
       refSpec: this.refName, remoteBranch: this.refName }, function(err) {
-        var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
-        self.node().branchesAndLocalTags.push(newRef);
-        newRef.node(self.node());
+        if (!err) {
+          var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
+          self.node().branchesAndLocalTags.push(newRef);
+          newRef.node(self.node());
+        }
         callback(err);
       });
 }
