@@ -4,7 +4,7 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   var self = this;
   this.nodeA = ko.observable(graph.nodesById[nodeAsha1]);
   this.nodeB = ko.observable(graph.nodesById[nodeBsha1]);
-  this.path = ko.computed(function() {
+  this.d = ko.computed(function() {
     var pathPrefix = "M " + self.nodeA().cx() + " " + self.nodeA().cy();
     if (self.nodeB()) {
       return pathPrefix + " L " + self.nodeB().cx() + " " + self.nodeB().cy();
