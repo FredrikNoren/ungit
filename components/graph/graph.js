@@ -240,7 +240,7 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
   }
 }
 
-GraphViewModel.prototype.handleBubbledClick = function() {
+GraphViewModel.prototype.handleBubbledClick = function(elem, event) {
   // If the clicked element is bound to the current action context,
   // then let's not deselect it.
   if (ko.dataFor(event.target) === this.currentActionContext()) return;
