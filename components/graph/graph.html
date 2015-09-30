@@ -1,7 +1,7 @@
 
 <div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
 
-  <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
+  <svg id="graphics" data-bind="attr: { width: graphWidth, height: graphHeight }" />
 
   <div class="nodes" data-bind="foreach: nodes">
     <div class="nodeContainer animation" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">

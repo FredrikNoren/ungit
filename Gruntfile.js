@@ -126,7 +126,8 @@ module.exports = function(grunt) {
             'ungit': true,
             'io': true,
             'Keen': true,
-            'Raven': true
+            'Raven': true,
+            'mina': true
           }
         },
         files: [
@@ -249,7 +250,7 @@ module.exports = function(grunt) {
     b.require('path', { expose: 'path' });
     b.require('diff2html', { expose: 'diff2html' });
     b.require('bluebird', { expose: 'bluebird' });
-    b.require('snapsvg', { expose: 'snapsvg' });
+    b.require('./node_modules/snapsvg/dist/snap.svg-min.js', { expose: 'snapsvg' });
     var outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', function() {
       done();

@@ -107,7 +107,24 @@ var GitNodeViewModel = function(graph, sha1) {
     }
   });
 
+  var render = function() {
+    if (self.graphic) {
+      self.graphic.stop().animate({ cx: self.cx(), cy: self.cy(), r: self.r(), color: self.color() }, 1000, mina.bounce);
+    } else {
+      if (!self.cx() || !self.cy() || !self.r()) return;
+      self.graphic = self.graph.paper.circle(self.cx(), self.cy(), self.r())
+        .attr({ fill: self.color(), "data-ta-clickable": "node-clickable" })
+        .mouseover(self.nodeMouseover.bind(self))
+        .mouseout(self.nodeMouseout.bind(self))
+        .click(self.toggleSelected.bind(self));
+    }
+  }
+
+  this.r.subscribe(render);
+  this.cy.subscribe(render);
+  this.color.subscribe(render);
   this.cx.subscribe(function(value) {
+    render();
     self.commitComponent.selectedDiffLeftPosition(-(value - 600));
   });
 
@@ -175,7 +192,8 @@ GitNodeViewModel.prototype.createTag = function() {
       self.newBranchName('');
     });
 }
-GitNodeViewModel.prototype.toggleSelected = function() {
+GitNodeViewModel.prototype.toggleSelected = function(e) {
+  if (e && typeof e.stopPropagation == 'function' ) e.stopPropagation();
   console.log(this);
   var self = this;
   var beforeThisCR = this.commitComponent.element().getBoundingClientRect();
@@ -210,8 +228,6 @@ GitNodeViewModel.prototype.toggleSelected = function() {
       console.log('Fix')
     }
   }
-
-  return false;
 }
 GitNodeViewModel.prototype.removeRef = function(ref) {
   if (ref.isRemoteTag) {

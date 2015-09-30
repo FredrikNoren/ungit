@@ -1,8 +1,7 @@
 {
   "exports": {
     "knockoutTemplates": {
-      "graph": "graph.html",
-      "graphGraphics": "graph-graphics.html"
+      "graph": "graph.html"
     },
     "javascript": "graph.bundle.js",
     "css": "graph.css"
