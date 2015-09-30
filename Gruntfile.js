@@ -204,11 +204,20 @@ module.exports = function(grunt) {
           name: 'ungit',
           dir: './build/resource',
           out: './build',
+          icon: './icon.ico',
           version: '0.31.1',
           platform: 'all',
           arch: 'all',
           asar: true,
-          prune: true
+          prune: true,
+          'version-string': {
+            FileDescription : 'ungit',
+            OriginalFilename : 'ungit.exe',
+            FileVersion : '<%= version %>',
+            ProductVersion : '<%= version %>',
+            ProductName : 'ungit',
+            InternalName : 'ungit.exe'
+          }
         }
       }
     }

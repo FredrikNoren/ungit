@@ -44,7 +44,9 @@ To get started:
 Known limitation:
  1. Current standalone application does not allow to execute more than one instance.
  2. There is no installer package neither automatic update mechanism for standalone application in place yet.
- 3. Icons, and other assets are not being updated for ungit but have default resources from electron. 
+
+Additional notes:
+ 1. To create windows package with proper application description on non-windows platform, [wine](https://www.winehq.org/) is required to be installed. If not, windows package will be created with default resources.
 
 Architecture overview
 ---------------------
