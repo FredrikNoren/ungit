@@ -65,6 +65,11 @@ Developing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Maintainers
+-----------
+* [FredrikNoren](https://github.com/FredrikNoren)
+* [codingtwinky](https://github.com/codingtwinky)
+
 Known issues
 ------------
 
