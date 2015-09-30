@@ -65,7 +65,7 @@ var StagingViewModel = function(server, repoPath) {
       return "Files in conflict";
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
-    
+
     if (self.textDiffType() === 'sidebysidediff') {
       var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
       if (patchFiles.length > 0) return "Cannot patch with side by side view."
@@ -302,8 +302,8 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.isShowingDiffs = ko.observable(false);
   this.textDiffType = textDiffType;
-  this.additions = ko.observable('-');
-  this.deletions = ko.observable('-');
+  this.additions = ko.observable('');
+  this.deletions = ko.observable('');
   this.diff = ko.observable(self.getSpecificDiff());
   this.patchLineList = ko.observableArray();
   this.isShowPatch = ko.computed(function() {
@@ -342,8 +342,8 @@ FileViewModel.prototype.setState = function(state) {
   this.removed(state.removed);
   this.conflict(state.conflict);
   this.renamed(state.renamed);
-  this.additions(state.additions != '-' ? '+' + state.additions : state.additions);
-  this.deletions(state.deletions != '-' ? '-' + state.deletions : state.deletions);
+  this.additions(state.additions != '-' ? '+' + state.additions : '');
+  this.deletions(state.deletions != '-' ? '-' + state.deletions : '');
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
