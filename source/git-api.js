@@ -279,6 +279,8 @@ exports.registerApi = function(env) {
         if (err) {
           if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
             res.json([]);
+          else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+            res.json([]);
           else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
             res.json([]);
           else
@@ -309,6 +311,8 @@ exports.registerApi = function(env) {
       .always(function(err, log) {
         if (err) {
           if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+            res.json([]);
+          else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
             res.json([]);
           else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
             res.json([]);
