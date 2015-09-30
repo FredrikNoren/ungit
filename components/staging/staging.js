@@ -36,7 +36,7 @@ var StagingViewModel = function(server, repoPath) {
     return self.files().length;
   });
   this.nStagedFiles = ko.computed(function() {
-    return self.files().filter(function(f) { return f.staged(); }).length;
+    return self.files().filter(function(f) { return f.editState() === 'staged'; }).length;
   });
   this.stats = ko.computed(function() {
     return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
@@ -58,13 +58,19 @@ var StagingViewModel = function(server, repoPath) {
   this.mergeAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-abort-' + this.repoPath, temporary: true });
   this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + this.repoPath, temporary: true });
   this.commitValidationError = ko.computed(function() {
-    if (!self.amend() && !self.files().some(function(file) { return file.staged(); }))
+    if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
       return "No files to commit";
 
     if (self.files().some(function(file) { return file.conflict(); }))
       return "Files in conflict";
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
+    
+    if (self.textDiffType() === 'sidebysidediff') {
+      var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
+      if (patchFiles.length > 0) return "Cannot patch with side by side view."
+    }
+
     return "";
   });
   this.toggleSelectAllGlyphClass = ko.computed(function() {
@@ -157,6 +163,10 @@ StagingViewModel.prototype.setFiles = function(files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
       this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType);
+    } else {
+      // this is mainly for patching and it may not fire due to the fact that
+      // '/commit' triggers working-tree-changed which triggers throttled refresh
+      fileViewModel.invalidateDiff();
     }
     fileViewModel.setState(files[file]);
     newFiles.push(fileViewModel);
@@ -184,9 +194,9 @@ StagingViewModel.prototype.commit = function() {
   var self = this;
   this.committingProgressBar.start();
   var files = this.files().filter(function(file) {
-    return file.staged();
+    return file.editState() !== 'none';
   }).map(function(file) {
-    return file.name();
+    return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
   });
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
@@ -254,7 +264,7 @@ StagingViewModel.prototype.stashAll = function() {
 StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
   for (var n in self.files()){
-    self.files()[n].staged(self.allStageFlag());
+    self.files()[n].editState(self.allStageFlag() ? 'staged' : 'none');
   }
 
   self.allStageFlag(!self.allStageFlag());
@@ -278,9 +288,10 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
 
 var FileViewModel = function(staging, name, textDiffType) {
   var self = this;
+  this.patchLineList = ko.observableArray();
   this.staging = staging;
   this.server = staging.server;
-  this.staged = ko.observable(true);
+  this.editState = ko.observable('staged'); // staged, patched and none
   this.name = ko.observable(name);
   this.displayName = ko.observable(name);
   this.isNew = ko.observable(false);
@@ -289,10 +300,29 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
+  this.isShowingDiffs = ko.observable(false);
   this.textDiffType = textDiffType;
   this.additions = ko.observable('-');
   this.deletions = ko.observable('-');
   this.diff = ko.observable(self.getSpecificDiff());
+  this.patchLineList = ko.observableArray();
+  this.isShowPatch = ko.computed(function() {
+    // if not new file
+    // and if not merging
+    // and if not rebasing
+    // and if text file
+    // and if diff is showing, display patch button
+    return !self.isNew() && !staging.inMerge() && !staging.inRebase() && fileType(self.name()) === 'text' && self.isShowingDiffs();
+  });
+  this.diff = ko.observable(self.getSpecificDiff());
+
+  this.editState.subscribe(function (value) {
+    if (value === 'none') {
+      self.patchLineList([]);
+    } else if (value === 'patched') {
+      if (self.diff().render) self.diff().render();
+    }
+  });
 }
 FileViewModel.prototype.getSpecificDiff = function() {
   return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
@@ -301,7 +331,9 @@ FileViewModel.prototype.getSpecificDiff = function() {
     server: this.server,
     textDiffType: this.textDiffType,
     isShowingDiffs: this.isShowingDiffs,
-    diffProgressBar: this.diffProgressBar
+    diffProgressBar: this.diffProgressBar,
+    patchLineList: this.patchLineList,
+    editState: this.editState
   });
 }
 FileViewModel.prototype.setState = function(state) {
@@ -316,7 +348,12 @@ FileViewModel.prototype.setState = function(state) {
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
 FileViewModel.prototype.toggleStaged = function() {
-  this.staged(!this.staged());
+  if (this.editState() === 'none') {
+    this.editState('staged');
+  } else {
+    this.editState('none');
+  }
+  this.patchLineList([]);
 }
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
@@ -350,6 +387,18 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
-    this.diff().invalidateDiff();
+    this.invalidateDiff();
   }
+}
+FileViewModel.prototype.patchClick = function() {
+  if (!this.isShowingDiffs()) return;
+
+  if (this.editState() === 'patched') {
+    this.editState('staged');
+  } else {
+    this.editState('patched');
+  }
+}
+FileViewModel.prototype.invalidateDiff = function() {
+  this.diff().invalidateDiff();
 }

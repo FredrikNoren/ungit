@@ -72,10 +72,10 @@ describe('git-api diff', function () {
 	});
 
 	it('should be possible to commit a file', function(done) {
-		common.post(req, '/commit', { path: testDir, message: "Init", files: [testFile] }, done);
+		common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testFile }] }, done);
 	});
 	it('should be possible to commit an image file', function(done) {
-		common.post(req, '/commit', { path: testDir, message: "Init", files: [testImage] }, done);
+		common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testImage }] }, done);
 	});
 
 	it('diff on commited file should work', function(done) {
@@ -131,7 +131,7 @@ describe('git-api diff', function () {
 	});
 
 	it('should be possible to commit a file', function(done) {
-		common.post(req, '/commit', { path: testDir, message: "Init", files: [testFile] }, done);
+		common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testFile }] }, done);
 	});
 
 	it('removing a test file should work', function(done) {
@@ -139,7 +139,7 @@ describe('git-api diff', function () {
 	});
 
 	it('should be possible to commit an image file', function(done) {
-		common.post(req, '/commit', { path: testDir, message: "Init", files: [testImage] }, done);
+		common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testImage }] }, done);
 	});
 	it('removing a test image file should work', function(done) {
 		common.post(req, '/testing/removefile', { file: path.join(testDir, testImage) }, done);

@@ -77,7 +77,7 @@ describe('git-api remote', function () {
 		var testFile = path.join(testDirLocal1, "testfile1.txt");
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Init", files: [testFile] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Init", files: [{ name: testFile }] }, done); }
 		], done);
 	});
 
@@ -121,7 +121,7 @@ describe('git-api remote', function () {
 		var testFile = path.join(testDirLocal1, "testfile2.txt");
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [testFile] }, done); },
+			function(done) { common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [{ name: testFile }] }, done); },
 			function(done) { common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }, done); }
 		], done);
 	});
@@ -173,7 +173,7 @@ describe('git-api remote', function () {
 		var testFile = path.join(testDirLocal2, "testfile3.txt");
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: testFile }, done); },
-			function(done) { common.post(req, '/commit', { path: testDirLocal2, message: "Commit3", files: [testFile] }, done); }
+			function(done) { common.post(req, '/commit', { path: testDirLocal2, message: "Commit3", files: [{ name: testFile }] }, done); }
 		], done);
 	});
 

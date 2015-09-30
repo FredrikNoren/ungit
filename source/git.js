@@ -10,6 +10,7 @@ var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
+var Promise = require('bluebird');
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
@@ -338,58 +339,104 @@ git.discardChangesInFile = function(repoPath, filename) {
   return task;
 }
 
+var parseDiffForPatch = function (patch, repoPath) {
+  return new Promise(function (resolve, reject) {
+    git(['diff', patch.name], repoPath)
+      .fail(reject)
+      .done(resolve).start();
+  });
+}
+
+var applyPatchedDiff = function(patch, repoPath, patchedDiff) {
+  return new Promise(function (resolve, reject) {
+    if (patchedDiff) {
+      git(['apply', '--cached'], repoPath)
+        .fail(reject)
+        .done(resolve)
+        .started(function() {
+          this.process.stdin.end(patchedDiff + '\n\n');
+        }).start();
+    } else {
+      resolve();
+    }
+  });
+}
+
 git.updateIndexFromFileList = function(repoPath, files) {
   var task = new GitTask();
+  var statusTask;
 
-  var statusTask = git.status(repoPath)
-    .fail(task.setResult)
-    .done(function(status) {
-      var toAdd = [];
-      var toRemove = [];
-      for(var v in files) {
-        var file = files[v];
-        var fileStatus = status.files[file] || status.files[path.relative(repoPath, file)];
-        if (!fileStatus) {
-          task.setResult({ error: 'No such file in staging: ' + file });
-          return;
-        }
-        if (fileStatus.removed) toRemove.push(file);
-        else toAdd.push(file);
+  new Promise(function (resolve, reject) {
+    statusTask = git.status(repoPath)
+      .fail(reject)
+      .done(resolve);
+  }).then(function(status) {
+    var toAdd = [];
+    var toRemove = [];
+    var toPatch = [];
+
+    for(var v in files) {
+      var file = files[v];
+      var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+      if (!fileStatus) {
+        task.setResult({ error: 'No such file in staging: ' + file.name });
+        return;
       }
 
-      async.series([
-        function(done) {
-          if (toAdd.length == 0) done();
-          else {
-            git(['update-index', '--add', '--stdin'], repoPath)
-              .always(done)
-              .started(function() {
-                var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-                this.process.stdin.end(filesToAdd);
-              })
-              .start();
-          }
-        },
-        function(done) {
-          if (toRemove.length == 0) done();
-          else {
-            git(['update-index', '--remove', '--stdin'], repoPath)
-              .always(done)
-              .started(function() {
-                var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-                this.process.stdin.end(filesToRemove);
-              })
-              .start();
-          }
-        }
-      ], function(err) {
-        if (err) return task.setResult(err);
-        task.setResult();
-      });
+      if (fileStatus.removed) toRemove.push(file.name);
+      else if (files[v].patchLineList) toPatch.push(file)
+      else toAdd.push(file.name);
+    }
 
+    var addPromise = new Promise(function (resolve, reject) {
+      if (toAdd.length == 0) {
+        resolve();
+        return;
+      }
+      git(['update-index', '--add', '--stdin'], repoPath)
+        .done(resolve)
+        .fail(reject)
+        .started(function() {
+          var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+          this.process.stdin.end(filesToAdd);
+        }).start();
     });
-  task.started(statusTask.start);
 
+    var removePromise = new Promise(function (resolve, reject) {
+      if (toRemove.length == 0) {
+        resolve();
+        return;
+      }
+      git(['update-index', '--remove', '--stdin'], repoPath)
+        .done(resolve)
+        .fail(reject)
+        .started(function() {
+          var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+          this.process.stdin.end(filesToRemove);
+        }).start();
+    });
+
+    var patchPromise = new Promise(function (resolve, reject) {
+      if (toPatch.length == 0) {
+        resolve();
+        return;
+      }
+
+      var diffPatchArray = [];
+      // handle patchings per file bases
+      for (var n = 0; n < toPatch.length; n++) {
+        diffPatchArray.push(parseDiffForPatch(toPatch[n], repoPath)
+          .then(gitParser.parsePatchDiffResult.bind(null, toPatch[n].patchLineList))
+          .then(applyPatchedDiff.bind(null, toPatch[n], repoPath)));
+      }
+
+      Promise.all(diffPatchArray).then(resolve, reject);
+    });
+
+    return Promise.join(addPromise, removePromise, patchPromise);
+  }).then(task.setResult.bind(null, null), task.setResult);
+
+  task.started(statusTask.start);
   return task;
 }
 
@@ -406,7 +453,19 @@ git.commit = function(repoPath, amend, message, files) {
     .fail(task.setResult)
     .done(function() {
       git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath)
-        .always(task.setResult)
+        .always(function(err) {
+          // ignore the case where nothing were added to be committed
+          if (!err || err.stdout.indexOf("Changes not staged for commit") > -1) {
+            task.setResult();
+          } else {
+            try {
+              task.setResult(err);
+            } catch (e) {
+              // log if json result is already sent...  should be fixed with promise impl
+              console.log(e);
+            }
+          }
+        })
         .started(function() {
           this.process.stdin.end(message);
         })

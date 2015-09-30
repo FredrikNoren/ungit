@@ -66,10 +66,10 @@
 
         <div class="files" data-bind="foreach: files">
           <div class="file" data-bind="css: { showingDiffs: isShowingDiffs }" data-ta-container="staging-file">
-            <div class="checkmark" data-bind="click: toggleStaged, css: { checked: staged }">
-              <span class="glyphicon" data-bind="css: { 'glyphicon-check': staged, 'glyphicon-unchecked': !staged() }"></span>
+            <div class="checkmark" data-bind="click: toggleStaged, css: { checked: editState() !== 'none' }">
+              <span class="glyphicon" data-bind="css: { 'glyphicon-check': editState() === 'staged', 'glyphicon-unchecked': editState() === 'none', 'glyphicon-list-alt': editState() === 'patched'}"></span>
             </div>
-            <button class="name btn btn-default" data-bind="click: toggleDiffs">
+            <button class="name btn btn-default" data-bind="click: toggleDiffs" data-ta-clickable="show-stage-diffs">
               <span data-bind="text: displayName"></span>
               <!-- ko component: diffProgressBar --><!-- /ko -->
             </button>
@@ -78,11 +78,15 @@
             <span class="additions" data-bind="text: additions"></span>
             <span class="deletions" data-bind="text: deletions"></span>
             <span class="conflict" data-bind="visible: conflict, click: resolveConflict"><span class="explanation">Resolve&nbsp;</span>Conflict</span>
+            <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
+                data-toggle="tooltip" data-placement="top" data-ta-clickable="patch-file" title="Patch changes">Patch</span>
             <span class="ignore bootstrap-tooltip" data-ta-clickable="ignore-file" data-bind="click: ignoreFile"
                 data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
             <span class="discard bootstrap-tooltip" data-ta-clickable="discard-file" data-bind="click: discardChanges"
                 data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
-            <div class="diffContainer" data-bind="component: diff" data-ta-container="stageDiffs"></div>
+            <!-- ko if: isShowingDiffs -->
+            <div class="diffContainer" data-bind="component: diff"></div>
+            <!-- /ko -->
           </div>
         </div>
       </div>

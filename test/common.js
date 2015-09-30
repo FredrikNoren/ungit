@@ -89,7 +89,7 @@ common.createSmallRepo = function(req, callback) {
 		var testFile = 'smalltestfile.txt';
 		async.series([
 			function(done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
-			function(done) { common.post(req, '/commit', { path: dir, message: 'Init', files: [testFile] }, done); }
+			function(done) { common.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] }, done); }
 		], function(err, res) {
 			callback(err, dir);
 		});

@@ -89,3 +89,15 @@ uiInteractions.checkout = function(page, branch, callback) {
     callback();
   });
 }
+
+uiInteractions.patch = function(page, commitMessage, callback) {
+  helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+    helpers.click(page, '[data-ta-clickable="show-stage-diffs"]');
+    setTimeout(function() {
+      helpers.click(page, '[data-ta-clickable="patch-file"]');
+      helpers.waitForElement(page, '[data-ta-clickable="patch-line-input"]', function() {
+        uiInteractions.commit(page, commitMessage, callback);
+      });
+    }, 1000);
+  });
+}
