@@ -15,9 +15,6 @@ var GitNodeViewModel = function(graph, sha1) {
   this.commitTime = ko.observable();
   this.color = ko.observable();
   this.ideologicalBranch = ko.observable();
-  this.ideologicalBranch.subscribe(function(value) {
-    self.color(value ? value.color : '#666');
-  });
   this.remoteTags = ko.observableArray();
   this.branchesAndLocalTags = ko.observableArray();
 
@@ -123,6 +120,7 @@ GitNodeViewModel.prototype.render = function() {
   }
 
   this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
+  this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
 }
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;
