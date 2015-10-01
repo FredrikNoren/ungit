@@ -5,7 +5,6 @@ var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
 var moment = require('moment');
 var EdgeViewModel = require('./edge');
-var Snap = require('snapsvg');
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -16,6 +15,7 @@ function GraphViewModel(server, repoPath) {
   this.repoPath = repoPath;
   this.maxNNodes = 25;
   this.server = server;
+  this.loadNodesFromApi();
   this.currentRemote = ko.observable();
   this.nodes = ko.observableArray();
   this.edges = ko.observableArray();
@@ -75,8 +75,6 @@ function GraphViewModel(server, repoPath) {
   this.updateBranchesThrottled();
   this.graphWidth = ko.observable();
   this.graphHeight = ko.observable();
-  this.paper = undefined;
-  this.loadNodesFromApi();
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
@@ -108,7 +106,6 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   // this.nodesLoader.start();
   this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
-      if (!self.paper) self.paper = Snap('#graphics');
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
         }));
