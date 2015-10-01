@@ -81,35 +81,9 @@ var GitNodeViewModel = function(graph, sha1) {
   this.branchOrder = ko.observable();
   this.aboveNode = ko.observable();
 
-  this.r = ko.computed(function() {
-    return self.ancestorOfHEAD() ? 30 : 15;
-  });
-
-  this.cx = ko.computed(function() {
-    return self.ancestorOfHEAD() ? 610 : 610 + (90 * self.branchOrder());
-  });
-
-  this.cy = ko.computed(function() {
-    if (self.aboveNode() && self.aboveNode().selected()) {
-      return self.aboveNode().cy() + self.aboveNode().commitComponent.element().offsetHeight + 30;
-    }
-
-    if (self.ancestorOfHEAD()) {
-      if (!self.aboveNode()) {
-        return 120;
-      } else if (self.aboveNode().ancestorOfHEAD()) {
-        return self.aboveNode().cy() + 120;
-      } else {
-        return self.aboveNode().cy() + 60;
-      }
-    } else {
-      return self.aboveNode() ? self.aboveNode().cy() + 60 : 120;
-    }
-  });
-
-  this.cx.subscribe(function(value) {
-    self.commitComponent.selectedDiffLeftPosition(-(value - 600));
-  });
+  this.r = ko.observable();
+  this.cx = ko.observable();
+  this.cy = ko.observable();
 
   this.dropareaGraphActions = [
     new GraphActions.Move(this.graph, this),
@@ -126,6 +100,30 @@ var GitNodeViewModel = function(graph, sha1) {
 }
 module.exports = GitNodeViewModel;
 
+GitNodeViewModel.prototype.render = function() {
+  if (this.ancestorOfHEAD()) {
+    this.r(30);
+    this.cx(610);
+
+    if (!this.aboveNode()) {
+      this.cy(120);
+    } else if (this.aboveNode().ancestorOfHEAD()) {
+      this.cy(this.aboveNode().cy() + 120);
+    } else {
+      this.cy(this.aboveNode().cy() + 60);
+    }
+  } else {
+    this.r(15);
+    this.cx(610 + (90 * this.branchOrder()));
+    this.cy(this.aboveNode() ? this.aboveNode().cy() + 60 : 120);
+  }
+
+  if (this.aboveNode() && this.aboveNode().selected()) {
+    this.cy(this.aboveNode().cy() + this.aboveNode().commitComponent.element().offsetHeight + 30);
+  }
+
+  this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
+}
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;
   this.title(logEntry.message.split('\n')[0]);

@@ -115,6 +115,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
         node.parents().forEach(function(parentSha1) {
           edges.push(self.getEdge(node.sha1, parentSha1));
         });
+        node.render();
       });
 
       self.edges(edges);
