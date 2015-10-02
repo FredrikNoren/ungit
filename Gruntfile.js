@@ -126,7 +126,8 @@ module.exports = function(grunt) {
             'ungit': true,
             'io': true,
             'Keen': true,
-            'Raven': true
+            'Raven': true,
+            'mina': true
           }
         },
         files: [

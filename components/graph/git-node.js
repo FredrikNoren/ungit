@@ -9,6 +9,7 @@ var GitNodeViewModel = function(graph, sha1) {
   Selectable.call(this, graph);
   this.graph = graph;
   this.sha1 = sha1;
+  this.elementId = 'a' + sha1; // sha1 may begin with a number and css selector will not allow that
   this.isInited = false;
   this.title = ko.observable();
   this.parents = ko.observableArray();
@@ -121,6 +122,12 @@ GitNodeViewModel.prototype.render = function() {
 
   this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
   this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+
+  if (!this.graphic) {
+    this.graphic = this.graph.getSnap() ? this.graph.getSnap().select('#' + this.elementId) : undefined;
+  } else {
+    this.graphic.animate({ cx: this.cx(), cy: this.cy(), r: this.r(), color: this.color() }, 500, mina.elastic);
+  }
 }
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;
