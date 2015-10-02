@@ -1,11 +1,15 @@
-sudo: false
+sudo: required
 language: node_js
 node_js:
   - "0.10"
   - "0.12"
   - "iojs"
+env:
+  - GIT_VERSION=default
+  - GIT_VERSION=edge
 before_script:
   - npm install -g grunt-cli
+  - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git version
