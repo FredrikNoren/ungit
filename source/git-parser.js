@@ -279,7 +279,17 @@ var updatePatchHeader = function(result, lastHeaderIndex, ignoredDiffCountTotal,
   splitedHeader[1] = '-' + (startLeft - ignoredDiffCountTotal) + ',' + startRight;
   splitedHeader[2] = '+' + (endLeft - ignoredDiffCountTotal) + ',' + (endRight - ignoredDiffCountCurrent);
 
-  result[lastHeaderIndex] = splitedHeader.join(' ');
+  var allSpace = true;
+  for (var i = lastHeaderIndex + 1; i < result.length; i++) {
+    if (result[i][0] != ' ') {
+      allSpace = false;
+      break;
+    }
+  }
+  if (allSpace)
+    result.splice(lastHeaderIndex, result.length - lastHeaderIndex);
+  else
+    result[lastHeaderIndex] = splitedHeader.join(' ');
 }
 
 exports.parsePatchDiffResult = function(patchLineList, text) {
