@@ -35,7 +35,7 @@ function GraphViewModel(server, repoPath) {
     return self.HEAD() ? self.HEAD().color() : '#4A4A4A';
   });
   this.commitNodeEdge = ko.computed(function() {
-    if (!self.HEAD() || !self.HEAD().cx()) return;
+    if (!self.HEAD() || !self.HEAD().cx() || !self.HEAD().cy()) return;
     return "M 610 68 L " + self.HEAD().cx() + " " + self.HEAD().cy();
   });
   this.showCommitNode = ko.observable(false);
