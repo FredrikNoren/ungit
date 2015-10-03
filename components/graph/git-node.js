@@ -126,8 +126,9 @@ GitNodeViewModel.prototype.render = function() {
 
   if (!this.graphic) {
     this.graphic = this.graph.getSnap() ? this.graph.getSnap().select('#' + this.elementId) : undefined;
-  } else {
-    this.graphic.animate({ cx: this.cx(), cy: this.cy(), r: this.r(), color: this.color() }, 500, mina.elastic);
+  }
+  if (this.graphic) {
+    this.graphic.animate({ cx: this.cx(), cy: this.cy(), r: this.r(), color: this.color() }, 750, mina.elastic);
   }
 }
 GitNodeViewModel.prototype.setData = function(logEntry) {

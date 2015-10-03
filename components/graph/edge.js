@@ -20,8 +20,9 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   this.d.subscribe(function(val) {
     if (!self.graphic) {
       self.graphic = graph.getSnap() ? graph.getSnap().select('#' + self.elementId) : undefined;
-    } else {
-      self.graphic.animate({ d: val }, 500, mina.elastic);
+    }
+    if (self.graphic) {
+      self.graphic.animate({ d: val }, 750, mina.elastic);
     }
   });
 }
