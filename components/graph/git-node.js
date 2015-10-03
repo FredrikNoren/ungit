@@ -9,7 +9,7 @@ var GitNodeViewModel = function(graph, sha1) {
   Selectable.call(this, graph);
   this.graph = graph;
   this.sha1 = sha1;
-  this.elementId = 'a' + sha1; // sha1 may begin with a number and css selector will not allow that
+  this.elementId = 'n' + sha1; // sha1 may begin with a number and css selector will not allow that
   this.isInited = false;
   this.title = ko.observable();
   this.parents = ko.observableArray();
