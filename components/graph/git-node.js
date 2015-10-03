@@ -99,6 +99,7 @@ var GitNodeViewModel = function(graph, sha1) {
 module.exports = GitNodeViewModel;
 
 GitNodeViewModel.prototype.render = function() {
+  if (!this.isInited) return;
   if (this.ancestorOfHEAD()) {
     this.r(30);
     this.cx(610);
