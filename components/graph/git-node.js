@@ -216,6 +216,7 @@ GitNodeViewModel.prototype.toggleSelected = function() {
     }
   }
 
+  programEvents.dispatch({ event: 'graph-render' });
   return false;
 }
 GitNodeViewModel.prototype.removeRef = function(ref) {

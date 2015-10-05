@@ -268,6 +268,10 @@ GraphViewModel.prototype.onProgramEvent = function(event) {
     this.setRemoteTags(event.tags);
   } else if (event.event == 'current-remote-changed') {
     this.currentRemote(event.newRemote);
+  } else if (event.event == 'graph-render') {
+    this.nodes().forEach(function(node) {
+      node.render();
+    });
   }
 }
 GraphViewModel.prototype.updateBranches = function() {

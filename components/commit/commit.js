@@ -71,13 +71,8 @@ CommitViewModel.prototype.setData = function(args) {
       sha1: this.sha1,
       repoPath: this.repoPath,
       server: this.server,
-      textDiffType: this.textDiffType,
-      diffToggleCallback: function() {
-        // git-node.js's .cy() computable is dependent on element().offsetHeight 
-        // however element() doesn't change and offsetHeight change doesn't trigger
-        // recompute, thus this callback is needs after toggle to recompute node.cy()
-        self.element.valueHasMutated();
-      } }));
+      textDiffType: this.textDiffType
+    }));
 }
 CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
