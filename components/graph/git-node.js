@@ -1,15 +1,16 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var Selectable = require('./selectable');
+var Animateable = require('./animateable');
 var programEvents = require('ungit-program-events');
 var GraphActions = require('./git-graph-actions');
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
   Selectable.call(this, graph);
+  Animateable.call(this);
   this.graph = graph;
   this.sha1 = sha1;
-  this.elementId = 'n' + sha1; // sha1 may begin with a number and css selector will not allow that
   this.isInited = false;
   this.title = ko.observable();
   this.parents = ko.observableArray();
@@ -98,6 +99,9 @@ var GitNodeViewModel = function(graph, sha1) {
 }
 module.exports = GitNodeViewModel;
 
+GitNodeViewModel.prototype.getGraphAttr = function() {
+  return { cx: this.cx(), cy: this.cy(), r: this.r(), color: this.color() };
+}
 GitNodeViewModel.prototype.render = function() {
   if (!this.isInited) return;
   if (this.ancestorOfHEAD()) {
@@ -123,13 +127,7 @@ GitNodeViewModel.prototype.render = function() {
 
   this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
   this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
-
-  if (!this.graphic) {
-    this.graphic = this.graph.getSnap() ? this.graph.getSnap().select('#' + this.elementId) : undefined;
-  }
-  if (this.graphic) {
-    this.graphic.animate({ cx: this.cx(), cy: this.cy(), r: this.r(), color: this.color() }, 750, mina.elastic);
-  }
+  this.animate();
 }
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;

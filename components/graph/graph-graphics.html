@@ -31,11 +31,11 @@
     <!-- /ko -->
 
     <!-- ko foreach: edges -->
-      <path data-bind="attr: { d: d.peek(), id: elementId }" stroke="#4A4A4A" stroke-width="8" />
+      <path data-bind="element: element, attr: { d: d.peek() }" stroke="#4A4A4A" stroke-width="8" />
     <!-- /ko -->
 
     <!-- ko foreach: nodes -->
-      <circle data-bind="attr: { cx: cx.peek(), cy: cy.peek(), r: r.peek(), fill: color.peek(), id: elementId }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected", data-ta-clickable="node-clickable" />
+      <circle data-bind="element: element, attr: { cx: cx.peek(), cy: cy.peek(), r: r.peek(), fill: color.peek() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected", data-ta-clickable="node-clickable" />
       <!-- ko if: selected -->
         <circle data-bind="attr: { cx: cx, cy: cy, r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" />
       <!-- /ko -->

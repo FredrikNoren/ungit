@@ -5,7 +5,6 @@ var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
 var moment = require('moment');
 var EdgeViewModel = require('./edge');
-var Snap = require('snapsvg');
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -306,8 +305,4 @@ GraphViewModel.prototype.moveRef = function(ref, toNode) {
   ref.node().removeRef(ref);
   toNode.pushRef(ref);
   ref.node(toNode);
-}
-GraphViewModel.prototype.getSnap = function() {
-  if (!this.snap) this.snap = Snap('svg');
-  return this.snap;
 }

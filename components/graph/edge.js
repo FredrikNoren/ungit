@@ -1,11 +1,11 @@
 var ko = require('knockout');
+var Animateable = require('./animateable');
 
 var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   var self = this;
+  Animateable.call(this);
   this.nodeA = graph.getNode(nodeAsha1);
   this.nodeB = graph.getNode(nodeBsha1);
-  this.elementId = 'e' + nodeAsha1.slice(0, 6) + '-' + nodeBsha1.slice(0, 6);
-  this.graphic = undefined;
   this.d = ko.computed(function() {
     var pathPrefix = "M " + self.nodeA.cx() + " " + self.nodeA.cy();
     if (self.nodeB.isInited) {
@@ -16,14 +16,11 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
       return ''; // nodes are not ready to calculate path, will be corrected on next calculation
     }
   });
-
   this.d.subscribe(function(val) {
-    if (!self.graphic) {
-      self.graphic = graph.getSnap() ? graph.getSnap().select('#' + self.elementId) : undefined;
-    }
-    if (self.graphic) {
-      self.graphic.animate({ d: val }, 750, mina.elastic);
-    }
+    self.animate();
   });
+}
+EdgeViewModel.prototype.getGraphAttr = function() {
+  return { d: this.d() };
 }
 module.exports = EdgeViewModel;
