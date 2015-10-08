@@ -15,8 +15,12 @@ function GraphViewModel(server, repoPath) {
   this.repoPath = repoPath;
   this.maxNNodes = 25;
   this.server = server;
-  this.loadNodesFromApi();
   this.currentRemote = ko.observable();
+  this.nodesLoader = components.create('progressBar', {
+    predictionMemoryKey: 'gitgraph-' + self.repoPath,
+    fallbackPredictedTimeMs: 1000,
+    temporary: true
+  });
   this.nodes = ko.observableArray();
   this.edges = ko.observableArray();
   this.refs = ko.observableArray();
@@ -103,7 +107,7 @@ GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
 GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
-  // this.nodesLoader.start();
+  this.nodesLoader.start();
   this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
       nodes = self.computeNode(nodes.map(function(logEntry) {
@@ -127,7 +131,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     })
     .finally(function(){
-      // self.nodesLoader.stop();
+      self.nodesLoader.stop();
       if (callback) callback();
     });
 }

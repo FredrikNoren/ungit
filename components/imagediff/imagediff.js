@@ -25,14 +25,12 @@ var ImageDiffViewModel = function(args) {
     return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
   });
   this.isShowingDiffs = args.isShowingDiffs;
-  this.diffToggleCallback = args.diffToggleCallback;
 }
 ImageDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('imagediff', this, {}, parentElement);
 }
 ImageDiffViewModel.prototype.invalidateDiff = function(callback) {
   if (callback) callback();
-  if (this.diffToggleCallback) this.this.diffToggleCallback();
 }
 ImageDiffViewModel.prototype.newImageError = function(data, event) {
   this.isRemoved(true);

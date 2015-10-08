@@ -51,7 +51,6 @@ CommitViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('commit', this, {}, parentElement);
 }
 CommitViewModel.prototype.setData = function(args) {
-  var self = this;
   this.commitTime(moment(new Date(args.commitDate)));
   this.authorTime(moment(new Date(args.authorDate)));
   var message = args.message.split('\n');
@@ -71,8 +70,7 @@ CommitViewModel.prototype.setData = function(args) {
       sha1: this.sha1,
       repoPath: this.repoPath,
       server: this.server,
-      textDiffType: this.textDiffType
-    }));
+      textDiffType: this.textDiffType }));
 }
 CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;

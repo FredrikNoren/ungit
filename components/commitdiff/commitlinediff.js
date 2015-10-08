@@ -2,7 +2,6 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
-var programEvents = require('ungit-program-events');
 
 var CommitLineDiff = function(args) {
   var self = this;
