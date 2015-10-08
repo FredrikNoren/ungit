@@ -157,6 +157,8 @@ Environment.prototype.changeTestFile = function(filename, callback) {
   this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback);
 }
 Environment.prototype.shutdownServer = function(callback) {
+  this.page.onConsoleMessage = undefined;
+  this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
 }
 Environment.prototype.createTempFolder = function(callback) {
