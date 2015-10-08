@@ -121,7 +121,9 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       self.edges(edges);
       self.nodes(nodes);
 
-      self.graphHeight(nodes[nodes.length - 1].cy() + 80);
+      if (nodes.length > 0) {
+        self.graphHeight(nodes[nodes.length - 1].cy() + 80);
+      }
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     })
     .finally(function(){
