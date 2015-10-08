@@ -32,11 +32,11 @@ Environment.prototype.init = function(callback) {
 }
 Environment.prototype.shutdown = function(callback) {
   var self = this;
-  this.page.onConsoleMessage = undefined;
-  this.page.onError = undefined;
+  this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/cleanup', undefined, function() {
     self.shutdownServer(function() {
       callback();
+      self.page.close();
     });
   });
 }
