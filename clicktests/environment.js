@@ -170,7 +170,7 @@ Environment.prototype.createFolder = function(dir, callback) {
   this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', 'http://localhost:' + this.config.port + '/api/init', options, callback);
+  this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
 
 var prependLines = function(pre, text) {
