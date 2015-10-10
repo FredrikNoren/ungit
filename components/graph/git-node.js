@@ -51,6 +51,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.selected.subscribe(function(value) {
     self.commitComponent.selected(value);
+    programEvents.dispatch({ event: 'graph-render' });
   });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
@@ -213,8 +214,6 @@ GitNodeViewModel.prototype.toggleSelected = function() {
       console.log('Fix')
     }
   }
-
-  programEvents.dispatch({ event: 'graph-render' });
   return false;
 }
 GitNodeViewModel.prototype.removeRef = function(ref) {
