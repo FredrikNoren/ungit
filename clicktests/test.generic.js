@@ -4,6 +4,7 @@ var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var uiInteractions = require('./ui-interactions.js');
 var webpage = require('webpage');
+var testCount = 0;
 
 var rootPaths = [
   '',
@@ -259,18 +260,22 @@ var testRepoPath;
     helpers.click(page, '[data-ta-clickable="home-link"]');
     helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
       done();
-      page.close();
     });
-  }, true);
+  });
 
   suite.test('Shutdown server should bring you to connection lost page', function(done) {
     environment.shutdown(function() {
       helpers.waitForElement(page, '[data-ta-container="user-error-page"]', function() {
-        page.close();
         done();
+        if (testCount == rootPaths.length) {
+          page.close();
+        } else {
+          tesetCount++;
+        }
       });
     });
   }, true);
-});
 
-testsuite.runAllSuits();
+
+  testsuite.runAllSuits();
+});
