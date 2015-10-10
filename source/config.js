@@ -10,7 +10,10 @@ var defaultConfig = {
   port: 8448,
 
   // The base URL ungit will be accessible from.
-  urlBase: "http://localhost",
+  urlBase: 'http://localhost',
+  
+  // The URL root path under which ungit will be accesible.
+  rootPath: '',
 
   // Directory to output log files.
   logDirectory: null,
@@ -126,6 +129,7 @@ var argv = yargs
 .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
 .describe('port', 'The port ungit is exposed on')
 .describe('urlBase', 'The base URL ungit will be accessible from')
+.describe('rootPath', 'The root path ungit will be accessible from')
 .describe('logDirectory', 'Directory to output log files')
 .describe('logRESTRequests', 'Write REST requests to the log')
 .describe('logGitCommands', 'Write git commands issued to the log')
@@ -155,6 +159,24 @@ var argv = yargs
 .describe('disableDiscardWarning', 'disable warning popup at discard')
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
 
+function cleanUpRootPath() {
+  var currentRootPath = module.exports.rootPath;
+
+  if (typeof currentRootPath !== 'string') {
+    currentRootPath = '';
+  } else if (currentRootPath !== '') {
+    // must start with a slash
+    if (currentRootPath.charAt(0) !== '/') {
+      currentRootPath = '/' + currentRootPath;
+    }
+    // can not end with a trailing slash
+    if (currentRootPath.charAt(currentRootPath.length - 1) === '/') {
+      currentRootPath = currentRootPath.substring(0, currentRootPath.length - 1);
+    }
+  }
+  module.exports.rootPath = currentRootPath;
+}
+
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
@@ -166,3 +188,5 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
   module.exports = rc('ungit', argv.default(defaultConfig).argv);
 }
 module.exports.homedir = homedir;
+
+cleanUpRootPath();
