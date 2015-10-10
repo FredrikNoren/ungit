@@ -62,13 +62,10 @@ suite.test('Should be possible to discard a created file without warning message
   createAndDiscard(done);
 });
 
-
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown(done, true);
 });
 
-
-// reinit with disableDiscardWarning is false, strangely port is not released and need investigation
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8500, serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
   environment.init(function(err) {

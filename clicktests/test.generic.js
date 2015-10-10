@@ -259,8 +259,9 @@ suite.test('Shutdown server should bring you to connection lost page', function(
   environment.shutdown(function() {
     helpers.waitForElement(page, '[data-ta-container="user-error-page"]', function() {
       done();
+      page.close();
     });
-  });
+  }, true);
 });
 
 

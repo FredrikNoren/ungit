@@ -30,11 +30,13 @@ Environment.prototype.init = function(callback) {
     });
   });
 }
-Environment.prototype.shutdown = function(callback) {
+Environment.prototype.shutdown = function(callback, doNotClose) {
   var self = this;
+  this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/cleanup', undefined, function() {
     self.shutdownServer(function() {
       callback();
+      if (!doNotClose) self.page.close();
     });
   });
 }
@@ -157,8 +159,6 @@ Environment.prototype.changeTestFile = function(filename, callback) {
   this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback);
 }
 Environment.prototype.shutdownServer = function(callback) {
-  this.page.onConsoleMessage = undefined;
-  this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
 }
 Environment.prototype.createTempFolder = function(callback) {
@@ -170,7 +170,7 @@ Environment.prototype.createFolder = function(dir, callback) {
   this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', 'http://localhost:' + this.config.port + '/api/init', options, callback);
+  this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
 
 var prependLines = function(pre, text) {
