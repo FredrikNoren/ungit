@@ -8,12 +8,12 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   this.nodeB = graph.getNode(nodeBsha1);
   this.d = ko.computed(function() {
     var pathPrefix = "M " + self.nodeA.cx() + " " + self.nodeA.cy();
-    if (self.nodeB.isInited) {
+    if (self.nodeB.isInited && self.nodeB.cx() && self.nodeB.cy()) {
       return pathPrefix + " L " + self.nodeB.cx() + " " + self.nodeB.cy();
-    } else if (graph.graphHeight()) {
+    } else if (!self.nodeB.isInited && graph.graphHeight()) {
       return pathPrefix + " V " + graph.graphHeight();
     } else {
-      return ''; // nodes are not ready to calculate path, will be corrected on next calculation
+      return pathPrefix + " L " + self.nodeA.cx() + " " + self.nodeA.cy();
     }
   });
   this.d.subscribe(function(val) {
