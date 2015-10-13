@@ -11,11 +11,12 @@ function Environment(page, config) {
   this.page = page;
   this.config = config || {};
   this.config.port = this.config.port || 8449;
+  this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '/ungit/12324';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
   this.config.showServerOutput = this.config.showServerOutput || false;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
-  this.url = 'http://localhost:' + this.config.port;
+  this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
 
 Environment.prototype.init = function(callback) {
@@ -30,11 +31,13 @@ Environment.prototype.init = function(callback) {
     });
   });
 }
-Environment.prototype.shutdown = function(callback) {
+Environment.prototype.shutdown = function(callback, doNotClose) {
   var self = this;
+  this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/cleanup', undefined, function() {
     self.shutdownServer(function() {
       callback();
+      if (!doNotClose) self.page.close();
     });
   });
 }
@@ -106,6 +109,7 @@ Environment.prototype.startServer = function(callback) {
   var options = ['bin/ungit',
     '--cliconfigonly',
     '--port=' + this.config.port,
+    '--rootPath=' + this.config.rootPath,
     '--no-launchBrowser',
     '--dev',
     '--no-bugtracking',
@@ -157,8 +161,6 @@ Environment.prototype.changeTestFile = function(filename, callback) {
   this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback);
 }
 Environment.prototype.shutdownServer = function(callback) {
-  this.page.onConsoleMessage = undefined;
-  this.page.onError = undefined;
   this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
 }
 Environment.prototype.createTempFolder = function(callback) {
@@ -170,7 +172,7 @@ Environment.prototype.createFolder = function(dir, callback) {
   this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', 'http://localhost:' + this.config.port + '/api/init', options, callback);
+  this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
 
 var prependLines = function(pre, text) {

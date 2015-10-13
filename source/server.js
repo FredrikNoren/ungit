@@ -61,6 +61,21 @@ var server = require('http').createServer(app);
 
 gitApi.pathPrefix = '/api';
 
+app.use(function(req, res, next) {
+  var rootPath = config.rootPath;
+  if (req.url === rootPath) {
+    // always have a trailing slash
+    res.redirect(req.url + '/');
+    return;
+  }
+  if (req.url.indexOf(rootPath) === 0) {
+    req.url = req.url.substring(rootPath.length);
+    next();
+    return;
+  }
+  res.send(400).end();
+});
+
 if (config.logRESTRequests) {
   app.use(function(req, res, next){
     winston.info(req.method + ' ' + req.url);
@@ -152,6 +167,7 @@ var indexHtmlCache = cache(function(callback) {
       }, function(err, result) {
         var html = result.join('\n\n');
         data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
+        data = data.replace(/__ROOT_PATH__/g, config.rootPath);
         callback(null, data);
       });
     });
@@ -175,6 +191,7 @@ var socketIO = require('socket.io');
 var socketsById = {};
 var socketIdCounter = 0;
 var io = socketIO.listen(server, {
+  path: config.rootPath + '/socket.io',
   logger: {
     debug: winston.debug.bind(winston),
     info: winston.info.bind(winston),
