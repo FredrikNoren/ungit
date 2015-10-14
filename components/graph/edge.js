@@ -10,7 +10,7 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
     var pathPrefix = "M " + self.nodeA.cx() + " " + self.nodeA.cy();
     if (self.nodeB.isInited && self.nodeB.cx() && self.nodeB.cy()) {
       return pathPrefix + " L " + self.nodeB.cx() + " " + self.nodeB.cy();
-    } else if (!self.nodeB.isInited && graph.graphHeight()) {
+    } else if (graph.graphHeight()) {
       return pathPrefix + " V " + graph.graphHeight();
     } else {
       return pathPrefix + " L " + self.nodeA.cx() + " " + self.nodeA.cy();
