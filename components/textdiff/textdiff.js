@@ -2,7 +2,6 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var diff2html = require('diff2html').Diff2Html;
-var programEvents = require('ungit-program-events');
 
 components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
@@ -65,7 +64,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
       if (typeof diffs == 'string') {
         self.diffJson = diff2html.getJsonFromDiff(diffs);
         self.render();
-        programEvents.dispatch({ event: 'graph-render' });
       }
 
       if (self.diffProgressBar) self.diffProgressBar.stop();
@@ -73,7 +71,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     });
   } else {
     if (callback) callback();
-    programEvents.dispatch({ event: 'graph-render' });
   }
 }
 
