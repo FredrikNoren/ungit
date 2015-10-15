@@ -245,7 +245,7 @@ GraphActions.Checkout.prototype.perform = function(callback) {
     }
 
     if (context instanceof RefViewModel && context.isRemoteBranch) {
-      this.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
+      self.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
         .then(moveRef)
         .catch(function(err) {
           return (err && err.errorCode == 'merge-failed') ? true : undefined;
