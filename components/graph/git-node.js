@@ -14,7 +14,8 @@ var GitNodeViewModel = function(graph, sha1) {
   this.isInited = false;
   this.title = ko.observable();
   this.parents = ko.observableArray();
-  this.commitTime = ko.observable();
+  this.commitTime = ko.observable(); // commit time in string
+  this.date = undefined;             // commit time in numeric format for sort
   this.color = ko.observable();
   this.ideologicalBranch = ko.observable();
   this.remoteTags = ko.observableArray();
@@ -135,6 +136,7 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.title(logEntry.message.split('\n')[0]);
   this.parents(logEntry.parents || []);
   this.commitTime(logEntry.commitDate);
+  this.date = Date.parse(logEntry.commitDate);
   this.commitComponent.setData(logEntry);
 
   if (logEntry.refs) {

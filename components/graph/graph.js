@@ -129,8 +129,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
         self.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
-    })
-    .finally(function(){
+    }).finally(function() {
       self.nodesLoader.stop();
       if (callback) callback();
     });
@@ -217,12 +216,12 @@ GraphViewModel.prototype.markNodesIdeologicalBranches = function(refs, nodes, no
     if (b.isLocal && !a.isLocal) return 1;
     if (a.isBranch && !b.isBranch) return -1;
     if (b.isBranch && !a.isBranch) return 1;
-    if (a.isHead && !b.isHead) return 1;
-    if (!a.isHead && b.isHead) return -1;
+    if (a.isHEAD && !b.isHEAD) return 1;
+    if (!a.isHEAD && b.isHEAD) return -1;
     if (a.isStash && !b.isStash) return 1;
     if (b.isStash && !a.isStash) return -1;
-    if (a.node() && a.node().commitTime() && b.node() && b.node().commitTime())
-      return a.node().commitTime() - b.node().commitTime();
+    if (a.node() && a.node().date && b.node() && b.node().date)
+      return b.node().date - a.node().date;
     return a.refName < b.refName ? -1 : 1;
   });
   var stamp = GraphViewModel._markIdeologicalStamp++;

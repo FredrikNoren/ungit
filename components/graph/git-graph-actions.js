@@ -87,7 +87,7 @@ GraphActions.Reset = function(graph, node) {
     var remoteRef = context.getRemoteRef(self.graph.currentRemote());
     return remoteRef &&
       remoteRef.node() != context.node() &&
-      remoteRef.node().commitTime() < context.node().commitTime();
+      remoteRef.node().date < context.node().date;
   });
 }
 inherits(GraphActions.Reset, GraphActions.ActionBase);
