@@ -15,13 +15,10 @@ function CommitViewModel(args) {
   this.repoPath = args.repoPath;
   this.sha1 = args.sha1;
   this.server = args.server;
-
-  this.highlighted = ko.observable();
-  this.nodeIsMousehover = ko.observable();
-  this.selected = ko.observable();
-
+  this.highlighted = args.highlighted;
+  this.nodeIsMousehover = args.nodeIsMousehover;
+  this.selected = args.selected;
   this.element = ko.observable();
-
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();
   this.message = ko.observable();

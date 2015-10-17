@@ -30,29 +30,24 @@ var GitNodeViewModel = function(graph, sha1) {
     });
     return rs;
   });
-  this.commitComponent = components.create('commit', {
-    sha1: this.sha1,
-    repoPath: this.graph.repoPath,
-    server: this.graph.server
-  });
-
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
-  this.nodeIsMousehover.subscribe(function(value) {
-    self.commitComponent.nodeIsMousehover(value);
-  });
   this.commitContainerVisible = ko.computed(function() {
     return self.ancestorOfHEAD() || self.nodeIsMousehover() || self.selected();
   });
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });
-  this.highlighted.subscribe(function(value) {
-    self.commitComponent.highlighted(value);
-  });
-  this.selected.subscribe(function(value) {
-    self.commitComponent.selected(value);
+  this.selected.subscribe(function() {
     programEvents.dispatch({ event: 'graph-render' });
+  });
+  this.commitComponent = components.create('commit', {
+    sha1: this.sha1,
+    repoPath: this.graph.repoPath,
+    server: this.graph.server,
+    selected: this.selected,
+    highlighted: this.highlighted,
+    nodeIsMousehover: this.nodeIsMousehover
   });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
