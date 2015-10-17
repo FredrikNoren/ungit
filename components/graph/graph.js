@@ -52,17 +52,10 @@ function GraphViewModel(server, repoPath) {
   this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
   this.heighstBranchOrder = 0;
   this.hoverGraphActionGraphic = ko.observable();
-  var prevHoverGraphic;
   this.hoverGraphActionGraphic.subscribe(function(value) {
-    prevHoverGraphic = value;
+    if (value && value.destroy)
+      value.destroy();
   }, null, 'beforeChange');
-  this.hoverGraphActionGraphic.subscribe(function(newValue) {
-    if (newValue != prevHoverGraphic && prevHoverGraphic && prevHoverGraphic.destroy)
-      prevHoverGraphic.destroy();
-  });
-  this.hoverGraphActionGraphicType = ko.computed(function() {
-    return self.hoverGraphActionGraphic() ? self.hoverGraphActionGraphic().type : '';
-  })
 
   this.hoverGraphAction = ko.observable();
   this.hoverGraphAction.subscribe(function(value) {
@@ -190,7 +183,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
   nodes.forEach(function(node) {
     node.branchOrder(branchSlots.length - node.branchOrder());
     node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
-    node.aboveNode(prevNode);
+    node.aboveNode = prevNode;
     if (prevNode) prevNode.belowNode = node;
     prevNode = node;
   });

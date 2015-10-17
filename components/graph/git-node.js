@@ -12,10 +12,10 @@ var GitNodeViewModel = function(graph, sha1) {
   this.graph = graph;
   this.sha1 = sha1;
   this.isInited = false;
-  this.title = ko.observable();
+  this.title = undefined;
   this.parents = ko.observableArray();
-  this.commitTime = ko.observable(); // commit time in string
-  this.date = undefined;             // commit time in numeric format for sort
+  this.commitTime = undefined; // commit time in string
+  this.date = undefined;       // commit time in numeric format for sort
   this.color = ko.observable();
   this.ideologicalBranch = ko.observable();
   this.remoteTags = ko.observableArray();
@@ -80,7 +80,8 @@ var GitNodeViewModel = function(graph, sha1) {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
   });
   this.branchOrder = ko.observable();
-  this.aboveNode = ko.observable();
+  this.aboveNode = undefined;
+  this.belowNode = undefined;
 
   this.r = ko.observable();
   this.cx = ko.observable();
@@ -110,21 +111,21 @@ GitNodeViewModel.prototype.render = function() {
     this.r(30);
     this.cx(610);
 
-    if (!this.aboveNode()) {
+    if (!this.aboveNode) {
       this.cy(120);
-    } else if (this.aboveNode().ancestorOfHEAD()) {
-      this.cy(this.aboveNode().cy() + 120);
+    } else if (this.aboveNode.ancestorOfHEAD()) {
+      this.cy(this.aboveNode.cy() + 120);
     } else {
-      this.cy(this.aboveNode().cy() + 60);
+      this.cy(this.aboveNode.cy() + 60);
     }
   } else {
     this.r(15);
     this.cx(610 + (90 * this.branchOrder()));
-    this.cy(this.aboveNode() ? this.aboveNode().cy() + 60 : 120);
+    this.cy(this.aboveNode ? this.aboveNode.cy() + 60 : 120);
   }
 
-  if (this.aboveNode() && this.aboveNode().selected()) {
-    this.cy(this.aboveNode().cy() + this.aboveNode().commitComponent.element().offsetHeight + 30);
+  if (this.aboveNode && this.aboveNode.selected()) {
+    this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
   }
 
   this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
@@ -133,10 +134,10 @@ GitNodeViewModel.prototype.render = function() {
 }
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;
-  this.title(logEntry.message.split('\n')[0]);
+  this.title = logEntry.message.split('\n')[0];
   this.parents(logEntry.parents || []);
-  this.commitTime(logEntry.commitDate);
-  this.date = Date.parse(logEntry.commitDate);
+  this.commitTime = logEntry.commitDate;
+  this.date = Date.parse(this.commitTime);
   this.commitComponent.setData(logEntry);
 
   if (logEntry.refs) {
