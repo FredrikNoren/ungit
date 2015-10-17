@@ -299,8 +299,8 @@ GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
     this.nodesById[key].remoteTags(nodeIdsToRemoteTags[key] || []);
   }
 }
-GraphViewModel.prototype.moveRef = function(ref, toNode) {
-  ref.node().removeRef(ref);
-  toNode.pushRef(ref);
-  ref.node(toNode);
+GraphViewModel.prototype.checkHeadMove = function(toNode) {
+  if (this.HEAD() === toNode) {
+    this.HEADref.node(toNode);
+  }
 }

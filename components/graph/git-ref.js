@@ -56,6 +56,9 @@ var RefViewModel = function(fullRefName, graph) {
   this.node.subscribe(function(oldNode) {
     if (oldNode) oldNode.branchesAndLocalTags.remove(self);
   }, null, "beforeChange");
+  this.node.subscribe(function(newNode) {
+    if (newNode) newNode.branchesAndLocalTags.push(self);
+  })
 };
 module.exports = RefViewModel;
 
@@ -80,9 +83,9 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     } else {
       var targetNode = self.graph.getNode(target);
       if (self.graph.checkedOutBranch() == self.refName) {
-        self.graph.moveRef(self.graph.HEADref(), targetNode);
+        self.graph.HEADref().node(targetNode);
       }
-      self.graph.moveRef(self, targetNode);
+      self.node(targetNode);
       callback();
     }
   }

@@ -108,7 +108,7 @@ GraphActions.Reset.prototype.perform = function(callback) {
     if (diag.result()) {
       var remoteRef = context.getRemoteRef(self.graph.currentRemote());
       self.server.post('/reset', { path: self.graph.repoPath, to: remoteRef.name, mode: 'hard' }, function() {
-        self.graph.moveRef(context, remoteRef.node());
+        context.node(remoteRef.node());
         callback();
       });
     } else {
@@ -202,10 +202,11 @@ GraphActions.Push.prototype.perform = function(callback) {
   var ref = this.graph.currentActionContext();
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
 
-  if (remoteRef) remoteRef.moveTo(ref.node().sha1, callback);
-  else ref.createRemoteRef(function(err) {
+  if (remoteRef) {
+    remoteRef.moveTo(ref.node().sha1, callback);
+  } else ref.createRemoteRef(function(err) {
     if (!err && self.graph.HEAD().name == ref.name) {
-      self.graph.moveRef(self.graph.HEADref(), ref.node());
+      self.grah.HEADref().node(ref.node());
     }
     callback();
   });
@@ -238,18 +239,16 @@ GraphActions.Checkout.prototype.perform = function(callback) {
       return;
     }
 
-    var moveRef = function() {
-      self.graph.moveRef(self.graph.HEADref(), context instanceof RefViewModel ? context.node() : context);
-    }
-
     if (context instanceof RefViewModel && context.isRemoteBranch) {
       self.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
-        .then(moveRef)
+        .then(function() {
+          self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
+        })
         .catch(function(err) {
           return (err && err.errorCode == 'merge-failed') ? true : undefined;
         }).finally(callback);
     } else {
-      moveRef();
+      self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
       callback();
     }
     return true;
@@ -321,8 +320,8 @@ GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
   this.server.queryPromise('POST', '/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
     .then(function() {
-      self.graph.moveRef(self.graph.HEADref(), self.graph.HEAD().belowNode);
-      self.graph.moveRef(self.graph.checkedOutRef(), self.graph.HEAD());
+      self.graph.HEADref().node(self.graph.HEAD().belowNode);
+      self.graph.checkedOutRef().node(self.graph.HEAD());
       self.graph.computeNode();
     }).finally(callback);
 }
