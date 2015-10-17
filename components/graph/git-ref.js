@@ -47,7 +47,6 @@ var RefViewModel = function(fullRefName, graph) {
   }
   this.show = true;
   this.server = this.graph.server;
-  this.localRef = ko.observable();
   this.isDragging = ko.observable(false);
   this.current = ko.computed(function() {
     return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;

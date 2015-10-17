@@ -78,7 +78,6 @@ GraphActions.Reset = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
-  this.onto = ko.observable(this.node);
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
     if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
@@ -152,7 +151,6 @@ GraphActions.Merge = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
-  this.mergeWith = ko.observable(this.node);
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
     if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;

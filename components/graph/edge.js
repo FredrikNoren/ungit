@@ -16,9 +16,7 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
       return pathPrefix + " L " + self.nodeA.cx() + " " + self.nodeA.cy();
     }
   });
-  this.d.subscribe(function(val) {
-    self.animate();
-  });
+  this.d.subscribe(self.animate.bind(self));
 }
 EdgeViewModel.prototype.getGraphAttr = function() {
   return { d: this.d() };
