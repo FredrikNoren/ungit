@@ -240,13 +240,11 @@ GraphActions.Checkout.prototype.perform = function(callback) {
     }
 
     if (context instanceof RefViewModel && context.isRemoteBranch) {
-      self.server.queryPromise('POST', '/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' })
-        .then(function() {
-          self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-        })
-        .catch(function(err) {
-          return (err && err.errorCode == 'merge-failed') ? true : undefined;
-        }).finally(callback);
+      self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
+        self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
+        callback();
+        return err && err.errorCode != 'merge-failed' ? undefined : true;
+      });
     } else {
       self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
       callback();
