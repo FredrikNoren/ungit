@@ -232,7 +232,7 @@ GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
-  var refName = context instanceof RefViewModel ? context.refName : context.sha1 ;
+  var refName = context instanceof RefViewModel ? context.refName : context.sha1;
   this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
     if (err && err.errorCode != 'merge-failed') {
       callback();
@@ -320,9 +320,12 @@ GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
   this.server.queryPromise('POST', '/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
     .then(function() {
-      self.graph.HEADref().node(self.graph.HEAD().belowNode);
-      self.graph.checkedOutRef().node(self.graph.HEAD());
-      self.graph.computeNode();
+      var targetNode = self.node.belowNode;
+      while (targetNode && !targetNode.ancestorOfHEAD()) {
+        targetNode = targetNode.belowNode;
+      }
+      self.graph.HEADref().node(targetNode ? targetNode : null);
+      self.graph.checkedOutRef().node(targetNode ? targetNode : null);
     }).finally(callback);
 }
 
