@@ -81,7 +81,7 @@ GraphViewModel.prototype.updateNode = function(parentElement) {
 GraphViewModel.prototype.getNode = function(sha1, logEntry) {
   var nodeViewModel = this.nodesById[sha1];
   if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
-  if (!nodeViewModel.isInited && logEntry) nodeViewModel.setData(logEntry);
+  if (logEntry) nodeViewModel.setData(logEntry);
   return nodeViewModel;
 }
 GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
