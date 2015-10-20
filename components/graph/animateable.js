@@ -6,6 +6,7 @@ module.exports = function(graph) {
   this.element = ko.observable();
   this.animationQueued = false;
   this.graphic = undefined;
+  this.previousGraph = undefined;
   this.element.subscribe(function(val) {
     if (val) {
       self.graphic = Snap._.wrap(val);
@@ -14,14 +15,20 @@ module.exports = function(graph) {
         self.animationQueued = false;
       }
     } else {
+      self.graphic.remove();
       self.graphic = null;
     }
   });
   this.animate = function() {
-    if (this.graphic) {
-      this.graphic.animate(this.getGraphAttr(), 750, mina.elastic);
-    } else {
-      this.animationQueued = true;
+    var currentGraph = this.getGraphAttr();
+    // animate only when attribute changed
+    if (JSON.stringify(currentGraph) !== JSON.stringify(this.previousGraph)) {
+      this.previousGraph = currentGraph;
+      if (this.graphic) {
+        this.graphic.animate(currentGraph, 750, mina.elastic);
+      } else {
+        this.animationQueued = true;
+      }
     }
   }
 };
