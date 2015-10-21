@@ -6,19 +6,21 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   Animateable.call(this);
   this.nodeA = graph.getNode(nodeAsha1);
   this.nodeB = graph.getNode(nodeBsha1);
-  this.d = ko.computed(function() {
-    var pathPrefix = "M " + self.nodeA.cx() + " " + self.nodeA.cy();
+  this.getGraphAttr = ko.computed(function() {
     if (self.nodeB.isInited && self.nodeB.cx() && self.nodeB.cy()) {
-      return pathPrefix + " L " + self.nodeB.cx() + " " + self.nodeB.cy();
+      return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
+              self.nodeB.cx(), self.nodeB.cy(), self.nodeB.cx(), self.nodeB.cy()];
     } else if (graph.graphHeight()) {
-      return pathPrefix + " V " + graph.graphHeight();
+      return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
+              self.nodeA.cx(), graph.graphHeight(), self.nodeA.cx(), graph.graphHeight()];
     } else {
-      return pathPrefix + " L " + self.nodeA.cx() + " " + self.nodeA.cy();
+      return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
+              self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy()];
     }
   });
-  this.d.subscribe(self.animate.bind(self));
+  this.getGraphAttr.subscribe(this.animate.bind(this));
 }
-EdgeViewModel.prototype.getGraphAttr = function() {
-  return { d: this.d() };
+EdgeViewModel.prototype.setGraphAttr = function(val) {
+  this.element().setAttribute('d', 'M' + val.slice(0,4).join(',') + 'L' + val.slice(4,8).join(','));
 }
 module.exports = EdgeViewModel;

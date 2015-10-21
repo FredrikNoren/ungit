@@ -4,31 +4,19 @@ var Snap = require('snapsvg');
 module.exports = function(graph) {
   var self = this;
   this.element = ko.observable();
-  this.animationQueued = false;
-  this.graphic = undefined;
   this.previousGraph = undefined;
   this.element.subscribe(function(val) {
-    if (val) {
-      self.graphic = Snap._.wrap(val);
-      if (self.animationQueued) {
-        self.graphic.animate(self.getGraphAttr(), 750, mina.elastic);
-        self.animationQueued = false;
-      }
-    } else {
-      self.graphic.remove();
-      self.graphic = null;
-    }
+    if (val) self.animate(true);
   });
-  this.animate = function() {
+  this.animate = function(forceRefresh) {
     var currentGraph = this.getGraphAttr();
-    // animate only when attribute changed
-    if (JSON.stringify(currentGraph) !== JSON.stringify(this.previousGraph)) {
+    // animate only when dom is valid and (attribute changed or force refresh due to dom change)
+    if (this.element() && (forceRefresh || JSON.stringify(currentGraph) !== JSON.stringify(this.previousGraph))) {
+      var now = Date.now();
+      mina(this.previousGraph || currentGraph, currentGraph, now, now + 750, mina.time, function (val) {
+        self.setGraphAttr(val);
+      }, mina.elastic);
       this.previousGraph = currentGraph;
-      if (this.graphic) {
-        this.graphic.animate(currentGraph, 750, mina.elastic);
-      } else {
-        this.animationQueued = true;
-      }
     }
   }
 };

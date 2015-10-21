@@ -117,6 +117,7 @@ module.exports = function(grunt) {
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
         '-W069': true, // ignore ['HEAD'] is better written in dot notation
+        '-W051': true, // Allow delete operation
       },
       web: {
         options: {
@@ -192,7 +193,7 @@ module.exports = function(grunt) {
           { expand: true, src: ['components/**'], dest: 'build/resource/' },
           { expand: true, src: ['assets/**'], dest: 'build/resource/' },
           { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
-          { expand: true, src: ['package.json'], dest: 'build/resource/'} 
+          { expand: true, src: ['package.json'], dest: 'build/resource/'}
         ]
       }
     },
@@ -360,7 +361,7 @@ module.exports = function(grunt) {
 
     });
   });
-  
+
   grunt.registerMultiTask('electron', 'Package Electron apps', function () {
     electronPackager(this.options(), this.async());
   });
