@@ -109,6 +109,15 @@ Server.prototype.queryPromise = function(type, url, arg) {
     });
   });
 }
+Server.prototype.getPromise = function(url, arg) {
+  return this.queryPromise('GET', url, arg);
+}
+Server.prototype.postPromise = function(url, arg) {
+  return this.queryPromise('POST', url, arg);
+}
+Server.prototype.delPromise = function(url, arg) {
+  return this.queryPromise('DELETE', url, arg);
+}
 Server.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);
 }

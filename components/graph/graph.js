@@ -101,7 +101,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   this.nodesLoader.start();
-  this.server.queryPromise('GET', '/log', { path: this.repoPath, limit: this.maxNNodes })
+  this.server.getPromise('/log', { path: this.repoPath, limit: this.maxNNodes })
     .then(function(nodes) {
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);

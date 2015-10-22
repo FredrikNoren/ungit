@@ -316,7 +316,7 @@ GraphActions.Uncommit.prototype.text = 'Uncommit';
 GraphActions.Uncommit.prototype.style = 'uncommit';
 GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
-  this.server.queryPromise('POST', '/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
+  this.server.postPromise('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
     .then(function() {
       var targetNode = self.node.belowNode;
       while (targetNode && !targetNode.ancestorOfHEAD()) {
@@ -341,6 +341,6 @@ GraphActions.Revert.prototype.text = 'Revert';
 GraphActions.Revert.prototype.style = 'revert';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
-  this.server.queryPromise('POST', '/revert', { path: this.graph.repoPath, commit: this.node.sha1 })
+  this.server.postPromise('/revert', { path: this.graph.repoPath, commit: this.node.sha1 })
     .finally(callback);
 }
