@@ -1,23 +1,15 @@
-
 var ko = require('knockout');
 var md5 = require('blueimp-md5').md5;
-var Selectable = require('./git-selectable').Selectable;
+var Selectable = require('./selectable');
 var programEvents = require('ungit-program-events');
 var components = require('ungit-components');
 
-var RefViewModel = function(args) {
-  Selectable.call(this, args.graph);
+var RefViewModel = function(fullRefName, graph) {
   var self = this;
+  Selectable.call(this, graph);
+  this.graph = graph;
+  this.name = fullRefName;
   this.node = ko.observable();
-  this.boxDisplayX = ko.computed(function() {
-    if (!self.node()) return 0;
-    return self.node().x();
-  });
-  this.boxDisplayY = ko.computed(function() {
-    if (!self.node()) return 0;
-    return self.node().y();
-  });
-  this.name = args.name;
   this.localRefName = this.name; // origin/master or master
   this.refName = this.name; // master
   this.isRemoteTag = this.name.indexOf('remote-tag: ') == 0;
@@ -28,7 +20,6 @@ var RefViewModel = function(args) {
   this.isRemoteHEAD = this.name.indexOf('/HEAD') != -1;
   this.isLocalBranch = this.name.indexOf('refs/heads/') == 0;
   this.isRemoteBranch = isRemoteBranchOrHEAD && !this.isRemoteHEAD;
-  this.isOriginBranch = this.isRemoteBranch && this.name.indexOf('/origin') > 0;
   this.isStash = this.name.indexOf('refs/stash') == 0;
   this.isHEAD = this.isLocalHEAD || this.isRemoteHEAD;
   this.isBranch = this.isLocalBranch || this.isRemoteBranch;
@@ -55,19 +46,25 @@ var RefViewModel = function(args) {
     this.refName = s.slice(1).join('/');
   }
   this.show = true;
-  this.graph = args.graph;
   this.server = this.graph.server;
-  this.localRef = ko.observable();
   this.isDragging = ko.observable(false);
   this.current = ko.computed(function() {
     return self.isLocalBranch && self.graph.checkedOutBranch() == self.refName;
   });
-  this.color = args.color || this._colorFromHashOfString(this.name);
-}
+  this.color = this._colorFromHashOfString(this.name);
+
+  this.node.subscribe(function(oldNode) {
+    if (oldNode) oldNode.branchesAndLocalTags.remove(self);
+  }, null, "beforeChange");
+  this.node.subscribe(function(newNode) {
+    if (newNode) newNode.branchesAndLocalTags.push(self);
+  })
+};
+module.exports = RefViewModel;
+
 RefViewModel.prototype._colorFromHashOfString = function(string) {
   return '#' + md5(string).toString().slice(0, 6);
 }
-exports.RefViewModel = RefViewModel;
 RefViewModel.prototype.dragStart = function() {
   this.graph.currentActionContext(this);
   this.isDragging(true);
@@ -77,25 +74,60 @@ RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
 }
-RefViewModel.prototype.canBePushed = function(remote) {
-  if (!this.isLocal) return false;
-  var remoteRef = this.getRemoteRef(remote);
-  if (!remoteRef) return true;
-  return this.node() != remoteRef.node();
+RefViewModel.prototype.moveTo = function(target, callback) {
+  var self = this;
+
+  var callbackWithRefSet = function(err, res) {
+    if (err) {
+      callback(err, res);
+    } else {
+      var targetNode = self.graph.getNode(target);
+      if (self.graph.checkedOutBranch() == self.refName) {
+        self.graph.HEADref().node(targetNode);
+      }
+      self.node(targetNode);
+      callback();
+    }
+  }
+
+  if (this.isLocal) {
+    if (this.current()) {
+      this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callbackWithRefSet);
+    } else if (this.isTag) {
+      this.server.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+    } else {
+      this.server.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+    }
+  } else {
+    var pushReq = { path: this.graph.repoPath, remote: this.remote, refSpec: target, remoteBranch: this.refName };
+    this.server.post('/push', pushReq, function(err, res) {
+        if (err) {
+          if (err.errorCode == 'non-fast-forward') {
+            var forcePushDialog = components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' });
+            forcePushDialog.closed.add(function() {
+              if (!forcePushDialog.result()) return callback();
+              pushReq.force = true;
+              self.server.post('/push', pushReq, callbackWithRefSet);
+            });
+            programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
+            return true;
+          }
+        }
+        callbackWithRefSet(err, res);
+      });
+  }
 }
-RefViewModel.prototype.getRemoteRef = function(remote) {
-  return this.graph.getRef(this.getRemoteRefFullName(remote), false);
-}
-RefViewModel.prototype.getRemoteRefFullName = function(remote) {
-  if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
-  if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
-  return null;
-}
+
 RefViewModel.prototype.remove = function(callback) {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
   this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
+    if (!err) {
+      self.node().removeRef(self);
+      self.graph.refsByRefName[self.name] = undefined;
+    }
+
     callback();
     self.graph.loadNodesFromApi();
     if (url == '/remote/tags') {
@@ -105,39 +137,33 @@ RefViewModel.prototype.remove = function(callback) {
     }
   });
 }
-RefViewModel.prototype.moveTo = function(target, callback) {
-  var self = this;
-  if (this.isLocal) {
-    if (this.current())
-      this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callback);
-    else if (this.isTag)
-      this.server.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
-    else
-      this.server.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callback);
-  } else {
-    var pushReq = { path: this.graph.repoPath, remote: this.remote,
-      refSpec: target, remoteBranch: this.refName };
-    this.server.post('/push', pushReq, function(err, res) {
-        if (err) {
-          if (err.errorCode == 'non-fast-forward') {
-            var forcePushDialog = components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' });
-            forcePushDialog.closed.add(function() {
-              if (!forcePushDialog.result()) return callback();
-              pushReq.force = true;
-              self.server.post('/push', pushReq, callback);
-            });
-            programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
-            return true;
-          } else {
-            callback(err, res);
-          }
-        } else {
-          callback();
-        }
-      });
-  }
+
+RefViewModel.prototype.getRemoteRef = function(remote) {
+  return this.graph.getRef(this.getRemoteRefFullName(remote), false);
 }
+
+RefViewModel.prototype.getRemoteRefFullName = function(remote) {
+  if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
+  if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
+  return null;
+}
+
+RefViewModel.prototype.canBePushed = function(remote) {
+  if (!this.isLocal) return false;
+  var remoteRef = this.getRemoteRef(remote);
+  if (!remoteRef) return true;
+  return this.node() != remoteRef.node();
+}
+
 RefViewModel.prototype.createRemoteRef = function(callback) {
+  var self = this;
   this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.currentRemote(),
-      refSpec: this.refName, remoteBranch: this.refName }, callback);
+      refSpec: this.refName, remoteBranch: this.refName }, function(err) {
+        if (!err) {
+          var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
+          self.node().branchesAndLocalTags.push(newRef);
+          newRef.node(self.node());
+        }
+        callback(err);
+      });
 }

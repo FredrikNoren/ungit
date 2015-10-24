@@ -1,5 +1,4 @@
 var ko = require('knockout');
-var _ = require('lodash');
 
 var Selectable = function(graph) {
   this.selected = ko.computed({
@@ -17,4 +16,4 @@ var Selectable = function(graph) {
     owner: this
   });
 };
-exports.Selectable = Selectable;
+module.exports = Selectable;

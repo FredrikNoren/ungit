@@ -2,21 +2,18 @@
 @import "public/less/variables.less";
 
 .graph {
-
   position: relative;
-  margin-top: 30px;
-  margin-bottom: 1px;
-  padding-bottom: 1px;
+  display: inline-block;
+  width: 100%;
 
   .graphLog {
-    position: relative;
-    display: inline-block;
-    top: -200px;
-    left: (@log-width-small + 25px);
+    left: 575px;
   }
 
   .nodeContainer {
     position: absolute;
+    left: 30px;
+    top: 120px;
     width: 100%;
 
     .commit-container {
@@ -24,18 +21,15 @@
       top: -43px;
     }
 
-    .node {
-      position: absolute;
-      margin-left: (@log-width-small + 30px);
-      outline: none;
-    }
-
     .rightSideContainer {
       position: absolute;
       margin-left: (@log-width-small + 40px);
-      top: -21px;
+      top: -22px;
       white-space: nowrap;
       height: 40px;
+    }
+    .droparea {
+      margin-top: 11px;
     }
 
     .ref {
@@ -44,7 +38,7 @@
       cursor: move;
       margin-left: 0px;
       margin-right: 0px;
-      margin-top: 9px;
+      margin-top: 11px;
       outline: none;
       padding: 2px 5px 2px 5px;
       border: 3px solid transparent;
@@ -71,7 +65,6 @@
         color: #EEF266;
       }
     }
-
     .graphAction {
       color: #fff;
       cursor: pointer;
@@ -115,7 +108,6 @@
         background: rgba(179, 135, 43, 0.9);
       }
     }
-
     .newRef {
       opacity: 1;
       padding-top: 2px;
@@ -140,8 +132,6 @@
         width: 150px;
       }
     }
-
-
   }
 
   .graphFooter {
@@ -153,28 +143,24 @@
     }
   }
 
-  svg {
-    z-index: -99;
+  .remote-icon {
+    background: url('images/remoteIcon.png');
+    width: 12px;
+    height: 10px;
+    display: inline-block;
   }
-}
 
-
-@media (min-width: @screen-md-min) {
-  .graph {
-    .nodeContainer {
-      .node {
-        margin-left: (@log-width-large + 30px);
-      }
-      .rightSideContainer {
-        margin-left: (@log-width-large + 40px);
-      }
-    }
-    .graphLog {
-      left: (@log-width-large + 25px);
-    }
+  .branch-icon {
+    background: url('images/branchIcon.png');
+    width: 9px;
+    height: 10px;
+    display: inline-block;
   }
-}
 
-.nodeSummaryContainer {
-  display: inline;
+  .tag-icon {
+    background: url('images/tagIcon.png');
+    width: 5px;
+    height: 10px;
+    display: inline-block;
+  }
 }

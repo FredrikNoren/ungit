@@ -1,89 +1,26 @@
 var ko = require('knockout');
-var inherits = require('util').inherits;
-var Selectable = require('./git-selectable').Selectable;
-var GraphActions = require('./git-graph-actions');
-var NodeViewModel = require('./graph-graphics/node').NodeViewModel;
 var components = require('ungit-components');
-var Vector2 = require('ungit-vector2');
+var Selectable = require('./selectable');
+var Animateable = require('./animateable');
 var programEvents = require('ungit-program-events');
+var GraphActions = require('./git-graph-actions');
 
 var GitNodeViewModel = function(graph, sha1) {
-  NodeViewModel.call(this);
-  Selectable.call(this, graph);
   var self = this;
-
+  Selectable.call(this, graph);
+  Animateable.call(this);
   this.graph = graph;
-  this.server = graph.server;
   this.sha1 = sha1;
-
   this.isInited = false;
-
-  this.boxDisplayX = ko.computed(function() {
-    return self.x();
-  });
-  this.boxDisplayY = ko.computed(function() {
-    return self.y();
-  });
-  this.commitContainerX = ko.computed(function() {
-    return -self.radius();
-  })
-  this.refsX = ko.computed(function() {
-    return self.radius();
-  });
-  this.nodeX = ko.computed(function() {
-    return -self.radius();
-  });
-  this.nodeY = ko.computed(function() {
-    return -self.radius();
-  });
-  this.nodeWidth = ko.computed(function() {
-    return self.radius()*2;
-  });
-  this.nodeHeight = ko.computed(function() {
-    return self.radius()*2;
-  });
-  this.aboveNode = null; // The node directly above this, graphically
-
-  this.parents = ko.observable([]);
-  this.title = ko.observable();
-  this.commitTime = ko.observable();
-
-  this.commitComponent = components.create('commit', {
-    sha1: sha1,
-    repoPath: this.graph.repoPath,
-    server: graph.server
-  });
-
-  this.boxDisplayX.subscribe(function(value) {
-    self.commitComponent.selectedDiffLeftPosition(-value);
-  });
-
-  this.index = ko.observable();
+  this.title = undefined;
+  this.parents = ko.observableArray();
+  this.commitTime = undefined; // commit time in string
+  this.date = undefined;       // commit time in numeric format for sort
+  this.color = ko.observable();
   this.ideologicalBranch = ko.observable();
-  self.ideologicalBranch.subscribe(function(value) {
-    self.color(value ? value.color : '#666');
-  });
-  this.ancestorOfHEAD = ko.observable(false);
-  this.nodeIsMousehover = ko.observable(false);
-  this.nodeIsMousehover.subscribe(function(value) {
-    self.commitComponent.nodeIsMousehover(value);
-  });
-  this.commitContainerVisible = ko.computed(function() {
-    return (self.ancestorOfHEAD() && self.isAtFinalXPosition()) || self.nodeIsMousehover() || self.selected();
-  });
-  this.highlighted = ko.computed(function() {
-    return self.nodeIsMousehover() || self.selected();
-  });
-  this.highlighted.subscribe(function(value) {
-    self.commitComponent.highlighted(value);
-  });
-  this.selected.subscribe(function(value) {
-    self.commitComponent.selected(value);
-  });
-  // These are split up like this because branches and local tags can be found in the git log,
-  // whereas remote tags needs to be fetched with another command (which is much slower)
-  this.branchesAndLocalTags = ko.observable([]);
-  this.remoteTags = ko.observable([]);
+  this.remoteTags = ko.observableArray();
+  this.branchesAndLocalTags = ko.observableArray();
+
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
@@ -93,6 +30,27 @@ var GitNodeViewModel = function(graph, sha1) {
     });
     return rs;
   });
+  this.ancestorOfHEAD = ko.observable(false);
+  this.nodeIsMousehover = ko.observable(false);
+  this.commitContainerVisible = ko.computed(function() {
+    return self.ancestorOfHEAD() || self.nodeIsMousehover() || self.selected();
+  });
+  this.highlighted = ko.computed(function() {
+    return self.nodeIsMousehover() || self.selected();
+  });
+  this.selected.subscribe(function() {
+    programEvents.dispatch({ event: 'graph-render' });
+  });
+  this.commitComponent = components.create('commit', {
+    sha1: this.sha1,
+    repoPath: this.graph.repoPath,
+    server: this.graph.server,
+    selected: this.selected,
+    highlighted: this.highlighted,
+    nodeIsMousehover: this.nodeIsMousehover
+  });
+  // These are split up like this because branches and local tags can be found in the git log,
+  // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branches = ko.computed(function() {
     return self.refs().filter(function(r) { return r.isBranch; });
   });
@@ -101,7 +59,7 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.showNewRefAction = ko.computed(function() {
     return !graph.currentActionContext();
-  })
+  });
   this.newBranchName = ko.observable();
   this.newBranchNameHasFocus = ko.observable(true);
   this.newBranchNameHasFocus.subscribe(function(newValue) {
@@ -111,11 +69,18 @@ var GitNodeViewModel = function(graph, sha1) {
         self.branchingFormVisible(false);
       }, 200);
     }
-  })
+  });
   this.branchingFormVisible = ko.observable(false);
   this.canCreateRef = ko.computed(function() {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
   });
+  this.branchOrder = ko.observable();
+  this.aboveNode = undefined;
+  this.belowNode = undefined;
+
+  this.r = ko.observable();
+  this.cx = ko.observable();
+  this.cy = ko.observable();
 
   this.dropareaGraphActions = [
     new GraphActions.Move(this.graph, this),
@@ -130,46 +95,61 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Revert(this.graph, this)
   ];
 }
-inherits(GitNodeViewModel, NodeViewModel);
-exports.GitNodeViewModel = GitNodeViewModel;
-GitNodeViewModel.prototype.setData = function(args) {
-  var self = this;
-  this.parents(args.parents || []);
-  this.commitTime(args.commitDate);
-  this.title(args.message.split('\n')[0]);
-  this.commitComponent.setData(args);
-}
-GitNodeViewModel.prototype.updateAnimationFrame = function(deltaT) {
-  this.commitComponent.updateAnimationFrame(deltaT);
-  GitNodeViewModel.super_.prototype.updateAnimationFrame.call(this, deltaT);
+module.exports = GitNodeViewModel;
 
-  this.updateGoalPosition();
+GitNodeViewModel.prototype.getGraphAttr = function() {
+  return [this.cx(), this.cy(), this.r()];
 }
-GitNodeViewModel.prototype.updateGoalPosition = function() {
-  var goalPosition = new Vector2();
+GitNodeViewModel.prototype.setGraphAttr = function(val) {
+  this.element().setAttribute('cx', val[0]);
+  this.element().setAttribute('cy', val[1])
+  this.element().setAttribute('r', val[2]);
+}
+GitNodeViewModel.prototype.render = function() {
+  if (!this.isInited) return;
   if (this.ancestorOfHEAD()) {
-    if (!this.aboveNode)
-      goalPosition.y = 120;
-    else if (this.aboveNode.ancestorOfHEAD())
-      goalPosition.y = this.aboveNode.goalPosition().y + 120;
-    else
-      goalPosition.y = this.aboveNode.goalPosition().y + 60;
-    goalPosition.x = 30;
-    this.setRadius(30);
-  } else {
-    if (this.aboveNode) {
-      goalPosition.y = this.aboveNode.goalPosition().y + 60;
-    } else {
-      goalPosition.y = 120;
-    }
+    this.r(30);
+    this.cx(610);
 
-    goalPosition.x = 30 + 90 * this.branchOrder;
-    this.setRadius(15);
+    if (!this.aboveNode) {
+      this.cy(120);
+    } else if (this.aboveNode.ancestorOfHEAD()) {
+      this.cy(this.aboveNode.cy() + 120);
+    } else {
+      this.cy(this.aboveNode.cy() + 60);
+    }
+  } else {
+    this.r(15);
+    this.cx(610 + (90 * this.branchOrder()));
+    this.cy(this.aboveNode ? this.aboveNode.cy() + 60 : 120);
   }
+
   if (this.aboveNode && this.aboveNode.selected()) {
-    goalPosition.y = this.aboveNode.goalPosition().y + this.aboveNode.commitComponent.element().offsetHeight + 30;
+    this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
   }
-  this.setPosition(goalPosition);
+
+  this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
+  this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+  this.animate();
+}
+GitNodeViewModel.prototype.setData = function(logEntry) {
+  var self = this;
+  this.title = logEntry.message.split('\n')[0];
+  this.parents(logEntry.parents || []);
+  this.commitTime = logEntry.commitDate;
+  this.date = Date.parse(this.commitTime);
+  this.commitComponent.setData(logEntry);
+
+  if (logEntry.refs) {
+    var refVMs = logEntry.refs.map(function(ref) {
+      var refViewModel = self.graph.getRef(ref);
+      refViewModel.node(self);
+      return refViewModel;
+    });
+    this.branchesAndLocalTags(refVMs);
+  }
+
+  this.isInited = true;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
@@ -177,52 +157,44 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
-  this.server.post('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 }, function() {
-    programEvents.dispatch({ event: 'branch-updated' });
-  });
-  this.branchingFormVisible(false);
-  this.newBranchName('');
+  var self = this;
+  this.graph.server.postPromise('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+    .then(function() {
+      var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
+      newRef.node(self);
+      self.branchesAndLocalTags.push(newRef);
+    }).finally(function() {
+      self.branchingFormVisible(false);
+      self.newBranchName('');
+      programEvents.dispatch({ event: 'branch-updated' });
+    });
 }
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
-  this.server.post('/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 });
-  this.branchingFormVisible(false);
-  this.newBranchName('');
-}
-GitNodeViewModel.prototype.isAncestor = function(node) {
-  if (this.index() >= this.graph.maxNNodes) return false;
-  if (node == this) return true;
-  for (var v in this.parents()) {
-    var n = this.graph.nodesById[this.parents()[v]];
-    if (n && n.isAncestor(node)) return true;
-  }
-  return false;
-}
-GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
-  var path = [];
-  var thisNode = this;
-  while (thisNode && !node.isAncestor(thisNode)) {
-    path.push(thisNode);
-    thisNode = this.graph.nodesById[thisNode.parents()[0]];
-  }
-  if (thisNode)
-    path.push(thisNode);
-  return path;
+  var self = this;
+  this.graph.server.postPromise('/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+    .then(function() {
+      var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
+      newRef.node(self);
+      self.branchesAndLocalTags.push(newRef);
+    }).finally(function() {
+      self.branchingFormVisible(false);
+      self.newBranchName('');
+    });
 }
 GitNodeViewModel.prototype.toggleSelected = function() {
   var self = this;
   var beforeThisCR = this.commitComponent.element().getBoundingClientRect();
   var beforeBelowCR = null;
-  if (this.belowNode)
+  if (this.belowNode) {
     beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
+  }
 
   var prevSelected  = this.graph.currentActionContext();
   if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
-  var prevSelectedCR = null;
-  if (prevSelected) prevSelectedCR = prevSelected.commitComponent.element().getBoundingClientRect();
+  var prevSelectedCR = prevSelected ? prevSelected.commitComponent.element().getBoundingClientRect() : null;
   this.selected(!this.selected());
 
-  this.graph.instantUpdatePositions();
   // If we are deselecting
   if (!this.selected()) {
     if (beforeThisCR.top < 0 && beforeBelowCR) {
@@ -244,6 +216,45 @@ GitNodeViewModel.prototype.toggleSelected = function() {
       console.log('Fix')
     }
   }
+  return false;
+}
+GitNodeViewModel.prototype.removeRef = function(ref) {
+  if (ref.isRemoteTag) {
+    this.remoteTags.remove(ref);
+  } else {
+    this.branchesAndLocalTags.remove(ref);
+  }
+}
+GitNodeViewModel.prototype.pushRef = function(ref) {
+  if (ref.isRemoteTag) {
+    this.remoteTags.push(ref);
+  } else {
+    this.branchesAndLocalTags.push(ref);
+  }
+}
+GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
+  var path = [];
+  var thisNode = this;
+  while (thisNode && !node.isAncestor(thisNode)) {
+    path.push(thisNode);
+    thisNode = this.graph.nodesById[thisNode.parents()[0]];
+  }
+  if (thisNode) path.push(thisNode);
+  return path;
+}
+GitNodeViewModel.prototype.isAncestor = function(node) {
+  if (node == this) return true;
+  for (var v in this.parents()) {
+    var n = this.graph.nodesById[this.parents()[v]];
+    if (n && n.isAncestor(node)) return true;
+  }
+  return false;
+}
+GitNodeViewModel.prototype.getRightToLeftStrike = function() {
+  return 'M ' + (this.cx() - 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() + 30) + ' ' + (this.cy() + 30);
+}
+GitNodeViewModel.prototype.getLeftToRightStrike = function() {
+  return 'M ' + (this.cx() + 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() - 30) + ' ' + (this.cy() + 30);
 }
 GitNodeViewModel.prototype.nodeMouseover = function() {
   this.nodeIsMousehover(true);
