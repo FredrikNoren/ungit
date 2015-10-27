@@ -117,7 +117,6 @@ module.exports = function(grunt) {
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
         '-W069': true, // ignore ['HEAD'] is better written in dot notation
-        '-W051': true, // Allow delete operation
       },
       web: {
         options: {
