@@ -44,8 +44,6 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
 
 TextDiffViewModel.prototype.invalidateDiff = function(callback) {
   var self = this;
-  if (this.patchLineList) this.patchLineList([]);
-
   if (this.isShowingDiffs()) {
     if (this.diffProgressBar) this.diffProgressBar.start();
 
