@@ -79,10 +79,19 @@ helpers.write = function(page, text) {
   helpers.log('Writing ' + text);
   page.sendEvent('keypress', text);
 }
+helpers.assertText = function(page, selector, expected) {
+  helpers.log('Trying to get text of ' + selector);
+  var element = page.evaluate(function(selector) {
+    return document.querySelector(selector);
+  }, selector);
+  var actual = !element ? undefined : element.innerText;
+  
+  if (actual !== expected) {
+    console.log("Text is not matching expected: " + expected + " actual:" + actual);
+    phantom.exit(1);
+  }
+}
 helpers.selectAllText = function(page) {
   helpers.log('Trying to select all in focused element (ctrl-A)');
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
 }
-
-
-
