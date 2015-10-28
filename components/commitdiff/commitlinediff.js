@@ -2,6 +2,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
+var programEvents = require('ungit-program-events');
 
 var CommitLineDiff = function(args) {
   var self = this;
@@ -29,10 +30,8 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
 }
 
 CommitLineDiff.prototype.fileNameClick = function() {
-  if (this.isShowingDiffs()) {
-    this.isShowingDiffs(false);
-  } else {
-    this.isShowingDiffs(true);
-    this.specificDiff().invalidateDiff();
-  }
+  this.isShowingDiffs(!this.isShowingDiffs());
+  this.specificDiff().invalidateDiff(function() {
+    programEvents.dispatch({ event: 'graph-render' });
+  });
 };

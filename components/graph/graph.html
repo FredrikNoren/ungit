@@ -1,22 +1,16 @@
+
 <div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
 
-  <!-- ko template: { name: 'graphGraphics', data: graphic } --><!-- /ko -->
+  <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
 
   <div class="nodes" data-bind="foreach: nodes">
-    <div class="nodeContainer" data-ta-container="node" data-bind="style: { left: boxDisplayX() + 'px', top: boxDisplayY() + 'px' }, attr: { 'data-ta-node-title': title }">
-
-      <div class="commit-container" data-bind="visible: commitContainerVisible, style: { left: commitContainerX() + 'px' }">
+    <div class="nodeContainer animation" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
+      <div class="commit-container animation" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
         <!-- ko component: commitComponent -->
         <!-- /ko -->
       </div>
 
-      <div tabIndex="-1" class="node" data-bind="event: { mouseover: nodeMouseover, mouseout: nodeMouseout },
-        click: toggleSelected,
-        style: { left: nodeX() + 'px', top: nodeY() + 'px', width: nodeWidth() + 'px', height: nodeHeight() + 'px' }"
-        data-ta-clickable="node-clickable">
-      </div>
-
-      <div class="rightSideContainer" data-bind="style: { left: refsX() + 'px' }">
+      <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
         <!-- ko foreach: branches -->
         <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1"
             data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
@@ -46,28 +40,26 @@
           <div class="dropmask" tabIndex="0" role="button" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
           <!-- ko component: performProgressBar --><!-- /ko -->
         </span>
-
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()" data-toggle="tooltip" data-placement="top" title="Create branch / tag at this commit">&#x271A;</button>
+          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
           <!-- ko if: branchingFormVisible -->
-          <form class="form-inline" data-bind="submit: createBranch">
-            <input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'">
-            <input class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="enable: canCreateRef">
+          <div class="form-inline">
+            <input class="name form-control" data-ta-input="new-branch-name" type="text" autofocus="true" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
+            <button class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
             <button class="btn btn-default" data-ta-clickable="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
-          </form>
+          </div>
           <!-- /ko -->
         </span>
         <!-- /ko -->
+
       </div>
 
     </div>
   </div>
-
   <div class="graphFooter">
     <!-- ko component: nodesLoader --><!-- /ko -->
   </div>
-
 </div>

@@ -15,13 +15,10 @@ function CommitViewModel(args) {
   this.repoPath = args.repoPath;
   this.sha1 = args.sha1;
   this.server = args.server;
-
-  this.highlighted = ko.observable();
-  this.nodeIsMousehover = ko.observable();
-  this.selected = ko.observable();
-
+  this.highlighted = args.highlighted;
+  this.nodeIsMousehover = args.nodeIsMousehover;
+  this.selected = args.selected;
   this.element = ko.observable();
-
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();
   this.message = ko.observable();
@@ -43,7 +40,7 @@ function CommitViewModel(args) {
 
   this.selectedDiffLeftPosition = ko.observable();
   this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 120) + 'px' };
+    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 220) + 'px' };
     else return { left: '0px', width: self.element() ? ((self.element().clientWidth - 20) + 'px') : 'inherit' };
   });
 }

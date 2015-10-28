@@ -2,12 +2,12 @@
 var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
-var RefViewModel = require('./ref.js').RefViewModel;
-var graphGraphicsActions = require('./graph-graphics/actions');
-var RebaseViewModel = graphGraphicsActions.RebaseViewModel;
-var MergeViewModel = graphGraphicsActions.MergeViewModel;
-var ResetViewModel = graphGraphicsActions.ResetViewModel;
-var PushViewModel = graphGraphicsActions.PushViewModel;
+var RefViewModel = require('./git-ref.js');
+var HoverActions = require('./hover-actions');
+var RebaseViewModel = HoverActions.RebaseViewModel;
+var MergeViewModel = HoverActions.MergeViewModel;
+var ResetViewModel = HoverActions.ResetViewModel;
+var PushViewModel = HoverActions.PushViewModel;
 var programEvents = require('ungit-program-events');
 
 var GraphActions = {};
@@ -74,12 +74,10 @@ GraphActions.Move.prototype.perform = function(callback) {
   this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
 
-
 GraphActions.Reset = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
-  this.onto = ko.observable(this.node);
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
     if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
@@ -88,7 +86,7 @@ GraphActions.Reset = function(graph, node) {
     var remoteRef = context.getRemoteRef(self.graph.currentRemote());
     return remoteRef &&
       remoteRef.node() != context.node() &&
-      remoteRef.node().commitTime() < context.node().commitTime();
+      remoteRef.node().date < context.node().date;
   });
 }
 inherits(GraphActions.Reset, GraphActions.ActionBase);
@@ -103,18 +101,19 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
   return new ResetViewModel(nodes);
 }
 GraphActions.Reset.prototype.perform = function(callback) {
-  var server = this.server;
+  var self = this;
   var context = this.graph.currentActionContext();
-  var remote = this.graph.currentRemote();
-  var repoPath = this.graph.repoPath;
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-		var remoteRef = context.getRemoteRef(remote);
-        server.post('/reset', { path: repoPath, to: remoteRef.name, mode: 'hard' }, callback);
-	} else {
-		callback();
-	}
+      var remoteRef = context.getRemoteRef(self.graph.currentRemote());
+      self.server.post('/reset', { path: self.graph.repoPath, to: remoteRef.name, mode: 'hard' }, function() {
+        context.node(remoteRef.node());
+        callback();
+      });
+    } else {
+      callback();
+    }
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
@@ -148,12 +147,10 @@ GraphActions.Rebase.prototype.perform = function(callback) {
   });
 }
 
-
 GraphActions.Merge = function(graph, node) {
   var self = this;
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
-  this.mergeWith = ko.observable(this.node);
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
     if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
@@ -169,7 +166,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
   var node = this.graph.currentActionContext();
   if (!node) return null;
   if (node instanceof RefViewModel) node = node.node();
-  return new MergeViewModel(this.graph.graphic, this.node, node);
+  return new MergeViewModel(this.graph, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
   this.server.post('/merge', { path: this.graph.repoPath, with: this.graph.currentActionContext().localRefName }, function(err) {
@@ -200,27 +197,19 @@ GraphActions.Push.prototype.createHoverGraphic = function() {
   if (!remoteRef) return null;
   return new PushViewModel(remoteRef.node(), context.node());
 }
-GraphActions.Push.prototype.perform = function( callback) {
+GraphActions.Push.prototype.perform = function(callback) {
   var self = this;
-  var programEventListener = function(event) {
-    if (event.event == 'request-credentials') self.performProgressBar.pause();
-    else if (event.event == 'request-credentials-response') self.performProgressBar.unpause();
-  };
-  programEvents.add(programEventListener);
   var ref = this.graph.currentActionContext();
-  var onDone = function(err) {
-    programEvents.remove(programEventListener);
-    callback();
-    if (!err) {
-      self.graph.loadNodesFromApi();
-      if (ref.isTag) {
-        programEvents.dispatch({ event: 'request-fetch-tags' });
-      }
-    }
-  }
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
-  if (remoteRef) remoteRef.moveTo(ref.refName, onDone);
-  else ref.createRemoteRef(onDone);
+
+  if (remoteRef) {
+    remoteRef.moveTo(ref.node().sha1, callback);
+  } else ref.createRemoteRef(function(err) {
+    if (!err && self.graph.HEAD().name == ref.name) {
+      self.grah.HEADref().node(ref.node());
+    }
+    callback();
+  });
 }
 
 GraphActions.Checkout = function(graph, node) {
@@ -243,22 +232,23 @@ GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
-  var refName;
-  if (context instanceof RefViewModel) refName = context.refName;
-  else refName = context.sha1;
+  var refName = context instanceof RefViewModel ? context.refName : context.sha1;
   this.server.post('/checkout', { path: this.graph.repoPath, name: refName }, function(err) {
     if (err && err.errorCode != 'merge-failed') {
       callback();
       return;
     }
-    if (context instanceof RefViewModel && context.isRemoteBranch)
+
+    if (context instanceof RefViewModel && context.isRemoteBranch) {
       self.server.post('/reset', { path: self.graph.repoPath, to: context.name, mode: 'hard' }, function(err, res) {
+        self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
         callback();
-        if (err && err.errorCode != 'merge-failed') return;
-        return true;
+        return err && err.errorCode != 'merge-failed' ? undefined : true;
       });
-    else
+    } else {
+      self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
       callback();
+    }
     return true;
   });
 }
@@ -283,14 +273,13 @@ GraphActions.Delete.prototype.perform = function(callback) {
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-		context.remove(callback);
-	} else {
-		callback();
-	}
+      context.remove(callback);
+    } else {
+      callback();
+    }
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
-
 
 GraphActions.CherryPick = function(graph, node) {
   var self = this;
@@ -327,7 +316,15 @@ GraphActions.Uncommit.prototype.text = 'Uncommit';
 GraphActions.Uncommit.prototype.style = 'uncommit';
 GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
-  this.server.post('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' }, callback);
+  this.server.postPromise('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
+    .then(function() {
+      var targetNode = self.node.belowNode;
+      while (targetNode && !targetNode.ancestorOfHEAD()) {
+        targetNode = targetNode.belowNode;
+      }
+      self.graph.HEADref().node(targetNode ? targetNode : null);
+      self.graph.checkedOutRef().node(targetNode ? targetNode : null);
+    }).finally(callback);
 }
 
 GraphActions.Revert = function(graph, node) {
@@ -344,5 +341,6 @@ GraphActions.Revert.prototype.text = 'Revert';
 GraphActions.Revert.prototype.style = 'revert';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
-  this.server.post('/revert', { path: this.graph.repoPath, commit: this.node.sha1 }, callback);
+  this.server.postPromise('/revert', { path: this.graph.repoPath, commit: this.node.sha1 })
+    .finally(callback);
 }

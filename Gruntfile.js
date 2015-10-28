@@ -191,7 +191,7 @@ module.exports = function(grunt) {
           { expand: true, src: ['components/**'], dest: 'build/resource/' },
           { expand: true, src: ['assets/**'], dest: 'build/resource/' },
           { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
-          { expand: true, src: ['package.json'], dest: 'build/resource/'} 
+          { expand: true, src: ['package.json'], dest: 'build/resource/'}
         ]
       }
     },
@@ -235,7 +235,6 @@ module.exports = function(grunt) {
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
     b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
-    b.require('./source/utils/vector2.js', { expose: 'ungit-vector2' });
     b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
     b.require('knockout', { expose: 'knockout' });
     b.require('lodash', { expose: 'lodash' });
@@ -249,6 +248,8 @@ module.exports = function(grunt) {
     b.require('util', { expose: 'util' });
     b.require('path', { expose: 'path' });
     b.require('diff2html', { expose: 'diff2html' });
+    b.require('bluebird', { expose: 'bluebird' });
+    b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
     var outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', function() {
       done();
@@ -274,7 +275,6 @@ module.exports = function(grunt) {
               'ungit-program-events',
               'ungit-navigation',
               'ungit-main',
-              'ungit-vector2',
               'ungit-address-parser',
               'knockout',
               'lodash',
@@ -357,7 +357,7 @@ module.exports = function(grunt) {
 
     });
   });
-  
+
   grunt.registerMultiTask('electron', 'Package Electron apps', function () {
     electronPackager(this.options(), this.async());
   });
