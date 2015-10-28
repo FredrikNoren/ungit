@@ -10,7 +10,7 @@ var rootPaths = [
   '/ungit',
   '/deep/root/path/to/app'
 ];
-  
+
 rootPaths.forEach(function(rootPath) {
 var page = webpage.create();
 var suite = testsuite.newSuite('generic - rootPath: ' + rootPath, page);
@@ -29,7 +29,7 @@ var testRepoPath;
         ], done);
     });
   });
-  
+
   suite.test('Open repo screen', function(done) {
     page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
       helpers.waitForElement(page, '.graph', function() {
@@ -37,7 +37,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Check for refresh button', function(done) {
     helpers.waitForElement(page, '[data-ta-clickable="refresh-button"]', function(err) {
       helpers.click(page, '[data-ta-clickable="refresh-button"]');
@@ -46,7 +46,7 @@ var testRepoPath;
       }, 500);
     });
   });
-  
+
   suite.test('Should be possible to create and commit a file', function(done) {
     environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
       if (err) return done(err);
@@ -57,7 +57,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Should be possible to amend a file', function(done) {
     environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
       if (err) return done(err);
@@ -68,7 +68,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Should be able to add a new file to .gitignore', function(done) {
     environment.createTestFile(testRepoPath + '/addMeToIgnore.txt', function(err) {
       if (err) return done(err);
@@ -86,7 +86,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Test showing commit diff between two commits', function(done) {
     helpers.click(page, '[data-ta-clickable="node-clickable"]');
     helpers.waitForElement(page, '[data-ta-container="commitLineDiffs"]', function() {
@@ -113,7 +113,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Should be possible to discard a created file and ensure patching is not avaliable for new file', function(done) {
     environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
       if (err) return done(err);
@@ -135,8 +135,7 @@ var testRepoPath;
   suite.test('Should be possible to create a branch', function(done) {
     uiInteractions.createBranch(page, 'testbranch', done);
   });
-  
-  
+
   suite.test('Should be possible to create and destroy a branch', function(done) {
     uiInteractions.createBranch(page, 'willbedeleted', function() {
       helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
@@ -149,7 +148,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Should be possible to create and destroy a tag', function(done) {
     uiInteractions.createTag(page, 'tagwillbedeleted', function() {
       helpers.click(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
@@ -162,7 +161,7 @@ var testRepoPath;
       });
     });
   });
-  
+
   suite.test('Commit changes to a file', function(done) {
   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
@@ -199,7 +198,7 @@ var testRepoPath;
       });
     });
   });
-    
+
   suite.test('Should be possible to patch a file', function(done) {
     environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
       if (err) return done(err);
@@ -214,54 +213,67 @@ var testRepoPath;
   suite.test('Checkout a branch', function(done) {
     uiInteractions.checkout(page, 'testbranch', done);
   });
-  
+
   suite.test('Create another commit', function(done) {
     environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
       if (err) return done(err);
+      helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+      helpers.assertText(page, '[data-ta-container="behind"]', '▼2');
       uiInteractions.commit(page, 'Branch commit', done);
     });
   });
-  
+
   suite.test('Rebase', function(done) {
     uiInteractions.refAction(page, 'testbranch', true, 'rebase', done);
   });
-  
-  suite.test('Checkout master again', function(done) {
-    uiInteractions.checkout(page, 'master', done);
-  });
-  
-  suite.test('Create yet another commit', function(done) {
-    environment.createTestFile(testRepoPath + '/testy3.txt', function(err) {
+
+  suite.test('Create one more commit', function(done) {
+    environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
       if (err) return done(err);
+      helpers.assertText(page, '[data-ta-container="ahead"]', '▲1');
+      helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
       uiInteractions.commit(page, 'Branch commit', done);
     });
   });
-  
+
+  suite.test('Checkout master again', function(done) {
+    uiInteractions.checkout(page, 'master', done);
+  });
+
+  suite.test('Create yet another commit', function(done) {
+    environment.createTestFile(testRepoPath + '/testy3.txt', function(err) {
+      if (err) return done(err);
+      helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
+      helpers.assertText(page, '[data-ta-container="behind"]', '▼0');
+      uiInteractions.commit(page, 'Branch commit', done);
+    });
+  });
+
   suite.test('Merge', function(done) {
     uiInteractions.refAction(page, 'testbranch', true, 'merge', done);
   });
-  
-  
+
+
   suite.test('Should be possible to move a branch', function(done) {
     uiInteractions.createBranch(page, 'movebranch', function() {
       uiInteractions.moveRef(page, 'movebranch', 'Init', done);
     });
   });
-  
+
   suite.test('Should be possible to click refresh button', function(done) {
     helpers.click(page, 'button.refresh-button');
     done();
   });
-  
+
   // Shutdown
-  
+
   suite.test('Go to home screen', function(done) {
     helpers.click(page, '[data-ta-clickable="home-link"]');
     helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
       done();
     });
   });
-  
+
   suite.test('Shutdown server should bring you to connection lost page', function(done) {
     environment.shutdown(function() {
       helpers.waitForElement(page, '[data-ta-container="user-error-page"]', function() {
@@ -270,7 +282,7 @@ var testRepoPath;
       });
     }, true);
   });
-  
-  
+
+
   testsuite.runAllSuits();
-});  
+});

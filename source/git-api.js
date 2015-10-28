@@ -681,6 +681,20 @@ exports.registerApi = function(env) {
     });
   });
 
+  app.get(exports.pathPrefix + '/behind', ensureAuthenticated, function(req, res) {
+    git(['rev-list', "HEAD..master"], req.query['path'])
+      .fail(function() { res.json([]); })
+      .done(function(result) { res.json(result ? result.trim().split('\n') : []); })
+      .start();
+  });
+
+  app.get(exports.pathPrefix + '/ahead', ensureAuthenticated, function(req, res) {
+    git(['rev-list', "master..HEAD"], req.query['path'])
+      .fail(function() { res.json([]); })
+      .done(function(result) { res.json(result ? result.trim().split('\n') : []); })
+      .start();
+  });
+
   if (config.dev) {
 
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
