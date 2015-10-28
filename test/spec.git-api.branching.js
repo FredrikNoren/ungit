@@ -96,7 +96,7 @@ describe('git-api branching', function () {
 			done();
 		});
 	});
-	
+
 	it('HEAD should not be before master branch', function(done) {
 		common.get(req, '/ahead', { path: testDir }, function(err, res) {
 			if (err) return done(err);
@@ -207,7 +207,7 @@ describe('git-api branching', function () {
 
 	it('should be possible to commit and checkout the previous commit', function(done) {
 		async.series([
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage2, files: [testFile1] }, done); },
+			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage2, files: [{ name: testFile1 }] }, done); },
 			function(done) { common.post(req, '/checkout', { path: testDir, name: 'HEAD~1' }, done); }
 		], done);
 	});

@@ -218,7 +218,7 @@ var testRepoPath;
     environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
       if (err) return done(err);
       helpers.assertText(page, '[data-ta-container="ahead"]', '▲0');
-      helpers.assertText(page, '[data-ta-container="behind"]', '▼1');
+      helpers.assertText(page, '[data-ta-container="behind"]', '▼2');
       uiInteractions.commit(page, 'Branch commit', done);
     });
   });
