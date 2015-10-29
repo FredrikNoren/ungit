@@ -101,7 +101,7 @@ AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   if (this.repoList.indexOf(repoPath) != -1) return;
   this.repoList.push(repoPath);
 }
-AppViewModel.prototype._handleCredentialsRequested = function() {
+AppViewModel.prototype._handleCredentialsRequested = function(event) {
   var self = this;
   var diag;
   // Only show one credentials dialog if we're asked to show another one while the first one is open
@@ -109,7 +109,7 @@ AppViewModel.prototype._handleCredentialsRequested = function() {
   if (this._isShowingCredentialsDialog)
     diag = self.dialog();
   else {
-    diag = components.create('credentialsdialog');
+    diag = components.create('credentialsdialog', { username: event.username });
     self.showDialog(diag);
   }
   this._isShowingCredentialsDialog = true;

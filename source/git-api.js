@@ -653,7 +653,7 @@ exports.registerApi = function(env) {
       socket.once('credentials', function(data) {
         res.json(data);
       });
-      socket.emit('request-credentials');
+      socket.emit('request-credentials', { username: req.query['username'] });
     }
   });
 
