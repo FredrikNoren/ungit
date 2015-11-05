@@ -11,7 +11,7 @@ var defaultConfig = {
 
   // The base URL ungit will be accessible from.
   urlBase: 'http://localhost',
-  
+
   // The URL root path under which ungit will be accesible.
   rootPath: '',
 
@@ -181,7 +181,8 @@ function cleanUpRootPath() {
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
   yargs.showHelp();
-  process.exit(0);
+} else if (argv.$0.indexOf('mocha') > -1) {
+  module.exports = rc('ungit');
 } else if (argv.cliconfigonly) {
   module.exports = argv.default(defaultConfig).argv;
 } else {
