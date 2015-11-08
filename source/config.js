@@ -119,7 +119,6 @@ var argv = yargs
 .example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
 .help('help')
 .version('ungit version: ' + JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version + '\n', 'version')
-.strict()
 .alias('b', 'launchBrowser')
 .alias('h', 'help')
 .alias('o', 'gitVersionCheckOverride')
@@ -159,6 +158,11 @@ var argv = yargs
 .describe('disableDiscardWarning', 'disable warning popup at discard')
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
 
+// If not triggered by test, then do strict option check
+if (argv.$0.indexOf('mocha') === -1) {
+  argv = argv.strict();
+}
+
 function cleanUpRootPath() {
   var currentRootPath = module.exports.rootPath;
 
@@ -181,8 +185,6 @@ function cleanUpRootPath() {
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
   yargs.showHelp();
-} else if (argv.$0.indexOf('mocha') > -1) {
-  module.exports = rc('ungit');
 } else if (argv.cliconfigonly) {
   module.exports = argv.default(defaultConfig).argv;
 } else {
