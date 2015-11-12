@@ -196,7 +196,9 @@ module.exports = function(grunt) {
       }
     },
     clean: {
-      electron: ['./build']
+      electron: ['./build'],
+      coverage: ['./coverage'],
+      'coverage-unit': ['./coverage/coverage-unit']
     },
     electron: {
       package: {
@@ -218,6 +220,15 @@ module.exports = function(grunt) {
             ProductName : 'ungit',
             InternalName : 'ungit.exe'
           }
+        }
+      }
+    },
+    mocha_istanbul: {
+      unit: {
+        src: './test',
+        options: {
+          coverageFolder: './coverage/coverage-unit',
+          mask: 'spec.*.js'
         }
       }
     }
@@ -362,6 +373,13 @@ module.exports = function(grunt) {
     electronPackager(this.options(), this.async());
   });
 
+  grunt.event.on('coverage', function(lcovFileContents, done){
+    // Check below on the section "The coverage event"
+    console.log(lcovFileContents);
+    console.log('\n\n=== html report: ./coverage/coverage-unit/lcove-report/index.html ===\n\n');
+    done();
+  });
+
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-lineending');
@@ -373,6 +391,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-mocha-istanbul');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
@@ -389,4 +408,7 @@ module.exports = function(grunt) {
 
   // Create electron package
   grunt.registerTask('package', ['clean:electron', 'copy:electron', 'electron']);
+
+  // run unit test coverage, assumes project is compiled
+  grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
 };

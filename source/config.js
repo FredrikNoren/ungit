@@ -11,7 +11,7 @@ var defaultConfig = {
 
   // The base URL ungit will be accessible from.
   urlBase: 'http://localhost',
-  
+
   // The URL root path under which ungit will be accesible.
   rootPath: '',
 
@@ -119,7 +119,6 @@ var argv = yargs
 .example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
 .help('help')
 .version('ungit version: ' + JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version + '\n', 'version')
-.strict()
 .alias('b', 'launchBrowser')
 .alias('h', 'help')
 .alias('o', 'gitVersionCheckOverride')
@@ -158,6 +157,11 @@ var argv = yargs
 .describe('fileSeparator', 'OS dependent file separator')
 .describe('disableDiscardWarning', 'disable warning popup at discard')
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
+
+// If not triggered by test, then do strict option check
+if (argv.$0.indexOf('mocha') === -1) {
+  argv = argv.strict();
+}
 
 function cleanUpRootPath() {
   var currentRootPath = module.exports.rootPath;
