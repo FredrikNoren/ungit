@@ -35,10 +35,12 @@
     <!-- /ko -->
 
     <!-- ko foreach: nodes -->
-      <circle data-bind="element: element, attr: { fill: color }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" data-ta-clickable="node-clickable" />
-      <!-- ko if: selected -->
-        <circle data-bind="attr: { cx: cx, cy: cy, r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" />
-      <!-- /ko -->
+      <svg data-bind="element: element" >
+        <circle data-bind="attr: { r: r, fill: color }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" data-ta-clickable="node-clickable" cx="30" cy="30" />
+        <!-- ko if: selected -->
+          <circle data-bind=" attr: { r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" cx="30" cy="30" />
+        <!-- /ko -->
+      </svg>
     <!-- /ko -->
 
     <!-- ko with: hoverGraphActionGraphic -->

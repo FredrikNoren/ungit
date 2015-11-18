@@ -98,12 +98,11 @@ var GitNodeViewModel = function(graph, sha1) {
 module.exports = GitNodeViewModel;
 
 GitNodeViewModel.prototype.getGraphAttr = function() {
-  return [this.cx(), this.cy(), this.r()];
+  return [this.cx(), this.cy()];
 }
 GitNodeViewModel.prototype.setGraphAttr = function(val) {
-  this.element().setAttribute('cx', val[0]);
-  this.element().setAttribute('cy', val[1])
-  this.element().setAttribute('r', val[2]);
+  this.element().setAttribute('x', val[0] - 30);
+  this.element().setAttribute('y', val[1] - 30);
 }
 GitNodeViewModel.prototype.render = function() {
   if (!this.isInited) return;
