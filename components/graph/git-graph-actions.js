@@ -69,7 +69,7 @@ GraphActions.Move = function(graph, node) {
 inherits(GraphActions.Move, GraphActions.ActionBase);
 GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.style = 'move';
-GraphActions.Move.prototype.icon = 'glyphicon-move';
+GraphActions.Move.prototype.icon = 'glyphicon glyphicon-move';
 GraphActions.Move.prototype.perform = function(callback) {
   this.graph.currentActionContext().moveTo(this.node.sha1, callback);
 }
@@ -92,7 +92,7 @@ GraphActions.Reset = function(graph, node) {
 inherits(GraphActions.Reset, GraphActions.ActionBase);
 GraphActions.Reset.prototype.text = 'Reset';
 GraphActions.Reset.prototype.style = 'reset';
-GraphActions.Reset.prototype.icon = 'glyphicon-trash';
+GraphActions.Reset.prototype.icon = 'glyphicon glyphicon-trash';
 GraphActions.Reset.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
@@ -162,6 +162,7 @@ GraphActions.Merge = function(graph, node) {
 inherits(GraphActions.Merge, GraphActions.ActionBase);
 GraphActions.Merge.prototype.text = 'Merge';
 GraphActions.Merge.prototype.style = 'merge';
+GraphActions.Merge.prototype.icon = 'octicon octicon-git-merge';
 GraphActions.Merge.prototype.createHoverGraphic = function() {
   var node = this.graph.currentActionContext();
   if (!node) return null;
@@ -189,7 +190,7 @@ GraphActions.Push = function(graph, node) {
 inherits(GraphActions.Push, GraphActions.ActionBase);
 GraphActions.Push.prototype.text = 'Push';
 GraphActions.Push.prototype.style = 'push';
-GraphActions.Push.prototype.icon = 'glyphicon-open';
+GraphActions.Push.prototype.icon = 'octicon octicon-cloud-upload';
 GraphActions.Push.prototype.createHoverGraphic = function() {
   var context = this.graph.currentActionContext();
   if (!context) return null;
@@ -228,7 +229,7 @@ GraphActions.Checkout = function(graph, node) {
 inherits(GraphActions.Checkout, GraphActions.ActionBase);
 GraphActions.Checkout.prototype.text = 'Checkout';
 GraphActions.Checkout.prototype.style = 'checkout';
-GraphActions.Checkout.prototype.icon = 'glyphicon-folder-open';
+GraphActions.Checkout.prototype.icon = 'octicon octicon-desktop-download';
 GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
@@ -267,7 +268,7 @@ GraphActions.Delete = function(graph, node) {
 inherits(GraphActions.Delete, GraphActions.ActionBase);
 GraphActions.Delete.prototype.text = 'Delete';
 GraphActions.Delete.prototype.style = 'delete';
-GraphActions.Delete.prototype.icon = 'glyphicon-remove';
+GraphActions.Delete.prototype.icon = 'glyphicon glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
