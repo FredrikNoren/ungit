@@ -23,22 +23,21 @@
 
     .rightSideContainer {
       position: absolute;
+      display: flex;
       margin-left: (@log-width-small + 40px);
       top: -22px;
       white-space: nowrap;
       height: 40px;
     }
     .droparea {
-      margin-top: 11px;
+      margin: 8px 0px 4px 0px;
     }
 
     .ref {
       display: inline-block;
       opacity: 0.6;
       cursor: move;
-      margin-left: 0px;
-      margin-right: 0px;
-      margin-top: 11px;
+      margin: 7px 0px 4px 0px;
       outline: none;
       padding: 2px 5px 2px 5px;
       border: 3px solid transparent;
@@ -56,10 +55,15 @@
       &.current {
         font-weight: bold;
         opacity: 1;
+        font-size: 16pt;
+        margin-top: 1.5px;
+        margin-bottom: -2px;
+        .octicon {
+          font-size: 16pt;
+        }
       }
       &.remote {
-        color: #89BCE8;
-        opacity: 0.3;
+        color: #5DB4FF;
       }
       &.tag {
         color: #EEF266;
@@ -71,6 +75,8 @@
       opacity: 1;
       transition: opacity 0.2s;
       -webkit-transition: opacity 0.2s;
+      margin-right: 2.5px;
+      margin-left: 2.5px;
       &.dimmed {
         opacity: 0.5;
       }
@@ -120,9 +126,9 @@
         padding: 0px;
         margin: 0px;
         margin-top: 9px;
-        color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.3);
         &:hover {
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(255, 255, 255, 0.8);
         }
       }
       .form-inline {
