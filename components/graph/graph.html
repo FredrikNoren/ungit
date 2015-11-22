@@ -35,7 +35,7 @@
 
         <!-- ko foreach: dropareaGraphActions -->
         <span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
-          <!-- ko if: icon --><span data-bind="css: icon"></span><!-- /ko -->
+          <!-- ko if: icon --><span data-bind="css: icon" class="icon"></span><!-- /ko -->
           <span data-bind="text: text"></span>
           <div class="dropmask" tabIndex="0" role="button" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
           <!-- ko component: performProgressBar --><!-- /ko -->

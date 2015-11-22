@@ -77,6 +77,20 @@
       -webkit-transition: opacity 0.2s;
       margin-right: 2.5px;
       margin-left: 2.5px;
+      overflow: hidden;
+      .icon {
+        &.octicon-git-merge {
+          margin-left: 3px;
+        }
+        margin-right: 6px;
+      }
+      &.droparea {
+        width: 30px;
+        padding-left: 7px;
+        &:hover {
+          width: auto;
+        }
+      }
       &.dimmed {
         opacity: 0.5;
       }
@@ -93,6 +107,7 @@
         background: rgba(65, 222, 60, 0.9);
       }
       &.move {
+        width: auto;
         background: rgba(0, 0, 0, 0.1);
       }
       &.merge {
