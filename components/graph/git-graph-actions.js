@@ -133,6 +133,7 @@ GraphActions.Rebase = function(graph, node) {
 inherits(GraphActions.Rebase, GraphActions.ActionBase);
 GraphActions.Rebase.prototype.text = 'Rebase';
 GraphActions.Rebase.prototype.style = 'rebase';
+GraphActions.Rebase.prototype.icon = 'octicon octicon-repo-forked flip';
 GraphActions.Rebase.prototype.createHoverGraphic = function() {
   var onto = this.graph.currentActionContext();
   if (!onto) return;
@@ -294,6 +295,7 @@ GraphActions.CherryPick = function(graph, node) {
 inherits(GraphActions.CherryPick, GraphActions.ActionBase);
 GraphActions.CherryPick.prototype.text = 'Cherry pick';
 GraphActions.CherryPick.prototype.style = 'cherry-pick';
+GraphActions.CherryPick.prototype.icon = 'octicon octicon-circuit-board';
 GraphActions.CherryPick.prototype.perform = function(callback) {
   var self = this;
   this.server.post('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 }, function(err) {
@@ -315,6 +317,7 @@ GraphActions.Uncommit = function(graph, node) {
 inherits(GraphActions.Uncommit, GraphActions.ActionBase);
 GraphActions.Uncommit.prototype.text = 'Uncommit';
 GraphActions.Uncommit.prototype.style = 'uncommit';
+GraphActions.Uncommit.prototype.icon = 'octicon octicon-zap';
 GraphActions.Uncommit.prototype.perform = function(callback) {
   var self = this;
   this.server.postPromise('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
@@ -340,6 +343,7 @@ GraphActions.Revert = function(graph, node) {
 inherits(GraphActions.Revert, GraphActions.ActionBase);
 GraphActions.Revert.prototype.text = 'Revert';
 GraphActions.Revert.prototype.style = 'revert';
+GraphActions.Revert.prototype.icon = 'octicon octicon-history';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
   this.server.postPromise('/revert', { path: this.graph.repoPath, commit: this.node.sha1 })
