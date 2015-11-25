@@ -73,8 +73,10 @@
       color: #fff;
       cursor: pointer;
       opacity: 1;
-      transition: opacity 0.2s;
-      -webkit-transition: opacity 0.2s;
+      transition: all 0.5s ease 0.2s;
+      -webkit-transition: all 0.5s ease 0.2s;
+      transition-property: opacity, max-width;
+      -webkit-transition-property: opacity, max-width;
       margin-right: 2.5px;
       margin-left: 2.5px;
       overflow: hidden;
@@ -97,10 +99,10 @@
         margin-right: 6px;
       }
       &.droparea {
-        width: 30px;
+        max-width: 30px;
         padding-left: 7px;
         &:hover {
-          width: auto;
+          max-width: 400px;
         }
       }
       &.dimmed {
