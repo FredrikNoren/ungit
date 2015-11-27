@@ -73,10 +73,38 @@
       color: #fff;
       cursor: pointer;
       opacity: 1;
-      transition: opacity 0.2s;
-      -webkit-transition: opacity 0.2s;
+      transition: all 0.5s ease 0.2s;
+      -webkit-transition: all 0.5s ease 0.2s;
+      transition-property: opacity, max-width;
+      -webkit-transition-property: opacity, max-width;
       margin-right: 2.5px;
       margin-left: 2.5px;
+      overflow: hidden;
+      .icon {
+        &.flip {
+          -webkit-transform:rotate(-180deg);
+          -moz-transform:rotate(-180deg);
+          -o-transform:rotate(-180deg);
+          transform:rotate(-180deg);
+        }
+        &.octicon-git-merge,&.octicon-repo-forked, &.octicon-zap {
+          margin-left: 3px;
+        }
+        &.octicon-history {
+          margin-left: 2px;
+        }
+        &.glyphicon-remove,&.octicon-circuit-board {
+          margin-left: 1px;
+        }
+        margin-right: 6px;
+      }
+      &.droparea {
+        max-width: 30px;
+        padding-left: 7px;
+        &:hover {
+          max-width: 400px;
+        }
+      }
       &.dimmed {
         opacity: 0.5;
       }
@@ -93,6 +121,7 @@
         background: rgba(65, 222, 60, 0.9);
       }
       &.move {
+        width: auto;
         background: rgba(0, 0, 0, 0.1);
       }
       &.merge {
