@@ -618,9 +618,9 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
-    var type = 'drop';
-    if (req.query.pop === 'true') type = 'pop';
-    git(['stash', type, 'stash@{' + req.params['id'] + '}'], req.query['path'])
+    var type = req.query.pop === 'true' ? 'pop' : 'drop';
+    var bracketEscape = config.isWindows ? '\\' : '';
+    git(['stash', type, 'stash@' +  bracketEscape + '{' + req.params['id'] + bracketEscape + '}'], req.query['path'])
       .always(jsonResultOrFail.bind(null, res))
       .always(emitGitDirectoryChanged.bind(null, req.query['path']))
       .always(emitWorkingTreeChanged.bind(null, req.query['path']))

@@ -9,7 +9,6 @@ var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var GitTask = require('./git-task');
 var _ = require('lodash');
-var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
@@ -265,7 +264,7 @@ git.diffFile = function(repoPath, filename, sha1) {
       } else {
         var gitCommands;
         var allowedCodes = null;  // default is [0]
-        var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+        var gitNewFileCompare = ['diff', '--no-index', config.isWindows ? 'NUL' : '/dev/null', filename.trim()];
 
         if (file && file.isNew) {
           gitCommands = gitNewFileCompare;
