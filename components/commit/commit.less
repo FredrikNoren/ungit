@@ -15,7 +15,7 @@
           display: block;
         }
         .arrow {
-          background: url('images/logBoxHoverArrowRight.png');
+          border-left: 15px solid #4A5665;
         }
       }
     }
@@ -49,10 +49,19 @@
       top: 5px;
       .shadow {
         display: none;
-        background: url('images/shadowArrowRight.png');
+        height: 0px;
+        width: 0px;
+        margin-left: -1px;
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+        border-left: 15px solid #1E2029;
       }
       .arrow {
-        background: url('images/panelArrowRight.png');
+        height: 0px;
+        width: 0px;
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+        border-left: 15px solid #3b4552;
       }
     }
   }
@@ -103,4 +112,3 @@
     }
   }
 }
-
