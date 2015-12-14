@@ -14,16 +14,15 @@ var Promise = require('bluebird');
 
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-var git = function(commands, repoPath, allowedCodes) {
+var git = function(commands, repoPath, allowedCodes, outPipe) {
   commands = gitConfigArguments.concat(commands).filter(function(element) {
     return element;
   });
 
-  return new GitExecutionTask(commands, repoPath, allowedCodes);
+  return new GitExecutionTask(commands, repoPath, allowedCodes, outPipe);
 }
 
-
-var GitExecutionTask = function(commands, repoPath, allowedCodes) {
+var GitExecutionTask = function(commands, repoPath, allowedCodes, outPipe) {
   GitTask.call(this);
   var self = this;
   this.repoPath = repoPath;
@@ -32,6 +31,7 @@ var GitExecutionTask = function(commands, repoPath, allowedCodes) {
   this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
   this.potentialError.commmands = commands;
   this.allowedCodes = allowedCodes;
+  this.outPipe = outPipe;
   this.start = function() {
     git.queueTask(self);
   }
@@ -40,10 +40,6 @@ inherits(GitExecutionTask, GitTask);
 GitExecutionTask.prototype.parser = function(parser, parseArgs) {
   this._parser = parser;
   this.parseArgs = parseArgs;
-  return this;
-}
-GitExecutionTask.prototype.encoding = function(encoding) {
-  this._encoding = encoding;
   return this;
 }
 GitExecutionTask.prototype.timeout = function(timeout) {
@@ -65,7 +61,6 @@ var gitQueue = async.queue(function (task, callback) {
     {
       cwd: task.repoPath,
       maxBuffer: 1024 * 1024 * 100,
-      encoding: task._encoding,
       timeout: task._timeout
     });
   task.process = gitProcess;
@@ -75,18 +70,24 @@ var gitQueue = async.queue(function (task, callback) {
   var stdout = '';
   var stderr = '';
 
-  gitProcess.stdout.on('data', function(data) {
-    stdout += data.toString();
-  });
+  if (task.outPipe) {
+    gitProcess.stdout.pipe(task.outPipe);
+  } else {
+    gitProcess.stdout.on('data', function(data) {
+      stdout += data.toString();
+    });
+  }
   gitProcess.stderr.on('data', function(data) {
     stderr += data.toString();
   });
   gitProcess.on('error', function (error) {
-      callback(error);
+    if (task.outPipe) task.outPipe.end();
+    callback(error);
   });
 
   gitProcess.on('close', function (code) {
     if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + task.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+    if (task.outPipe) task.outPipe.end();
 
     if (allowedCodes.indexOf(code) < 0) {
       var err = {};
@@ -244,11 +245,9 @@ git.stashAndPop = function(repoPath, wrappedTask) {
   return task;
 }
 
-git.binaryFileContent = function(repoPath, filename, version) {
-  return git(['show', version + ':' + filename], repoPath)
-        .encoding('binary');
+git.binaryFileContent = function(repoPath, filename, version, outPipe) {
+  return git(['show', version + ':' + filename], repoPath, null, outPipe);
 }
-
 
 git.diffFile = function(repoPath, filename, sha1) {
   var task = new GitTask();
