@@ -12,6 +12,7 @@ var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+var readFile = Promise.promisify(fs.readFile);
 
 var git = {};
 
@@ -134,13 +135,14 @@ git.getCurrentBranch = function(repoPath) {
     .promise.then(function(rootRepoPath) {
       var HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
       if (!fs.existsSync(HEADFile))
-        return { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
-      fs.readFile(HEADFile, { encoding: 'utf8' }, function(err, text) {
-        if (err) return err;
-        var rows = text.toString().split('\n');
-        var branch = rows[0].slice('ref: refs/heads/'.length);
-        return branch;
-      });
+        throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
+      return HEADFile;
+    }).then(function(HEADFile) {
+      return readFile(HEADFile, { encoding: 'utf8' });
+    }).then(function(text) {
+      var rows = text.toString().split('\n');
+      var branch = rows[0].slice('ref: refs/heads/'.length);
+      return branch;
     });
 }
 
