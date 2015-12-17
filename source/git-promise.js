@@ -12,7 +12,7 @@ var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var readFileProm = Promise.promisify(fs.readFile);
-var isFileExistsProm = Promise.promisify(fs.exists);
+var fileAccessProm = Promise.promisify(fs.access);
 
 var git = {};
 
@@ -121,15 +121,15 @@ var getGitError = function(args, stderr) {
 
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
-  return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
+  return this.getGitExecuteTask({ commands: ['rev-parse', '--show-toplevel'], repoPath: repoPath })
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
-      return isFileExistsProm(HEADFile);
-    }).then(function(isExist) {
-      if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
+      return fileAccessProm(HEADFile, fs.R_OK).catch(function() {
+        throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile }
+      });
     }).then(function() {
-      return readFileProm(HEADFile, { encoding: 'utf8' });
+      return readFileProm(HEADFile, 'utf8');
     }).then(function(text) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);

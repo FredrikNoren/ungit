@@ -13,6 +13,7 @@ var mkdirp = require('mkdirp');
 var fileType = require('./utils/file-type.js');
 var rimraf = require('rimraf');
 var _ = require('lodash');
+var gitPromise = require('./git-promise');
 
 exports.pathPrefix = '';
 
@@ -111,6 +112,14 @@ exports.registerApi = function(env) {
   var jsonResultOrFail = function(res, err, result) {
     if (err) res.status(400).json(err);
     else res.json(result || {});
+  }
+
+  var jsonResultOrFailProm = function(promise, res) {
+    promise.then(function(result) {
+        res.json(result);
+      }).catch(function(err) {
+        res.status(400).json(err);
+      });
   }
 
   function credentialsOption(socketId) {
@@ -405,10 +414,8 @@ exports.registerApi = function(env) {
       .start();
   });
 
-  app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.getCurrentBranch(req.query['path'])
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+  app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
+    jsonResultOrFailProm(gitPromise.getCurrentBranch(req.query['path']), res);
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
