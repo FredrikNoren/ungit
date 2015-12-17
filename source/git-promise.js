@@ -7,93 +7,82 @@ var config = require('./config');
 var winston = require('winston');
 var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
-var GitTask = require('./git-task');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var readFile = Promise.promisify(fs.readFile);
+var readFileProm = Promise.promisify(fs.readFile);
+var isFileExistsProm = Promise.promisify(fs.exists);
 
 var git = {};
 
-git.getGitExecutionTask = function(commands, repoPath, allowedCodes, outPipe) {
-  var self = this;
-  commands = gitConfigArguments.concat(commands).filter(function(element) {
+git.getGitExecuteTask = function(args) {
+  args.commands = gitConfigArguments.concat(args.commands).filter(function(element) {
     return element;
   });
-  this.repoPath = repoPath;
-  this.commands = commands;
-  this._timeout = 2 * 60 * 1000; // Default timeout tasks after 2 min
-  // TODO: remove this fake stack trace and use promise erro handling
-  this.potentialError = new Error(); // caputers the stack trace here so that we can use it if the command fail later on
-  this.potentialError.commmands = commands;
-  this.allowedCodes = allowedCodes;
-  this.outPipe = outPipe;
-  this.promise = null;
+  args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
+  args.startTime = Date.now();
 
-  this.start = function() {
-    self.promise = new Promise(function (resolve, reject) {
-      if (config.logGitCommands) winston.info('git executing: ' + self.repoPath + ' ' + self.commands.join(' '));
-      self.startTime = Date.now();
+  var exec = new Promise(function (resolve, reject) {
+    if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
+    var rejected = false;
+    var stdout = '';
+    var stderr = '';
 
-      var gitProcess = child_process.spawn(
-        'git',
-        self.commands,
-        {
-          cwd: self.repoPath,
-          maxBuffer: 1024 * 1024 * 100,
-          timeout: self._timeout
-        });
-      self.process = gitProcess;
-      var allowedCodes = self.allowedCodes || [0];
-      var stdout = '';
-      var stderr = '';
+    var gitProcess = child_process.spawn(
+      'git',
+      args.commands,
+      {
+        cwd: args.repoPath,
+        maxBuffer: 1024 * 1024 * 100,
+        timeout: args.timeout
+      });
+    var allowedCodes = args.allowedCodes || [0];
 
-      if (self.outPipe) {
-        gitProcess.stdout.pipe(self.outPipe);
+    if (args.outPipe) {
+      gitProcess.stdout.pipe(args.outPipe);
+    } else {
+      gitProcess.stdout.on('data', function(data) {
+        stdout += data.toString();
+      });
+    }
+    gitProcess.stderr.on('data', function(data) {
+      stderr += data.toString();
+    });
+    gitProcess.on('error', function (error) {
+      if (args.outPipe) args.outPipe.end();
+      rejected = true;
+      reject(error);
+    });
+
+    gitProcess.on('close', function (code) {
+      if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+      if (rejected) return;
+      if (args.outPipe) args.outPipe.end();
+
+      if (allowedCodes.indexOf(code) < 0) {
+        reject(getGitError(args, stderr));
       } else {
-        gitProcess.stdout.on('data', function(data) {
-          stdout += data.toString();
-        });
+        resolve(stdout);
       }
-      gitProcess.stderr.on('data', function(data) {
-        stderr += data.toString();
-      });
-      gitProcess.on('error', function (error) {
-        if (self.outPipe) self.outPipe.end();
-        reject(error);
-      });
+    });
+  });
 
-      gitProcess.on('close', function (code) {
-        if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + self.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
-        if (self.outPipe) self.outPipe.end();
-
-        if (allowedCodes.indexOf(code) < 0) {
-          reject(getErrorObject(stderr));
-        } else {
-          resolve(self._parser ? self._parser(stdout, self.parseArgs) : stdout);
-        }
-      });
+  if (args.parser) {
+    exec.then(function(stdout) {
+      // could put this in 'close' event but this will increase responsiveness of server
+      return args.parser(stdout, args.parseArgs);
     });
   }
-  this.parser = function(parser, parseArgs) {
-    this._parser = parser;
-    this.parseArgs = parseArgs;
-    return this;
-  }
-  this.timeout = function(timeout) {
-    this._timeout = timeout;
-    return this;
-  }
+
+  return exec;
 }
-var getErrorObject = function(stderr) {
+var getGitError = function(args, stderr) {
   var err = {};
   err.isGitError = true;
   err.errorCode = 'unknown';
-  err.stackAtCall = this.potentialError.stack;
-  err.lineAtCall = this.potentialError.lineNumber;
-  err.command = this.commands.join(' ');
-  err.workingDirectory = this.repoPath;
+  err.command = args.commands.join(' ');
+  err.workingDirectory = args.repoPath;
   err.error = stderr.toString();
   err.message = err.error.split('\n')[0];
   err.stderr = stderr;
@@ -131,14 +120,16 @@ var getErrorObject = function(stderr) {
 }
 
 git.getCurrentBranch = function(repoPath) {
-  return this.getGitExecutionTask(['rev-parse', '--show-toplevel'], repoPath)
-    .promise.then(function(rootRepoPath) {
-      var HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
-      if (!fs.existsSync(HEADFile))
-        throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
-      return HEADFile;
-    }).then(function(HEADFile) {
-      return readFile(HEADFile, { encoding: 'utf8' });
+  var HEADFile;
+  return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
+    .then(function(rootRepoPath) {
+      HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
+    }).then(function() {
+      return isFileExistsProm(HEADFile);
+    }).then(function(isExist) {
+      if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
+    }).then(function() {
+      return readFileProm(HEADFile, { encoding: 'utf8' });
     }).then(function(text) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
