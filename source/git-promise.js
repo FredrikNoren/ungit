@@ -14,14 +14,36 @@ var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', 
 var readFileProm = Promise.promisify(fs.readFile);
 var fileAccessProm = Promise.promisify(fs.access);
 var isFileExisProm = function(file) {
-  return fileAccessProm(file, fs.F_OK))
+  return fileAccessProm(file, fs.F_OK)
     .then(function() { return true; })
     .catch(function() { return false; });
 }
 
 var git = {};
 
-git.getGitExecuteTask = function(args) {
+/**
+ * Returns a promise that executes git command with given arguments
+ * @function send
+ * @param {array|obj} commands - An object that represents all parameters or the first parameter, which is an array of commands
+ * @param {string} repoPath - path to the git repository
+ * @param {array=} allowedCodes - array of acceptable execution return code to sometimes accept error as a success
+ * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
+ * @param {timeout=} outPipe - execution timeout, default is 2 mins
+ * @returns {promise} execution promise
+ * @example getGitExecuteTask({commands: ['show'], repoPath: '/tmp'});
+ * @example getGitExecuteTask(['show'], '/tmp');
+ */
+git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, timeout) {
+  var args = {};
+  if (Array.isArray(commands)) {
+    args.commands = commands;
+    args.repoPath = repoPath;
+    args.allowedCodes = allowedCodes;
+    args.outPipe = outPipe;
+  } else {
+    args = commands;
+  }
+
   args.commands = gitConfigArguments.concat(args.commands).filter(function(element) {
     return element;
   });
@@ -119,16 +141,16 @@ var getGitError = function(args, stderr) {
 
 git.status = function(repoPath, file) {
   return Promise.props({
-    numStatsStaged: this.getGitExecuteTask({ commands: ['diff', '--numstat', '--cached', '--', (file || '')], repoPath: repoPath }))
+    numStatsStaged: this.getGitExecuteTask(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: this.getGitExecuteTask({ commands: ['diff', '--numstat', '--', (file || '')], repoPath: repoPath }))
+    numStatsUnstaged: this.getGitExecuteTask(['diff', '--numstat', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    status: this.getGitExecuteTask({ commands: ['status', '-s', '-b', '-u', (file || '')], repoPath: repoPath }))
+    status: this.getGitExecuteTask(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
-          isRebaseMerge: isFileExisProm(path.join(repoPath, '.git', 'rebase-merge'),
-          isRebaseApply: isFileExisProm(path.join(repoPath, '.git', 'rebase-apply'),
+          isRebaseMerge: isFileExisProm(path.join(repoPath, '.git', 'rebase-merge')),
+          isRebaseApply: isFileExisProm(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: isFileExisProm(path.join(repoPath, '.git', 'MERGE_HEAD')),
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
@@ -143,18 +165,18 @@ git.status = function(repoPath, file) {
           }
           return status;
         });
-      });
+      })
   }).then(function(result) {
-    var status = results[0];
+    var status = result[0];
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
 
     // merge numstats
-    Object.keys(result.status.files).forEach(function(filename) {
+    Object.keys(status.files).forEach(function(filename) {
       // git diff returns paths relative to git repo but git status does not
       var absoluteFilename = filename.replace(/\.\.\//g, '');
       var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      result.status.files[filename].additions = stats.additions;
-      result.status.files[filename].deletions = stats.deletions;
+      status.files[filename].additions = stats.additions;
+      status.files[filename].deletions = stats.deletions;
     });
 
     return status;
@@ -173,17 +195,15 @@ git.resolveConflicts = function(repoPath, files) {
         });
     })).then(function() {
       var gitExecProm = [];
-
-      if (toAdd.length > 0) gitExecProm.push(this.getGitExecuteTask({ commands: ['add', toAdd ], repoPath: repoPath }));
-      if (toRemove.length > 0) gitExecProm.push(this.getGitExecuteTask({ commands: ['rm', toRemove ], repoPath: repoPath }));
-
+      if (toAdd.length > 0) gitExecProm.push(this.getGitExecuteTask(['add', toAdd ], repoPath));
+      if (toRemove.length > 0) gitExecProm.push(this.getGitExecuteTask(['rm', toRemove ], repoPath));
       return Promise.join(gitExecProm);
     });
 }
 
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
-  return this.getGitExecuteTask({ commands: ['rev-parse', '--show-toplevel'], repoPath: repoPath })
+  return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
