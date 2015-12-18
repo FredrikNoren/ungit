@@ -13,6 +13,11 @@ var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var readFileProm = Promise.promisify(fs.readFile);
 var fileAccessProm = Promise.promisify(fs.access);
+var isFileExisProm = function(file) {
+  return fileAccessProm(file, fs.F_OK))
+    .then(function() { return true; })
+    .catch(function() { return false; });
+}
 
 var git = {};
 
@@ -68,13 +73,6 @@ git.getGitExecuteTask = function(args) {
     });
   });
 
-  if (args.parser) {
-    exec.then(function(stdout) {
-      // could put this in 'close' event but this will increase responsiveness of server
-      return args.parser(stdout, args.parseArgs);
-    });
-  }
-
   return exec;
 }
 var getGitError = function(args, stderr) {
@@ -117,6 +115,70 @@ var getGitError = function(args, stderr) {
     err.errorCode = 'local-changes-would-be-overwritten';
 
   return err;
+}
+
+git.status = function(repoPath, file) {
+  return Promise.props({
+    numStatsStaged: this.getGitExecuteTask({ commands: ['diff', '--numstat', '--cached', '--', (file || '')], repoPath: repoPath }))
+      .then(gitParser.parseGitStatusNumstat),
+    numStatsUnstaged: this.getGitExecuteTask({ commands: ['diff', '--numstat', '--', (file || '')], repoPath: repoPath }))
+      .then(gitParser.parseGitStatusNumstat),
+    status: this.getGitExecuteTask({ commands: ['status', '-s', '-b', '-u', (file || '')], repoPath: repoPath }))
+      .then(gitParser.parseGitStatus)
+      .then(function(status) {
+        return Promise.props({
+          isRebaseMerge: isFileExisProm(path.join(repoPath, '.git', 'rebase-merge'),
+          isRebaseApply: isFileExisProm(path.join(repoPath, '.git', 'rebase-apply'),
+          isMerge: isFileExisProm(path.join(repoPath, '.git', 'MERGE_HEAD')),
+        }).then(function(result) {
+          status.inRebase = result.isRebaseMerge || result.isRebaseApply;
+          status.inMerge = result.isMerge;
+        }).then(function() {
+          if (status.inMerge) {
+            return readFileProm(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+              .then(function(commitMessage) {
+                status.commitMessage = commitMessage;
+                return status;
+              });
+          }
+          return status;
+        });
+      });
+  }).then(function(result) {
+    var status = results[0];
+    var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
+
+    // merge numstats
+    Object.keys(result.status.files).forEach(function(filename) {
+      // git diff returns paths relative to git repo but git status does not
+      var absoluteFilename = filename.replace(/\.\.\//g, '');
+      var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
+      result.status.files[filename].additions = stats.additions;
+      result.status.files[filename].deletions = stats.deletions;
+    });
+
+    return status;
+  });
+}
+
+git.resolveConflicts = function(repoPath, files) {
+  var toAdd = [];
+  var toRemove = [];
+  return Promise.all((files || []).map(function(file) {
+      return fileAccessProm(file, fs.F_OK)
+        .then(function() {
+          toAdd.push(file);
+        }).catch(function() {
+          toRemove.push(file);
+        });
+    })).then(function() {
+      var gitExecProm = [];
+
+      if (toAdd.length > 0) gitExecProm.push(this.getGitExecuteTask({ commands: ['add', toAdd ], repoPath: repoPath }));
+      if (toRemove.length > 0) gitExecProm.push(this.getGitExecuteTask({ commands: ['rm', toRemove ], repoPath: repoPath }));
+
+      return Promise.join(gitExecProm);
+    });
 }
 
 git.getCurrentBranch = function(repoPath) {
