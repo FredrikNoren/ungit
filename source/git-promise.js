@@ -13,7 +13,7 @@ var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var readFileProm = Promise.promisify(fs.readFile);
 var fileAccessProm = Promise.promisify(fs.access);
-var isFileExisProm = function(file) {
+var isFileExistsProm = function(file) {
   return fileAccessProm(file, fs.F_OK)
     .then(function() { return true; })
     .catch(function() { return false; });
@@ -149,9 +149,9 @@ git.status = function(repoPath, file) {
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
-          isRebaseMerge: isFileExisProm(path.join(repoPath, '.git', 'rebase-merge')),
-          isRebaseApply: isFileExisProm(path.join(repoPath, '.git', 'rebase-apply')),
-          isMerge: isFileExisProm(path.join(repoPath, '.git', 'MERGE_HEAD')),
+          isRebaseMerge: isFileExistsProm(path.join(repoPath, '.git', 'rebase-merge')),
+          isRebaseApply: isFileExistsProm(path.join(repoPath, '.git', 'rebase-apply')),
+          isMerge: isFileExistsProm(path.join(repoPath, '.git', 'MERGE_HEAD')),
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
@@ -187,12 +187,13 @@ git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
-      return fileAccessProm(file, fs.F_OK)
-        .then(function() {
+      return isFileExistsProm(file).then(function(isExist) {
+        if (isExist) {
           toAdd.push(file);
-        }).catch(function() {
+        } else {
           toRemove.push(file);
-        });
+        }
+      });
     })).then(function() {
       var gitExecProm = [];
       if (toAdd.length > 0) gitExecProm.push(this.getGitExecuteTask(['add', toAdd ], repoPath));
@@ -207,8 +208,8 @@ git.getCurrentBranch = function(repoPath) {
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
-      return fileAccessProm(HEADFile, fs.R_OK).catch(function() {
-        throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile }
+      return isFileExistsProm(HEADFile).then(function(isExist) {
+        if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
       });
     }).then(function() {
       return readFileProm(HEADFile, 'utf8');
