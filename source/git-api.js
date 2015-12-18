@@ -114,9 +114,9 @@ exports.registerApi = function(env) {
     else res.json(result || {});
   }
 
-  var jsonResultOrFailProm = function(promise, res) {
+  var jsonResultOrFailProm = function(res, promise) {
     promise.then(function(result) {
-        res.json(result);
+        res.json(result || {});
       }).catch(function(err) {
         res.status(400).json(err);
       });
@@ -415,7 +415,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
-    jsonResultOrFailProm(gitPromise.getCurrentBranch(req.query['path']), res);
+    jsonResultOrFailProm(res, gitPromise.getCurrentBranch(req.query['path']));
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
