@@ -206,7 +206,7 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
     res.type(path.extname(req.query.filename));
     if (req.query.version !== 'current') {
-      git.binaryFileContent(req.query.path, req.query.filename, req.query.version, res).start();
+      gitPromise.binaryFileContent(req.query.path, req.query.filename, req.query.version, res);
     } else {
       res.sendFile(path.join(req.query.path, req.query.filename));
     }

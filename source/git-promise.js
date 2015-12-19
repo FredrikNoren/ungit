@@ -209,6 +209,10 @@ git.resolveConflicts = function(repoPath, files) {
     });
 }
 
+git.binaryFileContent = function(repoPath, filename, version, outPipe) {
+  return this.getGitExecuteTask(['show', version + ':' + filename], repoPath, null, outPipe);
+}
+
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
   return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
