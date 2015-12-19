@@ -182,6 +182,13 @@ git.status = function(repoPath, file) {
   });
 }
 
+git.getRemoteAddress = function(repoPath, remoteName) {
+  return this.getGitExecuteTask(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
+    .then(function(text) {
+      return addressParser.parseAddress(text.split('\n')[0]);
+    });
+}
+
 git.resolveConflicts = function(repoPath, files) {
   var self = this;
   var toAdd = [];

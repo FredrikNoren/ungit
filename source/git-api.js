@@ -422,9 +422,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.getRemoteAddress(req.query['path'], req.params.name)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise.getRemoteAddress(req.query['path'], req.params.name));
   });
 
   app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
