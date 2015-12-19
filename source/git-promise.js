@@ -183,6 +183,7 @@ git.status = function(repoPath, file) {
 }
 
 git.resolveConflicts = function(repoPath, files) {
+  var self = this;
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
@@ -195,8 +196,8 @@ git.resolveConflicts = function(repoPath, files) {
       });
     })).then(function() {
       var gitExecProm = [];
-      if (toAdd.length > 0) gitExecProm.push(this.getGitExecuteTask(['add', toAdd ], repoPath));
-      if (toRemove.length > 0) gitExecProm.push(this.getGitExecuteTask(['rm', toRemove ], repoPath));
+      if (toAdd.length > 0) gitExecProm.push(self.getGitExecuteTask(['add', toAdd ], repoPath));
+      if (toRemove.length > 0) gitExecProm.push(self.getGitExecuteTask(['rm', toRemove ], repoPath));
       return Promise.join(gitExecProm);
     });
 }
