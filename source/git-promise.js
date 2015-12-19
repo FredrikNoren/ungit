@@ -24,7 +24,7 @@ var git = {};
 /**
  * Returns a promise that executes git command with given arguments
  * @function send
- * @param {array|obj} commands - An object that represents all parameters or the first parameter, which is an array of commands
+ * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
  * @param {string} repoPath - path to the git repository
  * @param {array=} allowedCodes - array of acceptable execution return code to sometimes accept error as a success
  * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
@@ -167,19 +167,18 @@ git.status = function(repoPath, file) {
         });
       })
   }).then(function(result) {
-    var status = result[0];
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
 
     // merge numstats
-    Object.keys(status.files).forEach(function(filename) {
+    Object.keys(result.status.files).forEach(function(filename) {
       // git diff returns paths relative to git repo but git status does not
       var absoluteFilename = filename.replace(/\.\.\//g, '');
       var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      status.files[filename].additions = stats.additions;
-      status.files[filename].deletions = stats.deletions;
+      result.status.files[filename].additions = stats.additions;
+      result.status.files[filename].deletions = stats.deletions;
     });
 
-    return status;
+    return result.status;
   });
 }
 

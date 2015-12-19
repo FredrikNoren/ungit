@@ -128,11 +128,7 @@ exports.registerApi = function(env) {
   }
 
   app.get(exports.pathPrefix + '/status', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var repoPath = req.query['path'];
-    git.status(repoPath, null)
-      .always(function(err, result) {
-        jsonResultOrFail(res, err, result);
-      }).start();
+    jsonResultOrFailProm(res, gitPromise.status(req.query['path'], null));
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
