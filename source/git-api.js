@@ -100,9 +100,12 @@ exports.registerApi = function(env) {
     }
   }
 
-  function autoStashAndPop(path, gitTask) {
-    if (config.autoStashAndPop) return git.stashAndPop(path, gitTask);
-    else return gitTask;
+  function autoStashExecuteAndPop(commands, repoPath, allowedCodes, outPipe, timeout) {
+    if (config.autoStashAndPop) {
+      return gitPromise.stashExecuteAndPop(commands, repoPath, allowedCodes, outPipe, timeout);
+    } else {
+      return gitPromise.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, timeout);
+    }
   }
 
   var jsonFail = function(res, err) {
@@ -115,7 +118,7 @@ exports.registerApi = function(env) {
   }
 
   var jsonResultOrFailProm = function(res, promise) {
-    promise.then(function(result) {
+    return promise.then(function(result) {
         res.json(result || {});
       }).catch(function(err) {
         res.status(400).json(err);
@@ -190,11 +193,9 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
-    autoStashAndPop(req.body['path'], git(['reset', '--' + req.body['mode'], req.body.to], req.body['path']))
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body['path']))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(['reset', '--' + req.body.mode, req.body.to], req.body.path))
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(exports.pathPrefix + '/diff', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -394,20 +395,16 @@ exports.registerApi = function(env) {
       .start();
   });
 
-  app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res){
-    autoStashAndPop(req.body['path'], git(['checkout', req.body.name.trim()], req.body['path']))
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body['path']))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+  app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(['checkout', req.body.name.trim()], req.body.path))
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
-  app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res){
-    autoStashAndPop(req.body['path'], git(['cherry-pick', req.body['name'].trim()], req.body['path']))
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body['path']))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+  app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res) {
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path))
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {

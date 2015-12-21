@@ -88,7 +88,7 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, time
       if (args.outPipe) args.outPipe.end();
 
       if (allowedCodes.indexOf(code) < 0) {
-        reject(getGitError(args, stderr));
+        reject(getGitError(args, stderr, stdout));
       } else {
         resolve(stdout);
       }
@@ -97,7 +97,8 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, time
 
   return exec;
 }
-var getGitError = function(args, stderr) {
+
+var getGitError = function(args, stderr, stdout) {
   var err = {};
   err.isGitError = true;
   err.errorCode = 'unknown';
@@ -106,6 +107,7 @@ var getGitError = function(args, stderr) {
   err.error = stderr.toString();
   err.message = err.error.split('\n')[0];
   err.stderr = stderr;
+  err.stdout = stdout;
   if (stderr.indexOf('Not a git repository') >= 0)
     err.errorCode = 'not-a-repository';
   else if (err.stderr.indexOf('Connection timed out') != -1)
@@ -206,6 +208,26 @@ git.resolveConflicts = function(repoPath, files) {
       if (toAdd.length > 0) gitExecProm.push(self.getGitExecuteTask(['add', toAdd ], repoPath));
       if (toRemove.length > 0) gitExecProm.push(self.getGitExecuteTask(['rm', toRemove ], repoPath));
       return Promise.join(gitExecProm);
+    });
+}
+
+git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, timeout) {
+  var hadLocalChanges = true;
+
+  return this.getGitExecuteTask(['stash'], repoPath)
+    .catch(function(err) {
+      if (err.stderr.indexOf('You do not have the initial commit yet') != -1) {
+        hadLocalChanges = err.stderr.indexOf('You do not have the initial commit yet') == -1;
+      } else {
+        throw err;
+      }
+    }).then(function(result) {
+      if (result.indexOf('No local changes to save') != -1) {
+        hadLocalChanges = false;
+      }
+      return git.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, timeout);
+    }).then(function() {
+      return hadLocalChanges ? git.getGitExecuteTask(['stash', 'pop'], repoPath) : null;
     });
 }
 
