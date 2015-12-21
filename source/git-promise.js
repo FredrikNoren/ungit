@@ -143,11 +143,11 @@ var getGitError = function(args, stderr, stdout) {
 
 git.status = function(repoPath, file) {
   return Promise.props({
-    numStatsStaged: this.getGitExecuteTask(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
+    numStatsStaged: git.getGitExecuteTask(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: this.getGitExecuteTask(['diff', '--numstat', '--', (file || '')], repoPath)
+    numStatsUnstaged: git.getGitExecuteTask(['diff', '--numstat', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    status: this.getGitExecuteTask(['status', '-s', '-b', '-u', (file || '')], repoPath)
+    status: git.getGitExecuteTask(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
@@ -185,14 +185,13 @@ git.status = function(repoPath, file) {
 }
 
 git.getRemoteAddress = function(repoPath, remoteName) {
-  return this.getGitExecuteTask(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
+  return git.getGitExecuteTask(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
     .then(function(text) {
       return addressParser.parseAddress(text.split('\n')[0]);
     });
 }
 
 git.resolveConflicts = function(repoPath, files) {
-  var self = this;
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
@@ -205,8 +204,8 @@ git.resolveConflicts = function(repoPath, files) {
       });
     })).then(function() {
       var gitExecProm = [];
-      if (toAdd.length > 0) gitExecProm.push(self.getGitExecuteTask(['add', toAdd ], repoPath));
-      if (toRemove.length > 0) gitExecProm.push(self.getGitExecuteTask(['rm', toRemove ], repoPath));
+      if (toAdd.length > 0) gitExecProm.push(git.getGitExecuteTask(['add', toAdd ], repoPath));
+      if (toRemove.length > 0) gitExecProm.push(git.getGitExecuteTask(['rm', toRemove ], repoPath));
       return Promise.join(gitExecProm);
     });
 }
@@ -214,7 +213,7 @@ git.resolveConflicts = function(repoPath, files) {
 git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, timeout) {
   var hadLocalChanges = true;
 
-  return this.getGitExecuteTask(['stash'], repoPath)
+  return git.getGitExecuteTask(['stash'], repoPath)
     .catch(function(err) {
       if (err.stderr.indexOf('You do not have the initial commit yet') != -1) {
         hadLocalChanges = err.stderr.indexOf('You do not have the initial commit yet') == -1;
@@ -232,7 +231,7 @@ git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, tim
 }
 
 git.binaryFileContent = function(repoPath, filename, version, outPipe) {
-  return this.getGitExecuteTask(['show', version + ':' + filename], repoPath, null, outPipe);
+  return git.getGitExecuteTask(['show', version + ':' + filename], repoPath, null, outPipe);
 }
 
 git.diffFile = function(repoPath, filename, sha1) {
@@ -275,7 +274,7 @@ git.diffFile = function(repoPath, filename, sha1) {
 
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
-  return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
+  return git.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
