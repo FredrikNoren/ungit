@@ -235,6 +235,44 @@ git.binaryFileContent = function(repoPath, filename, version, outPipe) {
   return this.getGitExecuteTask(['show', version + ':' + filename], repoPath, null, outPipe);
 }
 
+git.diffFile = function(repoPath, filename, sha1) {
+  return git.status(repoPath)
+    .then(function(status) {
+      var file = status.files[filename];
+      var filePath = path.join(repoPath, filename);
+
+      if (!file && !sha1) {
+        return isFileExistsProm(path.join(repoPath, filename))
+          .then(function(isExist) {
+            if (isExist) return [];
+            else throw { error: 'No such file: ' + filename, errorCode: 'no-such-file' };
+          });
+        // If the file is new or if it's a directory, i.e. a submodule
+      } else {
+        var gitCommands;
+        var allowedCodes = null;  // default is [0]
+        var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+
+        if (file && file.isNew) {
+          gitCommands = gitNewFileCompare;
+          allowedCodes =  [0, 1];
+        } else if (sha1) {
+          gitCommands = ['diff', sha1 + "^", sha1, "--", filename.trim()];
+        } else {
+          gitCommands = ['diff', 'HEAD', '--', filename.trim()];
+        }
+
+        return git.getGitExecuteTask(gitCommands, repoPath, allowedCodes)
+          .catch(function(err) {
+            // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
+            // it will error out with invalid object name error
+            if (sha1 && err && err.error.indexOf('bad revision') > -1)
+              return git.getGitExecuteTask(gitNewFileCompare, repoPath, allowedCodes);
+          });
+      }
+    });
+}
+
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
   return this.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
