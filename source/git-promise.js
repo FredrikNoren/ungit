@@ -13,6 +13,7 @@ var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 var readFileProm = Promise.promisify(fs.readFile);
 var fileAccessProm = Promise.promisify(fs.access);
+var fsUnlinkProm = Promise.promisify(fs.unlink);
 var isFileExistsProm = function(file) {
   return fileAccessProm(file, fs.F_OK)
     .then(function() { return true; })
@@ -287,6 +288,38 @@ git.getCurrentBranch = function(repoPath) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
       return branch;
+    });
+}
+
+git.discardAllChanges = function(repoPath) {
+  return git.getGitExecuteTask(['reset', '--hard', 'HEAD'], repoPath)
+    .then(function() {
+      return git.getGitExecuteTask(['clean', '-fd'], repoPath);
+    });
+}
+
+git.discardChangesInFile = function(repoPath, filename) {
+  var filePath = path.join(repoPath, filename);
+
+  return git.status(repoPath, filename)
+    .then(function(status){
+      if (Object.keys(status.files).length == 0) throw new Error('No files in status in discard, filename: ' + filename);
+      var fileStatus = status.files[Object.keys(status.files)[0]];
+
+      if (!fileStatus.staged) {
+        // If it's just a new file, remove it
+        if (fileStatus.isNew) {
+          return fsUnlinkProm(filePath)
+            .catch(function(err) {
+              throw { command: 'unlink', error: err };
+            });
+        // If it's a changed file, reset the changes
+        } else {
+          return git.getGitExecuteTask(['checkout', 'HEAD', '--', filename], repoPath);
+        }
+      } else {
+        return git.getGitExecuteTask(['rm', '-f', filename], repoPath);
+      }
     });
 }
 

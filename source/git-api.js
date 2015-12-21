@@ -212,14 +212,8 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
-    var task;
-    if (req.body['all']) task = git.discardAllChanges(req.body['path']);
-    else task = git.discardChangesInFile(req.body['path'], req.body['file'].trim());
-
-    task
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+    var task = req.body.all ? gitPromise.discardAllChanges(req.body.path) : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/ignorefile', ensureAuthenticated, ensurePathExists, function(req, res){
