@@ -213,6 +213,7 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
     var task = req.body.all ? gitPromise.discardAllChanges(req.body.path) : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
+    task.then(emitWorkingTreeChanged.bind(null, req.body.path));
     jsonResultOrFailProm(res, task);
   });
 
