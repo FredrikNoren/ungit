@@ -30,18 +30,20 @@ module.exports = git;
  * @param {string} repoPath - path to the git repository
  * @param {array=} allowedCodes - array of acceptable execution return code to sometimes accept error as a success
  * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
+ * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
  * @param {timeout=} outPipe - execution timeout, default is 2 mins
  * @returns {promise} execution promise
  * @example getGitExecuteTask({commands: ['show'], repoPath: '/tmp'});
  * @example getGitExecuteTask(['show'], '/tmp');
  */
-git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, timeout) {
+git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
     args.repoPath = repoPath;
     args.allowedCodes = allowedCodes;
     args.outPipe = outPipe;
+    args.inPipe = inPipe;
   } else {
     args = commands;
   }
@@ -212,7 +214,7 @@ git.resolveConflicts = function(repoPath, files) {
     });
 }
 
-git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, timeout) {
+git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
   var hadLocalChanges = true;
 
   return git.getGitExecuteTask(['stash'], repoPath)
@@ -226,7 +228,7 @@ git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, tim
       if (result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
-      return git.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, timeout);
+      return git.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }).then(function() {
       return hadLocalChanges ? git.getGitExecuteTask(['stash', 'pop'], repoPath) : null;
     });
