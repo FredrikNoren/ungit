@@ -268,7 +268,7 @@ git.diffFile = function(repoPath, filename, sha1) {
             // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
             // it will error out with invalid object name error
             if (sha1 && err && err.error.indexOf('bad revision') > -1)
-              return git.getGitExecuteTask(gitNewFileCompare, repoPath, allowedCodes);
+              return git.getGitExecuteTask(gitNewFileCompare, repoPath, [0, 1]);
           });
       }
     });
