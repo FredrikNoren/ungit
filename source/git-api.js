@@ -480,10 +480,8 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/resolveconflicts', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git.resolveConflicts(req.body['path'], req.body.files)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+    jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
