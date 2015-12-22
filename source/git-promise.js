@@ -86,6 +86,10 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
       reject(error);
     });
 
+    if (inPipe) {
+      gitProcess.stdin.end(inPipe);
+    }
+
     gitProcess.on('close', function (code) {
       if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
       if (rejected) return;
@@ -323,5 +327,64 @@ git.discardChangesInFile = function(repoPath, filename) {
       } else {
         return git.getGitExecuteTask(['rm', '-f', filename], repoPath);
       }
+    });
+}
+
+git.commit = function(repoPath, amend, message, files) {
+  return (new Promise(function(resolve, reject) {
+      if (message == undefined) {
+        reject({ error: 'Must specify commit message' });
+      }
+      if ((!(Array.isArray(files)) || files.length == 0) && !amend) {
+        reject({ error: 'Must specify files or amend to commit' });
+      }
+      resolve();
+    })).then(function() {
+      return git.status(repoPath);
+    }).then(function(status) {
+      var toAdd = [];
+      var toRemove = [];
+      var addPromise;     // a promise that add all files in toAdd
+      var removePromise;  // a proimse that removes all files in toRemove
+      var diffPatchPromises = []; // promiese that patches each files individually
+
+      for(var v in files) {
+        var file = files[v];
+        var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+        if (!fileStatus) {
+          throw { error: 'No such file in staging: ' + file.name };
+        }
+
+        if (fileStatus.removed) {
+          toRemove.push(file.name);
+        } else if (files[v].patchLineList) {
+          diffPatchPromises.push(git.getGitExecuteTask(['diff', file.name.trim()], repoPath)
+            .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
+            .then(function(patchedDiff) {
+              if (patchedDiff)
+                return git.getGitExecuteTask(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
+            }));
+        } else {
+          toAdd.push(file.name);
+        }
+      }
+
+      if (toAdd.length > 0) {
+        var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
+        addPromise = git.getGitExecuteTask(['update-index', '--add', '--stdin'], repoPath, null, null, filesToAdd);
+      }
+
+      if (toRemove.length > 0) {
+        var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
+        removePromise = git.getGitExecuteTask(['update-index', '--remove', '--stdin'], repoPath, null, null, filesToRemove);
+      }
+
+      return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+    }).then(function() {
+      return git.getGitExecuteTask(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
+    }).catch(function(err) {
+      // ignore the case where nothing were added to be committed
+      if (err.stdout.indexOf("Changes not staged for commit") === -1)
+        throw err;
     });
 }

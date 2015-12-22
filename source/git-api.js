@@ -248,12 +248,10 @@ exports.registerApi = function(env) {
     });
   });
 
-  app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res){
-    git.commit(req.body['path'], req.body['amend'], req.body['message'], req.body['files'])
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body['path']))
-      .always(emitWorkingTreeChanged.bind(null, req.body['path']))
-      .start();
+  app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res) {
+    jsonResultOrFailProm(res, gitPromise.commit(req.body.path, req.body.amend, req.body.message, req.body.files))
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
