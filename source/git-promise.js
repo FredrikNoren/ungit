@@ -11,16 +11,17 @@ var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var readFileProm = Promise.promisify(fs.readFile);
-var fileAccessProm = Promise.promisify(fs.access);
-var fsUnlinkProm = Promise.promisify(fs.unlink);
-var isFileExistsProm = function(file) {
-  return fileAccessProm(file, fs.F_OK)
+var fsReadFile = Promise.promisify(fs.readFile);
+var fsFileAccess = Promise.promisify(fs.access);
+var fsUnlink = Promise.promisify(fs.unlink);
+var fsIsFileExists = function(file) {
+  return fsFileAccess(file, fs.F_OK)
     .then(function() { return true; })
     .catch(function() { return false; });
 }
 
 var git = {};
+module.exports = git;
 
 /**
  * Returns a promise that executes git command with given arguments
@@ -152,15 +153,15 @@ git.status = function(repoPath, file) {
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
-          isRebaseMerge: isFileExistsProm(path.join(repoPath, '.git', 'rebase-merge')),
-          isRebaseApply: isFileExistsProm(path.join(repoPath, '.git', 'rebase-apply')),
-          isMerge: isFileExistsProm(path.join(repoPath, '.git', 'MERGE_HEAD')),
+          isRebaseMerge: fsIsFileExists(path.join(repoPath, '.git', 'rebase-merge')),
+          isRebaseApply: fsIsFileExists(path.join(repoPath, '.git', 'rebase-apply')),
+          isMerge: fsIsFileExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
         }).then(function() {
           if (status.inMerge) {
-            return readFileProm(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+            return fsReadFile(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
                 return status;
@@ -196,7 +197,7 @@ git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
-      return isFileExistsProm(file).then(function(isExist) {
+      return fsIsFileExists(file).then(function(isExist) {
         if (isExist) {
           toAdd.push(file);
         } else {
@@ -242,7 +243,7 @@ git.diffFile = function(repoPath, filename, sha1) {
       var filePath = path.join(repoPath, filename);
 
       if (!file && !sha1) {
-        return isFileExistsProm(path.join(repoPath, filename))
+        return fsIsFileExists(path.join(repoPath, filename))
           .then(function(isExist) {
             if (isExist) return [];
             else throw { error: 'No such file: ' + filename, errorCode: 'no-such-file' };
@@ -279,11 +280,11 @@ git.getCurrentBranch = function(repoPath) {
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
-      return isFileExistsProm(HEADFile).then(function(isExist) {
+      return fsIsFileExists(HEADFile).then(function(isExist) {
         if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
       });
     }).then(function() {
-      return readFileProm(HEADFile, 'utf8');
+      return fsReadFile(HEADFile, 'utf8');
     }).then(function(text) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
@@ -309,7 +310,7 @@ git.discardChangesInFile = function(repoPath, filename) {
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
         if (fileStatus.isNew) {
-          return fsUnlinkProm(filePath)
+          return fsUnlink(filePath)
             .catch(function(err) {
               throw { command: 'unlink', error: err };
             });
@@ -322,5 +323,3 @@ git.discardChangesInFile = function(repoPath, filename) {
       }
     });
 }
-
-module.exports = git;
