@@ -1,11 +1,9 @@
 var child_process = require('child_process');
 var gitParser = require('./git-parser');
-var async = require('async');
 var path = require('path');
 var fs = require('fs');
 var config = require('./config');
 var winston = require('winston');
-var inherits = require('util').inherits;
 var addressParser = require('./address-parser');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
@@ -25,7 +23,7 @@ module.exports = git;
 
 /**
  * Returns a promise that executes git command with given arguments
- * @function send
+ * @function
  * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
  * @param {string} repoPath - path to the git repository
  * @param {array=} allowedCodes - array of acceptable execution return code to sometimes accept error as a success
@@ -54,12 +52,12 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
-  var exec = new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
     var rejected = false;
     var stdout = '';
     var stderr = '';
-
+    var allowedCodes = args.allowedCodes || [0];
     var gitProcess = child_process.spawn(
       'git',
       args.commands,
@@ -68,7 +66,6 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
         maxBuffer: 1024 * 1024 * 100,
         timeout: args.timeout
       });
-    var allowedCodes = args.allowedCodes || [0];
 
     if (args.outPipe) {
       gitProcess.stdout.pipe(args.outPipe);
@@ -76,6 +73,9 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
       gitProcess.stdout.on('data', function(data) {
         stdout += data.toString();
       });
+    }
+    if (args.inPipe) {
+      gitProcess.stdin.end(inPipe);
     }
     gitProcess.stderr.on('data', function(data) {
       stderr += data.toString();
@@ -85,10 +85,6 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
       rejected = true;
       reject(error);
     });
-
-    if (inPipe) {
-      gitProcess.stdin.end(inPipe);
-    }
 
     gitProcess.on('close', function (code) {
       if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
@@ -102,8 +98,6 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
       }
     });
   });
-
-  return exec;
 }
 
 var getGitError = function(args, stderr, stdout) {
@@ -211,10 +205,13 @@ git.resolveConflicts = function(repoPath, files) {
         }
       });
     })).then(function() {
-      var gitExecProm = [];
-      if (toAdd.length > 0) gitExecProm.push(git.getGitExecuteTask(['add', toAdd ], repoPath));
-      if (toRemove.length > 0) gitExecProm.push(git.getGitExecuteTask(['rm', toRemove ], repoPath));
-      return Promise.join(gitExecProm);
+      var addExec;
+      var removeExec;
+      if (toAdd.length > 0)
+        addExec = git.getGitExecuteTask(['add', toAdd ], repoPath);
+      if (toRemove.length > 0)
+        removeExec = git.getGitExecuteTask(['rm', toRemove ], repoPath);
+      return Promise.join(addExec, removeExec);
     });
 }
 
@@ -306,8 +303,6 @@ git.discardAllChanges = function(repoPath) {
 }
 
 git.discardChangesInFile = function(repoPath, filename) {
-  var filePath = path.join(repoPath, filename);
-
   return git.status(repoPath, filename)
     .then(function(status){
       if (Object.keys(status.files).length == 0) throw new Error('No files in status in discard, filename: ' + filename);
@@ -316,7 +311,7 @@ git.discardChangesInFile = function(repoPath, filename) {
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
         if (fileStatus.isNew) {
-          return fsUnlink(filePath)
+          return fsUnlink(path.join(repoPath, filename))
             .catch(function(err) {
               throw { command: 'unlink', error: err };
             });
@@ -328,6 +323,12 @@ git.discardChangesInFile = function(repoPath, filename) {
         return git.getGitExecuteTask(['rm', '-f', filename], repoPath);
       }
     });
+}
+
+git.applyPatchedDiff = function(repoPath, patchedDiff) {
+  if (patchedDiff) {
+    return git.getGitExecuteTask(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
+  }
 }
 
 git.commit = function(repoPath, amend, message, files) {
@@ -356,27 +357,21 @@ git.commit = function(repoPath, amend, message, files) {
         }
 
         if (fileStatus.removed) {
-          toRemove.push(file.name);
+          toRemove.push(file.name.trim());
         } else if (files[v].patchLineList) {
           diffPatchPromises.push(git.getGitExecuteTask(['diff', file.name.trim()], repoPath)
             .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
-            .then(function(patchedDiff) {
-              if (patchedDiff)
-                return git.getGitExecuteTask(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
-            }));
+            .then(git.applyPatchedDiff.bind(null, repoPath)));
         } else {
-          toAdd.push(file.name);
+          toAdd.push(file.name.trim());
         }
       }
 
       if (toAdd.length > 0) {
-        var filesToAdd = toAdd.map(function(file) { return file.trim(); }).join('\n');
-        addPromise = git.getGitExecuteTask(['update-index', '--add', '--stdin'], repoPath, null, null, filesToAdd);
+        addPromise = git.getGitExecuteTask(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       }
-
       if (toRemove.length > 0) {
-        var filesToRemove = toRemove.map(function(file) { return file.trim(); }).join('\n');
-        removePromise = git.getGitExecuteTask(['update-index', '--remove', '--stdin'], repoPath, null, null, filesToRemove);
+        removePromise = git.getGitExecuteTask(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }
 
       return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
