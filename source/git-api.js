@@ -104,7 +104,7 @@ exports.registerApi = function(env) {
     if (config.autoStashAndPop) {
       return gitPromise.stashExecuteAndPop(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     } else {
-      return gitPromise.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
+      return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }
   }
 

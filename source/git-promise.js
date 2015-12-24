@@ -18,9 +18,6 @@ var fsIsFileExists = function(file) {
     .catch(function() { return false; });
 }
 
-var git = {};
-module.exports = git;
-
 /**
  * Returns a promise that executes git command with given arguments
  * @function
@@ -34,7 +31,7 @@ module.exports = git;
  * @example getGitExecuteTask({commands: ['show'], repoPath: '/tmp'});
  * @example getGitExecuteTask(['show'], '/tmp');
  */
-git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
+var git = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
@@ -75,7 +72,7 @@ git.getGitExecuteTask = function(commands, repoPath, allowedCodes, outPipe, inPi
       });
     }
     if (args.inPipe) {
-      gitProcess.stdin.end(inPipe);
+      gitProcess.stdin.end(args.inPipe);
     }
     gitProcess.stderr.on('data', function(data) {
       stderr += data.toString();
@@ -145,11 +142,11 @@ var getGitError = function(args, stderr, stdout) {
 
 git.status = function(repoPath, file) {
   return Promise.props({
-    numStatsStaged: git.getGitExecuteTask(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
+    numStatsStaged: git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: git.getGitExecuteTask(['diff', '--numstat', '--', (file || '')], repoPath)
+    numStatsUnstaged: git(['diff', '--numstat', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    status: git.getGitExecuteTask(['status', '-s', '-b', '-u', (file || '')], repoPath)
+    status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
@@ -187,7 +184,7 @@ git.status = function(repoPath, file) {
 }
 
 git.getRemoteAddress = function(repoPath, remoteName) {
-  return git.getGitExecuteTask(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
+  return git(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
     .then(function(text) {
       return addressParser.parseAddress(text.split('\n')[0]);
     });
@@ -208,9 +205,9 @@ git.resolveConflicts = function(repoPath, files) {
       var addExec;
       var removeExec;
       if (toAdd.length > 0)
-        addExec = git.getGitExecuteTask(['add', toAdd ], repoPath);
+        addExec = git(['add', toAdd ], repoPath);
       if (toRemove.length > 0)
-        removeExec = git.getGitExecuteTask(['rm', toRemove ], repoPath);
+        removeExec = git(['rm', toRemove ], repoPath);
       return Promise.join(addExec, removeExec);
     });
 }
@@ -218,7 +215,7 @@ git.resolveConflicts = function(repoPath, files) {
 git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
   var hadLocalChanges = true;
 
-  return git.getGitExecuteTask(['stash'], repoPath)
+  return git(['stash'], repoPath)
     .catch(function(err) {
       if (err.stderr.indexOf('You do not have the initial commit yet') != -1) {
         hadLocalChanges = err.stderr.indexOf('You do not have the initial commit yet') == -1;
@@ -229,14 +226,14 @@ git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, inP
       if (result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
-      return git.getGitExecuteTask(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
+      return git(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }).then(function() {
-      return hadLocalChanges ? git.getGitExecuteTask(['stash', 'pop'], repoPath) : null;
+      return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null;
     });
 }
 
 git.binaryFileContent = function(repoPath, filename, version, outPipe) {
-  return git.getGitExecuteTask(['show', version + ':' + filename], repoPath, null, outPipe);
+  return git(['show', version + ':' + filename], repoPath, null, outPipe);
 }
 
 git.diffFile = function(repoPath, filename, sha1) {
@@ -266,12 +263,12 @@ git.diffFile = function(repoPath, filename, sha1) {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        return git.getGitExecuteTask(gitCommands, repoPath, allowedCodes)
+        return git(gitCommands, repoPath, allowedCodes)
           .catch(function(err) {
             // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
             // it will error out with invalid object name error
             if (sha1 && err && err.error.indexOf('bad revision') > -1)
-              return git.getGitExecuteTask(gitNewFileCompare, repoPath, [0, 1]);
+              return git(gitNewFileCompare, repoPath, [0, 1]);
           });
       }
     });
@@ -279,7 +276,7 @@ git.diffFile = function(repoPath, filename, sha1) {
 
 git.getCurrentBranch = function(repoPath) {
   var HEADFile;
-  return git.getGitExecuteTask(['rev-parse', '--show-toplevel'], repoPath)
+  return git(['rev-parse', '--show-toplevel'], repoPath)
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
@@ -296,9 +293,9 @@ git.getCurrentBranch = function(repoPath) {
 }
 
 git.discardAllChanges = function(repoPath) {
-  return git.getGitExecuteTask(['reset', '--hard', 'HEAD'], repoPath)
+  return git(['reset', '--hard', 'HEAD'], repoPath)
     .then(function() {
-      return git.getGitExecuteTask(['clean', '-fd'], repoPath);
+      return git(['clean', '-fd'], repoPath);
     });
 }
 
@@ -317,17 +314,17 @@ git.discardChangesInFile = function(repoPath, filename) {
             });
         // If it's a changed file, reset the changes
         } else {
-          return git.getGitExecuteTask(['checkout', 'HEAD', '--', filename], repoPath);
+          return git(['checkout', 'HEAD', '--', filename], repoPath);
         }
       } else {
-        return git.getGitExecuteTask(['rm', '-f', filename], repoPath);
+        return git(['rm', '-f', filename], repoPath);
       }
     });
 }
 
 git.applyPatchedDiff = function(repoPath, patchedDiff) {
   if (patchedDiff) {
-    return git.getGitExecuteTask(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
+    return git(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
   }
 }
 
@@ -359,7 +356,7 @@ git.commit = function(repoPath, amend, message, files) {
         if (fileStatus.removed) {
           toRemove.push(file.name.trim());
         } else if (files[v].patchLineList) {
-          diffPatchPromises.push(git.getGitExecuteTask(['diff', file.name.trim()], repoPath)
+          diffPatchPromises.push(git(['diff', file.name.trim()], repoPath)
             .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
             .then(git.applyPatchedDiff.bind(null, repoPath)));
         } else {
@@ -368,18 +365,20 @@ git.commit = function(repoPath, amend, message, files) {
       }
 
       if (toAdd.length > 0) {
-        addPromise = git.getGitExecuteTask(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+        addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       }
       if (toRemove.length > 0) {
-        removePromise = git.getGitExecuteTask(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
+        removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }
 
       return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
     }).then(function() {
-      return git.getGitExecuteTask(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
+      return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
     }).catch(function(err) {
       // ignore the case where nothing were added to be committed
       if (err.stdout.indexOf("Changes not staged for commit") === -1)
         throw err;
     });
 }
+
+module.exports = git;
