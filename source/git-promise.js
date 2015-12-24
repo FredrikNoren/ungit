@@ -235,10 +235,10 @@ git.binaryFileContent = function(repoPath, filename, version, outPipe) {
 }
 
 git.diffFile = function(repoPath, filename, sha1) {
+  var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.status(repoPath)
     .then(function(status) {
       var file = status.files[filename];
-      var filePath = path.join(repoPath, filename);
 
       if (!file && !sha1) {
         return fsIsFileExists(path.join(repoPath, filename))
@@ -248,25 +248,19 @@ git.diffFile = function(repoPath, filename, sha1) {
           });
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
-        var gitCommands;
-        var allowError = null;  // default is [0]
-        var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
-
+        var exec;
         if (file && file.isNew) {
-          gitCommands = gitNewFileCompare;
-          allowError = true;
+          exec = git(newFileDiffArgs, repoPath, true);
         } else if (sha1) {
-          gitCommands = ['diff', sha1 + "^", sha1, "--", filename.trim()];
+          exec = git(['diff', sha1 + "^", sha1, "--", filename.trim()], repoPath);
         } else {
-          gitCommands = ['diff', 'HEAD', '--', filename.trim()];
+          exec = git(['diff', 'HEAD', '--', filename.trim()], repoPath);
         }
-
-        return git(gitCommands, repoPath, allowError)
-          .catch(function(err) {
+        return exec.catch(function(err) {
             // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
             // it will error out with invalid object name error
             if (sha1 && err && err.error.indexOf('bad revision') > -1)
-              return git(gitNewFileCompare, repoPath, true);
+              return git(newFileDiffArgs, repoPath, true);
           });
       }
     });
