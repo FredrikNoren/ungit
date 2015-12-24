@@ -23,7 +23,7 @@ var fsIsFileExists = function(file) {
  * @function
  * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
  * @param {string} repoPath - path to the git repository
- * @param {array=} allowedCodes - array of acceptable execution return code to sometimes accept error as a success
+ * @param {boolean=} allowError - true if accept error as some cases errors are acceptable
  * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
  * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
  * @param {timeout=} outPipe - execution timeout, default is 2 mins
@@ -31,12 +31,11 @@ var fsIsFileExists = function(file) {
  * @example getGitExecuteTask({commands: ['show'], repoPath: '/tmp'});
  * @example getGitExecuteTask(['show'], '/tmp');
  */
-var git = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
+var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
     args.repoPath = repoPath;
-    args.allowedCodes = allowedCodes;
     args.outPipe = outPipe;
     args.inPipe = inPipe;
   } else {
@@ -54,7 +53,6 @@ var git = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
     var rejected = false;
     var stdout = '';
     var stderr = '';
-    var allowedCodes = args.allowedCodes || [0];
     var gitProcess = child_process.spawn(
       'git',
       args.commands,
@@ -88,10 +86,10 @@ var git = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
       if (rejected) return;
       if (args.outPipe) args.outPipe.end();
 
-      if (allowedCodes.indexOf(code) < 0) {
-        reject(getGitError(args, stderr, stdout));
-      } else {
+      if (code === 0 || (code === 1 && allowError)) {
         resolve(stdout);
+      } else {
+        reject(getGitError(args, stderr, stdout));
       }
     });
   });
@@ -212,7 +210,7 @@ git.resolveConflicts = function(repoPath, files) {
     });
 }
 
-git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
+git.stashExecuteAndPop = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var hadLocalChanges = true;
 
   return git(['stash'], repoPath)
@@ -226,7 +224,7 @@ git.stashExecuteAndPop = function(commands, repoPath, allowedCodes, outPipe, inP
       if (result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
-      return git(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
+      return git(commands, repoPath, allowError, outPipe, inPipe, timeout);
     }).then(function() {
       return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null;
     });
@@ -251,24 +249,24 @@ git.diffFile = function(repoPath, filename, sha1) {
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
         var gitCommands;
-        var allowedCodes = null;  // default is [0]
+        var allowError = null;  // default is [0]
         var gitNewFileCompare = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
 
         if (file && file.isNew) {
           gitCommands = gitNewFileCompare;
-          allowedCodes =  [0, 1];
+          allowError = true;
         } else if (sha1) {
           gitCommands = ['diff', sha1 + "^", sha1, "--", filename.trim()];
         } else {
           gitCommands = ['diff', 'HEAD', '--', filename.trim()];
         }
 
-        return git(gitCommands, repoPath, allowedCodes)
+        return git(gitCommands, repoPath, allowError)
           .catch(function(err) {
             // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
             // it will error out with invalid object name error
             if (sha1 && err && err.error.indexOf('bad revision') > -1)
-              return git(gitNewFileCompare, repoPath, [0, 1]);
+              return git(gitNewFileCompare, repoPath, true);
           });
       }
     });

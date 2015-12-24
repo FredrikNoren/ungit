@@ -100,11 +100,11 @@ exports.registerApi = function(env) {
     }
   }
 
-  function autoStashExecuteAndPop(commands, repoPath, allowedCodes, outPipe, inPipe, timeout) {
+  function autoStashExecuteAndPop(commands, repoPath, allowError, outPipe, inPipe, timeout) {
     if (config.autoStashAndPop) {
-      return gitPromise.stashExecuteAndPop(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
+      return gitPromise.stashExecuteAndPop(commands, repoPath, allowError, outPipe, inPipe, timeout);
     } else {
-      return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
+      return gitPromise(commands, repoPath, allowError, outPipe, inPipe, timeout);
     }
   }
 
