@@ -4,6 +4,7 @@ node_js:
   - "0.10"
   - "0.12"
   - "4.1"
+  - "5.3"
 env:
   - GIT_VERSION=default
   - GIT_VERSION=edge

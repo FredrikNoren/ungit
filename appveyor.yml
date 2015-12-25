@@ -1,0 +1,19 @@
+environment:
+  matrix:
+  - nodejs_version: "0.10"
+  - nodejs_version: "0.12"
+  - nodejs_version: "4.1"
+  - nodejs_version: "5.3"
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm install
+  - npm install -g grunt-cli
+
+test_script:
+  - node --version
+  - npm --version
+  - grunt
+  - npm test
+
+build: off
