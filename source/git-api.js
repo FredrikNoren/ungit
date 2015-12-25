@@ -199,14 +199,9 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/diff/image', ensureAuthenticated, ensurePathExists, function(req, res) {
+    res.type(path.extname(req.query.filename));
     if (req.query.version !== 'current') {
-      git.binaryFileContent(req.query.path, req.query.filename, req.query.version)
-        .always(function(err, result) {
-          res.type(path.extname(req.query.filename));
-          if (err) res.status(400).json(err);
-          else res.send(new Buffer(result, 'binary'));
-        })
-        .start();
+      git.binaryFileContent(req.query.path, req.query.filename, req.query.version, res).start();
     } else {
       res.sendFile(path.join(req.query.path, req.query.filename));
     }
