@@ -1,6 +1,5 @@
 var child_process = require('child_process');
 var express = require('express');
-var fs = require('fs');
 var path = require('path');
 var temp = require('temp');
 var async = require('async');
@@ -14,6 +13,8 @@ var fileType = require('./utils/file-type.js');
 var rimraf = require('rimraf');
 var _ = require('lodash');
 var gitPromise = require('./git-promise');
+var Promise = require('bluebird');
+var fs = Promise.promisifyAll(require("fs"));
 
 exports.pathPrefix = '';
 

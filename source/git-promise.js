@@ -1,19 +1,16 @@
 var child_process = require('child_process');
 var gitParser = require('./git-parser');
 var path = require('path');
-var fs = require('fs');
 var config = require('./config');
 var winston = require('winston');
 var addressParser = require('./address-parser');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
+var fs = Promise.promisifyAll(require("fs"));
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var fsReadFile = Promise.promisify(fs.readFile);
-var fsFileAccess = Promise.promisify(fs.access);
-var fsUnlink = Promise.promisify(fs.unlink);
 var fsIsFileExists = function(file) {
-  return fsFileAccess(file, fs.F_OK)
+  return fs.accessAsync(file, fs.F_OK)
     .then(function() { return true; })
     .catch(function() { return false; });
 }
@@ -156,7 +153,7 @@ git.status = function(repoPath, file) {
           status.inMerge = result.isMerge;
         }).then(function() {
           if (status.inMerge) {
-            return fsReadFile(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+            return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
                 return status;
@@ -276,7 +273,7 @@ git.getCurrentBranch = function(repoPath) {
         if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
       });
     }).then(function() {
-      return fsReadFile(HEADFile, 'utf8');
+      return fs.readFileAsync(HEADFile, 'utf8');
     }).then(function(text) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
@@ -300,7 +297,7 @@ git.discardChangesInFile = function(repoPath, filename) {
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
         if (fileStatus.isNew) {
-          return fsUnlink(path.join(repoPath, filename))
+          return fs.unlinkAsync(path.join(repoPath, filename))
             .catch(function(err) {
               throw { command: 'unlink', error: err };
             });
