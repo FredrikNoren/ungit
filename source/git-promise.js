@@ -7,13 +7,8 @@ var addressParser = require('./address-parser');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require("fs"));
+var fs = require('./utils/fs-async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var fsIsFileExists = function(file) {
-  return fs.accessAsync(file, fs.F_OK)
-    .then(function() { return true; })
-    .catch(function() { return false; });
-}
 
 /**
  * Returns a promise that executes git command with given arguments
@@ -145,9 +140,9 @@ git.status = function(repoPath, file) {
       .then(gitParser.parseGitStatus)
       .then(function(status) {
         return Promise.props({
-          isRebaseMerge: fsIsFileExists(path.join(repoPath, '.git', 'rebase-merge')),
-          isRebaseApply: fsIsFileExists(path.join(repoPath, '.git', 'rebase-apply')),
-          isMerge: fsIsFileExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
+          isRebaseMerge: fs.isFileExists(path.join(repoPath, '.git', 'rebase-merge')),
+          isRebaseApply: fs.isFileExists(path.join(repoPath, '.git', 'rebase-apply')),
+          isMerge: fs.isFileExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
@@ -189,7 +184,7 @@ git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
-      return fsIsFileExists(file).then(function(isExist) {
+      return fs.isFileExists(file).then(function(isExist) {
         if (isExist) {
           toAdd.push(file);
         } else {
@@ -238,7 +233,7 @@ git.diffFile = function(repoPath, filename, sha1) {
       var file = status.files[filename];
 
       if (!file && !sha1) {
-        return fsIsFileExists(path.join(repoPath, filename))
+        return fs.isFileExists(path.join(repoPath, filename))
           .then(function(isExist) {
             if (isExist) return [];
             else throw { error: 'No such file: ' + filename, errorCode: 'no-such-file' };
@@ -269,7 +264,7 @@ git.getCurrentBranch = function(repoPath) {
     .then(function(rootRepoPath) {
       HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
     }).then(function() {
-      return fsIsFileExists(HEADFile).then(function(isExist) {
+      return fs.isFileExists(HEADFile).then(function(isExist) {
         if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
       });
     }).then(function() {
