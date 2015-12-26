@@ -136,14 +136,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/init', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var arg = ['init'];
-    if (req.body.bare) {
-      arg.push('--bare', '--shared');
-    }
-    git(arg, req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(req.body.bare ? ['init', '--bare', '--shared'] : ['init'], req.body.path));
   });
 
   app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
@@ -153,12 +146,15 @@ exports.registerApi = function(env) {
 
     var url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-    git(credentialsOption(req.body.socketId).concat(['clone', url, req.body.destinationDir.trim()]), req.body.path)
-      .timeout(timeoutMs)
-      .fail(jsonFail.bind(null, res))
-      .done(function(result) { res.json({ path: path.resolve(req.body.path, req.body.destinationDir) }); })
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise({
+      commands: credentialsOption(req.body.socketId).concat(['clone', url, req.body.destinationDir.trim()]),
+      repoPath: req.body.path,
+      timeout: timeoutMs
+    }).then(function() {
+      return { path: path.resolve(req.body.path, req.body.destinationDir) };
+    }).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
