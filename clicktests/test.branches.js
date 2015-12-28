@@ -43,7 +43,7 @@ suite.test('add a branch', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'commit-1', function() {
-      helpers.waitForElementVisible(page, '[data-ta-container="node"]', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
         uiInteractions.createBranch(page, 'branch-1', done);
       });
     });
@@ -63,7 +63,7 @@ suite.test('add second branch', function(done) {
   environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'commit-2', function() {
-      helpers.waitForElementVisible(page, '[data-ta-container="node"]', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
         uiInteractions.createBranch(page, 'branch-2', done);
       });
     });

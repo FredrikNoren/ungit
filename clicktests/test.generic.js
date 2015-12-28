@@ -43,7 +43,7 @@ suite.test('Should be possible to create and commit a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'Init', function() {
-      helpers.waitForElementVisible(page, '[data-ta-container="node"]', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
         done();
       });
     });
@@ -54,7 +54,7 @@ suite.test('Should be possible to amend a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.amendCommit(page, function() {
-      helpers.waitForElementVisible(page, '[data-ta-container="node"]', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
         done();
       });
     });
@@ -194,7 +194,7 @@ suite.test('Should be possible to patch a file', function(done) {
   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.patch(page, 'Patch', function() {
-      helpers.waitForElementVisible(page, '[data-ta-container="node"]', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
         done();
       });
     });
