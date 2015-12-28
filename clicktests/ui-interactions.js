@@ -10,7 +10,7 @@ uiInteractions.refAction = function(page, ref, local, action, callback) {
   helpers.mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
   setTimeout(function() { // Wait for next animation frame
     helpers.click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
       setTimeout(function() {
         callback();
       }, 500);
@@ -42,7 +42,7 @@ uiInteractions.moveRef = function(page, ref, targetNodeCommitTitle, callback) {
   helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + ref + '"]');
   helpers.waitForElementVisible(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]', function() {
     helpers.click(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
       setTimeout(function() {
         callback();
       }, 500);
@@ -57,7 +57,7 @@ uiInteractions.commit = function(page, commitMessage, callback) {
     helpers.write(page, commitMessage);
     setTimeout(function() {
       helpers.click(page, '[data-ta-clickable="commit"]');
-      helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+      helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
         setTimeout(function() { // let the animation finish
           callback();
         }, 1000);
@@ -71,7 +71,7 @@ uiInteractions.amendCommit = function(page, callback) {
     helpers.click(page, '[data-bind="click: toggleAmend"]');
     setTimeout(function() {
       helpers.click(page, '[data-ta-clickable="commit"]');
-      helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+      helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
         setTimeout(function() { // let the animation finish
           callback();
         }, 1000);
