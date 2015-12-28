@@ -43,22 +43,22 @@ suite.test('Submodule add', function(done) {
     helpers.write(page, subRepoPath);
     helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-clickable="submit"]');
 
-    setTimeout(function() {
+    setTimeout(function() { // Wait for dialog to close
+      helpers.click(page, '[data-ta-clickable="submodules-menu"]');
       helpers.waitForElementVisible(page, '[data-ta-container="submodules"] [data-ta-clickable="subrepo"]', function() {
         done();
       });
-    }, 3000);
+    }, 500);
   });
 });
 
-suite.test('Submodule view check', function(done) {
-  helpers.click(page, '[data-ta-clickable="submodules-menu"]');
+suite.test('Submodule update', function(done) {
   helpers.click(page, '[data-ta-clickable="update-submodule"]');
-  helpers.waitForElementVisible(page, '[data-ta-element="progress-bar"]', function() {
+  setTimeout(function() { // Wait for progressbar
     helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]', function() {
       done();
     });
-  });
+  }, 500);
 });
 
 suite.test('Submodule delete check', function(done) {
