@@ -56,11 +56,11 @@ suite.test('Adding a remote', function(done) {
 
 suite.test('Fetch from newly added remote', function(done) {
   helpers.click(page, '[data-ta-clickable="fetch"]');
-  helpers.waitForElementVisible(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
+  setTimeout(function() { // Wait for the fetch progress bar to appear
     helpers.waitForElementNotVisible(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
       done();
     });
-  });
+  }, 500);
 });
 
 suite.test('Remote delete check', function(done) {
