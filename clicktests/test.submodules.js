@@ -67,11 +67,11 @@ suite.test('Submodule delete check', function(done) {
     helpers.click(page, '[data-ta-clickable="subrepo-remove"]');
     helpers.waitForElementVisible(page, '[data-ta-container="yes-no-dialog"]', function() {
       helpers.click(page, '[data-ta-clickable="yes"]');
-      helpers.waitForElementVisible(page, '[data-ta-element="progress-bar"]', function() {
+      setTimeout(function() { // Wait for progressbar
         helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]', function() {
           done();
         });
-      });
+      }, 500);
     });
   });
 });
