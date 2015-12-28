@@ -81,26 +81,21 @@ suite.test('Should be able to add a new file to .gitignore', function(done) {
 
 suite.test('Test showing commit diff between two commits', function(done) {
   helpers.click(page, '[data-ta-clickable="node-clickable"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
+  helpers.waitForElementVisible(page, '.diff-wrapper', function() {
     helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
     helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
-      helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
       done();
     });
   });
 });
 
 suite.test('Test showing commit side by side diff between two commits', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable"]');
+  helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
   helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
-    helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
-    helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
-    helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
-      setTimeout(function() {                           // let it finish making api call
-        helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
-        done();
-      }, 1000);
-    });
+    setTimeout(function() {                           // let it finish making api call
+      helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
+      done();
+    }, 1000);
   });
 });
 
