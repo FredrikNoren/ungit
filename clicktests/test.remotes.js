@@ -44,9 +44,12 @@ suite.test('Adding a remote', function(done) {
       helpers.click(page, '[data-ta-container="add-remote"] [data-ta-input="url"]');
       helpers.write(page, bareRepoPath);
       helpers.click(page, '[data-ta-container="add-remote"] [data-ta-clickable="submit"]');
-      helpers.waitForElementVisible(page, '[data-ta-container="remotes"] [data-ta-clickable="myremote"]', function() {
-        done();
-      });
+      setTimeout(function() { // Wait for the dialog to close
+        helpers.click(page, '[data-ta-clickable="remotes-menu"]');
+        helpers.waitForElementVisible(page, '[data-ta-container="remotes"] [data-ta-clickable="myremote"]', function() {
+          done();
+        });
+      }, 500);
     });
   });
 });
