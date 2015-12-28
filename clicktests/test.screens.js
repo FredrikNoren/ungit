@@ -42,7 +42,8 @@ suite.test('Open path screen', function(done) {
 suite.test('Init repository should bring you to repo page', function(done) {
   helpers.click(page, '[data-ta-clickable="init-repository"]');
   helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
-    helpers.expectNotFindElement(page, '[data-ta-container="remote-error-popup"]');
+    if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
+      return done(new Error('Should not find remote error popup'));
     done();
   });
 });

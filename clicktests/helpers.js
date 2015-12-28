@@ -66,16 +66,6 @@ helpers.waitForElementNotVisible = function(page, selector, callback) {
   }, callback);
 }
 
-helpers.expectNotFindElement = function(page, selector) {
-  var found = page.evaluate(function(selector) {
-    return !!document.querySelector(selector);
-  }, selector);
-  if (found) {
-    console.log('expectNotFindElement error: Expected to not find ' + selector + ' but found it.');
-    phantom.exit(1);
-  }
-}
-
 helpers.getClickPosition = function(page, selector) {
   var rect = page.evaluate(function(selector) {
     var el = document.querySelector(selector);

@@ -26,7 +26,8 @@ suite.test('Open path screen', function(done) {
   page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
     page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath), function () {
       helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
-        helpers.expectNotFindElement(page, '[data-ta-container="remote-error-popup"]');
+        if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
+          return done(new Error('Should not find remote error popup'));
         done();
       });
     });

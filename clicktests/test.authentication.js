@@ -33,7 +33,8 @@ suite.test('Filling out the authentication with wrong details should result in a
   helpers.write(page, 'notthepassword');
   helpers.click(page, '[data-ta-container="login-page"] [data-ta-clickable="submit"]');
   helpers.waitForElementVisible(page, '[data-ta-element="login-error"]', function() {
-    helpers.expectNotFindElement(page, '[data-ta-container="home-page"]')
+    if (helpers.elementVisible(page, '[data-ta-container="home-page"]'))
+      return done(new Error('Should not see home page'));
     done();
   });
 });

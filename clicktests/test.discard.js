@@ -21,7 +21,8 @@ var createAndDiscard = function(callback, dialogButtonToClick) {
       if (dialogButtonToClick) {
         helpers.click(page, '[data-ta-clickable="' + dialogButtonToClick + '"]');
       } else {
-        helpers.expectNotFindElement(page, '[data-ta-clickable="yes"]');
+        if (helpers.elementVisible(page, '[data-ta-clickable="yes"]'))
+          return callback(new Error('Should not see yes button'))
       }
 
       if (dialogButtonToClick !== 'no') {
