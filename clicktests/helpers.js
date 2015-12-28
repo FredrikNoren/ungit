@@ -39,7 +39,7 @@ helpers.waitFor = function(page, query, callback) {
   var tryFind = function() {
     var res = query();
     if (res) callback(res);
-    else setTimeout(tryFind, 500);
+    else setTimeout(tryFind, 50);
   }
   tryFind();
 }
