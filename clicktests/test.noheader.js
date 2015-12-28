@@ -25,7 +25,7 @@ suite.test('Init', function(done) {
 suite.test('Open path screen', function(done) {
   page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
     page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElement(page, '[data-ta-container="repository-view"]', function() {
+      helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
         helpers.expectNotFindElement(page, '[data-ta-container="remote-error-popup"]');
         done();
       });
@@ -35,7 +35,7 @@ suite.test('Open path screen', function(done) {
 
 
 suite.test('Check for refresh button', function(done) {
-  helpers.waitForElement(page, '[data-ta-clickable="refresh-button"]', function(err) {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="refresh-button"]', function(err) {
     helpers.click(page, '[data-ta-clickable="refresh-button"]');
     setTimeout(function() {
       done();

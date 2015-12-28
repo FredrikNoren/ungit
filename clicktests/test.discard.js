@@ -15,7 +15,7 @@ var testRepoPath;
 var createAndDiscard = function(callback, dialogButtonToClick) {
   environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
     if (err) return callback(err);
-    helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
       helpers.click(page, '[data-ta-clickable="discard-file"]');
 
       if (dialogButtonToClick) {
@@ -25,11 +25,11 @@ var createAndDiscard = function(callback, dialogButtonToClick) {
       }
 
       if (dialogButtonToClick !== 'no') {
-        helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+        helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
           callback();
         });
       } else {
-        helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+        helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
           callback();
         });
       }
@@ -52,7 +52,7 @@ suite.test('Init', function(done) {
 
 suite.test('Open repo screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElement(page, '.graph', function() {
+    helpers.waitForElementVisible(page, '.graph', function() {
       setTimeout(done, 1000); // Let it finnish loading
     });
   });
@@ -79,7 +79,7 @@ suite.test('Init', function(done) {
 
 suite.test('Open repo screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElement(page, '.graph', function() {
+    helpers.waitForElementVisible(page, '.graph', function() {
       setTimeout(done, 1000); // Let it finnish loading
     });
   });
