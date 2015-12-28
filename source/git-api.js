@@ -162,15 +162,17 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.body.socketId).concat([
-        'fetch',
-        req.body.remote,
-        req.body.ref ? req.body.ref : '',
-        config.autoPruneOnFetch ? '--prune' : '']), req.body.path)
-      .timeout(10 * 60 * 1000)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise({
+      commands: credentialsOption(req.body.socketId).concat([
+          'fetch',
+          req.body.remote,
+          req.body.ref ? req.body.ref : '',
+          config.autoPruneOnFetch ? '--prune' : '']),
+      repoPath: req.body.path,
+      timeout: timeoutMs
+    }).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
@@ -178,15 +180,17 @@ exports.registerApi = function(env) {
     var timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    git(credentialsOption(req.body.socketId).concat([
-        'push',
-        req.body.remote,
-        (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''),
-        (req.body.force ? '-f' : '')]), req.body.path)
-      .timeout(10 * 60 * 1000)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise({
+      commands: credentialsOption(req.body.socketId).concat([
+          'push',
+          req.body.remote,
+          (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? ':' + req.body.remoteBranch : ''),
+          (req.body.force ? '-f' : '')]),
+      repoPath: req.body.path,
+      timeout: timeoutMs
+    }).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/reset', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -218,31 +222,11 @@ exports.registerApi = function(env) {
     var currentPath = req.body.path.trim();
     var gitIgnoreFile = currentPath + '/.gitignore';
     var ignoreFile = req.body.file.trim();
-    var socket = socketsById[req.body.socketId];
+    var task = fs.appendFileAsync(gitIgnoreFile, os.EOL + ignoreFile).catch(function(err) {
+      throw { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' };
+    }).finally(emitWorkingTreeChanged.bind(null, req.body.path));
 
-    if (!fs.existsSync(gitIgnoreFile)) fs.writeFileSync(gitIgnoreFile, '');
-
-    fs.readFile(gitIgnoreFile, function(err, data) {
-
-      var arrayOfLines = data.toString().match(/[^\r\n]+/g);
-      if(arrayOfLines != null){
-        for (var n = 0; n < arrayOfLines.length; n++) {
-          if (arrayOfLines[n].trim() == ignoreFile) {
-            return res.status(400).json({ errorCode: 'file-already-git-ignored', error: ignoreFile + ' already exist in .gitignore' });
-          }
-        }
-      }
-
-      fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile, function(err) {
-        if(err) {
-          return res.status(400).json({ errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' });
-        } else {
-          if(socket)
-            socket.emit('working-tree-changed', { repository: currentPath });
-          return res.json({});
-        }
-      });
-    });
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/commit', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -252,46 +236,29 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['revert', req.body.commit], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
+    jsonResultOrFailProm(res, gitPromise(['revert', req.body.commit], req.body.path)
       .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+      .always(emitWorkingTreeChanged.bind(null, req.body.path)));
   });
 
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
-    var limit = '';
-    if (req.query.limit) limit = '--max-count=' + req.query.limit;
-    git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path)
-      .parser(gitParser.parseGitLog)
-      .always(function(err, log) {
-        if (err) {
-          if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-            res.json([]);
-          else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
-            res.json([]);
-          else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-            res.json([]);
-          else
-            res.status(400).json(err);
-        } else {
-          res.json(log);
-        }
-      })
-      .start();
+    var limit = req.query.limit ? '--max-count=' + req.query.limit : '';
+    var task = gitPromise(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path);
+    task = task.then(gitParser.parseGitLog).catch(function(err) {
+        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+          return [];
+        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+          return [];
+        else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+          return [];
+        else
+          throw err;
+      });
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/show', ensureAuthenticated, function(req, res){
-    git(['show', '--numstat', req.query.sha1], req.query.path)
-      .parser(gitParser.parseGitLog)
-      .always(function(err, log) {
-        if (err) {
-          res.status(400).json(err);
-        } else {
-          res.json(log);
-        }
-      })
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['show', '--numstat', req.query.sha1], req.query.path).then(gitParser.parseGitLog));
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
