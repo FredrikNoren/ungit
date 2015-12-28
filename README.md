@@ -1,9 +1,17 @@
 ungit
 ======
+
+[![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![NPM version](https://badge.fury.io/js/ungit.svg)](http://badge.fury.io/js/ungit)
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 
 The easiest way to use git. On any platform. Anywhere.
+
+[![xkcd](xkcd.png)](https://xkcd.com/1597/)
+
+Git is known for being a versatile distributed source control system that is a staple of many individuals, communities, and even for [the City of Chattanooga to crowd source bicycle parking locations](https://github.com/cityofchattanooga/Bicycle-Parking).  However, it is not known for userfriendlyness or easy learning curve.
+
+Ungit is to bring user friendliness to git without sacrificing versatility of git.
 
  * Clean and intuitive UI that makes it easy to _understand_ git.
  * Runs on any platform that node.js & git supports.
