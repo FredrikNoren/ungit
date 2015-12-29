@@ -350,10 +350,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/remotes', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['remote'], req.query.path)
-      .parser(gitParser.parseGitRemotes)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['remote'], req.query.path).then(gitParser.parseGitRemotes));
   });
 
   app.get(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
@@ -361,44 +358,36 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['remote', 'add', req.params.name, req.body.url], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['remote', 'add', req.params.name, req.body.url], req.body.path));
   });
 
   app.delete(exports.pathPrefix + '/remotes/:name', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['remote', 'remove', req.params.name], req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['remote', 'remove', req.params.name], req.query.path));
   });
 
   app.post(exports.pathPrefix + '/merge', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var noFF = '';
-    if (config.noFFMerge) noFF = '--no-ff';
-    git(['merge', noFF, req.body.with.trim()], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise(['merge', config.noFFMerge ? '--no-ff' : '', req.body.with.trim()], req.body.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['commit', '--file=-'], req.body.path)
-      .started(function() {
-        this.process.stdin.end(req.body.message);
-      })
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise({
+      commands: ['commit', '--file=-'],
+      repoPath: req.body.path,
+      inPipe: req.body.message
+    }).finally(emitGitDirectoryChanged.bind(null, req.body.path))
+    .finally(emitWorkingTreeChanged.bind(null, req.body.path))
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/merge/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['merge', '--abort'], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['merge', '--abort'], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
 
