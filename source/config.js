@@ -192,5 +192,6 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
   module.exports = rc('ungit', argv.default(defaultConfig).argv);
 }
 module.exports.homedir = homedir;
+module.exports.isWindows = /^win/.test(process.platform);
 
 cleanUpRootPath();
