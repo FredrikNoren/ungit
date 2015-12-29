@@ -262,92 +262,75 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
-      .parser(gitParser.parseGitLog)
-      .always(function(err, log) {
-        if (err) {
-          if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-            res.json([]);
-          else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
-            res.json([]);
-          else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-            res.json([]);
-          else
-            res.status(400).json(err);
-        } else {
-          res.json(log);
-        }
-      })
-      .start();
+    var task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
+      .then(gitParser.parseGitLog)
+      .catch(function(err) {
+        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+          return [];
+        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+          return [];
+        else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+          return [];
+        throw err;
+      });
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-
-    git(['branch'], req.query.path)
-      .parser(gitParser.parseGitBranches)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['branch'], req.query.path).then(gitParser.parseGitBranches));
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+    var task = gitPromise(['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.body.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path));
+    jsonResultOrFailProm(res, task);
   });
 
   app.delete(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['branch', '-D', req.query.name.trim()], req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.query.path))
-      .start();
+    var task = gitPromise(['branch', '-D', req.query.name.trim()], req.query.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    jsonResultOrFailProm(res, task);
   });
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git(credentialsOption(req.query.socketId).concat(['push', req.query.remote, ':' + req.query.name.trim()]), req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.query.path))
-      .start();
+    var task = gitPromise(credentialsOption(req.query.socketId).concat(['push', req.query.remote, ':' + req.query.name.trim()]), req.query.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['tag', '-l'], req.query.path)
-      .parser(gitParser.parseGitTags)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    var task = gitPromise(['tag', '-l'], req.query.path)
+      .then(gitParser.parseGitTags);
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    git(credentialsOption(req.query.socketId).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
-      .parser(gitParser.parseGitLsRemote)
-      .always(function(err, result) {
-        if (err) return res.status(400).json(err);
+    var task = gitPromise(credentialsOption(req.query.socketId).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
+      .then(gitParser.parseGitLsRemote)
+      .then(function(result) {
         result.forEach(function(r) { r.remote = req.query.remote; });
-        res.json(result);
-      })
-      .start();
+        return result;
+      });
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m',
+    var task = gitPromise(['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m',
         req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .start();
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+    jsonResultOrFailProm(res, task);
   });
 
   app.delete(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['tag', '-d', req.query.name.trim()], req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.query.path))
-      .start();
+    var task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    jsonResultOrFailProm(res, task);
   });
 
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(credentialsOption(req.query.socketId).concat(['push', req.query.remote + ' :"refs/tags' + req.query.name.trim() + '"']), req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.query.path))
-      .start();
+    var task = gitPromise(credentialsOption(req.query.socketId).concat(['push', req.query.remote + ' :"refs/tags' + req.query.name.trim() + '"']), req.query.path)
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
