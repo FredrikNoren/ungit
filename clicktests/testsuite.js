@@ -36,7 +36,7 @@ testsuites.runAllSuits = function() {
 function TestSuite(page, config) {
   this.page = page;
   this.config = config || {};
-  this.config.timeout = this.config.timeout || 10000;
+  this.config.timeout = this.config.timeout || 30000;
   this.tests = [];
 }
 TestSuite.prototype.test = function(name, description) {
