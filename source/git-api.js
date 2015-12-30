@@ -395,27 +395,21 @@ exports.registerApi = function(env) {
 
 
   app.post(exports.pathPrefix + '/rebase', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['rebase', req.body.onto.trim()], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['rebase', req.body.onto.trim()], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(exports.pathPrefix + '/rebase/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['rebase', '--continue'], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['rebase', '--continue'], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(exports.pathPrefix + '/rebase/abort', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['rebase', '--abort'], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['rebase', '--abort'], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(exports.pathPrefix + '/resolveconflicts', ensureAuthenticated, ensurePathExists, function(req, res) {
@@ -462,37 +456,26 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['submodule', 'init'], req.body.path)
-      .always(function() {
-        return git(['submodule', 'update'], req.body.path)
-        .always(jsonResultOrFail.bind(null, res))
-        .start();
-      })
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['submodule', 'init'], req.body.path)
+      .finally(gitPromise.bind(null, ['submodule', 'update'], req.body.path)));
   });
 
   app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
-    git(['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
     // -f is needed for the cases when added submodule change is not in the staging or committed
-    git(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
-      .done(function() {
-        // remove from working directory and git completely
-        git(['rm', '-f', req.query.submoduleName], req.query.path)
-          .done(function() {
-            rimraf.sync(path.join(req.query.path, req.query.submodulePath));
-            rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
-          })
-          .always(jsonResultOrFail.bind(null, res))
-          .start();
-      })
-      .start();
+    var task = gitPromise(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
+      .then(gitPromise.bind(null, ['rm', '-f', req.query.submoduleName], req.query.path))
+      .then(function() {
+        rimraf.sync(path.join(req.query.path, req.query.submodulePath));
+        rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
+      });
+
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
@@ -502,57 +485,49 @@ exports.registerApi = function(env) {
         return;
       }
 
-      git(['rev-parse', '--is-inside-work-tree'], req.query.path)
-        .always(function(err, result) {
-          if (err || result.toString().indexOf('true') == -1) res.json('uninited');
-          else res.json('inited');
-        })
-        .start();
+      var task = gitPromise(['rev-parse', '--is-inside-work-tree'], req.query.path)
+        .catch(function(err) {
+          return 'uninited';
+        }).then(function(result) {
+          if (result.toString().indexOf('true') == -1) return 'uninited';
+          else return 'inited';
+        });
+      jsonResultOrFailProm(res, task);
     })
   });
 
   app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
-    git(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query.path)
-      .parser(gitParser.parseGitLog)
-      .always(function(err, items) {
-        if (err) return res.status(400).json(err);
-        res.json(items.map(function(item, index) {
+    var task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query.path)
+      .then(gitParser.parseGitLog)
+      .then(function(items) {
+        return items.map(function(item, index) {
           return {
             id: index,
             name: item.reflogName.slice('refs/'.length),
             title: item.message,
             date: item.commitDate
           }
-        }));
-      })
-      .start();
+        });
+      });
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
-    var message = '';
-    if (req.body.message) message = req.body.message;
-    git(['stash', 'save', '--include-untracked', message ], req.body.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['stash', 'save', '--include-untracked', req.body.message || '' ], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.delete(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
-    var type = 'drop';
-    if (req.query.pop === 'true') type = 'pop';
-    git(['stash', type, 'stash@{' + req.params.id + '}'], req.query.path)
-      .always(jsonResultOrFail.bind(null, res))
-      .always(emitGitDirectoryChanged.bind(null, req.query.path))
-      .always(emitWorkingTreeChanged.bind(null, req.query.path))
-      .start();
+    var type = req.query.pop === 'true' ? 'pop' : 'drop';
+    jsonResultOrFailProm(res, gitPromise(['stash', type, 'stash@{' + req.params.id + '}'], req.query.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.query.path));
   });
 
   app.get(exports.pathPrefix + '/gitconfig', ensureAuthenticated, function(req, res){
-    git(['config', '--list'])
-      .parser(gitParser.parseGitConfig)
-      .always(jsonResultOrFail.bind(null, res))
-      .start();
+    jsonResultOrFailProm(res, gitPromise(['config', '--list'])
+      .then(gitParser.parseGitConfig));
   });
 
   // This method isn't called by the client but by credentials-helper.js
@@ -590,18 +565,6 @@ exports.registerApi = function(env) {
     });
   });
 
-  app.get(exports.pathPrefix + '/debug', ensureAuthenticated, function(req, res) {
-    res.json({
-      runningGitTasks: git.runningTasks.map(function(task) {
-        return {
-          path: task.repoPath,
-          command: task.command,
-          runningTime: (Date.now() - task.startTime) / 1000
-        };
-      })
-    });
-  });
-
   if (config.dev) {
 
     app.post(exports.pathPrefix + '/testing/createtempdir', ensureAuthenticated, function(req, res){
@@ -634,9 +597,7 @@ exports.registerApi = function(env) {
       res.json({ });
     });
     app.post(exports.pathPrefix + '/testing/git', ensureAuthenticated, function(req, res){
-      git(req.body.command, req.body.repo)
-        .always(jsonResultOrFail.bind(null, res))
-        .start();
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
     });
     app.post(exports.pathPrefix + '/testing/cleanup', ensureAuthenticated, function(req, res){
       var cleaned = temp.cleanup();
