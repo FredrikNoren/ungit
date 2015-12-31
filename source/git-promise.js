@@ -15,12 +15,12 @@ var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', 
  * @function
  * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
  * @param {string} repoPath - path to the git repository
- * @param {boolean=} allowError - true if accept error as some cases errors are acceptable
+ * @param {boolean=} allowError - true if return code of 1 is acceptable as some cases errors are acceptable
  * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
  * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
- * @param {timeout=} outPipe - execution timeout, default is 2 mins
+ * @param {timeout=} timeout - execution timeout, default is 2 mins
  * @returns {promise} execution promise
- * @example getGitExecuteTask({commands: ['show'], repoPath: '/tmp'});
+ * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
  * @example getGitExecuteTask(['show'], '/tmp');
  */
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
