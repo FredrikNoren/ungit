@@ -41,6 +41,10 @@
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="col-lg-9 file-area">
+        <div class="form-display-button">
+          <span class="mega-octicon " data-bind="css: {'octicon-chevron-left': !isHidden(), 'octicon-chevron-right': isHidden}"></span>
+        </div>
+
         <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
           <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"1000", "hide":"0"}'>

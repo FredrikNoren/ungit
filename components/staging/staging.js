@@ -29,6 +29,7 @@ var StagingViewModel = function(server, repoPath) {
   this.inMerge = ko.observable(false);
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
+  this.isHidden = ko.observable(false);
   this.commitButtonVisible = ko.computed(function() {
     return !self.inRebase() && !self.inMerge();
   });
