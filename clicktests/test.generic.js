@@ -80,11 +80,13 @@ suite.test('Should be able to add a new file to .gitignore', function(done) {
 });
 
 suite.test('Test showing commit diff between two commits', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable"]');
-  helpers.waitForElementVisible(page, '.diff-wrapper', function() {
-    helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
-    helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
-      done();
+  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable"]', function() {
+    helpers.click(page, '[data-ta-clickable="node-clickable"]');
+    helpers.waitForElementVisible(page, '.diff-wrapper', function() {
+      helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
+      helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
+        done();
+      });
     });
   });
 });
