@@ -8,7 +8,7 @@
       Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>
     <div class="row" data-bind="visible: !showNux()">
-      <div class="col-lg-3" data-bind="visible: !isCommitMessageHidden()">
+      <div class="col-lg-3" data-bind="css: { 'commit-form-hide': isCommitMessageHidden }">
         <input class="form-control" data-ta-input="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onEnter}"></input>
         <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
         <div>

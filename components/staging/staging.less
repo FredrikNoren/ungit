@@ -27,6 +27,13 @@
     margin-right: auto;
   }
 
+  .commit-form-hide {
+    display: block;
+    @media (min-width: @screen-lg-min) {
+      display: none;
+    }
+  }
+
   .file-area {
     position: relative;
 
@@ -39,6 +46,10 @@
       top: 50%;
       opacity: 0.4;
       font-size: 32;
+      display: none;
+      @media (min-width: @screen-lg-min) {
+        display: block;
+      }
       &:hover {
         opacity: 1;
         cursor: pointer;
