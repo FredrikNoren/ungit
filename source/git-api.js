@@ -104,15 +104,6 @@ exports.registerApi = function(env) {
     }
   }
 
-  var jsonFail = function(res, err) {
-    res.status(400).json(err);
-  }
-
-  var jsonResultOrFail = function(res, err, result) {
-    if (err) res.status(400).json(err);
-    else res.json(result || {});
-  }
-
   var jsonResultOrFailProm = function(res, promise) {
     return promise.then(function(result) {
         res.json(result || {});
