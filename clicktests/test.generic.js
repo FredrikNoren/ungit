@@ -187,16 +187,16 @@ suite.test('Show stats for changed file and discard it', function(done) {
   });
 });
 
-suite.test('Should be possible to patch a file', function(done) {
-  environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
-    if (err) return done(err);
-    uiInteractions.patch(page, 'Patch', function() {
-      helpers.waitForElementVisible(page, '.commit', function() {
-        done();
-      });
-    });
-  });
-});
+// suite.test('Should be possible to patch a file', function(done) {
+//   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
+//     if (err) return done(err);
+//     uiInteractions.patch(page, 'Patch', function() {
+//       helpers.waitForElementVisible(page, '.commit', function() {
+//         done();
+//       });
+//     });
+//   });
+// });
 
 suite.test('Checkout a branch', function(done) {
   uiInteractions.checkout(page, 'testbranch', done);
