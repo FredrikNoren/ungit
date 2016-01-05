@@ -234,15 +234,15 @@ exports.registerApi = function(env) {
     var limit = req.query.limit ? '--max-count=' + req.query.limit : '';
     var task = gitPromise(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path);
     task = task.then(gitParser.parseGitLog).catch(function(err) {
-        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-          return [];
-        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
-          return [];
-        else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-          return [];
-        else
-          throw err;
-      });
+      if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+        return [];
+      else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+        return [];
+      else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+        return [];
+      else
+        throw err;
+    });
     jsonResultOrFailProm(res, task);
   });
 

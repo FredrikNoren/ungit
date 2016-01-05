@@ -184,22 +184,22 @@ git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
-      return fs.isFileExists(file).then(function(isExist) {
-        if (isExist) {
-          toAdd.push(file);
-        } else {
-          toRemove.push(file);
-        }
-      });
-    })).then(function() {
-      var addExec;
-      var removeExec;
-      if (toAdd.length > 0)
-        addExec = git(['add', toAdd ], repoPath);
-      if (toRemove.length > 0)
-        removeExec = git(['rm', toRemove ], repoPath);
-      return Promise.join(addExec, removeExec);
+    return fs.isFileExists(file).then(function(isExist) {
+      if (isExist) {
+        toAdd.push(file);
+      } else {
+        toRemove.push(file);
+      }
     });
+  })).then(function() {
+    var addExec;
+    var removeExec;
+    if (toAdd.length > 0)
+      addExec = git(['add', toAdd ], repoPath);
+    if (toRemove.length > 0)
+      removeExec = git(['rm', toRemove ], repoPath);
+    return Promise.join(addExec, removeExec);
+  });
 }
 
 git.stashExecuteAndPop = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
@@ -249,11 +249,11 @@ git.diffFile = function(repoPath, filename, sha1) {
           exec = git(['diff', 'HEAD', '--', filename.trim()], repoPath);
         }
         return exec.catch(function(err) {
-            // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
-            // it will error out with invalid object name error
-            if (sha1 && err && err.error.indexOf('bad revision') > -1)
-              return git(newFileDiffArgs, repoPath, true);
-          });
+          // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
+          // it will error out with invalid object name error
+          if (sha1 && err && err.error.indexOf('bad revision') > -1)
+            return git(newFileDiffArgs, repoPath, true);
+        });
       }
     });
 }
@@ -314,55 +314,55 @@ git.applyPatchedDiff = function(repoPath, patchedDiff) {
 
 git.commit = function(repoPath, amend, message, files) {
   return (new Promise(function(resolve, reject) {
-      if (message == undefined) {
-        reject({ error: 'Must specify commit message' });
-      }
-      if ((!(Array.isArray(files)) || files.length == 0) && !amend) {
-        reject({ error: 'Must specify files or amend to commit' });
-      }
-      resolve();
-    })).then(function() {
-      return git.status(repoPath);
-    }).then(function(status) {
-      var toAdd = [];
-      var toRemove = [];
-      var addPromise;     // a promise that add all files in toAdd
-      var removePromise;  // a proimse that removes all files in toRemove
-      var diffPatchPromises = []; // promiese that patches each files individually
+    if (message == undefined) {
+      reject({ error: 'Must specify commit message' });
+    }
+    if ((!(Array.isArray(files)) || files.length == 0) && !amend) {
+      reject({ error: 'Must specify files or amend to commit' });
+    }
+    resolve();
+  })).then(function() {
+    return git.status(repoPath);
+  }).then(function(status) {
+    var toAdd = [];
+    var toRemove = [];
+    var addPromise;     // a promise that add all files in toAdd
+    var removePromise;  // a proimse that removes all files in toRemove
+    var diffPatchPromises = []; // promiese that patches each files individually
 
-      for(var v in files) {
-        var file = files[v];
-        var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
-        if (!fileStatus) {
-          throw { error: 'No such file in staging: ' + file.name };
-        }
-
-        if (fileStatus.removed) {
-          toRemove.push(file.name.trim());
-        } else if (files[v].patchLineList) {
-          diffPatchPromises.push(git(['diff', file.name.trim()], repoPath)
-            .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
-            .then(git.applyPatchedDiff.bind(null, repoPath)));
-        } else {
-          toAdd.push(file.name.trim());
-        }
+    for(var v in files) {
+      var file = files[v];
+      var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+      if (!fileStatus) {
+        throw { error: 'No such file in staging: ' + file.name };
       }
 
-      if (toAdd.length > 0) {
-        addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+      if (fileStatus.removed) {
+        toRemove.push(file.name.trim());
+      } else if (files[v].patchLineList) {
+        diffPatchPromises.push(git(['diff', file.name.trim()], repoPath)
+          .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
+          .then(git.applyPatchedDiff.bind(null, repoPath)));
+      } else {
+        toAdd.push(file.name.trim());
       }
-      if (toRemove.length > 0) {
-        removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
-      }
+    }
 
-      return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
-    }).then(function() {
-      return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
-    }).catch(function(err) {
-      // ignore the case where nothing were added to be committed
-      if (err.stdout.indexOf("Changes not staged for commit") === -1)
-        throw err;
-    });
+    if (toAdd.length > 0) {
+      addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+    }
+    if (toRemove.length > 0) {
+      removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
+    }
+
+    return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+  }).then(function() {
+    return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
+  }).catch(function(err) {
+    // ignore the case where nothing were added to be committed
+    if (err.stdout.indexOf("Changes not staged for commit") === -1)
+      throw err;
+  });
 }
 
 module.exports = git;
