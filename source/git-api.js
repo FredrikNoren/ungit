@@ -64,12 +64,13 @@ exports.registerApi = function(env) {
   }
 
   var ensurePathExists = function(req, res, next) {
-    var path = req.query.path || req.body.path;
-    if (!fs.existsSync(path)) {
-      res.status(400).json({ error: 'No such path: ' + path, errorCode: 'no-such-path' });
-    } else {
-      next();
-    }
+    fs.isExists(req.query.path || req.body.path).then(function(isExists) {
+      if (isExists) {
+        next();
+      } else {
+        res.status(400).json({ error: 'No such path: ' + path, errorCode: 'no-such-path' });
+      }
+    });
   }
 
   var ensureValidSocketId = function(req, res, next) {
@@ -405,40 +406,24 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.query.path, '..'));
-    function isGitDirectory(currentPath) {
-      var gitDirectory = path.join(currentPath, '.git');
-      return fs.existsSync(gitDirectory) && fs.statSync(gitDirectory).isDirectory();
-    }
-    function isRoot(currentPath) {
-      if (os.platform().indexOf('win') == 0) return currentPath.length <= 3;
-      else return currentPath.length <= 1;
-    }
-
-    while (!isRoot(currentPath) && !isGitDirectory(currentPath)) {
-      currentPath = path.resolve(path.join(currentPath, '..'));
-    }
-
-    if (isGitDirectory(currentPath)) res.json({ path: currentPath });
-    else res.status(404).json({});
+    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath).then(function(path) {
+      return { path: path.trim() };
+    }));
   });
 
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
     var filename = path.join(req.query.path, '.gitmodules');
 
-    fs.exists(filename, function(exists) {
-      if (!exists) {
-        res.json({});
-        return;
+    var task = fs.isExists(filename).then(function(exists) {
+      if (exists) {
+        return fs.readFileAsync(filename, {encoding: 'utf8'})
+          .catch(function() { return {} })
+          .then(gitParser.parseGitSubmodule);
+      } else {
+        return {};
       }
-
-      fs.readFile(filename, {encoding: 'utf8'}, function (err, data) {
-        if (err) {
-          res.json({});
-        } else {
-          res.json(gitParser.parseGitSubmodule(data));
-        }
-      });
     });
+    jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
@@ -465,21 +450,20 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
-    fs.exists(req.query.path, function(exists) {
-      if (!exists) {
-        res.json('no-such-path');
-        return;
+    var task = fs.isExists(req.query.path).then(function(exists) {
+      if (exists) {
+        return gitPromise(['rev-parse', '--is-inside-work-tree'], req.query.path)
+          .catch(function(err) {
+            return 'uninited';
+          }).then(function(result) {
+            if (result.toString().indexOf('true') == -1) return 'uninited';
+            else return 'inited';
+          });
+      } else {
+        return 'no-such-path';
       }
-
-      var task = gitPromise(['rev-parse', '--is-inside-work-tree'], req.query.path)
-        .catch(function(err) {
-          return 'uninited';
-        }).then(function(result) {
-          if (result.toString().indexOf('true') == -1) return 'uninited';
-          else return 'inited';
-        });
-      jsonResultOrFailProm(res, task);
-    })
+    });
+    jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
