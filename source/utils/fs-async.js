@@ -8,7 +8,9 @@ fs.isExists = function(file) {
       .then(function() { return true; })
       .catch(function() { return false; });
   } else {
-    return fs.existsAsync(file);
+    return (new Promise(function(resolve) {
+      fs.exists(file, resolve);
+    }));
   }
 }
 
