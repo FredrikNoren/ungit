@@ -268,7 +268,7 @@ git.getCurrentBranch = function(repoPath) {
         if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
       });
     }).then(function() {
-      return fs.readFileAsync(HEADFile, 'utf8');
+      return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
     }).then(function(text) {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
@@ -330,7 +330,7 @@ git.commit = function(repoPath, amend, message, files) {
     var removePromise;  // a proimse that removes all files in toRemove
     var diffPatchPromises = []; // promiese that patches each files individually
 
-    for(var v in files) {
+    for (var v in files) {
       var file = files[v];
       var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
       if (!fileStatus) {

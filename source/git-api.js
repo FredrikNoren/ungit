@@ -428,7 +428,7 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/submodules/update', ensureAuthenticated, ensurePathExists, function(req, res){
     jsonResultOrFailProm(res, gitPromise(['submodule', 'init'], req.body.path)
-      .finally(gitPromise.bind(null, ['submodule', 'update'], req.body.path)));
+      .then(gitPromise.bind(null, ['submodule', 'update'], req.body.path)));
   });
 
   app.post(exports.pathPrefix + '/submodules/add', ensureAuthenticated, ensurePathExists, function(req, res) {
