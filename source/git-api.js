@@ -406,8 +406,8 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.query.path, '..'));
-    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath).then(function(path) {
-      return { path: path.trim() };
+    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath).then(function(baseRepoPath) {
+      return { path: path.resolve(baseRepoPath.trim()) };
     }));
   });
 
