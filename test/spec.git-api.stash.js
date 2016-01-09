@@ -28,9 +28,7 @@ describe('git-api conflict rebase', function () {
 			if (err) return done(err);
 			testDir = dir;
 
-			async.series([
-				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); }
-			], done);
+			common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done);
 		});
 	});
 
@@ -49,9 +47,14 @@ describe('git-api conflict rebase', function () {
 	});
 
 	it('should be possible to drop stash', function(done) {
-		common.delete(req, '/stashes/0', { path: testDir }, done);
+		var wrapper = function() {
+			console.log('callback called');
+			done();
+		}
+
+		common.delete(req, '/stashes/0', { path: testDir }, wrapper);
 	});
-	
+
 	after(function(done) {
 		common.post(req, '/testing/cleanup', undefined, done);
 	});
