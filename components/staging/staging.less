@@ -34,32 +34,31 @@
     }
   }
 
+  .form-display-button {
+    position: absolute;
+    opacity: 0.4;
+    display: none;
+    margin-left: 1px;
+    z-index: 1;
+    top: 18px;
+
+    .octicon {
+      font-size: 25px;
+    }
+    @media (min-width: @screen-lg-min) {
+      display: block;
+    }
+    &:hover {
+      opacity: 1;
+      cursor: pointer;
+    }
+  }
+
   .file-area {
     position: relative;
 
     .commands {
       width: 100%;
-    }
-
-    .form-display-button {
-      position: absolute;
-      top: 50%;
-      opacity: 0.4;
-      font-size: 32;
-      display: none;
-      @media (min-width: @screen-lg-min) {
-        display: block;
-      }
-      &:hover {
-        opacity: 1;
-        cursor: pointer;
-      }
-      .octicon-chevron-left {
-        margin-left: -22px;
-      }
-      .octicon-chevron-right {
-        margin-left: -15px;
-      }
     }
   }
 

@@ -8,6 +8,9 @@
       Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>
     <div class="row" data-bind="visible: !showNux()">
+      <div class="form-display-button">
+        <span class="octicon " data-bind="css: {'octicon-chevron-left': !isCommitMessageHidden(), 'octicon-chevron-right': isCommitMessageHidden}, click: toggleHideCommitMessage"></span>
+      </div>
       <div class="col-lg-3" data-bind="css: { 'commit-form-hide': isCommitMessageHidden }">
         <input class="form-control" data-ta-input="staging-commit-title" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onEnter}"></input>
         <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
@@ -41,10 +44,6 @@
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="file-area" data-bind="css: {'col-lg-9': !isCommitMessageHidden(), 'col-lg-12': isCommitMessageHidden}">
-        <div class="form-display-button">
-          <span class="mega-octicon " data-bind="css: {'octicon-chevron-left': !isCommitMessageHidden(), 'octicon-chevron-right': isCommitMessageHidden}, click: toggleHideCommitMessage"></span>
-        </div>
-
         <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
           <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"1000", "hide":"0"}'>
