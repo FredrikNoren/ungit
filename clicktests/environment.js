@@ -12,7 +12,7 @@ function Environment(page, config) {
   this.config = config || {};
   this.config.port = this.config.port || 8449;
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
-  this.config.serverTimeout = this.config.serverTimeout || 15000;
+  this.config.serverTimeout = this.config.serverTimeout || 20000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
   this.config.showServerOutput = this.config.showServerOutput || false;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
