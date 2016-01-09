@@ -24,7 +24,7 @@ UngitPlugin.prototype.init = function(env) {
         httpServer: env.httpServer,
         ensureAuthenticated: env.ensureAuthenticated,
         ensurePathExists: env.ensurePathExists,
-        git: require('./git'),
+        git: require('./git-promise'),
         config: env.config,
         socketIO: env.socketIO,
         socketsById: env.socketsById,

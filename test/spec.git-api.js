@@ -220,7 +220,7 @@ describe('git-api', function () {
         staged: false,
         removed: false,
         conflict: false,
-        renamed: false, 
+        renamed: false,
         type: 'text',
         additions: '1',
         deletions: '1'
@@ -421,7 +421,8 @@ describe('git-api', function () {
     mkdirp(baseRepoPathTestDir, function(err, res) {
       common.get(req, '/baserepopath', { path: baseRepoPathTestDir }, function(err, res) {
         if (err) return done(err);
-        expect(res.body.path).to.be(testDir);
+        // Some oses uses symlink and path will be different as git will return resolved symlink
+        expect(res.body.path).to.contain(testDir);
         done();
       });
     });

@@ -213,7 +213,6 @@ var apiEnvironment = {
   app: app,
   server: server,
   ensureAuthenticated: ensureAuthenticated,
-  git: require('./git'),
   config: config,
   pathPrefix: gitApi.pathPrefix,
   socketIO: io,

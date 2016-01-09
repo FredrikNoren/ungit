@@ -18,7 +18,7 @@ var testDir;
 var req = request(app);
 
 
-describe('git-api conflict checkout', function () {
+describe('git-api conflict checkout no auto stash', function () {
 
 	this.timeout(8000);
 

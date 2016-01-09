@@ -72,31 +72,6 @@ describe('git-api: test ignorefile call', function () {
     });
   });
 
-  it('Attempt to add existing file to .gitignore through api call', function (done) {
-    common.createSmallRepo(req, function (err, dir) {
-      if (err) return done(err);
-      var testFile = 'test.txt';
-
-      // Add file to .gitignore
-      fs.appendFileSync(path.join(dir, '.gitignore'), testFile);
-
-      async.series([
-
-        function (done) { common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }, done); },
-        function (done) {
-          common.post(req, '/ignorefile', { path: dir, file: testFile }, function (err, res) {
-            if (err) {
-              done();
-              return true;
-            } else {
-              throw new Error('Did not errored when existing file has been added');
-            }
-          });
-        }
-      ], done);
-    });
-  });
-
   it('Attempt to add a file where similar name alread exist in .gitignore through api call', function (done) {
     common.createSmallRepo(req, function (err, dir) {
       if (err) return done(err);
