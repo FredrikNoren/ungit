@@ -150,7 +150,8 @@ module.exports = function(grunt) {
       },
       node: {
         options: {
-          node: true
+          node: true,
+          esnext: true
         },
         src: [
           'Gruntfile.js',

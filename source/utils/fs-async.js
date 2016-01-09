@@ -1,5 +1,5 @@
-var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require("fs"));
+var Bluebird = require('bluebird');
+var fs = Bluebird.promisifyAll(require("fs"));
 var semver = require('semver');
 
 fs.isExists = function(file) {
@@ -8,7 +8,7 @@ fs.isExists = function(file) {
       .then(function() { return true; })
       .catch(function() { return false; });
   } else {
-    return (new Promise(function(resolve) {
+    return (new Bluebird(function(resolve) {
       fs.exists(file, resolve);
     }));
   }
