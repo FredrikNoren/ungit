@@ -16,7 +16,7 @@ suite.test('Init', function(done) {
 
 suite.test('Open home screen', function(done) {
   page.open(environment.url, function() {
-    helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-container="home-page"]', function() {
       done();
     });
   });
@@ -32,7 +32,7 @@ suite.test('Create test directory', function(done) {
 suite.test('Open path screen', function(done) {
   page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
     page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElement(page, '[data-ta-container="uninited-path-page"]', function() {
+      helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
         done();
       });
     });
@@ -41,15 +41,16 @@ suite.test('Open path screen', function(done) {
 
 suite.test('Init repository should bring you to repo page', function(done) {
   helpers.click(page, '[data-ta-clickable="init-repository"]');
-  helpers.waitForElement(page, '[data-ta-container="repository-view"]', function() {
-    helpers.expectNotFindElement(page, '[data-ta-container="remote-error-popup"]');
+  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
+    if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
+      return done(new Error('Should not find remote error popup'));
     done();
   });
 });
 
 suite.test('Clicking logo should bring you to home screen', function(done) {
   helpers.click(page, '[data-ta-clickable="home-link"]');
-  helpers.waitForElement(page, '[data-ta-container="home-page"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="home-page"]', function() {
     done();
   });
 });
@@ -57,9 +58,9 @@ suite.test('Clicking logo should bring you to home screen', function(done) {
 suite.test('Entering an invalid path and create directory in that location', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, environment.path + '/not/existing\n');
-  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]', function() {
     helpers.click(page, '[data-ta-clickable="create-dir"]');
-    helpers.waitForElement(page, '[data-ta-clickable="init-repository"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-clickable="init-repository"]', function() {
       done();
     });
   });
@@ -68,7 +69,7 @@ suite.test('Entering an invalid path and create directory in that location', fun
 suite.test('Entering an invalid path should bring you to an error screen', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.write(page, '/a/path/that/doesnt/exist\n');
-  helpers.waitForElement(page, '[data-ta-container="invalid-path"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]', function() {
     done();
   });
 });
@@ -77,7 +78,7 @@ var enterRepoByTypingPath = function(path, callback) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.selectAllText(page);
   helpers.write(page, path + '\n');
-  helpers.waitForElement(page, '[data-ta-container="repository-view"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
     callback();
   });
 }
@@ -91,7 +92,7 @@ suite.test('Create test directory with ampersand and open it', function(done) {
   environment.createFolder(specialRepoPath, function() {
     page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
       page.open(environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath), function () {
-        helpers.waitForElement(page, '[data-ta-container="uninited-path-page"]', function() {
+        helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
           done();
         });
       });

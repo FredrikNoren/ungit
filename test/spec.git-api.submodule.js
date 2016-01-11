@@ -24,7 +24,7 @@ describe('git-api submodule', function () {
 
 	before(function(done) {
 		// Set up two directories and init them and add some content
-		async.parallel([
+		async.series([
 			common.createSmallRepo.bind(null, req),
 			common.createSmallRepo.bind(null, req),
 		], function(err, res) {

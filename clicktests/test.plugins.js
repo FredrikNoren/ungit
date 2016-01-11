@@ -18,8 +18,9 @@ suite.test('Init', function(done) {
 
 suite.test('Plugin should replace all of the app', function(done) {
   page.open(environment.url, function() {
-    helpers.waitForElement(page, '[data-ta-element="dummy-app"]', function() {
-      helpers.expectNotFindElement(page, '[data-ta-container="app"]');
+    helpers.waitForElementVisible(page, '[data-ta-element="dummy-app"]', function() {
+      if (helpers.elementVisible(page, '[data-ta-container="app"]'))
+        return done(new Error('Should not find app'));
       done();
     });
   });

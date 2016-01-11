@@ -28,7 +28,7 @@ suite.test('Init', function(done) {
 
 suite.test('Open repo screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElement(page, '.graph', function() {
+    helpers.waitForElementVisible(page, '.graph', function() {
       setTimeout(done, 1000); // Let it finnish loading
     });
   });
@@ -36,38 +36,41 @@ suite.test('Open repo screen', function(done) {
 
 suite.test('Adding a remote', function(done) {
   helpers.click(page, '[data-ta-clickable="remotes-menu"]');
-  helpers.waitForElement(page, '[data-ta-clickable="show-add-remote-dialog"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="show-add-remote-dialog"]', function() {
     helpers.click(page, '[data-ta-clickable="show-add-remote-dialog"]');
-    helpers.waitForElement(page, '[data-ta-container="add-remote"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-container="add-remote"]', function() {
       helpers.click(page, '[data-ta-container="add-remote"] [data-ta-input="name"]');
       helpers.write(page, 'myremote');
       helpers.click(page, '[data-ta-container="add-remote"] [data-ta-input="url"]');
       helpers.write(page, bareRepoPath);
       helpers.click(page, '[data-ta-container="add-remote"] [data-ta-clickable="submit"]');
-      helpers.waitForElement(page, '[data-ta-container="remotes"] [data-ta-clickable="myremote"]', function() {
-        done();
-      });
+      setTimeout(function() { // Wait for the dialog to close
+        helpers.click(page, '[data-ta-clickable="remotes-menu"]');
+        helpers.waitForElementVisible(page, '[data-ta-container="remotes"] [data-ta-clickable="myremote"]', function() {
+          done();
+        });
+      }, 500);
     });
   });
 });
 
 suite.test('Fetch from newly added remote', function(done) {
   helpers.click(page, '[data-ta-clickable="fetch"]');
-  helpers.waitForElement(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
-    helpers.waitForNotElement(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
+  setTimeout(function() { // Wait for the fetch progress bar to appear
+    helpers.waitForElementNotVisible(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
       done();
     });
-  });
+  }, 500);
 });
 
 suite.test('Remote delete check', function(done) {
   helpers.click(page, '[data-ta-clickable="remotes-menu"]');
-  helpers.waitForElement(page, '[data-ta-container="remotes"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="remotes"]', function() {
     helpers.click(page, '[data-ta-clickable="myremote-remove"]');
-    helpers.waitForElement(page, '[data-ta-container="yes-no-dialog"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-container="yes-no-dialog"]', function() {
       helpers.click(page, '[data-ta-clickable="yes"]');
-      helpers.waitForElement(page, '[data-ta-element="progress-bar"]', function() {
-        helpers.waitForNotElement(page, '[data-ta-element="progress-bar"]', function() {
+      helpers.waitForElementVisible(page, '[data-ta-element="progress-bar"]', function() {
+        helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]', function() {
           done();
         });
       });
@@ -84,7 +87,7 @@ suite.test('Enter path to test root', function(done) {
   helpers.click(page, '[data-ta-input="navigation-path"]');
   helpers.selectAllText(page);
   helpers.write(page, environment.path + '\n');
-  helpers.waitForElement(page, '[data-ta-container="uninited-path-page"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
     done();
   });
 });
@@ -96,8 +99,9 @@ suite.test('Clone repository should bring you to repo page', function(done) {
   helpers.click(page, '[data-ta-input="clone-target"]');
   helpers.write(page, testClonePath);
   helpers.click(page, '[data-ta-clickable="clone-repository"]');
-  helpers.waitForElement(page, '[data-ta-container="repository-view"]', function() {
-    helpers.expectNotFindElement(page, '[data-ta-container="remote-error-popup"]');
+  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
+    if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
+      return done(new Error('Should not find remote error popup'));
     setTimeout(function() { // Let animations finish
       done();
     }, 1000);
@@ -106,8 +110,8 @@ suite.test('Clone repository should bring you to repo page', function(done) {
 
 suite.test('Should be possible to fetch', function(done) {
   helpers.click(page, '[data-ta-clickable="fetch"]');
-  helpers.waitForElement(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
-    helpers.waitForNotElement(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]', function() {
       done();
     });
   });
@@ -125,9 +129,9 @@ suite.test('Should be possible to force push a branch', function(done) {
     helpers.mousemove(page, '[data-ta-action="push"][data-ta-visible="true"]');
     setTimeout(function() { // Wait for next animation frame
       helpers.click(page, '[data-ta-action="push"][data-ta-visible="true"]');
-      helpers.waitForElement(page, '[data-ta-container="yes-no-dialog"]', function() {
+      helpers.waitForElementVisible(page, '[data-ta-container="yes-no-dialog"]', function() {
         helpers.click(page, '[data-ta-clickable="yes"]');
-        helpers.waitForNotElement(page, '[data-ta-action="push"][data-ta-visible="true"]', function() {
+        helpers.waitForElementNotVisible(page, '[data-ta-action="push"][data-ta-visible="true"]', function() {
           setTimeout(function() {
             done();
           }, 500);

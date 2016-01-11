@@ -4,44 +4,66 @@ helpers.log = function(text) {
   console.log((new Date()).toISOString(), text);
 }
 
-helpers.waitForElement = function(page, selector, callback) {
-  var tryFind = function() {
-    helpers.log('Trying to find element: ' + selector);
-    var element = page.evaluate(function(selector) {
-      return document.querySelector(selector);
-    }, selector);
-    if (element) {
-      helpers.log('Found element: ' + selector);
-      callback(element);
-    }
-    else setTimeout(tryFind, 500);
-  }
-  tryFind();
-}
-
-helpers.waitForNotElement = function(page, selector, callback) {
-  var tryFind = function() {
-    helpers.log('Trying to NOT find element: ' + selector);
-    var found = page.evaluate(function(selector) {
-      return !!document.querySelector(selector);
-    }, selector);
-    if (!found) {
-      helpers.log('Found no element matching: ' + selector);
-      callback();
-    }
-    else setTimeout(tryFind, 500);
-  }
-  tryFind();
-}
-
-helpers.expectNotFindElement = function(page, selector) {
-  var found = page.evaluate(function(selector) {
-    return !!document.querySelector(selector);
+helpers.elementExists = function(page, selector) {
+  helpers.log('Querying element exists: ' + selector);
+  var element = page.evaluate(function(selector) {
+    return document.querySelector(selector);
   }, selector);
-  if (found) {
-    console.log('expectNotFindElement error: Expected to not find ' + selector + ' but found it.');
-    phantom.exit(1);
+  if (element) {
+    helpers.log('Element exists: ' + selector);
+  } else {
+    helpers.log('Element doesn\'t exist: ' + selector);
   }
+  return element;
+}
+
+helpers.elementVisible = function(page, selector) {
+  helpers.log('Querying element visible: ' + selector);
+  var element = page.evaluate(function(selector) {
+    var element = document.querySelector(selector);
+    if (!element) return null;
+    var rect = element.getBoundingClientRect();
+    if (rect.width == 0 || rect.height == 0) return null;
+    return element;
+  }, selector);
+  if (element) {
+    helpers.log('Element visible: ' + selector);
+  } else {
+    helpers.log('Element not visible: ' + selector);
+  }
+  return element;
+}
+
+
+helpers.waitFor = function(page, query, callback) {
+  var tryFind = function() {
+    var res = query();
+    if (res) callback(res);
+    else setTimeout(tryFind, 500);
+  }
+  tryFind();
+}
+
+helpers.waitForElementVisible = function(page, selector, callback) {
+  helpers.log('Waiting for element visible: ' + selector);
+  helpers.waitFor(page, function() {
+    return helpers.elementVisible(page, selector);
+  }, callback);
+}
+
+helpers.waitForElementExists = function(page, selector, callback) {
+  helpers.log('Waiting for element exists: ' + selector);
+  helpers.waitFor(page, function() {
+    return helpers.elementExists(page, selector);
+  }, callback);
+}
+
+helpers.waitForElementNotVisible = function(page, selector, callback) {
+  helpers.log('Waiting for element not visible: ' + selector);
+  helpers.waitFor(page, function() {
+    if (helpers.elementVisible(page, selector)) return false;
+    else return true;
+  }, callback);
 }
 
 helpers.getClickPosition = function(page, selector) {

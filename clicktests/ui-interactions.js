@@ -10,7 +10,7 @@ uiInteractions.refAction = function(page, ref, local, action, callback) {
   helpers.mousemove(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
   setTimeout(function() { // Wait for next animation frame
     helpers.click(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-action="' + action + '"][data-ta-visible="true"]', function() {
       setTimeout(function() {
         callback();
       }, 500);
@@ -25,7 +25,7 @@ uiInteractions.createRef = function(page, name, type, callback) {
   helpers.write(page, name);
   setTimeout(function() {
     helpers.click(page, '[data-ta-clickable="create-' + type + '"]');
-    helpers.waitForElement(page, '[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]', function() {
       callback();
     });
   }, 100);
@@ -40,9 +40,9 @@ uiInteractions.createTag = function(page, name, callback) {
 
 uiInteractions.moveRef = function(page, ref, targetNodeCommitTitle, callback) {
   helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + ref + '"]');
-  helpers.waitForElement(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]', function() {
     helpers.click(page, '[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"]');
-    helpers.waitForNotElement(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-action="move"][data-ta-visible="true"]', function() {
       setTimeout(function() {
         callback();
       }, 500);
@@ -52,12 +52,12 @@ uiInteractions.moveRef = function(page, ref, targetNodeCommitTitle, callback) {
 
 
 uiInteractions.commit = function(page, commitMessage, callback) {
-  helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
     helpers.click(page, '[data-ta-input="staging-commit-title"]');
     helpers.write(page, commitMessage);
     setTimeout(function() {
       helpers.click(page, '[data-ta-clickable="commit"]');
-      helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+      helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
         setTimeout(function() { // let the animation finish
           callback();
         }, 1000);
@@ -67,11 +67,11 @@ uiInteractions.commit = function(page, commitMessage, callback) {
 }
 
 uiInteractions.amendCommit = function(page, callback) {
-  helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
     helpers.click(page, '[data-bind="click: toggleAmend"]');
     setTimeout(function() {
       helpers.click(page, '[data-ta-clickable="commit"]');
-      helpers.waitForNotElement(page, '[data-ta-container="staging-file"]', function() {
+      helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
         setTimeout(function() { // let the animation finish
           callback();
         }, 1000);
@@ -84,17 +84,17 @@ uiInteractions.amendCommit = function(page, callback) {
 uiInteractions.checkout = function(page, branch, callback) {
   helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"]');
   helpers.click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
-  helpers.waitForElement(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
     callback();
   });
 }
 
 uiInteractions.patch = function(page, commitMessage, callback) {
-  helpers.waitForElement(page, '[data-ta-container="staging-file"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
     helpers.click(page, '[data-ta-clickable="show-stage-diffs"]');
-    helpers.waitForElement(page, '[data-ta-clickable="patch-file"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-clickable="patch-file"]', function() {
       helpers.click(page, '[data-ta-clickable="patch-file"]');
-      helpers.waitForElement(page, '[data-ta-clickable="patch-line-input"]', function() {
+      helpers.waitForElementVisible(page, '[data-ta-clickable="patch-line-input"]', function() {
         uiInteractions.commit(page, commitMessage, callback);
       });
     });
