@@ -355,7 +355,7 @@ git.commit = function(repoPath, amend, message, files) {
       removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
     }
 
-    return Bluebird.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+    return Bluebird.join(addPromise, removePromise, Bluebird.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
