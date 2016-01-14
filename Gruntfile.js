@@ -7,10 +7,16 @@ var semver = require('semver');
 var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
+var babelPlugins = require('babel-features').options().plugins;
 
 module.exports = function(grunt) {
-
   var packageJson = grunt.file.readJSON('package.json');
+
+  if (grunt.cli.tasks.indexOf('package') > -1 || grunt.cli.tasks.indexOf('babel:electron') > -1) {
+    grunt.log.debug('Babel presets: ', ['es2015', 'stage-0']);
+  } else {
+    grunt.log.debug('Babel plugins: ', babelPlugins);
+  }
 
   grunt.initConfig({
     pkg: packageJson,
@@ -34,7 +40,7 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
-        tasks: ['browserify-common', 'browserify-components'],
+        tasks: ['browserify-common', 'browserify-components', 'babel:prod'],
         options: {
           spawn: false,
         },
@@ -188,7 +194,7 @@ module.exports = function(grunt) {
       electron: {
         files: [
           { expand: true, src: ['public/**'], dest: 'build/resource/' },
-          { expand: true, src: ['source/**'], dest: 'build/resource/' },
+          { expand: true, src: ['src/**'], dest: 'build/resource/' },
           { expand: true, src: ['components/**'], dest: 'build/resource/' },
           { expand: true, src: ['assets/**'], dest: 'build/resource/' },
           { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
@@ -199,7 +205,8 @@ module.exports = function(grunt) {
     clean: {
       electron: ['./build'],
       coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit']
+      'coverage-unit': ['./coverage/coverage-unit'],
+      babel: ['./src']
     },
     electron: {
       package: {
@@ -231,6 +238,32 @@ module.exports = function(grunt) {
           coverageFolder: './coverage/coverage-unit',
           mask: 'spec.*.js'
         }
+      }
+    },
+    babel: {
+      prod: {
+        options: {
+          plugins: babelPlugins
+        },
+        files: [{
+            expand: true,
+            cwd: 'source',
+            src: ['**/*.js'],
+            dest: 'src',
+            ext: '.js'
+        }]
+      },
+      electron: {
+        options: {
+          presets: ['es2015', 'stage-0']
+        },
+        files: [{
+            expand: true,
+            cwd: 'source',
+            src: ['**/*.js'],
+            dest: 'src',
+            ext: '.js'
+        }]
       }
     }
   });
@@ -393,9 +426,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
+  grunt.loadNpmTasks('grunt-babel');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests
   grunt.registerTask('unittest', ['mochaTest']);
@@ -408,7 +442,7 @@ module.exports = function(grunt) {
   grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
 
   // Create electron package
-  grunt.registerTask('package', ['clean:electron', 'copy:electron', 'electron']);
+  grunt.registerTask('package', ['clean:electron', 'clean:babel', 'babel:electron', 'copy:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
