@@ -4,11 +4,10 @@ var inherits = require('util').inherits;
 var fileType = require('../../source/utils/file-type.js');
 var programEvents = require('ungit-program-events');
 
-var CommitLineDiff = function(args) {
-  var self = this;
-  this.added = ko.observable(args.fileLineDiff[0]);
-  this.removed = ko.observable(args.fileLineDiff[1]);
-  this.fileName = ko.observable(args.fileLineDiff[2]);
+var CommitLineDiff = function(args, fileLineDiff) {
+  this.added = ko.observable(fileLineDiff[0]);
+  this.removed = ko.observable(fileLineDiff[1]);
+  this.fileName = ko.observable(fileLineDiff[2]);
   this.isShowingDiffs = ko.observable(false);
   this.repoPath = args.repoPath;
   this.server = args.server;
