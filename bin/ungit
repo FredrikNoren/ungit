@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 var startLaunchTime = Date.now();
 var forever = require('forever-monitor');
-var config = require('../source/config');
+var config = require('../src/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var async = require('async');
 
-var BugTracker = require('../source/bugtracker');
+var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../source/usage-statistics');
+var usageStatistics = require('../src/usage-statistics');
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
