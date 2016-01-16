@@ -1,6 +1,6 @@
 
 var expect = require('expect.js');
-var gitParser = require('../source/git-parser');
+var gitParser = require('../src/git-parser');
 
 describe('git-parser stash show', function () {
   it('should be possible to parse stashed show', function() {
