@@ -1,53 +1,45 @@
+'use strict';
 
+const winston = require('winston');
+const sysinfo = require('./sysinfo');
+const config = require('./config');
+const os = require('os');
+const superagent = require('superagent');
+const uuid = require('uuid')
+const raven = require('raven');
+const client = new raven.Client('https://58f16d6f010d4c77900bb1de9c02185f:84b7432f56674fbc8522bc84cc7b30f4@app.getsentry.com/12434');
 
-var winston = require('winston');
-var sysinfo = require('./sysinfo');
-var config = require('./config');
+class BugTracker {
+  constructor(subsystem) {
+    if (!config.bugtracking) return;
 
-var os;
-var superagent;
-var uuid;
+    this.subsystem = subsystem;
+    this.appVersion = 'unknown';
+    this.userHash = 'unkown';
 
-function BugTracker(subsystem) {
-  if (!config.bugtracking) return;
+    sysinfo.getUngitVersion((err, ungitVersion) => {
+      this.appVersion = ungitVersion;
+      winston.info('BugTracker set version: ' + this.appVersion);
+    });
 
-  var self = this;
+    sysinfo.getUserHash((err, userHash) => {
+      this.userHash = userHash;
+      winston.info('BugTracker set user hash');
+    });
+  }
+  notify(exception, clientName, callback) {
+    if (!config.bugtracking) return;
 
-  this.raven = require('raven');
-  this.client = new this.raven.Client('https://58f16d6f010d4c77900bb1de9c02185f:84b7432f56674fbc8522bc84cc7b30f4@app.getsentry.com/12434');
+    let options = {
+      user: { id: this.userHash },
+      tags: {
+        version: this.appVersion,
+        subsystem: this.subsystem,
+        deployment: config.desktopMode ? 'desktop' : 'web'
+      }
+    }
 
-  this.subsystem = subsystem;
-
-  this.appVersion = 'unknown';
-  sysinfo.getUngitVersion(function(err, ungitVersion) {
-    self.appVersion = ungitVersion;
-    winston.info('BugTracker set version: ' + self.appVersion);
-  });
-
-  this.userHash = 'unkown';
-  sysinfo.getUserHash(function(err, userHash) {
-    self.userHash = userHash;
-    winston.info('BugTracker set user hash');
-  });
+    client.captureException(exception, options);
+  }
 }
 module.exports = BugTracker;
-
-BugTracker.prototype.notify = function(exception, clientName, callback) {
-  if (!config.bugtracking) return;
-
-  var self = this;
-  if (!os) os = require('os');
-  if (!superagent) superagent = require('superagent');
-  if (!uuid) uuid = require('uuid');
-
-  var options = {
-    user: { id: this.userHash },
-    tags: {
-      version: this.appVersion,
-      subsystem: this.subsystem,
-      deployment: config.desktopMode ? 'desktop' : 'web'
-    }
-  }
-
-  this.client.captureException(exception, options);
-};
