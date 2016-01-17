@@ -22,8 +22,7 @@ CommitDiff.prototype.loadFileLineDiffs = function(args) {
   var lineDiffLength = this.commitLineDiffs().length;
 
   args.fileLineDiffs.slice(lineDiffLength === 0 ? 0 : lineDiffLength + 1, this.maxNumberOfFilesShown).forEach(function(fileLineDiff) {
-    args.fileLineDiff = fileLineDiff;
-    tempCommitLineDiffs.push(new CommitLineDiff(args));
+    tempCommitLineDiffs.push(new CommitLineDiff(args, fileLineDiff));
   });
 
   this.commitLineDiffs(this.commitLineDiffs().concat(tempCommitLineDiffs));

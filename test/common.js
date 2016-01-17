@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var async = require('async');
 var path = require('path');
-var restGit = require('../source/git-api');
+var restGit = require('../src/git-api');
 
 var common = exports;
 

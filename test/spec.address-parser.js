@@ -1,6 +1,6 @@
 
 var expect = require('expect.js');
-var addressParser = require('../source/address-parser');
+var addressParser = require('../src/address-parser');
 
 
 describe('git-parser addresses', function () {

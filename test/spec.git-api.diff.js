@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var async = require('async');
-var restGit = require('../source/git-api');
+var restGit = require('../src/git-api');
 var common = require('./common.js');
 var wrapErrorHandler = common.wrapErrorHandler;
 

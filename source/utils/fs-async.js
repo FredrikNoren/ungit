@@ -1,17 +1,17 @@
-var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require("fs"));
-var semver = require('semver');
+'use strict';
 
-fs.isExists = function(file) {
-  if (semver.satisfies(process.version, '>0.10')) {
+const Bluebird = require('bluebird');
+const fs = Bluebird.promisifyAll(require("fs"));
+const semver = require('semver');
+
+if (semver.satisfies(process.version, '>0.10')) {
+  fs.isExists = (file) => {
     return fs.accessAsync(file, fs.F_OK)
-      .then(function() { return true; })
-      .catch(function() { return false; });
-  } else {
-    return (new Promise(function(resolve) {
-      fs.exists(file, resolve);
-    }));
+      .then(() => true)
+      .catch(() => false);
   }
+} else {
+  fs.isExists = (file) => new Bluebird((resolve) => fs.exists(file, resolve))
 }
 
 module.exports = fs;

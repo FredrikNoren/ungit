@@ -1,4 +1,7 @@
+'use strict';
 
+// USED BY FRONT END
+// DO NOT GO ES6
 var addressWindowsLocalRegexp = /[a-zA-Z]:\\([^\\]+\\?)*/;
 var addressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
 var addressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
@@ -8,15 +11,14 @@ var addressHttpsRegexp = /https:\/\/([^\/]*)\/([^.]*)(\.git)?$/;
 var addressUnixLocalRegexp = /.*\/([^\/]+)/;
 
 exports.parseAddress = function(remote) {
-
-  match = addressWindowsLocalRegexp.exec(remote);
+  var match = addressWindowsLocalRegexp.exec(remote);
   if (match) {
     var project = match[1];
     if (project[project.length - 1] == '\\') project = project.slice(0, project.length - 1);
     return { address: remote, host: 'localhost', project: project, shortProject: project };
   }
 
-  var match = addressSshWithPortRegexp.exec(remote);
+  match = addressSshWithPortRegexp.exec(remote);
   if (match) return { address: remote, host: match[1], port: match[2], project: match[3], shortProject: match[3].split('/').pop() };
 
   match = addressSshWithoutPortRegexp.exec(remote);
