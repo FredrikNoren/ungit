@@ -6,8 +6,17 @@ node_js:
   - "4.1"
   - "5.3"
 env:
-  - GIT_VERSION=default
-  - GIT_VERSION=edge
+  global:
+    - CXX=g++-4.8
+  matrix:
+    - GIT_VERSION=default
+    - GIT_VERSION=edge
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
 before_script:
   - npm install -g grunt-cli
   - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
