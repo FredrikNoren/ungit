@@ -226,9 +226,9 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/revert', ensureAuthenticated, ensurePathExists, function(req, res){
-    jsonResultOrFailProm(res, gitPromise(['revert', req.body.commit], req.body.path)
-      .always(emitGitDirectoryChanged.bind(null, req.body.path))
-      .always(emitWorkingTreeChanged.bind(null, req.body.path)));
+    jsonResultOrFailProm(res, gitPromise(['revert', req.body.commit], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
