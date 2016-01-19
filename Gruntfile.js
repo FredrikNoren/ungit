@@ -16,6 +16,7 @@ module.exports = function(grunt) {
   if (grunt.cli.tasks.indexOf('package') > -1 || grunt.cli.tasks.indexOf('babel:electron') > -1) {
     grunt.log.debug('Babel presets: ', babelPresets);
   } else {
+    babelPlugins = babelPlugins.map(function(value){ return value.toLowerCase() });
     grunt.log.debug('Babel plugins: ', babelPlugins);
   }
 
