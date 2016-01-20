@@ -7,17 +7,17 @@ var semver = require('semver');
 var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
-var babelPlugins = require('babel-features').options().plugins.map(function(value){ return value.toLowerCase(); });
-var babelPresets = ['es2015', 'stage-0'];
 
 module.exports = function(grunt) {
   var packageJson = grunt.file.readJSON('package.json');
+  var babelPresets;
 
   if (grunt.cli.tasks.indexOf('package') > -1 || grunt.cli.tasks.indexOf('babel:electron') > -1) {
-    grunt.log.debug('Babel presets: ', babelPresets);
+    babelPresets = ['es2015', 'stage-0'];
   } else {
-    grunt.log.debug('Babel plugins: ', babelPlugins);
+    babelPresets = ['features'];
   }
+  grunt.log.debug('Babel presets: ', babelPresets);
 
   grunt.initConfig({
     pkg: packageJson,
@@ -249,7 +249,7 @@ module.exports = function(grunt) {
     babel: {
       prod: {
         options: {
-          plugins: babelPlugins
+          presets: babelPresets
         },
         files: [{
             expand: true,
