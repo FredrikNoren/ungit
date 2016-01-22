@@ -3,7 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var navigation = require('ungit-navigation');
 var programEvents = require('ungit-program-events');
-var md5 = require('blueimp-md5').md5;
+var md5 = require('blueimp-md5');
 var moment = require('moment');
 
 components.register('commit', function(args) {

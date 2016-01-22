@@ -3,7 +3,7 @@ var child_process = require('child_process');
 var path = require('path');
 var cache = require('./utils/cache');
 var getmac = require('getmac');
-var md5 = require('blueimp-md5').md5;
+var md5 = require('blueimp-md5');
 var semver = require('semver');
 
 var sysinfo = exports;
@@ -69,14 +69,14 @@ sysinfo.getGitVersionInfo = function(callback) {
     } else {
       var versionSearch = /.*?(\d+[.]\d+[.]\d+).*/.exec(stdout);
       if (!versionSearch) {
-        result.error = 
+        result.error =
           'Failed to parse git version number: ' + stdout + '. ' +
           'Note that Ungit requires git version ' + result.requiredVersion;
       } else {
         result.version = versionSearch[1];
         result.satisfied = semver.satisfies(result.version, result.requiredVersion);
         if (!result.satisfied) {
-          result.error = 
+          result.error =
             'Ungit requires git version ' + result.requiredVersion + ', you are currently running ' + result.version;
         }
       }
