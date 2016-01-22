@@ -177,7 +177,7 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
 }
 module.exports.homedir = homedir;
 
-var currentRootPath = module.exports.rootPath;
+let currentRootPath = module.exports.rootPath;
 if (typeof currentRootPath !== 'string') {
   currentRootPath = '';
 } else if (currentRootPath !== '') {
