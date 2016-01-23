@@ -15,7 +15,7 @@
             <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
           </div>
           <div class="text-muted nodeSummaryContainer">
-            <span data-bind="text: authorDateFromNow"></span> |
+            <span data-bind="text: authorDateFromNow, attr: { 'data-original-title': authorDate }" class="bootstrap-tooltip" data-toggle="tooltip" data-placement="bottom" data-delay='{"show":"2000", "hide":"0"}'></span> |
             +<span data-bind="text: numberOfAddedLines"></span>,
             -<span data-bind="text: numberOfRemovedLines"></span>
              |
