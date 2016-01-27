@@ -1,5 +1,5 @@
 var ko = require('knockout');
-var md5 = require('blueimp-md5').md5;
+var md5 = require('blueimp-md5');
 var Selectable = require('./selectable');
 var programEvents = require('ungit-program-events');
 var components = require('ungit-components');
