@@ -8,7 +8,7 @@ var common = require('./common.js');
 var mkdirp = require('mkdirp');
 var async = require('async');
 var Promise = require('bluebird');
-var uuid = require('uuid');
+var md5 = require('blueimp-md5');
 var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
@@ -120,7 +120,7 @@ describe('git-api: test patch api', function () {
   ///////////////////////////////////////////////////////
 
   it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with all selected.', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = [];
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -134,7 +134,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('Create a file with 10 lines, commit, change each 10 lines, and commit patch with none selected.', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -144,7 +144,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('10 lines, 10 edit, 0~2 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -154,7 +154,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('10 lines, 10 edit, 18~19 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2, [18, 19]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -164,7 +164,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('10 lines, 10 edit, 0~2 and 18~19 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 18, 19]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -174,7 +174,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('10 lines, 10 edit, 5~7 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var patchLineList = getPatchLineList(testFileSize * 2, [5, 6, 7]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -184,7 +184,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 30 edit, 0~2 and 28 ~ 29 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 28, 29]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -194,7 +194,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 30 edit, 0~2, 28~29, 58~59 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var patchLineList = getPatchLineList(testFileSize * 2, [0, 1, 2, 28, 29, 57, 58, 59]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -204,7 +204,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 30 edit, 6~8, 16~18 and 58 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var patchLineList = getPatchLineList(testFileSize * 2, [6, 7, 8, 16, 17, 18, 58]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -214,7 +214,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 30 edit, 12~15 and 17~19 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var patchLineList = getPatchLineList(testFileSize * 2, [12, 13, 14, 15, 17, 18, 19]);
     var contentsToPatch = getContentsToPatch(testFileSize);
@@ -224,7 +224,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 12~19 edit, 0~7, 10~16 selected ', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [12, 13, 14, 15, 16, 17, 18, 19];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -239,7 +239,7 @@ describe('git-api: test patch api', function () {
   //////////////////////////////////////////////////////
 
   it('30 lines, 2~4, 12~14, 22~24 edit, all selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -250,7 +250,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 2~4, 12~14, 22~24 edit, 0~5, 12~17 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -261,7 +261,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 2~4, 12~14, 22~24 edit, 6~11 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -272,7 +272,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 2~4, 12~14, 22~24 edit, none selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -283,7 +283,7 @@ describe('git-api: test patch api', function () {
   });
 
   it('30 lines, 12~14, 16~18 edit, 6~11 selected', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 30;
     var linesToChange = [12, 13, 14, 22, 23, 24];
     var contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
@@ -295,7 +295,7 @@ describe('git-api: test patch api', function () {
 
   // added diff only, (git apply uses diff -U3)
   it('10 lines, add 5 lines, select 0~1, 5', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var linesToAdd = 5;
     var contentsToPatch = getContentsToPatchWithAdd(testFileSize, linesToAdd);
@@ -307,7 +307,7 @@ describe('git-api: test patch api', function () {
 
   // deleted diff only, (git apply uses diff -U3)
   it('10 lines, delete 5 lines, select 0~1, 5', function(complete) {
-    var testFileName = uuid();
+    var testFileName = md5(Date.now());
     var testFileSize = 10;
     var linesToDelete = 5;
     var contentsToPatch = getContentsToPatchWithDelete(testFileSize, linesToDelete);
