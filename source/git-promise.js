@@ -184,7 +184,7 @@ git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
   return Promise.all((files || []).map(function(file) {
-    return fs.isExists(file).then(function(isExist) {
+    return fs.isExists(path.join(repoPath, file)).then(function(isExist) {
       if (isExist) {
         toAdd.push(file);
       } else {
