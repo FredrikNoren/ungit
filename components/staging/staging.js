@@ -190,6 +190,11 @@ StagingViewModel.prototype.toggleAmend = function() {
   }
   this.amend(!this.amend());
 }
+StagingViewModel.prototype.resetMessages = function() {
+  this.commitMessageTitle('');
+  this.commitMessageBody('');
+  this.amend(false);
+}
 StagingViewModel.prototype.commit = function() {
   var self = this;
   this.committingProgressBar.start();
@@ -205,9 +210,7 @@ StagingViewModel.prototype.commit = function() {
     if (err) {
       return;
     }
-    self.commitMessageTitle('');
-    self.commitMessageBody('');
-    self.amend(false);
+    self.resetMessages();
     self.files([]);
   });
 }
@@ -215,6 +218,7 @@ StagingViewModel.prototype.rebaseContinue = function() {
   var self = this;
   this.rebaseContinueProgressBar.start();
   this.server.post('/rebase/continue', { path: this.repoPath }, function(err, res) {
+    self.resetMessages();
     self.rebaseContinueProgressBar.stop();
   });
 }
@@ -222,6 +226,7 @@ StagingViewModel.prototype.rebaseAbort = function() {
   var self = this;
   this.rebaseAbortProgressBar.start();
   this.server.post('/rebase/abort', { path: this.repoPath }, function(err, res) {
+    self.resetMessages();
     self.rebaseAbortProgressBar.stop();
   });
 }
@@ -231,6 +236,7 @@ StagingViewModel.prototype.mergeContinue = function() {
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
   this.server.post('/merge/continue', { path: this.repoPath, message: commitMessage }, function(err, res) {
+    self.resetMessages();
     self.mergeContinueProgressBar.stop();
   });
 }
@@ -238,6 +244,7 @@ StagingViewModel.prototype.mergeAbort = function() {
   var self = this;
   this.mergeAbortProgressBar.start();
   this.server.post('/merge/abort', { path: this.repoPath }, function(err, res) {
+    self.resetMessages();
     self.mergeAbortProgressBar.stop();
   });
 }
