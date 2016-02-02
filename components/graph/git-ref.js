@@ -161,7 +161,7 @@ RefViewModel.prototype.createRemoteRef = function(callback) {
       refSpec: this.refName, remoteBranch: this.refName }, function(err) {
         if (!err) {
           var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
-          self.node().branchesAndLocalTags.push(newRef);
+          self.node().remoteTags.push(newRef);
           newRef.node(self.node());
         }
         callback(err);
