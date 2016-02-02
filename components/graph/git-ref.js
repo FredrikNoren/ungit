@@ -57,8 +57,8 @@ var RefViewModel = function(fullRefName, graph) {
     if (oldNode) oldNode.branchesAndLocalTags.remove(self);
   }, null, "beforeChange");
   this.node.subscribe(function(newNode) {
-    if (newNode) newNode.branchesAndLocalTags.push(self);
-  })
+    if (newNode && newNode.isLocalTag) newNode.branchesAndLocalTags.push(self);
+  });
 };
 module.exports = RefViewModel;
 
