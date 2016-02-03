@@ -9,3 +9,4 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Fixed
 - Fix crashes due to submodule parsing [#690](https://github.com/FredrikNoren/ungit/issues/690) [#689](https://github.com/FredrikNoren/ungit/issues/689)
+- Fix git hooks failing on non-ascii files [#676](https://github.com/FredrikNoren/ungit/issues/676)
