@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.0...master)
 ### Added
-- Introduced change log! #687
+- Introduced change log! [#687](https://github.com/FredrikNoren/ungit/issues/687)
 
 ### Fixed
-- Fix crashes due to submodule parsing #690 #689
+- Fix crashes due to submodule parsing [#690](https://github.com/FredrikNoren/ungit/issues/690) [#689](https://github.com/FredrikNoren/ungit/issues/689)
