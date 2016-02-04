@@ -84,6 +84,10 @@ Known issues
 * Ubuntu users may have trouble installing because the node executable is named differently on Ubuntu, see [#401](https://github.com/FredrikNoren/ungit/issues/401) for details.
 * Debian Wheezy's supported git and nodejs packages are too old, therefore download newest [git](https://github.com/git/git/releases) and [nodejs](http://nodejs.org/download/) tarballs and [build from source](http://www.control-escape.com/linux/lx-swinstall-tar.html).
 
+Changelog
+---------
+See [CHANGELOG.md](CHANGELOG.md).
+
 License (MIT)
 -------------
 
