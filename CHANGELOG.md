@@ -13,3 +13,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Removed
 - Reverted on hover button effects [#688](https://github.com/FredrikNoren/ungit/issues/688)
+
+### Changed
+- Upgrade keen.io client code [#679](https://github.com/FredrikNoren/ungit/issues/679)
