@@ -161,7 +161,6 @@ GitNodeViewModel.prototype.createBranch = function() {
     .then(function() {
       var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
       newRef.node(self);
-      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -175,7 +174,6 @@ GitNodeViewModel.prototype.createTag = function() {
     .then(function() {
       var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
       newRef.node(self);
-      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -225,9 +223,9 @@ GitNodeViewModel.prototype.removeRef = function(ref) {
   }
 }
 GitNodeViewModel.prototype.pushRef = function(ref) {
-  if (ref.isRemoteTag) {
+  if (ref.isRemoteTag && this.remoteTags.indexOf(ref) < 0) {
     this.remoteTags.push(ref);
-  } else {
+  } else if(this.branchesAndLocalTags.indexOf(ref) < 0) {
     this.branchesAndLocalTags.push(ref);
   }
 }
