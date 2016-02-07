@@ -29,6 +29,7 @@ process.on('uncaughtException', function(err) {
   });
 });
 
+
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {'timestamp':true});
 if (config.logDirectory)
