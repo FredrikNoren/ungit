@@ -140,14 +140,10 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.commitComponent.setData(logEntry);
 
   if (logEntry.refs) {
-    var refVMs = logEntry.refs.map(function(ref) {
-      var refViewModel = self.graph.getRef(ref);
-      refViewModel.node(self);
-      return refViewModel;
+    logEntry.refs.map(function(ref) {
+      self.graph.getRef(ref).node(self);
     });
-    this.branchesAndLocalTags(refVMs);
   }
-
   this.isInited = true;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
