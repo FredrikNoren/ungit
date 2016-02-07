@@ -41,7 +41,7 @@ var AppViewModel = function(appContainer, server) {
   var monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
   this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
   this.sendNPS = function(value) {
-    Keen.addEvent('survey-nps', {
+    keen.addEvent('survey-nps', {
       version: ungit.version,
       userHash: ungit.userHash,
       rating: value,

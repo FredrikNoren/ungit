@@ -125,7 +125,7 @@ module.exports = function(grunt) {
           globals: {
             'ungit': true,
             'io': true,
-            'Keen': true,
+            'keen': true,
             'Raven': true
           }
         },
