@@ -140,14 +140,10 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.commitComponent.setData(logEntry);
 
   if (logEntry.refs) {
-    var refVMs = logEntry.refs.map(function(ref) {
-      var refViewModel = self.graph.getRef(ref);
-      refViewModel.node(self);
-      return refViewModel;
+    logEntry.refs.forEach(function(ref) {
+      self.graph.getRef(ref).node(self);
     });
-    this.branchesAndLocalTags(refVMs);
   }
-
   this.isInited = true;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
@@ -161,7 +157,6 @@ GitNodeViewModel.prototype.createBranch = function() {
     .then(function() {
       var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
       newRef.node(self);
-      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -175,7 +170,6 @@ GitNodeViewModel.prototype.createTag = function() {
     .then(function() {
       var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
       newRef.node(self);
-      self.branchesAndLocalTags.push(newRef);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -225,9 +219,9 @@ GitNodeViewModel.prototype.removeRef = function(ref) {
   }
 }
 GitNodeViewModel.prototype.pushRef = function(ref) {
-  if (ref.isRemoteTag) {
+  if (ref.isRemoteTag && this.remoteTags.indexOf(ref) < 0) {
     this.remoteTags.push(ref);
-  } else {
+  } else if(this.branchesAndLocalTags.indexOf(ref) < 0) {
     this.branchesAndLocalTags.push(ref);
   }
 }
