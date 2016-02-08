@@ -207,9 +207,3 @@ Object.defineProperty(Error.prototype, 'toJSON', {
   },
   configurable: true
 });
-
-Object.defineProperty(Error.prototype, 'toString', {
-  value: function() {
-    return 'Message: ' + this.message + '\n' + this.stack;
-  }
-});
