@@ -140,7 +140,7 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.commitComponent.setData(logEntry);
 
   if (logEntry.refs) {
-    logEntry.refs.map(function(ref) {
+    logEntry.refs.forEach(function(ref) {
       self.graph.getRef(ref).node(self);
     });
   }
