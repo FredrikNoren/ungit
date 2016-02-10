@@ -10,7 +10,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Fixed
 - Fix crashes due to submodule parsing [#690](https://github.com/FredrikNoren/ungit/issues/690) [#689](https://github.com/FredrikNoren/ungit/issues/689)
-- Fix duplicate remote tag issues [#686](https://github.com/FredrikNoren/ungit/issues/686)
+- Fix duplicate remote tag issues [#685](https://github.com/FredrikNoren/ungit/issues/685)
+- Fix scrolling issue in safari [#686](https://github.com/FredrikNoren/ungit/issues/686)
 - Fix git hooks failing on non-ascii files [#676](https://github.com/FredrikNoren/ungit/issues/676)
 
 ### Removed
