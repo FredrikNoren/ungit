@@ -27,7 +27,7 @@ var child = new (forever.Monitor)(path.join(__dirname, '..', 'source', 'server.j
   max: config.maxNAutoRestartOnCrash,
   cwd: path.join(process.cwd(), '..'),
   options: process.argv.slice(2),
-  env: { LANG: 'en_US', LC_ALL: 'C' }
+  env: { LANG: 'en_US.UTF-8' }
 });
 
 child.on('exit', function (res) {

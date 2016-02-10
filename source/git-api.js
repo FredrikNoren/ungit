@@ -110,6 +110,14 @@ exports.registerApi = function(env) {
         res.json(result || {});
       }).catch(function(err) {
         res.status(400).json(err);
+
+        if (err instanceof Error) {
+           console.error('Unhandled error: ' + err.message);
+           console.error(err.stack);
+         } else {
+           console.error('Unhandled error');
+           console.error(err);
+         }
       });
   }
 

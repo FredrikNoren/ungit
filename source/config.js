@@ -194,3 +194,16 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
 module.exports.homedir = homedir;
 
 cleanUpRootPath();
+
+// Errors can not be serialized with JSON.stringify without this fix
+// http://stackoverflow.com/a/18391400
+Object.defineProperty(Error.prototype, 'toJSON', {
+  value: function() {
+    var alt = {};
+    Object.getOwnPropertyNames(this).forEach(function(key) {
+      alt[key] = this[key];
+    }, this);
+    return alt;
+  },
+  configurable: true
+});
