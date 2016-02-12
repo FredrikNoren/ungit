@@ -414,9 +414,15 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.query.path, '..'));
-    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath).then(function(baseRepoPath) {
-      return { path: path.resolve(baseRepoPath.trim()) };
-    }));
+    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath)
+      .then(function(baseRepoPath) {
+        return { path: path.resolve(baseRepoPath.trim()) };
+      }).catch(function(e) {
+        if (e.errorCode === 'not-a-repository') {
+          return {};
+        }
+        throw e;
+      }));
   });
 
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
