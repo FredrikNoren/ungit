@@ -360,7 +360,7 @@ git.commit = function(repoPath, amend, message, files) {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
     // ignore the case where nothing were added to be committed
-    if (err.stdout.indexOf("Changes not staged for commit") === -1)
+    if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1)
       throw err;
   });
 }
