@@ -54,14 +54,13 @@
 <!-- ungit-plugins-placeholder -->
 
 <script type="text/javascript">
+	!function(a,b){a("Keen","https://d26b395fwzu5fz.cloudfront.net/3.4.0-rc/keen.min.js",b)}(function(a,b,c){var d,e,f;c["_"+a]={},c[a]=function(b){c["_"+a].clients=c["_"+a].clients||{},c["_"+a].clients[b.projectId]=this,this._config=b},c[a].ready=function(b){c["_"+a].ready=c["_"+a].ready||[],c["_"+a].ready.push(b)},d=["addEvent","setGlobalProperties","trackExternalLink","on"];for(var g=0;g<d.length;g++){var h=d[g],i=function(a){return function(){return this["_"+a]=this["_"+a]||[],this["_"+a].push(arguments),this}};c[a].prototype[h]=i(h)}e=document.createElement("script"),e.async=!0,e.src=b,f=document.getElementsByTagName("script")[0],f.parentNode.insertBefore(e,f)},this);
 
-	var Keen=Keen||{configure:function(e){this._cf=e},addEvent:function(e,t,n,i){this._eq=this._eq||[],this._eq.push([e,t,n,i])},setGlobalProperties:function(e){this._gp=e},onChartsReady:function(e){this._ocrq=this._ocrq||[],this._ocrq.push(e)}};(function(){var e=document.createElement("script");e.type="text/javascript",e.async=!0,e.src=("https:"==document.location.protocol?"https://":"http://")+"dc8na2hxrj29i.cloudfront.net/code/keen-2.1.0-min.js";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)})();
-
-	Keen.configure({
+	var keen = new Keen({
 		projectId: '5240b1d436bf5a753800000c',
 		writeKey: 'da0303fb058149813443f1321a139f23420323887b6a4940e82d47d02df451a4a132b938d2e8200a17914e06aa2767dc1a6fa0891db41942918db91a8daa61784d7af2495b934a05111605e4aa4e5c3d92b0b7f8be4d146e05586701894dc35d619443ae234dbc608a36de9ee97e0e1a'
-	});
-	
+  });
+
 	if (ungit.config.sendUsageStatistics) {
 
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -73,10 +72,10 @@
 		ga('send', 'pageview');
 		console.log('Google analytics inited');
 
-		Keen.addEvent('ui-start', { version: ungit.version, userHash: ungit.userHash });
+		keen.addEvent('ui-start', { version: ungit.version, userHash: ungit.userHash });
 
 		Raven.TraceKit.report.subscribe(function(err) {
-			Keen.addEvent('ui-exception', { version: ungit.version, userHash: ungit.userHash });
+			keen.addEvent('ui-exception', { version: ungit.version, userHash: ungit.userHash });
 		});
 		console.log('Keen.io inited');
 	}
