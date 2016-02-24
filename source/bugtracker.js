@@ -3,8 +3,6 @@
 const winston = require('winston');
 const sysinfo = require('./sysinfo');
 const config = require('./config');
-const os = require('os');
-const superagent = require('superagent');
 const raven = require('raven');
 const client = new raven.Client('https://58f16d6f010d4c77900bb1de9c02185f:84b7432f56674fbc8522bc84cc7b30f4@app.getsentry.com/12434');
 
