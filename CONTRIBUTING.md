@@ -5,6 +5,12 @@ Posting issues
 
 Just common sense; do a quick search before posting, someone might already have created an issue (or resolved the problem!). If you're posting a bug; try to include as much relevant information as possible (ungit version, node and npm version, os, any git errors displayed, output from cli console and output from the browser console).
 
+Pull requests
+=============
+Make sure to include a note in CHANGELOG.md about the change as part of the PR.
+We follow the ["Keep a changelog"](http://keepachangelog.com/) style guide.
+Make sure to include reference's to issues and PR's when relevant in the change log.
+
 Writing plugins
 ===============
 See [PLUGINS.md](PLUGINS.md)
@@ -30,7 +36,7 @@ To get started developing on Ungit:
  4. Run `grunt` to build (compile templates, css and js).
  5. Type `npm start` to start ungit, or `npm test` to run tests.
  6. (Optional). Run `grunt watch` to automatically rebuild stuff when you change files.
- 
+
 Run ungit as standalone application
 -----------------------------------
 

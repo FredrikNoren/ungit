@@ -54,11 +54,11 @@ var RefViewModel = function(fullRefName, graph) {
   this.color = this._colorFromHashOfString(this.name);
 
   this.node.subscribe(function(oldNode) {
-    if (oldNode) oldNode.branchesAndLocalTags.remove(self);
+    if (oldNode) oldNode.removeRef(self);
   }, null, "beforeChange");
   this.node.subscribe(function(newNode) {
-    if (newNode) newNode.branchesAndLocalTags.push(self);
-  })
+    if (newNode) newNode.pushRef(self);
+  });
 };
 module.exports = RefViewModel;
 
@@ -161,7 +161,6 @@ RefViewModel.prototype.createRemoteRef = function(callback) {
       refSpec: this.refName, remoteBranch: this.refName }, function(err) {
         if (!err) {
           var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
-          self.node().branchesAndLocalTags.push(newRef);
           newRef.node(self.node());
         }
         callback(err);

@@ -150,6 +150,7 @@ Server.prototype.query = function(method, path, body, callback) {
       if (error.body) {
         if (error.body.errorCode && error.body.errorCode != 'unknown') errorSummary = error.body.errorCode;
         else if (typeof(error.body.error) == 'string') errorSummary = error.body.error.split('\n')[0];
+        else if (typeof(error.body.message) == 'string') errorSummary = error.body.message;
         else errorSummary = JSON.stringify(error.body.error);
       }
       else errorSummary = error.httpRequest.statusText + ' ' + error.status;
@@ -199,7 +200,7 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
     var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
     if (!shouldSkipReport) {
       if (ungit.config && ungit.config.sendUsageStatistics) {
-        Keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
+        keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
       }
       console.log('git-error', err); // Used by the clicktests
     }
@@ -217,7 +218,11 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
   else {
     precreatedError.message = 'Backend error: ' + err.errorSummary;
     console.error(err.errorSummary);
-    console.log(precreatedError.stack);
+    var stack = precreatedError.stack;
+    if (err.res.body && err.res.body.stack) {
+      stack += '\nBackend stacktrace:\n' + err.res.body.stack;
+    }
+    console.log(stack);
     Raven.captureException(precreatedError);
     programEvents.dispatch({ event: 'git-crash-error' });
   }

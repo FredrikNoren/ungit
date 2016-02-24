@@ -30,3 +30,52 @@ describe('git-parse diff on big change', function() {
     });
   });
 });
+
+describe('git-parser submodule', function() {
+  it('should work with empty string', function() {
+    var gitmodules = "";
+    var submodules = gitParser.parseGitSubmodule(gitmodules);
+    expect(submodules).to.be.an('object').and.to.be.empty();
+  });
+  it('should work with name, path and url', function() {
+    var gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com';
+    var submodules = gitParser.parseGitSubmodule(gitmodules);
+    expect(submodules.length).to.be(1);
+    expect(submodules[0].name).to.be('test1');
+    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].url).to.be('http://example1.com');
+  });
+  it('should work with multiple name, path and url', function() {
+    var gitmodules = [
+      '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com',
+      '[submodule "test2"]\npath = /path/to/sub2\nurl = http://example2.com',
+    ].join('\n');
+    var submodules = gitParser.parseGitSubmodule(gitmodules);
+    expect(submodules.length).to.be(2);
+    expect(submodules[0].name).to.be('test1');
+    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].url).to.be('http://example1.com');
+    expect(submodules[1].name).to.be('test2');
+    expect(submodules[1].path).to.be('/path/to/sub2');
+    expect(submodules[1].url).to.be('http://example2.com');
+  });
+  it('should work with multiple name, path, url, update, branch, fetchRecurseSubmodules and ignore', function() {
+    var gitmodules = [
+      '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all',
+      '[submodule  "test2"]\n\npath   ==/path/to/sub2\nurl= git://example2.com',
+    ].join('\n');
+    var submodules = gitParser.parseGitSubmodule(gitmodules);
+    expect(submodules.length).to.be(2);
+    expect(submodules[0].name).to.be('test1');
+    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].url).to.be('http://example1.com');
+    expect(submodules[0].update).to.be('checkout');
+    expect(submodules[0].branch).to.be('master');
+    expect(submodules[0].fetchRecurseSubmodules).to.be('true');
+    expect(submodules[0].ignore).to.be('all');
+    expect(submodules[1].name).to.be('test2');
+    expect(submodules[1].path).to.be('=/path/to/sub2');
+    expect(submodules[1].url).to.be('http://example2.com');
+    expect(submodules[1].rawUrl).to.be('git://example2.com');
+  });
+});

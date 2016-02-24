@@ -220,50 +220,38 @@ exports.parseGitSubmodule = function(text, args) {
     return {};
   }
 
-  var lines = text.trim().split('\n').filter(function(line) {
-    return line;
-  });
-
-  var submodule = {};
+  var submodule;
   var submodules = [];
 
-  var getSubmoduleName = function(line) {
-    submodule.name = line.match(/"(.*?)"/)[1];
-    parser = getPath;
-  };
+  text.trim().split('\n').filter(function(line) {
+    return line;
+  }).forEach(function(line) {
+    if (line.indexOf("[submodule") === 0) {
+      submodule = {};
+      submodules.push(submodule);
+      submodule.name = line.match(/"(.*?)"/)[1];
+    } else {
+      var parts = line.split("=");
+      var key = parts[0].trim();
+      var value = parts.slice(1).join("=").trim();
+      submodule[key] = value;
 
-  var getPath = function(line) {
-    submodule.path = line.substr(line.indexOf("= ") + 1).trim();
-    parser = getUrl;
-  };
+      if (key == "url") {
+        // keep a reference to the raw url
+        var url = submodule.rawUrl = value;
 
-  var getUrl = function(line) {
-    var url = line.substr(line.indexOf("= ") + 1).trim();
+        // When a repo is checkout with ssh or git instead of an url
+        if (url.indexOf('http') != 0) {
+          if (url.indexOf('git:') == 0) { // git
+            url = 'http' + url.substr(url.indexOf(':'));
+          } else { // ssh
+            url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+          }
+        }
 
-    // keep a reference to the raw url
-    submodule.rawUrl = url;
-
-    // When a repo is checkout with ssh or git instead of an url
-    if (url.indexOf('http') != 0) {
-      if (url.indexOf('git:') == 0) { // git
-        url = 'http' + url.substr(url.indexOf(':'));
-      } else { // ssh
-        url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
+        submodule.url = url;
       }
     }
-
-    submodule.url = url;
-
-    parser = getSubmoduleName;
-
-    submodules.push(submodule);
-    submodule = {};
-  };
-
-  var parser = getSubmoduleName;
-
-  lines.forEach(function(line) {
-    parser(line);
   });
 
   return submodules;
