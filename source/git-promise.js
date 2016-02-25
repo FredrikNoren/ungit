@@ -159,17 +159,23 @@ git.status = function(repoPath, file) {
       })
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
+    var status = result.status;
+    status.isInConflict = false;
 
     // merge numstats
-    Object.keys(result.status.files).forEach(function(filename) {
+    Object.keys(status.files).forEach(function(filename) {
       // git diff returns paths relative to git repo but git status does not
       var absoluteFilename = filename.replace(/\.\.\//g, '');
       var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      result.status.files[filename].additions = stats.additions;
-      result.status.files[filename].deletions = stats.deletions;
+      var fileObj = status.files[filename];
+      fileObj.additions = stats.additions;
+      fileObj.deletions = stats.deletions;
+      if (!status.isInConflict && fileObj.conflict) {
+        status.isInConflict = true;
+      }
     });
 
-    return result.status;
+    return status;
   });
 }
 
