@@ -8,6 +8,7 @@ var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var fs = require('./utils/fs-async');
+var async = require('async')
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
 /**
@@ -23,6 +24,53 @@ var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', 
  * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
  * @example getGitExecuteTask(['show'], '/tmp');
  */
+
+var gitQueue = async.queue(function (args, callback) {
+  if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
+  var rejected = false;
+  var stdout = '';
+  var stderr = '';
+  var gitProcess = child_process.spawn(
+    'git',
+    args.commands,
+    {
+      cwd: args.repoPath,
+      maxBuffer: 1024 * 1024 * 100,
+      timeout: args.timeout
+    });
+
+  if (args.outPipe) {
+    gitProcess.stdout.pipe(args.outPipe);
+  } else {
+    gitProcess.stdout.on('data', function(data) {
+      stdout += data.toString();
+    });
+  }
+  if (args.inPipe) {
+    gitProcess.stdin.end(args.inPipe);
+  }
+  gitProcess.stderr.on('data', function(data) {
+    stderr += data.toString();
+  });
+  gitProcess.on('error', function (error) {
+    if (args.outPipe) args.outPipe.end();
+    rejected = true;
+    callback(error);
+  });
+
+  gitProcess.on('close', function (code) {
+    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+    if (rejected) return;
+    if (args.outPipe) args.outPipe.end();
+
+    if (code === 0 || (code === 1 && args.allowError)) {
+      callback(null, stdout);
+    } else {
+      callback(getGitError(args, stderr, stdout));
+    }
+  });
+}, config.maxConcurrentGitOperations);
+
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
@@ -30,6 +78,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
     args.repoPath = repoPath;
     args.outPipe = outPipe;
     args.inPipe = inPipe;
+    args.allowError = allowError;
   } else {
     args = commands;
   }
@@ -41,47 +90,11 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.startTime = Date.now();
 
   return new Promise(function (resolve, reject) {
-    if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
-    var rejected = false;
-    var stdout = '';
-    var stderr = '';
-    var gitProcess = child_process.spawn(
-      'git',
-      args.commands,
-      {
-        cwd: args.repoPath,
-        maxBuffer: 1024 * 1024 * 100,
-        timeout: args.timeout
-      });
-
-    if (args.outPipe) {
-      gitProcess.stdout.pipe(args.outPipe);
-    } else {
-      gitProcess.stdout.on('data', function(data) {
-        stdout += data.toString();
-      });
-    }
-    if (args.inPipe) {
-      gitProcess.stdin.end(args.inPipe);
-    }
-    gitProcess.stderr.on('data', function(data) {
-      stderr += data.toString();
-    });
-    gitProcess.on('error', function (error) {
-      if (args.outPipe) args.outPipe.end();
-      rejected = true;
-      reject(error);
-    });
-
-    gitProcess.on('close', function (code) {
-      if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
-      if (rejected) return;
-      if (args.outPipe) args.outPipe.end();
-
-      if (code === 0 || (code === 1 && allowError)) {
-        resolve(stdout);
+    gitQueue.push(args, function(queueError, out){
+      if(queueError){
+        reject(queueError);
       } else {
-        reject(getGitError(args, stderr, stdout));
+        resolve(out);
       }
     });
   });
