@@ -109,15 +109,8 @@ exports.registerApi = function(env) {
     return promise.then(function(result) {
         res.json(result || {});
       }).catch(function(err) {
+        winston.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
-
-        if (err instanceof Error) {
-           console.error('Unhandled error: ' + err.message);
-           console.error(err.stack);
-         } else {
-           console.error('Unhandled error');
-           console.error(err);
-         }
       });
   }
 
@@ -414,9 +407,15 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
     var currentPath = path.resolve(path.join(req.query.path, '..'));
-    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath).then(function(baseRepoPath) {
-      return { path: path.resolve(baseRepoPath.trim()) };
-    }));
+    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath)
+      .then(function(baseRepoPath) {
+        return { path: path.resolve(baseRepoPath.trim()) };
+      }).catch(function(e) {
+        if (e.errorCode === 'not-a-repository') {
+          return {};
+        }
+        throw e;
+      }));
   });
 
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){

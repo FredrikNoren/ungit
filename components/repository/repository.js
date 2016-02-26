@@ -60,7 +60,7 @@ RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
   var self = this;
   this.server.get('/baserepopath', { path: this.repoPath }, function(err, baseRepoPath) {
-    if (err) {
+    if (err || !baseRepoPath.path) {
       self.isSubmodule(false);
       return true;
     }
