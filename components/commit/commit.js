@@ -63,7 +63,7 @@ CommitViewModel.prototype.setData = function(args) {
   this.fileLineDiffs(args.fileLineDiffs);
   this.isInited = true;
   this.commitDiff = ko.observable(components.create('commitDiff',
-    { fileLineDiffs: this.fileLineDiffs().slice(),
+    { fileLineDiffs: this.fileLineDiffs(),
       sha1: this.sha1,
       repoPath: this.repoPath,
       server: this.server,

@@ -8,7 +8,6 @@ var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var _ = require('lodash');
 var gitPromise = require('./git-promise');
-var Promise = require('bluebird');
 var fs = require('./utils/fs-async');
 
 exports.pathPrefix = '';

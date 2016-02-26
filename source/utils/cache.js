@@ -1,24 +1,23 @@
+'use strict';
 
-var signals = require('signals');
+const signals = require('signals');
 
 // Wraps a function to produce one value at a time no matter how many times invoked, and cache that value until invalidated
-var cache = function(constructValue) {
+module.exports = (constructValue) => {
+  let constructDone;
+  let hasCache = false;
 
-  var constructDone;
-  var hasCache = false;
-
-  var f = function(callback) {
-
+  let f = (callback) => {
     if (hasCache) return callback(f.error, f.value);
     if (constructDone) return constructDone.add(callback);
 
     constructDone = new signals.Signal();
-    var localConstructDone = constructDone;
-    constructDone.add(function(err, val) {
+    let localConstructDone = constructDone;
+    constructDone.add((err, val) => {
       constructDone = null;
       callback(err, val);
     });
-    constructValue(function(err, value) {
+    constructValue((err, value) => {
       hasCache = true;
       f.error = err;
       f.value = value;
@@ -26,7 +25,7 @@ var cache = function(constructValue) {
     });
   };
 
-  f.invalidate = function() {
+  f.invalidate = () => {
     hasCache = false;
     f.error = null;
     f.value = null;
@@ -35,5 +34,3 @@ var cache = function(constructValue) {
 
   return f;
 }
-
-module.exports = cache;

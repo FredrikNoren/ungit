@@ -5,7 +5,6 @@ var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var filesToDisplayIncrmentBy = 50;
 var filesToDisplayLimit = filesToDisplayIncrmentBy;
-var fileType = require('../../source/utils/file-type.js');
 // when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
 var muteGraceTimeDuration = 60 * 1000 * 5;
 
@@ -295,7 +294,6 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
 
 var FileViewModel = function(staging, name, textDiffType) {
   var self = this;
-  this.patchLineList = ko.observableArray();
   this.staging = staging;
   this.server = staging.server;
   this.editState = ko.observable('staged'); // staged, patched and none
@@ -311,17 +309,17 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.textDiffType = textDiffType;
   this.additions = ko.observable('');
   this.deletions = ko.observable('');
-  this.diff = ko.observable(self.getSpecificDiff());
+  this.fileType = ko.observable('text');
   this.patchLineList = ko.observableArray();
+  this.diff = ko.observable();
   this.isShowPatch = ko.computed(function() {
     // if not new file
     // and if not merging
     // and if not rebasing
     // and if text file
     // and if diff is showing, display patch button
-    return !self.isNew() && !staging.inMerge() && !staging.inRebase() && fileType(self.name()) === 'text' && self.isShowingDiffs();
+    return !self.isNew() && !staging.inMerge() && !staging.inRebase() && self.fileType() === 'text' && self.isShowingDiffs();
   });
-  this.diff = ko.observable(self.getSpecificDiff());
 
   this.editState.subscribe(function (value) {
     if (value === 'none') {
@@ -332,7 +330,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   });
 }
 FileViewModel.prototype.getSpecificDiff = function() {
-  return components.create(!this.name() || fileType(this.name()) === 'text' ? 'textdiff' : 'imagediff', {
+  return components.create(!this.name() || this.fileType() + 'diff', {
     filename: this.name(),
     repoPath: this.staging.repoPath,
     server: this.server,
@@ -349,8 +347,10 @@ FileViewModel.prototype.setState = function(state) {
   this.removed(state.removed);
   this.conflict(state.conflict);
   this.renamed(state.renamed);
+  this.fileType(state.type);
   this.additions(state.additions != '-' ? '+' + state.additions : '');
   this.deletions(state.deletions != '-' ? '-' + state.deletions : '');
+  this.diff = ko.observable(this.getSpecificDiff());
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }

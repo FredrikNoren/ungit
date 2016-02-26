@@ -1,10 +1,12 @@
-var rc = require('rc');
-var path = require('path');
-var fs = require('fs');
-var yargs = require('yargs');
-var homedir = require('os-homedir')();
+'use strict';
 
-var defaultConfig = {
+const rc = require('rc');
+const path = require('path');
+const fs = require('fs');
+const yargs = require('yargs');
+const homedir = require('os-homedir')();
+
+const defaultConfig = {
 
   // The port ungit is exposed on.
   port: 8448,
@@ -113,7 +115,7 @@ var defaultConfig = {
 };
 
 // Works for now but should be moved to bin/ungit
-var argv = yargs
+let argv = yargs
 .usage('$0 [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
 .example('$0 --port=8888', 'Run Ungit on port 8888')
 .example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
@@ -163,24 +165,6 @@ if (argv.$0.indexOf('mocha') === -1) {
   argv = argv.strict();
 }
 
-function cleanUpRootPath() {
-  var currentRootPath = module.exports.rootPath;
-
-  if (typeof currentRootPath !== 'string') {
-    currentRootPath = '';
-  } else if (currentRootPath !== '') {
-    // must start with a slash
-    if (currentRootPath.charAt(0) !== '/') {
-      currentRootPath = '/' + currentRootPath;
-    }
-    // can not end with a trailing slash
-    if (currentRootPath.charAt(currentRootPath.length - 1) === '/') {
-      currentRootPath = currentRootPath.substring(0, currentRootPath.length - 1);
-    }
-  }
-  module.exports.rootPath = currentRootPath;
-}
-
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
@@ -193,16 +177,29 @@ if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
 }
 module.exports.homedir = homedir;
 
-cleanUpRootPath();
+let currentRootPath = module.exports.rootPath;
+if (typeof currentRootPath !== 'string') {
+  currentRootPath = '';
+} else if (currentRootPath !== '') {
+  // must start with a slash
+  if (currentRootPath.charAt(0) !== '/') {
+    currentRootPath = '/' + currentRootPath;
+  }
+  // can not end with a trailing slash
+  if (currentRootPath.charAt(currentRootPath.length - 1) === '/') {
+    currentRootPath = currentRootPath.substring(0, currentRootPath.length - 1);
+  }
+}
+module.exports.rootPath = currentRootPath;
 
 // Errors can not be serialized with JSON.stringify without this fix
 // http://stackoverflow.com/a/18391400
 Object.defineProperty(Error.prototype, 'toJSON', {
   value: function() {
-    var alt = {};
-    Object.getOwnPropertyNames(this).forEach(function(key) {
+    let alt = {};
+    Object.getOwnPropertyNames(this).forEach(key => {
       alt[key] = this[key];
-    }, this);
+    });
     return alt;
   },
   configurable: true

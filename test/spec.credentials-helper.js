@@ -3,7 +3,7 @@ var expect = require('expect.js');
 var child_process = require('child_process');
 var path = require('path');
 var http = require('http');
-var config = require('../source/config');
+var config = require('../src/config');
 
 describe('credentials-helper', function () {
 
