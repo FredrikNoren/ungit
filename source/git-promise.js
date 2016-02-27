@@ -8,7 +8,7 @@ var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var fs = require('./utils/fs-async');
-var async = require('async')
+var async = require('async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
 /**
