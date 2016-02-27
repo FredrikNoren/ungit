@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.1...master)
 
+### Fixed
+- Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
+
 ## [0.10.1](https://github.com/FredrikNoren/ungit/compare/v0.10.0...v0.10.1)
 ### Added
 - Introduced change log! [#687](https://github.com/FredrikNoren/ungit/issues/687)
