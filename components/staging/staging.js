@@ -150,8 +150,8 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
   if (this.inRebase()) {
-    this.commitMessageTitle('Rebasing...');
-    this.commitMessageBody('');
+    this.commitMessageTitle('Rebase conflict');
+    this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
   }
 
   if (status.inMerge) {
