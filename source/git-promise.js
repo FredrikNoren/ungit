@@ -156,11 +156,13 @@ git.status = function(repoPath, file) {
           }
           return status;
         });
-      })
+      }),
+    isCherryFailed: fs.isExists(path.join(repoPath, '.cherrypick-conflict'))
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
     var status = result.status;
-    status.isInConflict = false;
+    status.inConflict = false;
+    status.isCherryFailed = result.isCherryFailed;  // No, I don't like this name either.
 
     // merge numstats
     Object.keys(status.files).forEach(function(filename) {
@@ -171,7 +173,7 @@ git.status = function(repoPath, file) {
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
       if (!status.isInConflict && fileObj.conflict) {
-        status.isInConflict = true;
+        status.inConflict = true;
       }
     });
 

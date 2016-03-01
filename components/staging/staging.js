@@ -27,6 +27,8 @@ var StagingViewModel = function(server, repoPath) {
   this.commitMessageBody = ko.observable();
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
+  this.inConflict = ko.observable(false);
+  this.isCherryFailed = ko.observable(false);
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
   this.commitButtonVisible = ko.computed(function() {
@@ -149,6 +151,8 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
+  this.inConflict(!!status.inConflict);
+  this.isCherryFailed(!!status.isCherryFailed);
   if (status.inMerge) {
     var lines = status.commitMessage.split('\n');
     this.commitMessageTitle(lines[0]);

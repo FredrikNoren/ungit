@@ -336,7 +336,7 @@ exports.registerApi = function(env) {
         .catch(function(e) {
           if (e.errorCode === 'merge-failed') {
             // Attempt to write a ".cherrypick-conflict" file to persist conflict state
-            fs.writeFile(path.join(req.body.path, '.cherrypick-conflict'), e.command;
+            fs.writeFile(path.join(req.body.path, '.cherrypick-conflict'), e.command);
           }
           throw (e);
         }))
