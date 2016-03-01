@@ -332,7 +332,14 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res) {
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path))
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path)
+        .catch(function(e) {
+          if (e.errorCode === 'merge-failed') {
+            // Attempt to write a ".cherrypick-conflict" file to persist conflict state
+            fs.writeFile(path.join(req.body.path, '.cherrypick-conflict'), e.command;
+          }
+          throw (e);
+        }))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });

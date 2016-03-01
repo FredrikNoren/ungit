@@ -36,3 +36,4 @@ report/
 /components/**/*.bundle.js
 
 coverage
+.cherrypick-conflict
