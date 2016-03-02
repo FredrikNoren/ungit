@@ -18,7 +18,7 @@
                   </span>
                   <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-        <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+        <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>
