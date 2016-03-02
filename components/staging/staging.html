@@ -38,6 +38,12 @@
           Abort merge
           <!-- ko component: mergeAbortProgressBar --><!-- /ko -->
         </button>
+        <button class="cherryContinueButton btn btn-primary" data-bind="click: commit, visible: inCherryConflict, enable: !commitValidationError()">
+          Continue Cherry-Pick
+        </button>
+        <button class="cherryAbortButton btn btn-warning" data-bind="click: discardAllChanges, visible: inCherryConflict">
+          Abort Cherry-Pick
+        </button>
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="col-lg-9 file-area">

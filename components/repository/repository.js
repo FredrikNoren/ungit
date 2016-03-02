@@ -21,7 +21,7 @@ var RepositoryViewModel = function(server, repoPath) {
   this.staging = components.create('staging', { server: server, repoPath: repoPath });
   this.branches = components.create('branches', { server: server, repoPath: repoPath });
   this.showLog = ko.computed(function() {
-    return !self.staging.inRebase() && !self.staging.inMerge();
+    return !self.staging.inRebase() && !self.staging.inMerge() && !self.staging.inCherryConflict();
   });
   this.server.watchRepository(repoPath);
   this.isSubmodule = ko.observable(false);

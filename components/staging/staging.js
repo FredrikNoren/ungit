@@ -28,11 +28,11 @@ var StagingViewModel = function(server, repoPath) {
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inConflict = ko.observable(false);
-  this.isCherryFailed = ko.observable(false);
+  this.inCherryConflict = ko.observable(false);
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
   this.commitButtonVisible = ko.computed(function() {
-    return !self.inRebase() && !self.inMerge();
+    return !self.inRebase() && !self.inMerge() && !self.inCherryConflict();
   });
   this.nFiles = ko.computed(function() {
     return self.files().length;
@@ -151,8 +151,9 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
-  this.inConflict(!!status.inConflict);
-  this.isCherryFailed(!!status.isCherryFailed);
+  this.inCherryConflict(!!status.isCherryFailed && !!status.inConflict);
+
+  console.log(this);
   if (status.inMerge) {
     var lines = status.commitMessage.split('\n');
     this.commitMessageTitle(lines[0]);
