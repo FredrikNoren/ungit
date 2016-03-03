@@ -9,6 +9,7 @@ var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var fs = require('./utils/fs-async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+var cherryFailedFileName = '.cherrypick-conflict';
 
 /**
  * Returns a promise that executes git command with given arguments
@@ -157,7 +158,7 @@ git.status = function(repoPath, file) {
           return status;
         });
       }),
-    isCherryFailed: fs.isExists(path.join(repoPath, '.cherrypick-conflict'))
+    isCherryFailed: fs.isExists(path.join(repoPath, cherryFailedFileName))
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
     var status = result.status;
@@ -371,6 +372,17 @@ git.commit = function(repoPath, amend, message, files) {
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1)
       throw err;
   });
+}
+
+git.cherryPick = function(repoPath, name) {
+  return git(['cherry-pick', name], repoPath)
+    .catch(function(e) {
+      if (e.errorCode === 'merge-failed') {
+        // Attempt to write a ${cherypickFailFileName} file to persist conflict state
+        fs.writeFile(path.join(repoPath, cherryFailedFileName), e.command);
+      }
+      throw (e);
+    });
 }
 
 module.exports = git;
