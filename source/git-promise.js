@@ -378,8 +378,18 @@ git.cherryPick = function(repoPath, name) {
   return git(['cherry-pick', name], repoPath)
     .catch(function(e) {
       if (e.errorCode === 'merge-failed') {
+        var sha1 = e.command.split(' ');
+        sha1 = sha1[sha1.length - 1];
+
         // Attempt to write a ${cherypickFailFileName} file to persist conflict state
-        fs.writeFile(path.join(repoPath, cherryFailedFileName), e.command);
+        // write promise is intentionally not being returned, and the reason is file write may
+        // fail based on the security settings and file write failure only means chery pick
+        // failure detection will not work.  Which is not the end of the world.
+        // ** depends on fs.watch on repoPath to trigger wokringTreeChanged() event **
+        git(['log', '--format=%B', '-n', "1", sha1], repoPath)
+          .then(function(message) {
+            return fs.writeFileAsync(path.join(repoPath, cherryFailedFileName), JSON.stringify({ command: e.command, message: message }));
+          });
       }
       throw (e);
     });
