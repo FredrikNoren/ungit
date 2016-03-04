@@ -332,7 +332,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/cherrypick', ensureAuthenticated, ensurePathExists, function(req, res) {
-    jsonResultOrFailProm(res, gitPromise.cherryPick(req.body.path, req.body.name.trim()))
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });

@@ -144,11 +144,13 @@ git.status = function(repoPath, file) {
           isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
           isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
+          inCherry: fs.isExists(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD'))
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
+          status.inCherry = result.inCherry;
         }).then(function() {
-          if (status.inMerge) {
+          if (status.inMerge || status.inCherry) {
             return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
@@ -157,13 +159,11 @@ git.status = function(repoPath, file) {
           }
           return status;
         });
-      }),
-    isCherryFailed: fs.isExists(path.join(repoPath, cherryFailedFileName))
+      })
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
     var status = result.status;
     status.inConflict = false;
-    status.isCherryFailed = result.isCherryFailed;  // No, I don't like this name either.
 
     // merge numstats
     Object.keys(status.files).forEach(function(filename) {
@@ -372,27 +372,6 @@ git.commit = function(repoPath, amend, message, files) {
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1)
       throw err;
   });
-}
-
-git.cherryPick = function(repoPath, name) {
-  return git(['cherry-pick', name], repoPath)
-    .catch(function(e) {
-      if (e.errorCode === 'merge-failed') {
-        var sha1 = e.command.split(' ');
-        sha1 = sha1[sha1.length - 1];
-
-        // Attempt to write a ${cherypickFailFileName} file to persist conflict state
-        // write promise is intentionally not being returned, and the reason is file write may
-        // fail based on the security settings and file write failure only means chery pick
-        // failure detection will not work.  Which is not the end of the world.
-        // ** depends on fs.watch on repoPath to trigger wokringTreeChanged() event **
-        git(['log', '--format=%B', '-n', "1", sha1], repoPath)
-          .then(function(message) {
-            return fs.writeFileAsync(path.join(repoPath, cherryFailedFileName), JSON.stringify({ command: e.command, message: message }));
-          });
-      }
-      throw (e);
-    });
 }
 
 module.exports = git;
