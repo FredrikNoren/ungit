@@ -27,7 +27,6 @@ var StagingViewModel = function(server, repoPath) {
   this.commitMessageBody = ko.observable();
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
-  this.inConflict = ko.observable(false);
   this.inCherry = ko.observable(false);
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
