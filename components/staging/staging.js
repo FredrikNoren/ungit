@@ -152,7 +152,7 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.inMerge(!!status.inMerge);
   this.inCherry(!!status.inCherry);
 
-  if (this.inMerge()) {
+  if (this.inMerge() || this.inCherry()) {
     var lines = status.commitMessage.split('\n');
     this.commitMessageTitle(lines[0]);
     this.commitMessageBody(lines.slice(1).join('\n'));
