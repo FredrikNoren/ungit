@@ -149,6 +149,11 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
+  if (this.inRebase()) {
+    this.commitMessageTitle('Rebase conflict');
+    this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
+  }
+
   if (status.inMerge) {
     var lines = status.commitMessage.split('\n');
     this.commitMessageTitle(lines[0]);
