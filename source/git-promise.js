@@ -9,7 +9,6 @@ var isWindows = /^win/.test(process.platform);
 var Promise = require('bluebird');
 var fs = require('./utils/fs-async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-var cherryFailedFileName = '.cherrypick-conflict';
 
 /**
  * Returns a promise that executes git command with given arguments
