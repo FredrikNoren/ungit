@@ -22,27 +22,13 @@
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>
-        <button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
-          Continue rebase
-          <!-- ko component: rebaseContinueProgressBar --><!-- /ko -->
+        <button class="btn btn-primary" data-bind="click: conflictContinue, visible: conflictText, enable: !commitValidationError()">
+          Continue <span data-bind="text: conflictText"/>
+          <!-- ko component: conflictContinueProgressBar --><!-- /ko -->
         </button>
-        <button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
-          Abort rebase
-          <!-- ko component: rebaseAbortProgressBar --><!-- /ko -->
-        </button>
-        <button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
-          Continue merge
-          <!-- ko component: mergeContinueProgressBar --><!-- /ko -->
-        </button>
-        <button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
-          Abort merge
-          <!-- ko component: mergeAbortProgressBar --><!-- /ko -->
-        </button>
-        <button class="cherryContinueButton btn btn-primary" data-bind="click: commit, visible: inCherry, enable: !commitValidationError()">
-          Continue Cherry-Pick
-        </button>
-        <button class="cherryAbortButton btn btn-warning" data-bind="click: discardAllChanges, visible: inCherry">
-          Abort Cherry-Pick
+        <button class="btn btn-warning" data-bind="click: conflictAbort, visible: conflictText">
+          Abort <span data-bind="text: conflictText"/>
+          <!-- ko component: conflictAbortProgressBar --><!-- /ko -->
         </button>
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>

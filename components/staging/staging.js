@@ -28,6 +28,25 @@ var StagingViewModel = function(server, repoPath) {
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
+  this.conflictText = ko.computed(function() {
+    if (self.inMerge()) {
+      self.conflictContinue = self.conflictResolution.bind(self, '/merge/continue', self.conflictContinueProgressBar)
+      self.conflictAbort = self.conflictResolution.bind(self, '/merge/abort', self.conflictAbortProgressBar)
+      return "Merge";
+    } else if (self.inRebase()) {
+      self.conflictContinue = self.conflictResolution.bind(self, '/rebase/continue', self.conflictContinueProgressBar)
+      self.conflictAbort = self.conflictResolution.bind(self, '/rebase/abort', self.conflictAbortProgressBar)
+      return "Rebase";
+    } else if (self.inCherry()) {
+      self.conflictContinue = self.commit;
+      self.conflictAbort = self.discardAllChanges;
+      return "Cherry-pick";
+    } else {
+      self.conflictContinue = undefined;
+      self.conflictAbort = undefined;
+      return undefined;
+    }
+  });
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
   this.isStageValid = ko.computed(function() {
@@ -53,10 +72,8 @@ var StagingViewModel = function(server, repoPath) {
     return self.files().length == 0 && !self.amend() && !self.inRebase();
   });
   this.committingProgressBar = components.create('progressBar', { predictionMemoryKey: 'committing-' + this.repoPath, temporary: true });
-  this.rebaseContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'rebase-continue-' + this.repoPath, temporary: true });
-  this.rebaseAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'rebase-abort-' + this.repoPath, temporary: true });
-  this.mergeContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-continue-' + this.repoPath, temporary: true });
-  this.mergeAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'merge-abort-' + this.repoPath, temporary: true });
+  this.conflictContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'conflict-continue-' + this.repoPath, temporary: true });
+  this.conflictAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'conflict-abort-' + this.repoPath, temporary: true });
   this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + this.repoPath, temporary: true });
   this.commitValidationError = ko.computed(function() {
     if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
@@ -150,6 +167,7 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
+  this.inCherry(!!status.inCherry);
 
   if (this.inRebase()) {
     this.commitMessageTitle('Rebase conflict');
@@ -219,38 +237,14 @@ StagingViewModel.prototype.commit = function() {
     self.files([]);
   });
 }
-StagingViewModel.prototype.rebaseContinue = function() {
+StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
   var self = this;
-  this.rebaseContinueProgressBar.start();
-  this.server.post('/rebase/continue', { path: this.repoPath }, function(err, res) {
-    self.resetMessages();
-    self.rebaseContinueProgressBar.stop();
-  });
-}
-StagingViewModel.prototype.rebaseAbort = function() {
-  var self = this;
-  this.rebaseAbortProgressBar.start();
-  this.server.post('/rebase/abort', { path: this.repoPath }, function(err, res) {
-    self.resetMessages();
-    self.rebaseAbortProgressBar.stop();
-  });
-}
-StagingViewModel.prototype.mergeContinue = function() {
-  var self = this;
-  this.mergeContinueProgressBar.start();
+  progressBar.start();
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.server.post('/merge/continue', { path: this.repoPath, message: commitMessage }, function(err, res) {
+  this.server.post(apiPath, { path: this.repoPath, message: commitMessage }, function(err, res) {
     self.resetMessages();
-    self.mergeContinueProgressBar.stop();
-  });
-}
-StagingViewModel.prototype.mergeAbort = function() {
-  var self = this;
-  this.mergeAbortProgressBar.start();
-  this.server.post('/merge/abort', { path: this.repoPath }, function(err, res) {
-    self.resetMessages();
-    self.mergeAbortProgressBar.stop();
+    progressBar.stop();
   });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
@@ -296,7 +290,6 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-
 
 var FileViewModel = function(staging, name, textDiffType) {
   var self = this;
