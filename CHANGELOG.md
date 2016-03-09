@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.1...master)
 
+### Added
+- Added support for cherry-pick conflict[#701](https://github.com/FredrikNoren/ungit/issues/701)
+
 ### Fixed
 - Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
 
