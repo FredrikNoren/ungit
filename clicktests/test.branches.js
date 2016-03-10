@@ -15,7 +15,8 @@ suite.test('Init', function(done) {
   environment = new Environment(page);
   environment.init(function(err) {
     if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
+    // testRepoPath = environment.path + '/testrepo';
+    testRepoPath = '/tmp/testrepo'
     environment.createRepos([
       { bare: false, path: testRepoPath }
       ], done);
@@ -94,6 +95,45 @@ suite.test('Delete a branch via selection', function(done) {
     }, 500);
   });
 });
+
+// CHERRY PICK TESTING
+
+suite.test('Create cherrypick test file and add third branch', function(done) {
+  environment.createTestFile(testRepoPath + '/cherry.txt', function(err) {
+    if (err) return done(err);
+    uiInteractions.commit(page, 'commit-3', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
+        uiInteractions.createBranch(page, 'branch-3', done);
+      });
+    });
+  });
+});
+
+suite.test('Roll back to ~1 commit by checking out a branch', function(done) {
+  helpers.click(page, '[data-ta-clickable="branch-menu"]');
+  helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutmaster"]', function() {
+    setTimeout(function() {
+      helpers.click(page, '[data-ta-clickable="checkoutmaster"]');
+      helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]', function() {
+        done();
+      });
+    }, 500);
+  });
+});
+
+suite.test('Cherrypick success test', function(done) {
+  helpers.click(page, '[data-ta-clickable="node-clickable"]')
+  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"]', function() {
+    helpers.click(page, '[data-ta-action="cherry-pick"]');
+    setTimeout(function() {
+      if (helpers.elementVisible(page, '[data-ta-container="user-error-page"]') || helpers.elementVisible(page, '[data-ta-container="staging-file"]')) {
+        done("Cherry-pick error!");
+      }else {
+        done();
+      }
+    }, 500);
+  });
+})
 
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
