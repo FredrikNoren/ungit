@@ -167,7 +167,9 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
-  this.inCherry(!!status.inCherry);
+  // There are time where '.git/CHERRY_PICK_HEAD' file is created and no files are in conflicts.
+  // in such cases we should ignore exception as no good way to resolve it.
+  this.inCherry(!!status.inCherry && !!status.inConflict);
 
   if (this.inRebase()) {
     this.commitMessageTitle('Rebase conflict');

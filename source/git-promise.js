@@ -175,6 +175,7 @@ git.status = function(repoPath, file) {
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
     var status = result.status;
+    status.inConflict = false;
 
     // merge numstats
     Object.keys(status.files).forEach(function(filename) {
@@ -184,6 +185,9 @@ git.status = function(repoPath, file) {
       var fileObj = status.files[filename];
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
+      if (!status.inConflict && fileObj.conflict) {
+        status.inConflict = true;
+      }
     });
 
     return status;
