@@ -121,7 +121,7 @@ suite.test('Roll back to ~1 commit by checking out a branch', function(done) {
 });
 
 suite.test('Cherrypick success test', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable"]')
+  helpers.click(page, '[data-ta-clickable="node-clickable-0"]')
   helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"]', function() {
     helpers.click(page, '[data-ta-action="cherry-pick"]');
     setTimeout(function() {
@@ -135,7 +135,7 @@ suite.test('Cherrypick success test', function(done) {
 });
 
 suite.test('Cherrypick self (causes error and creates ./git/CHERRY_PICK_HEAD but no conflicts)', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable"]')
+  helpers.click(page, '[data-ta-clickable="node-clickable-0"]')
   helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"]', function() {
     helpers.click(page, '[data-ta-action="cherry-pick"]');
     helpers.waitForElementVisible(page, '[data-ta-container="git-error-container"]', function() {
