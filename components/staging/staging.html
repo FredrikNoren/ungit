@@ -22,11 +22,11 @@
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>
-        <button class="btn btn-primary" data-bind="click: conflictContinue, visible: conflictText, enable: !commitValidationError()">
+        <button class="btn btn-primary" data-bind="click: conflictContinue, visible: conflictText, enable: !commitValidationError()"  data-ta-action="continue">
           Continue <span data-bind="text: conflictText"/>
           <!-- ko component: conflictContinueProgressBar --><!-- /ko -->
         </button>
-        <button class="btn btn-warning" data-bind="click: conflictAbort, visible: conflictText">
+        <button class="btn btn-warning" data-bind="click: conflictAbort, visible: conflictText" data-ta-action="abort">
           Abort <span data-bind="text: conflictText"/>
           <!-- ko component: conflictAbortProgressBar --><!-- /ko -->
         </button>

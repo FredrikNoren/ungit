@@ -84,9 +84,9 @@ suite.test('Check out a branch via selection', function(done) {
 
 suite.test('Delete a branch via selection', function(done) {
   helpers.click(page, '[data-ta-clickable="branch-menu"]');
-  helpers.waitForElementVisible(page, '[data-ta-clickable="branch-1-remove"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="branch-2-remove"]', function() {
     setTimeout(function() {
-      helpers.click(page, '[data-ta-clickable="branch-1-remove"]');
+      helpers.click(page, '[data-ta-clickable="branch-2-remove"]');
       helpers.click(page, '[data-ta-clickable="yes"]');
       helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]', function() {
         setTimeout(done, 500);
@@ -97,22 +97,20 @@ suite.test('Delete a branch via selection', function(done) {
 
 // CHERRY PICK TESTING
 
-suite.test('Create cherrypick test file and add third branch', function(done) {
-  environment.createTestFile(testRepoPath + '/cherry.txt', function(err) {
+suite.test('add a commit', function(done) {
+  environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'commit-3', function() {
-      helpers.waitForElementVisible(page, '.commit', function() {
-        uiInteractions.createBranch(page, 'branch-3', done);
-      });
+      done()
     });
   });
 });
 
-suite.test('Roll back to ~1 commit by checking out a branch', function(done) {
+suite.test('checkout chery pick base', function(done) {
   helpers.click(page, '[data-ta-clickable="branch-menu"]');
-  helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutmaster"]', function() {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutbranch-1"]', function() {
     setTimeout(function() {
-      helpers.click(page, '[data-ta-clickable="checkoutmaster"]');
+      helpers.click(page, '[data-ta-clickable="checkoutbranch-1"]');
       helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]', function() {
         done();
       });
@@ -120,24 +118,40 @@ suite.test('Roll back to ~1 commit by checking out a branch', function(done) {
   });
 });
 
-suite.test('Cherrypick success test', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable-0"]')
-  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"]', function() {
-    helpers.click(page, '[data-ta-action="cherry-pick"]');
-    setTimeout(function() {
-      if (helpers.elementVisible(page, '[data-ta-container="user-error-page"]') || helpers.elementVisible(page, '[data-ta-container="staging-file"]')) {
-        done("Cherry-pick error!");
-      }else {
-        done();
-      }
-    }, 500);
+suite.test('cherrypick fail case', function(done) {
+  helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
+  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
+    helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
+    helpers.waitForElementVisible(page, '[data-ta-action="abort"]', function() {
+      helpers.click(page, '[data-ta-action="abort"]');
+      helpers.waitForElementVisible(page, '[data-ta-clickable="yes"]', function() {
+        helpers.click(page, '[data-ta-clickable="yes"]');
+        setTimeout(done, 500);
+      });
+    });
+  });
+});
+
+suite.test('cherrypick success case', function(done) {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
+    helpers.click(page, '[data-ta-clickable="node-clickable-1"]');
+    helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
+      helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
+      setTimeout(function() {
+        if (helpers.elementVisible(page, '[data-ta-action="abort"]')) {
+          done("Cherry pick errored when success was expected.")
+        } else {
+          done();
+        }
+      }, 500)
+    });
   });
 });
 
 suite.test('Cherrypick self (causes error and creates ./git/CHERRY_PICK_HEAD but no conflicts)', function(done) {
   helpers.click(page, '[data-ta-clickable="node-clickable-0"]')
-  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"]', function() {
-    helpers.click(page, '[data-ta-action="cherry-pick"]');
+  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
+    helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
     helpers.waitForElementVisible(page, '[data-ta-container="git-error-container"]', function() {
       if (helpers.elementVisible(page, '[data-ta-clickable="graph"]')) {
         done();
@@ -147,7 +161,6 @@ suite.test('Cherrypick self (causes error and creates ./git/CHERRY_PICK_HEAD but
     });
   });
 });
-
 
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
