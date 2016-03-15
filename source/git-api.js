@@ -460,8 +460,13 @@ exports.registerApi = function(env) {
     var task = fs.isExists(req.query.path).then(function(exists) {
       if (exists) {
         return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
-          .then(function(result) {
-            return result ? 'inited' : 'uninited';
+          .then(function(isWorkingDir) {
+            if (isWorkingDir) {
+              return 'inited'
+            } else {
+              return gitPromise.revParse(req.query.path, '--is-bare-repository')
+                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; })
+            }
           });
       } else {
         return 'no-such-path';
