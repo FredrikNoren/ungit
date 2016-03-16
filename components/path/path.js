@@ -52,7 +52,7 @@ PathViewModel.prototype.updateStatus = function() {
   this.server.get('/quickstatus', { path: this.path }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
-    if (status == 'inited') {
+    if (status == 'inited' || status == 'bare') {
       self.status('repository');
       if (!self.repository())
         self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
@@ -99,5 +99,3 @@ PathViewModel.prototype.createDir = function() {
     self.updateStatus();
   });
 }
-
- 
