@@ -12,13 +12,14 @@ var RepositoryViewModel = function(server, path) {
   var self = this;
 
   this.server = server;
+  this.isBareDir = path.status() === 'bare';
   this.repoPath = path.path;
   this.gitErrors = components.create('gitErrors', { server: server, repoPath: this.repoPath });
   this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
   this.submodules = components.create('submodules', { server: server, repoPath: this.repoPath });
-  this.stash = components.create('stash', { server: server, repoPath: this.repoPath });
-  this.staging = components.create('staging', { server: server, repoPath: this.repoPath });
+  this.stash = components.create('stash', { server: server, repoPath: this.repoPath, isDisabled: this.isBareDir });
+  this.staging = components.create('staging', { server: server, repoPath: this.repoPath, isDisabled: this.isBareDir });
   this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();

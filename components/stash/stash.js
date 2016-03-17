@@ -4,7 +4,7 @@ var moment = require('moment');
 var components = require('ungit-components');
 
 components.register('stash', function(args) {
-  return new StashViewModel(args.server, args.repoPath);
+  return new StashViewModel(args.server, args.repoPath, args.isDisabled);
 });
 
 function StashItemViewModel(stash, data) {
@@ -30,8 +30,9 @@ StashItemViewModel.prototype.drop = function() {
   });
 }
 
-function StashViewModel(server, repoPath) {
+function StashViewModel(server, repoPath, isDisabled) {
   var self = this;
+  this.isDisabled = isDisabled;
   this.server = server;
   this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
@@ -50,6 +51,7 @@ StashViewModel.prototype.onProgramEvent = function(event) {
     this.refresh();
 }
 StashViewModel.prototype.refresh = function() {
+  if (this.isDisabled) return;
   var self = this;
   this.server.get('/stashes', { path: this.repoPath }, function(err, stashes) {
     if (err) {
