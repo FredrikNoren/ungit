@@ -52,15 +52,12 @@ PathViewModel.prototype.updateStatus = function() {
   this.server.get('/quickstatus', { path: this.path }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
+    self.status(status);
     if (status == 'inited' || status == 'bare') {
-      self.status('repository');
-      if (!self.repository())
+      if (!self.repository()) {
         self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
-    } else if (status == 'uninited') {
-      self.status('uninited');
-      self.repository(null);
-    } else if (status == 'no-such-path') {
-      self.status('invalidpath');
+      }
+    } else {
       self.repository(null);
     }
   });
