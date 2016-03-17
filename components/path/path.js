@@ -55,7 +55,7 @@ PathViewModel.prototype.updateStatus = function() {
     self.status(status);
     if (status == 'inited' || status == 'bare') {
       if (!self.repository()) {
-        self.repository(components.create('repository', { server: self.server, repoPath: self.path }));
+        self.repository(components.create('repository', { server: self.server, path: self }));
       }
     } else {
       self.repository(null);

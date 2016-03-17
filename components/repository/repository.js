@@ -5,25 +5,25 @@ var async = require('async');
 var _ = require('lodash');
 
 components.register('repository', function(args) {
-  return new RepositoryViewModel(args.server, args.repoPath);
+  return new RepositoryViewModel(args.server, args.path);
 });
 
-var RepositoryViewModel = function(server, repoPath) {
+var RepositoryViewModel = function(server, path) {
   var self = this;
 
   this.server = server;
-  this.repoPath = repoPath;
-  this.gitErrors = components.create('gitErrors', { server: server, repoPath: repoPath });
-  this.graph = components.create('graph', { server: server, repoPath: repoPath });
-  this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
-  this.submodules = components.create('submodules', { server: server, repoPath: repoPath });
-  this.stash = components.create('stash', { server: server, repoPath: repoPath });
-  this.staging = components.create('staging', { server: server, repoPath: repoPath });
-  this.branches = components.create('branches', { server: server, repoPath: repoPath });
+  this.repoPath = path.path;
+  this.gitErrors = components.create('gitErrors', { server: server, repoPath: this.repoPath });
+  this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
+  this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
+  this.submodules = components.create('submodules', { server: server, repoPath: this.repoPath });
+  this.stash = components.create('stash', { server: server, repoPath: this.repoPath });
+  this.staging = components.create('staging', { server: server, repoPath: this.repoPath });
+  this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
   this.showLog = ko.computed(function() {
     return !self.staging.inRebase() && !self.staging.inMerge();
   });
-  this.server.watchRepository(repoPath);
+  this.server.watchRepository(this.repoPath);
   this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();
