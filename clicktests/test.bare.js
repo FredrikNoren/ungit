@@ -14,8 +14,7 @@ suite.test('Init', function(done) {
   environment = new Environment(page);
   environment.init(function(err) {
     if (err) return done(err);
-    // testRepoPath = environment.path + '/testrepo';
-    testRepoPath = '/tmp/testrepo'
+    testRepoPath = environment.path + '/testrepo';
     environment.createRepos([
       { bare: true, path: testRepoPath }
       ], done);

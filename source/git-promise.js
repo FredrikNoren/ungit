@@ -383,7 +383,7 @@ git.revParse = function(repoPath, type) {
     .catch(function(err) {
       return false;
     }).then(function(result) {
-      return result.toString().indexOf('true') > -1
+      return result.toString().indexOf('true') > -1;
     });
 }
 

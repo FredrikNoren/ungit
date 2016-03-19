@@ -462,10 +462,10 @@ exports.registerApi = function(env) {
         return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
           .then(function(isWorkingDir) {
             if (isWorkingDir) {
-              return 'inited'
+              return 'inited';
             } else {
               return gitPromise.revParse(req.query.path, '--is-bare-repository')
-                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; })
+                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; });
             }
           });
       } else {
