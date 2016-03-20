@@ -29,6 +29,7 @@ var StagingViewModel = function(server, repoPath) {
   this.inMerge = ko.observable(false);
   this.allStageFlag = ko.observable(false);
   this.HEAD = ko.observable();
+  this.isCommitMessageHidden = ko.observable(false);
   this.commitButtonVisible = ko.computed(function() {
     return !self.inRebase() && !self.inMerge();
   });
@@ -296,7 +297,9 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-
+StagingViewModel.prototype.toggleHideCommitMessage = function() {
+  this.isCommitMessageHidden(!this.isCommitMessageHidden());
+}
 
 var FileViewModel = function(staging, name, textDiffType) {
   var self = this;
