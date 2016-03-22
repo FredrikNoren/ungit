@@ -18,11 +18,11 @@ var RepositoryViewModel = function(server, path) {
   this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
   this.submodules = components.create('submodules', { server: server, repoPath: this.repoPath });
-  this.stash = components.create('stash', { server: server, repoPath: this.repoPath, isDisabled: this.isBareDir });
-  this.staging = components.create('staging', { server: server, repoPath: this.repoPath, isDisabled: this.isBareDir });
+  this.stash = this.isBareDir ? {} : components.create('stash', { server: server, repoPath: this.repoPath });
+  this.staging = this.isBareDir ? {} : components.create('staging', { server: server, repoPath: this.repoPath });
   this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
   this.showLog = ko.computed(function() {
-    return !self.staging.inRebase() && !self.staging.inMerge();
+    return self.isBareDir || (!self.staging.inRebase() && !self.staging.inMerge());
   });
   this.server.watchRepository(this.repoPath);
   this.isSubmodule = ko.observable(false);

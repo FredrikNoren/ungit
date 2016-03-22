@@ -10,12 +10,11 @@ var fileType = require('../../source/utils/file-type.js');
 var muteGraceTimeDuration = 60 * 1000 * 5;
 
 components.register('staging', function(args) {
-  return new StagingViewModel(args.server, args.repoPath, args.isDisabled);
+  return new StagingViewModel(args.server, args.repoPath);
 });
 
-var StagingViewModel = function(server, repoPath, isDisabled) {
+var StagingViewModel = function(server, repoPath) {
   var self = this;
-  this.isDisabled = isDisabled;
   this.server = server;
   this.repoPath = repoPath;
   this.filesByPath = {};
@@ -90,7 +89,7 @@ var StagingViewModel = function(server, repoPath, isDisabled) {
   this.mutedTime = null;
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
-  if (!this.isDisabled) ko.renderTemplate('staging', this, {}, parentElement);
+  ko.renderTemplate('staging', this, {}, parentElement);
 }
 StagingViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-app-content-refresh') {
@@ -104,7 +103,6 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
-  if (this.isDisabled) return;
   this.server.get('/head', { path: this.repoPath, limit: 1 }, function(err, log) {
     if (err) {
       return err.errorCode == 'must-be-in-working-tree' ||
