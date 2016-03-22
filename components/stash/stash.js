@@ -42,7 +42,7 @@ function StashViewModel(server, repoPath, isDisabled) {
 }
 
 StashViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('stash', this, {}, parentElement);
+  if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
 }
 StashViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-app-content-refresh' ||
