@@ -22,7 +22,7 @@ var RepositoryViewModel = function(server, path) {
   this.staging = this.isBareDir ? {} : components.create('staging', { server: server, repoPath: this.repoPath });
   this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
   this.server.watchRepository(this.repoPath);
-  this.showLog = self.isBareDir ? ko.observable(false) : self.staging.isStageValid;
+  this.showLog = self.isBareDir ? ko.observable(true) : self.staging.isStageValid;
   this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();
