@@ -21,10 +21,8 @@ var RepositoryViewModel = function(server, path) {
   this.stash = this.isBareDir ? {} : components.create('stash', { server: server, repoPath: this.repoPath });
   this.staging = this.isBareDir ? {} : components.create('staging', { server: server, repoPath: this.repoPath });
   this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
-  this.showLog = ko.computed(function() {
-    return self.isBareDir || (!self.staging.inRebase() && !self.staging.inMerge());
-  });
   this.server.watchRepository(this.repoPath);
+  this.showLog = self.isBareDir ? ko.observable(false) : self.staging.isStageValid;
   this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();

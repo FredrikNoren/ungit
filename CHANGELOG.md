@@ -7,11 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 - Added bare repo support [#177](https://github.com/FredrikNoren/ungit/issues/177)
+- Added support for cherry-pick conflict[#701](https://github.com/FredrikNoren/ungit/issues/701)
 
 ### Fixed
 - Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
 
-### Chagned
+### Changed
 - Cleaner rebase conflict message display [#708](https://github.com/FredrikNoren/ungit/pull/708)
 
 ## [0.10.1](https://github.com/FredrikNoren/ungit/compare/v0.10.0...v0.10.1)

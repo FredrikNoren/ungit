@@ -80,8 +80,8 @@ suite.test('Should be able to add a new file to .gitignore', function(done) {
 });
 
 suite.test('Test showing commit diff between two commits', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable"]', function() {
-    helpers.click(page, '[data-ta-clickable="node-clickable"]');
+  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-0"]', function() {
+    helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
     helpers.waitForElementVisible(page, '.diff-wrapper', function() {
       helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
       helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
@@ -95,7 +95,7 @@ suite.test('Test showing commit side by side diff between two commits', function
   helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
   helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
     setTimeout(function() {                           // let it finish making api call
-      helpers.click(page, '[data-ta-clickable="node-clickable"]'); // De-select again
+      helpers.click(page, '[data-ta-clickable="node-clickable-0"]'); // De-select again
       done();
     }, 1000);
   });

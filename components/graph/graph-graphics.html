@@ -36,7 +36,7 @@
 
     <!-- ko foreach: nodes -->
       <svg data-bind="element: element" >
-        <circle data-bind="attr: { r: r, fill: color }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" data-ta-clickable="node-clickable" cx="30" cy="30" />
+        <circle data-bind="attr: { r: r, fill: color, 'data-ta-clickable': 'node-clickable-' + $index() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" cx="30" cy="30" />
         <!-- ko if: selected -->
           <circle data-bind=" attr: { r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" cx="30" cy="30" />
         <!-- /ko -->
