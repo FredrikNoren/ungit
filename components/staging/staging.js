@@ -25,6 +25,7 @@ var StagingViewModel = function(server, repoPath) {
     self.commitMessageTitleCount(value.length);
   });
   this.commitMessageBody = ko.observable();
+  this.wordWrap = ko.observable(false);
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
@@ -291,6 +292,9 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
       this.commit();
     }
     return true;
+};
+StagingViewModel.prototype.toggleWordWrap = function() {
+  this.wordWrap(!this.wordWrap());
 };
 
 var FileViewModel = function(staging, name, textDiffType) {
