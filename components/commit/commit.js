@@ -33,6 +33,7 @@ function CommitViewModel(args) {
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
   this.textDiffType = ko.observable('textdiff');
+  this.wordWrap = ko.observable(false)
 
   this.showCommitDiff = ko.computed(function() {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
