@@ -188,7 +188,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType, self.wordWrap);
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
@@ -297,7 +297,7 @@ StagingViewModel.prototype.toggleWordWrap = function() {
   this.wordWrap(!this.wordWrap());
 };
 
-var FileViewModel = function(staging, name, textDiffType) {
+var FileViewModel = function(staging, name, textDiffType, wordWrap) {
   var self = this;
   this.patchLineList = ko.observableArray();
   this.staging = staging;
@@ -313,6 +313,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.isShowingDiffs = ko.observable(false);
   this.textDiffType = textDiffType;
+  this.wordWrap = wordWrap;
   this.additions = ko.observable('');
   this.deletions = ko.observable('');
   this.diff = ko.observable(self.getSpecificDiff());
@@ -344,7 +345,8 @@ FileViewModel.prototype.getSpecificDiff = function() {
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar,
     patchLineList: this.patchLineList,
-    editState: this.editState
+    editState: this.editState,
+    wordWrap: this.wordWrap
   });
 }
 FileViewModel.prototype.setState = function(state) {
