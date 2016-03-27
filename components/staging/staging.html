@@ -18,25 +18,17 @@
                   </span>
                   <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-        <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: commitButtonVisible, enable: !commitValidationError()">
+        <button class="btn btn-primary btn-lg" data-ta-clickable="commit" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>
-        <button class="rebaseContinueButton btn btn-primary" data-bind="click: rebaseContinue, visible: inRebase, enable: !commitValidationError()">
-          Continue rebase
-          <!-- ko component: rebaseContinueProgressBar --><!-- /ko -->
+        <button class="btn btn-primary" data-bind="click: conflictContinue, visible: conflictText, enable: !commitValidationError()"  data-ta-action="continue">
+          Continue <span data-bind="text: conflictText"/>
+          <!-- ko component: conflictContinueProgressBar --><!-- /ko -->
         </button>
-        <button class="rebaseAbortButton btn btn-warning" data-bind="click: rebaseAbort, visible: inRebase">
-          Abort rebase
-          <!-- ko component: rebaseAbortProgressBar --><!-- /ko -->
-        </button>
-        <button class="mergeContinueButton btn btn-primary" data-bind="click: mergeContinue, visible: inMerge, enable: !commitValidationError()">
-          Continue merge
-          <!-- ko component: mergeContinueProgressBar --><!-- /ko -->
-        </button>
-        <button class="mergeAbortButton btn btn-warning" data-bind="click: mergeAbort, visible: inMerge">
-          Abort merge
-          <!-- ko component: mergeAbortProgressBar --><!-- /ko -->
+        <button class="btn btn-warning" data-bind="click: conflictAbort, visible: conflictText" data-ta-action="abort">
+          Abort <span data-bind="text: conflictText"/>
+          <!-- ko component: conflictAbortProgressBar --><!-- /ko -->
         </button>
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>

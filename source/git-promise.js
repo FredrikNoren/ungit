@@ -8,7 +8,55 @@ var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
 var Bluebird = require('bluebird');
 var fs = require('./utils/fs-async');
+var async = require('async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+
+var gitQueue = async.queue(function (args, callback) {
+  if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
+  var rejected = false;
+  var stdout = '';
+  var stderr = '';
+  var gitProcess = child_process.spawn(
+    'git',
+    args.commands,
+    {
+      cwd: args.repoPath,
+      maxBuffer: 1024 * 1024 * 100,
+      timeout: args.timeout
+    });
+
+  if (args.outPipe) {
+    gitProcess.stdout.pipe(args.outPipe);
+  } else {
+    gitProcess.stdout.on('data', function(data) {
+      stdout += data.toString();
+    });
+  }
+  if (args.inPipe) {
+    gitProcess.stdin.end(args.inPipe);
+  }
+  gitProcess.stderr.on('data', function(data) {
+    stderr += data.toString();
+  });
+  gitProcess.on('error', function (error) {
+    if (args.outPipe) args.outPipe.end();
+    rejected = true;
+    callback(error);
+  });
+
+  gitProcess.on('close', function (code) {
+    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+    if (rejected) return;
+    if (args.outPipe) args.outPipe.end();
+
+    if (code === 0 || (code === 1 && args.allowError)) {
+      callback(null, stdout);
+    } else {
+      callback(getGitError(args, stderr, stdout));
+    }
+  });
+}, config.maxConcurrentGitOperations);
+
 
 /**
  * Returns a promise that executes git command with given arguments
@@ -30,6 +78,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
     args.repoPath = repoPath;
     args.outPipe = outPipe;
     args.inPipe = inPipe;
+    args.allowError = allowError;
   } else {
     args = commands;
   }
@@ -41,47 +90,11 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.startTime = Date.now();
 
   return new Bluebird(function (resolve, reject) {
-    if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
-    var rejected = false;
-    var stdout = '';
-    var stderr = '';
-    var gitProcess = child_process.spawn(
-      'git',
-      args.commands,
-      {
-        cwd: args.repoPath,
-        maxBuffer: 1024 * 1024 * 100,
-        timeout: args.timeout
-      });
-
-    if (args.outPipe) {
-      gitProcess.stdout.pipe(args.outPipe);
-    } else {
-      gitProcess.stdout.on('data', function(data) {
-        stdout += data.toString();
-      });
-    }
-    if (args.inPipe) {
-      gitProcess.stdin.end(args.inPipe);
-    }
-    gitProcess.stderr.on('data', function(data) {
-      stderr += data.toString();
-    });
-    gitProcess.on('error', function (error) {
-      if (args.outPipe) args.outPipe.end();
-      rejected = true;
-      reject(error);
-    });
-
-    gitProcess.on('close', function (code) {
-      if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
-      if (rejected) return;
-      if (args.outPipe) args.outPipe.end();
-
-      if (code === 0 || (code === 1 && allowError)) {
-        resolve(stdout);
+    gitQueue.push(args, function(queueError, out){
+      if(queueError){
+        reject(queueError);
       } else {
-        reject(getGitError(args, stderr, stdout));
+        resolve(out);
       }
     });
   });
@@ -143,11 +156,13 @@ git.status = function(repoPath, file) {
           isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
           isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
+          inCherry: fs.isExists(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD'))
         }).then(function(result) {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
+          status.inCherry = result.inCherry;
         }).then(function() {
-          if (status.inMerge) {
+          if (status.inMerge || status.inCherry) {
             return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
@@ -159,17 +174,23 @@ git.status = function(repoPath, file) {
       })
   }).then(function(result) {
     var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
+    var status = result.status;
+    status.inConflict = false;
 
     // merge numstats
-    Object.keys(result.status.files).forEach(function(filename) {
+    Object.keys(status.files).forEach(function(filename) {
       // git diff returns paths relative to git repo but git status does not
       var absoluteFilename = filename.replace(/\.\.\//g, '');
       var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      result.status.files[filename].additions = stats.additions;
-      result.status.files[filename].deletions = stats.deletions;
+      var fileObj = status.files[filename];
+      fileObj.additions = stats.additions;
+      fileObj.deletions = stats.deletions;
+      if (!status.inConflict && fileObj.conflict) {
+        status.inConflict = true;
+      }
     });
 
-    return result.status;
+    return status;
   });
 }
 

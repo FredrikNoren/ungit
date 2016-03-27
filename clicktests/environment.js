@@ -69,11 +69,7 @@ Environment.prototype.setupPage = function() {
   page.onConsoleMessage = function(msg, lineNum, sourceId) {
     console.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
     if (msg.indexOf('git-error') != -1) {
-      setTimeout(function() {
-        page.render('clicktests/screenshots/error.png');
-        console.log('git-error found, page rendered to error.png');
-        phantom.exit(1);
-      }, 20);
+      console.log('git-error found, page rendered to error.png');
     }
   };
   page.onError = function(msg, trace) {
