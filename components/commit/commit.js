@@ -89,6 +89,6 @@ CommitViewModel.prototype.textDiffTypeChange = function(type) {
 CommitViewModel.prototype.stopClickPropagation = function(data, event) {
   event.stopImmediatePropagation();
 }
-CommitViewModel.prototype.toggleWordWrap = function() {
-  this.wordWrap(!this.wordWrap());
+CommitViewModel.prototype.toggleWordWrap = function(state) {
+  this.wordWrap(state);
 }

@@ -293,8 +293,8 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-StagingViewModel.prototype.toggleWordWrap = function() {
-  this.wordWrap(!this.wordWrap());
+StagingViewModel.prototype.toggleWordWrap = function(state) {
+  this.wordWrap(state);
 };
 
 var FileViewModel = function(staging, name, textDiffType, wordWrap) {
