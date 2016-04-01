@@ -120,7 +120,7 @@ let argv = yargs
 .example('$0 --port=8888', 'Run Ungit on port 8888')
 .example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
 .help('help')
-.version('ungit version: ' + JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version + '\n', 'version')
+.version()
 .alias('b', 'launchBrowser')
 .alias('h', 'help')
 .alias('o', 'gitVersionCheckOverride')
