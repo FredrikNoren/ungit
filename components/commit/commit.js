@@ -70,7 +70,6 @@ CommitViewModel.prototype.setData = function(args) {
       server: this.server,
       textDiffType: this.textDiffType,
       wordWrap: this.wordWrap }));
-      console.log(44, this);
 }
 CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
