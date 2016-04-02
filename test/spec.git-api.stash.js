@@ -42,8 +42,8 @@ describe('git-api conflict rebase', function () {
 		common.get(req, '/stashes', { path: testDir }, function(err, res) {
 			if (err) return done(err);
 			expect(res.body.length).to.be(1);
-			expect(res.body[0].id).to.be(0);
-			expect(res.body[0].name).to.be('stash@{0}');
+			expect(res.body[0].reflogId).to.be('0');
+			expect(res.body[0].reflogName).to.be('stash@{0}');
 			done();
 		});
 	});

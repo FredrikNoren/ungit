@@ -70,7 +70,8 @@ const gitLogHeaders = {
     currentCommmit.commitDate = date;
   },
   'Reflog': (currentCommmit, data) => {
-    currentCommmit.reflogName = data.substring(0, data.indexOf(' '));
+    currentCommmit.reflogId = /\{(.*?)\}/.exec(data)[1];
+    currentCommmit.reflogName = data.substring(0, data.indexOf(' ')).replace("refs/", "");
     const author = data.substring(data.indexOf(' ') + 2, data.length - 1);
     const capture = authorRegexp.exec(author);
     if (capture) {
