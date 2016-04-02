@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [0.10.3](https://github.com/FredrikNoren/ungit/compare/v0.10.2...v0.10.3)
 
+### Added
+- Show diffs for stashed changes [#444](https://github.com/FredrikNoren/ungit/issues/444)
+
 ### Fixed
 - Missing npm as a normal dependency [#766] (https://github.com/FredrikNoren/ungit/issues/766)
 
