@@ -338,9 +338,9 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
           });
           async.filter(absolutePaths, function(absolutePath, callback) {
             fs.stat(absolutePath, function(err, stat) {
-              callback(!err && stat && stat.isDirectory());
+              callback(null, !err && stat && stat.isDirectory());
             });
-          }, function(filteredFiles) {
+          }, function(err, filteredFiles) {
             res.json(filteredFiles);
           });
         }
