@@ -8,3 +8,4 @@ require('./test.generic');
 require('./test.noheader');
 require('./test.discard');
 require('./test.branches');
+require('./test.bare');

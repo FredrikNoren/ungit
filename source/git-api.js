@@ -459,12 +459,14 @@ exports.registerApi = function(env) {
   app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
     var task = fs.isExists(req.query.path).then(function(exists) {
       if (exists) {
-        return gitPromise(['rev-parse', '--is-inside-work-tree'], req.query.path)
-          .catch(function(err) {
-            return 'uninited';
-          }).then(function(result) {
-            if (result.toString().indexOf('true') == -1) return 'uninited';
-            else return 'inited';
+        return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
+          .then(function(isWorkingDir) {
+            if (isWorkingDir) {
+              return 'inited';
+            } else {
+              return gitPromise.revParse(req.query.path, '--is-bare-repository')
+                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; });
+            }
           });
       } else {
         return 'no-such-path';

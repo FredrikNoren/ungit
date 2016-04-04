@@ -386,4 +386,13 @@ git.commit = function(repoPath, amend, message, files) {
   });
 }
 
+git.revParse = function(repoPath, type) {
+  return git(['rev-parse', type], repoPath)
+    .catch(function(err) {
+      return false;
+    }).then(function(result) {
+      return result.toString().indexOf('true') > -1;
+    });
+}
+
 module.exports = git;
