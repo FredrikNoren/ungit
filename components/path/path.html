@@ -13,7 +13,7 @@
     <!-- ko component: cloningProgressBar --><!-- /ko -->
   </div>
   <!-- /ko -->
-  
+
   <!-- ko if: status() == 'uninited' -->
   <div class="uninited" data-ta-container="uninited-path-page">
     <div class="container">
@@ -53,12 +53,12 @@
         </div>
       </div>
     </div>
-    
+
   </div>
   <!-- /ko -->
 
-  <!-- ko if: status() == 'invalidpath' -->
-  <div data-ta-container="invalid-path" data-bind="visible: status() == 'invalidpath'">
+  <!-- ko if: status() == 'no-such-path' -->
+  <div data-ta-container="invalid-path" data-bind="visible: status() == 'no-such-path'">
     <h2>Invalid path</h2>
     <p>"<span data-bind="text: path"></span>" doesn&#39;t seem to be a valid path.</p>
     <div class="create-dir">

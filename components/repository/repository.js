@@ -5,23 +5,24 @@ var async = require('async');
 var _ = require('lodash');
 
 components.register('repository', function(args) {
-  return new RepositoryViewModel(args.server, args.repoPath);
+  return new RepositoryViewModel(args.server, args.path);
 });
 
-var RepositoryViewModel = function(server, repoPath) {
+var RepositoryViewModel = function(server, path) {
   var self = this;
 
   this.server = server;
-  this.repoPath = repoPath;
-  this.gitErrors = components.create('gitErrors', { server: server, repoPath: repoPath });
-  this.graph = components.create('graph', { server: server, repoPath: repoPath });
-  this.remotes = components.create('remotes', { server: server, repoPath: repoPath });
-  this.submodules = components.create('submodules', { server: server, repoPath: repoPath });
-  this.stash = components.create('stash', { server: server, repoPath: repoPath });
-  this.staging = components.create('staging', { server: server, repoPath: repoPath });
-  this.branches = components.create('branches', { server: server, repoPath: repoPath });
-  this.showLog = this.staging.isStageValid;
-  this.server.watchRepository(repoPath);
+  this.isBareDir = path.status() === 'bare';
+  this.repoPath = path.path;
+  this.gitErrors = components.create('gitErrors', { server: server, repoPath: this.repoPath });
+  this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
+  this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
+  this.submodules = components.create('submodules', { server: server, repoPath: this.repoPath });
+  this.stash = this.isBareDir ? {} : components.create('stash', { server: server, repoPath: this.repoPath });
+  this.staging = this.isBareDir ? {} : components.create('staging', { server: server, repoPath: this.repoPath });
+  this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
+  this.server.watchRepository(this.repoPath);
+  this.showLog = self.isBareDir ? ko.observable(true) : self.staging.isStageValid;
   this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();
