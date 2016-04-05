@@ -165,7 +165,7 @@ describe('git-api diff', function () {
 		});
 	});
 
-	it('diff bare repository file', function(done) {
+	it('diff on bare repository file should work', function(done) {
 		// first add remote and push all commits
 		async.series([
 			function(done) { common.post(req, '/remotes/barerepository', { path: testDir, url: testBareDir }, done); },
