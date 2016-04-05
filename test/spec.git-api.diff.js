@@ -4,7 +4,6 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
-var async = require('async');
 var restGit = require('../source/git-api');
 var common = require('./common.js');
 var wrapErrorHandler = common.wrapErrorHandler;
@@ -18,12 +17,16 @@ var req = request(app);
 
 describe('git-api diff', function () {
 
-	var testDir;
+	var testDir, testBareDir;
 
 	before(function(done) {
-		common.createEmptyRepo(req, function(err, dir) {
+		async.parallel([
+			function(done) { common.createEmptyRepo(req, done); },
+			function(done) { common.initRepo(req, { bare: true }, done); }
+		], function(err, results) {
 			if (err) return done(err);
-			testDir = dir;
+			testDir = results[0];
+			testBareDir = results[1];
 			done();
 		});
 	});
@@ -159,6 +162,25 @@ describe('git-api diff', function () {
 			if (err) return done(err);
 			expect(res.body.toString()).to.be('png ~~');
 			done();
+		});
+	});
+
+	it('diff bare repository file', function(done) {
+		// first add remote and push all commits
+		async.series([
+			function(done) { common.post(req, '/remotes/barerepository', { path: testDir, url: testBareDir }, done); },
+			function(done) { common.post(req, '/push', { path: testDir, remote: 'barerepository' }, done); }
+		], function(err) {
+			if (err) return done(err);
+			common.get(req, '/log', { path: testBareDir }, function(err, res) {
+				if (err) return done(err);
+				// find a commit which contains the testFile
+				var commit = res.body.filter(function(commit) { return commit.fileLineDiffs.some(function(lineDiff) { return lineDiff[2] == testFile; }) })[0];
+				common.get(req, '/diff', { path: testBareDir, sha1: commit.sha1, file: testFile }, function(err, res) {
+					if (err) return done(err);
+					done();
+				});
+			});
 		});
 	});
 
