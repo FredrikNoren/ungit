@@ -95,9 +95,19 @@ suite.test('Test showing commit side by side diff between two commits', function
   helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
   helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]', function() {
     setTimeout(function() {                           // let it finish making api call
-      helpers.click(page, '[data-ta-clickable="node-clickable-0"]'); // De-select again
+      // helpers.click(page, '[data-ta-clickable="node-clickable-0"]'); // De-select again
       done();
-    }, 1000);
+    }, 500);
+  });
+});
+
+suite.test('Test wordwrap', function(done) {
+  helpers.click(page, '[data-ta-clickable="commit-wordwrap"]');
+  helpers.waitForElementVisible(page, '.word-wrap', function() {
+    setTimeout(function() {
+      helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
+      done();
+    }, 500);
   });
 });
 

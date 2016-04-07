@@ -33,6 +33,7 @@ function CommitViewModel(args) {
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() { return md5(self.authorEmail()); });
   this.textDiffType = ko.observable('textdiff');
+  this.wordWrap = ko.observable(false);
 
   this.showCommitDiff = ko.computed(function() {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
@@ -67,7 +68,8 @@ CommitViewModel.prototype.setData = function(args) {
       sha1: this.sha1,
       repoPath: this.repoPath,
       server: this.server,
-      textDiffType: this.textDiffType }));
+      textDiffType: this.textDiffType,
+      wordWrap: this.wordWrap }));
 }
 CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
@@ -85,4 +87,7 @@ CommitViewModel.prototype.textDiffTypeChange = function(type) {
 }
 CommitViewModel.prototype.stopClickPropagation = function(data, event) {
   event.stopImmediatePropagation();
+}
+CommitViewModel.prototype.toggleWordWrap = function(state) {
+  this.wordWrap(state);
 }

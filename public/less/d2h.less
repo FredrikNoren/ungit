@@ -90,7 +90,7 @@
   padding-left: 10px;
   padding-right: 10px;
   height: 19px;
-  margin-left: 80px;
+  display: inline-block;
 }
 
 .d2h-code-side-line {
@@ -98,7 +98,7 @@
   padding-left: 5px;
   padding-right: 5px;
   height: 19px;
-  margin-left: 50px;
+  display: inline;
 }
 
 .d2h-code-line del,
@@ -138,29 +138,33 @@
 }
 
 .d2h-code-linenumber {
-  position: absolute;
-  width: 2%;
+  position: static;
+  display: table-cell;
+  width: 52px;
   min-width: 65px;
-  padding-left: 10px;
-  padding-right: 10px;
-  height: 19px;
-  background-color: #fff;
-  color: rgba(0, 0, 0, 0.3);
-  text-align: right;
-  border: solid #eeeeee;
+  text-align: center;
+  height: 100%;
+  background-color: #727a83;
+  color: rgba(0, 0, 0, 0.5);
   border-width: 0 1px 0 1px;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 1px solid rgba(0, 0, 0, 0.34);
+  border-right: 1px solid rgba(0, 0, 0, 0.34);
 }
 
 .d2h-cntx {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.d2h-code-side-linenumber, .d2h-code-linenumber {
-  position: absolute;
+.d2h-code-side-linenumber {
+  position: static;
+  display: tabl;
   width: 52px;
+  min-width: 65px;
   text-align: center;
-  height: 19px;
+  height: 100%;
   background-color: rgba(114, 122, 131, 1);
   color: rgba(0, 0, 0, 0.5);
   border-width: 0 1px 0 1px;
@@ -191,4 +195,14 @@
 
 .d2h-info {
   color: rgba(255, 255, 255, 0.3);
+}
+
+.d2h-code-line-ctn {
+  .word-wrap & {
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -webkit-pre-wrap; /*Chrome & Safari */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    white-space: pre-wrap;       /* css-3 */
+  }
 }

@@ -391,7 +391,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-istanbul');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main']);
 
   // Run tests
   grunt.registerTask('unittest', ['mochaTest']);
