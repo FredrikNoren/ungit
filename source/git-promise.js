@@ -352,8 +352,6 @@ git.commit = function(repoPath, amend, message, files) {
   }).then(function(status) {
     var toAdd = [];
     var toRemove = [];
-    var addPromise;     // a promise that add all files in toAdd
-    var removePromise;  // a proimse that removes all files in toRemove
     var diffPatchPromises = []; // promiese that patches each files individually
 
     for (var v in files) {
@@ -374,14 +372,14 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    if (toAdd.length > 0) {
-      addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
-    }
-    if (toRemove.length > 0) {
-      removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
-    }
+    var commitPromiseChain = new Promise(function(resolve) { resolve() }) // start with dummy
+      .then(function() {
+        if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'))
+      }).then(function() {
+        if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+      });
 
-    return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+    return Promise.join(commitPromiseChain, Promise.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
