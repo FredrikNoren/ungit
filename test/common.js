@@ -71,16 +71,20 @@ common.delete = function(req, path, payload, callback) {
 		.end(common.wrapErrorHandler(callback));
 }
 
-common.createEmptyRepo = function(req, callback) {
+common.initRepo = function(req, config, callback) {
 	var testDir;
-	common.post(req, '/testing/createtempdir', undefined, function(err, res) {
+	common.post(req, '/testing/createtempdir', config.path, function(err, res) {
 		if (err) return callback(err);
 		expect(res.body.path).to.be.ok();
 		testDir = res.body.path;
-		common.post(req, '/init', { path: testDir }, function(err) {
+		common.post(req, '/init', { path: testDir, bare: !!config.bare }, function(err) {
 			callback(err, testDir);
 		});
 	});
+}
+
+common.createEmptyRepo = function(req, callback) {
+	common.initRepo(req, {}, callback);
 }
 
 common.createSmallRepo = function(req, callback) {

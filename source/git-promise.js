@@ -249,8 +249,13 @@ git.binaryFileContent = function(repoPath, filename, version, outPipe) {
 
 git.diffFile = function(repoPath, filename, sha1) {
   var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
-  return git.status(repoPath)
-    .then(function(status) {
+  return git.revParse(repoPath, '--is-bare-repository')
+    .then(function(isBareDir) {
+      if (isBareDir) { // do not call git.status for bare repositories
+        return { files: {} };
+      }
+      return git.status(repoPath);
+    }).then(function(status) {
       var file = status.files[filename];
 
       if (!file && !sha1) {
@@ -384,6 +389,15 @@ git.commit = function(repoPath, amend, message, files) {
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1)
       throw err;
   });
+}
+
+git.revParse = function(repoPath, type) {
+  return git(['rev-parse', type], repoPath)
+    .catch(function(err) {
+      return false;
+    }).then(function(result) {
+      return result.toString().indexOf('true') > -1;
+    });
 }
 
 module.exports = git;

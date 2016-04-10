@@ -24,6 +24,7 @@ var StagingViewModel = function(server, repoPath) {
     self.commitMessageTitleCount(value.length);
   });
   this.commitMessageBody = ko.observable();
+  this.wordWrap = ko.observable(false);
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
@@ -186,7 +187,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType, self.wordWrap);
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
@@ -291,8 +292,11 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
+StagingViewModel.prototype.toggleWordWrap = function(state) {
+  this.wordWrap(state);
+};
 
-var FileViewModel = function(staging, name, textDiffType) {
+var FileViewModel = function(staging, name, textDiffType, wordWrap) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
@@ -307,6 +311,7 @@ var FileViewModel = function(staging, name, textDiffType) {
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath, temporary: true });
   this.isShowingDiffs = ko.observable(false);
   this.textDiffType = textDiffType;
+  this.wordWrap = wordWrap;
   this.additions = ko.observable('');
   this.deletions = ko.observable('');
   this.fileType = ko.observable('text');
@@ -338,7 +343,8 @@ FileViewModel.prototype.getSpecificDiff = function() {
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar,
     patchLineList: this.patchLineList,
-    editState: this.editState
+    editState: this.editState,
+    wordWrap: this.wordWrap
   });
 }
 FileViewModel.prototype.setState = function(state) {
