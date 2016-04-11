@@ -71,6 +71,26 @@ var gitQueue = async.queue(function (args, callback) {
   });
 }, config.maxConcurrentGitOperations);
 
+var gitExecutorProm = function(args, retryCount) {
+  return new Promise(function (resolve, reject) {
+    gitQueue.push(args, function(queueError, out) {
+      if(queueError) {
+        reject(queueError);
+      } else {
+        resolve(out);
+      }
+    });
+  }).catch(function(err) {
+    if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, Math.floor(Math.random() * (200) + 500));
+      }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+    } else {
+      throw err;
+    }
+  });
+}
+
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
@@ -89,15 +109,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
-  return new Promise(function (resolve, reject) {
-    gitQueue.push(args, function(queueError, out){
-      if(queueError){
-        reject(queueError);
-      } else {
-        resolve(out);
-      }
-    });
-  });
+  return gitExecutorProm(args, 3);
 }
 
 var getGitError = function(args, stderr, stdout) {
