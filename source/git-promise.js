@@ -83,7 +83,8 @@ var gitExecutorProm = function(args, retryCount) {
   }).catch(function(err) {
     if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
       return new Promise(function(resolve) {
-        setTimeout(resolve, Math.floor(Math.random() * (200) + 500));
+        // sleep random amount between 250 ~ 750 ms
+        setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));
     } else {
       throw err;
@@ -109,7 +110,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
-  return gitExecutorProm(args, 3);
+  return gitExecutorProm(args, config.lockConflictRetryCount);
 }
 
 var getGitError = function(args, stderr, stdout) {
