@@ -387,7 +387,7 @@ git.commit = function(repoPath, amend, message, files) {
 
     var commitPromiseChain = Promise.resolve()
       .then(function() {
-        if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'))
+        if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }).then(function() {
         if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       });
