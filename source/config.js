@@ -109,7 +109,10 @@ var defaultConfig = {
   disableDiscardWarning: false,
 
   // Duration of discard warning dialog mute time should it be muted.
-  disableDiscardMuteTime: 60 * 1000 * 5  // 5 mins
+  disableDiscardMuteTime: 60 * 1000 * 5,  // 5 mins
+
+  // Allowed number of retry for git "index.lock" conflict
+  lockConflictRetryCount: 3
 };
 
 // Works for now but should be moved to bin/ungit
@@ -156,7 +159,8 @@ var argv = yargs
 .describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
 .describe('fileSeparator', 'OS dependent file separator')
 .describe('disableDiscardWarning', 'disable warning popup at discard')
-.describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted');
+.describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted')
+.describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict');
 
 // If not triggered by test, then do strict option check
 if (argv.$0.indexOf('mocha') === -1) {

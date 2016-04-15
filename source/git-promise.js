@@ -71,6 +71,27 @@ var gitQueue = async.queue(function (args, callback) {
   });
 }, config.maxConcurrentGitOperations);
 
+var gitExecutorProm = function(args, retryCount) {
+  return new Promise(function (resolve, reject) {
+    gitQueue.push(args, function(queueError, out) {
+      if(queueError) {
+        reject(queueError);
+      } else {
+        resolve(out);
+      }
+    });
+  }).catch(function(err) {
+    if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
+      return new Promise(function(resolve) {
+        // sleep random amount between 250 ~ 750 ms
+        setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
+      }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+    } else {
+      throw err;
+    }
+  });
+}
+
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
@@ -89,15 +110,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
-  return new Promise(function (resolve, reject) {
-    gitQueue.push(args, function(queueError, out){
-      if(queueError){
-        reject(queueError);
-      } else {
-        resolve(out);
-      }
-    });
-  });
+  return gitExecutorProm(args, config.lockConflictRetryCount);
 }
 
 var getGitError = function(args, stderr, stdout) {
@@ -352,8 +365,6 @@ git.commit = function(repoPath, amend, message, files) {
   }).then(function(status) {
     var toAdd = [];
     var toRemove = [];
-    var addPromise;     // a promise that add all files in toAdd
-    var removePromise;  // a proimse that removes all files in toRemove
     var diffPatchPromises = []; // promiese that patches each files individually
 
     for (var v in files) {
@@ -374,14 +385,14 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    if (toAdd.length > 0) {
-      addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
-    }
-    if (toRemove.length > 0) {
-      removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
-    }
+    var commitPromiseChain = Promise.resolve()
+      .then(function() {
+        if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
+      }).then(function() {
+        if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+      });
 
-    return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+    return Promise.join(commitPromiseChain, Promise.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
