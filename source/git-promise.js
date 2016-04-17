@@ -58,7 +58,7 @@ var gitQueue = async.queue(function (args, callback) {
 }, config.maxConcurrentGitOperations);
 
 var gitExecutorProm = function(args, retryCount) {
-  return new Promise(function (resolve, reject) {
+  return new Bluebird(function (resolve, reject) {
     gitQueue.push(args, function(queueError, out) {
       if(queueError) {
         reject(queueError);
@@ -68,7 +68,7 @@ var gitExecutorProm = function(args, retryCount) {
     });
   }).catch(function(err) {
     if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
-      return new Promise(function(resolve) {
+      return new Bluebird(function(resolve) {
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));
@@ -384,14 +384,14 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    var commitPromiseChain = Promise.resolve()
+    var commitPromiseChain = Bluebird.resolve()
       .then(function() {
         if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }).then(function() {
         if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       });
 
-    return Promise.join(commitPromiseChain, Promise.all(diffPatchPromises));
+    return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
