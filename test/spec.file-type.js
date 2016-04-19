@@ -1,4 +1,4 @@
-var fileType = require('../source/utils/file-type.js');
+var fileType = require('../src/utils/file-type.js');
 var expect = require('expect.js');
 
 describe('file type', function () {

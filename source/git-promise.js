@@ -6,24 +6,10 @@ var winston = require('winston');
 var addressParser = require('./address-parser');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
-var Promise = require('bluebird');
+var Bluebird = require('bluebird');
 var fs = require('./utils/fs-async');
 var async = require('async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-
-/**
- * Returns a promise that executes git command with given arguments
- * @function
- * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
- * @param {string} repoPath - path to the git repository
- * @param {boolean=} allowError - true if return code of 1 is acceptable as some cases errors are acceptable
- * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
- * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
- * @param {timeout=} timeout - execution timeout, default is 2 mins
- * @returns {promise} execution promise
- * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
- * @example getGitExecuteTask(['show'], '/tmp');
- */
 
 var gitQueue = async.queue(function (args, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
@@ -72,7 +58,7 @@ var gitQueue = async.queue(function (args, callback) {
 }, config.maxConcurrentGitOperations);
 
 var gitExecutorProm = function(args, retryCount) {
-  return new Promise(function (resolve, reject) {
+  return new Bluebird(function (resolve, reject) {
     gitQueue.push(args, function(queueError, out) {
       if(queueError) {
         reject(queueError);
@@ -82,7 +68,7 @@ var gitExecutorProm = function(args, retryCount) {
     });
   }).catch(function(err) {
     if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
-      return new Promise(function(resolve) {
+      return new Bluebird(function(resolve) {
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));
@@ -92,6 +78,19 @@ var gitExecutorProm = function(args, retryCount) {
   });
 }
 
+/**
+ * Returns a promise that executes git command with given arguments
+ * @function
+ * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
+ * @param {string} repoPath - path to the git repository
+ * @param {boolean=} allowError - true if return code of 1 is acceptable as some cases errors are acceptable
+ * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
+ * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
+ * @param {timeout=} timeout - execution timeout, default is 2 mins
+ * @returns {promise} execution promise
+ * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
+ * @example getGitExecuteTask(['show'], '/tmp');
+ */
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
@@ -157,7 +156,7 @@ var getGitError = function(args, stderr, stdout) {
 }
 
 git.status = function(repoPath, file) {
-  return Promise.props({
+  return Bluebird.props({
     numStatsStaged: git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
     numStatsUnstaged: git(['diff', '--numstat', '--', (file || '')], repoPath)
@@ -165,7 +164,7 @@ git.status = function(repoPath, file) {
     status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then(function(status) {
-        return Promise.props({
+        return Bluebird.props({
           isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
           isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
@@ -217,7 +216,7 @@ git.getRemoteAddress = function(repoPath, remoteName) {
 git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
-  return Promise.all((files || []).map(function(file) {
+  return Bluebird.all((files || []).map(function(file) {
     return fs.isExists(path.join(repoPath, file)).then(function(isExist) {
       if (isExist) {
         toAdd.push(file);
@@ -232,7 +231,7 @@ git.resolveConflicts = function(repoPath, files) {
       addExec = git(['add', toAdd ], repoPath);
     if (toRemove.length > 0)
       removeExec = git(['rm', toRemove ], repoPath);
-    return Promise.join(addExec, removeExec);
+    return Bluebird.join(addExec, removeExec);
   });
 }
 
@@ -352,7 +351,7 @@ git.applyPatchedDiff = function(repoPath, patchedDiff) {
 }
 
 git.commit = function(repoPath, amend, message, files) {
-  return (new Promise(function(resolve, reject) {
+  return (new Bluebird(function(resolve, reject) {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
@@ -385,14 +384,14 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    var commitPromiseChain = Promise.resolve()
+    var commitPromiseChain = Bluebird.resolve()
       .then(function() {
         if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }).then(function() {
         if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       });
 
-    return Promise.join(commitPromiseChain, Promise.all(diffPatchPromises));
+    return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {

@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Changed
 - Cleaner rebase conflict message display [#708](https://github.com/FredrikNoren/ungit/pull/708)
+- ES6 [#672](https://github.com/FredrikNoren/ungit/pull/672)
 
 ## [0.10.1](https://github.com/FredrikNoren/ungit/compare/v0.10.0...v0.10.1)
 ### Added
