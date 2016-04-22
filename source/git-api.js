@@ -460,15 +460,16 @@ exports.registerApi = function(env) {
       if (exists) {
         return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
           .then(function(isWorkingDir) {
+            var gitRootPath = req.query.path;
             if (isWorkingDir) {
-              return 'inited';
+              return { type: 'inited', path: gitRootPath };
             } else {
               return gitPromise.revParse(req.query.path, '--is-bare-repository')
-                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; });
+                .then(function(isBareDir) { return { type: isBareDir ? 'bare' : 'uninited', path: gitRootPath } });
             }
           });
       } else {
-        return 'no-such-path';
+        return { type: 'no-such-path', path: req.query.path };
       }
     });
     jsonResultOrFailProm(res, task);
