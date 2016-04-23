@@ -261,12 +261,9 @@ git.binaryFileContent = function(repoPath, filename, version, outPipe) {
 
 git.diffFile = function(repoPath, filename, sha1) {
   var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
-  return git.revParse(repoPath, '--is-bare-repository')
-    .then(function(isBareDir) {
-      if (isBareDir) { // do not call git.status for bare repositories
-        return { files: {} };
-      }
-      return git.status(repoPath);
+  return git.revParse(repoPath)
+    .then(function(revParse) {
+      return revParse.type === 'bare' ? { files: {} } : git.status(repoPath); // if bare do not call status
     }).then(function(status) {
       var file = status.files[filename];
 
@@ -401,12 +398,19 @@ git.commit = function(repoPath, amend, message, files) {
   });
 }
 
-git.revParse = function(repoPath, type) {
-  return git(['rev-parse', type], repoPath)
-    .catch(function(err) {
-      return false;
-    }).then(function(result) {
-      return result.toString().indexOf('true') > -1;
+git.revParse = function(repoPath) {
+  return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
+    .then(function(result) {
+      var resultLines = result.toString().split('\n');
+      var rootPath = resultLines[2] ? resultLines[2] : repoPath;
+      if (resultLines[0].indexOf('true') > -1) {
+        return { type: 'inited', gitRootPath: rootPath };
+      } else if (resultLines[1].indexOf('true') > -1) {
+        return { type: 'bare', gitRootPath: rootPath };
+      }
+      return { type: 'uninited', gitRootPath: rootPath };
+    }).catch(function(err) {
+      return { type: 'uninited', gitRootPath: repoPath };
     });
 }
 

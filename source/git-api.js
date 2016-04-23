@@ -457,20 +457,7 @@ exports.registerApi = function(env) {
 
   app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
     var task = fs.isExists(req.query.path).then(function(exists) {
-      if (exists) {
-        return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
-          .then(function(isWorkingDir) {
-            var gitRootPath = req.query.path;
-            if (isWorkingDir) {
-              return { type: 'inited', path: gitRootPath };
-            } else {
-              return gitPromise.revParse(req.query.path, '--is-bare-repository')
-                .then(function(isBareDir) { return { type: isBareDir ? 'bare' : 'uninited', path: gitRootPath } });
-            }
-          });
-      } else {
-        return { type: 'no-such-path', path: req.query.path };
-      }
+      return exists ? gitPromise.revParse(req.query.path) : { type: 'no-such-path', path: req.query.path };
     });
     jsonResultOrFailProm(res, task);
   });
