@@ -53,6 +53,7 @@ PathViewModel.prototype.updateStatus = function() {
     self.loadingProgressBar.stop();
     if (err) return;
     if (status.type == 'inited' || status.type == 'bare') {
+      self.path = status.gitRootPath ? status.gitRootPath : self.path;
       self.status(status.type);
       if (!self.repository()) {
         self.repository(components.create('repository', { server: self.server, path: self }));
