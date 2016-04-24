@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 ### Fixed
 - Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
 - Fix ".lock" file conflicts in parallelized git operations [#515](https://github.com/FredrikNoren/ungit/issues/515)
+- Allow Ungit to function under sub dir of a git dir [#734](https://github.com/FredrikNoren/ungit/issues/734)
 
 ### Changed
 - Cleaner rebase conflict message display [#708](https://github.com/FredrikNoren/ungit/pull/708)
