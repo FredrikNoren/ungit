@@ -400,18 +400,16 @@ git.commit = function(repoPath, amend, message, files) {
 
 git.revParse = function(repoPath) {
   return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
-    .then(function(result) {
-      var resultLines = result.toString().split('\n');
-      var rootPath = resultLines[2] ? resultLines[2] : repoPath;
+    .then((result) => {
+      const resultLines = result.toString().split('\n');
+      const rootPath = resultLines[2] ? resultLines[2] : repoPath;
       if (resultLines[0].indexOf('true') > -1) {
         return { type: 'inited', gitRootPath: rootPath };
       } else if (resultLines[1].indexOf('true') > -1) {
         return { type: 'bare', gitRootPath: rootPath };
       }
       return { type: 'uninited', gitRootPath: rootPath };
-    }).catch(function(err) {
-      return { type: 'uninited', gitRootPath: repoPath };
-    });
+    }).catch((err) => ({ type: 'uninited', gitRootPath: repoPath }));
 }
 
 module.exports = git;
