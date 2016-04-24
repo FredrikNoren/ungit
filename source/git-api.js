@@ -456,9 +456,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res) {
-    const task = fs.isExists(req.query.path).then((exists) => {
-      return exists ? gitPromise.revParse(req.query.path) : { type: 'no-such-path', path: req.query.path };
-    });
+    const task = fs.isExists(req.query.path).then((exists) => exists ? gitPromise.revParse(req.query.path) : { type: 'no-such-path', gitRootPath: req.query.path } )
     jsonResultOrFailProm(res, task);
   });
 

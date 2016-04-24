@@ -6,6 +6,7 @@ var uiInteractions = require('./ui-interactions.js');
 var webpage = require('webpage');
 var page = webpage.create();
 var suite = testsuite.newSuite('generic', page);
+var fs = require('fs');
 
 var environment;
 
@@ -16,9 +17,15 @@ suite.test('Init', function(done) {
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
+    environment.createRepos([ { bare: false, path: testRepoPath } ], function () {
+      // create a sub dir and change working dir to sub dir to prove functionality within subdir
+      testRepoPath += '/asubdir';
+      if (fs.makeDirectory(testRepoPath)) {
+        done();
+      } else {
+        done("failed to make subdir");
+      }
+    });
   });
 });
 
