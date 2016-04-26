@@ -19,10 +19,10 @@ var ImageDiffViewModel = function(args) {
     return 'changed';
   });
   this.oldImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1 + '^': 'HEAD');
+    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1 + '^': 'HEAD');
   });
   this.newImageSrc = ko.computed(function() {
-    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
+    return '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
   });
   this.isShowingDiffs = args.isShowingDiffs;
 }

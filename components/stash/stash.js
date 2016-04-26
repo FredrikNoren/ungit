@@ -18,14 +18,14 @@ function StashItemViewModel(stash, data) {
 StashItemViewModel.prototype.pop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath, pop: true }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath(), pop: true }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath }, function(err, res) {
+  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath() }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
 }
@@ -51,7 +51,7 @@ StashViewModel.prototype.onProgramEvent = function(event) {
 }
 StashViewModel.prototype.refresh = function() {
   var self = this;
-  this.server.get('/stashes', { path: this.repoPath }, function(err, stashes) {
+  this.server.get('/stashes', { path: this.repoPath() }, function(err, stashes) {
     if (err) {
       if (err.errorCode == 'no-such-path') return true;
       return;

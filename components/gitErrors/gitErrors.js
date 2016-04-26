@@ -21,7 +21,7 @@ GitErrorsViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'git-error') this._handleGitError(event);
 }
 GitErrorsViewModel.prototype._handleGitError = function(event) {
-  if (event.data.repoPath != this.repoPath) return;
+  if (event.data.repoPath != this.repoPath()) return;
   this.gitErrors.push(new GitErrorViewModel(this, this.server, event.data));
 }
 

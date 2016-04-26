@@ -3,6 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var addressParser = require('ungit-address-parser');
 var navigation = require('ungit-navigation');
+var programEvents = require('ungit-program-events');
 
 components.register('path', function(args) {
   return new PathViewModel(args.server, args.path);
@@ -11,8 +12,8 @@ components.register('path', function(args) {
 var PathViewModel = function(server, path) {
   var self = this;
   this.server = server;
-  this.path = path;
-  this.dirName = this.path.replace('\\', '/')
+  this.path = ko.observable(path);
+  this.dirName = this.path().replace('\\', '/')
                    .split('/')
                    .filter(function(s) { return s; })
                    .slice(-1)[0] || '/';
@@ -49,11 +50,14 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.server.get('/quickstatus', { path: this.path }, function(err, status){
+  this.server.get('/quickstatus', { path: this.path() }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
     if (status.type == 'inited' || status.type == 'bare') {
-      self.path = status.gitRootPath ? status.gitRootPath : self.path;
+      if (self.path() !== status.gitRootPath) {
+        self.path(status.gitRootPath);
+        programEvents.dispatch({ event: 'working-tree-changed' });
+      }
       self.status(status.type);
       if (!self.repository()) {
         self.repository(components.create('repository', { server: self.server, path: self }));
@@ -66,7 +70,7 @@ PathViewModel.prototype.updateStatus = function() {
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  this.server.post('/init', { path: this.path }, function(err, res) {
+  this.server.post('/init', { path: this.path() }, function(err, res) {
     if (err) return;
     self.updateStatus();
   });
@@ -85,7 +89,7 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  this.server.post('/clone', { path: this.path, url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+  this.server.post('/clone', { path: this.path(), url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
     self.cloningProgressBar.stop();
     if (err) return;
     navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
@@ -94,7 +98,7 @@ PathViewModel.prototype.cloneRepository = function() {
 PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
-  this.server.post('/createDir',  {dir: this.path }, function() {
+  this.server.post('/createDir',  { dir: this.path() }, function() {
     self.updateStatus();
   });
 }
