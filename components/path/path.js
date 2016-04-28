@@ -12,8 +12,8 @@ components.register('path', function(args) {
 var PathViewModel = function(server, path) {
   var self = this;
   this.server = server;
-  this.path = ko.observable(path);
-  this.dirName = this.path().replace('\\', '/')
+  this.repoPath = ko.observable(path);
+  this.dirName = this.repoPath().replace('\\', '/')
                    .split('/')
                    .filter(function(s) { return s; })
                    .slice(-1)[0] || '/';
@@ -50,12 +50,13 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.server.get('/quickstatus', { path: this.path() }, function(err, status){
+  this.server.get('/quickstatus', { path: this.repoPath() }, function(err, status){
     self.loadingProgressBar.stop();
     if (err) return;
     if (status.type == 'inited' || status.type == 'bare') {
-      if (self.path() !== status.gitRootPath) {
-        self.path(status.gitRootPath);
+      if (self.repoPath() !== status.gitRootPath) {
+        self.repoPath(status.gitRootPath);
+        programEvents.dispatch({ event: 'navigated-to-path', path: self.repoPath() });
         programEvents.dispatch({ event: 'working-tree-changed' });
       }
       self.status(status.type);
@@ -89,7 +90,7 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  this.server.post('/clone', { path: this.path(), url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
+  this.server.post('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
     self.cloningProgressBar.stop();
     if (err) return;
     navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
@@ -98,7 +99,7 @@ PathViewModel.prototype.cloneRepository = function() {
 PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
-  this.server.post('/createDir',  { dir: this.path() }, function() {
+  this.server.post('/createDir',  { dir: this.repoPath() }, function() {
     self.updateStatus();
   });
 }

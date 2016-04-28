@@ -13,7 +13,7 @@ var RepositoryViewModel = function(server, path) {
 
   this.server = server;
   this.isBareDir = path.status() === 'bare';
-  this.repoPath = path.path;
+  this.repoPath = path.repoPath;
   this.gitErrors = components.create('gitErrors', { server: server, repoPath: this.repoPath });
   this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
