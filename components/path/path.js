@@ -71,7 +71,7 @@ PathViewModel.prototype.updateStatus = function() {
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  this.server.post('/init', { path: this.path() }, function(err, res) {
+  this.server.post('/init', { path: this.repoPath() }, function(err, res) {
     if (err) return;
     self.updateStatus();
   });
