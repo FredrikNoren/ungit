@@ -153,7 +153,7 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
   var self = this;
-  this.graph.server.postPromise('/branches', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+  this.graph.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.newBranchName(), startPoint: this.sha1 })
     .then(function() {
       var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
       newRef.node(self);
@@ -166,7 +166,7 @@ GitNodeViewModel.prototype.createBranch = function() {
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
   var self = this;
-  this.graph.server.postPromise('/tags', { path: this.graph.repoPath, name: this.newBranchName(), startPoint: this.sha1 })
+  this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), startPoint: this.sha1 })
     .then(function() {
       var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
       newRef.node(self);

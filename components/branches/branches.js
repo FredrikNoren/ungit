@@ -14,7 +14,7 @@ function BranchesViewModel(server, repoPath) {
   this.repoPath = repoPath;
   this.server = server;
   this.branches = ko.observableArray();
-  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
+  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath(), temporary: true });
   this.current = ko.observable();
   this.fetchLabel = ko.computed(function() {
     if (self.current()) {
@@ -35,7 +35,7 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
   var self = this;
   this.fetchingProgressBar.start();
-  this.server.post('/checkout', { path: this.repoPath, name: branch.name }, function(err) {
+  this.server.post('/checkout', { path: this.repoPath(), name: branch.name }, function(err) {
     if (err) return;
     self.current(branch.name);
     self.fetchingProgressBar.stop();
@@ -44,7 +44,7 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
   this.fetchingProgressBar.start();
-  this.server.get('/branches', { path: this.repoPath }, function(err, branches) {
+  this.server.get('/branches', { path: this.repoPath() }, function(err, branches) {
     if (err) {
       self.current("~error");
       return;
@@ -76,7 +76,7 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-      self.server.del('/branches', { name: branch.name, path: self.repoPath }, function(err) {
+      self.server.del('/branches', { name: branch.name, path: self.repoPath() }, function(err) {
         if (!err) {
           programEvents.dispatch({ event: 'working-tree-changed' });
         }

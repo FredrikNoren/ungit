@@ -26,7 +26,7 @@ describe('git-api', function () {
     common.post(req, '/testing/createtempdir', undefined, function(err, res) {
       if (err) return done(err);
       expect(res.body.path).to.be.ok();
-      testDir = res.body.path;
+      testDir = fs.realpathSync(res.body.path);
       done();
     });
   });
@@ -59,7 +59,7 @@ describe('git-api', function () {
   it('quickstatus should say uninited in uninited directory', function(done) {
     common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be('uninited');
+      expect(res.body).to.eql({ type: 'uninited', gitRootPath: testDir });
       done();
     });
   });
@@ -80,7 +80,7 @@ describe('git-api', function () {
   it('quickstatus should say false in non-existing directory', function(done) {
     common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be('no-such-path');
+      expect(res.body).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') });
       done();
     });
   });
@@ -96,7 +96,7 @@ describe('git-api', function () {
   it('quickstatus should say inited in inited directory', function(done) {
     common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be('inited');
+      expect(res.body).to.eql({ type: 'inited', gitRootPath: testDir });
       done();
     });
   });

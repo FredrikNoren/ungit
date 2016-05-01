@@ -92,14 +92,14 @@ RefViewModel.prototype.moveTo = function(target, callback) {
 
   if (this.isLocal) {
     if (this.current()) {
-      this.server.post('/reset', { path: this.graph.repoPath, to: target, mode: 'hard' }, callbackWithRefSet);
+      this.server.post('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' }, callbackWithRefSet);
     } else if (this.isTag) {
-      this.server.post('/tags', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+      this.server.post('/tags', { path: this.graph.repoPath(), name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
     } else {
-      this.server.post('/branches', { path: this.graph.repoPath, name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+      this.server.post('/branches', { path: this.graph.repoPath(), name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
     }
   } else {
-    var pushReq = { path: this.graph.repoPath, remote: this.remote, refSpec: target, remoteBranch: this.refName };
+    var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
     this.server.post('/push', pushReq, function(err, res) {
         if (err) {
           if (err.errorCode == 'non-fast-forward') {
@@ -122,7 +122,7 @@ RefViewModel.prototype.remove = function(callback) {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
-  this.server.del(url, { path: this.graph.repoPath, remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
+  this.server.del(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
     if (!err) {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;
@@ -157,7 +157,7 @@ RefViewModel.prototype.canBePushed = function(remote) {
 
 RefViewModel.prototype.createRemoteRef = function(callback) {
   var self = this;
-  this.server.post('/push', { path: this.graph.repoPath, remote: this.graph.currentRemote(),
+  this.server.post('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(),
       refSpec: this.refName, remoteBranch: this.refName }, function(err) {
         if (!err) {
           var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);

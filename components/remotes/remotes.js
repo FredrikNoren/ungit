@@ -23,7 +23,7 @@ function RemotesViewModel(server, repoPath) {
     else return 'No remotes specified';
   })
 
-  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath, temporary: true });
+  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath(), temporary: true });
 
   this.fetchEnabled = ko.computed(function() {
     return self.remotes().length > 0;
@@ -47,8 +47,8 @@ RemotesViewModel.prototype.fetch = function(options) {
 
   this.fetchingProgressBar.start();
   var jobs = [];
-  if (options.tags) jobs.push(function(done) { self.server.get('/remote/tags', { path: self.repoPath, remote: self.currentRemote() }, done); });
-  if (options.nodes) jobs.push(function(done) { self.server.post('/fetch', { path: self.repoPath, remote: self.currentRemote() }, done);  });
+  if (options.tags) jobs.push(function(done) { self.server.get('/remote/tags', { path: self.repoPath(), remote: self.currentRemote() }, done); });
+  if (options.nodes) jobs.push(function(done) { self.server.post('/fetch', { path: self.repoPath(), remote: self.currentRemote() }, done);  });
   async.parallel(jobs, function(err, result) {
     self.fetchingProgressBar.stop();
 
@@ -58,7 +58,7 @@ RemotesViewModel.prototype.fetch = function(options) {
 
 RemotesViewModel.prototype.updateRemotes = function() {
   var self = this;
-  this.server.get('/remotes', { path: this.repoPath }, function(err, remotes) {
+  this.server.get('/remotes', { path: this.repoPath() }, function(err, remotes) {
     if (err && err.errorCode == 'not-a-repository') return true;
     if (err) return;
     remotes = remotes.map(function(remote) {
@@ -85,7 +85,7 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var diag = components.create('addremotedialog');
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
-      self.server.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath, url: diag.url() }, function(err, res) {
+      self.server.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() }, function(err, res) {
         if (err) return;
         self.updateRemotes();
       })
@@ -100,7 +100,7 @@ RemotesViewModel.prototype.remoteRemove = function(remote) {
   diag.closed.add(function() {
     if (diag.result()) {
       self.fetchingProgressBar.start();
-      self.server.del('/remotes/' + remote.name, { path: self.repoPath }, function(err, result) {
+      self.server.del('/remotes/' + remote.name, { path: self.repoPath() }, function(err, result) {
         if (err) {
           console.log(err);
           return;

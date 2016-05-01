@@ -38,7 +38,7 @@ TextDiffViewModel.prototype.updateNode = function(parentElement) {
 TextDiffViewModel.prototype.getDiffArguments = function() {
   return {
     file: this.filename,
-    path: this.repoPath,
+    path: this.repoPath(),
     sha1: this.sha1 ? this.sha1 : ''
   };
 }

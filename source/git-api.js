@@ -455,22 +455,8 @@ exports.registerApi = function(env) {
     jsonResultOrFailProm(res, task);
   });
 
-  app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res){
-    var task = fs.isExists(req.query.path).then(function(exists) {
-      if (exists) {
-        return gitPromise.revParse(req.query.path, '--is-inside-work-tree')
-          .then(function(isWorkingDir) {
-            if (isWorkingDir) {
-              return 'inited';
-            } else {
-              return gitPromise.revParse(req.query.path, '--is-bare-repository')
-                .then(function(isBareDir) { return isBareDir ? 'bare' : 'uninited'; });
-            }
-          });
-      } else {
-        return 'no-such-path';
-      }
-    });
+  app.get(exports.pathPrefix + '/quickstatus', ensureAuthenticated, function(req, res) {
+    const task = fs.isExists(req.query.path).then((exists) => exists ? gitPromise.revParse(req.query.path) : { type: 'no-such-path', gitRootPath: req.query.path } )
     jsonResultOrFailProm(res, task);
   });
 

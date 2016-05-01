@@ -6,24 +6,32 @@ var uiInteractions = require('./ui-interactions.js');
 var webpage = require('webpage');
 var page = webpage.create();
 var suite = testsuite.newSuite('generic', page);
+var fs = require('fs');
 
 var environment;
 
 var testRepoPath;
+var testRepoPathSubDir;
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
+    environment.createRepos([ { bare: false, path: testRepoPath } ], function () {
+      // create a sub dir and change working dir to sub dir to prove functionality within subdir
+      testRepoPathSubDir = testRepoPath + '/asubdir';
+      if (fs.makeDirectory(testRepoPathSubDir)) {
+        done();
+      } else {
+        done("failed to make subdir");
+      }
+    });
   });
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir), function () {
     helpers.waitForElementVisible(page, '.graph', function() {
       setTimeout(done, 1000); // Let it finnish loading
     });
