@@ -1,5 +1,5 @@
 var childProcess = require('child_process');
-var phantomjs = require('phantomjs');
+var phantomjs = require('phantomjs2');
 var path = require('path');
 var fs = require('fs');
 var npm = require('npm');
