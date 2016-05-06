@@ -19,10 +19,9 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open home screen should show authentication dialog', function(done) {
-  page.open(environment.url, function() {
-    helpers.waitForElementVisible(page, '[data-ta-container="login-page"]', function() {
-      done();
-    });
+  page.open(environment.url);
+  helpers.waitForElementVisible(page, '[data-ta-container="login-page"]', function() {
+    setTimeout(done, 500);
   });
 });
 

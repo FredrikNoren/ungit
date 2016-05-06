@@ -31,10 +31,9 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      setTimeout(done, 1000); // Let it finnish loading
-    });
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir));
+  helpers.waitForElementVisible(page, '.graph', function() {
+    setTimeout(done, 500);
   });
 });
 

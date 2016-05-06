@@ -10,15 +10,14 @@ var suite = testsuite.newSuite('screens', page);
 var environment;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page);
+  environment = new Environment(page, { showServerOutput: true });
   environment.init(done);
 });
 
 suite.test('Open home screen', function(done) {
-  page.open(environment.url, function() {
-    helpers.waitForElementVisible(page, '[data-ta-container="home-page"]', function() {
-      done();
-    });
+  page.open(environment.url);
+  helpers.waitForElementVisible(page, '[data-ta-container="home-page"]', function() {
+    setTimeout(done, 500);
   });
 });
 
@@ -30,12 +29,9 @@ suite.test('Create test directory', function(done) {
 });
 
 suite.test('Open path screen', function(done) {
-  page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
-    page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
-        done();
-      });
-    });
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+  helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
+    setTimeout(done, 500);
   });
 });
 
@@ -90,12 +86,9 @@ suite.test('Entering a path to a repo should bring you to that repo', function(d
 suite.test('Create test directory with ampersand and open it', function(done) {
   var specialRepoPath = environment.path + '/test & repo';
   environment.createFolder(specialRepoPath, function() {
-    page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
-      page.open(environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath), function () {
-        helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
-          done();
-        });
-      });
+    page.open(environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath));
+    helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
+      setTimeout(done, 500);
     });
   });
 });

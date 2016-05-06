@@ -23,14 +23,11 @@ suite.test('Init', function(done) {
 
 
 suite.test('Open path screen', function(done) {
-  page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
-    page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
-        if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
-          return done(new Error('Should not find remote error popup'));
-        done();
-      });
-    });
+  page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath));
+  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
+    if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
+      return done(new Error('Should not find remote error popup'));
+    setTimeout(done, 500);
   });
 });
 
