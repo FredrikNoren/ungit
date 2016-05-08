@@ -179,6 +179,10 @@ git.status = function(repoPath, file) {
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
                 return status;
+              }).catch(err => {
+                // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
+                // and state changed while this call is being made.
+                status.inMerge = status.inMerge = false;
               });
           }
           return status;
