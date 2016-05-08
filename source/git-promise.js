@@ -183,6 +183,7 @@ git.status = function(repoPath, file) {
                 // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
                 // and state changed while this call is being made.
                 status.inMerge = status.inCherry = false;
+                return status;
               });
           }
           return status;
