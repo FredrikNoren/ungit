@@ -7,6 +7,7 @@ var semver = require('semver');
 var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
+var Bluebird = require('bluebird');
 
 module.exports = function(grunt) {
   var packageJson = grunt.file.readJSON('package.json');
@@ -337,19 +338,46 @@ module.exports = function(grunt) {
     });
   });
 
+  var getClickTestFiles = function(callback) {
+    fs.readdir('clicktests', function(err, ls) {
+      if (err) callback(err)
+
+      callback(null, ls.filter(function(file) {
+        return file.startsWith("test.");
+      }));
+    });
+  }
+
+  var clickExecute = function(file, onOut, onErr) {
+    return new Bluebird(function(resolve, reject) {
+      var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', file)], { maxBuffer: 10*1024*1024});
+      child.stdout.on('data', onOut);
+      child.stderr.on('data', onErr);
+      child.on('exit', function(code) {
+        if (code == 0) resolve(file);
+        else reject();
+      });
+    });
+  }
+
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
-    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'test.all.js')], { maxBuffer: 10*1024*1024});
-    child.stdout.on('data', function(data) {
-      grunt.log.write(data);
-    });
-    child.stderr.on('data', function(data) {
-      grunt.log.error(data);
-    })
-    child.on('exit', function(code) {
-      grunt.log.writeln('Clicktests exited with code ' + code);
-      done(code == 0);
+
+    getClickTestFiles(function(err, clickTestFiles) {
+      if (err) done(err);
+
+      var onOut = function(data) { grunt.log.write(data); }
+      var onErr = function(data) { grunt.log.error(data); }
+      var onFinish = function(file) {
+        grunt.log.writeln(file + ' Clicktest success!');
+        if (clickTestFiles.length > 0) return clickExecute(clickTestFiles.shift(), onOut, onErr).then(onFinish)
+        else done(true);
+      }
+
+      clickExecute(clickTestFiles.shift(), onOut, onErr)
+        .then(onFinish)
+        .catch(done)
     });
   });
 
