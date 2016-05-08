@@ -377,7 +377,7 @@ module.exports = function(grunt) {
 
       clickExecute(clickTestFiles.shift(), onOut, onErr)
         .then(onFinish)
-        .catch(done)
+        .catch(done.bind(null, false))
     });
   });
 
