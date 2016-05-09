@@ -36,3 +36,5 @@ report/
 /components/**/*.bundle.js
 
 coverage
+
+/src

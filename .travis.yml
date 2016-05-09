@@ -23,4 +23,4 @@ before_script:
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git version
-  - grunt
+  - grunt -d

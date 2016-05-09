@@ -6,24 +6,10 @@ var winston = require('winston');
 var addressParser = require('./address-parser');
 var _ = require('lodash');
 var isWindows = /^win/.test(process.platform);
-var Promise = require('bluebird');
+var Bluebird = require('bluebird');
 var fs = require('./utils/fs-async');
 var async = require('async');
 var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
-
-/**
- * Returns a promise that executes git command with given arguments
- * @function
- * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
- * @param {string} repoPath - path to the git repository
- * @param {boolean=} allowError - true if return code of 1 is acceptable as some cases errors are acceptable
- * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
- * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
- * @param {timeout=} timeout - execution timeout, default is 2 mins
- * @returns {promise} execution promise
- * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
- * @example getGitExecuteTask(['show'], '/tmp');
- */
 
 var gitQueue = async.queue(function (args, callback) {
   if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
@@ -71,6 +57,40 @@ var gitQueue = async.queue(function (args, callback) {
   });
 }, config.maxConcurrentGitOperations);
 
+var gitExecutorProm = function(args, retryCount) {
+  return new Bluebird(function (resolve, reject) {
+    gitQueue.push(args, function(queueError, out) {
+      if(queueError) {
+        reject(queueError);
+      } else {
+        resolve(out);
+      }
+    });
+  }).catch(function(err) {
+    if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
+      return new Bluebird(function(resolve) {
+        // sleep random amount between 250 ~ 750 ms
+        setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
+      }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+    } else {
+      throw err;
+    }
+  });
+}
+
+/**
+ * Returns a promise that executes git command with given arguments
+ * @function
+ * @param {obj|array} commands - An object that represents all parameters or first parameter only, which is an array of commands
+ * @param {string} repoPath - path to the git repository
+ * @param {boolean=} allowError - true if return code of 1 is acceptable as some cases errors are acceptable
+ * @param {stream=} outPipe - if this argument exists, stdout is piped to this object
+ * @param {stream=} inPipe - if this argument exists, data is piped to stdin process on start
+ * @param {timeout=} timeout - execution timeout, default is 2 mins
+ * @returns {promise} execution promise
+ * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
+ * @example getGitExecuteTask(['show'], '/tmp');
+ */
 var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   var args = {};
   if (Array.isArray(commands)) {
@@ -89,15 +109,7 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
-  return new Promise(function (resolve, reject) {
-    gitQueue.push(args, function(queueError, out){
-      if(queueError){
-        reject(queueError);
-      } else {
-        resolve(out);
-      }
-    });
-  });
+  return gitExecutorProm(args, config.lockConflictRetryCount);
 }
 
 var getGitError = function(args, stderr, stdout) {
@@ -144,7 +156,7 @@ var getGitError = function(args, stderr, stdout) {
 }
 
 git.status = function(repoPath, file) {
-  return Promise.props({
+  return Bluebird.props({
     numStatsStaged: git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
     numStatsUnstaged: git(['diff', '--numstat', '--', (file || '')], repoPath)
@@ -152,7 +164,7 @@ git.status = function(repoPath, file) {
     status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then(function(status) {
-        return Promise.props({
+        return Bluebird.props({
           isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
           isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
@@ -204,7 +216,7 @@ git.getRemoteAddress = function(repoPath, remoteName) {
 git.resolveConflicts = function(repoPath, files) {
   var toAdd = [];
   var toRemove = [];
-  return Promise.all((files || []).map(function(file) {
+  return Bluebird.all((files || []).map(function(file) {
     return fs.isExists(path.join(repoPath, file)).then(function(isExist) {
       if (isExist) {
         toAdd.push(file);
@@ -219,7 +231,7 @@ git.resolveConflicts = function(repoPath, files) {
       addExec = git(['add', toAdd ], repoPath);
     if (toRemove.length > 0)
       removeExec = git(['rm', toRemove ], repoPath);
-    return Promise.join(addExec, removeExec);
+    return Bluebird.join(addExec, removeExec);
   });
 }
 
@@ -249,8 +261,10 @@ git.binaryFileContent = function(repoPath, filename, version, outPipe) {
 
 git.diffFile = function(repoPath, filename, sha1) {
   var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
-  return git.status(repoPath)
-    .then(function(status) {
+  return git.revParse(repoPath)
+    .then(function(revParse) {
+      return revParse.type === 'bare' ? { files: {} } : git.status(repoPath); // if bare do not call status
+    }).then(function(status) {
       var file = status.files[filename];
 
       if (!file && !sha1) {
@@ -334,7 +348,7 @@ git.applyPatchedDiff = function(repoPath, patchedDiff) {
 }
 
 git.commit = function(repoPath, amend, message, files) {
-  return (new Promise(function(resolve, reject) {
+  return (new Bluebird(function(resolve, reject) {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
@@ -347,8 +361,6 @@ git.commit = function(repoPath, amend, message, files) {
   }).then(function(status) {
     var toAdd = [];
     var toRemove = [];
-    var addPromise;     // a promise that add all files in toAdd
-    var removePromise;  // a proimse that removes all files in toRemove
     var diffPatchPromises = []; // promiese that patches each files individually
 
     for (var v in files) {
@@ -369,14 +381,14 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    if (toAdd.length > 0) {
-      addPromise = git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
-    }
-    if (toRemove.length > 0) {
-      removePromise = git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
-    }
+    var commitPromiseChain = Bluebird.resolve()
+      .then(function() {
+        if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
+      }).then(function() {
+        if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
+      });
 
-    return Promise.join(addPromise, removePromise, Promise.all(diffPatchPromises));
+    return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(function() {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
   }).catch(function(err) {
@@ -386,13 +398,18 @@ git.commit = function(repoPath, amend, message, files) {
   });
 }
 
-git.revParse = function(repoPath, type) {
-  return git(['rev-parse', type], repoPath)
-    .catch(function(err) {
-      return false;
-    }).then(function(result) {
-      return result.toString().indexOf('true') > -1;
-    });
+git.revParse = function(repoPath) {
+  return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
+    .then((result) => {
+      const resultLines = result.toString().split('\n');
+      const rootPath = path.normalize(resultLines[2] ? resultLines[2] : repoPath);
+      if (resultLines[0].indexOf('true') > -1) {
+        return { type: 'inited', gitRootPath: rootPath };
+      } else if (resultLines[1].indexOf('true') > -1) {
+        return { type: 'bare', gitRootPath: rootPath };
+      }
+      return { type: 'uninited', gitRootPath: rootPath };
+    }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
 module.exports = git;

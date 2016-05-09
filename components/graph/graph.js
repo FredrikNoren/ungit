@@ -17,7 +17,7 @@ function GraphViewModel(server, repoPath) {
   this.server = server;
   this.currentRemote = ko.observable();
   this.nodesLoader = components.create('progressBar', {
-    predictionMemoryKey: 'gitgraph-' + self.repoPath,
+    predictionMemoryKey: 'gitgraph-' + self.repoPath(),
     fallbackPredictedTimeMs: 1000,
     temporary: true
   });
@@ -101,7 +101,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   this.nodesLoader.start();
-  this.server.getPromise('/log', { path: this.repoPath, limit: this.maxNNodes })
+  this.server.getPromise('/log', { path: this.repoPath(), limit: this.maxNNodes })
     .then(function(nodes) {
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
@@ -273,7 +273,7 @@ GraphViewModel.prototype.onProgramEvent = function(event) {
 }
 GraphViewModel.prototype.updateBranches = function() {
   var self = this;
-  this.server.get('/checkout', { path: this.repoPath }, function(err, branch) {
+  this.server.get('/checkout', { path: this.repoPath() }, function(err, branch) {
     if (err && err.errorCode == 'not-a-repository') return true;
     if (err) return;
     self.checkedOutBranch(branch);

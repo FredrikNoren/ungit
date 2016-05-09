@@ -1,13 +1,13 @@
 var startLaunchTime = Date.now();
-var config = require('../source/config');
+var config = require('../src/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var async = require('async');
 
-var BugTracker = require('../source/bugtracker');
+var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../source/usage-statistics');
+var usageStatistics = require('../src/usage-statistics');
 
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
@@ -58,7 +58,7 @@ function checkIfUngitIsRunning(callback) {
     }
   });
 }
-  
+
 var mainWindow = null;
 
 app.on('window-all-closed', function() {
@@ -72,19 +72,19 @@ app.on('ready', function() {
       app.quit();
     }
     else {
-      var server = require('../source/server');
+      var server = require('../src/server');
       server.started.add(function() {
         launch(function(err) {
           if (err) console.log(err);
         })
-          
+
         var launchTime = (Date.now() - startLaunchTime);
         console.log('Took ' + launchTime + 'ms to start server.');
         usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
       });
-      
+
       mainWindow = new BrowserWindow({width: 1366, height: 768});
-      
+
       mainWindow.on('closed', function() {
         mainWindow = null;
       });

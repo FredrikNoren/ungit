@@ -13,7 +13,7 @@ var RepositoryViewModel = function(server, path) {
 
   this.server = server;
   this.isBareDir = path.status() === 'bare';
-  this.repoPath = path.path;
+  this.repoPath = path.repoPath;
   this.gitErrors = components.create('gitErrors', { server: server, repoPath: this.repoPath });
   this.graph = components.create('graph', { server: server, repoPath: this.repoPath });
   this.remotes = components.create('remotes', { server: server, repoPath: this.repoPath });
@@ -21,7 +21,8 @@ var RepositoryViewModel = function(server, path) {
   this.stash = this.isBareDir ? {} : components.create('stash', { server: server, repoPath: this.repoPath });
   this.staging = this.isBareDir ? {} : components.create('staging', { server: server, repoPath: this.repoPath });
   this.branches = components.create('branches', { server: server, repoPath: this.repoPath });
-  this.server.watchRepository(this.repoPath);
+  this.repoPath.subscribe(function(value) { self.sever.watchRepository(value); });
+  this.server.watchRepository(this.repoPath());
   this.showLog = self.isBareDir ? ko.observable(true) : self.staging.isStageValid;
   this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
@@ -44,21 +45,17 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
   if (this.submodules.onProgramEvent) this.submodules.onProgramEvent(event);
   if (this.branches.onProgramEvent) this.branches.onProgramEvent(event);
+  if (event.event == 'connected') this.server.watchRepository(this.repoPath());
 
   // If we get a reconnect event it's usually because the server crashed and then restarted
   // or something like that, so we need to tell it to start watching the path again
-  if (event.event == 'connected') {
-    this.server.watchRepository(this.repoPath);
-  } else if (event.event == 'request-app-content-refresh') {
-
-  }
 }
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
 }
 RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
   var self = this;
-  this.server.get('/baserepopath', { path: this.repoPath }, function(err, baseRepoPath) {
+  this.server.get('/baserepopath', { path: this.repoPath() }, function(err, baseRepoPath) {
     if (err || !baseRepoPath.path) {
       self.isSubmodule(false);
       return true;
@@ -66,7 +63,7 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
 
     self.server.get('/submodules', { path: baseRepoPath.path }, function(err, submodules) {
       if (!err && Array.isArray(submodules)) {
-        var baseName = self.repoPath.replace(/^.*[\\\/]/, '');
+        var baseName = self.repoPath().replace(/^.*[\\\/]/, '');
 
         for (var n = 0; n < submodules.length; n++) {
           if (submodules[n].path === baseName) {

@@ -142,11 +142,13 @@ exports.parseGitLog = function(data) {
           total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
         }
       }
-      currentCommmit.fileLineDiffs.splice(0,0, total);
+      currentCommmit.fileLineDiffs.splice(0, 0, total);
       parser = parseCommitLine;
       return;
     }
-    currentCommmit.fileLineDiffs.push(row.split('\t'));
+    var splitted = row.split('\t');
+    splitted.push(fileType(splitted[2]));
+    currentCommmit.fileLineDiffs.push(splitted);
   }
   var parser = parseCommitLine;
   var rows = data.split('\n');
@@ -335,7 +337,7 @@ exports.parsePatchDiffResult = function(patchLineList, text) {
 
   // We don't want to leave out last diff block header...
   updatePatchHeader(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent);
-  
+
   if (selectedLines > 0) {
     return result.join('\n');
   } else {

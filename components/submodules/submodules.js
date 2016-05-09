@@ -30,7 +30,7 @@ SubmodulesViewModel.prototype.updateNode = function(parentElement) {
 SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
   var self = this;
 
-  this.server.get('/submodules', { path: this.repoPath }, function(err, submodules) {
+  this.server.get('/submodules', { path: this.repoPath() }, function(err, submodules) {
     // if returned is not array, don't render submodules module
     if (submodules && Array.isArray(submodules)) {
       self.submodules(submodules);
@@ -53,7 +53,7 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
   var self = this;
 
   this.updateProgressBar.start();
-  this.server.post('/submodules/update', { path: this.repoPath }, function(err, result) {
+  this.server.post('/submodules/update', { path: this.repoPath() }, function(err, result) {
     self.updateProgressBar.stop();
   });
 }
@@ -64,7 +64,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
       self.fetchProgressBar.start();
-      self.server.post('/submodules/add', { path: self.repoPath, submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
+      self.server.post('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
         if (err) {
           console.log(err);
           return;
@@ -92,7 +92,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   diag.closed.add(function() {
     if (diag.result()) {
       self.fetchProgressBar.start();
-      self.server.del('/submodules', { path: self.repoPath, submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
+      self.server.del('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
         if (err) {
           console.log(err);
           return;

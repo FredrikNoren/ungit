@@ -1,6 +1,6 @@
-var path = require('path');
-var imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF', '.JPEG'];
+'use strict';
 
-module.exports = function(fileName) {
-  return imageFileExtensions.indexOf(path.extname(fileName).toUpperCase()) > -1 ? 'image' : 'text';
-}
+const path = require('path');
+const imageFileExtensions = ['.PNG', '.JPG', '.BMP', '.GIF', '.JPEG'];
+
+module.exports = (fileName) => imageFileExtensions.indexOf(path.extname(fileName).toUpperCase()) > -1 ? 'image' : 'text';

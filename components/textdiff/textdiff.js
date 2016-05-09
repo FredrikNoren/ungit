@@ -22,6 +22,7 @@ var TextDiffViewModel = function(args) {
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
+  this.wordWrap = args.wordWrap;
 
   this.textDiffType.subscribe(function() {
     self.invalidateDiff();
@@ -37,7 +38,7 @@ TextDiffViewModel.prototype.updateNode = function(parentElement) {
 TextDiffViewModel.prototype.getDiffArguments = function() {
   return {
     file: this.filename,
-    path: this.repoPath,
+    path: this.repoPath(),
     sha1: this.sha1 ? this.sha1 : ''
   };
 }
