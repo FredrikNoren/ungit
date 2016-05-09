@@ -8,6 +8,7 @@ var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
 var Bluebird = require('bluebird');
+var temp = require('temp');
 
 module.exports = function(grunt) {
   var packageJson = grunt.file.readJSON('package.json');
@@ -378,6 +379,43 @@ module.exports = function(grunt) {
       clickExecute(clickTestFiles.shift(), onOut, onErr)
         .then(onFinish)
         .catch(done.bind(null, false))
+    });
+  });
+
+  // This is purely for devs for faster churn of clicktest result
+  // Each individual click test files will be excuted in it's own threads.
+  // TODO: failling currently and I suspect timing issues with phantom and etc.
+  // TODO: need to even out test loads of each tests and better spread clicktest loads.
+  grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
+    var done = this.async();
+
+    getClickTestFiles(function(err, clickTestFiles) {
+      if (err) done(err);
+      grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
+      Bluebird.all(clickTestFiles.map(function(file) {
+        var output = "";
+        var outStream = function(data) { output += data; }
+        grunt.log.writeln('Clicktest started! \t' + file);
+        return clickExecute(file, outStream, outStream)
+          .then(function() {
+            grunt.log.writeln('Clicktest success! \t' + file);
+            return { name: file, output: output, isSuccess: true };
+          }).catch(function() {
+            grunt.log.writeln('Clicktest fail! \t' + file);
+            return { name: file, output: output, isSuccess: false };
+          });
+      })).then(function(results) {
+        var isSuccess = true;
+        results.forEach(function(result) {
+          if (!result.isSuccess) {
+            grunt.log.writeln("---- start of " + result.name + " log ----")
+            grunt.log.writeln(result.output);
+            grunt.log.writeln("---- end of " + result.name + " log ----")
+            isSuccess = false;
+          }
+        });
+        done(isSuccess);
+      });
     });
   });
 

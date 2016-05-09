@@ -10,7 +10,7 @@ var suite = testsuite.newSuite('screens', page);
 var environment;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page, { showServerOutput: true });
+  environment = new Environment(page, { port: 8459, showServerOutput: true });
   environment.init(done);
 });
 

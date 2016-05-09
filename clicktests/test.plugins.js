@@ -11,6 +11,7 @@ var environment;
 
 suite.test('Init', function(done) {
   environment = new Environment(page, {
+    port: 8457,
     serverStartupOptions: ['--pluginDirectory=' + phantom.libraryPath + '/test-plugins']
   });
   environment.init(done);
