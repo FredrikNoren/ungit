@@ -22,9 +22,10 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open path screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath));
-  helpers.waitForElementVisible(page, '.graph', function() {
-    setTimeout(done, 500);
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
+    helpers.waitForElementVisible(page, '.graph', function() {
+      done();
+    });
   });
 });
 
