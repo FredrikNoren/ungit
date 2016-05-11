@@ -351,7 +351,7 @@ module.exports = function(grunt) {
 
   var clickExecute = function(file, onOut, onErr) {
     return new Bluebird(function(resolve, reject) {
-      var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', file)], { maxBuffer: 10*1024*1024});
+      var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', file)], { maxBuffer: 10*1024*1024 });
       child.stdout.on('data', onOut);
       child.stderr.on('data', onErr);
       child.on('exit', function(code) {
