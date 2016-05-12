@@ -384,7 +384,6 @@ module.exports = function(grunt) {
 
   // This is purely for devs for faster churn of clicktest result
   // Each individual click test files will be excuted in it's own threads.
-  // TODO: failling currently and I suspect timing issues with phantom and etc.
   // TODO: need to even out test loads of each tests and better spread clicktest loads.
   grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
     var done = this.async();
