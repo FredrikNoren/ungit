@@ -30,7 +30,7 @@ suite.test('Create test directory', function(done) {
 });
 
 suite.test('Open path screen', function(done) {
-  page.open(environment.url + '/#/repository?abc=24&path=' + encodeURIComponent(testRepoPath));
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath));
   helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]', function() {
     done();
   });

@@ -8,7 +8,7 @@ var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
 var Bluebird = require('bluebird');
-var temp = require('temp');
+var cliColor = require('ansi-color');
 
 module.exports = function(grunt) {
   var packageJson = grunt.file.readJSON('package.json');
@@ -394,13 +394,13 @@ module.exports = function(grunt) {
       Bluebird.all(clickTestFiles.map(function(file) {
         var output = "";
         var outStream = function(data) { output += data; }
-        grunt.log.writeln('Clicktest started! \t' + file);
+        grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
         return clickExecute(file, outStream, outStream)
           .then(function() {
-            grunt.log.writeln('Clicktest success! \t' + file);
+            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
             return { name: file, output: output, isSuccess: true };
           }).catch(function() {
-            grunt.log.writeln('Clicktest fail! \t' + file);
+            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
             return { name: file, output: output, isSuccess: false };
           });
       })).then(function(results) {
