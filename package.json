@@ -79,7 +79,7 @@
     "istanbul": "~0.4.3",
     "mocha": "~2.4.5",
     "npm": "~3.9.1",
-    "phantomjs2": "~2.2.0",
+    "phantomjs-prebuilt": "^2.1.7",
     "supertest": "~0.15.0"
   },
   "engines": {
