@@ -22,11 +22,8 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open path screen', function(done) {
-  console.log(1111)
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    console.log(2222)
     helpers.waitForElementVisible(page, '.graph', function() {
-      console.log(3333)
       done();
     });
   });
