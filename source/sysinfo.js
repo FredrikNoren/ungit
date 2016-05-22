@@ -5,7 +5,7 @@ var cache = require('./utils/cache');
 var getmac = require('getmac');
 var md5 = require('blueimp-md5');
 var semver = require('semver');
-var npmconf = require('npmconf');
+var npm = require('npm');
 var RegClient = require('npm-registry-client');
 
 var sysinfo = exports;
@@ -34,7 +34,7 @@ sysinfo.getUngitPackageJsonVersion = function(callback) {
 function noop() {}
 
 sysinfo.getUngitLatestVersion = function(callback) {
-  npmconf.load({}, function(err, config) {
+  npm.load({}, function(err, config) {
     if (err) return callback(err);
     config.log = { error: noop, warn: noop, info: noop,
              verbose: noop, silly: noop, http: noop,
