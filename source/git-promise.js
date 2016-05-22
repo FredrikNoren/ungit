@@ -179,6 +179,11 @@ git.status = function(repoPath, file) {
               .then(function(commitMessage) {
                 status.commitMessage = commitMessage;
                 return status;
+              }).catch(err => {
+                // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
+                // and state changed while this call is being made.
+                status.inMerge = status.inCherry = false;
+                return status;
               });
           }
           return status;
@@ -294,21 +299,18 @@ git.diffFile = function(repoPath, filename, sha1) {
 }
 
 git.getCurrentBranch = function(repoPath) {
-  var HEADFile;
-  return git(['rev-parse', '--show-toplevel'], repoPath)
-    .then(function(rootRepoPath) {
-      HEADFile = path.join(rootRepoPath.trim(), '.git', 'HEAD');
-    }).then(function() {
-      return fs.isExists(HEADFile).then(function(isExist) {
-        if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
-      });
-    }).then(function() {
+  return git.revParse(repoPath).then(revResult => {
+    const HEADFile = path.join(revResult.gitRootPath, '.git', 'HEAD');
+    return fs.isExists(HEADFile).then(isExist => {
+      if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
+    }).then(() => {
       return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
-    }).then(function(text) {
+    }).then(text => {
       var rows = text.toString().split('\n');
       var branch = rows[0].slice('ref: refs/heads/'.length);
       return branch;
     });
+  });
 }
 
 git.discardAllChanges = function(repoPath) {

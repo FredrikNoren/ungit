@@ -7,7 +7,8 @@ helpers.log = function(text) {
 helpers.elementExists = function(page, selector) {
   helpers.log('Querying element exists: ' + selector);
   var element = page.evaluate(function(selector) {
-    return document.querySelector(selector);
+    var element =  document.querySelector(selector);
+    return element ? { selector: selector, textContent: element.textContent } : null;
   }, selector);
   if (element) {
     helpers.log('Element exists: ' + selector);
@@ -24,7 +25,7 @@ helpers.elementVisible = function(page, selector) {
     if (!element) return null;
     var rect = element.getBoundingClientRect();
     if (rect.width == 0 || rect.height == 0) return null;
-    return element;
+    return { selector: selector, textContent: element.textContent };
   }, selector);
   if (element) {
     helpers.log('Element visible: ' + selector);
@@ -34,12 +35,11 @@ helpers.elementVisible = function(page, selector) {
   return element;
 }
 
-
 helpers.waitFor = function(page, query, callback) {
   var tryFind = function() {
     var res = query();
     if (res) callback(res);
-    else setTimeout(tryFind, 500);
+    else setTimeout(tryFind, 250);
   }
   tryFind();
 }
@@ -87,8 +87,8 @@ helpers.getClickPosition = function(page, selector) {
   return { left: x, top: y };
 }
 helpers.click = function(page, selector) {
-  helpers.log('Trying to click ' + selector);
   var pos = helpers.getClickPosition(page, selector);
+  helpers.log('Trying to click ' + selector, "|", pos.left, pos.top);
   page.sendEvent('mousemove', pos.left, pos.top);
   page.sendEvent('click', pos.left, pos.top);
 }
@@ -105,6 +105,3 @@ helpers.selectAllText = function(page) {
   helpers.log('Trying to select all in focused element (ctrl-A)');
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
 }
-
-
-
