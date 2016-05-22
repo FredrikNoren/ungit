@@ -13,7 +13,9 @@ var testuser = { username: 'testuser', password: 'testpassword' }
 
 suite.test('Init', function(done) {
   environment = new Environment(page, {
-    serverStartupOptions: ['--authentication', '--users.' + testuser.username + '=' + testuser.password]
+    port: 8450,
+    serverStartupOptions: ['--authentication', '--users.' + testuser.username + '=' + testuser.password],
+    showServerOutput: true
   });
   environment.init(done);
 });

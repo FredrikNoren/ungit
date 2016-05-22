@@ -82,10 +82,12 @@ uiInteractions.amendCommit = function(page, callback) {
 
 
 uiInteractions.checkout = function(page, branch, callback) {
-  helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"]');
-  helpers.click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
-  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
-    callback();
+  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"]', function() {
+    helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"]');
+    helpers.click(page, '[data-ta-action="checkout"][data-ta-visible="true"]');
+    helpers.waitForElementVisible(page, '[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]', function() {
+      callback();
+    });
   });
 }
 

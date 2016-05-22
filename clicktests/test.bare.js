@@ -5,13 +5,13 @@ var Environment = require('./environment');
 var webpage = require('webpage');
 
 var page = webpage.create();
-var suite = testsuite.newSuite('authentication', page);
+var suite = testsuite.newSuite('bare', page);
 
 var environment;
 var testRepoPath;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page);
+  environment = new Environment(page, { port: 8451 });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';

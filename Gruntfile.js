@@ -1,5 +1,5 @@
 var childProcess = require('child_process');
-var phantomjs = require('phantomjs');
+var phantomjs = require('phantomjs-prebuilt');
 var path = require('path');
 var fs = require('fs');
 var npm = require('npm');
@@ -7,6 +7,8 @@ var semver = require('semver');
 var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
+var Bluebird = require('bluebird');
+var cliColor = require('ansi-color');
 
 module.exports = function(grunt) {
   var packageJson = grunt.file.readJSON('package.json');
@@ -337,19 +339,82 @@ module.exports = function(grunt) {
     });
   });
 
+  var getClickTestFiles = function(callback) {
+    fs.readdir('clicktests', function(err, ls) {
+      if (err) callback(err)
+
+      callback(null, ls.filter(function(file) {
+        return file.startsWith("test.");
+      }));
+    });
+  }
+
+  var clickExecute = function(file, onOut, onErr) {
+    return new Bluebird(function(resolve, reject) {
+      var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', file)], { maxBuffer: 10*1024*1024 });
+      child.stdout.on('data', onOut);
+      child.stderr.on('data', onErr);
+      child.on('exit', function(code) {
+        if (code == 0) resolve(file);
+        else reject();
+      });
+    });
+  }
+
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
-    var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', 'test.all.js')], { maxBuffer: 10*1024*1024});
-    child.stdout.on('data', function(data) {
-      grunt.log.write(data);
+
+    getClickTestFiles(function(err, clickTestFiles) {
+      if (err) done(err);
+
+      var onOut = function(data) { grunt.log.write(data); }
+      var onErr = function(data) { grunt.log.error(data); }
+      var onFinish = function(file) {
+        grunt.log.writeln(file + ' Clicktest success!');
+        if (clickTestFiles.length > 0) return clickExecute(clickTestFiles.shift(), onOut, onErr).then(onFinish)
+        else done(true);
+      }
+
+      clickExecute(clickTestFiles.shift(), onOut, onErr)
+        .then(onFinish)
+        .catch(done.bind(null, false))
     });
-    child.stderr.on('data', function(data) {
-      grunt.log.error(data);
-    })
-    child.on('exit', function(code) {
-      grunt.log.writeln('Clicktests exited with code ' + code);
-      done(code == 0);
+  });
+
+  // This is purely for devs for faster churn of clicktest result
+  // Each individual click test files will be excuted in it's own threads.
+  // TODO: need to even out test loads of each tests and better spread clicktest loads.
+  grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
+    var done = this.async();
+
+    getClickTestFiles(function(err, clickTestFiles) {
+      if (err) done(err);
+      grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
+      Bluebird.all(clickTestFiles.map(function(file) {
+        var output = "";
+        var outStream = function(data) { output += data; }
+        grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
+        return clickExecute(file, outStream, outStream)
+          .then(function() {
+            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+            return { name: file, output: output, isSuccess: true };
+          }).catch(function() {
+            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+            return { name: file, output: output, isSuccess: false };
+          });
+      })).then(function(results) {
+        var isSuccess = true;
+        results.forEach(function(result) {
+          if (!result.isSuccess) {
+            grunt.log.writeln("---- start of " + result.name + " log ----")
+            grunt.log.writeln(result.output);
+            grunt.log.writeln("---- end of " + result.name + " log ----")
+            isSuccess = false;
+          }
+        });
+        done(isSuccess);
+      });
     });
   });
 

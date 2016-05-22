@@ -11,7 +11,7 @@ var environment;
 var testRepoPath;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page);
+  environment = new Environment(page, { port: 8456 });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';

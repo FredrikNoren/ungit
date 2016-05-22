@@ -14,7 +14,7 @@ var bareRepoPath;
 var testRepoPath;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page, {rootPath: '/ungit12234'});
+  environment = new Environment(page, { port: 8458, rootPath: '/ungit12234' });
   environment.init(function(err) {
     if (err) return done(err);
     bareRepoPath = environment.path + '/barerepo';
