@@ -87,8 +87,8 @@ helpers.getClickPosition = function(page, selector) {
   return { left: x, top: y };
 }
 helpers.click = function(page, selector) {
-  helpers.log('Trying to click ' + selector);
   var pos = helpers.getClickPosition(page, selector);
+  helpers.log('Trying to click ' + selector, "|", pos.left, pos.top);
   page.sendEvent('mousemove', pos.left, pos.top);
   page.sendEvent('click', pos.left, pos.top);
 }

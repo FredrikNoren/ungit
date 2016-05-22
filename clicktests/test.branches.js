@@ -143,7 +143,7 @@ suite.test('cherrypick success case', function(done) {
         } else {
           done();
         }
-      }, 500)
+      }, 500);
     });
   });
 });
