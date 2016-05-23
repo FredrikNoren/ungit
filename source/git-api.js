@@ -284,9 +284,9 @@ exports.registerApi = function(env) {
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
     var commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote, ':' + req.query.name.trim()]);
-    var task = gitPromise(commands, req.query.apath)
+    var task = gitPromise(commands, req.query.path)
       .catch(err => {
-        if (!(err.stderr && err.stderr.indexOf("remote ref does not exist"))) {
+        if (!(err.stderr && err.stderr.indexOf("remote ref does not exist") > -1)) {
           throw err;
         }
       });
