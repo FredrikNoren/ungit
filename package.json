@@ -36,7 +36,6 @@
     "mkdirp": "~0.5.1",
     "moment": "~2.13.0",
     "npm-registry-client": "~7.1.0",
-    "npmconf": "~2.1.2",
     "octicons": "~3.5.0",
     "open": "~0.0.5",
     "os-homedir": "~1.0.1",
