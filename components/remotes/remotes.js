@@ -96,7 +96,7 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
 
 RemotesViewModel.prototype.remoteRemove = function(remote) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Remote ' + remote.name + ' delete cannot be undone with ungit.'});
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + remote.name + ' remote cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       self.fetchingProgressBar.start();
