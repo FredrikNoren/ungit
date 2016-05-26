@@ -103,7 +103,7 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
 GraphActions.Reset.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       var remoteRef = context.getRemoteRef(self.graph.currentRemote());
@@ -272,7 +272,7 @@ GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.icon = 'glyphicon glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Delete cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       context.remove(callback);

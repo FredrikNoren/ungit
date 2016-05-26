@@ -88,7 +88,7 @@ SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
 
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Submodule ' + submodule.name + 'delete cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       self.fetchProgressBar.start();
