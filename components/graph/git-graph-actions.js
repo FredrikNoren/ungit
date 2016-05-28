@@ -104,7 +104,7 @@ GraphActions.Reset.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
   var remoteRef = context.getRemoteRef(self.graph.currentRemote());
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref:' + remoteRef.name + ' cannot be undone with ungit.'});
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       self.server.post('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' }, function() {
