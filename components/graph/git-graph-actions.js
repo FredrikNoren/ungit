@@ -103,10 +103,10 @@ GraphActions.Reset.prototype.createHoverGraphic = function() {
 GraphActions.Reset.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  var remoteRef = context.getRemoteRef(self.graph.currentRemote());
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-      var remoteRef = context.getRemoteRef(self.graph.currentRemote());
       self.server.post('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' }, function() {
         context.node(remoteRef.node());
         callback();
@@ -272,7 +272,8 @@ GraphActions.Delete.prototype.style = 'delete';
 GraphActions.Delete.prototype.icon = 'glyphicon glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation cannot be undone with ungit.'});
+  var name = context.isRemoteBranch ? "remote " + context.localRefName : context.localRefName;
+  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + name + ' branch or tag cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
       context.remove(callback);
