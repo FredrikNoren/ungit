@@ -271,7 +271,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()];
+    var commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -312,7 +312,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()];
+    var commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -332,7 +332,6 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
     var arg = null;
-    console.log(11111, req.body.sha1)
     if (!!req.body.sha1) {
       arg = ['checkout', '-b', req.body.name.trim(), req.body.sha1];
     } else {

@@ -153,18 +153,11 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
   var self = this;
-  var task = null;
+  var command = ungit.config.autoCheckoutOnBranchCreate ? "/checkout" : "/branches";
 
-  if (ungit.config.autoCheckoutOnBranchCreate) {
-    task = this.graph.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 });
-  } else {
-    task = this.graph.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.newBranchName(), startPoint: this.sha1 });
-  }
-
-  task
+  this.graph.server.postPromise(command, { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
     .then(function() {
-      var newRef = self.graph.getRef('refs/heads/' + self.newBranchName());
-      newRef.node(self);
+      self.graph.getRef('refs/heads/' + self.newBranchName()).node(self);
     }).finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
@@ -174,7 +167,7 @@ GitNodeViewModel.prototype.createBranch = function() {
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
   var self = this;
-  this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), startPoint: this.sha1 })
+  this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
     .then(function() {
       var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
       newRef.node(self);
