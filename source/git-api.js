@@ -331,7 +331,15 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(['checkout', req.body.name.trim()], req.body.path))
+    var arg = null;
+    console.log(11111, req.body.sha1)
+    if (!!req.body.sha1) {
+      arg = ['checkout', '-b', req.body.name.trim(), req.body.sha1];
+    } else {
+      arg = ['checkout', req.body.name.trim()];
+    }
+
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
