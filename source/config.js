@@ -114,7 +114,10 @@ const defaultConfig = {
   disableDiscardMuteTime: 60 * 1000 * 5,  // 5 mins
 
   // Allowed number of retry for git "index.lock" conflict
-  lockConflictRetryCount: 3
+  lockConflictRetryCount: 3,
+
+  // Auto checkout the created branch on creation
+  autoCheckoutOnBranchCreate: false,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -162,7 +165,8 @@ let argv = yargs
 .describe('fileSeparator', 'OS dependent file separator')
 .describe('disableDiscardWarning', 'disable warning popup at discard')
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted')
-.describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict');
+.describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict')
+.describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation');
 
 // If not triggered by test, then do strict option check
 if (argv.$0.indexOf('mocha') === -1) {
