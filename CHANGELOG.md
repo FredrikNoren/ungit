@@ -9,15 +9,20 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Added bare repo support [#177](https://github.com/FredrikNoren/ungit/issues/177) [#728](https://github.com/FredrikNoren/ungit/issues/728)
 - Added support for cherry-pick conflict[#701](https://github.com/FredrikNoren/ungit/issues/701)
 - Added wordwrap support for diffs [#721](https://github.com/FredrikNoren/ungit/issues/721)
+- Support for Node6 [#745](https://github.com/FredrikNoren/ungit/pull/745/files)
 
 ### Fixed
 - Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
 - Fix ".lock" file conflicts in parallelized git operations [#515](https://github.com/FredrikNoren/ungit/issues/515)
 - Allow Ungit to function under sub dir of a git dir [#734](https://github.com/FredrikNoren/ungit/issues/734)
+- Removed deprecated npmconf package [#746](https://github.com/FredrikNoren/ungit/issues/746)
+- More helpful warning messages [#749](https://github.com/FredrikNoren/ungit/pull/749/files)
+- Deleting already deleted remote tag [#748](https://github.com/FredrikNoren/ungit/pull/748)
 
 ### Changed
 - Cleaner rebase conflict message display [#708](https://github.com/FredrikNoren/ungit/pull/708)
 - ES6 [#672](https://github.com/FredrikNoren/ungit/pull/672)
+- Dropped support for Node 0.10 and 0.12 [#745](https://github.com/FredrikNoren/ungit/pull/745/files)
 
 ## [0.10.1](https://github.com/FredrikNoren/ungit/compare/v0.10.0...v0.10.1)
 ### Added
