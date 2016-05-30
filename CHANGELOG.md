@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Added support for cherry-pick conflict[#701](https://github.com/FredrikNoren/ungit/issues/701)
 - Added wordwrap support for diffs [#721](https://github.com/FredrikNoren/ungit/issues/721)
 - Support for Node6 [#745](https://github.com/FredrikNoren/ungit/pull/745/files)
+- Added "autoCheckoutOnBranchCreate" option [#752](https://github.com/FredrikNoren/ungit/pull/752/files)
 
 ### Fixed
 - Fix maxConcurrentGitOperations not limiting git processes [#707](https://github.com/FredrikNoren/ungit/issues/707)
