@@ -145,6 +145,7 @@ module.exports = function(grunt) {
           globals: {
             '$': true,
             'module': true,
+            'ungit': true
           }
         },
         src: ['clicktests/**/*.js']

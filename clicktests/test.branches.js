@@ -148,16 +148,16 @@ suite.test('cherrypick success case', function(done) {
   });
 });
 
-suite.test('Cherrypick self (causes error and creates ./git/CHERRY_PICK_HEAD but no conflicts)', function(done) {
-  helpers.click(page, '[data-ta-clickable="node-clickable-0"]')
-  helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
-    helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
-    helpers.waitForElementVisible(page, '[data-ta-container="git-error-container"]', function() {
-      if (helpers.elementVisible(page, '[data-ta-clickable="graph"]')) {
-        done();
-      } else {
-        done("Cheerypick self should cause error but should not get into merge state.")
-      }
+suite.test('Auto checkout on branch creation.', function(done) {
+  // Set autoCheckoutOnBranchCreate=true on client side instead of restarting
+  // ungit with this option as this would be faster.
+  page.evaluate(function() {
+    ungit.config.autoCheckoutOnBranchCreate = true;
+  });
+
+  uiInteractions.createBranch(page, 'autoCheckout', function() {
+    helpers.waitForElementVisible(page, '[data-ta-name="autoCheckout"][data-ta-current="true"]', function() {
+      done();
     });
   });
 });
