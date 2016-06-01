@@ -1,22 +1,22 @@
-var child_process = require('child_process');
-var gitParser = require('./git-parser');
-var path = require('path');
-var config = require('./config');
-var winston = require('winston');
-var addressParser = require('./address-parser');
-var _ = require('lodash');
-var isWindows = /^win/.test(process.platform);
-var Bluebird = require('bluebird');
-var fs = require('./utils/fs-async');
-var async = require('async');
-var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+let child_process = require('child_process');
+let gitParser = require('./git-parser');
+let path = require('path');
+let config = require('./config');
+let winston = require('winston');
+let addressParser = require('./address-parser');
+let _ = require('lodash');
+let isWindows = /^win/.test(process.platform);
+let Bluebird = require('bluebird');
+let fs = require('./utils/fs-async');
+let async = require('async');
+let gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-var gitQueue = async.queue((args, callback) => {
+let gitQueue = async.queue((args, callback) => {
   if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
-  var rejected = false;
-  var stdout = '';
-  var stderr = '';
-  var gitProcess = child_process.spawn(
+  let rejected = false;
+  let stdout = '';
+  let stderr = '';
+  let gitProcess = child_process.spawn(
     'git',
     args.commands,
     {
@@ -53,7 +53,7 @@ var gitQueue = async.queue((args, callback) => {
   });
 }, config.maxConcurrentGitOperations);
 
-var gitExecutorProm = (args, retryCount) => {
+let gitExecutorProm = (args, retryCount) => {
   return new Bluebird((resolve, reject) => {
     gitQueue.push(args, (queueError, out) => {
       if(queueError) {
@@ -87,8 +87,8 @@ var gitExecutorProm = (args, retryCount) => {
  * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
  * @example getGitExecuteTask(['show'], '/tmp');
  */
-var git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
-  var args = {};
+let git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
+  let args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
     args.repoPath = repoPath;
@@ -108,8 +108,8 @@ var git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
   return gitExecutorProm(args, config.lockConflictRetryCount);
 }
 
-var getGitError = (args, stderr, stdout) => {
-  var err = {};
+let getGitError = (args, stderr, stdout) => {
+  let err = {};
   err.isGitError = true;
   err.errorCode = 'unknown';
   err.command = args.commands.join(' ');
@@ -187,16 +187,16 @@ git.status = (repoPath, file) => {
         });
       })
   }).then((result) => {
-    var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
-    var status = result.status;
+    let numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
+    let status = result.status;
     status.inConflict = false;
 
     // merge numstats
     Object.keys(status.files).forEach((filename) => {
       // git diff returns paths relative to git repo but git status does not
-      var absoluteFilename = filename.replace(/\.\.\//g, '');
-      var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      var fileObj = status.files[filename];
+      let absoluteFilename = filename.replace(/\.\.\//g, '');
+      let stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
+      let fileObj = status.files[filename];
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
       if (!status.inConflict && fileObj.conflict) {
@@ -214,8 +214,8 @@ git.getRemoteAddress = (repoPath, remoteName) => {
 }
 
 git.resolveConflicts = (repoPath, files) => {
-  var toAdd = [];
-  var toRemove = [];
+  let toAdd = [];
+  let toRemove = [];
   return Bluebird.all((files || []).map((file) => {
     return fs.isExists(path.join(repoPath, file)).then((isExist) => {
       if (isExist) {
@@ -225,14 +225,14 @@ git.resolveConflicts = (repoPath, files) => {
       }
     });
   })).then(() => {
-    var addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
-    var removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
+    let addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
+    let removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
     return Bluebird.join(addExec, removeExec);
   });
 }
 
 git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
-  var hadLocalChanges = true;
+  let hadLocalChanges = true;
 
   return git(['stash'], repoPath)
     .catch((err) => {
@@ -254,11 +254,11 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 }
 
 git.diffFile = (repoPath, filename, sha1) => {
-  var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+  let newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.revParse(repoPath)
     .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
     .then((status) => {
-      var file = status.files[filename];
+      let file = status.files[filename];
 
       if (!file && !sha1) {
         return fs.isExists(path.join(repoPath, filename))
@@ -268,7 +268,7 @@ git.diffFile = (repoPath, filename, sha1) => {
           });
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
-        var exec;
+        let exec;
         if (file && file.isNew) {
           exec = git(newFileDiffArgs, repoPath, true);
         } else if (sha1) {
@@ -294,8 +294,8 @@ git.getCurrentBranch = (repoPath) => {
     }).then(() => {
       return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
     }).then(text => {
-      var rows = text.toString().split('\n');
-      var branch = rows[0].slice('ref: refs/heads/'.length);
+      let rows = text.toString().split('\n');
+      let branch = rows[0].slice('ref: refs/heads/'.length);
       return branch;
     });
   });
@@ -310,7 +310,7 @@ git.discardChangesInFile = (repoPath, filename) => {
   return git.status(repoPath, filename)
     .then((status) => {
       if (Object.keys(status.files).length == 0) throw new Error('No files in status in discard, filename: ' + filename);
-      var fileStatus = status.files[Object.keys(status.files)[0]];
+      let fileStatus = status.files[Object.keys(status.files)[0]];
 
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
@@ -347,13 +347,13 @@ git.commit = (repoPath, amend, message, files) => {
   })).then(() => {
     return git.status(repoPath);
   }).then((status) => {
-    var toAdd = [];
-    var toRemove = [];
-    var diffPatchPromises = []; // promiese that patches each files individually
+    let toAdd = [];
+    let toRemove = [];
+    let diffPatchPromises = []; // promiese that patches each files individually
 
-    for (var v in files) {
-      var file = files[v];
-      var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+    for (let v in files) {
+      let file = files[v];
+      let fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
       if (!fileStatus) {
         throw { error: 'No such file in staging: ' + file.name };
       }
@@ -369,7 +369,7 @@ git.commit = (repoPath, amend, message, files) => {
       }
     }
 
-    var commitPromiseChain = Bluebird.resolve()
+    let commitPromiseChain = Bluebird.resolve()
       .then(() => {
         if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }).then(() => {
