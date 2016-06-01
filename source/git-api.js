@@ -271,7 +271,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()];
+    var commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -312,7 +312,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.startPoint || 'HEAD').trim()];
+    var commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -331,7 +331,14 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(['checkout', req.body.name.trim()], req.body.path))
+    var arg = null;
+    if (!!req.body.sha1) {
+      arg = ['checkout', '-b', req.body.name.trim(), req.body.sha1];
+    } else {
+      arg = ['checkout', req.body.name.trim()];
+    }
+
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });

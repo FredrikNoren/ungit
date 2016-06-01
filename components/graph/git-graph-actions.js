@@ -290,7 +290,8 @@ GraphActions.CherryPick = function(graph, node) {
   this.node = node;
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
-    return self.graph.currentActionContext() == self.node
+    var context = self.graph.currentActionContext();
+    return context === self.node && self.graph.HEAD() && context.sha1 !== self.graph.HEAD().sha1
   });
 }
 inherits(GraphActions.CherryPick, GraphActions.ActionBase);
