@@ -94,9 +94,9 @@ RefViewModel.prototype.moveTo = function(target, callback) {
     if (this.current()) {
       this.server.post('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' }, callbackWithRefSet);
     } else if (this.isTag) {
-      this.server.post('/tags', { path: this.graph.repoPath(), name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+      this.server.post('/tags', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true }, callbackWithRefSet);
     } else {
-      this.server.post('/branches', { path: this.graph.repoPath(), name: this.refName, startPoint: target, force: true }, callbackWithRefSet);
+      this.server.post('/branches', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true }, callbackWithRefSet);
     }
   } else {
     var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
