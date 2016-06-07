@@ -6,6 +6,8 @@ const express = require('express');
 const winston = require('winston');
 const config = require('./config');
 
+const assureArray = (obj) => { return Array.isArray(obj) ? obj : [obj]; }
+
 class UngitPlugin {
   constructor(args) {
     this.dir = args.dir;
@@ -88,8 +90,3 @@ class UngitPlugin {
   }
 }
 module.exports = UngitPlugin;
-
-const assureArray = (obj) => {
-  if (obj instanceof Array) return obj;
-  else return [obj];
-}
