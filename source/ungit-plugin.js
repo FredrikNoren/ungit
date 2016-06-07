@@ -1,12 +1,12 @@
 
-var fs = require('fs');
-var path = require('path');
-var async = require('async');
-var express = require('express');
-var winston = require('winston');
-var config = require('./config');
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
+const express = require('express');
+const winston = require('winston');
+const config = require('./config');
 
-function UngitPlugin(args) {
+const UngitPlugin = (args) => {
   this.dir = args.dir;
   this.path = args.path;
   this.httpBasePath = args.httpBasePath;
@@ -16,9 +16,9 @@ function UngitPlugin(args) {
 }
 module.exports = UngitPlugin;
 
-UngitPlugin.prototype.init = function(env) {
+UngitPlugin.prototype.init = (env) => {
   if (this.manifest.server) {
-    var serverScript = require(path.join(this.path, this.manifest.server));
+    const serverScript = require(path.join(this.path, this.manifest.server));
     serverScript.install({
         app: env.app,
         httpServer: env.httpServer,
@@ -29,26 +29,23 @@ UngitPlugin.prototype.init = function(env) {
         socketIO: env.socketIO,
         socketsById: env.socketsById,
         pluginConfig: this.config,
-        httpPath: env.pathPrefix + '/plugins/' + this.name,
+        httpPath: `${env.pathPrefix}/plugins/${this.name}`,
         pluginApiVersion: require('../package.json').ungitPluginApiVersion
       });
   }
-  env.app.use('/plugins/' + this.name, express.static(this.path));
+  env.app.use(`/plugins/${this.name}`, express.static(this.path));
 }
 
-UngitPlugin.prototype.compile = function(callback) {
-  var self = this;
+UngitPlugin.prototype.compile = (callback) => {
   winston.info('Compiling plugin ' + this.path);
-
-  var exports = this.manifest.exports || {};
-
-  var tasks = [];
+  const exports = this.manifest.exports || {};
+  const tasks = [];
 
   if (exports.raw) {
-    var raw = assureArray(exports.raw);
-    raw.forEach(function(rawSource) {
-      tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, rawSource), function(err, text) {
+    const raw = assureArray(exports.raw);
+    raw.forEach((rawSource) => {
+      tasks.push((callback) => {
+        fs.readFile(path.join(this.path, rawSource), (err, text) => {
           callback(err, text + '\n');
         });
       });
@@ -56,43 +53,41 @@ UngitPlugin.prototype.compile = function(callback) {
   }
 
   if (exports.javascript) {
-    var js = assureArray(exports.javascript);
+    const js = assureArray(exports.javascript);
 
-    js.forEach(function(filename) {
-      tasks.push(function(callback) {
-        callback(null, '<script type="text/javascript" src="' + config.rootPath + '/plugins/' + self.name + '/' + filename +'"></script>');
+    js.forEach((filename) => {
+      tasks.push((callback) => {
+        callback(null, `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`);
       });
     });
   }
 
   if (exports.knockoutTemplates) {
-    Object.keys(exports.knockoutTemplates).forEach(function(templateName) {
-      tasks.push(function(callback) {
-        fs.readFile(path.join(self.path, exports.knockoutTemplates[templateName]), function(err, text) {
-          callback(err, '<script type="text/html" id="' + templateName + '">\n' +
-            text +
-            '\n</script>\n');
+    Object.keys(exports.knockoutTemplates).forEach((templateName) => {
+      tasks.push((callback) => {
+        fs.readFile(path.join(this.path, exports.knockoutTemplates[templateName]), (err, text) => {
+          callback(err, `<script type="text/html" id="${templateName}">\n${text}'\n</script>\n`);
         });
       });
     });
   }
 
   if (exports.css) {
-    var css = assureArray(exports.css);
-    css.forEach(function(cssSource) {
-      tasks.push(function(callback) {
-        callback(null, '<link rel="stylesheet" type="text/css" href="' + config.rootPath + '/plugins/' + self.name + '/' + cssSource + '" />');
+    const css = assureArray(exports.css);
+    css.forEach((cssSource) => {
+      tasks.push((callback) => {
+        callback(null, `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`);
       });
     });
   }
 
-  async.parallel(tasks, function(err, result) {
+  async.parallel(tasks, (err, result) => {
     if (err) throw err;
-    callback(err, '<!-- Component: ' + self.name + ' -->\n' + result.join('\n'))
+    callback(err, `<!-- Component: ${this.name} -->\n${result.join('\n')}`)
   });
 }
 
-function assureArray(obj) {
+const assureArray = (obj) => {
   if (obj instanceof Array) return obj;
   else return [obj];
 }
