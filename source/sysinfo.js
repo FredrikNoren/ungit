@@ -1,25 +1,25 @@
-var fs = require('fs');
-var child_process = require('child_process');
-var path = require('path');
-var cache = require('./utils/cache');
-var getmac = require('getmac');
-var md5 = require('blueimp-md5');
-var semver = require('semver');
-var npm = require('npm');
-var RegClient = require('npm-registry-client');
+const fs = require('fs');
+const child_process = require('child_process');
+const path = require('path');
+const cache = require('./utils/cache');
+const getmac = require('getmac');
+const md5 = require('blueimp-md5');
+const semver = require('semver');
+const npm = require('npm');
+const RegClient = require('npm-registry-client');
+const version = require('../package.json').version
 
-var sysinfo = exports;
+const noop = () => {}
 
-sysinfo.getUngitVersion = cache(function(callback) {
-  sysinfo.getUngitPackageJsonVersion(function(err, packageJsonVersion) {
+exports.getUngitVersion = cache((callback) => {
+  exports.getUngitPackageJsonVersion((err, packageJsonVersion) => {
     if (err) return callback(err);
     if (fs.existsSync(path.join(__dirname, '..', '.git'))){
-      child_process.exec('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') }, function(err, revision) {
+      child_process.exec('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') }, (err, revision) => {
         revision.replace('\n', ' ');
         revision = revision.trim();
 
-        var ver = 'dev-' + packageJsonVersion + '-' + revision;
-        callback(null, ver);
+        callback(null, `dev-${packageJsonVersion}-${revision}`);
       });
     } else {
       callback(null, packageJsonVersion);
@@ -27,37 +27,35 @@ sysinfo.getUngitVersion = cache(function(callback) {
   });
 });
 
-sysinfo.getUngitPackageJsonVersion = function(callback) {
-  callback(null, require('../package.json').version);
+exports.getUngitPackageJsonVersion = (callback) => {
+  callback(null, version);
 };
 
-function noop() {}
-
-sysinfo.getUngitLatestVersion = function(callback) {
-  npm.load({}, function(err, config) {
+exports.getUngitLatestVersion = (callback) => {
+  npm.load({}, (err, config) => {
     if (err) return callback(err);
     config.log = { error: noop, warn: noop, info: noop,
              verbose: noop, silly: noop, http: noop,
              pause: noop, resume: noop };
-    var client = new RegClient(config);
+    const client = new RegClient(config);
 
-    client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, function (err, data, raw, res) {
+    client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, (err, data, raw, res) => {
       if (err) return callback(err);
-      var versions = Object.keys(data.versions);
+      const versions = Object.keys(data.versions);
       callback(null, versions[versions.length - 1]);
     })
   });
 }
 
-sysinfo.getUserHash = function(callback) {
-  getmac.getMac(function(err, addr) {
+exports.getUserHash = (callback) => {
+  getmac.getMac((err, addr) => {
     callback(err, md5(addr));
   });
 }
 
-sysinfo.getGitVersionInfo = function(callback) {
-  child_process.exec('git --version', function(err, stdout, stderr) {
-    var result = {
+exports.getGitVersionInfo = (callback) => {
+  child_process.exec('git --version', (err, stdout, stderr) => {
+    const result = {
       requiredVersion: '>=1.8.x',
       version: 'unkown',
       satisfied: false
@@ -66,22 +64,19 @@ sysinfo.getGitVersionInfo = function(callback) {
     if (err) {
       result.error = 'Can\'t run "git --version". Is git installed and available in your path?';
     } else {
-      var versionSearch = /.*?(\d+[.]\d+[.]\d+).*/.exec(stdout);
+      const versionSearch = /.*?(\d+[.]\d+[.]\d+).*/.exec(stdout);
       if (!versionSearch) {
-        result.error =
-          'Failed to parse git version number: ' + stdout + '. ' +
-          'Note that Ungit requires git version ' + result.requiredVersion;
+        result.error = `Failed to parse git version number: ${stdout}. Note that Ungit requires git version ${result.requiredVersion}`;
       } else {
         result.version = versionSearch[1];
         result.satisfied = semver.satisfies(result.version, result.requiredVersion);
         if (!result.satisfied) {
           result.error =
-            'Ungit requires git version ' + result.requiredVersion + ', you are currently running ' + result.version;
+            `Ungit requires git version ${result.requiredVersion}, you are currently running ${result.version}`;
         }
       }
     }
 
     callback(result);
-
   });
 }
