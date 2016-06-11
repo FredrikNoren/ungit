@@ -1,24 +1,24 @@
-var path = require('path');
-var temp = require('temp');
-var gitParser = require('./git-parser');
-var winston = require('winston');
-var usageStatistics = require('./usage-statistics');
-var os = require('os');
-var mkdirp = require('mkdirp');
-var rimraf = require('rimraf');
-var _ = require('lodash');
-var gitPromise = require('./git-promise');
-var fs = require('./utils/fs-async');
+const path = require('path');
+const temp = require('temp');
+const gitParser = require('./git-parser');
+const winston = require('winston');
+const usageStatistics = require('./usage-statistics');
+const os = require('os');
+const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
+const _ = require('lodash');
+const gitPromise = require('./git-promise');
+const fs = require('./utils/fs-async');
 
 exports.pathPrefix = '';
 
 exports.registerApi = function(env) {
-  var app = env.app;
-  var server = env.server;
-  var ensureAuthenticated = env.ensureAuthenticated || function(req, res, next) { next(); };
-  var config = env.config;
-  var io = env.socketIO;
-  var socketsById = env.socketsById || {};
+  const app = env.app;
+  const server = env.server;
+  const ensureAuthenticated = env.ensureAuthenticated || function(req, res, next) { next(); };
+  const config = env.config;
+  const io = env.socketIO;
+  const socketsById = env.socketsById || {};
 
   if (config.dev)
     temp.track();
@@ -40,7 +40,7 @@ exports.registerApi = function(env) {
         }
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
-        var workingTreeChanged = _.debounce(function() {
+        const workingTreeChanged = _.debounce(function() {
           socket.emit('working-tree-changed', { repository: data.path });
         }, 200);
         try {
@@ -62,7 +62,7 @@ exports.registerApi = function(env) {
     });
   }
 
-  var ensurePathExists = function(req, res, next) {
+  const ensurePathExists = function(req, res, next) {
     fs.isExists(req.query.path || req.body.path).then(function(isExists) {
       if (isExists) {
         next();
@@ -72,10 +72,10 @@ exports.registerApi = function(env) {
     });
   }
 
-  var ensureValidSocketId = function(req, res, next) {
-    var socketId = req.query.socketId || req.body.socketId;
+  const ensureValidSocketId = function(req, res, next) {
+    const socketId = req.query.socketId || req.body.socketId;
     if (socketId == 'ignore') return next(); // Used in unit tests
-    var socket = socketsById[socketId];
+    const socket = socketsById[socketId];
     if (!socket) {
       res.status(400).json({ error: 'No such socket: ' + socketId, errorCode: 'invalid-socket-id' });
     } else {
@@ -83,13 +83,13 @@ exports.registerApi = function(env) {
     }
   }
 
-  var emitWorkingTreeChanged = function(repoPath) {
+  const emitWorkingTreeChanged = function(repoPath) {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
       winston.info('emitting working-tree-changed to sockets, manually triggered');
     }
   }
-  var emitGitDirectoryChanged = function(repoPath) {
+  const emitGitDirectoryChanged = function(repoPath) {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
       winston.info('emitting git-directory-changed to sockets, manually triggered');
@@ -104,7 +104,7 @@ exports.registerApi = function(env) {
     }
   }
 
-  var jsonResultOrFailProm = function(res, promise) {
+  const jsonResultOrFailProm = function(res, promise) {
     return promise.then(function(result) {
         res.json(result || {});
       }).catch(function(err) {
@@ -114,7 +114,7 @@ exports.registerApi = function(env) {
   }
 
   function credentialsOption(socketId) {
-    var credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
+    const credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
     return ['-c', 'credential.helper=' + [credentialsHelperPath, socketId, config.port].join(' ')];
   }
 
@@ -128,12 +128,12 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/clone', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Default timeout is 2min but clone can take much longer than that (allows up to 2h)
-    var timeoutMs = 2 * 60 * 60 * 1000;
+    const timeoutMs = 2 * 60 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    var url = req.body.url.trim();
+    let url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
-    var task = gitPromise({
+    const task = gitPromise({
       commands: credentialsOption(req.body.socketId).concat(['clone', url, req.body.destinationDir.trim()]),
       repoPath: req.body.path,
       timeout: timeoutMs
@@ -147,10 +147,10 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/fetch', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Allow a little longer timeout on fetch (10min)
-    var timeoutMs = 10 * 60 * 1000;
+    const timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
-    var task = gitPromise({
+    const task = gitPromise({
       commands: credentialsOption(req.body.socketId).concat([
           'fetch',
           req.body.remote,
@@ -166,9 +166,9 @@ exports.registerApi = function(env) {
 
   app.post(exports.pathPrefix + '/push', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res) {
     // Allow a little longer timeout on push (10min)
-    var timeoutMs = 10 * 60 * 1000;
+    const timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
-    var task = gitPromise({
+    const task = gitPromise({
       commands: credentialsOption(req.body.socketId).concat([
           'push',
           req.body.remote,
@@ -202,16 +202,16 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/discardchanges', ensureAuthenticated, ensurePathExists, function(req, res){
-    var task = req.body.all ? gitPromise.discardAllChanges(req.body.path) : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
+    const task = req.body.all ? gitPromise.discardAllChanges(req.body.path) : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
     task.then(emitWorkingTreeChanged.bind(null, req.body.path));
     jsonResultOrFailProm(res, task);
   });
 
   app.post(exports.pathPrefix + '/ignorefile', ensureAuthenticated, ensurePathExists, function(req, res){
-    var currentPath = req.body.path.trim();
-    var gitIgnoreFile = currentPath + '/.gitignore';
-    var ignoreFile = req.body.file.trim();
-    var task = fs.appendFileAsync(gitIgnoreFile, os.EOL + ignoreFile).catch(function(err) {
+    const currentPath = req.body.path.trim();
+    const gitIgnoreFile = currentPath + '/.gitignore';
+    const ignoreFile = req.body.file.trim();
+    const task = fs.appendFileAsync(gitIgnoreFile, os.EOL + ignoreFile).catch(function(err) {
       throw { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' };
     });
 
@@ -232,18 +232,18 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/log', ensureAuthenticated, ensurePathExists, function(req, res){
-    var limit = req.query.limit ? '--max-count=' + req.query.limit : '';
-    var task = gitPromise(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path);
-    task = task.then(gitParser.parseGitLog).catch(function(err) {
-      if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
-        return [];
-      else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
-        return [];
-      else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
-        return [];
-      else
-        throw err;
-    });
+    const limit = req.query.limit ? '--max-count=' + req.query.limit : '';
+    const task = gitPromise(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path)
+      .then(gitParser.parseGitLog).catch(function(err) {
+        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+          return [];
+        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+          return [];
+        else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+          return [];
+        else
+          throw err;
+      });
     jsonResultOrFailProm(res, task);
   });
 
@@ -252,7 +252,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/head', ensureAuthenticated, ensurePathExists, function(req, res){
-    var task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
+    const task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
       .then(gitParser.parseGitLog)
       .catch(function(err) {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
@@ -271,7 +271,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/branches', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
+    const commands = ['branch', (req.body.force ? '-f' : ''), req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -283,8 +283,8 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/remote/branches', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    var commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote, ':' + req.query.name.trim()]);
-    var task = gitPromise(commands, req.query.path)
+    const commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote, ':' + req.query.name.trim()]);
+    const task = gitPromise(commands, req.query.path)
       .catch(err => {
         if (!(err.stderr && err.stderr.indexOf("remote ref does not exist") > -1)) {
           throw err;
@@ -296,13 +296,13 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    var task = gitPromise(['tag', '-l'], req.query.path)
+    const task = gitPromise(['tag', '-l'], req.query.path)
       .then(gitParser.parseGitTags);
     jsonResultOrFailProm(res, task);
   });
 
   app.get(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, ensureValidSocketId, function(req, res){
-    var task = gitPromise(credentialsOption(req.query.socketId).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
+    const task = gitPromise(credentialsOption(req.query.socketId).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
       .then(gitParser.parseGitLsRemote)
       .then(function(result) {
         result.forEach(function(r) { r.remote = req.query.remote; });
@@ -312,7 +312,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/tags', ensureAuthenticated, ensurePathExists, function(req, res){
-    var commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
+    const commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
@@ -324,19 +324,14 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/remote/tags', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote + ' :"refs/tags' + req.query.name.trim() + '"']);
+    const commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote + ' :"refs/tags' + req.query.name.trim() + '"']);
 
     jsonResultOrFailProm(res, gitPromise(commands, req.query.path))
       .finally(emitGitDirectoryChanged.bind(null, req.query.path));
   });
 
   app.post(exports.pathPrefix + '/checkout', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var arg = null;
-    if (!!req.body.sha1) {
-      arg = ['checkout', '-b', req.body.name.trim(), req.body.sha1];
-    } else {
-      arg = ['checkout', req.body.name.trim()];
-    }
+    const arg = !!req.body.sha1 ? ['checkout', '-b', req.body.name.trim(), req.body.sha1] : ['checkout', req.body.name.trim()];
 
     jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
@@ -376,7 +371,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/merge/continue', ensureAuthenticated, ensurePathExists, function(req, res) {
-    var args = {
+    const args = {
       commands: ['commit', '--file=-'],
       repoPath: req.body.path,
       inPipe: req.body.message
@@ -418,7 +413,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/baserepopath', ensureAuthenticated, ensurePathExists, function(req, res){
-    var currentPath = path.resolve(path.join(req.query.path, '..'));
+    const currentPath = path.resolve(path.join(req.query.path, '..'));
     jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath)
       .then(function(baseRepoPath) {
         return { path: path.resolve(baseRepoPath.trim()) };
@@ -431,9 +426,9 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res){
-    var filename = path.join(req.query.path, '.gitmodules');
+    const filename = path.join(req.query.path, '.gitmodules');
 
-    var task = fs.isExists(filename).then(function(exists) {
+    const task = fs.isExists(filename).then(function(exists) {
       if (exists) {
         return fs.readFileAsync(filename, {encoding: 'utf8'})
           .catch(function() { return {} })
@@ -458,7 +453,7 @@ exports.registerApi = function(env) {
 
   app.delete(exports.pathPrefix + '/submodules', ensureAuthenticated, ensurePathExists, function(req, res) {
     // -f is needed for the cases when added submodule change is not in the staging or committed
-    var task = gitPromise(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
+    const task = gitPromise(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
       .then(gitPromise.bind(null, ['rm', '-f', req.query.submoduleName], req.query.path))
       .then(function() {
         rimraf.sync(path.join(req.query.path, req.query.submodulePath));
@@ -474,7 +469,7 @@ exports.registerApi = function(env) {
   });
 
   app.get(exports.pathPrefix + '/stashes', ensureAuthenticated, ensurePathExists, function(req, res){
-    var task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query.path)
+    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query.path)
       .then(gitParser.parseGitLog)
       .then(function(items) {
         return items.map(function(item, index) {
@@ -496,7 +491,7 @@ exports.registerApi = function(env) {
   });
 
   app.delete(exports.pathPrefix + '/stashes/:id', ensureAuthenticated, ensurePathExists, function(req, res){
-    var type = req.query.pop === 'true' ? 'pop' : 'drop';
+    const type = req.query.pop === 'true' ? 'pop' : 'drop';
     jsonResultOrFailProm(res, gitPromise(['stash', type, 'stash@{' + req.params.id + '}'], req.query.path))
       .finally(emitGitDirectoryChanged.bind(null, req.query.path))
       .finally(emitWorkingTreeChanged.bind(null, req.query.path));
@@ -516,7 +511,7 @@ exports.registerApi = function(env) {
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
-    var socket = socketsById[req.query.socketId];
+    const socket = socketsById[req.query.socketId];
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
@@ -531,7 +526,7 @@ exports.registerApi = function(env) {
   });
 
   app.post(exports.pathPrefix + '/createdir', ensureAuthenticated, function(req, res) {
-    var dir = req.query.dir || req.body.dir;
+    const dir = req.query.dir || req.body.dir;
     if (!dir) {
       return res.status(400).json({ errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
     }
@@ -550,14 +545,12 @@ exports.registerApi = function(env) {
       });
     });
     app.post(exports.pathPrefix + '/testing/createfile', ensureAuthenticated, function(req, res){
-      var content = req.body.content;
-      if (req.body.content === undefined) content = ('test content\n' + Math.random() + '\n');
+      const content = req.body.content ? req.body.content : ('test content\n' + Math.random() + '\n');
       fs.writeFileSync(req.body.file, content);
       res.json({ });
     });
     app.post(exports.pathPrefix + '/testing/changefile', ensureAuthenticated, function(req, res){
-      var content = req.body.content;
-      if (content === undefined) content = ('test content\n' + Math.random() + '\n');
+      const content = req.body.content ? req.body.content : ('test content\n' + Math.random() + '\n');
       fs.writeFileSync(req.body.file, content);
       res.json({ });
     });
@@ -577,7 +570,7 @@ exports.registerApi = function(env) {
       jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
     });
     app.post(exports.pathPrefix + '/testing/cleanup', ensureAuthenticated, function(req, res){
-      var cleaned = temp.cleanup();
+      const cleaned = temp.cleanup();
       //winston.info('Cleaned up: ' + JSON.stringify(cleaned));
       res.json({ result: cleaned });
     });
