@@ -300,7 +300,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
       } else { // lines[0] === '-'
         // deleted line diff is selected to be ignored
         ignoredDiffCountCurrent--;
-        result.push(` ${line.splice(1)}`);
+        result.push(` ${line.slice(1)}`);
       }
     } else {
       // none modified line or diff block header
