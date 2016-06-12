@@ -33,8 +33,8 @@ Server.prototype.initSocket = function() {
   this.socket.on('git-directory-changed', function () {
     programEvents.dispatch({ event: 'git-directory-changed' });
   });
-  this.socket.on('request-credentials', function () {
-    self._getCredentials(function(credentials) {
+  this.socket.on('request-credentials', function (data) {
+    self._getCredentials(data, function(credentials) {
       self.socket.emit('credentials', credentials);
     });
   });
@@ -85,9 +85,9 @@ Server.prototype._isConnected = function(callback) {
 Server.prototype._onDisconnect = function() {
   programEvents.dispatch({ event: 'disconnected' });
 }
-Server.prototype._getCredentials = function(callback) {
+Server.prototype._getCredentials = function(data, callback) {
   // Push out a program event, hoping someone will respond! (Which the app component will)
-  programEvents.dispatch({ event: 'request-credentials' });
+  programEvents.dispatch({ event: 'request-credentials', username: data.username });
   var credentialsBinding = programEvents.add(function(event) {
     if (event.event != 'request-credentials-response') return;
     credentialsBinding.detach();
