@@ -1,22 +1,22 @@
-var child_process = require('child_process');
-var gitParser = require('./git-parser');
-var path = require('path');
-var config = require('./config');
-var winston = require('winston');
-var addressParser = require('./address-parser');
-var _ = require('lodash');
-var isWindows = /^win/.test(process.platform);
-var Bluebird = require('bluebird');
-var fs = require('./utils/fs-async');
-var async = require('async');
-var gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+const child_process = require('child_process');
+const gitParser = require('./git-parser');
+const path = require('path');
+const config = require('./config');
+const winston = require('winston');
+const addressParser = require('./address-parser');
+const _ = require('lodash');
+const isWindows = /^win/.test(process.platform);
+const Bluebird = require('bluebird');
+const fs = require('./utils/fs-async');
+const async = require('async');
+const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-var gitQueue = async.queue(function (args, callback) {
-  if (config.logGitCommands) winston.info('git executing: ' + args.repoPath + ' ' + args.commands.join(' '));
-  var rejected = false;
-  var stdout = '';
-  var stderr = '';
-  var gitProcess = child_process.spawn(
+const gitQueue = async.queue((args, callback) => {
+  if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
+  let rejected = false;
+  let stdout = '';
+  let stderr = '';
+  const gitProcess = child_process.spawn(
     'git',
     args.commands,
     {
@@ -28,24 +28,20 @@ var gitQueue = async.queue(function (args, callback) {
   if (args.outPipe) {
     gitProcess.stdout.pipe(args.outPipe);
   } else {
-    gitProcess.stdout.on('data', function(data) {
-      stdout += data.toString();
-    });
+    gitProcess.stdout.on('data', (data) => stdout += data.toString());
   }
   if (args.inPipe) {
     gitProcess.stdin.end(args.inPipe);
   }
-  gitProcess.stderr.on('data', function(data) {
-    stderr += data.toString();
-  });
-  gitProcess.on('error', function (error) {
+  gitProcess.stderr.on('data', (data) => stderr += data.toString());
+  gitProcess.on('error', (error) => {
     if (args.outPipe) args.outPipe.end();
     rejected = true;
     callback(error);
   });
 
-  gitProcess.on('close', function (code) {
-    if (config.logGitCommands) winston.info('git result (first 400 bytes): ' + args.commands.join(' ') + '\n' + stderr.slice(0, 400) + '\n' + stdout.slice(0, 400));
+  gitProcess.on('close', (code) => {
+    if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
     if (rejected) return;
     if (args.outPipe) args.outPipe.end();
 
@@ -57,18 +53,18 @@ var gitQueue = async.queue(function (args, callback) {
   });
 }, config.maxConcurrentGitOperations);
 
-var gitExecutorProm = function(args, retryCount) {
-  return new Bluebird(function (resolve, reject) {
-    gitQueue.push(args, function(queueError, out) {
+const gitExecutorProm = (args, retryCount) => {
+  return new Bluebird((resolve, reject) => {
+    gitQueue.push(args, (queueError, out) => {
       if(queueError) {
         reject(queueError);
       } else {
         resolve(out);
       }
     });
-  }).catch(function(err) {
+  }).catch((err) => {
     if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
-      return new Bluebird(function(resolve) {
+      return new Bluebird((resolve) => {
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));
@@ -91,8 +87,8 @@ var gitExecutorProm = function(args, retryCount) {
  * @example getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
  * @example getGitExecuteTask(['show'], '/tmp');
  */
-var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
-  var args = {};
+const git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
+  let args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
     args.repoPath = repoPath;
@@ -103,17 +99,17 @@ var git = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
     args = commands;
   }
 
-  args.commands = gitConfigArguments.concat(args.commands).filter(function(element) {
+  args.commands = gitConfigArguments.concat(args.commands.filter((element) => {
     return element;
-  });
+  }));
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
   args.startTime = Date.now();
 
   return gitExecutorProm(args, config.lockConflictRetryCount);
 }
 
-var getGitError = function(args, stderr, stdout) {
-  var err = {};
+const getGitError = (args, stderr, stdout) => {
+  const err = {};
   err.isGitError = true;
   err.errorCode = 'unknown';
   err.command = args.commands.join(' ');
@@ -122,40 +118,41 @@ var getGitError = function(args, stderr, stdout) {
   err.message = err.error.split('\n')[0];
   err.stderr = stderr;
   err.stdout = stdout;
-  if (stderr.indexOf('Not a git repository') >= 0)
+  if (stderr.indexOf('Not a git repository') >= 0) {
     err.errorCode = 'not-a-repository';
-  else if (err.stderr.indexOf('Connection timed out') != -1)
+  } else if (err.stderr.indexOf('Connection timed out') != -1) {
     err.errorCode = 'remote-timeout';
-  else if (err.stderr.indexOf('Permission denied (publickey)') != -1)
+  } else if (err.stderr.indexOf('Permission denied (publickey)') != -1) {
     err.errorCode = 'permision-denied-publickey';
-  else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1)
+  } else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1) {
     err.errorCode = 'ssh-bad-file-number';
-  else if (err.stderr.indexOf('No remote configured to list refs from.') != -1)
+  } else if (err.stderr.indexOf('No remote configured to list refs from.') != -1) {
     err.errorCode = 'no-remote-configured';
-  else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
-    (err.stderr.indexOf('Could not resolve hostname') != -1))
+  } else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
+    (err.stderr.indexOf('Could not resolve hostname') != -1)) {
     err.errorCode = 'offline';
-  else if (err.stderr.indexOf('Proxy Authentication Required') != -1)
+  } else if (err.stderr.indexOf('Proxy Authentication Required') != -1) {
     err.errorCode = 'proxy-authentication-required';
-  else if (err.stderr.indexOf('Please tell me who you are') != -1)
+  } else if (err.stderr.indexOf('Please tell me who you are') != -1) {
     err.errorCode = 'no-git-name-email-configured';
-  else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0)
+  } else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0) {
     err.errorCode = 'no-supported-authentication-provided';
-  else if (stderr.indexOf('fatal: No remote repository specified.') == 0)
+  } else if (stderr.indexOf('fatal: No remote repository specified.') == 0) {
     err.errorCode = 'no-remote-specified';
-  else if (err.stderr.indexOf('non-fast-forward') != -1)
+  } else if (err.stderr.indexOf('non-fast-forward') != -1) {
     err.errorCode = 'non-fast-forward';
-  else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1)
+  } else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1) {
     err.errorCode = 'merge-failed';
-  else if (err.stderr.indexOf('This operation must be run in a work tree') != -1)
+  } else if (err.stderr.indexOf('This operation must be run in a work tree') != -1) {
     err.errorCode = 'must-be-in-working-tree';
-  else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1)
+  } else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1) {
     err.errorCode = 'local-changes-would-be-overwritten';
+  }
 
   return err;
 }
 
-git.status = function(repoPath, file) {
+git.status = (repoPath, file) => {
   return Bluebird.props({
     numStatsStaged: git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
@@ -163,20 +160,20 @@ git.status = function(repoPath, file) {
       .then(gitParser.parseGitStatusNumstat),
     status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
-      .then(function(status) {
+      .then((status) => {
         return Bluebird.props({
           isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
           isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
           isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
           inCherry: fs.isExists(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD'))
-        }).then(function(result) {
+        }).then((result) => {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
           status.inCherry = result.inCherry;
-        }).then(function() {
+        }).then(() => {
           if (status.inMerge || status.inCherry) {
             return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
-              .then(function(commitMessage) {
+              .then((commitMessage) => {
                 status.commitMessage = commitMessage;
                 return status;
               }).catch(err => {
@@ -189,17 +186,17 @@ git.status = function(repoPath, file) {
           return status;
         });
       })
-  }).then(function(result) {
-    var numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
-    var status = result.status;
+  }).then((result) => {
+    const numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
+    const status = result.status;
     status.inConflict = false;
 
     // merge numstats
-    Object.keys(status.files).forEach(function(filename) {
+    Object.keys(status.files).forEach((filename) => {
       // git diff returns paths relative to git repo but git status does not
-      var absoluteFilename = filename.replace(/\.\.\//g, '');
-      var stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
-      var fileObj = status.files[filename];
+      const absoluteFilename = filename.replace(/\.\.\//g, '');
+      const stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
+      const fileObj = status.files[filename];
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
       if (!status.inConflict && fileObj.conflict) {
@@ -211,84 +208,75 @@ git.status = function(repoPath, file) {
   });
 }
 
-git.getRemoteAddress = function(repoPath, remoteName) {
-  return git(['config', '--get', 'remote.' + remoteName + '.url'], repoPath)
-    .then(function(text) {
-      return addressParser.parseAddress(text.split('\n')[0]);
-    });
+git.getRemoteAddress = (repoPath, remoteName) => {
+  return git(['config', '--get', `remote.${remoteName}.url`], repoPath)
+    .then((text) => addressParser.parseAddress(text.split('\n')[0]));
 }
 
-git.resolveConflicts = function(repoPath, files) {
-  var toAdd = [];
-  var toRemove = [];
-  return Bluebird.all((files || []).map(function(file) {
-    return fs.isExists(path.join(repoPath, file)).then(function(isExist) {
+git.resolveConflicts = (repoPath, files) => {
+  const toAdd = [];
+  const toRemove = [];
+  return Bluebird.all((files || []).map((file) => {
+    return fs.isExists(path.join(repoPath, file)).then((isExist) => {
       if (isExist) {
         toAdd.push(file);
       } else {
         toRemove.push(file);
       }
     });
-  })).then(function() {
-    var addExec;
-    var removeExec;
-    if (toAdd.length > 0)
-      addExec = git(['add', toAdd ], repoPath);
-    if (toRemove.length > 0)
-      removeExec = git(['rm', toRemove ], repoPath);
+  })).then(() => {
+    const addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
+    const removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
     return Bluebird.join(addExec, removeExec);
   });
 }
 
-git.stashExecuteAndPop = function(commands, repoPath, allowError, outPipe, inPipe, timeout) {
-  var hadLocalChanges = true;
+git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
+  let hadLocalChanges = true;
 
   return git(['stash'], repoPath)
-    .catch(function(err) {
+    .catch((err) => {
       if (err.stderr.indexOf('You do not have the initial commit yet') != -1) {
         hadLocalChanges = err.stderr.indexOf('You do not have the initial commit yet') == -1;
       } else {
         throw err;
       }
-    }).then(function(result) {
+    }).then((result) => {
       if (result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
       return git(commands, repoPath, allowError, outPipe, inPipe, timeout);
-    }).then(function() {
-      return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null;
-    });
+    }).then(() => { return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null });
 }
 
-git.binaryFileContent = function(repoPath, filename, version, outPipe) {
-  return git(['show', version + ':' + filename], repoPath, null, outPipe);
+git.binaryFileContent = (repoPath, filename, version, outPipe) => {
+  return git(['show', `${version}:${filename}`], repoPath, null, outPipe);
 }
 
-git.diffFile = function(repoPath, filename, sha1) {
-  var newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+git.diffFile = (repoPath, filename, sha1) => {
+  const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.revParse(repoPath)
-    .then(function(revParse) {
-      return revParse.type === 'bare' ? { files: {} } : git.status(repoPath); // if bare do not call status
-    }).then(function(status) {
-      var file = status.files[filename];
+    .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
+    .then((status) => {
+      const file = status.files[filename];
 
       if (!file && !sha1) {
         return fs.isExists(path.join(repoPath, filename))
-          .then(function(isExist) {
+          .then((isExist) => {
             if (isExist) return [];
-            else throw { error: 'No such file: ' + filename, errorCode: 'no-such-file' };
+            else throw { error: `No such file: ${filename}`, errorCode: 'no-such-file' };
           });
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
-        var exec;
+        let exec;
         if (file && file.isNew) {
           exec = git(newFileDiffArgs, repoPath, true);
         } else if (sha1) {
-          exec = git(['diff', sha1 + "^", sha1, "--", filename.trim()], repoPath);
+          exec = git(['diff', `${sha1}^`, sha1, "--", filename.trim()], repoPath);
         } else {
           exec = git(['diff', 'HEAD', '--', filename.trim()], repoPath);
         }
-        return exec.catch(function(err) {
+        return exec.catch((err) => {
           // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
           // it will error out with invalid object name error
           if (sha1 && err && err.error.indexOf('bad revision') > -1)
@@ -298,39 +286,36 @@ git.diffFile = function(repoPath, filename, sha1) {
     });
 }
 
-git.getCurrentBranch = function(repoPath) {
+git.getCurrentBranch = (repoPath) => {
   return git.revParse(repoPath).then(revResult => {
     const HEADFile = path.join(revResult.gitRootPath, '.git', 'HEAD');
     return fs.isExists(HEADFile).then(isExist => {
-      if (!isExist) throw { errorCode: 'not-a-repository', error: 'No such file: ' + HEADFile };
+      if (!isExist) throw { errorCode: 'not-a-repository', error: `No such file: ${HEADFile}` };
     }).then(() => {
       return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
     }).then(text => {
-      var rows = text.toString().split('\n');
-      var branch = rows[0].slice('ref: refs/heads/'.length);
-      return branch;
+      const rows = text.toString().split('\n');
+      return rows[0].slice('ref: refs/heads/'.length);
     });
   });
 }
 
-git.discardAllChanges = function(repoPath) {
+git.discardAllChanges = (repoPath) => {
   return git(['reset', '--hard', 'HEAD'], repoPath)
-    .then(function() {
-      return git(['clean', '-fd'], repoPath);
-    });
+    .then(() => { return git(['clean', '-fd'], repoPath) });
 }
 
-git.discardChangesInFile = function(repoPath, filename) {
+git.discardChangesInFile = (repoPath, filename) => {
   return git.status(repoPath, filename)
-    .then(function(status){
-      if (Object.keys(status.files).length == 0) throw new Error('No files in status in discard, filename: ' + filename);
-      var fileStatus = status.files[Object.keys(status.files)[0]];
+    .then((status) => {
+      if (Object.keys(status.files).length == 0) throw new Error(`No files in status in discard, filename: ${filename}`);
+      const fileStatus = status.files[Object.keys(status.files)[0]];
 
       if (!fileStatus.staged) {
         // If it's just a new file, remove it
         if (fileStatus.isNew) {
           return fs.unlinkAsync(path.join(repoPath, filename))
-            .catch(function(err) {
+            .catch((err) => {
               throw { command: 'unlink', error: err };
             });
         // If it's a changed file, reset the changes
@@ -343,14 +328,14 @@ git.discardChangesInFile = function(repoPath, filename) {
     });
 }
 
-git.applyPatchedDiff = function(repoPath, patchedDiff) {
+git.applyPatchedDiff = (repoPath, patchedDiff) => {
   if (patchedDiff) {
     return git(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
   }
 }
 
-git.commit = function(repoPath, amend, message, files) {
-  return (new Bluebird(function(resolve, reject) {
+git.commit = (repoPath, amend, message, files) => {
+  return (new Bluebird((resolve, reject) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
@@ -358,18 +343,18 @@ git.commit = function(repoPath, amend, message, files) {
       reject({ error: 'Must specify files or amend to commit' });
     }
     resolve();
-  })).then(function() {
+  })).then(() => {
     return git.status(repoPath);
-  }).then(function(status) {
-    var toAdd = [];
-    var toRemove = [];
-    var diffPatchPromises = []; // promiese that patches each files individually
+  }).then((status) => {
+    const toAdd = [];
+    const toRemove = [];
+    const diffPatchPromises = []; // promiese that patches each files individually
 
-    for (var v in files) {
-      var file = files[v];
-      var fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
+    for (let v in files) {
+      let file = files[v];
+      let fileStatus = status.files[file.name] || status.files[path.relative(repoPath, file.name)];
       if (!fileStatus) {
-        throw { error: 'No such file in staging: ' + file.name };
+        throw { error: `No such file in staging: ${file.name}` };
       }
 
       if (fileStatus.removed) {
@@ -383,24 +368,25 @@ git.commit = function(repoPath, amend, message, files) {
       }
     }
 
-    var commitPromiseChain = Bluebird.resolve()
-      .then(function() {
+    let commitPromiseChain = Bluebird.resolve()
+      .then(() => {
         if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
-      }).then(function() {
+      }).then(() => {
         if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
       });
 
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
-  }).then(function() {
+  }).then(() => {
     return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
-  }).catch(function(err) {
+  }).catch((err) => {
     // ignore the case where nothing were added to be committed
-    if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1)
+    if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1) {
       throw err;
+    }
   });
 }
 
-git.revParse = function(repoPath) {
+git.revParse = (repoPath) => {
   return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
     .then((result) => {
       const resultLines = result.toString().split('\n');

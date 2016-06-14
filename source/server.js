@@ -1,32 +1,30 @@
-var config = require('./config');
-var BugTracker = require('./bugtracker');
-var bugtracker = new BugTracker('server');
-var usageStatistics = require('./usage-statistics');
-var express = require('express');
-var gitApi = require('./git-api');
-var winston = require('winston');
-var sysinfo = require('./sysinfo');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var semver = require('semver');
-var path = require('path');
-var fs = require('fs');
-var async = require('async');
-var signals = require('signals');
-var os = require('os');
-var cache = require('./utils/cache');
-var UngitPlugin = require('./ungit-plugin');
-var serveStatic = require('serve-static');
-var bodyParser = require('body-parser');
+const config = require('./config');
+const BugTracker = require('./bugtracker');
+const bugtracker = new BugTracker('server');
+const usageStatistics = require('./usage-statistics');
+const express = require('express');
+const gitApi = require('./git-api');
+const winston = require('winston');
+const sysinfo = require('./sysinfo');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const semver = require('semver');
+const path = require('path');
+const fs = require('fs');
+const async = require('async');
+const signals = require('signals');
+const os = require('os');
+const cache = require('./utils/cache');
+const UngitPlugin = require('./ungit-plugin');
+const serveStatic = require('serve-static');
+const bodyParser = require('body-parser');
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
   async.parallel([
     bugtracker.notify.bind(bugtracker, err, 'ungit-server'),
     usageStatistics.addEvent.bind(usageStatistics, 'server-exception')
-  ], function() {
-    process.exit();
-  });
+  ], () => process.exit());
 });
 
 
@@ -35,20 +33,20 @@ winston.add(winston.transports.Console, {'timestamp':true});
 if (config.logDirectory)
   winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
 
-var users = config.users;
+const users = config.users;
 config.users = null; // So that we don't send the users to the client
 
 if (config.authentication) {
 
-  passport.serializeUser(function(username, done) {
+  passport.serializeUser((username, done) => {
     done(null, username);
   });
 
-  passport.deserializeUser(function(username, done) {
+  passport.deserializeUser((username, done) => {
     done(null, users[username] !== undefined ? username : null);
   });
 
-  passport.use(new LocalStrategy(function(username, password, done) {
+  passport.use(new LocalStrategy((username, password, done) => {
     if (users[username] !== undefined && password === users[username])
       done(null, username);
     else
@@ -56,13 +54,13 @@ if (config.authentication) {
   }));
 }
 
-var app = express();
-var server = require('http').createServer(app);
+const app = express();
+const server = require('http').createServer(app);
 
 gitApi.pathPrefix = '/api';
 
-app.use(function(req, res, next) {
-  var rootPath = config.rootPath;
+app.use((req, res, next) => {
+  const rootPath = config.rootPath;
   if (req.url === rootPath) {
     // always have a trailing slash
     res.redirect(req.url + '/');
@@ -77,22 +75,22 @@ app.use(function(req, res, next) {
 });
 
 if (config.logRESTRequests) {
-  app.use(function(req, res, next){
+  app.use((req, res, next) => {
     winston.info(req.method + ' ' + req.url);
     next();
   });
 }
 
 if (config.allowedIPs) {
-  app.use(function(req, res, next) {
-    var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+  app.use((req, res, next) => {
+    const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
     else res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
       '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
   });
 }
 
-var noCache = function(req, res, next) {
+const noCache = (req, res, next) => {
   res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
@@ -103,39 +101,39 @@ app.use(noCache);
 app.use(require('body-parser').json());
 
 if (config.autoShutdownTimeout) {
-  var autoShutdownTimeout;
-  var refreshAutoShutdownTimeout = function() {
+  let autoShutdownTimeout;
+  const refreshAutoShutdownTimeout = () => {
     if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
-    autoShutdownTimeout = setTimeout(function() {
+    autoShutdownTimeout = setTimeout(() => {
       winston.info('Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' + config.autoShutdownTimeout + 'ms)');
       process.exit(0);
     }, config.autoShutdownTimeout);
   }
-  app.use(function(req, res, next) {
+  app.use((req, res, next) => {
     refreshAutoShutdownTimeout();
     next();
   });
   refreshAutoShutdownTimeout();
 }
 
-var ensureAuthenticated = function(req, res, next) { next(); };
+let ensureAuthenticated = (req, res, next) => { next(); };
 
 if (config.authentication) {
-  var cookieParser = require('cookie-parser');
+  const cookieParser = require('cookie-parser');
   app.use(cookieParser());
-  var session = require('express-session');
+  const session = require('express-session');
   app.use(session({ secret: 'ungit' }));
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.post('/api/login', function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
+  app.post('/api/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
       if (err) { return next(err) }
       if (!user) {
         res.status(401).json({ errorCode: 'authentication-failed', error: info.message });
         return;
       }
-      req.logIn(user, function(err) {
+      req.logIn(user, (err) => {
         if (err) { return next(err); }
         res.json({ ok: true });
         return;
@@ -143,29 +141,29 @@ if (config.authentication) {
     })(req, res, next);
   });
 
-  app.get('/api/loggedin', function(req, res){
+  app.get('/api/loggedin', (req, res) => {
     if (req.isAuthenticated()) res.json({ loggedIn: true });
     else res.json({ loggedIn: false });
   });
 
-  app.get('/api/logout', function(req, res){
+  app.get('/api/logout', (req, res) => {
     req.logout();
     res.json({ ok: true });
   });
 
-  ensureAuthenticated = function(req, res, next) {
+  ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) { return next(); }
     res.status(401).json({ errorCode: 'authentication-required', error: 'You have to authenticate to access this resource' });
   };
 }
 
-var indexHtmlCache = cache(function(callback) {
-  pluginsCache(function(plugins) {
-    fs.readFile(__dirname + '/../public/index.html', function(err, data) {
-      async.map(Object.keys(plugins), function(pluginName, callback) {
+const indexHtmlCache = cache((callback) => {
+  pluginsCache((plugins) => {
+    fs.readFile(__dirname + '/../public/index.html', (err, data) => {
+      async.map(Object.keys(plugins), (pluginName, callback) => {
         plugins[pluginName].compile(callback);
-      }, function(err, result) {
-        var html = result.join('\n\n');
+      }, (err, result) => {
+        const html = result.join('\n\n');
         data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
         callback(null, data);
@@ -174,12 +172,12 @@ var indexHtmlCache = cache(function(callback) {
   });
 });
 
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
   if (config.dev) {
     pluginsCache.invalidate();
     indexHtmlCache.invalidate();
   }
-  indexHtmlCache(function(err, data) {
+  indexHtmlCache((err, data) => {
     res.end(data);
   });
 });
@@ -187,10 +185,10 @@ app.get('/', function(req, res) {
 app.use(serveStatic(__dirname + '/../public'));
 
 // Socket-IO
-var socketIO = require('socket.io');
-var socketsById = {};
-var socketIdCounter = 0;
-var io = socketIO.listen(server, {
+const socketIO = require('socket.io');
+const socketsById = {};
+let socketIdCounter = 0;
+const io = socketIO.listen(server, {
   path: config.rootPath + '/socket.io',
   logger: {
     debug: winston.debug.bind(winston),
@@ -199,17 +197,15 @@ var io = socketIO.listen(server, {
     warn: winston.warn.bind(winston)
   }
 });
-io.sockets.on('connection', function (socket) {
-  var socketId = socketIdCounter++;
+io.sockets.on('connection', (socket) => {
+  const socketId = socketIdCounter++;
   socketsById[socketId] = socket;
   socket.socketId = socketId;
   socket.emit('connected', { socketId: socketId });
-  socket.on('disconnect', function () {
-    delete socketsById[socketId];
-  });
+  socket.on('disconnect', () => delete socketsById[socketId]);
 });
 
-var apiEnvironment = {
+const apiEnvironment = {
   app: app,
   server: server,
   ensureAuthenticated: ensureAuthenticated,
@@ -222,16 +218,16 @@ var apiEnvironment = {
 gitApi.registerApi(apiEnvironment);
 
 // Init plugins
-function loadPlugins(plugins, pluginBasePath) {
-  fs.readdirSync(pluginBasePath).forEach(function(pluginDir) {
-    var pluginPath = path.join(pluginBasePath, pluginDir);
+const loadPlugins = (plugins, pluginBasePath) => {
+  fs.readdirSync(pluginBasePath).forEach((pluginDir) => {
+    const pluginPath = path.join(pluginBasePath, pluginDir);
     // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
     if (!fs.lstatSync(pluginPath).isDirectory() ||
       !fs.existsSync(path.join(pluginPath, 'ungit-plugin.json'))) {
       return;
     }
     winston.info('Loading plugin: ' + pluginPath);
-    var plugin = new UngitPlugin({
+    const plugin = new UngitPlugin({
       dir: pluginDir,
       httpBasePath: 'plugins/' + pluginDir,
       path: pluginPath
@@ -245,31 +241,31 @@ function loadPlugins(plugins, pluginBasePath) {
     winston.info('Plugin loaded: ' + pluginDir);
   });
 }
-var pluginsCache = cache(function(callback) {
-  var plugins = [];
+const pluginsCache = cache((callback) => {
+  const plugins = [];
   loadPlugins(plugins, path.join(__dirname, '..', 'components'));
   if (fs.existsSync(config.pluginDirectory))
     loadPlugins(plugins, config.pluginDirectory);
   callback(plugins);
 });
 
-app.get('/serverdata.js', function(req, res) {
+app.get('/serverdata.js', (req, res) => {
   async.parallel({
     userHash: sysinfo.getUserHash.bind(sysinfo),
     version: sysinfo.getUngitVersion.bind(sysinfo)
-  }, function(err, data) {
-    var text = 'ungit.config = ' + JSON.stringify(config) + ';\n';
-    text += 'ungit.userHash = "' + data.userHash + '";\n';
-    text += 'ungit.version = "' + data.version + '";\n';
-    text += 'ungit.platform = "' + os.platform() + '"\n';
-    text += 'ungit.pluginApiVersion = "' + require('../package.json').ungitPluginApiVersion + '"\n';
+  }, (err, data) => {
+    const text = `ungit.config = ${JSON.stringify(config)};\n` +
+      `ungit.userHash = "${data.userHash}";\n` +
+      `ungit.version = "${data.version}";\n` +
+      `ungit.platform = "${os.platform()}"\n` +
+      `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}"\n`;
     res.send(text);
   });
 });
 
-app.get('/api/latestversion', function(req, res) {
-  sysinfo.getUngitVersion(function(err, currentVersion) {
-    sysinfo.getUngitLatestVersion(function(err, latestVersion) {
+app.get('/api/latestversion', (req, res) => {
+  sysinfo.getUngitVersion((err, currentVersion) => {
+    sysinfo.getUngitLatestVersion((err, latestVersion) => {
       if (err)
         res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
       else if (!semver.valid(currentVersion))
@@ -280,69 +276,61 @@ app.get('/api/latestversion', function(req, res) {
   });
 });
 
-app.get('/api/ping', function(req, res) {
-  res.json({});
+app.get('/api/ping', (req, res) => res.json({}));
+
+app.get('/api/gitversion', (req, res) => {
+  sysinfo.getGitVersionInfo((result) => res.json(result));
 });
 
-app.get('/api/gitversion', function(req, res) {
-  sysinfo.getGitVersionInfo(function(result) {
-    res.json(result);
-  });
-});
-
-var userConfigPath = path.join(config.homedir, '.ungitrc');
-function readUserConfig(callback) {
-  fs.exists(userConfigPath, function(hasConfig) {
+const userConfigPath = path.join(config.homedir, '.ungitrc');
+const readUserConfig = (callback) => {
+  fs.exists(userConfigPath, (hasConfig) => {
     if (!hasConfig) return callback(null, {});
 
-    fs.readFile(userConfigPath, { encoding: 'utf8' }, function(err, content) {
+    fs.readFile(userConfigPath, { encoding: 'utf8' }, (err, content) => {
       if (err) return callback(err);
       else callback(null, JSON.parse(content.toString()));
     });
   });
 }
-function writeUserConfig(configContent, callback) {
+const writeUserConfig = (configContent, callback) => {
   fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2), callback);
 }
 
-app.get('/api/userconfig', ensureAuthenticated, function(req, res) {
-  readUserConfig(function(err, userConfig) {
+app.get('/api/userconfig', ensureAuthenticated, (req, res) => {
+  readUserConfig((err, userConfig) => {
     if (err) res.status(400).json(err);
     else res.json(userConfig);
   });
 });
-app.post('/api/userconfig', ensureAuthenticated, function(req, res) {
-  writeUserConfig(req.body, function(err) {
+app.post('/api/userconfig', ensureAuthenticated, (req, res) => {
+  writeUserConfig(req.body, (err) => {
     if (err) res.status(400).json(err);
     else res.json({});
   })
 });
 
 
-app.get('/api/fs/exists', ensureAuthenticated, function(req, res) {
+app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
   res.json(fs.existsSync(req.query['path']));
 });
 
-app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
-  var dir = req.query.term.trim();
+app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
+  const dir = req.query.term.trim();
 
-  readUserConfig(function(err, userconfig) {
+  readUserConfig((err, userconfig) => {
     if (err) res.status(400).json(err);
     else if (dir) {
-      fs.readdir(dir, function(err, files) {
+      fs.readdir(dir, (err, files) => {
         if (err) {
           res.status(400).json({ errorCode: 'read-dir-failed', error: err });
         } else {
-          var absolutePaths = files.map(function(file) {
-            return path.join(dir, file);
-          });
-          async.filter(absolutePaths, function(absolutePath, callback) {
-            fs.stat(absolutePath, function(err, stat) {
+          const absolutePaths = files.map((file) => { return path.join(dir, file) });
+          async.filter(absolutePaths, (absolutePath, callback) => {
+            fs.stat(absolutePath, (err, stat) => {
               callback(null, !err && stat && stat.isDirectory());
             });
-          }, function(err, filteredFiles) {
-            res.json(filteredFiles);
-          });
+          }, (err, filteredFiles) => res.json(filteredFiles));
         }
       });
     }
@@ -350,7 +338,7 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, function(req, res) {
 });
 
 // Error handling
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   bugtracker.notify(err, 'ungit-node');
   usageStatistics.addEvent('server-exception');
   winston.error(err.stack);
@@ -359,7 +347,7 @@ app.use(function(err, req, res, next) {
 
 exports.started = new signals.Signal();
 
-server.listen(config.port, function() {
+server.listen(config.port, () => {
   winston.info('Listening on port ' + config.port);
   console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
   exports.started.dispatch();
