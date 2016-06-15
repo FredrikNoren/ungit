@@ -246,6 +246,15 @@ suite.test('Merge', function(done) {
   uiInteractions.refAction(page, 'testbranch', true, 'merge', done);
 });
 
+suite.test('Revert merge', function(done) {
+  helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
+  helpers.waitForElementVisible(page, '[data-ta-action="revert"]', function() {
+    helpers.click(page, '[data-ta-action="revert"]');
+    helpers.waitForElementNotVisible(page, '[data-ta-container="user-error-page"]', function() {
+      done();
+    });
+  });
+});
 
 suite.test('Should be possible to move a branch', function(done) {
   uiInteractions.createBranch(page, 'movebranch', function() {
