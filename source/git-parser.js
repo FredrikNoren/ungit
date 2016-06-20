@@ -1,52 +1,59 @@
-const moment = require('moment');
-const fs = require('fs');
-const fileType = require('./utils/file-type.js');
+var moment = require('moment');
+var fs = require('fs');
+var fileType = require('./utils/file-type.js');
 
-exports.parseGitStatus = (text, args) => {
-  const lines = text.split('\n');
-  const files = {};
+exports.parseGitStatus = function(text, args) {
+  var result = { isMoreToLoad: false };
+  var lines = text.split('\n');
+  result.branch = lines[0].split(' ').pop();
+  result.inited = true;
+  result.files = {};
+
   // skipping first line...
-  lines.slice(1).forEach((line) => {
-    if (line == '') return;
-    const status = line.slice(0, 2);
-    const filename = line.slice(3).trim().replace(/^"(.*)"$/, '$1'); // may contain old and renamed file name.
-    const finalFilename = status[0] == 'R' ? filename.slice(filename.indexOf('>') + 2) : filename;
-    files[finalFilename] = {
-      displayName: filename,
-      staged: status[0] == 'A' || status[0] == 'M',
-      removed: status[0] == 'D' || status[1] == 'D',
-      isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
-      conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
-      renamed: status[0] == 'R',
-      type: fileType(finalFilename)
-    };
-  });
+  for(var i = 1; i < lines.length; i++) {
+    var line = lines[i];
+    if (line == '') continue;
+    var status = line.slice(0, 2);
+    var filename = line.slice(3).trim();
+    if (filename[0] == '"' && filename[filename.length - 1] == '"')
+      filename = filename.slice(1, filename.length - 1);
+    var file = {};
+    file.displayName = filename;
+    file.staged = status[0] == 'A' || status[0] == 'M';
+    file.removed = status[0] == 'D' || status[1] == 'D';
+    file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
+    file.conflict = (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U';
+    file.renamed = status[0] == 'R';
+    if (file.renamed)
+      filename = filename.slice(filename.indexOf('>') + 2);
+    file.type = fileType(filename);
+    result.files[filename] = file;
+  }
 
-  return {
-    isMoreToLoad: false,
-    branch: lines[0].split(' ').pop(),
-    inited: true,
-    files: files
-  };
-};
-
-exports.parseGitStatusNumstat = (text) => {
-  const result = {};
-  text.split('\n').forEach((line) => {
-    if (line == '') return;
-    const parts = line.split('\t');
-    result[parts[2]] = {
-      additions: parts[0],
-      deletions: parts[1]
-    };
-  });
   return result;
 };
 
-const authorRegexp = /([^<]+)<([^>]+)>/;
-const gitLogHeaders = {
-  'Author': (currentCommmit, author) => {
-    const capture = authorRegexp.exec(author);
+exports.parseGitStatusNumstat = function(text) {
+  var result = {};
+  var lines = text.split('\n');
+
+  for(var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (line == '') continue;
+    var parts = line.split('\t');
+    var file = {};
+    file.additions = parts[0];
+    file.deletions = parts[1];
+    result[parts[2]] = file;
+  }
+
+  return result;
+};
+
+var authorRegexp = /([^<]+)<([^>]+)>/;
+var gitLogHeaders = {
+  'Author': function(currentCommmit, author) {
+    var capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.authorName = capture[1].trim();
       currentCommmit.authorEmail = capture[2].trim();
@@ -54,8 +61,8 @@ const gitLogHeaders = {
       currentCommmit.authorName = author;
     }
   },
-  'Commit': (currentCommmit, author) => {
-    const capture = authorRegexp.exec(author);
+  'Commit': function(currentCommmit, author) {
+    var capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.committerName = capture[1].trim();
       currentCommmit.committerEmail = capture[2].trim();
@@ -63,16 +70,16 @@ const gitLogHeaders = {
       currentCommmit.committerName = author;
     }
   },
-  'AuthorDate': (currentCommmit, date) => {
+  'AuthorDate': function(currentCommmit, date) {
     currentCommmit.authorDate = date;
   },
-  'CommitDate': (currentCommmit, date) => {
+  'CommitDate': function(currentCommmit, date) {
     currentCommmit.commitDate = date;
   },
-  'Reflog': (currentCommmit, data) => {
+  'Reflog': function(currentCommmit, data) {
     currentCommmit.reflogName = data.substring(0, data.indexOf(' '));
-    const author = data.substring(data.indexOf(' ') + 2, data.length - 1);
-    const capture = authorRegexp.exec(author);
+    var author = data.substring(data.indexOf(' ') + 2, data.length - 1);
+    var capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.reflogAuthorName = capture[1].trim();
       currentCommmit.reflogAuthorEmail = capture[2].trim();
@@ -81,36 +88,36 @@ const gitLogHeaders = {
     }
   },
 };
-exports.parseGitLog = (data) => {
-  const commits = [];
-  let currentCommmit;
-  const parseCommitLine = (row) => {
+exports.parseGitLog = function(data) {
+  var commits = [];
+  var currentCommmit;
+  var parseCommitLine = function(row) {
     if (!row.trim()) return;
     currentCommmit = { refs: [], fileLineDiffs: [] };
-    const refStartIndex = row.indexOf('(');
-    const sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter((sha1) => { return sha1 && sha1.length; });
+    var refStartIndex = row.indexOf('(');
+    var sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter(function(sha1) { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
     currentCommmit.parents = sha1s.slice(1);
     if (refStartIndex > 0) {
-      const refs = row.substring(refStartIndex + 1, row.length - 1);
+      var refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
     commits.push(currentCommmit);
     parser = parseHeaderLine;
   }
-  const parseHeaderLine = (row) => {
+  var parseHeaderLine = function(row) {
     if (row.trim() == '') {
       parser = parseCommitMessage;
     } else {
-      for (const key in gitLogHeaders) {
-        if (row.indexOf(`${key}: `) == 0) {
-          gitLogHeaders[key](currentCommmit, row.slice((`${key}: `).length).trim());
+      for (var key in gitLogHeaders) {
+        if (row.indexOf(key + ': ') == 0) {
+          gitLogHeaders[key](currentCommmit, row.slice((key + ': ').length).trim());
           return;
         }
       }
     }
   }
-  const parseCommitMessage = (row, index) => {
+  var parseCommitMessage = function(row, index) {
     if (/[\d-]+\t[\d-]+\t.+/g.test(rows[index + 1])) {
       parser = parseFileChanges;
       return;
@@ -123,11 +130,11 @@ exports.parseGitLog = (data) => {
     else currentCommmit.message = '';
     currentCommmit.message += row.trim();
   }
-  const parseFileChanges = (row, index) => {
+  var parseFileChanges = function(row, index) {
     if (rows.length === index + 1 || rows[index + 1] && rows[index + 1].indexOf('commit ') === 0) {
-      const total = [0, 0, 'Total'];
-      for (let n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
-        const fileLineDiff = currentCommmit.fileLineDiffs[n];
+      var total = [0, 0, 'Total'];
+      for (var n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
+        var fileLineDiff = currentCommmit.fileLineDiffs[n];
         if (!isNaN(parseInt(fileLineDiff[0], 10))) {
           total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
         }
@@ -139,97 +146,106 @@ exports.parseGitLog = (data) => {
       parser = parseCommitLine;
       return;
     }
-    const splitted = row.split('\t');
+    var splitted = row.split('\t');
     splitted.push(fileType(splitted[2]));
     currentCommmit.fileLineDiffs.push(splitted);
   }
-  let parser = parseCommitLine;
-  const rows = data.split('\n');
-  rows.forEach((row, index) => {
+  var parser = parseCommitLine;
+  var rows = data.split('\n');
+  rows.forEach(function(row, index) {
     parser(row, index);
   });
 
-  commits.forEach((commit) => { commit.message = (typeof commit.message) === 'string' ? commit.message.trim() : ''; });
+  commits.forEach(function(commit) { commit.message = (typeof commit.message) === 'string' ? commit.message.trim() : ''; });
   return commits;
 };
 
 
-exports.parseGitConfig = (text) => {
-  const conf = {};
-  text.split('\n').forEach((row) => {
-    const ss = row.split('=');
+exports.parseGitConfig = function(text) {
+  var conf = {};
+  text.split('\n').forEach(function(row) {
+    var ss = row.split('=');
     conf[ss[0]] = ss[1];
   });
   return conf;
 }
 
-exports.parseGitBranches = (text) => {
-  const branches = [];
-  text.split('\n').forEach((row) => {
+exports.parseGitBranches = function(text) {
+  var branches = [];
+  text.split('\n').forEach(function(row) {
     if (row.trim() == '') return;
-    const branch = { name: row.slice(2) };
+    var branch = { name: row.slice(2) };
     if(row[0] == '*') branch.current = true;
     branches.push(branch);
   });
   return branches;
 }
 
-exports.parseGitTags = (text) => {
-  return text.split('\n')
-    .filter((tag) => { return tag != '' });
+exports.parseGitTags = function(text) {
+  return text.split('\n').filter(function(tag) {
+    return tag != '';
+  });
 }
 
-exports.parseGitRemotes = (text) => {
-  return text.split('\n')
-    .filter((remote) => { return remote != '' });
+exports.parseGitRemotes = function(text) {
+  return text.split('\n').filter(function(remote) {
+    return remote != '';
+  });
 }
 
-exports.parseGitLsRemote = (text) => {
-  return text.split('\n').filter((item) => {
+exports.parseGitLsRemote = function(text) {
+  return text.split('\n').filter(function(item) {
     return item && item.indexOf('From ') != 0;
-  }).map((line) => {
-    const sha1 = line.slice(0, 40);
-    const name = line.slice(41).trim();
+  }).map(function(line) {
+    var sha1 = line.slice(0, 40);
+    var name = line.slice(41).trim();
     return { sha1: sha1, name: name };
   });
 }
 
-exports.parseGitStashShow = (text) => {
-  const lines = text.split('\n').filter((item) =>  item );
-  return lines.slice(0, lines.length - 1).map((line) => {
-    return { filename: line.substring(0, line.indexOf('|')).trim() }
+exports.parseGitStashShow = function(text) {
+  var lines = text.split('\n').filter(function(item) {
+    return item;
+  });
+  return lines.slice(0, lines.length - 1).map(function(line) {
+    var split = line.indexOf('|');
+    return {
+      filename: line.substring(0, split).trim()
+    }
   });
 }
 
-exports.parseGitSubmodule = (text, args) => {
+exports.parseGitSubmodule = function(text, args) {
   if (!text) {
     return {};
   }
 
-  let submodule;
-  const submodules = [];
+  var submodule;
+  var submodules = [];
 
-  text.trim().split('\n').filter((line) => line)
-  .forEach((line) => {
+  text.trim().split('\n').filter(function(line) {
+    return line;
+  }).forEach(function(line) {
     if (line.indexOf("[submodule") === 0) {
-      submodule = { name: line.match(/"(.*?)"/)[1] };
+      submodule = {};
       submodules.push(submodule);
+      submodule.name = line.match(/"(.*?)"/)[1];
     } else {
-      const parts = line.split("=");
-      const key = parts[0].trim();
-      const value = parts.slice(1).join("=").trim();
+      var parts = line.split("=");
+      var key = parts[0].trim();
+      var value = parts.slice(1).join("=").trim();
       submodule[key] = value;
 
       if (key == "url") {
         // keep a reference to the raw url
-        let url = submodule.rawUrl = value;
+        var url = submodule.rawUrl = value;
 
         // When a repo is checkout with ssh or git instead of an url
         if (url.indexOf('http') != 0) {
           if (url.indexOf('git:') == 0) { // git
-            url = `http${url.substr(url.indexOf(':'))}`;
+            url = 'http' + url.substr(url.indexOf(':'));
           } else { // ssh
-            url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+            url = 'http://' + url.substr(url.indexOf('@') + 1).replace(':', '/');
           }
         }
 
@@ -241,20 +257,20 @@ exports.parseGitSubmodule = (text, args) => {
   return submodules;
 }
 
-const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) => {
-  const splitedHeader = result[lastHeaderIndex].split(' ');
-  const start = splitedHeader[1].split(','); // start of block
-  const end = splitedHeader[2].split(',');   // end of block
-  const startLeft = Math.abs(start[0]);
-  const startRight = Math.abs(start[1]);
-  const endLeft = end[0];
-  const endRight = end[1];
+var updatePatchHeader = function(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) {
+  var splitedHeader = result[lastHeaderIndex].split(' ');
+  var start = splitedHeader[1].split(','); // start of block
+  var end = splitedHeader[2].split(',');   // end of block
+  var startLeft = Math.abs(start[0]);
+  var startRight = Math.abs(start[1]);
+  var endLeft = end[0];
+  var endRight = end[1];
 
-  splitedHeader[1] = `-${startLeft - ignoredDiffCountTotal},${startRight}`;
-  splitedHeader[2] = `+${endLeft - ignoredDiffCountTotal},${endRight - ignoredDiffCountCurrent}`;
+  splitedHeader[1] = '-' + (startLeft - ignoredDiffCountTotal) + ',' + startRight;
+  splitedHeader[2] = '+' + (endLeft - ignoredDiffCountTotal) + ',' + (endRight - ignoredDiffCountCurrent);
 
-  let allSpace = true;
-  for (let i = lastHeaderIndex + 1; i < result.length; i++) {
+  var allSpace = true;
+  for (var i = lastHeaderIndex + 1; i < result.length; i++) {
     if (result[i][0] != ' ') {
       allSpace = false;
       break;
@@ -266,17 +282,17 @@ const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignor
     result[lastHeaderIndex] = splitedHeader.join(' ');
 }
 
-exports.parsePatchDiffResult = (patchLineList, text) => {
+exports.parsePatchDiffResult = function(patchLineList, text) {
   if (!text) return {};
 
-  const lines = text.trim().split('\n');
-  const result = [];
-  let ignoredDiffCountTotal = 0;
-  let ignoredDiffCountCurrent = 0;
-  let headerIndex = null;
-  let lastHeaderIndex = -1;
-  let n = 0;
-  let selectedLines = 0;
+  var lines = text.trim().split('\n');
+  var result = [];
+  var ignoredDiffCountTotal = 0;
+  var ignoredDiffCountCurrent = 0;
+  var headerIndex = null;
+  var lastHeaderIndex = -1;
+  var n = 0;
+  var selectedLines = 0;
 
   // first add all lines until diff block header is found
   while (!/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/.test(lines[n])) {
@@ -286,7 +302,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
 
   // per rest of the lines
   while (n < lines.length) {
-    const line = lines[n];
+    var line = lines[n];
 
     if (/^[\-\+]/.test(line)) {
       // Modified line
@@ -300,7 +316,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
       } else { // lines[0] === '-'
         // deleted line diff is selected to be ignored
         ignoredDiffCountCurrent--;
-        result.push(` ${line.slice(1)}`);
+        result.push(' ' + line.slice(1));
       }
     } else {
       // none modified line or diff block header

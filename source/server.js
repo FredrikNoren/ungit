@@ -284,7 +284,7 @@ app.get('/api/gitversion', (req, res) => {
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');
 const readUserConfig = (callback) => {
-  fs.exists(userConfigPath, (hasConfig) => {
+  fs.exists(userConfigPath, function(hasConfig) {
     if (!hasConfig) return callback(null, {});
 
     fs.readFile(userConfigPath, { encoding: 'utf8' }, (err, content) => {
