@@ -4,42 +4,51 @@ const fileType = require('./utils/file-type.js');
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');
-  const files = {};
-  // skipping first line...
-  lines.slice(1).forEach((line) => {
-    if (line == '') return;
-    const status = line.slice(0, 2);
-    const filename = line.slice(3).trim().replace(/^"(.*)"$/, '$1'); // may contain old and renamed file name.
-    const finalFilename = status[0] == 'R' ? filename.slice(filename.indexOf('>') + 2) : filename;
-    files[finalFilename] = {
-      displayName: filename,
-      staged: status[0] == 'A' || status[0] == 'M',
-      removed: status[0] == 'D' || status[1] == 'D',
-      isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
-      conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
-      renamed: status[0] == 'R',
-      type: fileType(finalFilename)
-    };
-  });
-
-  return {
+  const result = {
     isMoreToLoad: false,
     branch: lines[0].split(' ').pop(),
     inited: true,
-    files: files
+    files: {}
   };
+
+  // skipping first line...
+  for(let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line == '') continue;
+    const status = line.slice(0, 2);
+    let filename = line.slice(3).trim();
+    if (filename[0] == '"' && filename[filename.length - 1] == '"')
+      filename = filename.slice(1, filename.length - 1);
+    const file = {};
+    file.displayName = filename;
+    file.staged = status[0] == 'A' || status[0] == 'M';
+    file.removed = status[0] == 'D' || status[1] == 'D';
+    file.isNew = (status[0] == '?' || status[0] == 'A') && !file.removed;
+    file.conflict = (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U';
+    file.renamed = status[0] == 'R';
+    if (file.renamed)
+      filename = filename.slice(filename.indexOf('>') + 2);
+    file.type = fileType(filename);
+    result.files[filename] = file;
+  }
+
+  return result;
 };
 
 exports.parseGitStatusNumstat = (text) => {
   const result = {};
-  text.split('\n').forEach((line) => {
-    if (line == '') return;
+  const lines = text.split('\n');
+
+  for(let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line == '') continue;
     const parts = line.split('\t');
-    result[parts[2]] = {
-      additions: parts[0],
-      deletions: parts[1]
-    };
-  });
+    const file = {};
+    file.additions = parts[0];
+    file.deletions = parts[1];
+    result[parts[2]] = file;
+  }
+
   return result;
 };
 
@@ -175,13 +184,15 @@ exports.parseGitBranches = (text) => {
 }
 
 exports.parseGitTags = (text) => {
-  return text.split('\n')
-    .filter((tag) => { return tag != '' });
+  return text.split('\n').filter((tag) => {
+    return tag != '';
+  });
 }
 
 exports.parseGitRemotes = (text) => {
-  return text.split('\n')
-    .filter((remote) => { return remote != '' });
+  return text.split('\n').filter((remote) => {
+    return remote != '';
+  });
 }
 
 exports.parseGitLsRemote = (text) => {
@@ -195,9 +206,14 @@ exports.parseGitLsRemote = (text) => {
 }
 
 exports.parseGitStashShow = (text) => {
-  const lines = text.split('\n').filter((item) =>  item );
+  const lines = text.split('\n').filter((item) => {
+    return item;
+  });
   return lines.slice(0, lines.length - 1).map((line) => {
-    return { filename: line.substring(0, line.indexOf('|')).trim() }
+    const split = line.indexOf('|');
+    return {
+      filename: line.substring(0, split).trim()
+    }
   });
 }
 
@@ -209,11 +225,13 @@ exports.parseGitSubmodule = (text, args) => {
   let submodule;
   const submodules = [];
 
-  text.trim().split('\n').filter((line) => line)
-  .forEach((line) => {
+  text.trim().split('\n').filter((line) => {
+    return line;
+  }).forEach((line) => {
     if (line.indexOf("[submodule") === 0) {
-      submodule = { name: line.match(/"(.*?)"/)[1] };
+      submodule = {};
       submodules.push(submodule);
+      submodule.name = line.match(/"(.*?)"/)[1];
     } else {
       const parts = line.split("=");
       const key = parts[0].trim();
