@@ -223,7 +223,15 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/revert`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['revert', req.body.commit], req.body.path))
+    const task = gitPromise(['revert', req.body.commit], req.body.path)
+      .catch(e => {
+        if (e.message.indexOf("is a merge but no -m option was given.") > 0) {
+          return gitPromise(['revert', '-m', 1, req.body.commit], req.body.path)
+        } else {
+          throw e;
+        }
+      });
+    jsonResultOrFailProm(res, task)
       .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });

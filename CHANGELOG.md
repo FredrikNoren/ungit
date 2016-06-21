@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Removed deprecated npmconf package [#746](https://github.com/FredrikNoren/ungit/issues/746)
 - More helpful warning messages [#749](https://github.com/FredrikNoren/ungit/pull/749/files)
 - Deleting already deleted remote tag [#748](https://github.com/FredrikNoren/ungit/pull/748)
+- Fix to handle revert merge commit [#757](https://github.com/FredrikNoren/ungit/pull/757)
 
 ### Changed
 - Cleaner rebase conflict message display [#708](https://github.com/FredrikNoren/ungit/pull/708)
