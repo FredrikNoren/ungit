@@ -154,9 +154,9 @@ const getGitError = (args, stderr, stdout) => {
 
 git.status = (repoPath, file) => {
   return Bluebird.props({
-    numStatsStaged: git(['diff', '--numstat', '--cached', '--', (file || '')], repoPath)
+    numStatsStaged: git(['diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: git(['diff', '--numstat', '--', (file || '')], repoPath)
+    numStatsUnstaged: git(['diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
     status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
