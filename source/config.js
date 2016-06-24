@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const homedir = require('os-homedir')();
+const winston = require('winston');
+const child_process = require('child_process');
 
 const defaultConfig = {
 
@@ -212,3 +214,10 @@ Object.defineProperty(Error.prototype, 'toJSON', {
   },
   configurable: true
 });
+
+try {
+  module.exports.gitVersion = /.*?(\d+[.]\d+[.]\d+).*/.exec(child_process.execSync('git --version').toString())[1];
+} catch (e) {
+  winston.error('Can\'t run "git --version". Is git installed and available in your path?', e.stderr);
+  throw e;
+}

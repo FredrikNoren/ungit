@@ -7,7 +7,8 @@ const md5 = require('blueimp-md5');
 const semver = require('semver');
 const npm = require('npm');
 const RegClient = require('npm-registry-client');
-const version = require('../package.json').version
+const version = require('../package.json').version;
+const config = require('./config');
 
 const noop = () => {}
 
@@ -54,29 +55,21 @@ exports.getUserHash = (callback) => {
 }
 
 exports.getGitVersionInfo = (callback) => {
-  child_process.exec('git --version', (err, stdout, stderr) => {
-    const result = {
-      requiredVersion: '>=1.8.x',
-      version: 'unkown',
-      satisfied: false
-    };
+  const result = {
+    requiredVersion: '>=1.8.x',
+    version: 'unkown',
+    satisfied: false
+  };
 
-    if (err) {
-      result.error = 'Can\'t run "git --version". Is git installed and available in your path?';
-    } else {
-      const versionSearch = /.*?(\d+[.]\d+[.]\d+).*/.exec(stdout);
-      if (!versionSearch) {
-        result.error = `Failed to parse git version number: ${stdout}. Note that Ungit requires git version ${result.requiredVersion}`;
-      } else {
-        result.version = versionSearch[1];
-        result.satisfied = semver.satisfies(result.version, result.requiredVersion);
-        if (!result.satisfied) {
-          result.error =
-            `Ungit requires git version ${result.requiredVersion}, you are currently running ${result.version}`;
-        }
-      }
+  if (!config.gitVersion) {
+    result.error = `Failed to parse git version number. Note that Ungit requires git version ${result.requiredVersion}`;
+  } else {
+    result.version = config.gitVersion;
+    result.satisfied = semver.satisfies(result.version, result.requiredVersion);
+    if (!result.satisfied) {
+      result.error = `Ungit requires git version ${result.requiredVersion}, you are currently running ${result.version}`;
     }
+  }
 
-    callback(result);
-  });
+  callback(result);
 }
