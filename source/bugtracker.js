@@ -13,11 +13,8 @@ class BugTracker {
     this.subsystem = subsystem;
     this.appVersion = 'unknown';
     this.userHash = 'unkown';
-
-    sysinfo.getUngitVersion((err, ungitVersion) => {
-      this.appVersion = ungitVersion;
-      winston.info('BugTracker set version: ' + this.appVersion);
-    });
+    this.appVersion = config.ungitDevVersion;
+    winston.info(`BugTracker set version: ${this.appVersion}`);
 
     sysinfo.getUserHash((err, userHash) => {
       this.userHash = userHash;
