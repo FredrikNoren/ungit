@@ -11,14 +11,6 @@ const config = require('./config');
 
 const noop = () => {}
 
-exports.getUngitVersion = (callback) => {
-  callback(null, config.ungitDevVersion);
-};
-
-exports.getUngitPackageJsonVersion = (callback) => {
-  callback(null, config.ungitPackageVersion);
-};
-
 exports.getUngitLatestVersion = (callback) => {
   npm.load({}, (err, config) => {
     if (err) return callback(err);
