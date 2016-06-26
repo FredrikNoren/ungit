@@ -7,29 +7,16 @@ const md5 = require('blueimp-md5');
 const semver = require('semver');
 const npm = require('npm');
 const RegClient = require('npm-registry-client');
-const version = require('../package.json').version;
 const config = require('./config');
 
 const noop = () => {}
 
-exports.getUngitVersion = cache((callback) => {
-  exports.getUngitPackageJsonVersion((err, packageJsonVersion) => {
-    if (err) return callback(err);
-    if (fs.existsSync(path.join(__dirname, '..', '.git'))){
-      child_process.exec('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') }, (err, revision) => {
-        revision.replace('\n', ' ');
-        revision = revision.trim();
-
-        callback(null, `dev-${packageJsonVersion}-${revision}`);
-      });
-    } else {
-      callback(null, packageJsonVersion);
-    }
-  });
-});
+exports.getUngitVersion = (callback) => {
+  callback(null, config.ungitDevVersion);
+};
 
 exports.getUngitPackageJsonVersion = (callback) => {
-  callback(null, version);
+  callback(null, config.ungitPackageVersion);
 };
 
 exports.getUngitLatestVersion = (callback) => {

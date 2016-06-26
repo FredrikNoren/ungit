@@ -221,3 +221,15 @@ try {
   winston.error('Can\'t run "git --version". Is git installed and available in your path?', e.stderr);
   throw e;
 }
+
+module.exports.ungitPackageVersion = require('../package.json').version;
+
+if (fs.existsSync(path.join(__dirname, '..', '.git'))){
+  const revision = child_process.execSync('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') })
+    .toString()
+    .replace('\n', ' ')
+    .trim();
+  module.exports.ungitDevVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
+} else {
+  module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
+}
