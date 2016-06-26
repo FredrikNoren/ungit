@@ -1,7 +1,6 @@
 const fs = require('fs');
 const child_process = require('child_process');
 const path = require('path');
-const cache = require('./utils/cache');
 const getmac = require('getmac');
 const md5 = require('blueimp-md5');
 const semver = require('semver');
