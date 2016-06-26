@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a changlelog's changelog standard](http://keepachangelog.com/)
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.1...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.2...master)
+
+## [0.10.2](https://github.com/FredrikNoren/ungit/compare/v0.10.1...v0.10.2)
 
 ### Added
 - Added bare repo support [#177](https://github.com/FredrikNoren/ungit/issues/177) [#728](https://github.com/FredrikNoren/ungit/issues/728)
@@ -27,6 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Dropped support for Node 0.10 and 0.12 [#745](https://github.com/FredrikNoren/ungit/pull/745/files)
 
 ## [0.10.1](https://github.com/FredrikNoren/ungit/compare/v0.10.0...v0.10.1)
+
 ### Added
 - Introduced change log! [#687](https://github.com/FredrikNoren/ungit/issues/687)
 - Improved server and client error logging [#695](https://github.com/FredrikNoren/ungit/pull/695)
