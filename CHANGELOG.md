@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a changlelog's changelog standard](http://keepachangelog.com/)
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.2...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
+
+## [0.10.3](https://github.com/FredrikNoren/ungit/compare/v0.10.2...v0.10.3)
 
 ### Fixed
 - Missing npm as a normal dependency [#766] (https://github.com/FredrikNoren/ungit/issues/766)
