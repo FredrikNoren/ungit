@@ -35,7 +35,7 @@
     "lodash": "~4.12.0",
     "mkdirp": "~0.5.1",
     "moment": "~2.13.0",
-    "npm": "~3.9.1",
+    "npm": "^3.9.1",
     "npm-registry-client": "~7.1.0",
     "octicons": "~3.5.0",
     "open": "~0.0.5",
