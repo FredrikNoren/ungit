@@ -7,6 +7,8 @@ const semver = require('semver');
 const npm = require('npm');
 const RegClient = require('npm-registry-client');
 const config = require('./config');
+const Bluebird = require('bluebird');
+const winston = require('winston');
 
 const noop = () => {}
 
@@ -26,9 +28,15 @@ exports.getUngitLatestVersion = (callback) => {
   });
 }
 
-exports.getUserHash = (callback) => {
-  getmac.getMac((err, addr) => {
-    callback(err, md5(addr));
+exports.getUserHash = () => {
+  return new Bluebird((resolve) => {
+    getmac.getMac((err, addr) => {
+      if (err) {
+        winston.error("attempt to get mac addr failed, using fake mac.", err);
+        addr = "abcde";
+      }
+      resolve(md5(addr));
+    });
   });
 }
 

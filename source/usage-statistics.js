@@ -13,9 +13,10 @@ class UsageStatistics {
     if (!config.sendUsageStatistics) return;
     this.keen = keenio.configure({ projectId: _PROJECT_ID, writeKey: _WRITE_KEY });
     this.getDefaultData = cache((callback) => {
-      sysinfo.getUserHash((err, hash) => {
-        callback(null, { version: config.ungitDevVersion, userHash: hash });
-      });
+      sysinfo.getUserHash()
+        .then((hash) => {
+          callback(null, { version: config.ungitDevVersion, userHash: hash });
+        });
     });
   }
 

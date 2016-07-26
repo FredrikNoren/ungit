@@ -250,14 +250,15 @@ const pluginsCache = cache((callback) => {
 });
 
 app.get('/serverdata.js', (req, res) => {
-  sysinfo.getUserHash((err, hash) => {
-    const text = `ungit.config = ${JSON.stringify(config)};\n` +
-      `ungit.userHash = "${hash}";\n` +
-      `ungit.version = "${config.ungitDevVersion}";\n` +
-      `ungit.platform = "${os.platform()}"\n` +
-      `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}"\n`;
-    res.send(text);
-  });
+  sysinfo.getUserHash()
+    .then((hash) => {
+      const text = `ungit.config = ${JSON.stringify(config)};\n` +
+        `ungit.userHash = "${hash}";\n` +
+        `ungit.version = "${config.ungitDevVersion}";\n` +
+        `ungit.platform = "${os.platform()}"\n` +
+        `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}"\n`;
+      res.send(text);
+    });
 });
 
 app.get('/api/latestversion', (req, res) => {
