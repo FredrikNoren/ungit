@@ -13,18 +13,25 @@ const winston = require('winston');
 const noop = () => {}
 
 exports.getUngitLatestVersion = (callback) => {
-  npm.load({}, (err, config) => {
-    if (err) return callback(err);
-    config.log = { error: noop, warn: noop, info: noop,
-             verbose: noop, silly: noop, http: noop,
-             pause: noop, resume: noop };
-    const client = new RegClient(config);
-
-    client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, (err, data, raw, res) => {
-      if (err) return callback(err);
-      const versions = Object.keys(data.versions);
-      callback(null, versions[versions.length - 1]);
-    })
+  return new Bluebird((resolve, reject) => {
+    npm.load({}, (err, config) => {
+      if (err) return reject(err);
+      config.log = { error: noop, warn: noop, info: noop,
+               verbose: noop, silly: noop, http: noop,
+               pause: noop, resume: noop };
+      resolve(new RegClient(config));
+    });
+  }).then((client) => {
+    return new Bluebird((resolve, reject) => {
+      client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, (err, data, raw, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          const versions = Object.keys(data.versions);
+          resolve(versions[versions.length - 1]);
+        }
+      });
+    });
   });
 }
 
@@ -40,7 +47,7 @@ exports.getUserHash = () => {
   });
 }
 
-exports.getGitVersionInfo = (callback) => {
+exports.getGitVersionInfo = () => {
   const result = {
     requiredVersion: '>=1.8.x',
     version: 'unkown',
@@ -57,5 +64,5 @@ exports.getGitVersionInfo = (callback) => {
     }
   }
 
-  callback(result);
+  return Bluebird.resolve(result);
 }
