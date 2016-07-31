@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.1...master)
 
+# Fixed
+- Handle SIGTERM [#763](https://github.com/FredrikNoren/ungit/issues/763)
+
 ### Added
 - Added bare repo support [#177](https://github.com/FredrikNoren/ungit/issues/177) [#728](https://github.com/FredrikNoren/ungit/issues/728)
 - Added support for cherry-pick conflict[#701](https://github.com/FredrikNoren/ungit/issues/701)
