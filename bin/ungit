@@ -43,11 +43,6 @@ child.on('exit', function (res) {
   console.log('Stopped keeping ungit alive');
 });
 
-process.on('SIGTERM', function() {
-  try { child.stop(); } catch (e) {}
-  process.exit(0);
-});
-
 function launch(callback) {
   var currentUrl = config.urlBase + ':' + config.port + config.rootPath;
   if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
