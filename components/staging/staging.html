@@ -43,7 +43,7 @@
             <span class="glyphicon glyphicon-trash"></span>
             Discard all
           </button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
