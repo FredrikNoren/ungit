@@ -17,14 +17,6 @@
         </a>
         <!-- ko if: showCommitDiff() -->
         <div class="diff-wrapper">
-          <div class="btn-group btn-group-xs">
-            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff'), css: {active: textDiffType() === 'sidebysidediff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: 'Side by Side'"></span>
-            </button>
-            <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-defaultDiff" data-bind="click: textDiffTypeChange.bind($data, 'textdiff'), css: {active: textDiffType() === 'textdiff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: 'Default'"></span>
-            </button>
-          </div>
           <div class="diff-inner" data-bind="component: commitDiff"></div>
         </div>
         <!-- /ko -->

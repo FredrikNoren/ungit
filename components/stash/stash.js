@@ -16,14 +16,12 @@ function StashItemViewModel(stash, data) {
   this.message = data.message;
   this.stashPopProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-pop', temporary: true });
   this.showCommitDiff = ko.observable(false);
-  this.textDiffType = ko.observable('textdiff');
 
   this.commitDiff = ko.observable(components.create('commitDiff', {
     fileLineDiffs: data.fileLineDiffs.slice(),
     sha1: this.sha1,
     repoPath: stash.repoPath,
-    server: stash.server,
-    textDiffType: this.textDiffType
+    server: stash.server
   }));
 }
 StashItemViewModel.prototype.pop = function() {
@@ -42,9 +40,6 @@ StashItemViewModel.prototype.drop = function() {
 }
 StashItemViewModel.prototype.toggleShowCommitDiffs = function() {
   this.showCommitDiff(!this.showCommitDiff());
-}
-StashItemViewModel.prototype.textDiffTypeChange = function(type) {
-  this.textDiffType(type);
 }
 
 function StashViewModel(server, repoPath) {

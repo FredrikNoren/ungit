@@ -292,7 +292,7 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-StagingViewModel.prototype.toggleWordWrap = function(state) {
+StagingViewModel.prototype.wordWrapChange = function(state) {
   this.wordWrap(state);
 };
 
