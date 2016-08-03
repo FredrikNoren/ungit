@@ -250,36 +250,34 @@ const pluginsCache = cache((callback) => {
 });
 
 app.get('/serverdata.js', (req, res) => {
-  async.parallel({
-    userHash: sysinfo.getUserHash.bind(sysinfo),
-    version: sysinfo.getUngitVersion.bind(sysinfo)
-  }, (err, data) => {
-    const text = `ungit.config = ${JSON.stringify(config)};\n` +
-      `ungit.userHash = "${data.userHash}";\n` +
-      `ungit.version = "${data.version}";\n` +
-      `ungit.platform = "${os.platform()}"\n` +
-      `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}"\n`;
-    res.send(text);
-  });
+  sysinfo.getUserHash()
+    .then((hash) => {
+      const text = `ungit.config = ${JSON.stringify(config)};\n` +
+        `ungit.userHash = "${hash}";\n` +
+        `ungit.version = "${config.ungitDevVersion}";\n` +
+        `ungit.platform = "${os.platform()}"\n` +
+        `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}"\n`;
+      res.send(text);
+    });
 });
 
 app.get('/api/latestversion', (req, res) => {
-  sysinfo.getUngitVersion((err, currentVersion) => {
-    sysinfo.getUngitLatestVersion((err, latestVersion) => {
-      if (err)
-        res.json({ latestVersion: currentVersion, currentVersion: currentVersion, outdated: false });
-      else if (!semver.valid(currentVersion))
-        res.json({ latestVersion: latestVersion, currentVersion: currentVersion, outdated: false });
-      else
-        res.json({ latestVersion: latestVersion, currentVersion: currentVersion, outdated: semver.gt(latestVersion, currentVersion) });
+  sysinfo.getUngitLatestVersion()
+    .then((latestVersion) => {
+      if (!semver.valid(config.ungitDevVersion)) {
+        res.json({ latestVersion: latestVersion, currentVersion: config.ungitDevVersion, outdated: false });
+      } else {
+        res.json({ latestVersion: latestVersion, currentVersion: config.ungitDevVersion, outdated: semver.gt(latestVersion, config.ungitDevVersion) });
+      }
+    }).catch((err) => {
+      res.json({ latestVersion: config.ungitDevVersion, currentVersion: config.ungitDevVersion, outdated: false });
     });
-  });
 });
 
 app.get('/api/ping', (req, res) => res.json({}));
 
 app.get('/api/gitversion', (req, res) => {
-  sysinfo.getGitVersionInfo((result) => res.json(result));
+  sysinfo.getGitVersionInfo().then((result) => res.json(result));
 });
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');

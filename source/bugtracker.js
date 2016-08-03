@@ -13,16 +13,14 @@ class BugTracker {
     this.subsystem = subsystem;
     this.appVersion = 'unknown';
     this.userHash = 'unkown';
+    this.appVersion = config.ungitDevVersion;
+    winston.info(`BugTracker set version: ${this.appVersion}`);
 
-    sysinfo.getUngitVersion((err, ungitVersion) => {
-      this.appVersion = ungitVersion;
-      winston.info('BugTracker set version: ' + this.appVersion);
-    });
-
-    sysinfo.getUserHash((err, userHash) => {
-      this.userHash = userHash;
-      winston.info('BugTracker set user hash');
-    });
+    sysinfo.getUserHash()
+      .then((userHash) => {
+        this.userHash = userHash;
+        winston.info('BugTracker set user hash');
+      });
   }
   notify(exception, clientName, callback) {
     if (!config.bugtracking) return;

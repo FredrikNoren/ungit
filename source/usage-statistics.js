@@ -2,7 +2,6 @@ const config = require('./config');
 const cache = require('./utils/cache');
 const sysinfo = require('./sysinfo');
 const getmac = require('getmac');
-const async = require('async');
 const winston = require('winston');
 const keenio = require('keen.io');
 
@@ -14,12 +13,10 @@ class UsageStatistics {
     if (!config.sendUsageStatistics) return;
     this.keen = keenio.configure({ projectId: _PROJECT_ID, writeKey: _WRITE_KEY });
     this.getDefaultData = cache((callback) => {
-      async.parallel({
-        userHash: sysinfo.getUserHash.bind(sysinfo),
-        version: sysinfo.getUngitVersion.bind(sysinfo)
-      }, (err, data) => {
-        callback(err, data);
-      });
+      sysinfo.getUserHash()
+        .then((hash) => {
+          callback(null, { version: config.ungitDevVersion, userHash: hash });
+        });
     });
   }
 
