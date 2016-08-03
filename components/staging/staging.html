@@ -43,25 +43,25 @@
             <span class="glyphicon glyphicon-trash"></span>
             Discard all
           </button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
             <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
           <div class="btn-group pull-right btn-group-sm">
-            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff'), css: {active: textDiffType() === 'sidebysidediff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: 'Side by Side'"></span>
-            </button>
             <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-defaultDiff" data-bind="click: textDiffTypeChange.bind($data, 'textdiff'), css: {active: textDiffType() === 'textdiff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
               <span data-bind="text: 'Default'"></span>
             </button>
+            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff'), css: {active: textDiffType() === 'sidebysidediff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: 'Side by Side'"></span>
+            </button>
           </div>
           <div class="btn-group pull-right btn-group-sm">
-            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-wordwrap" data-bind="click: toggleWordWrap.bind($data, true), css: {active: wordWrap}" data-toggle="tooltip" data-placement="bottom" data-original-title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: 'Word Wrap'"></span>
-            </button>
-            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-nowrap" data-bind="click: toggleWordWrap.bind($data, false), css: {active: !wordWrap()}" data-toggle="tooltip" data-placement="bottom" data-original-title="Not wrapping words per line" data-delay='{"show":"2000", "hide":"0"}'>
+            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-nowrap" data-bind="click: wordWrapChange.bind($data, false), css: {active: !wordWrap()}" data-toggle="tooltip" data-placement="bottom" data-original-title="Not wrapping words per line" data-delay='{"show":"2000", "hide":"0"}'>
               <span data-bind="text: 'Default'"></span>
+            </button>
+            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-wordwrap" data-bind="click: wordWrapChange.bind($data, true), css: {active: wordWrap}" data-toggle="tooltip" data-placement="bottom" data-original-title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: 'Word Wrap'"></span>
             </button>
           </div>
         </div>

@@ -477,18 +477,8 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller'], req.query.path)
-      .then(gitParser.parseGitLog)
-      .then((items) => {
-        return items.map((item, index) => {
-          return {
-            id: index,
-            name: item.reflogName.slice('refs/'.length),
-            title: item.message,
-            date: item.commitDate
-          }
-        });
-      });
+    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller', '--parents', '--numstat'], req.query.path)
+      .then(gitParser.parseGitLog);
     jsonResultOrFailProm(res, task);
   });
 

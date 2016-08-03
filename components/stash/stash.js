@@ -10,10 +10,19 @@ components.register('stash', function(args) {
 function StashItemViewModel(stash, data) {
   this.stash = stash;
   this.server = stash.server;
-  this.id = data.id;
-  this.title = data.name + ' ' + moment(new Date(data.date)).fromNow();
-  this.body = data.title;
+  this.id = data.reflogId;
+  this.sha1 = data.sha1;
+  this.title = data.reflogName + ' ' + moment(new Date(data.commitDate)).fromNow();
+  this.message = data.message;
   this.stashPopProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-pop', temporary: true });
+  this.showCommitDiff = ko.observable(false);
+
+  this.commitDiff = ko.observable(components.create('commitDiff', {
+    fileLineDiffs: data.fileLineDiffs.slice(),
+    sha1: this.sha1,
+    repoPath: stash.repoPath,
+    server: stash.server
+  }));
 }
 StashItemViewModel.prototype.pop = function() {
   var self = this;
@@ -28,6 +37,9 @@ StashItemViewModel.prototype.drop = function() {
   this.server.del('/stashes/' + this.id, { path: this.stash.repoPath() }, function(err, res) {
     self.stashPopProgressBar.stop();
   });
+}
+StashItemViewModel.prototype.toggleShowCommitDiffs = function() {
+  this.showCommitDiff(!this.showCommitDiff());
 }
 
 function StashViewModel(server, repoPath) {
@@ -56,7 +68,19 @@ StashViewModel.prototype.refresh = function() {
       if (err.errorCode == 'no-such-path') return true;
       return;
     }
-    self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
+
+    var changed = self.stashedChanges().length != stashes.length;
+    if (!changed) {
+      changed = !self.stashedChanges().every(function(item1) {
+        return stashes.some(function(item2) {
+          return item1.sha1 == item2.sha1;
+        });
+      });
+    }
+
+    if (changed) {
+      self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
+    }
   });
 }
 StashViewModel.prototype.toggleShowStash = function() {
