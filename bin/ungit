@@ -11,6 +11,24 @@ var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 var usageStatistics = require('../src/usage-statistics');
 
+var child = new (forever.Monitor)(path.join(__dirname, '..', 'src', 'server.js'), {
+  silent: false,
+  minUptime: 2000,
+  max: config.maxNAutoRestartOnCrash,
+  cwd: path.join(process.cwd(), '..'),
+  options: process.argv.slice(2),
+  env: { LANG: 'en_US.UTF-8' }
+});
+
+process.on('exit', function() {
+  child.kill();
+  console.log('Exit: killed children')
+});
+
+var cleanExit = function() { process.exit() };
+process.on('SIGINT', cleanExit); // catch ctrl-c
+process.on('SIGTERM', cleanExit); // catch kill
+
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
   async.parallel([
@@ -19,15 +37,6 @@ process.on('uncaughtException', function(err) {
   ], function() {
     process.exit();
   });
-});
-
-var child = new (forever.Monitor)(path.join(__dirname, '..', 'src', 'server.js'), {
-  silent: false,
-  minUptime: 2000,
-  max: config.maxNAutoRestartOnCrash,
-  cwd: path.join(process.cwd(), '..'),
-  options: process.argv.slice(2),
-  env: { LANG: 'en_US.UTF-8' }
 });
 
 child.on('exit', function (res) {
