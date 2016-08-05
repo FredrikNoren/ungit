@@ -126,7 +126,7 @@ const defaultConfig = {
 let argv = yargs
 .usage('$0 [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
 .example('$0 --port=8888', 'Run Ungit on port 8888')
-.example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but tur on git command log')
+.example('$0 --no-logRESTRequests --logGitCommands', 'Turn off REST logging but turn on git command log')
 .help('help')
 .version()
 .alias('b', 'launchBrowser')
