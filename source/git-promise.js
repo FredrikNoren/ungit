@@ -401,8 +401,19 @@ git.revParse = (repoPath) => {
 }
 
 git.log = (path, limit) => {
-  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], path)
+  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit ? `--max-count=${limit}` : ''], path)
     .then(gitParser.parseGitLog)
+}
+
+git.logWithHead = (path, limit) => {
+  return git.log(path, limit)
+    .then((log) => {
+      if (!log.isHeadExist) {
+        return git.logWithHead(path, log.length + 25);
+      } else {
+        return log;
+      }
+    })
 }
 
 module.exports = git;

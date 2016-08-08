@@ -237,8 +237,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/log`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const limit = req.query.limit ? `--max-count=${req.query.limit}` : '';
-    const task = gitPromise.log(req.query.path, limit)
+    const task = gitPromise.logWithHead(req.query.path, req.query.limit)
       .catch((err) => {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return [];
