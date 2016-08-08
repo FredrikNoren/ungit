@@ -400,4 +400,9 @@ git.revParse = (repoPath) => {
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
+git.log = (path, limit) => {
+  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], path)
+    .then(gitParser.parseGitLog)
+}
+
 module.exports = git;

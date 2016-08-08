@@ -238,16 +238,17 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/log`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const limit = req.query.limit ? `--max-count=${req.query.limit}` : '';
-    const task = gitPromise(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit], req.query.path)
-      .then(gitParser.parseGitLog).catch((err) => {
-        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
+    const task = gitPromise.log(req.query.path, limit)
+      .catch((err) => {
+        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return [];
-        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+        } else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)) {
           return [];
-        else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
+        } else if (err.stderr.indexOf('fatal: Not a git repository') == 0) {
           return [];
-        else
+        } else {
           throw err;
+        }
       });
     jsonResultOrFailProm(res, task);
   });
