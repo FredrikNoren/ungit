@@ -237,7 +237,8 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/log`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise.logWithHead(req.query.path, req.query.limit)
+    const logFunction = config.alwaysLoadActiveBranch ? gitPromise.logWithHead : gitPromise.log
+    const task = logFunction(req.query.path, req.query.limit)
       .catch((err) => {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return [];
