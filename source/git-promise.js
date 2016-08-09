@@ -11,6 +11,8 @@ const fs = require('./utils/fs-async');
 const async = require('async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
+const logSlideSize = 25; // when checked out ref is not in ref, skip $logSlideSize and redo git.log
+
 const gitQueue = async.queue((args, callback) => {
   if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
   let rejected = false;
@@ -400,11 +402,11 @@ git.revParse = (repoPath) => {
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
-git.log = (path, limit) => {
-  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit ? `--max-count=${limit}` : ''], path)
+git.log = (path, limit, skip) => {
+  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit ? `--max-count=${limit}` : '', skip ? `--skip=${skip}` : ''], path)
     .then((log) => {
       if (config.alwaysLoadActiveBranch && !log.isHeadExist) {
-        return git.logWithHead(path, log.length + 25);
+        return git.log(path, log.length + logSlideSize, skip + logSlideSize);
       } else {
         return log;
       }
