@@ -117,6 +117,15 @@ exports.registerApi = (env) => {
     return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${config.port}`];
   }
 
+  const getNumber = (value, nullValue) => {
+    const finalValue = parseInt(value ? value : nullValue);
+    if (finalValue || finalValue === 0) {
+      return finalValue;
+    } else {
+      throw { error: "invalid number"};
+    }
+  }
+
   app.get(`${exports.pathPrefix}/status`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(res, gitPromise.status(req.query.path, null));
   });
@@ -237,13 +246,13 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/log`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise.log(req.query.path, req.query.limit)
+    const task = gitPromise.log(req.query.path, getNumber(req.query.limit, 25), getNumber(req.query.skip, 0))
       .catch((err) => {
-        if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
+        if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return [];
         } else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)) {
           return [];
-        } else if (err.stderr.indexOf('fatal: Not a git repository') == 0) {
+        } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
           return [];
         } else {
           throw err;

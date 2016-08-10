@@ -403,14 +403,15 @@ git.revParse = (repoPath) => {
 }
 
 git.log = (path, limit, skip) => {
-  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', limit ? `--max-count=${limit}` : '', skip ? `--skip=${skip}` : ''], path)
+  return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
+    .then(gitParser.parseGitLog)
     .then((log) => {
       if (config.alwaysLoadActiveBranch && !log.isHeadExist) {
-        return git.log(path, log.length + logSlideSize, skip + logSlideSize);
+        return git.log(path, logSlideSize + limit, logSlideSize + skip);
       } else {
         return log;
       }
-    }).then(gitParser.parseGitLog)
+    })
 }
 
 module.exports = git;
