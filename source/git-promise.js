@@ -409,7 +409,7 @@ git.log = (path, limit, skip) => {
       if (config.alwaysLoadActiveBranch && !log.isHeadExist) {
         return git.log(path, logSlideSize + limit, logSlideSize + skip);
       } else {
-        return log;
+        return { "limit": limit, "skip": skip, "nodes": log};
       }
     })
 }

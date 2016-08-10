@@ -13,7 +13,8 @@ components.register('graph', function(args) {
 function GraphViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
-  this.maxNNodes = 25;
+  this.limit = ko.observable(25);
+  this.skip = ko.observable(0);
   this.server = server;
   this.currentRemote = ko.observable();
   this.nodesLoader = components.create('progressBar', {
@@ -45,7 +46,7 @@ function GraphViewModel(server, repoPath) {
   this.currentActionContext = ko.observable();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
-    self.maxNNodes = self.maxNNodes + 25;
+    self.limit(25 + self.limit());
     self.loadNodesFromApi();
   }, 500, true);
   this.dimCommit = ko.observable(false);
@@ -101,8 +102,11 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   this.nodesLoader.start();
-  this.server.getPromise('/log', { path: this.repoPath(), limit: this.maxNNodes })
-    .then(function(nodes) {
+  this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
+    .then(function(log) {
+      var nodes = log.nodes;
+      self.limit(parseInt(log.limit));
+      self.skip(parseInt(log.skip));
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
         }));
