@@ -49,6 +49,10 @@ function GraphViewModel(server, repoPath) {
     self.limit(25 + self.limit());
     self.loadNodesFromApi();
   }, 500, true);
+  this.loadAhead = _.debounce(function() {
+    this.skip(Math.max(this.skip() - 25, 0))
+    self.loadNodesFromApi();
+  }, 500, true);
   this.dimCommit = ko.observable(false);
   this.commitOpacity = ko.computed(function() { return self.dimCommit() ? 0.1 : 1; });
   this.heighstBranchOrder = 0;
