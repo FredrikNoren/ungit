@@ -12,11 +12,10 @@ var environment;
 var testRepoPath;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page, { port: 8452, alwaysLoadActiveBranch: true, numberOfNodesPerLoad: 1 });
+  environment = new Environment(page, { port: 8462, serverStartupOptions: ['--numberOfNodesPerLoad=1'] });
   environment.init(function(err) {
     if (err) return done(err);
-    // testRepoPath = environment.path + '/testrepo';
-    testRepoPath = '/tmp/testrepo';
+    testRepoPath = environment.path + '/testrepo';
     environment.createRepos([
       { bare: false, path: testRepoPath }
       ], done);
@@ -67,7 +66,7 @@ suite.test('Should be possible to create and commit a file', function(done) {
 
 suite.test('Open path screen again and should see only 1 commit', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '[data-ta-clickable="load-ahead"]', function() {
+    helpers.waitForElementVisible(page, '[data-ta-container="nodes-skipped"]', function() {
       helpers.waitForElementNotVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
         done();
       });
@@ -76,10 +75,9 @@ suite.test('Open path screen again and should see only 1 commit', function(done)
 });
 
 suite.test('Load ahead', function(done) {
-
-  helpers.click(page, '[data-ta-clickable="load-ahead"]');
+  helpers.click(page, '[data-ta-container="nodes-skipped"]');
   helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
-    helpers.waitForElementNotVisible(page, '[data-ta-clickable="load-ahead"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-container="nodes-skipped"]', function() {
       setTimeout(done, 500);
     });
   });

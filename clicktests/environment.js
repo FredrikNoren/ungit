@@ -113,6 +113,7 @@ Environment.prototype.startServer = function(callback) {
     '--autoShutdownTimeout=' + this.config.serverTimeout,
     '--maxNAutoRestartOnCrash=0',
     '--no-autoCheckoutOnBranchCreate',
+    '--alwaysLoadActiveBranch',
     '--logGitCommands']
     .concat(this.config.serverStartupOptions);
   var ungitServer = child_process.spawn('node', options);
