@@ -51,7 +51,8 @@ function GraphViewModel(server, repoPath) {
     self.loadNodesFromApi();
   }, 500, true);
   this.loadAhead = _.debounce(function() {
-    this.skip(Math.max(this.skip() - numberOfNodesPerLoad, 0))
+    if (self.skip() <= 0) return;
+    self.skip(Math.max(self.skip() - numberOfNodesPerLoad, 0));
     self.loadNodesFromApi();
   }, 500, true);
   this.dimCommit = ko.observable(false);
