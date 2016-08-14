@@ -11,8 +11,6 @@ const fs = require('./utils/fs-async');
 const async = require('async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-const logSlideSize = 25; // when checked out ref is not in ref, skip $logSlideSize and redo git.log
-
 const gitQueue = async.queue((args, callback) => {
   if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
   let rejected = false;
@@ -408,7 +406,7 @@ git.log = (path, limit, skip) => {
     .then((log) => {
       log = log ? log : [];
       if (config.alwaysLoadActiveBranch && !log.isHeadExist) {
-        return git.log(path, logSlideSize + limit, logSlideSize + skip);
+        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip);
       } else {
         return { "limit": limit, "skip": skip, "nodes": log};
       }
