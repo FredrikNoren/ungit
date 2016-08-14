@@ -5,6 +5,7 @@ var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
 var moment = require('moment');
 var EdgeViewModel = require('./edge');
+var numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -13,7 +14,7 @@ components.register('graph', function(args) {
 function GraphViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
-  this.limit = ko.observable(25);
+  this.limit = ko.observable(numberOfNodesPerLoad);
   this.skip = ko.observable(0);
   this.server = server;
   this.currentRemote = ko.observable();
@@ -46,11 +47,11 @@ function GraphViewModel(server, repoPath) {
   this.currentActionContext = ko.observable();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
-    self.limit(25 + self.limit());
+    self.limit(numberOfNodesPerLoad + self.limit());
     self.loadNodesFromApi();
   }, 500, true);
   this.loadAhead = _.debounce(function() {
-    this.skip(Math.max(this.skip() - 25, 0))
+    this.skip(Math.max(this.skip() - numberOfNodesPerLoad, 0))
     self.loadNodesFromApi();
   }, 500, true);
   this.dimCommit = ko.observable(false);

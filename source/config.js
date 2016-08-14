@@ -123,6 +123,9 @@ const defaultConfig = {
 
   // Always load with active checkout branch
   alwaysLoadActiveBranch: false,
+
+  // number of nodes to load for each git.log call
+  numberOfNodesPerLoad: 25,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -172,7 +175,8 @@ let argv = yargs
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted')
 .describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict')
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
-.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch');
+.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
+.describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call');
 
 // If not triggered by test, then do strict option check
 if (argv.$0.indexOf('mocha') === -1) {
