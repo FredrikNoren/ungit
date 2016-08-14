@@ -1,0 +1,92 @@
+
+var helpers = require('./helpers');
+var testsuite = require('./testsuite');
+var Environment = require('./environment');
+var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
+
+var page = webpage.create();
+var suite = testsuite.newSuite('loadAhead', page);
+
+var environment;
+var testRepoPath;
+
+suite.test('Init', function(done) {
+  environment = new Environment(page, { port: 8452, alwaysLoadActiveBranch: true, numberOfNodesPerLoad: 1 });
+  environment.init(function(err) {
+    if (err) return done(err);
+    // testRepoPath = environment.path + '/testrepo';
+    testRepoPath = '/tmp/testrepo';
+    environment.createRepos([
+      { bare: false, path: testRepoPath }
+      ], done);
+  });
+});
+
+suite.test('Open path screen', function(done) {
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
+    helpers.waitForElementVisible(page, '.graph', function() {
+      done();
+    });
+  });
+});
+
+suite.test('Should be possible to create and commit a file', function(done) {
+  environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
+    if (err) return done(err);
+    uiInteractions.commit(page, 'commit 1', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
+        uiInteractions.createBranch(page, 'branch-1', done);
+      });
+    });
+  });
+});
+
+suite.test('Should be possible to create and commit a file', function(done) {
+  environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
+    if (err) return done(err);
+    uiInteractions.commit(page, 'commit 2', function() {
+      helpers.waitForElementVisible(page, '.commit', function() {
+        done();
+      });
+    });
+  });
+});
+
+suite.test('Should be possible to create and commit a file', function(done) {
+  helpers.click(page, '[data-ta-clickable="branch-menu"]');
+  helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutbranch-1"]', function() {
+    setTimeout(function() {
+      helpers.click(page, '[data-ta-clickable="checkoutbranch-1"]');
+      helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]', function() {
+        done();
+      });
+    }, 500);
+  });
+});
+
+suite.test('Open path screen again and should see only 1 commit', function(done) {
+  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
+    helpers.waitForElementVisible(page, '[data-ta-clickable="load-ahead"]', function() {
+      helpers.waitForElementNotVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
+        done();
+      });
+    });
+  });
+});
+
+suite.test('Load ahead', function(done) {
+
+  helpers.click(page, '[data-ta-clickable="load-ahead"]');
+  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-clickable="load-ahead"]', function() {
+      setTimeout(done, 500);
+    });
+  });
+});
+
+suite.test('Shutdown', function(done) {
+  environment.shutdown(done);
+});
+
+testsuite.runAllSuits();
