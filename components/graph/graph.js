@@ -109,7 +109,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   this.nodesLoader.start();
   this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
     .then(function(log) {
-      var nodes = log.nodes;
+      var nodes = log.nodes ? log.nodes : [];
       self.limit(parseInt(log.limit));
       self.skip(parseInt(log.skip));
       nodes = self.computeNode(nodes.map(function(logEntry) {

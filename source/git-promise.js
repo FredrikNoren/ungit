@@ -406,6 +406,7 @@ git.log = (path, limit, skip) => {
   return git(['log', '--decorate=full', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
     .then(gitParser.parseGitLog)
     .then((log) => {
+      log = log ? log : [];
       if (config.alwaysLoadActiveBranch && !log.isHeadExist) {
         return git.log(path, logSlideSize + limit, logSlideSize + skip);
       } else {
