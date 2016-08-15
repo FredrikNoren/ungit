@@ -84,9 +84,9 @@ describe('git-api remote', function () {
 	it('log in "local1" should show the init commit', function(done) {
 		common.get(req, '/log', { path: testDirLocal1 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.a('array');
-			expect(res.body.length).to.be(1);
-			var init = res.body[0];
+			expect(res.body.nodes).to.be.a('array');
+			expect(res.body.nodes.length).to.be(1);
+			var init = res.body.nodes[0];
 			expect(init.message.indexOf('Init')).to.be(0);
 			expect(init.refs).to.contain('HEAD');
 			expect(init.refs).to.contain('refs/heads/master');
@@ -105,9 +105,9 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the init commit', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.a('array');
-			expect(res.body.length).to.be(1);
-			var init = res.body[0];
+			expect(res.body.nodes).to.be.a('array');
+			expect(res.body.nodes.length).to.be(1);
+			var init = res.body.nodes[0];
 			expect(init.message.indexOf('Init')).to.be(0);
 			expect(init.refs).to.contain('HEAD');
 			expect(init.refs).to.contain('refs/heads/master');
@@ -133,10 +133,10 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the branch as one behind', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.a('array');
-			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			expect(res.body.nodes).to.be.a('array');
+			expect(res.body.nodes.length).to.be(2);
+			var init = _.find(res.body.nodes, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body.nodes, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.contain('HEAD');
@@ -154,10 +154,10 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the branch as in sync', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.a('array');
-			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			expect(res.body.nodes).to.be.a('array');
+			expect(res.body.nodes.length).to.be(2);
+			var init = _.find(res.body.nodes, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body.nodes, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init).to.be.ok();
 			expect(commit2).to.be.ok();
 			expect(init.refs).to.eql([]);
@@ -184,9 +184,9 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the branch as in sync', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body.length).to.be(2);
-			var init = _.find(res.body, function(node) { return node.message.indexOf('Init') == 0; });
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			expect(res.body.nodes.length).to.be(2);
+			var init = _.find(res.body.nodes, function(node) { return node.message.indexOf('Init') == 0; });
+			var commit2 = _.find(res.body.nodes, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(init.refs).to.eql([]);
 			expect(commit2.refs).to.contain('HEAD');
 			expect(commit2.refs).to.contain('refs/heads/master');
@@ -215,7 +215,7 @@ describe('git-api remote', function () {
 	it('log in "local2" should show the local tag', function(done) {
 		common.get(req, '/log', { path: testDirLocal2 }, function(err, res) {
 			if (err) return done(err);
-			var commit2 = _.find(res.body, function(node) { return node.message.indexOf('Commit2') == 0; });
+			var commit2 = _.find(res.body.nodes, function(node) { return node.message.indexOf('Commit2') == 0; });
 			expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
 			done();
 		});

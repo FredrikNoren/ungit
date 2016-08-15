@@ -175,7 +175,7 @@ describe('git-api diff', function () {
 			common.get(req, '/log', { path: testBareDir }, function(err, res) {
 				if (err) return done(err);
 				// find a commit which contains the testFile
-				var commit = res.body.filter(function(commit) { return commit.fileLineDiffs.some(function(lineDiff) { return lineDiff[2] == testFile; }) })[0];
+				var commit = res.body.nodes.filter(function(commit) { return commit.fileLineDiffs.some(function(lineDiff) { return lineDiff[2] == testFile; }) })[0];
 				common.get(req, '/diff', { path: testBareDir, sha1: commit.sha1, file: testFile }, function(err, res) {
 					if (err) return done(err);
 					done();

@@ -110,10 +110,14 @@ describe('git-api branching', function () {
 	it('log should show both branches and all commits', function(done) {
 		common.get(req, '/log', { path: testDir }, function(err, res) {
 			if (err) return done(err);
-			expect(res.body).to.be.a('array');
-			expect(res.body.length).to.be(2);
+      expect(res.body.skip).to.be(0);
+      expect(res.body.limit).to.be(25);
+
+      var nodes = res.body.nodes
+			expect(nodes).to.be.a('array');
+			expect(nodes.length).to.be(2);
 			var objs = {};
-			res.body.forEach(function(obj) {
+			nodes.forEach(function(obj) {
 				obj.refs.sort();
 				objs[obj.refs[0]] = obj;
 			});
