@@ -36,6 +36,8 @@ if (config.logDirectory)
 const users = config.users;
 config.users = null; // So that we don't send the users to the client
 
+if(config.lockPath && (config.forcedLaunchPath === undefined || config.forcedLaunchPath === '')) config.forcedLaunchPath = process.env.launchDir;
+
 if (config.authentication) {
 
   passport.serializeUser((username, done) => {

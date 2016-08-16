@@ -14,6 +14,7 @@ function HeaderViewModel(app) {
   this.showBackButton = ko.observable(false);
   this.path = ko.observable();
   this.currentVersion = ungit.version;
+  this.lockPath = ungit.config.lockPath;
   this.refreshButton = components.create('refreshbutton');
   this.showAddToRepoListButton = ko.computed(function() {
     return self.path() && self.app.repoList().indexOf(self.path()) == -1;
