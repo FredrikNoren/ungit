@@ -1,7 +1,7 @@
 const moment = require('moment');
 const fs = require('fs');
 const fileType = require('./utils/file-type.js');
-const _ = require('underscore')
+const _ = require('lodash')
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');
