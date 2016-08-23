@@ -74,6 +74,12 @@ suite.test('Open path screen again and should see only 1 commit', function(done)
   });
 });
 
+suite.test('Create a branch during collapsed mode', function(done) {
+  setTimeout(function() {
+    uiInteractions.createBranch(page, 'new-branch', done);
+  }, 500);
+});
+
 suite.test('Load ahead', function(done) {
   helpers.click(page, '[data-ta-container="nodes-skipped"]');
   helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
