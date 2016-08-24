@@ -97,7 +97,7 @@ exports.parseGitLog = (data) => {
       const refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
-    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item === 'HEAD' });
+    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item.trim() === 'HEAD' });
     commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;
     commits.push(currentCommmit);
     parser = parseHeaderLine;
