@@ -8,6 +8,19 @@
 
   .graphLog {
     left: 575px;
+    .loadAhead {
+      cursor: pointer;
+      animation: throb 1s ease alternate infinite;
+    }
+  }
+
+  @keyframes throb {
+    50% {
+      r: 20;
+    }
+    100% {
+      r: 18;
+    }
   }
 
   .nodeContainer {

@@ -1,6 +1,7 @@
 const moment = require('moment');
 const fs = require('fs');
 const fileType = require('./utils/file-type.js');
+const _ = require('lodash')
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');
@@ -96,6 +97,8 @@ exports.parseGitLog = (data) => {
       const refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
+    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item.trim() === 'HEAD' });
+    commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;
     commits.push(currentCommmit);
     parser = parseHeaderLine;
   }

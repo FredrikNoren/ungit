@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 - Show diffs for stashed changes [#444](https://github.com/FredrikNoren/ungit/issues/444)
+- Active node focused git log result [#420](https://github.com/FredrikNoren/ungit/issues/420)
 
 ### Fixed
 - Missing npm as a normal dependency [#766] (https://github.com/FredrikNoren/ungit/issues/766)

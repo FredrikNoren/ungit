@@ -116,8 +116,8 @@ describe('git-api', function () {
   it('log should be empty before first commit', function(done) {
     common.get(req, '/log', { path: testDir }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be.a('array');
-      expect(res.body.length).to.be(0);
+      expect(res.body.nodes).to.be.a('array');
+      expect(res.body.nodes.length).to.be(0);
       done();
     });
   });
@@ -184,11 +184,11 @@ describe('git-api', function () {
   it('log should show latest commit', function(done) {
     common.get(req, '/log', { path: testDir }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be.a('array');
-      expect(res.body.length).to.be(1);
-      expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
-      expect(res.body[0].authorName).to.be(gitConfig['user.name']);
-      expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
+      expect(res.body.nodes).to.be.a('array');
+      expect(res.body.nodes.length).to.be(1);
+      expect(res.body.nodes[0].message.indexOf(commitMessage)).to.be(0);
+      expect(res.body.nodes[0].authorName).to.be(gitConfig['user.name']);
+      expect(res.body.nodes[0].authorEmail).to.be(gitConfig['user.email']);
       done();
     });
   });
@@ -243,7 +243,7 @@ describe('git-api', function () {
 
   it('amend should not produce additional log-entry', function(done) {
     common.get(req, '/log', { path: testDir }, done, function(err, res) {
-      expect(res.body.length).to.be(1);
+      expect(res.body.nodes.length).to.be(1);
       done();
     });
   });
@@ -328,9 +328,9 @@ describe('git-api', function () {
   it('log should show last commit', function(done) {
     common.get(req, '/log', { path: testDir }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be.a('array');
-      expect(res.body.length).to.be(2);
-      var HEAD = res.body[0];
+      expect(res.body.nodes).to.be.a('array');
+      expect(res.body.nodes.length).to.be(2);
+      var HEAD = res.body.nodes[0];
 
       expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
       expect(HEAD.authorDate).to.be.a('string');
@@ -409,8 +409,8 @@ describe('git-api', function () {
   it('log with limit should only return specified number of items', function(done) {
     common.get(req, '/log', { path: testDir, limit: 1 }, function(err, res) {
       if (err) return done(err);
-      expect(res.body).to.be.a('array');
-      expect(res.body.length).to.be(1);
+      expect(res.body.nodes).to.be.a('array');
+      expect(res.body.nodes.length).to.be(1);
       done();
     });
   });

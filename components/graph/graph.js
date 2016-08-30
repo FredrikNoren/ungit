@@ -5,6 +5,7 @@ var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
 var moment = require('moment');
 var EdgeViewModel = require('./edge');
+var numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
 components.register('graph', function(args) {
   return new GraphViewModel(args.server, args.repoPath);
@@ -13,7 +14,8 @@ components.register('graph', function(args) {
 function GraphViewModel(server, repoPath) {
   var self = this;
   this.repoPath = repoPath;
-  this.maxNNodes = 25;
+  this.limit = ko.observable(numberOfNodesPerLoad);
+  this.skip = ko.observable(0);
   this.server = server;
   this.currentRemote = ko.observable();
   this.nodesLoader = components.create('progressBar', {
@@ -45,7 +47,12 @@ function GraphViewModel(server, repoPath) {
   this.currentActionContext = ko.observable();
   this.edgesById = {};
   this.scrolledToEnd = _.debounce(function() {
-    self.maxNNodes = self.maxNNodes + 25;
+    self.limit(numberOfNodesPerLoad + self.limit());
+    self.loadNodesFromApi();
+  }, 500, true);
+  this.loadAhead = _.debounce(function() {
+    if (self.skip() <= 0) return;
+    self.skip(Math.max(self.skip() - numberOfNodesPerLoad, 0));
     self.loadNodesFromApi();
   }, 500, true);
   this.dimCommit = ko.observable(false);
@@ -101,8 +108,11 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
 
   this.nodesLoader.start();
-  this.server.getPromise('/log', { path: this.repoPath(), limit: this.maxNNodes })
-    .then(function(nodes) {
+  this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
+    .then(function(log) {
+      var nodes = log.nodes ? log.nodes : [];
+      self.limit(parseInt(log.limit));
+      self.skip(parseInt(log.skip));
       nodes = self.computeNode(nodes.map(function(logEntry) {
           return self.getNode(logEntry.sha1, logEntry);
         }));
