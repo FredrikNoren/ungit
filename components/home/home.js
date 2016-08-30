@@ -12,7 +12,7 @@ function HomeRepositoryViewModel(home, path) {
   this.server = this.app.server;
   this.path = path;
   this.title = path;
-  this.link = '/#/repository?path=' + encodeURIComponent(path);
+  this.link = ungit.config.rootPath + '/#/repository?path=' + encodeURIComponent(path);
   this.pathRemoved = ko.observable(false);
   this.remote = ko.observable('...');
   this.updateState();
