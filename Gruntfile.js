@@ -447,6 +447,8 @@ module.exports = function(grunt) {
           if (dep == 'forever-monitor') return callback();
           // Superagent 1.x has a new api, need to upgrade to that if we want to bump
           if (dep == 'superagent') return callback();
+          // Octicon moved to SCSS instead of less
+          if (dep == 'octicons') return callback();
 
           bumpDependency(tempPackageJson, 'dependencies', dep, callback);
         }),
