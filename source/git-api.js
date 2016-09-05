@@ -430,7 +430,7 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/launchmergetool`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = ['mergetool', ...(typeof req.body.tool === 'string'? ['--tool ', req.body.tool]: []), req.body.file];
+    const commands = ['mergetool', ...(typeof req.body.tool === 'string'? ['--tool ', req.body.tool]: []), '--no-prompt', req.body.file];
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path));
   });
 
