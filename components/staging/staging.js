@@ -7,6 +7,7 @@ var filesToDisplayIncrmentBy = 50;
 var filesToDisplayLimit = filesToDisplayIncrmentBy;
 // when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
 var muteGraceTimeDuration = 60 * 1000 * 5;
+var mergeTool = ungit.config.mergeTool;
 
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
@@ -325,6 +326,9 @@ var FileViewModel = function(staging, name, textDiffType, wordWrap) {
     // and if diff is showing, display patch button
     return !self.isNew() && !staging.inMerge() && !staging.inRebase() && self.fileType() === 'text' && self.isShowingDiffs();
   });
+  this.mergeTool = ko.computed(function() {
+    return self.conflict() && mergeTool !== false;
+  });
 
   this.editState.subscribe(function (value) {
     if (value === 'none') {
@@ -393,6 +397,9 @@ FileViewModel.prototype.ignoreFile = function() {
 }
 FileViewModel.prototype.resolveConflict = function() {
   this.server.post('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
+}
+FileViewModel.prototype.launchMergeTool = function() {
+  this.server.post('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames

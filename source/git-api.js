@@ -424,8 +424,14 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/resolveconflicts`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    console.log('resolve conflicts');
     jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
+  });
+
+  app.post(`${exports.pathPrefix}/launchmergetool`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const commands = ['mergetool', ...(typeof req.body.tool === 'string'? ['--tool ', req.body.tool]: []), req.body.file];
+    jsonResultOrFailProm(res, gitPromise(commands, req.body.path));
   });
 
   app.get(`${exports.pathPrefix}/baserepopath`, ensureAuthenticated, ensurePathExists, (req, res) => {
