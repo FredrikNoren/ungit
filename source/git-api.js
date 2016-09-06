@@ -431,7 +431,10 @@ exports.registerApi = (env) => {
 
   app.post(`${exports.pathPrefix}/launchmergetool`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const commands = ['mergetool', ...(typeof req.body.tool === 'string'? ['--tool ', req.body.tool]: []), '--no-prompt', req.body.file];
-    jsonResultOrFailProm(res, gitPromise(commands, req.body.path));
+    gitPromise(commands, req.body.path);
+    // Send immediate response, this is because merging may take a long time
+    // and there is no need to wait for it to finish.
+    res.json({});
   });
 
   app.get(`${exports.pathPrefix}/baserepopath`, ensureAuthenticated, ensurePathExists, (req, res) => {
