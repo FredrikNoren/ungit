@@ -32,9 +32,7 @@ winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {
   level: config.logLevel,
   timestamp: true,
-  prettyPrint: true,
-  colorize: true,
-  silent: false
+  colorize: true
 });
 if (config.logDirectory)
   winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
