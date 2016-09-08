@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a changlelog's changelog standard](http://keepachangelog.com/)
 
 ### Added
+- New configuration option `logLevel` allows you to assign the level of logging you want to see in the servers output console.
 - New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [783](https://github.com/FredrikNoren/ungit/issues/783)
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
