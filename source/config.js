@@ -70,7 +70,8 @@ const defaultConfig = {
   // Used for development purposes.
   dev: false,
 
-  // Assigns the log level.
+  // Assigns the log level. Possible values, in order from quietest to loudest, are
+  // "none", "error", "warn", "info", "verbose", "debug", and "silly"
   logLevel: 'warn',
 
   // Specify a custom command to launch. `%U` will be replaced with the URL
