@@ -59,6 +59,10 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 
 Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [yargs](https://github.com/yargs/yargs) for command line arguments. See corresponding documentations for more details.
 
+External Merge Tools
+--------------------
+If you have your own merge tool that you would like to use, such as Kaleidoscope or p4merge, you can configure ungit to use it. See [MERGETOOL.md](MERGETOOL.md).
+
 Plugins
 -------
 Plugins are installed by simply placing them in the Ungit plugin directory (`~/.ungit/plugins` by default), and then restarting Ungit.

@@ -149,7 +149,7 @@
       }
       padding: 0.3em;
 
-      .new, .deleted, .conflict {
+      .new, .deleted, .conflict, .markresolved, .launchmergetool {
         padding: 3px;
         padding-left: 5px;
         padding-right: 5px;
@@ -164,12 +164,41 @@
       }
       .conflict {
         color: #DB12C0;
+        .explanation {
+          display: none;
+        }
+        &:hover {
+          .explanation {
+            display: inline;
+          }
+          .temporary {
+            display: none;
+          }
+        }
+      }
+      .markresolved {
+        color: #DB12C0;
         cursor: pointer;
         .explanation {
           display: none;
         }
         &:hover {
           background: #A445ED;
+          color: #000;
+          border-radius: 3px;
+          .explanation {
+            display: inline;
+          }
+        }
+      }
+      .launchmergetool {
+        color: #DB55FF;
+        cursor: pointer;
+        .explanation {
+          display: none;
+        }
+        &:hover {
+          background: #A477FF;
           color: #000;
           border-radius: 3px;
           .explanation {
