@@ -207,7 +207,7 @@ GitNodeViewModel.prototype.toggleSelected = function() {
     if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
       afterThisCR.top != beforeThisCR.top) {
       window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
-      console.log('Fix')
+      console.log('Fix');
     }
   }
   return false;

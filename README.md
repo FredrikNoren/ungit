@@ -59,6 +59,10 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 
 Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [yargs](https://github.com/yargs/yargs) for command line arguments. See corresponding documentations for more details.
 
+External Merge Tools
+--------------------
+If you have your own merge tool that you would like to use, such as Kaleidoscope or p4merge, you can configure ungit to use it. See [MERGETOOL.md](MERGETOOL.md).
+
 Plugins
 -------
 Plugins are installed by simply placing them in the Ungit plugin directory (`~/.ungit/plugins` by default), and then restarting Ungit.
@@ -99,5 +103,5 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[![Dependency Status](https://david-dm.org/FredrikNoren/ungit.png)](https://david-dm.org/FredrikNoren/ungit)
-[![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.png)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)
+[![Dependency Status](https://david-dm.org/FredrikNoren/ungit.svg)](https://david-dm.org/FredrikNoren/ungit)
+[![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.svg)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)

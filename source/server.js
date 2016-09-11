@@ -27,9 +27,13 @@ process.on('uncaughtException', (err) => {
   ], () => process.exit());
 });
 
-
+console.log('Setting log level to ' + config.logLevel);
 winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, {'timestamp':true});
+winston.add(winston.transports.Console, {
+  level: config.logLevel,
+  timestamp: true,
+  colorize: true
+});
 if (config.logDirectory)
   winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
 

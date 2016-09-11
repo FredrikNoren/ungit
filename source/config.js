@@ -70,6 +70,10 @@ const defaultConfig = {
   // Used for development purposes.
   dev: false,
 
+  // Assigns the log level. Possible values, in order from quietest to loudest, are
+  // "none", "error", "warn", "info", "verbose", "debug", and "silly"
+  logLevel: 'warn',
+
   // Specify a custom command to launch. `%U` will be replaced with the URL
   //  that corresponds with the working git directory.
   //
@@ -126,6 +130,10 @@ const defaultConfig = {
 
   // number of nodes to load for each git.log call
   numberOfNodesPerLoad: 25,
+
+  // Specifies a custom git merge tool to use when resolving conflicts. Your git configuration must be set up to use this!
+  // A true value will use the default tool while a string value will use the tool of that specified name.
+  mergeTool: false
 };
 
 // Works for now but should be moved to bin/ungit
@@ -161,6 +169,7 @@ let argv = yargs
 .describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')
 .describe('autoFetch', 'Automatically fetch from remote when entering a repository using ungit')
 .describe('dev', 'Used for development purposes')
+.describe('logLevel', 'The logging level, possible values are none, error, warn, info, verbose, debug, and silly.')
 .describe('launchCommand', 'Specify a custom command to launch. `%U` will be replaced with the URL that corresponds with the working git directory.')
 .describe('allowCheckoutNodes', 'Allow checking out nodes (which results in a detached head)')
 .describe('allowedIPs', 'An array of ip addresses that can connect to ungit. All others are denied')
@@ -176,7 +185,8 @@ let argv = yargs
 .describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict')
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
-.describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call');
+.describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
+.describe('mergeTool', 'the git merge tool to use when resolving conflicts');
 
 // If not triggered by test, then do strict option check
 if (argv.$0.indexOf('mocha') === -1) {

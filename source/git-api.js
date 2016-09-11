@@ -424,8 +424,17 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/resolveconflicts`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    console.log('resolve conflicts');
     jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
+  });
+
+  app.post(`${exports.pathPrefix}/launchmergetool`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const commands = ['mergetool', ...(typeof req.body.tool === 'string'? ['--tool ', req.body.tool]: []), '--no-prompt', req.body.file];
+    gitPromise(commands, req.body.path);
+    // Send immediate response, this is because merging may take a long time
+    // and there is no need to wait for it to finish.
+    res.json({});
   });
 
   app.get(`${exports.pathPrefix}/baserepopath`, ensureAuthenticated, ensurePathExists, (req, res) => {
