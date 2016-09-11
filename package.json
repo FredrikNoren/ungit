@@ -24,7 +24,7 @@
     "color": "~0.11.3",
     "cookie-parser": "~1.4.3",
     "crossroads": "~0.12.2",
-    "diff2html": "~2.0.1",
+    "diff2html": "~2.0.6",
     "express": "~4.14.0",
     "express-session": "~1.14.1",
     "forever-monitor": "~1.1.0",
