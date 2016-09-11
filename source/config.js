@@ -70,6 +70,10 @@ const defaultConfig = {
   // Used for development purposes.
   dev: false,
 
+  // Assigns the log level. Possible values, in order from quietest to loudest, are
+  // "none", "error", "warn", "info", "verbose", "debug", and "silly"
+  logLevel: 'warn',
+
   // Specify a custom command to launch. `%U` will be replaced with the URL
   //  that corresponds with the working git directory.
   //
@@ -165,6 +169,7 @@ let argv = yargs
 .describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')
 .describe('autoFetch', 'Automatically fetch from remote when entering a repository using ungit')
 .describe('dev', 'Used for development purposes')
+.describe('logLevel', 'The logging level, possible values are none, error, warn, info, verbose, debug, and silly.')
 .describe('launchCommand', 'Specify a custom command to launch. `%U` will be replaced with the URL that corresponds with the working git directory.')
 .describe('allowCheckoutNodes', 'Allow checking out nodes (which results in a detached head)')
 .describe('allowedIPs', 'An array of ip addresses that can connect to ungit. All others are denied')
