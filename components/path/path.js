@@ -12,6 +12,12 @@ components.register('path', function(args) {
 var PathViewModel = function(server, path) {
   var self = this;
   this.server = server;
+
+  if (ungit.config.lockPath && path !== ungit.config.forcedLaunchPath) {
+    path = ungit.config.forcedLaunchPath;
+    navigation.browseTo('repository?path=' + encodeURIComponent(ungit.config.forcedLaunchPath));
+  }
+
   this.repoPath = ko.observable(path);
   this.dirName = this.repoPath().replace('\\', '/')
                    .split('/')

@@ -55,6 +55,9 @@ const defaultConfig = {
   // Instead of launching ungit with the current folder force a different path to be used. Can be set to null to force the home screen.
   forcedLaunchPath: undefined,
 
+  // Lock the path to forcedLaunchPath or to the directory from where ungit is launched. Consequently opens the new browser session without header.
+  lockPath: false,
+
   // Closes the server after x ms of inactivity. Mainly used by the clicktesting.
   autoShutdownTimeout: undefined,
 
@@ -164,6 +167,7 @@ let argv = yargs
 .describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')
 .describe('maxConcurrentGitOperations', 'Maximum number of concurrent git operations')
 .describe('forcedLaunchPath', 'Define path to be used on open. Can be set to null to force the home screen')
+.describe('lockPath', 'Lock the path to forcedLaunchPath or to the directory from where ungit is launched. Consequently opens the new browser session without header')
 .describe('autoShutdownTimeout', 'Closes the server after x ms of inactivity. Mainly used by the clicktesting')
 .describe('maxNAutoRestartOnCrash', 'Maximum number of automatic restarts after a crash. Undefined == unlimited')
 .describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')

@@ -17,7 +17,7 @@ var child = new (forever.Monitor)(path.join(__dirname, '..', 'src', 'server.js')
   max: config.maxNAutoRestartOnCrash,
   cwd: path.join(process.cwd(), '..'),
   options: process.argv.slice(2),
-  env: { LANG: 'en_US.UTF-8' }
+  env: { LANG: 'en_US.UTF-8', launchDir: process.cwd() }
 });
 
 process.on('exit', function() {
@@ -44,9 +44,10 @@ child.on('exit', function (res) {
 });
 
 function launch(callback) {
-  var currentUrl = config.urlBase + ':' + config.port + config.rootPath;
-  if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
-  else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+  var currentUrl = config.urlBase + ':' + config.port + config.rootPath + '/';
+  if (config.lockPath) currentUrl += '?noheader=true';
+  if (config.forcedLaunchPath === undefined) currentUrl += '#/repository?path=' + encodeURIComponent(process.cwd());
+  else if (config.forcedLaunchPath !== null || config.forcedLaunchPath !== '') currentUrl += '#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
   console.log('Browse to ' + currentUrl);
   if (config.launchBrowser && !config.launchCommand) {
     open(currentUrl);
