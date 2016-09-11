@@ -82,18 +82,18 @@ exports.registerApi = (env) => {
     }
   }
 
-  const emitWorkingTreeChanged = (repoPath) => {
+  const emitWorkingTreeChanged = _.debounce((repoPath) => {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
       winston.info('emitting working-tree-changed to sockets, manually triggered');
     }
-  }
-  const emitGitDirectoryChanged = (repoPath) => {
+  }, 250, { 'maxWait': 1000 })
+  const emitGitDirectoryChanged = _.debounce((repoPath) => {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
       winston.info('emitting git-directory-changed to sockets, manually triggered');
     }
-  }
+  }, 250, { 'maxWait': 1000 })
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
     if (config.autoStashAndPop) {
