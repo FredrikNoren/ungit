@@ -133,7 +133,10 @@ const defaultConfig = {
 
   // Specifies a custom git merge tool to use when resolving conflicts. Your git configuration must be set up to use this!
   // A true value will use the default tool while a string value will use the tool of that specified name.
-  mergeTool: false
+  mergeTool: false,
+
+  // ignore white spaces changes in git-diff
+  ignoreWhiteSpace: false
 };
 
 // Works for now but should be moved to bin/ungit
@@ -186,7 +189,8 @@ let argv = yargs
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
-.describe('mergeTool', 'the git merge tool to use when resolving conflicts');
+.describe('mergeTool', 'the git merge tool to use when resolving conflicts')
+.describe('ignoreWhiteSpace', 'ignore white spaces changes in git-diff');
 
 // If not triggered by test, then do strict option check
 if (argv.$0.indexOf('mocha') === -1) {
