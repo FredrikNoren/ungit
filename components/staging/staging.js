@@ -28,10 +28,15 @@ var StagingViewModel = function(server, repoPath) {
     self.commitMessageTitleCount(value.length);
   });
   this.commitMessageBody = ko.observable();
-  this.wordWrapTitle = ko.observable("No Wrap");
+  this.wordWrapTitle = ko.observable("No Word Wrap");
   this.wordWrap = ko.observable(false);
   this.wordWrap.subscribe(function(value) {
     self.wordWrapTitle(value ? "Word Wrap" : "No Word Wrap");
+  });
+  this.textDiffTypeTitle = ko.observable("Default");
+  this.textDiffType = ko.observable(textDiff);
+  this.textDiffType.subscribe(function(value) {
+    self.textDiffTypeTitle(value === textDiff ? "Default" : "Side By Side");
   });
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
@@ -107,11 +112,6 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffTypeTitle = ko.observable("Default");
-  this.textDiffType = ko.observable(textDiff);
-  this.textDiffType.subscribe(function(value) {
-    self.textDiffTypeTitle(value === textDiff ? "Default" : "Side By Side");
-  });
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
