@@ -9,6 +9,9 @@ var filesToDisplayLimit = filesToDisplayIncrmentBy;
 var muteGraceTimeDuration = 60 * 1000 * 5;
 var mergeTool = ungit.config.mergeTool;
 
+var sideBySideDiff = 'sidebysidediff'
+var textDiff = 'textdiff'
+
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
 });
@@ -25,7 +28,11 @@ var StagingViewModel = function(server, repoPath) {
     self.commitMessageTitleCount(value.length);
   });
   this.commitMessageBody = ko.observable();
+  this.wordWrapTitle = ko.observable("No Wrap");
   this.wordWrap = ko.observable(false);
+  this.wordWrap.subscribe(function(value) {
+    self.wordWrapTitle(value ? "Word Wrap" : "No Word Wrap");
+  });
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
@@ -85,7 +92,7 @@ var StagingViewModel = function(server, repoPath) {
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
 
-    if (self.textDiffType() === 'sidebysidediff') {
+    if (self.textDiffType() === sideBySideDiff) {
       var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
       if (patchFiles.length > 0) return "Cannot patch with side by side view."
     }
@@ -100,7 +107,11 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffType = ko.observable('textdiff');
+  this.textDiffTypeTitle = ko.observable("Default");
+  this.textDiffType = ko.observable(textDiff);
+  this.textDiffType.subscribe(function(value) {
+    self.textDiffTypeTitle(value === textDiff ? "Default" : "Side By Side");
+  });
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
@@ -278,8 +289,8 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
-StagingViewModel.prototype.textDiffTypeChange = function(type) {
-  this.textDiffType(type);
+StagingViewModel.prototype.textDiffTypeToggle = function() {
+  this.textDiffType(this.textDiffType() === textDiff ? sideBySideDiff : textDiff);
 }
 StagingViewModel.prototype.onEnter = function(d, e){
     if (e.keyCode === 13 && !this.commitValidationError()) {
@@ -293,8 +304,8 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-StagingViewModel.prototype.wordWrapChange = function(state) {
-  this.wordWrap(state);
+StagingViewModel.prototype.wordWrapToggle = function() {
+  this.wordWrap(!this.wordWrap());
 };
 
 var FileViewModel = function(staging, name, textDiffType, wordWrap) {
