@@ -9,9 +9,6 @@ var filesToDisplayLimit = filesToDisplayIncrmentBy;
 var muteGraceTimeDuration = 60 * 1000 * 5;
 var mergeTool = ungit.config.mergeTool;
 
-var sideBySideDiff = 'sidebysidediff'
-var textDiff = 'textdiff'
-
 components.register('staging', function(args) {
   return new StagingViewModel(args.server, args.repoPath);
 });
@@ -33,11 +30,7 @@ var StagingViewModel = function(server, repoPath) {
   this.wordWrap.subscribe(function(value) {
     self.wordWrapTitle(value ? "Word Wrap" : "No Word Wrap");
   });
-  this.textDiffTypeTitle = ko.observable("Default");
-  this.textDiffType = ko.observable(textDiff);
-  this.textDiffType.subscribe(function(value) {
-    self.textDiffTypeTitle(value === textDiff ? "Default" : "Side By Side");
-  });
+  this.textDiffType = components.create('textdiff.type');
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
@@ -97,7 +90,7 @@ var StagingViewModel = function(server, repoPath) {
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
 
-    if (self.textDiffType() === sideBySideDiff) {
+    if (self.textDiffType.value() === 'sidebysidediff') {
       var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
       if (patchFiles.length > 0) return "Cannot patch with side by side view."
     }
@@ -288,9 +281,6 @@ StagingViewModel.prototype.toggleAllStages = function() {
   }
 
   self.allStageFlag(!self.allStageFlag());
-}
-StagingViewModel.prototype.textDiffTypeToggle = function() {
-  this.textDiffType(this.textDiffType() === textDiff ? sideBySideDiff : textDiff);
 }
 StagingViewModel.prototype.onEnter = function(d, e){
     if (e.keyCode === 13 && !this.commitValidationError()) {

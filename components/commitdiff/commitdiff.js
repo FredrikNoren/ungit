@@ -16,11 +16,7 @@ var CommitDiff = function(args) {
 
   // parent components can provide their own buttons (e.g. staging component)
   this.showDiffButtons = ko.observable(!args.textDiffType);
-  this.textDiffTypeTitle = ko.observable("Default");
-  this.textDiffType = args.textDiffType = args.textDiffType || ko.observable('textdiff');
-  this.textDiffType.subscribe(function(value) {
-    self.textDiffTypeTitle(value === textDiff ? "Default" : "Side By Side");
-  });
+  this.textDiffType = args.textDiffType = args.textDiffType || components.create('textdiff.type');
   this.wordWrapTitle = ko.observable("No Word Wrap");
   this.wordWrap = args.wordWrap = args.wordWrap || ko.observable(false);
   this.wordWrap.subscribe(function(value) {
@@ -44,9 +40,6 @@ CommitDiff.prototype.loadFileLineDiffs = function(args) {
   });
 
   this.commitLineDiffs(this.commitLineDiffs().concat(tempCommitLineDiffs));
-}
-CommitDiff.prototype.textDiffTypeToggle = function(type) {
-  this.textDiffType(this.textDiffType() === textDiff ? sideBySideDiff : textDiff);
 }
 CommitDiff.prototype.wordWrapToggle = function(state) {
   this.wordWrap(!this.wordWrap());

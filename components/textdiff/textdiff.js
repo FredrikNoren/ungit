@@ -7,7 +7,26 @@ components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
 });
 
+components.register('textdiff.type', function() {
+  return new Type();
+})
+
 var loadLimit = 100;
+
+var Type = function() {
+  var self = this;
+  var sideBySideDiff = 'sidebysidediff'
+  var textDiff = 'textdiff'
+
+  this.text = ko.observable("Default");
+  this.value = ko.observable(textDiff);
+  this.value.subscribe(function(value) {
+    self.text(value === textDiff ? "Default" : "Side By Side");
+  });
+  this.toggle = function() {
+    self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
+  }
+}
 
 var TextDiffViewModel = function(args) {
   var self = this;
@@ -24,7 +43,7 @@ var TextDiffViewModel = function(args) {
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
 
-  this.textDiffType.subscribe(function() {
+  this.textDiffType.value.subscribe(function() {
     self.invalidateDiff();
   });
   this.patchLineList = args.patchLineList;
@@ -95,7 +114,7 @@ TextDiffViewModel.prototype.render = function() {
 
   var html;
 
-  if (this.textDiffType() === 'sidebysidediff') {
+  if (this.textDiffType.value() === 'sidebysidediff') {
     html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
   } else {
     html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
