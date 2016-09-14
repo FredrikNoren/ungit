@@ -17,11 +17,7 @@ var CommitDiff = function(args) {
   // parent components can provide their own buttons (e.g. staging component)
   this.showDiffButtons = ko.observable(!args.textDiffType);
   this.textDiffType = args.textDiffType = args.textDiffType || components.create('textdiff.type');
-  this.wordWrapTitle = ko.observable("No Word Wrap");
-  this.wordWrap = args.wordWrap = args.wordWrap || ko.observable(false);
-  this.wordWrap.subscribe(function(value) {
-    self.wordWrapTitle(value ? "Word Wrap" : "No Word Wrap");
-  });
+  this.wordWrap = args.wordWrap = args.wordWrap || components.create('textdiff.wordwrap');
 
   args.fileLineDiffs.shift();  // remove first line that has "total"
   this.loadFileLineDiffs(args);
@@ -40,7 +36,4 @@ CommitDiff.prototype.loadFileLineDiffs = function(args) {
   });
 
   this.commitLineDiffs(this.commitLineDiffs().concat(tempCommitLineDiffs));
-}
-CommitDiff.prototype.wordWrapToggle = function(state) {
-  this.wordWrap(!this.wordWrap());
 }

@@ -1,7 +1,7 @@
 <!-- ko if: isShowingDiffs -->
 <div>
   <!-- ko if: isParsed -->
-  <div data-bind="template: {nodes: ko.utils.parseHtmlFragment(htmlSrc)}, css: {'word-wrap': wordWrap}"></div>
+  <div data-bind="template: {nodes: ko.utils.parseHtmlFragment(htmlSrc)}, css: {'word-wrap': wordWrap.value}"></div>
   <!-- /ko -->
   <div class="btn-load-more" data-bind="visible: loadMoreCount() > 0">
     <span class="btn btn-warning" data-bind="click: loadMore, text: 'Load ' + loadMoreCount() + ' more lines'"></span>

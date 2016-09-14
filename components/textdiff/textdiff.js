@@ -9,9 +9,26 @@ components.register('textdiff', function(args) {
 
 components.register('textdiff.type', function() {
   return new Type();
-})
+});
+
+components.register('textdiff.wordwrap', function() {
+  return new WordWrap();
+});
 
 var loadLimit = 100;
+
+var WordWrap = function() {
+  var self = this;
+
+  this.text = ko.observable("No Wrap");
+  this.value = ko.observable(false);
+  this.value.subscribe(function(value) {
+    self.text(value ? "Word Wrap" : "No Wrap");
+  });
+  this.toggle = function() {
+    self.value(!self.value());
+  }
+}
 
 var Type = function() {
   var self = this;
