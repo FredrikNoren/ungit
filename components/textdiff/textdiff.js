@@ -15,6 +15,10 @@ components.register('textdiff.wordwrap', function() {
   return new WordWrap();
 });
 
+components.register('textdiff.whitespace', function() {
+  return new WhiteSpace();
+});
+
 var loadLimit = 100;
 
 var WordWrap = function() {
@@ -42,6 +46,19 @@ var Type = function() {
   });
   this.toggle = function() {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
+  }
+}
+
+var WhiteSpace = function() {
+  var self = this;
+
+  this.text = ko.observable("Show White Space");
+  this.value = ko.observable(true);
+  this.value.subscribe(function(value) {
+    self.text(value ? "Show White Space" : "Ignore White Space");
+  });
+  this.toggle = function() {
+    self.value(!self.value());
   }
 }
 

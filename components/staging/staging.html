@@ -49,6 +49,11 @@
             <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
           <div class="btn-group pull-right btn-group-sm">
+            <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-whitespace" data-bind="click: whiteSpace.toggle, css: {active: !whiteSpace.value()}" data-toggle="tooltip" data-placement="bottom" data-original-title="Igonore whitespaces" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: whiteSpace.text"></span>
+            </button>
+          </div>
+          <div class="btn-group pull-right btn-group-sm">
             <button class="btn btn-default bootstrap-tooltip" data-ta-clickable="stage-defaultDiff" data-bind="click: textDiffType.toggle, css: {active: textDiffType.value() === 'textdiff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
               <span data-bind="text: textDiffType.text"></span>
             </button>

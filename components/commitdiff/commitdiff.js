@@ -18,6 +18,7 @@ var CommitDiff = function(args) {
   this.showDiffButtons = ko.observable(!args.textDiffType);
   this.textDiffType = args.textDiffType = args.textDiffType || components.create('textdiff.type');
   this.wordWrap = args.wordWrap = args.wordWrap || components.create('textdiff.wordwrap');
+  this.whiteSpace = args.whiteSpace = args.whiteSpace || components.create('textdiff.whitespace');
 
   args.fileLineDiffs.shift();  // remove first line that has "total"
   this.loadFileLineDiffs(args);

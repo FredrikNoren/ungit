@@ -27,6 +27,7 @@ var StagingViewModel = function(server, repoPath) {
   this.commitMessageBody = ko.observable();
   this.wordWrap = components.create("textdiff.wordwrap");
   this.textDiffType = components.create('textdiff.type');
+  this.whiteSpace = components.create('textdiff.whitespace');
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
