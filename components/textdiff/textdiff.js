@@ -55,7 +55,7 @@ var WhiteSpace = function() {
   this.text = ko.observable("Show White Space");
   this.value = ko.observable(true);
   this.value.subscribe(function(value) {
-    self.text(value ? "Show White Space" : "Ignore White Space");
+    self.text(value ? "Showing White Space diff" : "Ignoring White Space diff");
   });
   this.toggle = function() {
     self.value(!self.value());
