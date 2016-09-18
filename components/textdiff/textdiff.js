@@ -72,12 +72,16 @@ var TextDiffViewModel = function(args) {
   this.diffJson = null;
   this.loadCount = loadLimit;
   this.textDiffType = args.textDiffType;
+  this.whiteSpace = args.whiteSpace;
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
 
   this.textDiffType.value.subscribe(function() {
+    self.invalidateDiff();
+  });
+  this.whiteSpace.value.subscribe(function() {
     self.invalidateDiff();
   });
   this.patchLineList = args.patchLineList;
@@ -92,7 +96,8 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   return {
     file: this.filename,
     path: this.repoPath(),
-    sha1: this.sha1 ? this.sha1 : ''
+    sha1: this.sha1 ? this.sha1 : '',
+    whiteSpace: this.whiteSpace.value()
   };
 }
 
