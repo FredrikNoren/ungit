@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
+- Limit commit title to 72 characters, the rest is truncated and shown when inspecting the commit
 
 ## [0.10.3](https://github.com/FredrikNoren/ungit/compare/v0.10.2...v0.10.3)
 

@@ -11,7 +11,7 @@
           onerror="this.style.display='none';">
         <div>
           <div>
-            <span class="title" data-bind="text: title"></span>
+            <span class="title" data-bind="text: (title().length > 72 ? title().substring(0, 72) + '...' : title)"></span>
             <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
           </div>
           <div class="text-muted nodeSummaryContainer">
@@ -25,6 +25,7 @@
       </div>
       <!-- ko if: selected() || nodeIsMousehover() -->
       <div class="details">
+        <div class="body" data-bind="visible: title().length > 72, text: '...' + title().substring(72)"></div>
         <div class="body" data-bind="text: body"></div>
         <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle, click: stopClickPropagation">
           <div class="diff-inner" data-bind="component: commitDiff"></div>
