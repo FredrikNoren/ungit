@@ -52,10 +52,10 @@ var Type = function() {
 var WhiteSpace = function() {
   var self = this;
 
-  this.text = ko.observable("Show White Space");
-  this.value = ko.observable(true);
+  this.text = ko.observable("Showing White Space diff");
+  this.value = ko.observable(false);
   this.value.subscribe(function(value) {
-    self.text(value ? "Showing White Space diff" : "Ignoring White Space diff");
+    self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
   });
   this.toggle = function() {
     self.value(!self.value());
