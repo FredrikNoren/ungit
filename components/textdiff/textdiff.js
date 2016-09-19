@@ -2,6 +2,7 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var diff2html = require('diff2html').Diff2Html;
+var programEvents = require('ungit-program-events');
 
 components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
@@ -43,6 +44,7 @@ var Type = function() {
   this.value = ko.observable(textDiff);
   this.value.subscribe(function(value) {
     self.text(value === textDiff ? "Default" : "Side By Side");
+    programEvents.dispatch({ event: 'invalidate-diff' });
   });
   this.toggle = function() {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
@@ -56,6 +58,7 @@ var WhiteSpace = function() {
   this.value = ko.observable(false);
   this.value.subscribe(function(value) {
     self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
+    programEvents.dispatch({ event: 'invalidate-diff' });
   });
   this.toggle = function() {
     self.value(!self.value());
@@ -77,17 +80,16 @@ var TextDiffViewModel = function(args) {
   this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
-
-  this.textDiffType.value.subscribe(function() {
-    self.invalidateDiff();
-  });
-  this.whiteSpace.value.subscribe(function() {
-    self.invalidateDiff();
-  });
   this.patchLineList = args.patchLineList;
   this.numberOfSelectedPatchLines = 0;
   this.htmlSrc = undefined;
   this.isParsed = ko.observable(false);
+
+  programEvents.add(function(event) {
+    if (event.event === "invalidate-diff" && self.isShowingDiffs()) {
+      self.invalidateDiff();
+    }
+  });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
