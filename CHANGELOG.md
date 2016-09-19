@@ -3,12 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a changlelog's changelog standard](http://keepachangelog.com/)
 
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
+
 ### Added
 - New configuration option `logLevel` allows you to assign the level of logging you want to see in the servers output console.
 - New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [783](https://github.com/FredrikNoren/ungit/issues/783)
-
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
+- Whitespace ignore option for text diffs [777](https://github.com/FredrikNoren/ungit/issues/777)
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
+
+### Fixed
+- File diff firing increasing number of events longer it survives.
 
 ## [0.10.3](https://github.com/FredrikNoren/ungit/compare/v0.10.2...v0.10.3)
 
