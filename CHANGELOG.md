@@ -7,8 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 - New configuration option `logLevel` allows you to assign the level of logging you want to see in the servers output console.
-- New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [783](https://github.com/FredrikNoren/ungit/issues/783)
-- Whitespace ignore option for text diffs [777](https://github.com/FredrikNoren/ungit/issues/777)
+- New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [#783](https://github.com/FredrikNoren/ungit/issues/783)
+- Whitespace ignore option for text diffs [#777](https://github.com/FredrikNoren/ungit/issues/777)
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
 - Limit commit title to 72 characters, the rest is truncated and shown when inspecting the commit
 

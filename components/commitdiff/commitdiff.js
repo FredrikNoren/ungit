@@ -2,15 +2,11 @@ var ko = require('knockout');
 var CommitLineDiff = require('./commitlinediff.js').CommitLineDiff;
 var components = require('ungit-components');
 
-var sideBySideDiff = 'sidebysidediff'
-var textDiff = 'textdiff'
-
 components.register('commitDiff', function(args) {
   return new CommitDiff(args);
 });
 
 var CommitDiff = function(args) {
-  var self = this;
   this.commitLineDiffs = ko.observableArray();
   this.sha1 = args.sha1;
 

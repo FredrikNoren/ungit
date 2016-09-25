@@ -189,7 +189,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file)
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file);
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
