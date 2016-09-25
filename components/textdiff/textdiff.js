@@ -33,6 +33,7 @@ var WordWrap = function() {
   this.toggle = function() {
     self.value(!self.value());
   }
+  this.isActive = ko.computed(function() { return !!self.value(); });
 }
 
 var Type = function() {
@@ -49,6 +50,9 @@ var Type = function() {
   this.toggle = function() {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
   }
+  this.isActive = ko.computed(function() {
+    return self.value() === 'textdiff';
+  });
 }
 
 var WhiteSpace = function() {
@@ -63,6 +67,7 @@ var WhiteSpace = function() {
   this.toggle = function() {
     self.value(!self.value());
   }
+  this.isActive = ko.computed(function() { return !self.value(); });
 }
 
 var TextDiffViewModel = function(args) {
