@@ -25,12 +25,12 @@ suite.test('Init', function(done) {
 suite.test('Open path screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
     helpers.waitForElementVisible(page, '.graph', function() {
-      done();
+      setTimeout(done, 500);
     });
   });
 });
 
-suite.test('Should be possible to create and commit a file', function(done) {
+suite.test('Should be possible to create and commit 1', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'commit 1', function() {
@@ -41,7 +41,7 @@ suite.test('Should be possible to create and commit a file', function(done) {
   });
 });
 
-suite.test('Should be possible to create and commit a file', function(done) {
+suite.test('Should be possible to create and commit 2', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'commit 2', function() {
@@ -52,7 +52,7 @@ suite.test('Should be possible to create and commit a file', function(done) {
   });
 });
 
-suite.test('Should be possible to create and commit a file', function(done) {
+suite.test('Should be possible to create and commit 3', function(done) {
   helpers.click(page, '[data-ta-clickable="branch-menu"]');
   helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutbranch-1"]', function() {
     setTimeout(function() {
