@@ -7,15 +7,14 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
   this.nodeA = graph.getNode(nodeAsha1);
   this.nodeB = graph.getNode(nodeBsha1);
   this.getGraphAttr = ko.computed(function() {
-    if (self.nodeB.isInited && self.nodeB.cx() && self.nodeB.cy()) {
-      return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
-              self.nodeB.cx(), self.nodeB.cy(), self.nodeB.cx(), self.nodeB.cy()];
-    } else if (graph.graphHeight()) {
+    if (self.nodeA.isViewable() && (!self.nodeB.isViewable() || !self.nodeB.isInited)) {
       return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
               self.nodeA.cx(), graph.graphHeight(), self.nodeA.cx(), graph.graphHeight()];
-    } else {
+    } else if (self.nodeB.isInited && self.nodeB.cx() && self.nodeB.cy()) {
       return [self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy(),
-              self.nodeA.cx(), self.nodeA.cy(), self.nodeA.cx(), self.nodeA.cy()];
+              self.nodeB.cx(), self.nodeB.cy(), self.nodeB.cx(), self.nodeB.cy()];
+    } else {
+      return [0, 0, 0, 0, 0, 0, 0, 0];
     }
   });
   this.getGraphAttr.subscribe(this.animate.bind(this));

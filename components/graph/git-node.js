@@ -256,3 +256,6 @@ GitNodeViewModel.prototype.nodeMouseover = function() {
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
 }
+GitNodeViewModel.prototype.isViewable = function() {
+  return this.graph.nodes().indexOf(this) > -1;
+}
