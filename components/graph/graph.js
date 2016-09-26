@@ -78,7 +78,7 @@ function GraphViewModel(server, repoPath) {
   this.loadNodesFromApiThrottled();
   this.updateBranchesThrottled();
   this.graphWidth = ko.observable();
-  this.graphHeight = ko.observable();
+  this.graphHeight = ko.observable(800);
 }
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
