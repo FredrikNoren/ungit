@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a changlelog's changelog standard](http://keepachangelog.com/)
 
 ### Added
+- Added search by git contining folder name for the search bar. [#793](https://github.com/FredrikNoren/ungit/issues/793)
 - New configuration option `logLevel` allows you to assign the level of logging you want to see in the servers output console.
 - New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [783](https://github.com/FredrikNoren/ungit/issues/783)
 
