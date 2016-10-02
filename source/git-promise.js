@@ -53,6 +53,23 @@ const gitQueue = async.queue((args, callback) => {
   });
 }, config.maxConcurrentGitOperations);
 
+const isRetryableError = function(err) {
+  if (!err) {
+    return false;
+  } else if (!err.error) {
+    return false;
+  } else if (err.error.indexOf("index.lock': File exists") > -1) {
+    // Dued to git operation parallelization it is possible that race condition may happen
+    return true;
+  } else if (err.error.indexOf("index file open failed: Permission denied") > -1) {
+    // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
+    // can report "Permission denied" for the file locking issue.
+    return true;
+  } else {
+    return false;
+  }
+}
+
 const gitExecutorProm = (args, retryCount) => {
   return new Bluebird((resolve, reject) => {
     gitQueue.push(args, (queueError, out) => {
@@ -63,7 +80,7 @@ const gitExecutorProm = (args, retryCount) => {
       }
     });
   }).catch((err) => {
-    if (retryCount > 0 && err.error && err.error.indexOf("index.lock': File exists") > -1) {
+    if (retryCount > 0 && isRetryableError(err)) {
       return new Bluebird((resolve) => {
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
