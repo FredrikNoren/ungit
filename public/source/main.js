@@ -50,7 +50,7 @@ ko.bindingHandlers.autocomplete = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     var handleKeyEvent = function(event) {
       var lastChar = $(element).val().slice(-1);
-      if(lastChar == '/' || lastChar == '\\'){  // When "/" or "\"
+      if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
         server.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
           if (err) {
             if (err.errorCode == 'read-dir-failed') return true;
@@ -66,11 +66,28 @@ ko.bindingHandlers.autocomplete = {
             $(element).autocomplete("search", $(element).val());
           }
         });
-      } else if(event.keyCode == 39){
+      } else if (event.keyCode == 39) { // '/'
         $(element).val($(element).val() + ungit.config.fileSeparator);
-      } else if(event.keyCode == 13){
+      } else if (event.keyCode == 13) { // enter
         event.preventDefault();
         navigation.browseTo('repository?path=' + encodeURIComponent($(element).val()));
+      } else if ($(element).val().indexOf("/") === -1 && $(element).val().indexOf("\\") === -1) {
+        var folderNames = localStorage.repositories.replace(/("|\[|\])/g, "")
+          .split(",")
+          .map(function(value) {
+            return {
+              value: value,
+              label: value.substring(value.lastIndexOf("/") + 1)
+            };
+          });
+
+        $(element).autocomplete({
+          source: folderNames,
+          messages: {
+            noResults: '',
+            results: function() {}
+          }
+        });
       }
 
       return true;
