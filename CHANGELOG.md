@@ -6,9 +6,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
 
 ### Added
-- Added search by git contining folder name for the search bar. [#793](https://github.com/FredrikNoren/ungit/issues/793)
+- Added search by git folder name in the search bar. [#793](https://github.com/FredrikNoren/ungit/issues/793)
 - New configuration option `logLevel` allows you to assign the level of logging you want to see in the servers output console.
-- New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [#783](https://github.com/FredrikNoren/ungit/issues/783)
+- New configuration option `mergeTool` allows you to assign a custom external merge tool for conflict resolution [#783](https://github.com/FredrikNoren/ungit/issues/783) [Doc](https://github.com/FredrikNoren/ungit/blob/master/MERGETOOL.md)
 - Whitespace ignore option for text diffs [#777](https://github.com/FredrikNoren/ungit/issues/777)
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
 - Limit commit title to 72 characters, the rest is truncated and shown when inspecting the commit
@@ -23,7 +23,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Active node focused git log result [#420](https://github.com/FredrikNoren/ungit/issues/420)
 
 ### Fixed
-- Missing npm as a normal dependency [#766] (https://github.com/FredrikNoren/ungit/issues/766)
+- Missing npm as a normal dependency [#766](https://github.com/FredrikNoren/ungit/issues/766)
 
 ## [0.10.2](https://github.com/FredrikNoren/ungit/compare/v0.10.1...v0.10.2)
 
