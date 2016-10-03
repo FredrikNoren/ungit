@@ -1,17 +1,16 @@
 <div class="btn-group btn-group-xs" data-bind="visible: showDiffButtons">
-  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-wordwrap" data-bind="click: wordWrapChange.bind($data, true), css: {active: wordWrap()}" data-toggle="tooltip" data-placement="bottom" data-original-title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
-    <span data-bind="text: 'Word Wrap'"></span>
-  </button>
-  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-nowrap" data-bind="click: wordWrapChange.bind($data, false), css: {active: !wordWrap()}" data-toggle="tooltip" data-placement="bottom" data-original-title="Not wrapping words per line" data-delay='{"show":"2000", "hide":"0"}'>
-    <span data-bind="text: 'Default'"></span>
+  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-whitespace" data-bind="click: whiteSpace.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" data-original-title="Igonore whitespaces" data-delay='{"show":"2000", "hide":"0"}'>
+    <span data-bind="text: whiteSpace.text"></span>
   </button>
 </div>
 <div class="btn-group btn-group-xs" data-bind="visible: showDiffButtons">
-  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-sideBySideDiff" data-bind="click: textDiffTypeChange.bind($data, 'sidebysidediff'), css: {active: textDiffType() === 'sidebysidediff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
-    <span data-bind="text: 'Side by Side'"></span>
+  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-sideBySideDiff" data-bind="click: textDiffType.toggle, css: {active: textDiffType.isActive}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+    <span data-bind="text: textDiffType.text"></span>
   </button>
-  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-defaultDiff" data-bind="click: textDiffTypeChange.bind($data, 'textdiff'), css: {active: textDiffType() === 'textdiff'}" data-toggle="tooltip" data-placement="bottom" data-original-title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
-    <span data-bind="text: 'Default'"></span>
+</div>
+<div class="btn-group btn-group-xs" data-bind="visible: showDiffButtons">
+  <button class="btn btn-default bootstrap-tooltip pull-right" data-ta-clickable="commit-wordwrap" data-bind="click: wordWrap.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" data-original-title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
+    <span data-bind="text: wordWrap.text"></span>
   </button>
 </div>
 

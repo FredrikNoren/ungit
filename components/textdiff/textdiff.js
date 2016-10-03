@@ -2,12 +2,73 @@
 var ko = require('knockout');
 var components = require('ungit-components');
 var diff2html = require('diff2html').Diff2Html;
+var programEvents = require('ungit-program-events');
 
 components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
 });
 
+components.register('textdiff.type', function() {
+  return new Type();
+});
+
+components.register('textdiff.wordwrap', function() {
+  return new WordWrap();
+});
+
+components.register('textdiff.whitespace', function() {
+  return new WhiteSpace();
+});
+
 var loadLimit = 100;
+
+var WordWrap = function() {
+  var self = this;
+
+  this.text = ko.observable("No Wrap");
+  this.value = ko.observable(false);
+  this.value.subscribe(function(value) {
+    self.text(value ? "Word Wrap" : "No Wrap");
+  });
+  this.toggle = function() {
+    self.value(!self.value());
+  }
+  this.isActive = ko.computed(function() { return !!self.value(); });
+}
+
+var Type = function() {
+  var self = this;
+  var sideBySideDiff = 'sidebysidediff'
+  var textDiff = 'textdiff'
+
+  this.text = ko.observable("Default");
+  this.value = ko.observable(textDiff);
+  this.value.subscribe(function(value) {
+    self.text(value === textDiff ? "Default" : "Side By Side");
+    programEvents.dispatch({ event: 'invalidate-diff' });
+  });
+  this.toggle = function() {
+    self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
+  }
+  this.isActive = ko.computed(function() {
+    return self.value() === 'textdiff';
+  });
+}
+
+var WhiteSpace = function() {
+  var self = this;
+
+  this.text = ko.observable("Showing White Space diff");
+  this.value = ko.observable(false);
+  this.value.subscribe(function(value) {
+    self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
+    programEvents.dispatch({ event: 'invalidate-diff' });
+  });
+  this.toggle = function() {
+    self.value(!self.value());
+  }
+  this.isActive = ko.computed(function() { return !self.value(); });
+}
 
 var TextDiffViewModel = function(args) {
   var self = this;
@@ -19,18 +80,21 @@ var TextDiffViewModel = function(args) {
   this.diffJson = null;
   this.loadCount = loadLimit;
   this.textDiffType = args.textDiffType;
+  this.whiteSpace = args.whiteSpace;
   this.isShowingDiffs = args.isShowingDiffs;
   this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
-
-  this.textDiffType.subscribe(function() {
-    self.invalidateDiff();
-  });
   this.patchLineList = args.patchLineList;
   this.numberOfSelectedPatchLines = 0;
   this.htmlSrc = undefined;
   this.isParsed = ko.observable(false);
+
+  programEvents.add(function(event) {
+    if (event.event === "invalidate-diff" && self.isShowingDiffs()) {
+      self.invalidateDiff();
+    }
+  });
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -39,7 +103,8 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   return {
     file: this.filename,
     path: this.repoPath(),
-    sha1: this.sha1 ? this.sha1 : ''
+    sha1: this.sha1 ? this.sha1 : '',
+    whiteSpace: this.whiteSpace.value()
   };
 }
 
@@ -59,6 +124,7 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
         }
         return callback ? callback(err) : null;
       }
+      self.isParsed(false);
 
       if (typeof diffs == 'string') {
         self.diffJson = diff2html.getJsonFromDiff(diffs);
@@ -75,7 +141,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
 
 TextDiffViewModel.prototype.render = function() {
   if (this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
-  this.isParsed(false);
 
   var self = this;
   var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
@@ -95,7 +160,7 @@ TextDiffViewModel.prototype.render = function() {
 
   var html;
 
-  if (this.textDiffType() === 'sidebysidediff') {
+  if (this.textDiffType.value() === 'sidebysidediff') {
     html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
   } else {
     html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);

@@ -14,6 +14,7 @@ var CommitLineDiff = function(args, fileLineDiff) {
   this.sha1 = args.sha1;
   this.textDiffType = args.textDiffType;
   this.wordWrap = args.wordWrap;
+  this.whiteSpace = args.whiteSpace;
   this.specificDiff = ko.observable(this.getSpecificDiff());
 };
 exports.CommitLineDiff = CommitLineDiff;
@@ -26,6 +27,7 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
     sha1: this.sha1,
     textDiffType: this.textDiffType,
     isShowingDiffs: this.isShowingDiffs,
+    whiteSpace: this.whiteSpace,
     wordWrap: this.wordWrap
   });
 }

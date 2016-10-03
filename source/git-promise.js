@@ -270,7 +270,7 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
   return git(['show', `${version}:${filename}`], repoPath, null, outPipe);
 }
 
-git.diffFile = (repoPath, filename, sha1) => {
+git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
   const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.revParse(repoPath)
     .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
@@ -289,9 +289,9 @@ git.diffFile = (repoPath, filename, sha1) => {
         if (file && file.isNew) {
           exec = git(newFileDiffArgs, repoPath, true);
         } else if (sha1) {
-          exec = git(['diff', `${sha1}^`, sha1, "--", filename.trim()], repoPath);
+          exec = git(['diff', ignoreWhiteSpace ? '-w' : '', `${sha1}^`, sha1, "--", filename.trim()], repoPath);
         } else {
-          exec = git(['diff', 'HEAD', '--', filename.trim()], repoPath);
+          exec = git(['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()], repoPath);
         }
         return exec.catch((err) => {
           // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,

@@ -25,7 +25,9 @@ var StagingViewModel = function(server, repoPath) {
     self.commitMessageTitleCount(value.length);
   });
   this.commitMessageBody = ko.observable();
-  this.wordWrap = ko.observable(false);
+  this.wordWrap = components.create("textdiff.wordwrap");
+  this.textDiffType = components.create('textdiff.type');
+  this.whiteSpace = components.create('textdiff.whitespace');
   this.inRebase = ko.observable(false);
   this.inMerge = ko.observable(false);
   this.inCherry = ko.observable(false);
@@ -85,7 +87,7 @@ var StagingViewModel = function(server, repoPath) {
 
     if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
 
-    if (self.textDiffType() === 'sidebysidediff') {
+    if (self.textDiffType.value() === 'sidebysidediff') {
       var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
       if (patchFiles.length > 0) return "Cannot patch with side by side view."
     }
@@ -100,7 +102,6 @@ var StagingViewModel = function(server, repoPath) {
   this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
   this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
   this.refreshContentThrottled();
-  this.textDiffType = ko.observable('textdiff');
   if (window.location.search.indexOf('noheader=true') >= 0)
     this.refreshButton = components.create('refreshbutton');
   this.loadAnyway = false;
@@ -188,7 +189,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   for(var file in files) {
     var fileViewModel = this.filesByPath[file];
     if (!fileViewModel) {
-      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file, self.textDiffType, self.wordWrap);
+      this.filesByPath[file] = fileViewModel = new FileViewModel(self, file);
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
@@ -278,9 +279,6 @@ StagingViewModel.prototype.toggleAllStages = function() {
 
   self.allStageFlag(!self.allStageFlag());
 }
-StagingViewModel.prototype.textDiffTypeChange = function(type) {
-  this.textDiffType(type);
-}
 StagingViewModel.prototype.onEnter = function(d, e){
     if (e.keyCode === 13 && !this.commitValidationError()) {
       this.commit();
@@ -293,11 +291,8 @@ StagingViewModel.prototype.onAltEnter = function(d, e){
     }
     return true;
 };
-StagingViewModel.prototype.wordWrapChange = function(state) {
-  this.wordWrap(state);
-};
 
-var FileViewModel = function(staging, name, textDiffType, wordWrap) {
+var FileViewModel = function(staging, name) {
   var self = this;
   this.staging = staging;
   this.server = staging.server;
@@ -310,9 +305,6 @@ var FileViewModel = function(staging, name, textDiffType, wordWrap) {
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
   this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath(), temporary: true });
-  this.isShowingDiffs = ko.observable(false);
-  this.textDiffType = textDiffType;
-  this.wordWrap = wordWrap;
   this.additions = ko.observable('');
   this.deletions = ko.observable('');
   this.fileType = ko.observable('text');
@@ -343,12 +335,13 @@ FileViewModel.prototype.getSpecificDiff = function() {
     filename: this.name(),
     repoPath: this.staging.repoPath,
     server: this.server,
-    textDiffType: this.textDiffType,
+    textDiffType: this.staging.textDiffType,
+    whiteSpace: this.staging.whiteSpace,
     isShowingDiffs: this.isShowingDiffs,
     diffProgressBar: this.diffProgressBar,
     patchLineList: this.patchLineList,
     editState: this.editState,
-    wordWrap: this.wordWrap
+    wordWrap: this.staging.wordWrap
   });
 }
 FileViewModel.prototype.setState = function(state) {
