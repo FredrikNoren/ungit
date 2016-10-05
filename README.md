@@ -71,6 +71,15 @@ Plugins are installed by simply placing them in the Ungit plugin directory (`~/.
 
 There's a guide in the [PLUGINS.md](PLUGINS.md) file on how to write new plugins.
 
+Text Editor Support
+-------------------
+
+* [atom-ungit](https://github.com/codingtwinky/atom-ungit) for [Atom.io](https://atom.io/)
+![atom-ungit Screenshot](https://raw.githubusercontent.com/codingtwinky/atom-ungit/master/screenshot.png)
+* [atom-bracket](https://github.com/Hirse/brackets-ungit) for [Brackets.io](http://brackets.io/)
+![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/blob/master/screenshots/viewer.png)
+
+
 Developing
 ----------
 
