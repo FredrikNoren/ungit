@@ -74,11 +74,11 @@ There's a guide in the [PLUGINS.md](PLUGINS.md) file on how to write new plugins
 Text Editor Support
 -------------------
 
-* [atom-ungit](https://github.com/codingtwinky/atom-ungit) for [Atom.io](https://atom.io/)
+* [atom-ungit](https://github.com/codingtwinky/atom-ungit) for [Atom.io](https://atom.io/) by [@codingtwinky](https://github.com/codingtwinky)
 
 ![atom-ungit Screenshot](https://raw.githubusercontent.com/codingtwinky/atom-ungit/master/screenshot.png)
 
-* [atom-bracket](https://github.com/Hirse/brackets-ungit) for [Brackets.io](http://brackets.io/)
+* [atom-bracket](https://github.com/Hirse/brackets-ungit) for [Brackets.io](http://brackets.io/) by [@hirse](https://github.com/Hirse)
 
 ![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/screenshots/viewer.png)
 
