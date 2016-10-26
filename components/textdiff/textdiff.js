@@ -124,8 +124,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
         }
         return callback ? callback(err) : null;
       }
-      self.isParsed(false);
-
       if (typeof diffs == 'string') {
         self.diffJson = diff2html.getJsonFromDiff(diffs);
         self.render();
@@ -143,6 +141,7 @@ TextDiffViewModel.prototype.render = function() {
   if (this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
   var self = this;
+  this.isParsed(false);
   var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
   var lineCount = 0;
 
