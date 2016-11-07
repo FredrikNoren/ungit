@@ -39,16 +39,11 @@ exports.registerApi = (env) => {
         }
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
-        const workingTreeChanged = _.debounce(() => {
-          socket.emit('working-tree-changed', { repository: data.path });
-        }, 200);
         try {
-          socket.watcher = fs.watch(data.path, (event, filename) => {
-            // The .git dir changes on for instance 'git status', so we
-            // can't trigger a change here (since that would lead to an endless
-            // loop of the client getting the change and then requesting the new data)
-            if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-              workingTreeChanged();
+          socket.watcher = fs.watch(data.path, {"recursive": true}, (event, filename) => {
+            if (isFileWatched(filename)) {
+              emitGitDirectoryChanged(data.path);
+            }
           });
           winston.info(`Start watching ${socket.watcherPath}`);
         } catch(err) {
@@ -59,6 +54,21 @@ exports.registerApi = (env) => {
         if (callback) callback();
       });
     });
+  }
+
+  // The .git dir changes on for instance 'git status', so we
+  // can't trigger a change here (since that would lead to an endless
+  // loop of the client getting the change and then requesting the new data)
+  const isFileWatched = (filename) => {
+    if (!filename) {
+      return true;   // @TODO may need to check fs.watch API but I doubt we will ever be here.
+    } else if (filename == ".git/HEAD") {
+      return true;   // Explicitly return true for ".git/HEAD" for branch changes
+    } else if (filename.startsWith(".git")) {
+       return false; // Ignore changes under ".git/*"
+    } else {
+      return true;
+    }
   }
 
   const ensurePathExists = (req, res, next) => {
