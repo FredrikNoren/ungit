@@ -43,6 +43,7 @@ exports.registerApi = (env) => {
           socket.watcher = fs.watch(data.path, {"recursive": true}, (event, filename) => {
             if (isFileWatched(filename)) {
               emitGitDirectoryChanged(data.path);
+              emitWorkingTreeChanged(data.path);
             }
           });
           winston.info(`Start watching ${socket.watcherPath}`);
