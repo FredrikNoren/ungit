@@ -267,6 +267,7 @@ GraphViewModel.prototype.handleBubbledClick = function(elem, event) {
 
 GraphViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'git-directory-changed') {
+    this._clearRefs();
     this.loadNodesFromApiThrottled();
     this.updateBranchesThrottled();
   } else if (event.event == 'request-app-content-refresh') {
@@ -304,4 +305,12 @@ GraphViewModel.prototype.checkHeadMove = function(toNode) {
   if (this.HEAD() === toNode) {
     this.HEADref.node(toNode);
   }
+}
+GraphViewModel.prototype._clearRefs = function(toNode) {
+  this.refs().forEach(function(ref) {
+    ref.node(null);
+  });
+
+  this.refs.removeAll();
+  this.refsByRefName = {};
 }
