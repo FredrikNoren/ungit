@@ -63,6 +63,8 @@ exports.registerApi = (env) => {
   const isFileWatched = (filename) => {
     if (!filename) {
       return true;   // @TODO may need to check fs.watch API but I doubt we will ever be here.
+    } else if (filename.startsWith(".git/refs/")) {
+      return true;
     } else if (filename == ".git/HEAD") {
       return true;   // Explicitly return true for ".git/HEAD" for branch changes
     } else if (filename.startsWith(".git")) {
