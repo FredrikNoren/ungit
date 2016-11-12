@@ -113,9 +113,18 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       var nodes = log.nodes ? log.nodes : [];
       self.limit(parseInt(log.limit));
       self.skip(parseInt(log.skip));
+      var updatedRefs = [];
       nodes = self.computeNode(nodes.map(function(logEntry) {
-          return self.getNode(logEntry.sha1, logEntry);
-        }));
+        updatedRefs = updatedRefs.concat(logEntry.refs);
+        return self.getNode(logEntry.sha1, logEntry);
+      }));
+      Object.keys(self.refsByRefName).forEach(function(refName) {
+        if (updatedRefs.indexOf(refName) < 0) {
+          self.refs.remove(self.refsByRefName[refName]);
+          self.refsByRefName[refName].node(null);
+          delete self.refsByRefName[refName]
+        }
+      });
 
       var edges = [];
       nodes.forEach(function(node) {
