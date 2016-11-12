@@ -72,7 +72,7 @@ ko.bindingHandlers.autocomplete = {
       } else if (event.keyCode == 13) { // enter
         event.preventDefault();
         navigation.browseTo('repository?path=' + encodeURIComponent(value));
-      } else if (value.indexOf("/") === -1 && value.indexOf("\\") === -1) {
+      } else if (localStorage.repositories && value.indexOf("/") === -1 && value.indexOf("\\") === -1) {
         var folderNames = localStorage.repositories.replace(/("|\[|\])/g, "")
           .split(",")
           .map(function(value) {
