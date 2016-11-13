@@ -73,8 +73,8 @@ function GraphViewModel(server, repoPath) {
     }
   });
 
-  this.loadNodesFromApiThrottled = null;
-  this.updateBranchesThrottled = null;
+  this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
+  this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
   this.loadNodesFromApi();
   this.updateBranches();
   this.graphWidth = ko.observable();
@@ -276,13 +276,8 @@ GraphViewModel.prototype.handleBubbledClick = function(elem, event) {
 
 GraphViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'git-directory-changed') {
-    if (!this.loadNodesFromApiThrottled || !this.updateBranchesThrottled) {
-      this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500, {leading: false});
-      this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500, {leading: false});
-    } else {
-      this.loadNodesFromApiThrottled();
-      this.updateBranchesThrottled();
-    }
+    this.loadNodesFromApiThrottled();
+    this.updateBranchesThrottled();
   } else if (event.event == 'request-app-content-refresh') {
     this.loadNodesFromApiThrottled();
   } else if (event.event == 'remote-tags-update') {
