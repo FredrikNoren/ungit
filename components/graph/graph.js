@@ -121,7 +121,8 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       Object.keys(self.refsByRefName).forEach(function(refName) {
         if (updatedRefs.indexOf(refName) < 0) {
           self.refs.remove(self.refsByRefName[refName]);
-          self.refsByRefName[refName].node(null);
+          var ref = self.refsByRefName[refName];
+          if (ref) { ref.node(null); }
           delete self.refsByRefName[refName]
         }
       });
