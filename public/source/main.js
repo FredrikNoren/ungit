@@ -49,9 +49,10 @@ var navigation = require('ungit-navigation');
 ko.bindingHandlers.autocomplete = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     var handleKeyEvent = function(event) {
-      var lastChar = $(element).val().slice(-1);
+      var value = $(element).val();
+      var lastChar = value.slice(-1);
       if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
-        server.get('/fs/listDirectories', {term: $(element).val()}, function(err, directoryList) {
+        server.get('/fs/listDirectories', {term: value}, function(err, directoryList) {
           if (err) {
             if (err.errorCode == 'read-dir-failed') return true;
             else return false;
@@ -63,15 +64,15 @@ ko.bindingHandlers.autocomplete = {
                 results: function() {}
               }
             });
-            $(element).autocomplete("search", $(element).val());
+            $(element).autocomplete("search", value);
           }
         });
       } else if (event.keyCode == 39) { // '/'
-        $(element).val($(element).val() + ungit.config.fileSeparator);
+        $(element).val(value + ungit.config.fileSeparator);
       } else if (event.keyCode == 13) { // enter
         event.preventDefault();
-        navigation.browseTo('repository?path=' + encodeURIComponent($(element).val()));
-      } else if ($(element).val().indexOf("/") === -1 && $(element).val().indexOf("\\") === -1) {
+        navigation.browseTo('repository?path=' + encodeURIComponent(value));
+      } else if (localStorage.repositories && value.indexOf("/") === -1 && value.indexOf("\\") === -1) {
         var folderNames = localStorage.repositories.replace(/("|\[|\])/g, "")
           .split(",")
           .map(function(value) {
