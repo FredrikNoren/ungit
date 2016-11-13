@@ -315,11 +315,3 @@ GraphViewModel.prototype.checkHeadMove = function(toNode) {
     this.HEADref.node(toNode);
   }
 }
-GraphViewModel.prototype._clearRefs = function(toNode) {
-  this.refs().forEach(function(ref) {
-    ref.node(null);
-  });
-
-  this.refs.removeAll();
-  this.refsByRefName = {};
-}
