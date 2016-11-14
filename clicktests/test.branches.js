@@ -164,7 +164,7 @@ suite.test('Auto checkout on branch creation.', function(done) {
 
 var branchTagLoc;
 suite.test('test branch create from command line', function(done) {
-  environment.gitCommand({ command: "branch gitCommandBranch", repo: testRepoPath }, function() {
+  environment.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPath }, function() {
     helpers.waitForElementVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
       branchTagLoc = helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]');
       done();
@@ -173,7 +173,7 @@ suite.test('test branch create from command line', function(done) {
 });
 
 suite.test('test branch move from command line', function(done) {
-  environment.gitCommand({ command: "branch -f gitCommandBranch branch-1", repo: testRepoPath }, function() {
+  environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPath }, function() {
     setTimeout(function() {
       if (branchTagLoc == helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')) {
         done("Branch haven't moved");
@@ -185,7 +185,7 @@ suite.test('test branch move from command line', function(done) {
 });
 
 suite.test('test branch delete from command line', function(done) {
-  environment.gitCommand({ command: "branch -D gitCommandBranch", repo: testRepoPath }, function() {
+  environment.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPath }, function() {
     helpers.waitForElementNotVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
       done();
     });
