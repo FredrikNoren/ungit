@@ -594,7 +594,7 @@ exports.registerApi = (env) => {
       res.json({});
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
+      jsonResultOrFailProm(res, gitPromise(req.body.command.split(" "), req.body.repo))
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, ensureAuthenticated, (req, res) => {
       //winston.info('Cleaned up: ' + JSON.stringify(cleaned));

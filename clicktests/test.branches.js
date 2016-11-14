@@ -162,6 +162,22 @@ suite.test('Auto checkout on branch creation.', function(done) {
   });
 });
 
+suite.test('test branch create from command line', function(done) {
+  environment.gitCommand({ command: "branch gitCommandBranch", repo: testRepoPath }, function() {
+    helpers.waitForElementVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
+      done();
+    });
+  });
+});
+
+suite.test('test branhc move from command line', function(done) {
+  done();
+});
+
+suite.test('test branch delete from command line', function(done) {
+  done();
+});
+
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
 });

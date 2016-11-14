@@ -172,6 +172,10 @@ Environment.prototype.createFolder = function(dir, callback) {
 Environment.prototype.initFolder = function(options, callback) {
   this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
+Environment.prototype.gitCommand = function(options, callback) {
+  console.log(">>>>", JSON.stringify(options));
+  this.backgroundAction('POST', this.url + '/api/testing/git', options, callback);
+}
 
 var prependLines = function(pre, text) {
   return text.split('\n').filter(function(l) { return l; }).map(function(line) { return pre + line; }).join('\n');
