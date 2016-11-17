@@ -10,7 +10,6 @@ const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 
-const isWindows = /^win/.test(process.platform);
 const isMac = /^darwin/.test(process.platform);
 
 exports.pathPrefix = '';
@@ -40,15 +39,13 @@ exports.registerApi = (env) => {
             }
           }
 
-          if (isWindows || isMac) {
-            // recursive file watch works only for win and mac
-            socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
-            winston.info(`Start watching ${socket.watcherPath} recursively`);
-          } else {
-            socket.watcher = [fs.watch(data.path, runOnFileWatchEvent),
-              fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent),
-              fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent)];
-            winston.info(`Start watching ${socket.watcherPath} with .git and .git/refs`);
+          socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
+          winston.info(`Start watching ${socket.watcherPath} recursively`);
+          if (!isMac) {
+            // recursive fs.watch seems to be only working in mac env...
+            socket.watcher.push(fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent));
+            socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
+            winston.info(`Start watching with .git and .git/refs`);
           }
         } catch(err) {
           // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
