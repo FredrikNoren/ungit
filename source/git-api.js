@@ -10,6 +10,9 @@ const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 
+const isWindows = /^win/.test(process.platform);
+const isMac = /^darwin/.test(process.platform);
+
 exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
@@ -24,29 +27,29 @@ exports.registerApi = (env) => {
 
   if (io) {
     io.sockets.on('connection', (socket) => {
-      socket.on('disconnect', () => {
-        if (socket.watcher) {
-          socket.watcher.close();
-          socket.watcher = null;
-          winston.info(`Stop watching ${socket.watcherPath}`);
-        }
-      });
+      socket.on('disconnect', () => { stopDirectoryWatch(socket); });
       socket.on('watch', (data, callback) => {
-        if (socket.watcher) {
-          socket.leave(socket.watcherPath);
-          socket.watcher.close(); // only one watcher per socket
-          winston.info(`Stop watching ${socket.watcherPath}`);
-        }
+        stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
         try {
-          socket.watcher = fs.watch(data.path, {"recursive": true}, (event, filename) => {
+          const runOnFileWatchEvent = (event, filename) => {
             if (isFileWatched(filename)) {
               emitGitDirectoryChanged(data.path);
               emitWorkingTreeChanged(data.path);
             }
-          });
-          winston.info(`Start watching ${socket.watcherPath}`);
+          }
+
+          if (isWindows || isMac) {
+            // recursive file watch works only for win and mac
+            socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
+            winston.info(`Start watching ${socket.watcherPath} recursively`);
+          } else {
+            socket.watcher = [fs.watch(data.path, runOnFileWatchEvent),
+              fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent),
+              fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent)];
+            winston.info(`Start watching ${socket.watcherPath} with .git and .git/refs`);
+          }
         } catch(err) {
           // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
           // which is pretty weird, but hard to do anything about, so we just log them here.
@@ -55,6 +58,12 @@ exports.registerApi = (env) => {
         if (callback) callback();
       });
     });
+  }
+
+  const stopDirectoryWatch = (socket) => {
+    socket.leave(socket.watcherPath);
+    (socket.watcher || []).forEach((watcher) => watcher.close());
+    winston.info(`Stop watching ${socket.watcherPath}`);
   }
 
   // The .git dir changes on for instance 'git status', so we
