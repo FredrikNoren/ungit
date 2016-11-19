@@ -4,7 +4,6 @@ var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
 var uiInteractions = require('./ui-interactions.js');
-var system = require('system');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('branches', page);
@@ -163,39 +162,35 @@ suite.test('Auto checkout on branch creation.', function(done) {
   });
 });
 
-console.log(system.os.name)
+var branchTagLoc;
+suite.test('test branch create from command line', function(done) {
+  environment.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPath }, function() {
+    helpers.waitForElementVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
+      branchTagLoc = helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]');
+      done();
+    });
+  });
+});
 
-if (system.os.name.indexOf("win") > -1) {
-  var branchTagLoc;
-  suite.test('test branch create from command line', function(done) {
-    environment.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPath }, function() {
-      helpers.waitForElementVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
-        branchTagLoc = helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]');
+suite.test('test branch move from command line', function(done) {
+  environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPath }, function() {
+    setTimeout(function() {
+      if (branchTagLoc == helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')) {
+        done("Branch haven't moved");
+      } else {
         done();
-      });
-    });
+      }
+    }, 500);
   });
+});
 
-  suite.test('test branch move from command line', function(done) {
-    environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPath }, function() {
-      setTimeout(function() {
-        if (branchTagLoc == helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')) {
-          done("Branch haven't moved");
-        } else {
-          done();
-        }
-      }, 500);
+suite.test('test branch delete from command line', function(done) {
+  environment.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPath }, function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
+      done();
     });
   });
-
-  suite.test('test branch delete from command line', function(done) {
-    environment.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPath }, function() {
-      helpers.waitForElementNotVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
-        done();
-      });
-    });
-  });
-}
+});
 
 suite.test('Shutdown', function(done) {
   environment.shutdown(done);
