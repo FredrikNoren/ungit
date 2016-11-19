@@ -113,7 +113,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       // set new limit and skip
       self.limit(parseInt(log.limit));
       self.skip(parseInt(log.skip));
-      return log.nodes || []
+      return log.nodes || [];
     }).then(function(nodes) {
       // check for deleted refs to update the UI
       var updatedRefs = [];
