@@ -9,6 +9,7 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
+const ignore = require('ignore');
 
 const isMac = /^darwin/.test(process.platform);
 
@@ -33,7 +34,7 @@ exports.registerApi = (env) => {
         socket.watcherPath = data.path;
         try {
           const runOnFileWatchEvent = (event, filename) => {
-            if (isFileWatched(filename)) {
+            if (isFileWatched(filename, socket.ignore)) {
               emitGitDirectoryChanged(data.path);
               emitWorkingTreeChanged(data.path);
             }
@@ -47,6 +48,9 @@ exports.registerApi = (env) => {
             socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
             winston.info(`Start watching with .git and .git/refs`);
           }
+          fs.readFileAsync(path.join(data.path, ".gitignore"))
+            .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
+            .catch(() => {});
         } catch(err) {
           // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
           // which is pretty weird, but hard to do anything about, so we just log them here.
@@ -59,6 +63,7 @@ exports.registerApi = (env) => {
 
   const stopDirectoryWatch = (socket) => {
     socket.leave(socket.watcherPath);
+    socket.ignore = undefined;
     (socket.watcher || []).forEach((watcher) => watcher.close());
     winston.info(`Stop watching ${socket.watcherPath}`);
   }
@@ -66,15 +71,15 @@ exports.registerApi = (env) => {
   // The .git dir changes on for instance 'git status', so we
   // can't trigger a change here (since that would lead to an endless
   // loop of the client getting the change and then requesting the new data)
-  const isFileWatched = (filename) => {
-    if (!filename) {
-      return true;   // @TODO may need to check fs.watch API but I doubt we will ever be here.
+  const isFileWatched = (filename, ignore) => {
+    if (ignore && ignore.filter(filename).length == 0) {
+      return false;  // ignore files that are in .gitignore
     } else if (filename.startsWith(".git/refs/")) {
       return true;
     } else if (filename == ".git/HEAD") {
       return true;   // Explicitly return true for ".git/HEAD" for branch changes
     } else if (filename.startsWith(".git")) {
-       return false; // Ignore changes under ".git/*"
+      return false;  // Ignore changes under ".git/*"
     } else {
       return true;
     }
