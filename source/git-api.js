@@ -32,31 +32,32 @@ exports.registerApi = (env) => {
         stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
-        try {
-          const runOnFileWatchEvent = (event, filename) => {
-            if (isFileWatched(filename, socket.ignore)) {
-              emitGitDirectoryChanged(data.path);
-              emitWorkingTreeChanged(data.path);
-            }
+        
+        const runOnFileWatchEvent = (event, filename) => {
+          if (isFileWatched(filename, socket.ignore)) {
+            emitGitDirectoryChanged(data.path);
+            emitWorkingTreeChanged(data.path);
           }
-
-          socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
-          winston.info(`Start watching ${socket.watcherPath} recursively`);
-          if (!isMac) {
-            // recursive fs.watch seems to be only working in mac env...
-            socket.watcher.push(fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent));
-            socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
-            winston.info(`Start watching with .git and .git/refs`);
-          }
-          fs.readFileAsync(path.join(data.path, ".gitignore"))
-            .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
-            .catch(() => {});
-        } catch(err) {
-          // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
-          // which is pretty weird, but hard to do anything about, so we just log them here.
-          usageStatistics.addEvent('fs-watch-exception');
         }
-        if (callback) callback();
+
+        fs.readFileAsync(path.join(data.path, ".gitignore"))
+          .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
+          .catch(() => {})
+          .then(() => {
+            socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
+            winston.info(`Start watching ${socket.watcherPath} recursively`);
+
+            if (!isMac) {
+              // recursive fs.watch seems to be only working in mac env...
+              socket.watcher.push(fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent));
+              socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
+              winston.info(`Start watching with .git and .git/refs`);
+            }
+          }).catch((err) => {
+            // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
+            // which is pretty weird, but hard to do anything about, so we just log them here.
+            usageStatistics.addEvent('fs-watch-exception');
+          }).finally(callback);
       });
     });
   }
