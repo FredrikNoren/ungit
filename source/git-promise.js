@@ -259,7 +259,7 @@ git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeo
         throw err;
       }
     }).then((result) => {
-      if (result.indexOf('No local changes to save') != -1) {
+      if (!result || result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
       return git(commands, repoPath, allowError, outPipe, inPipe, timeout);
