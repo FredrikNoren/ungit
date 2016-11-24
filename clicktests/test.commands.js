@@ -52,25 +52,25 @@ suite.test('add a branch-2', function(done) {
   });
 });
 
-var branchTagLoc;
 suite.test('test branch create from command line', function(done) {
   environment.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPath }, function() {
     helpers.waitForElementVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
-      branchTagLoc = helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]');
       done();
     });
   });
 });
 
 suite.test('test branch move from command line', function(done) {
-  environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-2"], repo: testRepoPath }, function() {
+  var branchTagLoc = JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]'));
+  environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPath }, function() {
     setTimeout(function() {
-      if (branchTagLoc == helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')) {
+      console.log(branchTagLoc, JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')))
+      if (branchTagLoc == JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]'))) {
         done("Branch haven't moved");
       } else {
         done();
       }
-    }, 500);
+    }, 1000);
   });
 });
 
@@ -79,6 +79,36 @@ suite.test('test branch delete from command line', function(done) {
     helpers.waitForElementNotVisible(page, '[data-ta-name="gitCommandBranch"]', function() {
       done();
     });
+  });
+});
+
+suite.test('test tag create from command line', function(done) {
+  environment.gitCommand({ command: ["tag", "tag1"], repo: testRepoPath }, function() {
+    helpers.waitForElementVisible(page, '[data-ta-name="tag1"]', function() {
+      done();
+    });
+  });
+});
+
+suite.test('test tag delete from command line', function(done) {
+  environment.gitCommand({ command: ["tag", "-d", "tag1"], repo: testRepoPath }, function() {
+    helpers.waitForElementNotVisible(page, '[data-ta-name="tag1"]', function() {
+      done();
+    });
+  });
+});
+
+suite.test('test reset from command line', function(done) {
+  var headLoc = JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]'));
+  environment.gitCommand({ command: ["reset", "branch-1"], repo: testRepoPath }, function() {
+    console.log(headLoc, JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]')))
+    setTimeout(function() {
+      if (headLoc == JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]'))) {
+        done("reset failed")
+      } else {
+        done();
+      }
+    }, 500);
   });
 });
 
