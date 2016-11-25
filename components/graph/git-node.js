@@ -139,11 +139,9 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.date = Date.parse(this.commitTime);
   this.commitComponent.setData(logEntry);
 
-  if (logEntry.refs) {
-    logEntry.refs.forEach(function(ref) {
-      self.graph.getRef(ref).node(self);
-    });
-  }
+  (logEntry.refs || []).forEach(function(ref) {
+    self.graph.getRef(ref).node(self);
+  });
   this.isInited = true;
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {

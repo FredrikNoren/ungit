@@ -9,6 +9,9 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
+const ignore = require('ignore');
+
+const isMac = /^darwin/.test(process.platform);
 
 exports.pathPrefix = '';
 
@@ -24,41 +27,63 @@ exports.registerApi = (env) => {
 
   if (io) {
     io.sockets.on('connection', (socket) => {
-      socket.on('disconnect', () => {
-        if (socket.watcher) {
-          socket.watcher.close();
-          socket.watcher = null;
-          winston.info(`Stop watching ${socket.watcherPath}`);
-        }
-      });
+      socket.on('disconnect', () => { stopDirectoryWatch(socket); });
       socket.on('watch', (data, callback) => {
-        if (socket.watcher) {
-          socket.leave(socket.watcherPath);
-          socket.watcher.close(); // only one watcher per socket
-          winston.info(`Stop watching ${socket.watcherPath}`);
-        }
+        stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
-        const workingTreeChanged = _.debounce(() => {
-          socket.emit('working-tree-changed', { repository: data.path });
-        }, 200);
-        try {
-          socket.watcher = fs.watch(data.path, (event, filename) => {
-            // The .git dir changes on for instance 'git status', so we
-            // can't trigger a change here (since that would lead to an endless
-            // loop of the client getting the change and then requesting the new data)
-            if (!filename || (filename != '.git' && filename.indexOf('.git/') != 0))
-              workingTreeChanged();
-          });
-          winston.info(`Start watching ${socket.watcherPath}`);
-        } catch(err) {
-          // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
-          // which is pretty weird, but hard to do anything about, so we just log them here.
-          usageStatistics.addEvent('fs-watch-exception');
+        
+        const runOnFileWatchEvent = (event, filename) => {
+          if (isFileWatched(filename, socket.ignore)) {
+            emitGitDirectoryChanged(data.path);
+            emitWorkingTreeChanged(data.path);
+          }
         }
-        if (callback) callback();
+
+        fs.readFileAsync(path.join(data.path, ".gitignore"))
+          .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
+          .catch(() => {})
+          .then(() => {
+            socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
+            winston.info(`Start watching ${socket.watcherPath} recursively`);
+
+            if (!isMac) {
+              // recursive fs.watch seems to be only working in mac env...
+              socket.watcher.push(fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent));
+              socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
+              winston.info(`Start watching with .git and .git/refs`);
+            }
+          }).catch((err) => {
+            // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
+            // which is pretty weird, but hard to do anything about, so we just log them here.
+            usageStatistics.addEvent('fs-watch-exception');
+          }).finally(callback);
       });
     });
+  }
+
+  const stopDirectoryWatch = (socket) => {
+    socket.leave(socket.watcherPath);
+    socket.ignore = undefined;
+    (socket.watcher || []).forEach((watcher) => watcher.close());
+    winston.info(`Stop watching ${socket.watcherPath}`);
+  }
+
+  // The .git dir changes on for instance 'git status', so we
+  // can't trigger a change here (since that would lead to an endless
+  // loop of the client getting the change and then requesting the new data)
+  const isFileWatched = (filename, ignore) => {
+    if (ignore && ignore.filter(filename).length == 0) {
+      return false;  // ignore files that are in .gitignore
+    } else if (filename.startsWith(".git/refs/")) {
+      return true;
+    } else if (filename == ".git/HEAD") {
+      return true;   // Explicitly return true for ".git/HEAD" for branch changes
+    } else if (filename.startsWith(".git")) {
+      return false;  // Ignore changes under ".git/*"
+    } else {
+      return true;
+    }
   }
 
   const ensurePathExists = (req, res, next) => {

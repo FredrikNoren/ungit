@@ -73,10 +73,10 @@ function GraphViewModel(server, repoPath) {
     }
   });
 
-  this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 500);
-  this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 500);
-  this.loadNodesFromApiThrottled();
-  this.updateBranchesThrottled();
+  this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
+  this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
+  this.loadNodesFromApi();
+  this.updateBranches();
   this.graphWidth = ko.observable();
   this.graphHeight = ko.observable(800);
 }
@@ -110,13 +110,32 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   this.nodesLoader.start();
   this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
     .then(function(log) {
-      var nodes = log.nodes ? log.nodes : [];
+      // set new limit and skip
       self.limit(parseInt(log.limit));
       self.skip(parseInt(log.skip));
-      nodes = self.computeNode(nodes.map(function(logEntry) {
-          return self.getNode(logEntry.sha1, logEntry);
-        }));
-
+      return log.nodes || [];
+    }).then(function(nodes) {
+      // check for deleted refs to update the UI
+      var updatedRefs = [];
+      nodes.forEach(function(logEntry) {
+        updatedRefs = updatedRefs.concat(logEntry.refs);
+      });
+      Object.keys(self.refsByRefName).forEach(function(refName) {
+        if (updatedRefs.indexOf(refName) < 0) {
+          self.refs.remove(self.refsByRefName[refName]);
+          var ref = self.refsByRefName[refName];
+          if (ref) { ref.node(null); }
+          delete self.refsByRefName[refName]
+        }
+      });
+      return nodes;
+    }).then(function(nodes) {
+      // create and/or calculate nodes
+      return self.computeNode(nodes.map(function(logEntry) {
+        return self.getNode(logEntry.sha1, logEntry);
+      }));
+    }).then(function(nodes) {
+      // create edges
       var edges = [];
       nodes.forEach(function(node) {
         node.parents().forEach(function(parentSha1) {
@@ -127,7 +146,6 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
 
       self.edges(edges);
       self.nodes(nodes);
-
       if (nodes.length > 0) {
         self.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
