@@ -14,7 +14,7 @@ var testRepoPath;
 var testRepoPathSubDir;
 
 suite.test('Init', function(done) {
-  environment = new Environment(page, { port: 8455, serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
+  environment = new Environment(page, { port: 8455, serverStartupOptions: ['--no-disableDiscardWarning', '--gitConfigUserName=timon', '--gitConfigUserEmail=timon@safari.gov'], rootPath: '/deep/root/path/to/app' });
   environment.init(function(err) {
     if (err) return done(err);
     testRepoPath = environment.path + '/testrepo';
@@ -51,7 +51,7 @@ suite.test('Should be possible to create and commit a file', function(done) {
   environment.createTestFile(testRepoPath + '/testfile.txt', function(err) {
     if (err) return done(err);
     uiInteractions.commit(page, 'Init', function() {
-      helpers.waitForElementVisible(page, '.commit', function() {
+      helpers.waitForElementVisible(page, '[data-ta-author="timon"]', function() {
         done();
       });
     });

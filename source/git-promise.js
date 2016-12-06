@@ -394,7 +394,7 @@ git.commit = (repoPath, amend, message, files, user, email) => {
 
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
-    return git(['commit', (amend ? '--amend' : ''), (user || email ?  `--author="${user} <${email}>"` : '') '--file=-'], repoPath, null, null, message);
+    return git(['commit', (amend ? '--amend' : ''), (user || email ?  `--author="${user} <${email}>"` : ''), '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
     // ignore the case where nothing were added to be committed
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1) {
