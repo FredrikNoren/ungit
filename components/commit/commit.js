@@ -52,7 +52,7 @@ CommitViewModel.prototype.setData = function(args) {
   var message = args.message.split('\n');
   this.message(args.message);
   this.title(message[0]);
-  this.body(message.slice(2).join('\n'));
+  this.body(message.slice((message[1] ? 1 : 2)).join('\n'));
   this.authorDate(moment(new Date(args.authorDate)));
   this.authorDateFromNow(this.authorDate().fromNow());
   this.authorName(args.authorName);
