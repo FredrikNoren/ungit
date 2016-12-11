@@ -259,3 +259,12 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
 }
+
+const authorString = (module.exports.gitConfigUserName || module.exports.gitConfigUserEmail) ?  `--author="${module.exports.gitConfigUserName} <${module.exports.gitConfigUserEmail}>"` : null;
+const gitDefaultConfigString = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+if (authorString) {
+  winston.info(`Initialized with author: ${authorString}`);
+} else {
+  winston.info(`Using default git author...`);
+}
+module.exports.gitConfigArguments = authorString ? gitDefaultConfigString.push(authorString) : gitDefaultConfigString;
