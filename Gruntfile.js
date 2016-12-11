@@ -435,6 +435,31 @@ module.exports = function(grunt) {
     });
   }
 
+  function calcPatchVersionFromGitTag(callback) {
+    childProcess.exec("git describe --tags --abbrev=4", (err, stdout, stderr) => {
+      callback(parseInt(stdout.split('-')[1]));
+    });
+  }
+  function updatePackageJsonPatchVersion(patchVersion) {
+    var packageJson = JSON.parse(fs.readFileSync('package.json'));
+    var ver = packageJson.version.split('.');
+    packageJson.version = ver[0] + "." + ver[1] + "." + patchVersion;
+    fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+  }
+  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
+    var done = this.async();
+    if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
+      console.log('Skipping travis npm publish');
+      return done();
+    }
+    calcPatchVersionFromGitTag(ver => {
+      updatePackageJsonPatchVersion(patchVersion);
+      fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
+      childProcess.exec("npm publish", () => done());
+    })
+  });
+
+
   grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
     var done = this.async();
     grunt.log.writeln('Bumping dependencies...');

@@ -23,3 +23,5 @@ before_script:
   - git config --global user.name "Test testy"
   - git version
   - grunt -d
+after_script:
+  - grunt travisnpmpublish
