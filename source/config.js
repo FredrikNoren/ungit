@@ -267,4 +267,4 @@ if (authorString) {
 } else {
   winston.info(`Using default git author...`);
 }
-module.exports.gitConfigArguments = authorString ? gitDefaultConfigString.push(authorString) : gitDefaultConfigString;
+module.exports.gitConfigArguments = authorString ? gitDefaultConfigString.concat(authorString) : gitDefaultConfigString;
