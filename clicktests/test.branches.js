@@ -134,17 +134,19 @@ suite.test('cherrypick fail case', function(done) {
 
 suite.test('cherrypick success case', function(done) {
   helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-1"]', function() {
-    helpers.click(page, '[data-ta-clickable="node-clickable-1"]');
-    helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
-      helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
-      setTimeout(function() {
-        if (helpers.elementVisible(page, '[data-ta-action="abort"]')) {
-          done("Cherry pick errored when success was expected.")
-        } else {
-          done();
-        }
-      }, 500);
-    });
+    setTimeout(function() {
+      helpers.click(page, '[data-ta-clickable="node-clickable-1"]');
+      helpers.waitForElementVisible(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]', function() {
+        helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
+        setTimeout(function() {
+          if (helpers.elementVisible(page, '[data-ta-action="abort"]')) {
+            done("Cherry pick errored when success was expected.")
+          } else {
+            done();
+          }
+        }, 500);
+      });
+    }, 500);
   });
 });
 
