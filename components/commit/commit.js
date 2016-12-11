@@ -37,9 +37,8 @@ function CommitViewModel(args) {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
   });
 
-  this.selectedDiffLeftPosition = ko.observable();
   this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 220) + 'px' };
+    if (self.selected() && self.element()) return { left: (self.element().getBoundingClientRect().left - 30) + 'px', width: (window.innerWidth - 220) + 'px' };
     else return { left: '0px', width: self.element() ? ((self.element().clientWidth - 20) + 'px') : 'inherit' };
   });
 }

@@ -127,7 +127,6 @@ GitNodeViewModel.prototype.render = function() {
     this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
   }
 
-  this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
   this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
   this.animate();
 }
