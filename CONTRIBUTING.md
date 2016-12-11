@@ -8,8 +8,8 @@ Just common sense; do a quick search before posting, someone might already have 
 Pull requests
 =============
 Make sure to include a note in CHANGELOG.md about the change as part of the PR.
-We follow the ["Keep a changelog"](http://keepachangelog.com/) style guide.
-Make sure to include reference's to issues and PR's when relevant in the change log.
+The CHANGELOG format is: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
+For code change PR's: Bump the version in `package.json`. Bump minor version if the change introduces new features, otherwise patch.
 
 Writing plugins
 ===============
