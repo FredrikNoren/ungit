@@ -435,15 +435,14 @@ module.exports = function(grunt) {
     });
   }
 
-  function calcPatchVersionFromGitTag(callback) {
-    childProcess.exec("git describe --tags --abbrev=4", (err, stdout, stderr) => {
-      callback(parseInt(stdout.split('-')[1]));
+  function getGitLastCommitHash(callback) {
+    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
+      callback(stdout.trim());
     });
   }
-  function updatePackageJsonPatchVersion(patchVersion) {
+  function updatePackageJsonBuildVersion(commitHash) {
     var packageJson = JSON.parse(fs.readFileSync('package.json'));
-    var ver = packageJson.version.split('.');
-    packageJson.version = ver[0] + "." + ver[1] + "." + patchVersion;
+    packageJson.version += '-' + commitHash;
     fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
   }
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
@@ -452,8 +451,8 @@ module.exports = function(grunt) {
       console.log('Skipping travis npm publish');
       return done();
     }
-    calcPatchVersionFromGitTag(ver => {
-      updatePackageJsonPatchVersion(patchVersion);
+    getGitLastCommitHash(hash => {
+      updatePackageJsonBuildVersion(hash);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
       childProcess.exec("npm publish", () => done());
     })
