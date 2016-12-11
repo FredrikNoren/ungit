@@ -436,7 +436,7 @@ module.exports = function(grunt) {
   }
 
   function getGitLastCommitHash(callback) {
-    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
+    childProcess.exec("git rev-parse --short HEAD", function(err, stdout, stderr) {
       callback(stdout.trim());
     });
   }
@@ -451,10 +451,10 @@ module.exports = function(grunt) {
       console.log('Skipping travis npm publish');
       return done();
     }
-    getGitLastCommitHash(hash => {
+    getGitLastCommitHash(function(hash) {
       updatePackageJsonBuildVersion(hash);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec("npm publish", () => done());
+      childProcess.exec("npm publish", function() { done(); });
     })
   });
 
