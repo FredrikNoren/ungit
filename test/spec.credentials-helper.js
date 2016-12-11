@@ -22,11 +22,10 @@ describe('credentials-helper', function () {
 		child_process.exec(command, function(err, stdout, stderr) {
 			expect(err).to.not.be.ok();
 			var ss = stdout.split('\n');
-			expect(ss[0]).to.be('username=' + payload.username);
-			expect(ss[1]).to.be('password=' + payload.password);
+			expect(ss[1]).to.be('username=' + payload.username);
+			expect(ss[2]).to.be('password=' + payload.password);
 			server.close();
 			done();
 		});
 	});
-
 });
