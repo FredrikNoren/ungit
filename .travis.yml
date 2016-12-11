@@ -4,6 +4,9 @@ node_js:
   - "4.1"
   - "5.3"
   - "6.0"
+branches:
+  only:
+    - master
 env:
   global:
     - CXX=g++-4.8
