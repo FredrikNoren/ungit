@@ -271,7 +271,7 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 }
 
 git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
-  const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', '--', filename.trim()];
+  const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.revParse(repoPath)
     .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
     .then((status) => {
