@@ -259,3 +259,9 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
 }
+
+if (module.exports.gitConfigUserName || module.exports.gitConfigUserEmail) {
+  winston.info(`Using gitUserName: ${module.exports.gitConfigUserName} gitUserEmail: ${module.exports.gitConfigUserEmail}`);
+} else {
+  winston.info("Using default git user name and email...");
+}
