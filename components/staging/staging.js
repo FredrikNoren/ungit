@@ -222,6 +222,7 @@ StagingViewModel.prototype.toggleAmend = function() {
 StagingViewModel.prototype.resetMessages = function() {
   this.commitMessageTitle('');
   this.commitMessageBody('');
+  this.filesByPath = {};
   this.amend(false);
 }
 StagingViewModel.prototype.commit = function() {
