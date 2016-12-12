@@ -178,8 +178,10 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
     this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
   } else if (this.inMerge() || this.inCherry()) {
     var lines = status.commitMessage.split('\n');
-    this.commitMessageTitle(lines[0]);
-    this.commitMessageBody(lines.slice(1).join('\n'));
+    if (!this.commitMessageTitle()) {
+      this.commitMessageTitle(lines[0]);
+      this.commitMessageBody(lines.slice(1).join('\n'));
+    }
   }
   if (callback) callback();
 }
