@@ -13,6 +13,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
 - Limit commit title to 72 characters, the rest is truncated and shown when inspecting the commit
 - Updated file watch logic to closely follow git commands in another process [#283](https://github.com/FredrikNoren/ungit/issues/283)
+- Persist commit messages during merge operation [#779](https://github.com/FredrikNoren/ungit/issues/779)
+- Refresh staging.files object for cleaner refresh such as refresh pached line list, diff and etc.
 
 ### Fixed
 - File diff firing increasing number of events longer it survives.
