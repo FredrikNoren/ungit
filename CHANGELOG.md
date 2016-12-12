@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Updated file watch logic to closely follow git commands in another process [#283](https://github.com/FredrikNoren/ungit/issues/283)
 - Persist commit messages during merge operation [#779](https://github.com/FredrikNoren/ungit/issues/779)
 - Refresh staging.files object for cleaner refresh such as refresh pached line list, diff and etc.
+- Fixed an issue where patching on some key word file names such as "test".
 
 ### Fixed
 - File diff firing increasing number of events longer it survives.
