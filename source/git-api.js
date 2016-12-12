@@ -252,7 +252,10 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/commit`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise.commit(req.body.path, req.body.amend, req.body.message, req.body.files))
+    const user = req.body.user || config.gitConfigUserName;
+    const email = req.body.email || config.gitConfigUserEmail;
+
+    jsonResultOrFailProm(res, gitPromise.commit(req.body.path, req.body.amend, req.body.message, req.body.files, user, email))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });

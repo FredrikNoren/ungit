@@ -9,6 +9,7 @@ const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
 const async = require('async');
+const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
 const gitQueue = async.queue((args, callback) => {
   if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
@@ -115,7 +116,7 @@ const git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
     args = commands;
   }
 
-  args.commands = config.gitConfigArguments.concat(args.commands.filter((element) => {
+  args.commands = gitConfigArguments.concat(args.commands.filter((element) => {
     return element;
   }));
   args.timeout = args.timeout || 2 * 60 * 1000; // Default timeout tasks after 2 min
@@ -350,7 +351,7 @@ git.applyPatchedDiff = (repoPath, patchedDiff) => {
   }
 }
 
-git.commit = (repoPath, amend, message, files) => {
+git.commit = (repoPath, amend, message, files, user, email) => {
   return (new Bluebird((resolve, reject) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
@@ -393,7 +394,7 @@ git.commit = (repoPath, amend, message, files) => {
 
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
-    return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
+    return git(['commit', (amend ? '--amend' : ''), (user || email ?  `--author="${user} <${email}>"` : ''), '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
     // ignore the case where nothing were added to be committed
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1) {
