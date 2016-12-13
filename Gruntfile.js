@@ -442,7 +442,7 @@ module.exports = function(grunt) {
   }
   function updatePackageJsonBuildVersion(commitHash) {
     var packageJson = JSON.parse(fs.readFileSync('package.json'));
-    packageJson.version += '-' + commitHash;
+    packageJson.version += '+' + commitHash;
     fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
   }
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
