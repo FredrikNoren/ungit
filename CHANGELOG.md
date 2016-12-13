@@ -21,6 +21,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Persist commit messages during merge operation [#779](https://github.com/FredrikNoren/ungit/issues/779)
 - Refresh `staging.files` object for cleaner refresh such as refresh pached line list, diff and etc.
 - Fixed an issue where patching on some key word file names such as "test".
+- Fix missing commit message body if commit was committed with Visual Studio or Visual Studio Code [#826](https://github.com/FredrikNoren/ungit/pull/826)
 
 ## [0.10.3](https://github.com/FredrikNoren/ungit/compare/v0.10.2...v0.10.3)
 
