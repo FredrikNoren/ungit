@@ -12,6 +12,7 @@ const fs = require('./utils/fs-async');
 const ignore = require('ignore');
 
 const isMac = /^darwin/.test(process.platform);
+const isWindows = /^win/.test(process.platform);
 
 exports.pathPrefix = '';
 
@@ -32,25 +33,33 @@ exports.registerApi = (env) => {
         stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
-        
-        const runOnFileWatchEvent = (event, filename) => {
-          if (isFileWatched(filename, socket.ignore)) {
-            emitGitDirectoryChanged(data.path);
-            emitWorkingTreeChanged(data.path);
-          }
-        }
+
+        const watchPath = (subFolders, options) => {
+          const watcherPath = path.join(data.path, ...subFolders);
+          const relativPath = subFolders.length > 0 ? path.join(...subFolders) : '';
+
+          const runOnFileWatchEvent = function(event, filename) {
+            const filePath = path.join(relativPath, filename);
+            if (isFileWatched(filePath, socket.ignore)) {
+              emitGitDirectoryChanged(data.path);
+              emitWorkingTreeChanged(data.path);
+            }
+          };
+
+          return fs.watch(watcherPath, options || {}, runOnFileWatchEvent);
+        };
 
         fs.readFileAsync(path.join(data.path, ".gitignore"))
           .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
           .catch(() => {})
           .then(() => {
-            socket.watcher = [fs.watch(data.path, {"recursive": true}, runOnFileWatchEvent)];
+            socket.watcher = [watchPath([], {"recursive": true})];
             winston.info(`Start watching ${socket.watcherPath} recursively`);
 
-            if (!isMac) {
-              // recursive fs.watch seems to be only working in mac env...
-              socket.watcher.push(fs.watch(path.join(data.path, '.git'), runOnFileWatchEvent));
-              socket.watcher.push(fs.watch(path.join(data.path, '.git', 'refs'), runOnFileWatchEvent));
+            if (!isMac && !isWindows) {
+              // recursive fs.watch only works on mac and windows
+              socket.watcher.push(watchPath(['.git']));
+              socket.watcher.push(watchPath(['.git', 'refs']));
               winston.info(`Start watching with .git and .git/refs`);
             }
           }).catch((err) => {
@@ -75,11 +84,11 @@ exports.registerApi = (env) => {
   const isFileWatched = (filename, ignore) => {
     if (ignore && ignore.filter(filename).length == 0) {
       return false;  // ignore files that are in .gitignore
-    } else if (filename.startsWith(".git/refs/")) {
+    } else if (filename.startsWith(path.join(".git", "refs"))) {
       return true;
-    } else if (filename == ".git/HEAD") {
+    } else if (filename == path.join(".git", "HEAD")) {
       return true;   // Explicitly return true for ".git/HEAD" for branch changes
-    } else if (filename.startsWith(".git")) {
+    } else if (filename == ".git" || filename.startsWith(".git" + path.sep)) {
       return false;  // Ignore changes under ".git/*"
     } else {
       return true;
