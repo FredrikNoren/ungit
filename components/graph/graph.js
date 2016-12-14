@@ -153,6 +153,9 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
     }).finally(function() {
       self.nodesLoader.stop();
       if (callback) callback();
+      if (window.innerHeight - self.graphHeight() > 0) {
+        self.scrolledToEnd();
+      }
     });
 }
 
