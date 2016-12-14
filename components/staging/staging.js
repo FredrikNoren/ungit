@@ -178,8 +178,10 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
     this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
   } else if (this.inMerge() || this.inCherry()) {
     var lines = status.commitMessage.split('\n');
-    this.commitMessageTitle(lines[0]);
-    this.commitMessageBody(lines.slice(1).join('\n'));
+    if (!this.commitMessageTitle()) {
+      this.commitMessageTitle(lines[0]);
+      this.commitMessageBody(lines.slice(1).join('\n'));
+    }
   }
   if (callback) callback();
 }
@@ -220,6 +222,7 @@ StagingViewModel.prototype.toggleAmend = function() {
 StagingViewModel.prototype.resetMessages = function() {
   this.commitMessageTitle('');
   this.commitMessageBody('');
+  this.filesByPath = {};
   this.amend(false);
 }
 StagingViewModel.prototype.commit = function() {
@@ -232,14 +235,13 @@ StagingViewModel.prototype.commit = function() {
   });
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.server.post('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() }, function(err, res) {
-    self.committingProgressBar.stop();
-    if (err) {
-      return;
-    }
-    self.resetMessages();
-    self.files([]);
-  });
+
+  this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
+    .catch(function() {})
+    .finally(function() {
+      self.committingProgressBar.stop();
+      self.resetMessages();
+    });
 }
 StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
   var self = this;
