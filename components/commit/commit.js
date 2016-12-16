@@ -38,7 +38,7 @@ function CommitViewModel(gitNode) {
   });
 
   this.diffStyle = ko.computed(function() {
-    var marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1
+    var marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1;
     if (self.selected() && self.element()) return { "margin-left": marginLeft + 'px', width: (window.innerWidth - 220) + 'px' };
     else return { left: '0px', width: self.element() ? ((self.element().clientWidth - 20) + 'px') : 'inherit' };
   });
