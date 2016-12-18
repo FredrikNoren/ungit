@@ -31,6 +31,12 @@ const defaultConfig = {
   // Write the result of git commands issued to the log
   logGitOutput: false,
 
+  // User name to use for git operations
+  gitConfigUserName: undefined,
+
+  // Email to use for git operations
+  gitConfigUserEmail: undefined,
+
   // This will automatically send anonymous bug reports.
   bugtracking: false,
 
@@ -157,6 +163,8 @@ let argv = yargs
 .describe('logRESTRequests', 'Write REST requests to the log')
 .describe('logGitCommands', 'Write git commands issued to the log')
 .describe('logGitOutput', 'Write the result of git commands issued to the log')
+.describe('gitConfigUserName', 'User name to use for git operations')
+.describe('gitConfigUserEmail', 'Email to use for git operations')
 .describe('bugtracking', 'This will automatically send anonymous bug reports')
 .describe('sendUsageStatistics', 'Google analytics for usage statistics')
 .describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
@@ -250,4 +258,10 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
   module.exports.ungitDevVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
+}
+
+if (module.exports.gitConfigUserName || module.exports.gitConfigUserEmail) {
+  winston.info(`Using gitUserName: ${module.exports.gitConfigUserName} gitUserEmail: ${module.exports.gitConfigUserEmail}`);
+} else {
+  winston.info("Using default git user name and email...");
 }
