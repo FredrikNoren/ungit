@@ -38,9 +38,10 @@ exports.registerApi = (env) => {
           const watcherPath = path.join(data.path, ...subFolders);
           const relativPath = subFolders.length > 0 ? path.join(...subFolders) : '';
 
-          const runOnFileWatchEvent = function(event, filename) {
+          const runOnFileWatchEvent = (event, filename) => {
             const filePath = path.join(relativPath, filename);
             if (isFileWatched(filePath, socket.ignore)) {
+              winston.info(`FILE WATCH TRIGGERED: ${filePath}`);
               emitGitDirectoryChanged(data.path);
               emitWorkingTreeChanged(data.path);
             }
@@ -58,9 +59,11 @@ exports.registerApi = (env) => {
 
             if (!isMac && !isWindows) {
               // recursive fs.watch only works on mac and windows
-              socket.watcher.push(watchPath(['.git']));
-              socket.watcher.push(watchPath(['.git', 'refs']));
-              winston.info(`Start watching with .git and .git/refs`);
+              socket.watcher.push(watchPath(['.git', 'HEAD']));
+              socket.watcher.push(watchPath(['.git', 'refs', 'heads']));
+              socket.watcher.push(watchPath(['.git', 'refs', 'remotes']));
+              socket.watcher.push(watchPath(['.git', 'refs', 'tags']));
+              winston.info(`Start watching with .git and .git/refs/[heads|remotes|tags]`);
             }
           }).catch((err) => {
             // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
