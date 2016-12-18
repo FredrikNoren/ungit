@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - File diff firing increasing number of events longer it survives.
 - Fix missing ungit logo. [#812](https://github.com/FredrikNoren/ungit/issues/812)
 - Fix when stash output is empty [#818](https://github.com/FredrikNoren/ungit/issues/818)
+- Fix minor display error for wide git repo [#830](https://github.com/FredrikNoren/ungit/pull/830)
 - Persist commit messages during merge operation [#779](https://github.com/FredrikNoren/ungit/issues/779)
 - Refresh `staging.files` object for cleaner refresh such as refresh pached line list, diff and etc.
 - Fixed an issue where patching on some key word file names such as "test".

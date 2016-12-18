@@ -10,14 +10,14 @@ components.register('commit', function(args) {
   return new CommitViewModel(args);
 });
 
-function CommitViewModel(args) {
+function CommitViewModel(gitNode) {
   var self = this;
-  this.repoPath = args.repoPath;
-  this.sha1 = args.sha1;
-  this.server = args.server;
-  this.highlighted = args.highlighted;
-  this.nodeIsMousehover = args.nodeIsMousehover;
-  this.selected = args.selected;
+  this.repoPath = gitNode.graph.repoPath;
+  this.sha1 = gitNode.sha1;
+  this.server = gitNode.graph.server;
+  this.highlighted = gitNode.highlighted;
+  this.nodeIsMousehover = gitNode.nodeIsMousehover;
+  this.selected = gitNode.selected;
   this.element = ko.observable();
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();
@@ -37,9 +37,9 @@ function CommitViewModel(args) {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
   });
 
-  this.selectedDiffLeftPosition = ko.observable();
   this.diffStyle = ko.computed(function() {
-    if (self.selected()) return { left: self.selectedDiffLeftPosition() + 'px', width: (window.innerWidth - 220) + 'px' };
+    var marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1;
+    if (self.selected() && self.element()) return { "margin-left": marginLeft + 'px', width: (window.innerWidth - 220) + 'px' };
     else return { left: '0px', width: self.element() ? ((self.element().clientWidth - 20) + 'px') : 'inherit' };
   });
 }

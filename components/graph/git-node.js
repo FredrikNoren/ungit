@@ -41,14 +41,6 @@ var GitNodeViewModel = function(graph, sha1) {
   this.selected.subscribe(function() {
     programEvents.dispatch({ event: 'graph-render' });
   });
-  this.commitComponent = components.create('commit', {
-    sha1: this.sha1,
-    repoPath: this.graph.repoPath,
-    server: this.graph.server,
-    selected: this.selected,
-    highlighted: this.highlighted,
-    nodeIsMousehover: this.nodeIsMousehover
-  });
   // These are split up like this because branches and local tags can be found in the git log,
   // whereas remote tags needs to be fetched with another command (which is much slower)
   this.branches = ko.computed(function() {
@@ -77,7 +69,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.branchOrder = ko.observable();
   this.aboveNode = undefined;
   this.belowNode = undefined;
-
+  this.commitComponent = components.create('commit', this);
   this.r = ko.observable();
   this.cx = ko.observable();
   this.cy = ko.observable();
@@ -127,7 +119,6 @@ GitNodeViewModel.prototype.render = function() {
     this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
   }
 
-  this.commitComponent.selectedDiffLeftPosition(-(this.cx() - 600));
   this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
   this.animate();
 }
