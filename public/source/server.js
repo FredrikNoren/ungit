@@ -118,6 +118,9 @@ Server.prototype.postPromise = function(url, arg) {
 Server.prototype.delPromise = function(url, arg) {
   return this.queryPromise('DELETE', url, arg);
 }
+Server.prototype.emptyPromise = function() {
+  return Promise.resolve();
+}
 Server.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);
 }
