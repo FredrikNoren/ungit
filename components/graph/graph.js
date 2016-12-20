@@ -304,11 +304,12 @@ GraphViewModel.prototype.onProgramEvent = function(event) {
 }
 GraphViewModel.prototype.updateBranches = function() {
   var self = this;
-  this.server.get('/checkout', { path: this.repoPath() }, function(err, branch) {
-    if (err && err.errorCode == 'not-a-repository') return true;
-    if (err) return;
-    self.checkedOutBranch(branch);
-  });
+
+  this.server.getPromise('/checkout', { path: this.repoPath() })
+    .then(self.checkedOutBranch)
+    .catch(function(err) {
+      if (!err || err.errorCode != 'not-a-repository') throw err;
+    })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   var self = this;
