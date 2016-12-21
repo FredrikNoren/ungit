@@ -39,6 +39,7 @@ exports.registerApi = (env) => {
           const relativPath = subFolders.length > 0 ? path.join(...subFolders) : '';
 
           const runOnFileWatchEvent = (event, filename) => {
+            if (filename === null) return;
             const filePath = path.join(relativPath, filename);
             if (isFileWatched(filePath, socket.ignore)) {
               winston.info(`FILE WATCH TRIGGERED: ${filePath}`);
