@@ -91,6 +91,8 @@ exports.registerApi = (env) => {
   const isFileWatched = (filename, ignore) => {
     if (ignore && ignore.filter(filename).length == 0) {
       return false;  // ignore files that are in .gitignore
+    } else if (filename.endsWith(".lock")) {
+      return false;
     } else if (filename.startsWith(path.join(".git", "refs"))) {
       return true;
     } else if (filename == path.join(".git", "HEAD")) {
