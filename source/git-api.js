@@ -34,7 +34,7 @@ exports.registerApi = (env) => {
         socket.join(path.normalize(data.path)); // join room for this path
         socket.watcherPath = data.path;
 
-        const watchPath = (subFolders, options) => {
+        const watchPath = (subFolders, watchers, options) => {
           const watcherPath = path.join(data.path, ...subFolders);
           const relativPath = subFolders.length > 0 ? path.join(...subFolders) : '';
 
@@ -48,22 +48,25 @@ exports.registerApi = (env) => {
             }
           };
 
-          return fs.watch(watcherPath, options || {}, runOnFileWatchEvent);
+          return fs.isExists(watcherPath).then((isExists) => {
+            if (isExists) watchers.push(fs.watch(watcherPath, options || {}, runOnFileWatchEvent));
+          })
         };
 
         fs.readFileAsync(path.join(data.path, ".gitignore"))
           .then((ignoreContent) => socket.ignore = ignore().add(ignoreContent.toString()))
           .catch(() => {})
           .then(() => {
-            socket.watcher = [watchPath([], {"recursive": true})];
+            socket.watcher = [];
+            watchPath([], socket.watcher, {"recursive": true});
             winston.info(`Start watching ${socket.watcherPath} recursively`);
 
             if (!isMac && !isWindows) {
               // recursive fs.watch only works on mac and windows
-              socket.watcher.push(watchPath(['.git', 'HEAD']));
-              socket.watcher.push(watchPath(['.git', 'refs', 'heads']));
-              socket.watcher.push(watchPath(['.git', 'refs', 'remotes']));
-              socket.watcher.push(watchPath(['.git', 'refs', 'tags']));
+              watchPath(['.git', 'HEAD'], socket.watcher);
+              watchPath(['.git', 'refs', 'heads'], socket.watcher);
+              watchPath(['.git', 'refs', 'remotes'], socket.watcher);
+              watchPath(['.git', 'refs', 'tags'], socket.watcher);
               winston.info(`Start watching with .git and .git/refs/[heads|remotes|tags]`);
             }
           }).catch((err) => {
