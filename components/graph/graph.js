@@ -106,6 +106,7 @@ GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
 
 GraphViewModel.prototype.loadNodesFromApi = function(callback) {
   var self = this;
+  var nodeSize = self.nodes().length;
 
   this.nodesLoader.start();
   this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
@@ -153,7 +154,7 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
     }).finally(function() {
       self.nodesLoader.stop();
       if (callback) callback();
-      if (window.innerHeight - self.graphHeight() > 0) {
+      if (window.innerHeight - self.graphHeight() > 0 && nodeSize != self.nodes().length) {
         self.scrolledToEnd();
       }
     });
