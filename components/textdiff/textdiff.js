@@ -120,14 +120,10 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
         self.render();
       }
     }).catch(function(err) {
-      if (err.errorCode == 'no-such-file') {
-        // The file existed before but has been removed, but we're trying to get a diff for it
-        // Most likely it will just disappear with the next refresh of the staging area
-        // so we just ignore the error here
-        return;
-      } else {
-        throw err;
-      }
+      // The file existed before but has been removed, but we're trying to get a diff for it
+      // Most likely it will just disappear with the next refresh of the staging area
+      // so we just ignore the error here
+      if (err.errorCode != 'no-such-file') throw err;
     });
   }).finally(function() {
     if (self.diffProgressBar) self.diffProgressBar.stop();

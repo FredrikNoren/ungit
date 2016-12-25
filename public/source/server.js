@@ -266,7 +266,7 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
 
 Promise.onPossiblyUnhandledRejection(function(err, promise) {
   // Show a error screen for git errors (so that people have a chance to debug them)
-  if (err.res.body && err.res.body.isGitError) {
+  if (err.res && err.res.body && err.res.body.isGitError) {
     // Skip report is used for "user errors"; i.e. it's something ungit can't really do anything about.
     // It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
     var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;

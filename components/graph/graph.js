@@ -309,7 +309,7 @@ GraphViewModel.prototype.updateBranches = function() {
   this.server.getPromise('/checkout', { path: this.repoPath() })
     .then(self.checkedOutBranch)
     .catch(function(err) {
-      if (!err || err.errorCode != 'not-a-repository') throw err;
+      if (err.errorCode != 'not-a-repository') throw err;
     })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
