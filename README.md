@@ -88,6 +88,10 @@ Text Editor Integration
 
 ![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/screenshots/viewer.png)
 
+* [Codiad-OpenUngit](https://github.com/viharm/Codiad-OpenUngit) for [Codiad](http://codiad.com/) by [@viharm](https://github.com/viharm)
+
+![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
+
 
 Developing
 ----------
