@@ -63,7 +63,7 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
 
     self.server.get('/submodules', { path: baseRepoPath.path }, function(err, submodules) {
       if (!err && Array.isArray(submodules)) {
-        var baseName = self.repoPath().replace(/^.*[\\\/]/, '');
+        var baseName = self.repoPath().substring(baseRepoPath.path.length + 1);
 
         for (var n = 0; n < submodules.length; n++) {
           if (submodules[n].path === baseName) {
