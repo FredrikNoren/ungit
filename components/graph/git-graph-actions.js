@@ -107,10 +107,9 @@ GraphActions.Reset.prototype.perform = function(callback) {
   var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'});
   diag.closed.add(function() {
     if (diag.result()) {
-      self.server.post('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' }, function() {
-        context.node(remoteRef.node());
-        callback();
-      });
+      self.server.postPromise('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
+        .then(function() { context.node(remoteRef.node()); })
+        .finally(function() { callback(); });
     } else {
       callback();
     }
@@ -142,10 +141,9 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
   return new RebaseViewModel(this.node, path);
 }
 GraphActions.Rebase.prototype.perform = function(callback) {
-  this.server.post('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 }, function(err) {
-    callback();
-    if (err && err.errorCode == 'merge-failed') return true;
-  });
+  this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
+    .catch(function(err) { if (err.edrrorCode != 'merge-failed') throw err })
+    .finally(function() { callback(); });
 }
 
 GraphActions.Merge = function(graph, node) {
@@ -171,10 +169,9 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
   return new MergeViewModel(this.graph, this.node, node);
 }
 GraphActions.Merge.prototype.perform = function(callback) {
-  this.server.post('/merge', { path: this.graph.repoPath(), with: this.graph.currentActionContext().localRefName }, function(err) {
-    callback();
-    if (err && err.errorCode == 'merge-failed') return true;
-  });
+  this.server.postPromise('/merge', { path: this.graph.repoPath(), with: this.graph.currentActionContext().localRefName })
+    .catch(function(err) { if (err.edrrorCode != 'merge-failed') throw err })
+    .finally(function() { callback(); });
 }
 
 GraphActions.Push = function(graph, node) {
@@ -235,24 +232,22 @@ GraphActions.Checkout.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
   var refName = context instanceof RefViewModel ? context.refName : context.sha1;
-  this.server.post('/checkout', { path: this.graph.repoPath(), name: refName }, function(err) {
-    if (err && err.errorCode != 'merge-failed') {
-      callback();
-      return;
-    }
 
+  this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: refName })
+  .then(function(err) {
     if (context instanceof RefViewModel && context.isRemoteBranch) {
-      self.server.post('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' }, function(err, res) {
-        self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-        callback();
-        return err && err.errorCode != 'merge-failed' ? undefined : true;
-      });
+      return self.server.postPromise('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' })
+        .then(function() {
+          self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
+        }).catch(function(err) {
+          if (err.errorCode == 'merge-failed') throw err
+        })
     } else {
       self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-      callback();
     }
-    return true;
-  });
+  }).catch(function(err) {
+    if (err.errorCode != 'merge-failed') { throw err; }
+  }).finally(function() { callback(); });
 }
 
 GraphActions.Delete = function(graph, node) {
@@ -300,10 +295,9 @@ GraphActions.CherryPick.prototype.style = 'cherry-pick';
 GraphActions.CherryPick.prototype.icon = 'octicon octicon-circuit-board';
 GraphActions.CherryPick.prototype.perform = function(callback) {
   var self = this;
-  this.server.post('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 }, function(err) {
-    callback();
-    if (err && err.errorCode == 'merge-failed') return true;
-  });
+  this.server.postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
+  .finally(function() { callback(); })
+  .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
 }
 
 GraphActions.Uncommit = function(graph, node) {
