@@ -4,6 +4,9 @@ node_js:
   - "4.1"
   - "5.3"
   - "6.0"
+branches:
+  only:
+    - master
 env:
   global:
     - CXX=g++-4.8
@@ -23,3 +26,5 @@ before_script:
   - git config --global user.name "Test testy"
   - git version
   - grunt -d
+after_script:
+  - grunt travisnpmpublish

@@ -1,9 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/) and
-[Keep a changlelog's changelog standard](http://keepachangelog.com/)
+This project adheres to [Semantic Versioning](http://semver.org/).
+Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v0.10.3...master)
+- 1.0.0: Introduced Continuous delivery. [#823](https://github.com/FredrikNoren/ungit/issues/823)
+
+## [1.0.0](https://github.com/FredrikNoren/ungit/compare/v0.10.3...v1.0.0)
 
 ### Added
 - Added search by git folder name in the search bar. [#793](https://github.com/FredrikNoren/ungit/issues/793)
