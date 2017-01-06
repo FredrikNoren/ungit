@@ -38,7 +38,7 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   this.server.postPromise('/checkout', { path: this.repoPath(), name: branch.name })
     .then(function() { self.current(branch.name); })
     .catch(function() {})
-    .finally(self.fetchingProgressBar.stop);
+    .finally(function() { self.fetchingProgressBar.stop(); });
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;

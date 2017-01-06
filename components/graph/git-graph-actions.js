@@ -234,7 +234,7 @@ GraphActions.Checkout.prototype.perform = function(callback) {
   var refName = context instanceof RefViewModel ? context.refName : context.sha1;
 
   this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: refName })
-  .then(function(err) {
+  .then(function() {
     if (context instanceof RefViewModel && context.isRemoteBranch) {
       return self.server.postPromise('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' })
         .then(function() {
@@ -324,7 +324,7 @@ GraphActions.Uncommit.prototype.perform = function(callback) {
       }
       self.graph.HEADref().node(targetNode ? targetNode : null);
       self.graph.checkedOutRef().node(targetNode ? targetNode : null);
-    }).finally(callback);
+    }).finally(function() { callback(); });
 }
 
 GraphActions.Revert = function(graph, node) {
@@ -343,5 +343,5 @@ GraphActions.Revert.prototype.icon = 'octicon octicon-history';
 GraphActions.Revert.prototype.perform = function(callback) {
   var self = this;
   this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 })
-    .finally(callback);
+    .finally(function() { callback(); });
 }

@@ -307,7 +307,7 @@ GraphViewModel.prototype.updateBranches = function() {
   var self = this;
 
   this.server.getPromise('/checkout', { path: this.repoPath() })
-    .then(self.checkedOutBranch)
+    .then(function(res) { self.checkedOutBranch(res); })
     .catch(function(err) {
       if (err.errorCode != 'not-a-repository') throw err;
     })

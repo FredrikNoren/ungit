@@ -49,7 +49,7 @@ GitErrorViewModel.prototype.dismiss = function() {
 GitErrorViewModel.prototype.enableBugtrackingAndStatistics = function() {
   var self = this;
   this.server.getPromise('/userconfig')
-    .then(function(err, userConfig) {
+    .then(function(userConfig) {
       userConfig.bugtracking = true;
       userConfig.sendUsageStatistics = true;
       return self.server.postPromise('/userconfig', userConfig)
