@@ -64,7 +64,10 @@ suite.test('Should be possible to discard a created file without warning message
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done, true);
+  environment.shutdown(function() {
+    page = webpage.create();
+    done();
+  }, true);
 });
 
 suite.test('Init', function(done) {

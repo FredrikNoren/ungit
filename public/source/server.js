@@ -287,7 +287,7 @@ Promise.onPossiblyUnhandledRejection(function(err, promise) {
     } });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error(err.errorSummary, promise.reason());
+    console.error(err.errorSummary, JSON.stringify(promise.reason()));
     programEvents.dispatch({ event: 'git-crash-error' });
     Raven.captureException(promise.reason());
   }
