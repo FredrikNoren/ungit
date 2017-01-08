@@ -31,7 +31,11 @@ function CommitViewModel(gitNode) {
   this.fileLineDiffs = ko.observable();
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
-  this.authorGravatar = ko.computed(function() { return md5(self.authorEmail().toLowerCase()); });
+  this.authorGravatar = ko.computed(function() {
+    var lowerCaseEmail = self.authorEmail();
+    lowerCaseEmail = lowerCaseEmail ? lowerCaseEmail.toLowerCase() : lowerCaseEmail;
+    return md5(lowerCaseEmail);
+  });
 
   this.showCommitDiff = ko.computed(function() {
     return self.fileLineDiffs() && self.fileLineDiffs().length > 0;
