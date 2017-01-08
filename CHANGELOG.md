@@ -5,6 +5,11 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 
 - 1.0.0: Introduced Continuous delivery. [#823](https://github.com/FredrikNoren/ungit/issues/823)
 
+## [1.0.1](https://github.com/FredrikNoren/ungit/compare/v1.0.0...v1.0.1)
+
+### Fixed
+- Fixed gravatar avatar fetch if email have different cases applied. [#847](https://github.com/FredrikNoren/ungit/issues/847)
+
 ## [1.0.0](https://github.com/FredrikNoren/ungit/compare/v0.10.3...v1.0.0)
 
 ### Added
