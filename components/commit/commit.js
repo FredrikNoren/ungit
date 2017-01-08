@@ -33,7 +33,7 @@ function CommitViewModel(gitNode) {
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() {
     var lowerCaseEmail = self.authorEmail();
-    lowerCaseEmail = lowerCaseEmail ? lowerCaseEmail.toLowerCase().trim() : lowerCaseEmail;
+    lowerCaseEmail = lowerCaseEmail ? lowerCaseEmail.toLowerCase() : lowerCaseEmail;
     return md5(lowerCaseEmail);
   });
 
