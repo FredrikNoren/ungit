@@ -15,13 +15,15 @@ var LoginViewModel = function(server) {
   this.username = ko.observable();
   this.password = ko.observable();
   this.loginError = ko.observable();
-  this.server.get('/loggedin', undefined, function(err, status) {
-    if (status.loggedIn) {
-      self.loggedIn.dispatch();
-      self.status('loggedIn');
-    }
-    else self.status('login');
-  });
+  this.server.getPromise('/loggedin')
+    .then(function(status) {
+      if (status.loggedIn) {
+        self.loggedIn.dispatch();
+        self.status('loggedIn');
+      } else {
+        self.status('login');
+      }
+    }).catch(function(err) { });
 }
 LoginViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('login', this, {}, parentElement);
@@ -40,4 +42,3 @@ LoginViewModel.prototype.login = function() {
     }
   });
 }
-

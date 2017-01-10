@@ -50,24 +50,24 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.server.get('/quickstatus', { path: this.repoPath() }, function(err, status){
-    self.loadingProgressBar.stop();
-    if (err) return;
-    if (status.type == 'inited' || status.type == 'bare') {
-      if (self.repoPath() !== status.gitRootPath) {
-        self.repoPath(status.gitRootPath);
-        programEvents.dispatch({ event: 'navigated-to-path', path: self.repoPath() });
-        programEvents.dispatch({ event: 'working-tree-changed' });
+  return this.server.getPromise('/quickstatus', { path: this.repoPath() })
+    .then(function(status){
+      if (status.type == 'inited' || status.type == 'bare') {
+        if (self.repoPath() !== status.gitRootPath) {
+          self.repoPath(status.gitRootPath);
+          programEvents.dispatch({ event: 'navigated-to-path', path: self.repoPath() });
+          programEvents.dispatch({ event: 'working-tree-changed' });
+        }
+        self.status(status.type);
+        if (!self.repository()) {
+          self.repository(components.create('repository', { server: self.server, path: self }));
+        }
+      } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+        self.status(status.type);
+        self.repository(null);
       }
-      self.status(status.type);
-      if (!self.repository()) {
-        self.repository(components.create('repository', { server: self.server, path: self }));
-      }
-    } else if (status.type == 'uninited' || status.type == 'no-such-path') {
-      self.status(status.type);
-      self.repository(null);
-    }
-  });
+    }).catch(function(err) { })
+    .finally(function() { self.loadingProgressBar.stop() });
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
@@ -99,7 +99,6 @@ PathViewModel.prototype.cloneRepository = function() {
 PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
-  this.server.post('/createDir',  { dir: this.repoPath() }, function() {
-    self.updateStatus();
-  });
+  return this.server.postPromise('/createDir',  { dir: this.repoPath() })
+    .then(function() { self.updateStatus(); });
 }

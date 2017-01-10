@@ -44,13 +44,9 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
   this.fetchingProgressBar.start();
-  this.server.get('/branches', { path: this.repoPath() }, function(err, branches) {
-    if (err) {
-      self.current("~error");
-      return;
-    }
 
-    if (branches) {
+  this.server.getPromise('/branches', { path: this.repoPath() })
+    .then(function(branches) {
       var sorted = branches.sort(function(a, b) {
         if (a.name < b.name)
            return -1;
@@ -65,10 +61,8 @@ BranchesViewModel.prototype.updateBranches = function() {
           self.current(branch.name);
         }
       });
-    }
-
-    self.fetchingProgressBar.stop();
-  });
+    }).catch(function(err) { self.current("~error"); })
+    .finally(function() { self.fetchingProgressBar.stop() })
 }
 
 BranchesViewModel.prototype.branchRemove = function(branch) {

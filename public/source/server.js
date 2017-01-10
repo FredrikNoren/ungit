@@ -97,14 +97,47 @@ Server.prototype._getCredentials = function(callback) {
 Server.prototype.watchRepository = function(repositoryPath, callback) {
   this.socket.emit('watch', { path: repositoryPath }, callback);
 };
-Server.prototype.queryPromise = function(type, url, arg) {
+Server.prototype.queryPromise = function(method, path, body) {
   var self = this;
+  if (body) body.socketId = this.socketId;
+  var request = {
+    method: method,
+    url: rootPath + '/api' + path,
+  }
+  if (method == 'GET' || method == 'DELETE') request.query = body;
+  else request.body = body;
+
   return new Promise(function (resolve, reject) {
-    self.query(type, url, arg, function(err, result) {
-      if (err) {
-        reject(err);
+    self._httpJsonRequest(request, function(error, res) {
+      if (error) {
+        if (error.error == 'connection-lost') {
+          return self._isConnected(function(connected) {
+            if (connected) {
+              reject({ errorCode: 'cross-domain-error', error: error });
+            } else {
+              self._onDisconnect();
+              resolve();
+            }
+          });
+        }
+        var errorSummary = 'unknown';
+        if (error.body) {
+          if (error.body.errorCode && error.body.errorCode != 'unknown') errorSummary = error.body.errorCode;
+          else if (typeof(error.body.error) == 'string') errorSummary = error.body.error.split('\n')[0];
+          else if (typeof(error.body.message) == 'string') errorSummary = error.body.message;
+          else errorSummary = JSON.stringify(error.body.error);
+        } else {
+          errorSummary = error.httpRequest.statusText + ' ' + error.status;
+        }
+        reject({
+          errorSummary: errorSummary,
+          error: error,
+          path: path,
+          res: error,
+          errorCode: error && error.body ? error.body.errorCode : 'unknown'
+        });
       } else {
-        resolve(result);
+        resolve(res);
       }
     });
   });
@@ -117,6 +150,9 @@ Server.prototype.postPromise = function(url, arg) {
 }
 Server.prototype.delPromise = function(url, arg) {
   return this.queryPromise('DELETE', url, arg);
+}
+Server.prototype.emptyPromise = function() {
+  return Promise.resolve();
 }
 Server.prototype.get = function(path, query, callback) {
   this.query('GET', path, query, callback);
@@ -227,3 +263,32 @@ Server.prototype._onUnhandledBadBackendResponse = function(err, precreatedError)
     programEvents.dispatch({ event: 'git-crash-error' });
   }
 }
+
+Promise.onPossiblyUnhandledRejection(function(err, promise) {
+  // Show a error screen for git errors (so that people have a chance to debug them)
+  if (err.res && err.res.body && err.res.body.isGitError) {
+    // Skip report is used for "user errors"; i.e. it's something ungit can't really do anything about.
+    // It's still shown in the ui but we don't send a bug report since we can't do anything about it anyways
+    var shouldSkipReport = this._skipReportErrorCodes.indexOf(err.errorCode) >= 0;
+    if (!shouldSkipReport) {
+      if (ungit.config && ungit.config.sendUsageStatistics) {
+        keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
+      }
+      console.log('git-error', err); // Used by the clicktests
+    }
+    programEvents.dispatch({ event: 'git-error', data: {
+      tip: this._backendErrorCodeToTip[err.errorCode],
+      command: err.res.body.command,
+      error: err.res.body.error,
+      stdout: err.res.body.stdout,
+      stderr: err.res.body.stderr,
+      shouldSkipReport: shouldSkipReport,
+      repoPath: err.res.body.workingDirectory
+    } });
+  } else {
+    // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
+    console.error(err.errorSummary, promise.reason());
+    programEvents.dispatch({ event: 'git-crash-error' });
+    Raven.captureException(promise.reason());
+  }
+});

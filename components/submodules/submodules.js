@@ -30,18 +30,16 @@ SubmodulesViewModel.prototype.updateNode = function(parentElement) {
 SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
   var self = this;
 
-  this.server.get('/submodules', { path: this.repoPath() }, function(err, submodules) {
-    // if returned is not array, don't render submodules module
-    if (submodules && Array.isArray(submodules)) {
-      self.submodules(submodules);
-    } else {
-      self.submodules([]);
-    }
-
-    if (callback) {
-      callback(self);
-    }
-  });
+  return this.server.getPromise('/submodules', { path: this.repoPath() })
+    .then(function(submodules) {
+      if (submodules && Array.isArray(submodules)) {
+        self.submodules(submodules);
+      } else {
+        self.submodules([]);
+      }
+    }).finally(function() {
+      if (callback) callback(self);
+    });
 }
 
 SubmodulesViewModel.prototype.isRunning = function() {

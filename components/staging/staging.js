@@ -123,47 +123,48 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
 }
 StagingViewModel.prototype.refreshContent = function(callback) {
   var self = this;
-  this.server.get('/head', { path: this.repoPath(), limit: 1 }, function(err, log) {
-    if (err) {
-      return err.errorCode == 'must-be-in-working-tree' ||
-        err.errorCode == 'no-such-path';
-    }
-    if (log.length > 0) {
-      var array = log[0].message.split('\n');
-      self.HEAD({title: array[0], body: array.slice(2).join('\n')});
-    }
-    else self.HEAD(null);
-  });
-  this.server.get('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit }, function(err, status) {
-    if (err) {
-      if (callback) callback(err);
-      return err.errorCode == 'must-be-in-working-tree' ||
-        err.errorCode == 'no-such-path';
-    }
-
-    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
-      if (self.isDiagOpen) {
-        if (callback) callback();
-        return;
+  this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
+    .then(function(log) {
+      if (log.length > 0) {
+        var array = log[0].message.split('\n');
+        self.HEAD({title: array[0], body: array.slice(2).join('\n')});
       }
-      self.isDiagOpen = true;
-      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
-
-      diag.closed.add(function() {
-        self.isDiagOpen = false;
-        if (diag.result()) {
-          self.loadAnyway = true;
-          self.loadStatus(status, callback);
-        } else {
-          window.location.href = '/#/';
+      else self.HEAD(null);
+    }).catch(function(err) {
+      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+        throw err;
+      }
+    });
+  this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
+    .then(function(status) {
+      if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+        if (self.isDiagOpen) {
+          if (callback) callback();
+          return;
         }
-      })
+        self.isDiagOpen = true;
+        var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
 
-      programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
-    } else {
-      self.loadStatus(status, callback);
-    }
-  });
+        diag.closed.add(function() {
+          self.isDiagOpen = false;
+          if (diag.result()) {
+            self.loadAnyway = true;
+            self.loadStatus(status, callback);
+          } else {
+            window.location.href = '/#/';
+          }
+        })
+
+        programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+      } else {
+        self.loadStatus(status, callback);
+      }
+    }).catch(function(err) {
+      if (callback) callback(err);
+      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+        throw err;
+      }
+    });
 }
 StagingViewModel.prototype.loadStatus = function(status, callback) {
   this.setFiles(status.files);

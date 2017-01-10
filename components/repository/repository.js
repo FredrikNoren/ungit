@@ -24,9 +24,11 @@ var RepositoryViewModel = function(server, path) {
   this.repoPath.subscribe(function(value) { self.sever.watchRepository(value); });
   this.server.watchRepository(this.repoPath());
   this.showLog = self.isBareDir ? ko.observable(true) : self.staging.isStageValid;
-  this.isSubmodule = ko.observable(false);
   this.parentModulePath = ko.observable();
   this.parentModuleLink = ko.observable();
+  this.isSubmodule = ko.computed(function() {
+    return self.parentModulePath() && self.parentModuleLink();
+  });
   this.refreshSubmoduleStatus();
   if (window.location.search.indexOf('noheader=true') >= 0) {
     this.refreshButton = components.create('refreshbutton');
@@ -55,28 +57,23 @@ RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
   var self = this;
-  this.server.get('/baserepopath', { path: this.repoPath() }, function(err, baseRepoPath) {
-    if (err || !baseRepoPath.path) {
-      self.isSubmodule(false);
-      return true;
-    }
 
-    self.server.get('/submodules', { path: baseRepoPath.path }, function(err, submodules) {
-      if (!err && Array.isArray(submodules)) {
-        var baseName = self.repoPath().replace(/^.*[\\\/]/, '');
-
-        for (var n = 0; n < submodules.length; n++) {
-          if (submodules[n].path === baseName) {
-            self.isSubmodule(true);
-            self.parentModulePath(baseRepoPath.path);
-            self.parentModuleLink('/#/repository?path=' + encodeURIComponent(baseRepoPath.path));
-            return;
-          }
-        }
+  return this.server.getPromise('/baserepopath', { path: this.repoPath() })
+    .then(function(baseRepoPath) {
+      if (baseRepoPath.path) {
+        return self.server.getProimse('/submodules', { path: baseRepoPath.path })
+          .then(function(submodules) {
+            if (Array.isArray(submodules)) {
+              var baseName = self.repoPath().replace(/^.*[\\\/]/, '');
+              for (var n = 0; n < submodules.length; n++) {
+                if (submodules[n].path === baseName) {
+                  self.parentModulePath(baseRepoPath.path);
+                  self.parentModuleLink('/#/repository?path=' + encodeURIComponent(baseRepoPath.path));
+                  return;
+                }
+              }
+            }
+          });
       }
-
-      self.isSubmodule(false);
-      return true;
-    });
-  });
+    }).catch(function(err) { })
 }

@@ -63,25 +63,23 @@ StashViewModel.prototype.onProgramEvent = function(event) {
 }
 StashViewModel.prototype.refresh = function() {
   var self = this;
-  this.server.get('/stashes', { path: this.repoPath() }, function(err, stashes) {
-    if (err) {
-      if (err.errorCode == 'no-such-path') return true;
-      return;
-    }
-
-    var changed = self.stashedChanges().length != stashes.length;
-    if (!changed) {
-      changed = !self.stashedChanges().every(function(item1) {
-        return stashes.some(function(item2) {
-          return item1.sha1 == item2.sha1;
+  this.server.getPromise('/stashes', { path: this.repoPath() })
+    .then(function(stashes) {
+      var changed = self.stashedChanges().length != stashes.length;
+      if (!changed) {
+        changed = !self.stashedChanges().every(function(item1) {
+          return stashes.some(function(item2) {
+            return item1.sha1 == item2.sha1;
+          });
         });
-      });
-    }
+      }
 
-    if (changed) {
-      self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
-    }
-  });
+      if (changed) {
+        self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
+      }
+    }).catch(function(err) {
+      if (err.errorCode != 'no-such-path') throw err
+    })
 }
 StashViewModel.prototype.toggleShowStash = function() {
   this.isShow(!this.isShow());
