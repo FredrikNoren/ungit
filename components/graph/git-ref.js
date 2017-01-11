@@ -92,7 +92,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
       .catch(function(err) {
         if (err.errorCode == 'non-fast-forward') {
           return components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' })
-            .publish
+            .publish()
             .closePromise
             .then(function(diag) {
               if (!diag.result()) return false;
