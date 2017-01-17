@@ -30,15 +30,14 @@ LoginViewModel.prototype.updateNode = function(parentElement) {
 }
 LoginViewModel.prototype.login = function() {
   var self = this;
-  this.server.post('/login', { username: this.username(), password: this.password() }, function(err, res) {
-    if (err) {
-      if (err.res.body.error) {
-        self.loginError(err.res.body.error);
-        return true;
-      }
+  this.server.postPromise('/login', { username: this.username(), password: this.password() }).then(function(res) {
+    self.loggedIn.dispatch();
+    self.status('loggedIn');
+  }).catch(function(err) {
+    if (err.res.body.error) {
+      self.loginError(err.res.body.error);
     } else {
-      self.loggedIn.dispatch();
-      self.status('loggedIn');
+      throw err;
     }
   });
 }

@@ -203,12 +203,14 @@ GraphActions.Push.prototype.perform = function(callback) {
 
   if (remoteRef) {
     remoteRef.moveTo(ref.node().sha1, callback);
-  } else ref.createRemoteRef(function(err) {
-    if (!err && self.graph.HEAD().name == ref.name) {
-      self.grah.HEADref().node(ref.node());
-    }
-    callback();
-  });
+  } else {
+    ref.createRemoteRef()
+      .then(function() {
+        if (self.graph.HEAD().name == ref.name) {
+          self.grah.HEADref().node(ref.node());
+        }
+      }).finally(callback)
+  }
 }
 
 GraphActions.Checkout = function(graph, node) {
