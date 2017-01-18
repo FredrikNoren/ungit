@@ -84,34 +84,28 @@ RemotesViewModel.prototype.updateRemotes = function() {
 }
 RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var self = this;
-  var diag = components.create('addremotedialog');
-  diag.closed.add(function() {
-    if (diag.isSubmitted()) {
-      self.server.post('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() }, function(err, res) {
-        if (err) return;
-        self.updateRemotes();
-      })
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('addremotedialog')
+    .publish()
+    .closeThen(function(diag) {
+      if(diag.isSubmitted()) {
+        return self.server.postPromise('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() })
+          .then(function() { self.updateRemotes(); })
+          .catch(function() {});
+      }
+    });
 }
 
 RemotesViewModel.prototype.remoteRemove = function(remote) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + remote.name + ' remote cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
-      self.fetchingProgressBar.start();
-      self.server.del('/remotes/' + remote.name, { path: self.repoPath() }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
-        self.updateRemotes();
-        self.fetchingProgressBar.stop();
-      });
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + remote.name + ' remote cannot be undone with ungit.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (diag.result()) {
+        self.fetchingProgressBar.start();
+        return self.server.delPromise('/remotes/' + remote.name, { path: self.repoPath() })
+          .then(function() { self.updateRemotes(); })
+          .catch(console.log)
+          .finally(function() { self.fetchingProgressBar.stop(); });
+      }
+    });
 }

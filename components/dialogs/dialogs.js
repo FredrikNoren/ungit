@@ -3,7 +3,7 @@ var ko = require('knockout');
 var signals = require('signals');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
-var Promise = require('bluebird')
+var Promise = require('bluebird');
 var programEvents = require('ungit-program-events');
 
 components.register('formdialog', function(args) {
@@ -46,6 +46,10 @@ function DialogViewModel(title) {
   this.closePromise = new Promise(function(resolve) {
     self.closed.add(function() { resolve(self); });
   });
+}
+DialogViewModel.prototype.closeThen = function(thenFunc) {
+  this.closePromise = this.closePromise.then(thenFunc);
+  return this;
 }
 DialogViewModel.prototype.setCloser = function(closer) {
   this.close = closer;
