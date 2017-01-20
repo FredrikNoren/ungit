@@ -51,7 +51,7 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
   var self = this;
 
   this.updateProgressBar.start();
-  this.server.post('/submodules/update', { path: this.repoPath() }, function(err, result) {
+  return this.server.postPromise('/submodules/update', { path: this.repoPath() }).finally(function() {
     self.updateProgressBar.stop();
   });
 }
@@ -62,15 +62,10 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   diag.closed.add(function() {
     if (diag.isSubmitted()) {
       self.fetchProgressBar.start();
-      self.server.post('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
+      self.server.postPromise('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }).then(function() {
         programEvents.dispatch({ event: 'submodule-fetch' });
-        self.fetchProgressBar.stop();
-      });
+      }).catch(function() {})
+      .finally(function() { self.fetchProgressBar.stop(); });
     }
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });

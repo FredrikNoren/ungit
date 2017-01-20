@@ -249,10 +249,12 @@ StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
   progressBar.start();
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.server.post(apiPath, { path: this.repoPath(), message: commitMessage }, function(err, res) {
-    self.resetMessages();
-    progressBar.stop();
-  });
+  this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
+    .catch(function(){})
+    .finally(function(err, res) {
+      self.resetMessages();
+      progressBar.stop();
+    });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -263,14 +265,14 @@ StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
   var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'});
   diag.closed.add(function() {
-    if (diag.result()) self.server.post('/discardchanges', { path: self.repoPath(), all: true });
+    if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
   this.stashProgressBar.start();
-  this.server.post('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() }, function(err, res) {
+  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() }).finally(function() {
     self.stashProgressBar.stop();
   });
 }
@@ -371,11 +373,11 @@ FileViewModel.prototype.toggleStaged = function() {
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
   if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
-    self.server.post('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+    self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
   } else {
     var diag = components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
     diag.closed.add(function() {
-      if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+      if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
       if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
     });
     programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
@@ -383,19 +385,20 @@ FileViewModel.prototype.discardChanges = function() {
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.server.post('/ignorefile', { path: this.staging.repoPath(), file: this.name() }, function(err) {
-    if (err && err.errorCode == 'file-already-git-ignored') {
+  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() }).catch(function(err) {
+    if (err.errorCode == 'file-already-git-ignored') {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
-      return true;
+    } else {
+      throw err;
     }
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
-  this.server.post('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
+  this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
 }
 FileViewModel.prototype.launchMergeTool = function() {
-  this.server.post('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
+  this.server.postPromise('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames
