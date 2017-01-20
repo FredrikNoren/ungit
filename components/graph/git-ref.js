@@ -119,12 +119,11 @@ RefViewModel.prototype.remove = function(callback) {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
-  this.server.del(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
-    if (!err) {
-      self.node().removeRef(self);
-      self.graph.refsByRefName[self.name] = undefined;
-    }
 
+  return this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }).then(function(err) {
+    self.node().removeRef(self);
+    self.graph.refsByRefName[self.name] = undefined;
+  }).finally(function() {
     callback();
     self.graph.loadNodesFromApi();
     if (url == '/remote/tags') {

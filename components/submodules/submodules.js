@@ -85,15 +85,12 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   diag.closed.add(function() {
     if (diag.result()) {
       self.fetchProgressBar.start();
-      self.server.del('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
+      self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }).catch(function(err, result) {
+        console.log(err);
+      }).then(function() {
         programEvents.dispatch({ event: 'submodule-fetch' });
         self.fetchProgressBar.stop();
-      });
+      })
     }
   });
   programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });

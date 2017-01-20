@@ -27,14 +27,14 @@ function StashItemViewModel(stash, data) {
 StashItemViewModel.prototype.pop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath(), pop: true }, function(err, res) {
+  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), pop: true }).finally(function() {
     self.stashPopProgressBar.stop();
   });
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.del('/stashes/' + this.id, { path: this.stash.repoPath() }, function(err, res) {
+  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath() }).finally(function() {
     self.stashPopProgressBar.stop();
   });
 }
