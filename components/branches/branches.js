@@ -66,13 +66,12 @@ BranchesViewModel.prototype.updateBranches = function() {
 
 BranchesViewModel.prototype.branchRemove = function(branch) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (!diag.result()) return;
       self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() }).then(function(err) {
         programEvents.dispatch({ event: 'working-tree-changed' });
       }).catch(function() {});
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    });
 }

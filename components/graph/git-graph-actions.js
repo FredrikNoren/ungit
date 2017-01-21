@@ -8,7 +8,6 @@ var RebaseViewModel = HoverActions.RebaseViewModel;
 var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
 var PushViewModel = HoverActions.PushViewModel;
-var programEvents = require('ungit-program-events');
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -104,17 +103,13 @@ GraphActions.Reset.prototype.perform = function(callback) {
   var self = this;
   var context = this.graph.currentActionContext();
   var remoteRef = context.getRemoteRef(self.graph.currentRemote());
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (!diag.result()) return;
       self.server.postPromise('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
         .then(function() { context.node(remoteRef.node()); })
-        .finally(function() { callback(); });
-    } else {
-      callback();
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    }).finally(callback)
 }
 
 GraphActions.Rebase = function(graph, node) {
@@ -270,15 +265,15 @@ GraphActions.Delete.prototype.icon = 'glyphicon glyphicon-remove';
 GraphActions.Delete.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
   var name = context.isRemoteBranch ? "remote " + context.localRefName : context.localRefName;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + name + ' branch or tag cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
-      context.remove(callback);
-    } else {
-      callback();
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + name + ' branch or tag cannot be undone with ungit.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (diag.result()) {
+        context.remove(callback);
+      } else {
+        callback();
+      }
+    });
 }
 
 GraphActions.CherryPick = function(graph, node) {

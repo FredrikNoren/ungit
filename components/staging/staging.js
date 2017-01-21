@@ -143,19 +143,17 @@ StagingViewModel.prototype.refreshContent = function(callback) {
           return;
         }
         self.isDiagOpen = true;
-        var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
-
-        diag.closed.add(function() {
-          self.isDiagOpen = false;
-          if (diag.result()) {
-            self.loadAnyway = true;
-            self.loadStatus(status, callback);
-          } else {
-            window.location.href = '/#/';
-          }
-        })
-
-        programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+        return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
+          .publish()
+          .closeThen(function(diag) {
+            self.isDiagOpen = false;
+            if (diag.result()) {
+              self.loadAnyway = true;
+              self.loadStatus(status, callback);
+            } else {
+              window.location.href = '/#/';
+            }
+          });
       } else {
         self.loadStatus(status, callback);
       }
@@ -263,11 +261,11 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 }
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'});
-  diag.closed.add(function() {
-    if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
+    });
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
@@ -375,12 +373,12 @@ FileViewModel.prototype.discardChanges = function() {
   if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
     self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
   } else {
-    var diag = components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
-    diag.closed.add(function() {
-      if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
-      if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
-    });
-    programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'})
+      .publish()
+      .closeThen(function(diag) {
+        if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+        if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
+      });
   }
 }
 FileViewModel.prototype.ignoreFile = function() {

@@ -58,17 +58,16 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
 
 SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   var self = this;
-  var diag = components.create('addsubmoduledialog');
-  diag.closed.add(function() {
-    if (diag.isSubmitted()) {
+  components.create('addsubmoduledialog')
+    .publish()
+    .closeThen(function(diag) {
+      if (!diag.isSubmitted()) return;
       self.fetchProgressBar.start();
       self.server.postPromise('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }).then(function() {
-        programEvents.dispatch({ event: 'submodule-fetch' });
-      }).catch(function() {})
-      .finally(function() { self.fetchProgressBar.stop(); });
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+          programEvents.dispatch({ event: 'submodule-fetch' });
+        }).catch(function() {})
+        .finally(function() { self.fetchProgressBar.stop(); });
+    });
 }
 
 SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
@@ -81,9 +80,10 @@ SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
 
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + submodule.name + ' submodule cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + submodule.name + ' submodule cannot be undone with ungit.'})
+    .publish()
+    .closeThen(function(diag) {
+      if (!diag.result()) return;
       self.fetchProgressBar.start();
       self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }).catch(function(err, result) {
         console.log(err);
@@ -91,7 +91,5 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
         programEvents.dispatch({ event: 'submodule-fetch' });
         self.fetchProgressBar.stop();
       })
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    });
 }

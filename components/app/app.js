@@ -103,27 +103,24 @@ AppViewModel.prototype._handleRequestRememberRepo = function(event) {
 }
 AppViewModel.prototype._handleCredentialsRequested = function() {
   var self = this;
-  var diag;
   // Only show one credentials dialog if we're asked to show another one while the first one is open
   // This happens for instance when we fetch nodes and remote tags at the same time
-  if (this._isShowingCredentialsDialog)
-    diag = self.dialog();
-  else {
-    diag = components.create('credentialsdialog');
-    self.showDialog(diag);
+  if (!this._isShowingCredentialsDialog) {
+    this._isShowingCredentialsDialog = true;
+    self.dialog.onclose();
+    self.showDialog(components.create('credentialsdialog').closeThen(function(diag) {
+      self._isShowingCredentialsDialog = false;
+      programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
+    }));
   }
-  this._isShowingCredentialsDialog = true;
-  diag.closed.add(function() {
-    self._isShowingCredentialsDialog = false;
-    programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
-  });
 }
 AppViewModel.prototype.showDialog = function(dialog) {
   var self = this;
-  dialog.closed.add(function() {
+  // console.log("!!!", dialog.closeThen)
+  this.dialog(dialog.closeThen(function() {
     self.dialog(null);
-  })
-  this.dialog(dialog);
+    return dialog;
+  }));
 }
 var gitSetUserConfig = function(bugTracking, sendUsageStatistics) {
   var self = this;

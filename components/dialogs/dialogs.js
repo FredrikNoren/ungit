@@ -1,6 +1,5 @@
 
 var ko = require('knockout');
-var signals = require('signals');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
 var Promise = require('bluebird');
@@ -40,11 +39,11 @@ components.register('TooManyFilesDialogViewModel', function(args) {
 
 function DialogViewModel(title) {
   var self = this;
-  this.closed = new signals.Signal();
+  this.onclose = null;
   this.title = ko.observable(title);
   this.taDialogName = ko.observable('');
   this.closePromise = new Promise(function(resolve) {
-    self.closed.add(function() { resolve(self); });
+    self.onclose = resolve;
   });
 }
 DialogViewModel.prototype.closeThen = function(thenFunc) {
@@ -53,9 +52,6 @@ DialogViewModel.prototype.closeThen = function(thenFunc) {
 }
 DialogViewModel.prototype.setCloser = function(closer) {
   this.close = closer;
-}
-DialogViewModel.prototype.onclose = function() {
-  this.closed.dispatch();
 }
 DialogViewModel.prototype.publish = function() {
   programEvents.dispatch({ event: 'request-show-dialog', dialog: this });
