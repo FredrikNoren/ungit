@@ -22,23 +22,17 @@ SubmodulesViewModel.prototype.onProgramEvent = function(event) {
 }
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
-  this.fetchSubmodules(function(submoduleViewModel) {
+  this.fetchSubmodules().then(function(submoduleViewModel) {
     ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
   });
 }
 
-SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
+SubmodulesViewModel.prototype.fetchSubmodules = function() {
   var self = this;
-
   return this.server.getPromise('/submodules', { path: this.repoPath() })
     .then(function(submodules) {
-      if (submodules && Array.isArray(submodules)) {
-        self.submodules(submodules);
-      } else {
-        self.submodules([]);
-      }
-    }).finally(function() {
-      if (callback) callback(self);
+      self.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      return self;
     });
 }
 
