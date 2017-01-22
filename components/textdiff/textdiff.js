@@ -108,10 +108,9 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   };
 }
 
-TextDiffViewModel.prototype.invalidateDiff = function(callback) {
+TextDiffViewModel.prototype.invalidateDiff = function() {
   var self = this;
-
-  this.server.emptyPromise().then(function() {
+  return this.server.emptyPromise().then(function() {
     if (!self.isShowingDiffs()) return;
     if (self.diffProgressBar) self.diffProgressBar.start();
     return self.server.getPromise('/diff', self.getDiffArguments()).then(function(diffs) {
@@ -127,7 +126,6 @@ TextDiffViewModel.prototype.invalidateDiff = function(callback) {
     });
   }).finally(function() {
     if (self.diffProgressBar) self.diffProgressBar.stop();
-    if (callback) callback();
   });
 }
 
@@ -180,7 +178,7 @@ TextDiffViewModel.prototype.render = function() {
   this.isParsed(true);
 };
 
-TextDiffViewModel.prototype.loadMore = function(callback) {
+TextDiffViewModel.prototype.loadMore = function() {
   this.loadCount += this.loadMoreCount();
   this.render();
 }

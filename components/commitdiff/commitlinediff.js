@@ -34,7 +34,7 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
 
 CommitLineDiff.prototype.fileNameClick = function() {
   this.isShowingDiffs(!this.isShowingDiffs());
-  this.specificDiff().invalidateDiff(function() {
-    programEvents.dispatch({ event: 'graph-render' });
-  });
+  this.specificDiff()
+    .invalidateDiff()
+    .then(function() { programEvents.dispatch({ event: 'graph-render' }); });
 };
