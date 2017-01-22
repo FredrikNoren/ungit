@@ -104,7 +104,7 @@ GraphActions.Reset.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
   var remoteRef = context.getRemoteRef(self.graph.currentRemote());
   components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
       self.server.postPromise('/reset', { path: self.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
@@ -266,7 +266,7 @@ GraphActions.Delete.prototype.perform = function(callback) {
   var context = this.graph.currentActionContext();
   var name = context.isRemoteBranch ? "remote " + context.localRefName : context.localRefName;
   components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + name + ' branch or tag cannot be undone with ungit.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (diag.result()) {
         context.remove(callback);

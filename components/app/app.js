@@ -116,7 +116,6 @@ AppViewModel.prototype._handleCredentialsRequested = function() {
 }
 AppViewModel.prototype.showDialog = function(dialog) {
   var self = this;
-  // console.log("!!!", dialog.closeThen)
   this.dialog(dialog.closeThen(function() {
     self.dialog(null);
     return dialog;

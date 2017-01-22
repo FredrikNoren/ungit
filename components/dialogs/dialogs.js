@@ -53,7 +53,7 @@ DialogViewModel.prototype.closeThen = function(thenFunc) {
 DialogViewModel.prototype.setCloser = function(closer) {
   this.close = closer;
 }
-DialogViewModel.prototype.publish = function() {
+DialogViewModel.prototype.show = function() {
   programEvents.dispatch({ event: 'request-show-dialog', dialog: this });
   return this;
 }

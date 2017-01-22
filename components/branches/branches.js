@@ -67,7 +67,7 @@ BranchesViewModel.prototype.updateBranches = function() {
 BranchesViewModel.prototype.branchRemove = function(branch) {
   var self = this;
   components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
       self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() }).then(function(err) {

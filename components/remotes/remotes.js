@@ -85,7 +85,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
 RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var self = this;
   components.create('addremotedialog')
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if(diag.isSubmitted()) {
         return self.server.postPromise('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() })
@@ -98,7 +98,7 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
 RemotesViewModel.prototype.remoteRemove = function(remote) {
   var self = this;
   components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + remote.name + ' remote cannot be undone with ungit.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (diag.result()) {
         self.fetchingProgressBar.start();

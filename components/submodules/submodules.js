@@ -59,7 +59,7 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
 SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   var self = this;
   components.create('addsubmoduledialog')
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (!diag.isSubmitted()) return;
       self.fetchProgressBar.start();
@@ -81,7 +81,7 @@ SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var self = this;
   components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + submodule.name + ' submodule cannot be undone with ungit.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
       self.fetchProgressBar.start();

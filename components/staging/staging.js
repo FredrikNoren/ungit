@@ -144,7 +144,7 @@ StagingViewModel.prototype.refreshContent = function(callback) {
         }
         self.isDiagOpen = true;
         return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
-          .publish()
+          .show()
           .closeThen(function(diag) {
             self.isDiagOpen = false;
             if (diag.result()) {
@@ -262,7 +262,7 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
   components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'})
-    .publish()
+    .show()
     .closeThen(function(diag) {
       if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
     });
@@ -374,7 +374,7 @@ FileViewModel.prototype.discardChanges = function() {
     self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
   } else {
     components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'})
-      .publish()
+      .show()
       .closeThen(function(diag) {
         if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
         if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
