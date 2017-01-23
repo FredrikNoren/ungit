@@ -113,7 +113,7 @@ RefViewModel.prototype.moveTo = function(target) {
     });
 }
 
-RefViewModel.prototype.remove = function(callback) {
+RefViewModel.prototype.remove = function() {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
@@ -124,8 +124,7 @@ RefViewModel.prototype.remove = function(callback) {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;
     }).finally(function() {
-      callback();
-      self.graph.loadNodesFromApi();
+      return self.graph.loadNodesFromApi();
       if (url == '/remote/tags') {
         programEvents.dispatch({ event: 'request-fetch-tags' });
       } else {
