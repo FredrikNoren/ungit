@@ -70,7 +70,8 @@ GraphActions.Move.prototype.text = 'Move';
 GraphActions.Move.prototype.style = 'move';
 GraphActions.Move.prototype.icon = 'glyphicon glyphicon-move';
 GraphActions.Move.prototype.perform = function(callback) {
-  this.graph.currentActionContext().moveTo(this.node.sha1, callback);
+  return this.graph.currentActionContext().moveTo(this.node.sha1)
+    .then(callback)
 }
 
 GraphActions.Reset = function(graph, node) {
@@ -197,9 +198,10 @@ GraphActions.Push.prototype.perform = function(callback) {
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
 
   if (remoteRef) {
-    remoteRef.moveTo(ref.node().sha1, callback);
+    return remoteRef.moveTo(ref.node().sha1)
+      .then(callback);
   } else {
-    ref.createRemoteRef()
+    return ref.createRemoteRef()
       .then(function() {
         if (self.graph.HEAD().name == ref.name) {
           self.grah.HEADref().node(ref.node());

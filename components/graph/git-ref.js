@@ -74,7 +74,7 @@ RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
 }
-RefViewModel.prototype.moveTo = function(target, callback) {
+RefViewModel.prototype.moveTo = function(target) {
   var self = this;
   var promise;
 
@@ -102,8 +102,7 @@ RefViewModel.prototype.moveTo = function(target, callback) {
       });
   }
 
-  promise
-    .catch(function(err) { callback(err) })
+  return promise
     .then(function(res) {
       if (!res) return;
       var targetNode = self.graph.getNode(target);
@@ -111,7 +110,6 @@ RefViewModel.prototype.moveTo = function(target, callback) {
         self.graph.HEADref().node(targetNode);
       }
       self.node(targetNode);
-      callback();
     });
 }
 
