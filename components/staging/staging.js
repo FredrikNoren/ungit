@@ -3,6 +3,7 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var Promise = require("bluebird");
 var filesToDisplayIncrmentBy = 50;
 var filesToDisplayLimit = filesToDisplayIncrmentBy;
 // when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
@@ -121,50 +122,48 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
     this.invalidateFilesDiffsThrottled();
   }
 }
-StagingViewModel.prototype.refreshContent = function(callback) {
+StagingViewModel.prototype.refreshContent = function() {
   var self = this;
-  this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
-    .then(function(log) {
-      if (log.length > 0) {
-        var array = log[0].message.split('\n');
-        self.HEAD({title: array[0], body: array.slice(2).join('\n')});
-      }
-      else self.HEAD(null);
-    }).catch(function(err) {
-      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-        throw err;
-      }
-    });
-  this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
-    .then(function(status) {
-      if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
-        if (self.isDiagOpen) {
-          if (callback) callback();
-          return;
+  return Promise.all([this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
+      .then(function(log) {
+        if (log.length > 0) {
+          var array = log[0].message.split('\n');
+          self.HEAD({title: array[0], body: array.slice(2).join('\n')});
         }
-        self.isDiagOpen = true;
-        return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
-          .show()
-          .closeThen(function(diag) {
-            self.isDiagOpen = false;
-            if (diag.result()) {
-              self.loadAnyway = true;
-              self.loadStatus(status, callback);
-            } else {
-              window.location.href = '/#/';
-            }
-          });
-      } else {
-        self.loadStatus(status, callback);
-      }
-    }).catch(function(err) {
-      if (callback) callback(err);
-      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-        throw err;
-      }
-    });
+        else self.HEAD(null);
+      }).catch(function(err) {
+        if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+          throw err;
+        }
+      }),
+    this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
+      .then(function(status) {
+        if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+          if (self.isDiagOpen) {
+            return;
+          }
+          self.isDiagOpen = true;
+          return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
+            .show()
+            .closeThen(function(diag) {
+              self.isDiagOpen = false;
+              if (diag.result()) {
+                self.loadAnyway = true;
+                self.loadStatus(status);
+              } else {
+                window.location.href = '/#/';
+              }
+            });
+        } else {
+          self.loadStatus(status);
+        }
+      }).catch(function(err) {
+        if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+          throw err;
+        }
+      })]);
 }
-StagingViewModel.prototype.loadStatus = function(status, callback) {
+StagingViewModel.prototype.loadStatus = function(status) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
@@ -182,7 +181,6 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
       this.commitMessageBody(lines.slice(1).join('\n'));
     }
   }
-  if (callback) callback();
 }
 StagingViewModel.prototype.setFiles = function(files) {
   var self = this;

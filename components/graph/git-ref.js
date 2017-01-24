@@ -124,12 +124,12 @@ RefViewModel.prototype.remove = function() {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;
     }).finally(function() {
-      return self.graph.loadNodesFromApi();
       if (url == '/remote/tags') {
         programEvents.dispatch({ event: 'request-fetch-tags' });
       } else {
         programEvents.dispatch({ event: 'branch-updated' });
       }
+      return self.graph.loadNodesFromApi();
     });
 }
 
