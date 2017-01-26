@@ -107,6 +107,9 @@ const defaultConfig = {
   // Don't show errors when the user is using a bad or undecidable git version
   gitVersionCheckOverride: false,
 
+  // Don't show upgrade message when the user is using an older version of ungit
+  ungitVersionCheckOverride: false,
+
   // Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick. This makes it
   // possible to perform those actions even when you have a dirty working directory.
   autoStashAndPop: true,
@@ -148,6 +151,7 @@ let argv = yargs
 .alias('o', 'gitVersionCheckOverride')
 .alias('v', 'version')
 .describe('o', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
+.describe('ungitVersionCheckOverride', 'Ignore check for older version of ungit')
 .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this')
 .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
 .describe('port', 'The port ungit is exposed on')

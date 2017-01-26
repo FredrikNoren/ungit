@@ -75,7 +75,7 @@ AppViewModel.prototype.shown = function() {
     if (!version) return;
     self.currentVersion(version.currentVersion);
     self.latestVersion(version.latestVersion);
-    self.newVersionAvailable(version.outdated);
+    self.newVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
   });
   this.server.get('/gitversion', undefined, function(err, gitversion) {
     if (!gitversion) return;
