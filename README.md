@@ -26,7 +26,7 @@ Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
 
 Installing
 ----------
-Requires [node.js](http://nodejs.org) (≥ 0.10), [npm](https://www.npmjs.com/) (≥ 1.3.1, comes with node.js) and [git](http://git-scm.com/) (≥ 1.8.x). To install ungit just type:
+Requires [node.js](http://nodejs.org) (≥ 4.1), [npm](https://www.npmjs.com/) (≥ 2.14.3, comes with node.js) and [git](http://git-scm.com/) (≥ 1.8.x). To install ungit just type:
 
 	npm install -g ungit
 
@@ -87,6 +87,10 @@ Text Editor Integration
 * [brackets-ungit](https://github.com/Hirse/brackets-ungit) for [Brackets.io](http://brackets.io/) by [@hirse](https://github.com/Hirse)
 
 ![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/screenshots/viewer.png)
+
+* [Codiad-OpenUngit](https://github.com/viharm/Codiad-OpenUngit) for [Codiad](http://codiad.com/) by [@viharm](https://github.com/viharm)
+
+![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
 
 
 Developing

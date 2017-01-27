@@ -7,9 +7,14 @@ Just common sense; do a quick search before posting, someone might already have 
 
 Pull requests
 =============
-Make sure to include a note in CHANGELOG.md about the change as part of the PR.
-We follow the ["Keep a changelog"](http://keepachangelog.com/) style guide.
-Make sure to include reference's to issues and PR's when relevant in the change log.
+All PRs are automatically published to NPM once merged (see [#823](https://github.com/FredrikNoren/ungit/issues/823)).
+There are two things you have to do for all PRs:
+- Make sure to include a note in CHANGELOG.md about the change as part of the PR.
+- If it's a code change: Bump the version in `package.json`.
+  - Does the change fundamentally change how people use Ungit: Bump the major version.
+  - Does the change introduce new features: Bump the minor version.
+  - Otherwise (bug fixes, tweaks and refactoring): Bump patch version.
+  - If the change doesn't affect the product (e.g. you change the README): No need to bump the version.
 
 Writing plugins
 ===============

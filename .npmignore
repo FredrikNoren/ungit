@@ -38,3 +38,5 @@ build/
 *.dll
 nw.exe
 nw.pak
+
+.npmrc

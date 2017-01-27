@@ -269,9 +269,22 @@ app.get('/api/latestversion', (req, res) => {
   sysinfo.getUngitLatestVersion()
     .then((latestVersion) => {
       if (!semver.valid(config.ungitDevVersion)) {
-        res.json({ latestVersion: latestVersion, currentVersion: config.ungitDevVersion, outdated: false });
+        res.json({
+          latestVersion: latestVersion,
+          currentVersion: config.ungitDevVersion,
+          outdated: false
+        });
       } else {
-        res.json({ latestVersion: latestVersion, currentVersion: config.ungitDevVersion, outdated: semver.gt(latestVersion, config.ungitDevVersion) });
+        // We only want to show the "new version" banner if the major/minor version was bumped
+        let latestSansPatch = semver(latestVersion);
+        latestSansPatch.patch = 0;
+        let currentSansPatch = semver(config.ungitDevVersion);
+        currentSansPatch.patch = 0;
+        res.json({
+          latestVersion: latestVersion,
+          currentVersion: config.ungitDevVersion,
+          outdated: semver.gt(latestSansPatch, currentSansPatch)
+        });
       }
     }).catch((err) => {
       res.json({ latestVersion: config.ungitDevVersion, currentVersion: config.ungitDevVersion, outdated: false });
