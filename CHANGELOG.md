@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.1: [patch] Fixed small spelling error for ignore whitespace feature [#853](https://github.com/FredrikNoren/ungit/pull/853)
 - 1.1.0: Added option to ignore ungit version checks [#851](https://github.com/FredrikNoren/ungit/issues/851)
 - 1.0.1: [patch] Fixed gravatar avatar fetch if email have different cases applied. [#847](https://github.com/FredrikNoren/ungit/issues/847)
 - 1.0.0: Introduced Continuous delivery. [#823](https://github.com/FredrikNoren/ungit/issues/823)
