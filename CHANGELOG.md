@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.2: [patch] Promise refactoring
 - 1.1.1: [patch] Fixed small spelling error for ignore whitespace feature [#853](https://github.com/FredrikNoren/ungit/pull/853)
 - 1.1.0: Added option to ignore ungit version checks [#851](https://github.com/FredrikNoren/ungit/issues/851)
 - 1.0.1: [patch] Fixed gravatar avatar fetch if email have different cases applied. [#847](https://github.com/FredrikNoren/ungit/issues/847)
@@ -18,6 +19,9 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - Fix for favorites linking in case rootPath is used @sebastianmay [#609](https://github.com/FredrikNoren/ungit/issues/609) and image diffing
 - Limit commit title to 72 characters, the rest is truncated and shown when inspecting the commit
 - Updated file watch logic to closely follow git commands in another process [#283](https://github.com/FredrikNoren/ungit/issues/283)
+
+### Changed
+- Refactored to use promises on client side [#852](https://github.com/FredrikNoren/ungit/pull/852)
 
 ### Fixed
 - File diff firing increasing number of events longer it survives.
