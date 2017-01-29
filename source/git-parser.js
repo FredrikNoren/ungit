@@ -1,5 +1,6 @@
 const moment = require('moment');
 const fs = require('fs');
+const path = require('path');
 const fileType = require('./utils/file-type.js');
 const _ = require('lodash')
 
@@ -221,10 +222,11 @@ exports.parseGitSubmodule = (text, args) => {
     } else {
       const parts = line.split("=");
       const key = parts[0].trim();
-      const value = parts.slice(1).join("=").trim();
-      submodule[key] = value;
+      let value = parts.slice(1).join("=").trim();
 
-      if (key == "url") {
+      if (key == "path") {
+        value = path.normalize(value);
+      } else if (key == "url") {
         // keep a reference to the raw url
         let url = submodule.rawUrl = value;
 
@@ -237,8 +239,10 @@ exports.parseGitSubmodule = (text, args) => {
           }
         }
 
-        submodule.url = url;
+        value = url;
       }
+
+      submodule[key] = value;
     }
   });
 
