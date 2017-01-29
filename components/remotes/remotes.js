@@ -69,15 +69,17 @@ RemotesViewModel.prototype.updateRemotes = function() {
       });
       self.remotes(remotes);
       if (!self.currentRemote() && remotes.length > 0) {
-        if (_.find(remotes, { 'name': 'origin' })) // default to origin if it exists
+        if (_.find(remotes, { 'name': 'origin' })) {// default to origin if it exists
           self.currentRemote('origin');
-        else // otherwise take the first one
+        } else {// otherwise take the first one
           self.currentRemote(remotes[0].name);
+        }
+
         if (self.shouldAutoFetch) {
-          self.fetch({ nodes: true, tags: true });
+          self.shouldAutoFetch = false;
+          return self.fetch({ nodes: true, tags: true });
         }
       }
-      self.shouldAutoFetch = false;
     }).catch(function(err) {
       if (err.errorCode != 'not-a-repository') throw err;
     });

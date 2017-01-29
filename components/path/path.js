@@ -71,10 +71,8 @@ PathViewModel.prototype.updateStatus = function() {
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  this.server.postPromise('/init', { path: this.repoPath() }).catch(function() {})
-  .finally(function(res) {
-    self.updateStatus();
-  });
+  return this.server.postPromise('/init', { path: this.repoPath() }).catch(function() {})
+    .finally(function(res) { self.updateStatus(); });
 }
 PathViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-credentials') this.cloningProgressBar.pause();
@@ -90,10 +88,10 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }).then(function(res) {
-    navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
-  }).catch(function() {})
-  .finally(function() { self.cloningProgressBar.stop() })
+  return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }).then(function(res) {
+      navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
+    }).catch(function() {})
+    .finally(function() { self.cloningProgressBar.stop() })
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;

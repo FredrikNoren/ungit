@@ -36,7 +36,7 @@ GraphActions.ActionBase.prototype.doPerform = function() {
   var self = this;
   this.graph.hoverGraphAction(null);
   self.performProgressBar.start();
-  this.perform().then(function() {
+  this.perform().finally(function() {
     self.performProgressBar.stop();
   });
 }
@@ -137,7 +137,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 }
 GraphActions.Rebase.prototype.perform = function() {
   return this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
-    .catch(function(err) { if (err.edrrorCode != 'merge-failed') throw err })
+    .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
 }
 
 GraphActions.Merge = function(graph, node) {
@@ -164,7 +164,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 }
 GraphActions.Merge.prototype.perform = function() {
   return this.server.postPromise('/merge', { path: this.graph.repoPath(), with: this.graph.currentActionContext().localRefName })
-    .catch(function(err) { if (err.edrrorCode != 'merge-failed') throw err })
+    .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
 }
 
 GraphActions.Push = function(graph, node) {
