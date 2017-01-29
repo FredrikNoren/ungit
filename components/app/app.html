@@ -9,13 +9,13 @@
     <button type="button" class="close" data-bind="click: dismissGitVersionError">&times;</button>
   </div>
 
-  <div class="alert alert-info" data-bind="visible: newVersionAvailable">
+  <div class="alert alert-info" data-bind="visible: showNewVersionAvailable">
     A new version of ungit (<span data-bind="text: latestVersion"></span>) is
     <a href="https://github.com/FredrikNoren/ungit">available</a>! Run
     <code data-bind="text: newVersionInstallCommand"></code> to install.
-    See what's new in our
+    See what's new in the
     <a href="https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md">changelog</a>.
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <button type="button" class="close" data-bind="click: dismissNewVersion">&times;</button>
   </div>
 
   <div class="alert alert-info clearfix" data-bind="visible: showBugtrackingNagscreen">

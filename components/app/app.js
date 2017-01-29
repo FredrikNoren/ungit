@@ -22,7 +22,7 @@ var AppViewModel = function(appContainer, server) {
   this.content = ko.observable(components.create('home', { app: this }));
   this.currentVersion = ko.observable();
   this.latestVersion = ko.observable();
-  this.newVersionAvailable = ko.observable();
+  this.showNewVersionAvailable = ko.observable();
   this.newVersionInstallCommand = (ungit.platform == 'win32' ? '' : 'sudo -H ') + 'npm update -g ungit';
   this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
 
@@ -75,7 +75,7 @@ AppViewModel.prototype.shown = function() {
       if (!version) return;
       self.currentVersion(version.currentVersion);
       self.latestVersion(version.latestVersion);
-      self.newVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
+      self.showNewVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
     });
   this.server.getPromise('/gitversion')
     .then(function(gitversion) {
@@ -148,6 +148,9 @@ AppViewModel.prototype.dismissGitVersionError = function() {
 AppViewModel.prototype.dismissNPSSurvey = function() {
   this.showNPSSurvey(false);
   localStorage.setItem('NPSSurveyLastDismissed', Date.now());
+}
+AppViewModel.prototype.dismissNewVersion = function() {
+  this.showNewVersionAvailable(false);
 }
 AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
