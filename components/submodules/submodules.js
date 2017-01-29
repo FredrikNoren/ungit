@@ -69,7 +69,7 @@ SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
 }
 
 SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
-  window.location.href = document.URL + '/' + submodule.path;
+  window.location.href = document.URL + ungit.config.fileSeparator + submodule.path;
 }
 
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {

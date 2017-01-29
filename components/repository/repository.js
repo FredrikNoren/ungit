@@ -64,7 +64,7 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
         return self.server.getProimse('/submodules', { path: baseRepoPath.path })
           .then(function(submodules) {
             if (Array.isArray(submodules)) {
-              var baseName = self.repoPath().replace(/^.*[\\\/]/, '');
+              var baseName = self.repoPath().substring(baseRepoPath.path.length + 1);
               for (var n = 0; n < submodules.length; n++) {
                 if (submodules[n].path === baseName) {
                   self.parentModulePath(baseRepoPath.path);
@@ -75,5 +75,8 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
             }
           });
       }
-    }).catch(function(err) { })
+    }).catch(function(err) {
+      self.parentModuleLink(undefined);
+      self.parentModulePath(undefined);
+    });
 }

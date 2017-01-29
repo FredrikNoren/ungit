@@ -1,5 +1,6 @@
 
 var expect = require('expect.js');
+var path = require('path');
 var gitParser = require('../src/git-parser');
 
 describe('git-parser stash show', function () {
@@ -42,7 +43,7 @@ describe('git-parser submodule', function() {
     var submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(1);
     expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
     expect(submodules[0].url).to.be('http://example1.com');
   });
   it('should work with multiple name, path and url', function() {
@@ -53,10 +54,10 @@ describe('git-parser submodule', function() {
     var submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(2);
     expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
     expect(submodules[0].url).to.be('http://example1.com');
     expect(submodules[1].name).to.be('test2');
-    expect(submodules[1].path).to.be('/path/to/sub2');
+    expect(submodules[1].path).to.be(path.join(path.sep, 'path', 'to', 'sub2'));
     expect(submodules[1].url).to.be('http://example2.com');
   });
   it('should work with multiple name, path, url, update, branch, fetchRecurseSubmodules and ignore', function() {
@@ -67,14 +68,14 @@ describe('git-parser submodule', function() {
     var submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(2);
     expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be('/path/to/sub1');
+    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
     expect(submodules[0].url).to.be('http://example1.com');
     expect(submodules[0].update).to.be('checkout');
     expect(submodules[0].branch).to.be('master');
     expect(submodules[0].fetchRecurseSubmodules).to.be('true');
     expect(submodules[0].ignore).to.be('all');
     expect(submodules[1].name).to.be('test2');
-    expect(submodules[1].path).to.be('=/path/to/sub2');
+    expect(submodules[1].path).to.be(path.join('=', 'path', 'to', 'sub2'));
     expect(submodules[1].url).to.be('http://example2.com');
     expect(submodules[1].rawUrl).to.be('git://example2.com');
   });
