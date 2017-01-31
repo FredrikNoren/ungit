@@ -9,7 +9,7 @@ const winston = require('winston');
 
 const noop = () => {}
 
-exports.getUngitLatestVersion = (callback) => {
+exports.getUngitLatestVersion = () => {
   return new Bluebird((resolve, reject) => {
     npm.load({}, (err, config) => {
       if (err) return reject(err);

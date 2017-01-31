@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.4: [patch] Promise refactoring
 - 1.1.3: [patch] Fix submodule navigation on windows [#577](https://github.com/FredrikNoren/ungit/issues/577)
 - 1.1.2: Fix a bug that prevented the new version dialog from being dismissed
 - 1.1.1: [patch] Fixed small spelling error for ignore whitespace feature [#853](https://github.com/FredrikNoren/ungit/pull/853)

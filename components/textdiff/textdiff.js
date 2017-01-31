@@ -108,33 +108,25 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   };
 }
 
-TextDiffViewModel.prototype.invalidateDiff = function(callback) {
+TextDiffViewModel.prototype.invalidateDiff = function() {
   var self = this;
-  if (this.isShowingDiffs()) {
-    if (this.diffProgressBar) this.diffProgressBar.start();
-
-    self.server.get('/diff', this.getDiffArguments() , function(err, diffs) {
-      if (err) {
-        if (self.diffProgressBar) self.diffProgressBar.stop();
-        if (err.errorCode == 'no-such-file') {
-          // The file existed before but has been removed, but we're trying to get a diff for it
-          // Most likely it will just disappear with the next refresh of the staging area
-          // so we just ignore the error here
-          return true;
-        }
-        return callback ? callback(err) : null;
-      }
+  return this.server.emptyPromise().then(function() {
+    if (!self.isShowingDiffs()) return;
+    if (self.diffProgressBar) self.diffProgressBar.start();
+    return self.server.getPromise('/diff', self.getDiffArguments()).then(function(diffs) {
       if (typeof diffs == 'string') {
         self.diffJson = diff2html.getJsonFromDiff(diffs);
         self.render();
       }
-
-      if (self.diffProgressBar) self.diffProgressBar.stop();
-      if (callback) callback();
+    }).catch(function(err) {
+      // The file existed before but has been removed, but we're trying to get a diff for it
+      // Most likely it will just disappear with the next refresh of the staging area
+      // so we just ignore the error here
+      if (err.errorCode != 'no-such-file') throw err;
     });
-  } else {
-    if (callback) callback();
-  }
+  }).finally(function() {
+    if (self.diffProgressBar) self.diffProgressBar.stop();
+  });
 }
 
 TextDiffViewModel.prototype.render = function() {
@@ -186,7 +178,7 @@ TextDiffViewModel.prototype.render = function() {
   this.isParsed(true);
 };
 
-TextDiffViewModel.prototype.loadMore = function(callback) {
+TextDiffViewModel.prototype.loadMore = function() {
   this.loadCount += this.loadMoreCount();
   this.render();
 }

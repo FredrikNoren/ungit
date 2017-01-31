@@ -19,16 +19,11 @@ function HomeRepositoryViewModel(home, path) {
 }
 HomeRepositoryViewModel.prototype.updateState = function() {
   var self = this;
-  this.server.get('/fs/exists?path=' + encodeURIComponent(this.path), undefined, function(err, exists) {
-    self.pathRemoved(!exists);
-  });
-  this.server.get('/remotes/origin?path=' + encodeURIComponent(this.path), undefined, function(err, remote) {
-    if (err) {
-      self.remote('');
-      return true;
-    }
-    self.remote(remote.address);
-  });
+  this.server.getPromise('/fs/exists?path=' + encodeURIComponent(this.path))
+    .then(function(exists) { self.pathRemoved(!exists); });
+  this.server.getPromise('/remotes/origin?path=' + encodeURIComponent(this.path))
+    .then(function(remote) { self.remote(remote.address); })
+    .catch(function(err) { self.remote(''); });
 }
 HomeRepositoryViewModel.prototype.remove = function() {
   this.app.repoList.remove(this.path);

@@ -50,31 +50,29 @@ PathViewModel.prototype.updateAnimationFrame = function(deltaT) {
 }
 PathViewModel.prototype.updateStatus = function() {
   var self = this;
-  this.server.get('/quickstatus', { path: this.repoPath() }, function(err, status){
-    self.loadingProgressBar.stop();
-    if (err) return;
-    if (status.type == 'inited' || status.type == 'bare') {
-      if (self.repoPath() !== status.gitRootPath) {
-        self.repoPath(status.gitRootPath);
-        programEvents.dispatch({ event: 'navigated-to-path', path: self.repoPath() });
-        programEvents.dispatch({ event: 'working-tree-changed' });
+  return this.server.getPromise('/quickstatus', { path: this.repoPath() })
+    .then(function(status){
+      if (status.type == 'inited' || status.type == 'bare') {
+        if (self.repoPath() !== status.gitRootPath) {
+          self.repoPath(status.gitRootPath);
+          programEvents.dispatch({ event: 'navigated-to-path', path: self.repoPath() });
+          programEvents.dispatch({ event: 'working-tree-changed' });
+        }
+        self.status(status.type);
+        if (!self.repository()) {
+          self.repository(components.create('repository', { server: self.server, path: self }));
+        }
+      } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+        self.status(status.type);
+        self.repository(null);
       }
-      self.status(status.type);
-      if (!self.repository()) {
-        self.repository(components.create('repository', { server: self.server, path: self }));
-      }
-    } else if (status.type == 'uninited' || status.type == 'no-such-path') {
-      self.status(status.type);
-      self.repository(null);
-    }
-  });
+    }).catch(function(err) { })
+    .finally(function() { self.loadingProgressBar.stop() });
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  this.server.post('/init', { path: this.repoPath() }, function(err, res) {
-    if (err) return;
-    self.updateStatus();
-  });
+  return this.server.postPromise('/init', { path: this.repoPath() }).catch(function() {})
+    .finally(function(res) { self.updateStatus(); });
 }
 PathViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-credentials') this.cloningProgressBar.pause();
@@ -90,16 +88,14 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  this.server.post('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }, function(err, res) {
-    self.cloningProgressBar.stop();
-    if (err) return;
-    navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
-  });
+  return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }).then(function(res) {
+      navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
+    }).catch(function() {})
+    .finally(function() { self.cloningProgressBar.stop() })
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;
   this.showDirectoryCreatedAlert(true);
-  this.server.post('/createDir',  { dir: this.repoPath() }, function() {
-    self.updateStatus();
-  });
+  return this.server.postPromise('/createDir',  { dir: this.repoPath() })
+    .then(function() { self.updateStatus(); });
 }

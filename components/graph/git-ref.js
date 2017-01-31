@@ -74,68 +74,63 @@ RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
 }
-RefViewModel.prototype.moveTo = function(target, callback) {
+RefViewModel.prototype.moveTo = function(target) {
   var self = this;
+  var promise;
 
-  var callbackWithRefSet = function(err, res) {
-    if (err) {
-      callback(err, res);
+  if (this.isLocal) {
+    if (this.current()) {
+      promise = this.server.postPromise('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' });
+    } else if (this.isTag) {
+      promise = this.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
     } else {
+      promise = this.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
+    }
+  } else {
+    var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
+    promise = this.server.postPromise('/push', pushReq)
+      .catch(function(err) {
+        if (err.errorCode == 'non-fast-forward') {
+          return components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' })
+            .show()
+            .closeThen(function(diag) {
+              if (!diag.result()) return false;
+              pushReq.force = true;
+              return self.server.postPromise('/push', pushReq);
+            })
+        }
+      });
+  }
+
+  return promise
+    .then(function(res) {
+      if (!res) return;
       var targetNode = self.graph.getNode(target);
       if (self.graph.checkedOutBranch() == self.refName) {
         self.graph.HEADref().node(targetNode);
       }
       self.node(targetNode);
-      callback();
-    }
-  }
-
-  if (this.isLocal) {
-    if (this.current()) {
-      this.server.post('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' }, callbackWithRefSet);
-    } else if (this.isTag) {
-      this.server.post('/tags', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true }, callbackWithRefSet);
-    } else {
-      this.server.post('/branches', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true }, callbackWithRefSet);
-    }
-  } else {
-    var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
-    this.server.post('/push', pushReq, function(err, res) {
-        if (err) {
-          if (err.errorCode == 'non-fast-forward') {
-            var forcePushDialog = components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' });
-            forcePushDialog.closed.add(function() {
-              if (!forcePushDialog.result()) return callback();
-              pushReq.force = true;
-              self.server.post('/push', pushReq, callbackWithRefSet);
-            });
-            programEvents.dispatch({ event: 'request-show-dialog', dialog: forcePushDialog });
-            return true;
-          }
-        }
-        callbackWithRefSet(err, res);
-      });
-  }
+    });
 }
 
-RefViewModel.prototype.remove = function(callback) {
+RefViewModel.prototype.remove = function() {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
-  this.server.del(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }, function(err) {
-    if (!err) {
+
+  return this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName })
+    .catch(function() {})
+    .then(function() {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;
-    }
-
-    callback();
-    self.graph.loadNodesFromApi();
-    if (url == '/remote/tags') {
-      programEvents.dispatch({ event: 'request-fetch-tags' });
-    } else {
-      programEvents.dispatch({ event: 'branch-updated' });
-    }
-  });
+    }).finally(function() {
+      if (url == '/remote/tags') {
+        programEvents.dispatch({ event: 'request-fetch-tags' });
+      } else {
+        programEvents.dispatch({ event: 'branch-updated' });
+      }
+      return self.graph.loadNodesFromApi();
+    });
 }
 
 RefViewModel.prototype.getRemoteRef = function(remote) {
@@ -155,14 +150,11 @@ RefViewModel.prototype.canBePushed = function(remote) {
   return this.node() != remoteRef.node();
 }
 
-RefViewModel.prototype.createRemoteRef = function(callback) {
+RefViewModel.prototype.createRemoteRef = function() {
   var self = this;
-  this.server.post('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(),
-      refSpec: this.refName, remoteBranch: this.refName }, function(err) {
-        if (!err) {
-          var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
-          newRef.node(self.node());
-        }
-        callback(err);
-      });
+  return this.server.postPromise('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(),
+    refSpec: this.refName, remoteBranch: this.refName }).then(function() {
+      var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
+      newRef.node(self.node());
+    });
 }

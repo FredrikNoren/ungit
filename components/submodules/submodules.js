@@ -22,26 +22,18 @@ SubmodulesViewModel.prototype.onProgramEvent = function(event) {
 }
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
-  this.fetchSubmodules(function(submoduleViewModel) {
+  this.fetchSubmodules().then(function(submoduleViewModel) {
     ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
   });
 }
 
-SubmodulesViewModel.prototype.fetchSubmodules = function(callback) {
+SubmodulesViewModel.prototype.fetchSubmodules = function() {
   var self = this;
-
-  this.server.get('/submodules', { path: this.repoPath() }, function(err, submodules) {
-    // if returned is not array, don't render submodules module
-    if (submodules && Array.isArray(submodules)) {
-      self.submodules(submodules);
-    } else {
-      self.submodules([]);
-    }
-
-    if (callback) {
-      callback(self);
-    }
-  });
+  return this.server.getPromise('/submodules', { path: this.repoPath() })
+    .then(function(submodules) {
+      self.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      return self;
+    });
 }
 
 SubmodulesViewModel.prototype.isRunning = function() {
@@ -53,29 +45,23 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
   var self = this;
 
   this.updateProgressBar.start();
-  this.server.post('/submodules/update', { path: this.repoPath() }, function(err, result) {
+  return this.server.postPromise('/submodules/update', { path: this.repoPath() }).finally(function() {
     self.updateProgressBar.stop();
   });
 }
 
 SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   var self = this;
-  var diag = components.create('addsubmoduledialog');
-  diag.closed.add(function() {
-    if (diag.isSubmitted()) {
+  components.create('addsubmoduledialog')
+    .show()
+    .closeThen(function(diag) {
+      if (!diag.isSubmitted()) return;
       self.fetchProgressBar.start();
-      self.server.post('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
-        programEvents.dispatch({ event: 'submodule-fetch' });
-        self.fetchProgressBar.stop();
-      });
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+      self.server.postPromise('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }).then(function() {
+          programEvents.dispatch({ event: 'submodule-fetch' });
+        }).catch(function() {})
+        .finally(function() { self.fetchProgressBar.stop(); });
+    });
 }
 
 SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
@@ -88,20 +74,16 @@ SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
 
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + submodule.name + ' submodule cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + submodule.name + ' submodule cannot be undone with ungit.'})
+    .show()
+    .closeThen(function(diag) {
+      if (!diag.result()) return;
       self.fetchProgressBar.start();
-      self.server.del('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
+      self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }).catch(function(err, result) {
+        console.log(err);
+      }).then(function() {
         programEvents.dispatch({ event: 'submodule-fetch' });
         self.fetchProgressBar.stop();
-      });
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+      })
+    });
 }

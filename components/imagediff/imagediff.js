@@ -1,6 +1,7 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
+var Promise = require('bluebird');
 
 components.register('imagediff', function(args) {
   return new ImageDiffViewModel(args);
@@ -29,8 +30,8 @@ var ImageDiffViewModel = function(args) {
 ImageDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('imagediff', this, {}, parentElement);
 }
-ImageDiffViewModel.prototype.invalidateDiff = function(callback) {
-  if (callback) callback();
+ImageDiffViewModel.prototype.invalidateDiff = function() {
+  return Promise.resolve();
 }
 ImageDiffViewModel.prototype.newImageError = function(data, event) {
   this.isRemoved(true);

@@ -10,7 +10,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const semver = require('semver');
 const path = require('path');
-const fs = require('fs');
+const fs = require('./utils/fs-async');
 const async = require('async');
 const signals = require('signals');
 const os = require('os');
@@ -298,33 +298,26 @@ app.get('/api/gitversion', (req, res) => {
 });
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');
-const readUserConfig = (callback) => {
-  fs.exists(userConfigPath, (hasConfig) => {
-    if (!hasConfig) return callback(null, {});
-
-    fs.readFile(userConfigPath, { encoding: 'utf8' }, (err, content) => {
-      if (err) return callback(err);
-      else callback(null, JSON.parse(content.toString()));
+const readUserConfig = () => {
+  return fs.isExists(userConfigPath).then((hasConfig) => {
+      if (!hasConfig) return {};
+      return fs.readFileAsync(userConfigPath, { encoding: 'utf8' }).then((content) => {
+          return JSON.parse(content.toString());
+        });
     });
-  });
 }
-const writeUserConfig = (configContent, callback) => {
-  fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2), callback);
+const writeUserConfig = (configContent) => {
+  return fs.writeFileAsync(userConfigPath, JSON.stringify(configContent, undefined, 2));
 }
 
 app.get('/api/userconfig', ensureAuthenticated, (req, res) => {
-  readUserConfig((err, userConfig) => {
-    if (err) res.status(400).json(err);
-    else res.json(userConfig);
-  });
+  readUserConfig().then((userConfig) => { res.json(userConfig); })
+    .catch((err) => { res.status(400).json(err); });
 });
 app.post('/api/userconfig', ensureAuthenticated, (req, res) => {
-  writeUserConfig(req.body, (err) => {
-    if (err) res.status(400).json(err);
-    else res.json({});
-  })
+  writeUserConfig(req.body).then(() => { res.json({}); })
+    .catch((err) => { res.status(400).json(err); });
 });
-
 
 app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
   res.json(fs.existsSync(req.query['path']));

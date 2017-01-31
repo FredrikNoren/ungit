@@ -3,6 +3,7 @@ var inherits = require('util').inherits;
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
+var Promise = require("bluebird");
 var filesToDisplayIncrmentBy = 50;
 var filesToDisplayLimit = filesToDisplayIncrmentBy;
 // when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
@@ -121,51 +122,48 @@ StagingViewModel.prototype.onProgramEvent = function(event) {
     this.invalidateFilesDiffsThrottled();
   }
 }
-StagingViewModel.prototype.refreshContent = function(callback) {
+StagingViewModel.prototype.refreshContent = function() {
   var self = this;
-  this.server.get('/head', { path: this.repoPath(), limit: 1 }, function(err, log) {
-    if (err) {
-      return err.errorCode == 'must-be-in-working-tree' ||
-        err.errorCode == 'no-such-path';
-    }
-    if (log.length > 0) {
-      var array = log[0].message.split('\n');
-      self.HEAD({title: array[0], body: array.slice(2).join('\n')});
-    }
-    else self.HEAD(null);
-  });
-  this.server.get('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit }, function(err, status) {
-    if (err) {
-      if (callback) callback(err);
-      return err.errorCode == 'must-be-in-working-tree' ||
-        err.errorCode == 'no-such-path';
-    }
-
-    if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
-      if (self.isDiagOpen) {
-        if (callback) callback();
-        return;
-      }
-      self.isDiagOpen = true;
-      var diag = components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'});
-
-      diag.closed.add(function() {
-        self.isDiagOpen = false;
-        if (diag.result()) {
-          self.loadAnyway = true;
-          self.loadStatus(status, callback);
-        } else {
-          window.location.href = '/#/';
+  return Promise.all([this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
+      .then(function(log) {
+        if (log.length > 0) {
+          var array = log[0].message.split('\n');
+          self.HEAD({title: array[0], body: array.slice(2).join('\n')});
         }
-      })
-
-      programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
-    } else {
-      self.loadStatus(status, callback);
-    }
-  });
+        else self.HEAD(null);
+      }).catch(function(err) {
+        if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+          throw err;
+        }
+      }),
+    this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
+      .then(function(status) {
+        if (Object.keys(status.files).length > filesToDisplayLimit && !self.loadAnyway) {
+          if (self.isDiagOpen) {
+            return;
+          }
+          self.isDiagOpen = true;
+          return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
+            .show()
+            .closeThen(function(diag) {
+              self.isDiagOpen = false;
+              if (diag.result()) {
+                self.loadAnyway = true;
+                self.loadStatus(status);
+              } else {
+                window.location.href = '/#/';
+              }
+            });
+        } else {
+          self.loadStatus(status);
+        }
+      }).catch(function(err) {
+        if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+          throw err;
+        }
+      })]);
 }
-StagingViewModel.prototype.loadStatus = function(status, callback) {
+StagingViewModel.prototype.loadStatus = function(status) {
   this.setFiles(status.files);
   this.inRebase(!!status.inRebase);
   this.inMerge(!!status.inMerge);
@@ -183,7 +181,6 @@ StagingViewModel.prototype.loadStatus = function(status, callback) {
       this.commitMessageBody(lines.slice(1).join('\n'));
     }
   }
-  if (callback) callback();
 }
 StagingViewModel.prototype.setFiles = function(files) {
   var self = this;
@@ -248,10 +245,12 @@ StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
   progressBar.start();
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-  this.server.post(apiPath, { path: this.repoPath(), message: commitMessage }, function(err, res) {
-    self.resetMessages();
-    progressBar.stop();
-  });
+  this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
+    .catch(function(){})
+    .finally(function(err, res) {
+      self.resetMessages();
+      progressBar.stop();
+    });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -260,16 +259,16 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
 }
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'});
-  diag.closed.add(function() {
-    if (diag.result()) self.server.post('/discardchanges', { path: self.repoPath(), all: true });
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'})
+    .show()
+    .closeThen(function(diag) {
+      if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
+    });
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
   this.stashProgressBar.start();
-  this.server.post('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() }, function(err, res) {
+  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() }).finally(function() {
     self.stashProgressBar.stop();
   });
 }
@@ -370,31 +369,32 @@ FileViewModel.prototype.toggleStaged = function() {
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
   if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
-    self.server.post('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+    self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
   } else {
-    var diag = components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'});
-    diag.closed.add(function() {
-      if (diag.result()) self.server.post('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
-      if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
-    });
-    programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+    components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'})
+      .show()
+      .closeThen(function(diag) {
+        if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+        if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
+      });
   }
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.server.post('/ignorefile', { path: this.staging.repoPath(), file: this.name() }, function(err) {
-    if (err && err.errorCode == 'file-already-git-ignored') {
+  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() }).catch(function(err) {
+    if (err.errorCode == 'file-already-git-ignored') {
       // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
       programEvents.dispatch({ event: 'working-tree-changed' });
-      return true;
+    } else {
+      throw err;
     }
   });
 }
 FileViewModel.prototype.resolveConflict = function() {
-  this.server.post('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
+  this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
 }
 FileViewModel.prototype.launchMergeTool = function() {
-  this.server.post('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
+  this.server.postPromise('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames

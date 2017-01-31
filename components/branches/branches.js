@@ -35,22 +35,17 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
   var self = this;
   this.fetchingProgressBar.start();
-  this.server.post('/checkout', { path: this.repoPath(), name: branch.name }, function(err) {
-    if (err) return;
-    self.current(branch.name);
-    self.fetchingProgressBar.stop();
-  });
+  this.server.postPromise('/checkout', { path: this.repoPath(), name: branch.name })
+    .then(function() { self.current(branch.name); })
+    .catch(function() {})
+    .finally(function() { self.fetchingProgressBar.stop(); });
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
   this.fetchingProgressBar.start();
-  this.server.get('/branches', { path: this.repoPath() }, function(err, branches) {
-    if (err) {
-      self.current("~error");
-      return;
-    }
 
-    if (branches) {
+  this.server.getPromise('/branches', { path: this.repoPath() })
+    .then(function(branches) {
       var sorted = branches.sort(function(a, b) {
         if (a.name < b.name)
            return -1;
@@ -65,23 +60,18 @@ BranchesViewModel.prototype.updateBranches = function() {
           self.current(branch.name);
         }
       });
-    }
-
-    self.fetchingProgressBar.stop();
-  });
+    }).catch(function(err) { self.current("~error"); })
+    .finally(function() { self.fetchingProgressBar.stop() })
 }
 
 BranchesViewModel.prototype.branchRemove = function(branch) {
   var self = this;
-  var diag = components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'});
-  diag.closed.add(function() {
-    if (diag.result()) {
-      self.server.del('/branches', { name: branch.name, path: self.repoPath() }, function(err) {
-        if (!err) {
-          programEvents.dispatch({ event: 'working-tree-changed' });
-        }
-      });
-    }
-  });
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: diag });
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'})
+    .show()
+    .closeThen(function(diag) {
+      if (!diag.result()) return;
+      self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() }).then(function(err) {
+        programEvents.dispatch({ event: 'working-tree-changed' });
+      }).catch(function() {});
+    });
 }

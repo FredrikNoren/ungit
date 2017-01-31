@@ -66,23 +66,23 @@ AppViewModel.prototype.shown = function() {
     // but is only used for changing around the configuration. We need to check this here
     // since ungit may have crashed without the server crashing since we enabled bugtracking,
     // and we don't want to show the nagscreen twice in that case.
-    this.server.get('/userconfig', undefined, function(err, userConfig) {
-      self.bugtrackingEnabled(userConfig.bugtracking);
-    });
+    this.server.getPromise('/userconfig')
+      .then(function(userConfig) { self.bugtrackingEnabled(userConfig.bugtracking); });
   }
 
-  this.server.get('/latestversion', undefined, function(err, version) {
-    if (!version) return;
-    self.currentVersion(version.currentVersion);
-    self.latestVersion(version.latestVersion);
-    self.showNewVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
-  });
-  this.server.get('/gitversion', undefined, function(err, gitversion) {
-    if (!gitversion) return;
-    if (!gitversion.satisfied) {
-      self.gitVersionError(gitversion.error);
-    }
-  });
+  this.server.getPromise('/latestversion')
+    .then(function(version) {
+      if (!version) return;
+      self.currentVersion(version.currentVersion);
+      self.latestVersion(version.latestVersion);
+      self.showNewVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
+    });
+  this.server.getPromise('/gitversion')
+    .then(function(gitversion) {
+      if (gitversion && !gitversion.satisfied) {
+        self.gitVersionError(gitversion.error);
+      }
+    });
 }
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
@@ -103,50 +103,39 @@ AppViewModel.prototype._handleRequestRememberRepo = function(event) {
 }
 AppViewModel.prototype._handleCredentialsRequested = function() {
   var self = this;
-  var diag;
   // Only show one credentials dialog if we're asked to show another one while the first one is open
   // This happens for instance when we fetch nodes and remote tags at the same time
-  if (this._isShowingCredentialsDialog)
-    diag = self.dialog();
-  else {
-    diag = components.create('credentialsdialog');
-    self.showDialog(diag);
+  if (!this._isShowingCredentialsDialog) {
+    this._isShowingCredentialsDialog = true;
+    self.dialog.onclose();
+    self.showDialog(components.create('credentialsdialog').closeThen(function(diag) {
+      self._isShowingCredentialsDialog = false;
+      programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
+    }));
   }
-  this._isShowingCredentialsDialog = true;
-  diag.closed.add(function() {
-    self._isShowingCredentialsDialog = false;
-    programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
-  });
 }
 AppViewModel.prototype.showDialog = function(dialog) {
   var self = this;
-  dialog.closed.add(function() {
+  this.dialog(dialog.closeThen(function() {
     self.dialog(null);
-  })
-  this.dialog(dialog);
+    return dialog;
+  }));
+}
+var gitSetUserConfig = function(bugTracking, sendUsageStatistics) {
+  var self = this;
+  this.server.getPromise('/userconfig')
+    .then(function(userConfig) {
+      userConfig.bugtracking = bugTracking;
+      if (sendUsageStatistics != undefined) userConfig.sendUsageStatistics = sendUsageStatistics;
+      return self.server.postPromise('/userconfig', userConfig)
+        .then(function() { self.bugtrackingEnabled(bugTracking); });
+    }).catch(function(err) { })
 }
 AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
-  var self = this;
-  this.server.get('/userconfig', undefined, function(err, userConfig) {
-    if (err) return;
-    userConfig.bugtracking = true;
-    userConfig.sendUsageStatistics = true;
-    self.server.post('/userconfig', userConfig, function(err) {
-      if (err) return;
-      self.bugtrackingEnabled(true);
-    });
-  });
+  gitSetUserConfig(true, true)
 }
 AppViewModel.prototype.enableBugtracking = function() {
-  var self = this;
-  this.server.get('/userconfig', undefined, function(err, userConfig) {
-    if (err) return;
-    userConfig.bugtracking = true;
-    self.server.post('/userconfig', userConfig, function(err) {
-      if (err) return;
-      self.bugtrackingEnabled(true);
-    });
-  });
+  gitSetUserConfig(true);
 }
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
   localStorage.setItem('bugtrackingNagscreenDismissed', true);

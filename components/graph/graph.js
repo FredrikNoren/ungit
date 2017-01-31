@@ -104,12 +104,12 @@ GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
   return refViewModel;
 }
 
-GraphViewModel.prototype.loadNodesFromApi = function(callback) {
+GraphViewModel.prototype.loadNodesFromApi = function() {
   var self = this;
   var nodeSize = self.nodes().length;
 
   this.nodesLoader.start();
-  this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
+  return this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
     .then(function(log) {
       // set new limit and skip
       self.limit(parseInt(log.limit));
@@ -153,7 +153,6 @@ GraphViewModel.prototype.loadNodesFromApi = function(callback) {
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     }).finally(function() {
       self.nodesLoader.stop();
-      if (callback) callback();
       if (window.innerHeight - self.graphHeight() > 0 && nodeSize != self.nodes().length) {
         self.scrolledToEnd();
       }
@@ -305,11 +304,12 @@ GraphViewModel.prototype.onProgramEvent = function(event) {
 }
 GraphViewModel.prototype.updateBranches = function() {
   var self = this;
-  this.server.get('/checkout', { path: this.repoPath() }, function(err, branch) {
-    if (err && err.errorCode == 'not-a-repository') return true;
-    if (err) return;
-    self.checkedOutBranch(branch);
-  });
+
+  this.server.getPromise('/checkout', { path: this.repoPath() })
+    .then(function(res) { self.checkedOutBranch(res); })
+    .catch(function(err) {
+      if (err.errorCode != 'not-a-repository') throw err;
+    })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   var self = this;

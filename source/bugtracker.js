@@ -22,7 +22,7 @@ class BugTracker {
         winston.info('BugTracker set user hash');
       });
   }
-  notify(exception, clientName, callback) {
+  notify(exception, clientName) {
     if (!config.bugtracking) return;
 
     let options = {
