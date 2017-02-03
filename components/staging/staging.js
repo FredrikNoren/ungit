@@ -61,8 +61,8 @@ var StagingViewModel = function(server, repoPath) {
   this.nStagedFiles = ko.computed(function() {
     return self.files().filter(function(f) { return f.editState() === 'staged'; }).length;
   });
-	this.allStageFlag = ko.computed(function() {
-		return self.nFiles() !== self.nStagedFiles();
+  this.allStageFlag = ko.computed(function() {
+    return self.nFiles() !== self.nStagedFiles();
   });
   this.stats = ko.computed(function() {
     return self.nFiles() + ' files, ' + self.nStagedFiles() + ' to be commited';
@@ -276,7 +276,7 @@ StagingViewModel.prototype.stashAll = function() {
 }
 StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
-	var allStageFlag = self.allStageFlag()
+  var allStageFlag = self.allStageFlag()
   for (var n in self.files()){
     self.files()[n].editState(allStageFlag ? 'staged' : 'none');
   }
