@@ -221,7 +221,12 @@ StagingViewModel.prototype.toggleAmend = function() {
 StagingViewModel.prototype.resetMessages = function() {
   this.commitMessageTitle('');
   this.commitMessageBody('');
-  this.filesByPath = {};
+  for (var key in this.filesByPath) {
+    var element = this.filesByPath[key];
+    element.diff().invalidateDiff();
+    element.patchLineList.removeAll();
+    element.isShowingDiffs(false);
+  }
   this.amend(false);
 }
 StagingViewModel.prototype.commit = function() {
@@ -355,7 +360,7 @@ FileViewModel.prototype.setState = function(state) {
   this.fileType(state.type);
   this.additions(state.additions != '-' ? '+' + state.additions : '');
   this.deletions(state.deletions != '-' ? '-' + state.deletions : '');
-  this.diff = ko.observable(this.getSpecificDiff());
+  this.diff(this.getSpecificDiff());
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
