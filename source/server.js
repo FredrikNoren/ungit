@@ -300,11 +300,8 @@ app.get('/api/gitversion', (req, res) => {
 const userConfigPath = path.join(config.homedir, '.ungitrc');
 const readUserConfig = () => {
   return fs.isExists(userConfigPath).then((hasConfig) => {
-      console.log(9)
       if (!hasConfig) return {};
-      console.log(10)
       return fs.readFileAsync(userConfigPath, { encoding: 'utf8' }).then((content) => {
-        console.log(1)
           return JSON.parse(content.toString());
         });
     });

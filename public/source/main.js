@@ -52,9 +52,7 @@ ko.bindingHandlers.autocomplete = {
       var value = $(element).val();
       var lastChar = value.slice(-1);
       if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
-        console.log(33);
         server.getPromise('/fs/listDirectories', {term: value}).then(function(directoryList) {
-          console.log(111, directoryList);
           $(element).autocomplete({
             source: directoryList,
             messages: {
@@ -64,7 +62,6 @@ ko.bindingHandlers.autocomplete = {
           });
           $(element).autocomplete("search", value);
         }).catch(function(err) {
-          console.log(666)
           if (err.errorCode !== 'read-dir-failed') throw err;
         });
       } else if (event.keyCode == 39) { // '/'
