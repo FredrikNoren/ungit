@@ -194,7 +194,7 @@ StagingViewModel.prototype.setFiles = function(files) {
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
-      fileViewModel.invalidateDiff();
+      fileViewModel.diff().invalidateDiff();
     }
     fileViewModel.setState(files[file]);
     newFiles.push(fileViewModel);
@@ -408,7 +408,7 @@ FileViewModel.prototype.toggleDiffs = function() {
     this.isShowingDiffs(false);
   } else {
     this.isShowingDiffs(true);
-    this.invalidateDiff();
+    this.diff().render();
   }
 }
 FileViewModel.prototype.patchClick = function() {
@@ -419,7 +419,4 @@ FileViewModel.prototype.patchClick = function() {
   } else {
     this.editState('patched');
   }
-}
-FileViewModel.prototype.invalidateDiff = function() {
-  this.diff().invalidateDiff();
 }

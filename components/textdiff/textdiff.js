@@ -3,6 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var diff2html = require('diff2html').Diff2Html;
 var programEvents = require('ungit-program-events');
+var Promise = require("bluebird");
 
 components.register('textdiff', function(args) {
   return new TextDiffViewModel(args);
@@ -45,7 +46,7 @@ var Type = function() {
   this.value = ko.observable(textDiff);
   this.value.subscribe(function(value) {
     self.text(value === textDiff ? "Default" : "Side By Side");
-    programEvents.dispatch({ event: 'invalidate-diff' });
+    programEvents.dispatch({ event: 'invalidate-diff-and-render' });
   });
   this.toggle = function() {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
@@ -62,7 +63,7 @@ var WhiteSpace = function() {
   this.value = ko.observable(false);
   this.value.subscribe(function(value) {
     self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
-    programEvents.dispatch({ event: 'invalidate-diff' });
+    programEvents.dispatch({ event: 'invalidate-diff-and-render' });
   });
   this.toggle = function() {
     self.value(!self.value());
@@ -91,10 +92,13 @@ var TextDiffViewModel = function(args) {
   this.isParsed = ko.observable(false);
 
   programEvents.add(function(event) {
-    if (event.event === "invalidate-diff" && self.isShowingDiffs()) {
+    if (event.event === "invalidate-diff-and-render") {
       self.invalidateDiff();
+      if (self.isShowingDiffs()) self.render();
     }
   });
+
+  if (this.isShowingDiffs()) { this.render(); }
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
@@ -109,73 +113,76 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
 }
 
 TextDiffViewModel.prototype.invalidateDiff = function() {
+  this.diffJson = null;
+}
+
+TextDiffViewModel.prototype.getDiffJson = function() {
   var self = this;
-  return this.server.emptyPromise().then(function() {
-    if (!self.isShowingDiffs()) return;
-    if (self.diffProgressBar) self.diffProgressBar.start();
-    return self.server.getPromise('/diff', self.getDiffArguments()).then(function(diffs) {
-      if (typeof diffs == 'string') {
-        self.diffJson = diff2html.getJsonFromDiff(diffs);
-        self.render();
-      }
-    }).catch(function(err) {
-      // The file existed before but has been removed, but we're trying to get a diff for it
-      // Most likely it will just disappear with the next refresh of the staging area
-      // so we just ignore the error here
-      if (err.errorCode != 'no-such-file') throw err;
-    });
-  }).finally(function() {
-    if (self.diffProgressBar) self.diffProgressBar.stop();
+  return self.server.getPromise('/diff', self.getDiffArguments()).then(function(diffs) {
+    if (typeof diffs == 'string') {
+      self.diffJson = diff2html.getJsonFromDiff(diffs);
+    }
+  }).catch(function(err) {
+    // The file existed before but has been removed, but we're trying to get a diff for it
+    // Most likely it will just disappear with the next refresh of the staging area
+    // so we just ignore the error here
+    if (err.errorCode != 'no-such-file') throw err;
   });
 }
 
-TextDiffViewModel.prototype.render = function() {
-  if (this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
-
+TextDiffViewModel.prototype.render = function(isInvalidate) {
   var self = this;
-  this.isParsed(false);
-  var diffJsonCopy = JSON.parse(JSON.stringify(this.diffJson)); // make a json copy
-  var lineCount = 0;
-
-  diffJsonCopy[0].blocks = diffJsonCopy[0].blocks.reduce(function(blocks, block) {
-    var length = block.lines.length;
-    if (lineCount < self.loadCount) {
-      block.lines = block.lines.slice(0, self.loadCount - lineCount);
-      blocks.push(block);
+  return Promise.resolve().then(function() {
+    if (!self.diffJson || isInvalidate) {
+      return self.getDiffJson();
     }
-    lineCount += length;
-    return blocks;
-  }, []);
+  }).then(function() {
+    if (self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
-  this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
+    self.isParsed(false);
+    var diffJsonCopy = JSON.parse(JSON.stringify(self.diffJson)); // make a json copy
+    var lineCount = 0;
 
-  var html;
-
-  if (this.textDiffType.value() === 'sidebysidediff') {
-    html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
-  } else {
-    html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
-  }
-
-  var index = 0;
-  this.numberOfSelectedPatchLines = 0;
-
-  // if self.patchLineList is null then patching is not avaliable so skip this expensive op.x
-  if (self.patchLineList) {
-    html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
-      if (self.patchLineList()[index] === undefined) {
-        self.patchLineList()[index] = true;
+    diffJsonCopy[0].blocks = diffJsonCopy[0].blocks.reduce(function(blocks, block) {
+      var length = block.lines.length;
+      if (lineCount < self.loadCount) {
+        block.lines = block.lines.slice(0, self.loadCount - lineCount);
+        blocks.push(block);
       }
+      lineCount += length;
+      return blocks;
+    }, []);
 
-      return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
-    });
-  }
+    self.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - self.loadCount)));
 
-  // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
-  // data bind at getPatchCheckBox that is rendered with "html" binding.
-  // which is reason why manually updating the html content and refreshing kobinding to have it render...
-  this.htmlSrc = html;
-  this.isParsed(true);
+    var html;
+
+    if (self.textDiffType.value() === 'sidebysidediff') {
+      html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
+    } else {
+      html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
+    }
+
+    var index = 0;
+    self.numberOfSelectedPatchLines = 0;
+
+    // if self.editState is null then patching is not avaliable so skip this expensive op.x
+    if (self.editState && self.editState() === "patched") {
+      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
+        if (self.patchLineList()[index] === undefined) {
+          self.patchLineList()[index] = true;
+        }
+
+        return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
+      });
+    }
+
+    // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
+    // data bind at getPatchCheckBox that is rendered with "html" binding.
+    // which is reason why manually updating the html content and refreshing kobinding to have it render...
+    self.htmlSrc = html;
+    self.isParsed(true);
+  });
 };
 
 TextDiffViewModel.prototype.loadMore = function() {
