@@ -360,7 +360,11 @@ FileViewModel.prototype.setState = function(state) {
   this.fileType(state.type);
   this.additions(state.additions != '-' ? '+' + state.additions : '');
   this.deletions(state.deletions != '-' ? '-' + state.deletions : '');
-  this.diff(this.getSpecificDiff());
+  if (this.diff()) {
+    this.diff().invalidateDiff();
+  } else {
+    this.diff(this.getSpecificDiff());
+  }
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
