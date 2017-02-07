@@ -169,13 +169,15 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
     // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
     // data bind at getPatchCheckBox that is rendered with "html" binding.
     // which is reason why manually updating the html content and refreshing kobinding to have it render...
-    html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
-      if (self.patchLineList()[index] === undefined) {
-        self.patchLineList()[index] = true;
-      }
+    if (self.patchLineList) {
+      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
+        if (self.patchLineList()[index] === undefined) {
+          self.patchLineList()[index] = true;
+        }
 
-      return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
-    });
+        return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
+      });
+    }
 
     if (html !== self.htmlSrc) {
       // diff has changed since last we displayed and need refresh
