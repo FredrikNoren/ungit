@@ -138,8 +138,6 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
     }
   }).then(function() {
     if (self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
-
-    self.isParsed(false);
     var lineCount = 0;
 
     if (!self.diffJson[0].isTrimmed) {
@@ -165,25 +163,26 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
       html = diff2html.getPrettyHtmlFromJson(self.diffJson);
     }
 
-    var index = 0;
     self.numberOfSelectedPatchLines = 0;
-
-    // if self.editState is null then patching is not avaliable so skip this expensive op.x
-    if (self.editState && self.editState() === "patched") {
-      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
-        if (self.patchLineList()[index] === undefined) {
-          self.patchLineList()[index] = true;
-        }
-
-        return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
-      });
-    }
+    var index = 0;
 
     // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
     // data bind at getPatchCheckBox that is rendered with "html" binding.
     // which is reason why manually updating the html content and refreshing kobinding to have it render...
-    self.htmlSrc = html;
-    self.isParsed(true);
+    html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
+      if (self.patchLineList()[index] === undefined) {
+        self.patchLineList()[index] = true;
+      }
+
+      return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
+    });
+
+    if (html !== self.htmlSrc) {
+      // diff has changed since last we displayed and need refresh
+      self.htmlSrc = html;
+      self.isParsed(false);
+      self.isParsed(true);
+    }
   });
 };
 
