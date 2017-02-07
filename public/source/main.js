@@ -52,20 +52,20 @@ ko.bindingHandlers.autocomplete = {
       var value = $(element).val();
       var lastChar = value.slice(-1);
       if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
-        server.get('/fs/listDirectories', {term: value}, function(err, directoryList) {
-          if (err) {
-            if (err.errorCode == 'read-dir-failed') return true;
-            else return false;
-          } else {
-            $(element).autocomplete({
-              source: directoryList,
-              messages: {
-                noResults: '',
-                results: function() {}
-              }
-            });
-            $(element).autocomplete("search", value);
-          }
+        console.log(33);
+        server.getPromise('/fs/listDirectories', {term: value}).then(function(directoryList) {
+          console.log(111, directoryList);
+          $(element).autocomplete({
+            source: directoryList,
+            messages: {
+              noResults: '',
+              results: function() {}
+            }
+          });
+          $(element).autocomplete("search", value);
+        }).catch(function(err) {
+          console.log(666)
+          if (err.errorCode !== 'read-dir-failed') throw err;
         });
       } else if (event.keyCode == 39) { // '/'
         $(element).val(value + ungit.config.fileSeparator);

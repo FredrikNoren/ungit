@@ -300,8 +300,11 @@ app.get('/api/gitversion', (req, res) => {
 const userConfigPath = path.join(config.homedir, '.ungitrc');
 const readUserConfig = () => {
   return fs.isExists(userConfigPath).then((hasConfig) => {
+      console.log(9)
       if (!hasConfig) return {};
+      console.log(10)
       return fs.readFileAsync(userConfigPath, { encoding: 'utf8' }).then((content) => {
+        console.log(1)
           return JSON.parse(content.toString());
         });
     });
@@ -325,23 +328,21 @@ app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
   const dir = req.query.term.trim();
-
-  readUserConfig((err, userconfig) => {
-    if (err) res.status(400).json(err);
-    else if (dir) {
-      fs.readdir(dir, (err, files) => {
-        if (err) {
-          res.status(400).json({ errorCode: 'read-dir-failed', error: err });
-        } else {
-          const absolutePaths = files.map((file) => { return path.join(dir, file) });
-          async.filter(absolutePaths, (absolutePath, callback) => {
-            fs.stat(absolutePath, (err, stat) => {
-              callback(null, !err && stat && stat.isDirectory());
-            });
-          }, (err, filteredFiles) => res.json(filteredFiles));
-        }
-      });
-    }
+  readUserConfig().then((userconfig) => {
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        res.status(400).json({ errorCode: 'read-dir-failed', error: err });
+      } else {
+        const absolutePaths = files.map((file) => { return path.join(dir, file) });
+        async.filter(absolutePaths, (absolutePath, callback) => {
+          fs.stat(absolutePath, (err, stat) => {
+            callback(null, !err && stat && stat.isDirectory());
+          });
+        }, (err, filteredFiles) => res.json(filteredFiles));
+      }
+    });
+  }).catch((err) => {
+    res.status(400).json(err)
   });
 });
 
