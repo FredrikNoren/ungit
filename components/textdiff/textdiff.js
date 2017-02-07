@@ -140,27 +140,29 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
     if (self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
     self.isParsed(false);
-    var diffJsonCopy = JSON.parse(JSON.stringify(self.diffJson)); // make a json copy
     var lineCount = 0;
 
-    diffJsonCopy[0].blocks = diffJsonCopy[0].blocks.reduce(function(blocks, block) {
-      var length = block.lines.length;
-      if (lineCount < self.loadCount) {
-        block.lines = block.lines.slice(0, self.loadCount - lineCount);
-        blocks.push(block);
-      }
-      lineCount += length;
-      return blocks;
-    }, []);
+    if (!self.diffJson[0].isTrimmed) {
+      self.diffJson[0].blocks = self.diffJson[0].blocks.reduce(function(blocks, block) {
+        var length = block.lines.length;
+        if (lineCount < self.loadCount) {
+          block.lines = block.lines.slice(0, self.loadCount - lineCount);
+          blocks.push(block);
+        }
+        lineCount += length;
+        return blocks;
+      }, []);
+    }
+    self.diffJson[0].isTrimmed = true;
 
     self.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - self.loadCount)));
 
     var html;
 
     if (self.textDiffType.value() === 'sidebysidediff') {
-      html = diff2html.getPrettySideBySideHtmlFromJson(diffJsonCopy);
+      html = diff2html.getPrettySideBySideHtmlFromJson(self.diffJson);
     } else {
-      html = diff2html.getPrettyHtmlFromJson(diffJsonCopy);
+      html = diff2html.getPrettyHtmlFromJson(self.diffJson);
     }
 
     var index = 0;
