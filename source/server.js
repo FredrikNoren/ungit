@@ -18,6 +18,7 @@ const cache = require('./utils/cache');
 const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
 const bodyParser = require('body-parser');
+const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
@@ -325,23 +326,16 @@ app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
   const dir = req.query.term.trim();
-
-  readUserConfig((err, userconfig) => {
-    if (err) res.status(400).json(err);
-    else if (dir) {
-      fs.readdir(dir, (err, files) => {
-        if (err) {
-          res.status(400).json({ errorCode: 'read-dir-failed', error: err });
-        } else {
-          const absolutePaths = files.map((file) => { return path.join(dir, file) });
-          async.filter(absolutePaths, (absolutePath, callback) => {
-            fs.stat(absolutePath, (err, stat) => {
-              callback(null, !err && stat && stat.isDirectory());
-            });
-          }, (err, filteredFiles) => res.json(filteredFiles));
-        }
-      });
-    }
+  fs.readdirAsync(dir).then(filenames => {
+    return filenames.map((filename) => path.join(dir, filename));
+  }).filter((filepath) => {
+    return fs.statAsync(filepath).then((stat) => {
+      return stat.isDirectory();
+    }).catch(function() { return false; });
+  }).then(filteredFiles => {
+    res.json(filteredFiles)
+  }).catch((err) => {
+    res.status(400).json(err)
   });
 });
 

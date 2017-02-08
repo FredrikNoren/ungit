@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.6: Fix path auto complete
 - 1.1.5: Update "Toggle all" button after commit or changing selected files [#859](https://github.com/FredrikNoren/ungit/issues/859)
 - 1.1.4: [patch] Promise refactoring
 - 1.1.3: [patch] Fix submodule navigation on windows [#577](https://github.com/FredrikNoren/ungit/issues/577)
