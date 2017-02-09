@@ -10,7 +10,7 @@ The easiest way to use git. On any platform. Anywhere.
 
 Git is known for being a versatile distributed source control system that is a staple of many individuals, communities, and even for [the City of Chattanooga to crowd source bicycle parking locations](https://github.com/cityofchattanooga/Bicycle-Parking).  However, it is not known for userfriendlyness or easy learning curve.
 
-Ungit is to bring user friendliness to git without sacrificing versatility of git.
+Ungit brings user friendliness to git without sacrificing the versatility of git.
 
  * Clean and intuitive UI that makes it easy to _understand_ git.
  * Runs on any platform that node.js & git supports.
@@ -63,21 +63,13 @@ External Merge Tools
 --------------------
 If you have your own merge tool that you would like to use, such as Kaleidoscope or p4merge, you can configure ungit to use it. See [MERGETOOL.md](MERGETOOL.md).
 
-Plugins
--------
-Plugins are installed by simply placing them in the Ungit plugin directory (`~/.ungit/plugins` by default), and then restarting Ungit.
-
-[List of available plugins](https://github.com/FredrikNoren/ungit/wiki/List-of-plugins)
-
-There's a guide in the [PLUGINS.md](PLUGINS.md) file on how to write new plugins.
-
 Auto Refresh
 ------------
 Ungit will watch git directory recursively upon page view and automatically refresh contents on git operations or changes on files that are not configured to be ignored in `.gitignore`.  
 
 One caveat is that node's [`fs.watch()`](https://nodejs.org/docs/latest/api/fs.html#fs_fs_watch_filename_options_listener) with `recursive: true` option is only available in Mac and Windows.  For non Mac and Windows machines, git operations will be automatically refreshed but file changes may require manual refreshes as `fs.watch()` is unable to detect changes within nested directory hierarchy.
 
-Text Editor Integration
+Text Editor Integrations
 -------------------
 
 * [atom-ungit](https://github.com/codingtwinky/atom-ungit) for [Atom.io](https://atom.io/) by [@codingtwinky](https://github.com/codingtwinky)
@@ -117,7 +109,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 License (MIT)
 -------------
 
-Copyright (C) 2013-2016 Fredrik Norén
+Copyright (C) 2013-2017 Fredrik Norén
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
