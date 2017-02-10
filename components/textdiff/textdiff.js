@@ -98,6 +98,10 @@ var TextDiffViewModel = function(args) {
     }
   });
 
+  this.isShowingDiffs.subscribe(function(newValue) {
+    if (newValue) self.render();
+  });
+
   if (this.isShowingDiffs()) { this.render(); }
 }
 TextDiffViewModel.prototype.updateNode = function(parentElement) {

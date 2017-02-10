@@ -408,12 +408,7 @@ FileViewModel.prototype.launchMergeTool = function() {
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames
-  if (this.isShowingDiffs()) {
-    this.isShowingDiffs(false);
-  } else {
-    this.isShowingDiffs(true);
-    this.diff().render();
-  }
+  this.isShowingDiffs(!this.isShowingDiffs());
 }
 FileViewModel.prototype.patchClick = function() {
   if (!this.isShowingDiffs()) return;
