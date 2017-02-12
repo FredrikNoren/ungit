@@ -141,7 +141,7 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
       return self.getDiffJson();
     }
   }).then(function() {
-    if (self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
+    if (!self.diffJson || self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
     var lineCount = 0;
 
     if (!self.diffJson[0].isTrimmed) {
