@@ -92,7 +92,7 @@ var TextDiffViewModel = function(args) {
   this.isParsed = ko.observable(false);
 
   programEvents.add(function(event) {
-    if (event.event === "invalidate-diff-and-render") {
+    if (event.event === "invalidate-diff-and-render" || event.event === "working-tree-changed") {
       self.invalidateDiff();
       if (self.isShowingDiffs()) self.render();
     }
