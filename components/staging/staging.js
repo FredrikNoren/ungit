@@ -194,7 +194,7 @@ StagingViewModel.prototype.setFiles = function(files) {
     } else {
       // this is mainly for patching and it may not fire due to the fact that
       // '/commit' triggers working-tree-changed which triggers throttled refresh
-      fileViewModel.invalidateDiff();
+      fileViewModel.diff().invalidateDiff();
     }
     fileViewModel.setState(files[file]);
     newFiles.push(fileViewModel);
@@ -221,7 +221,12 @@ StagingViewModel.prototype.toggleAmend = function() {
 StagingViewModel.prototype.resetMessages = function() {
   this.commitMessageTitle('');
   this.commitMessageBody('');
-  this.filesByPath = {};
+  for (var key in this.filesByPath) {
+    var element = this.filesByPath[key];
+    element.diff().invalidateDiff();
+    element.patchLineList.removeAll();
+    element.isShowingDiffs(false);
+  }
   this.amend(false);
 }
 StagingViewModel.prototype.commit = function() {
@@ -355,7 +360,11 @@ FileViewModel.prototype.setState = function(state) {
   this.fileType(state.type);
   this.additions(state.additions != '-' ? '+' + state.additions : '');
   this.deletions(state.deletions != '-' ? '-' + state.deletions : '');
-  this.diff = ko.observable(this.getSpecificDiff());
+  if (this.diff()) {
+    this.diff().invalidateDiff();
+  } else {
+    this.diff(this.getSpecificDiff());
+  }
   if (this.diff().isNew) this.diff().isNew(state.isNew);
   if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
 }
@@ -399,12 +408,7 @@ FileViewModel.prototype.launchMergeTool = function() {
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames
-  if (this.isShowingDiffs()) {
-    this.isShowingDiffs(false);
-  } else {
-    this.isShowingDiffs(true);
-    this.invalidateDiff();
-  }
+  this.isShowingDiffs(!this.isShowingDiffs());
 }
 FileViewModel.prototype.patchClick = function() {
   if (!this.isShowingDiffs()) return;
@@ -414,7 +418,4 @@ FileViewModel.prototype.patchClick = function() {
   } else {
     this.editState('patched');
   }
-}
-FileViewModel.prototype.invalidateDiff = function() {
-  this.diff().invalidateDiff();
 }

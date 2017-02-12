@@ -19,23 +19,18 @@ var ImageDiffViewModel = function(args) {
     if (self.isRemoved()) return 'removed';
     return 'changed';
   });
-  this.oldImageSrc = ko.computed(function() {
-    return ungit.config.rootPath + '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1 + '^': 'HEAD');
-  });
-  this.newImageSrc = ko.computed(function() {
-    return ungit.config.rootPath + '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=' + (self.sha1 ? self.sha1: 'current');
-  });
+  var gitDiffURL = ungit.config.rootPath + '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=';
+  this.oldImageSrc = gitDiffURL + (self.sha1 ? self.sha1 + '^': 'HEAD');
+  this.newImageSrc = gitDiffURL + (self.sha1 ? self.sha1: 'current');
   this.isShowingDiffs = args.isShowingDiffs;
 }
 ImageDiffViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('imagediff', this, {}, parentElement);
 }
-ImageDiffViewModel.prototype.invalidateDiff = function() {
-  return Promise.resolve();
-}
-ImageDiffViewModel.prototype.newImageError = function(data, event) {
+ImageDiffViewModel.prototype.invalidateDiff = function() {}
+ImageDiffViewModel.prototype.newImageError = function() {
   this.isRemoved(true);
 }
-ImageDiffViewModel.prototype.oldImageError = function(data, event) {
+ImageDiffViewModel.prototype.oldImageError = function() {
   this.isNew(true);
 }
