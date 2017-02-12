@@ -107,11 +107,10 @@ AppViewModel.prototype._handleCredentialsRequested = function() {
   // This happens for instance when we fetch nodes and remote tags at the same time
   if (!this._isShowingCredentialsDialog) {
     this._isShowingCredentialsDialog = true;
-    self.dialog.onclose();
-    self.showDialog(components.create('credentialsdialog').closeThen(function(diag) {
+    components.create('credentialsdialog').show().closeThen(function(diag) {
       self._isShowingCredentialsDialog = false;
       programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
-    }));
+    });
   }
 }
 AppViewModel.prototype.showDialog = function(dialog) {
