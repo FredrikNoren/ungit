@@ -170,9 +170,7 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
 GraphViewModel.prototype.computeNode = function(nodes) {
   var self = this;
 
-  if (!nodes) {
-    nodes = this.nodes();
-  }
+  nodes = nodes || this.nodes();
 
   this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
 
@@ -184,9 +182,11 @@ GraphViewModel.prototype.computeNode = function(nodes) {
   }
 
   // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-  nodes = nodes.filter(function(node) { return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp; })
+  nodes = nodes.filter(function(node) {
+    return (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp;
+  });
 
-  var branchSlots = [];
+  var branchSlotCounter = this.HEAD() ? 1 : 0;
 
   // Then iterate from the bottom to fix the orders of the branches
   for (var i = nodes.length - 1; i >= 0; i--) {
@@ -197,23 +197,17 @@ GraphViewModel.prototype.computeNode = function(nodes) {
     // First occurence of the branch, find an empty slot for the branch
     if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
       ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
-      var slot = branchSlots.indexOf(undefined);
-      if (slot === -1) {
-        branchSlots.push(ideologicalBranch);
-        slot = branchSlots.length - 1;
-      }
-      ideologicalBranch.branchOrder = slot;
-      branchSlots[slot] = slot;
+      ideologicalBranch.branchOrder = branchSlotCounter++
     }
 
     node.branchOrder(ideologicalBranch.branchOrder);
-    self.heighstBranchOrder = Math.max(self.heighstBranchOrder, node.branchOrder());
   }
 
+  self.heighstBranchOrder = branchSlotCounter - 1;
   var prevNode;
   nodes.forEach(function(node) {
-    node.branchOrder(branchSlots.length - node.branchOrder());
     node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
+    if (node.ancestorOfHEAD()) node.branchOrder(0);
     node.aboveNode = prevNode;
     if (prevNode) prevNode.belowNode = node;
     prevNode = node;
