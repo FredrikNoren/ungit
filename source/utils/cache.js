@@ -1,36 +1,47 @@
-'use strict';
+const Bluebird = require('bluebird');
+const NodeCache = require('node-cache');
+const cache = Bluebird.promisifyAll(new NodeCache({ stdTTL: 0, errorOnMissing: true }));
+const md5 = require('blueimp-md5');
+const funcMap = {}; // Will there ever be a use case where this is a cache with TTL? func registration with TTL?
 
-const signals = require('signals');
-
-// Wraps a function to produce one value at a time no matter how many times invoked, and cache that value until invalidated
-module.exports = (constructValue) => {
-  let constructDone;
-  let hasCache = false;
-
-  let f = (callback) => {
-    if (hasCache) return callback(f.error, f.value);
-    if (constructDone) return constructDone.add(callback);
-
-    constructDone = new signals.Signal();
-    let localConstructDone = constructDone;
-    constructDone.add((err, val) => {
-      constructDone = null;
-      callback(err, val);
+cache.resolveFunc = (key) => {
+  return cache.getAsync(key) // Cant do `cache.getAsync(key, true)` due to `get` argument ordering...
+    .catch({ errorcode: "ENOTFOUND" }, (e) => {
+      if (!funcMap[key]) throw e;     // func associated with key is not found, throw not found error
+      const result = funcMap[key]();  // func is found, resolve, set with TTL and return result
+      return cache.setAsync(key, result, cache.options.stdTTL)
+        .then(() => { return result });
     });
-    constructValue((err, value) => {
-      hasCache = true;
-      f.error = err;
-      f.value = value;
-      localConstructDone.dispatch(err, value);
-    });
-  };
-
-  f.invalidate = () => {
-    hasCache = false;
-    f.error = null;
-    f.value = null;
-    constructDone = null;
-  };
-
-  return f;
 }
+
+cache.registerFunc = (key, func) => {
+  let checkedKey = key;
+  let checkedFunc = func;
+
+  if (typeof key === "function") {
+    checkedFunc = key
+    checkedKey = md5(checkedFunc);
+  }
+
+  if (typeof checkedFunc !== "function") {
+    throw new Error("no function was passed in");
+  }
+
+  if (funcMap[checkedKey]) {
+    cache.deregisterFunc(checkedKey);
+  }
+  funcMap[checkedKey] = checkedFunc;
+
+  return checkedKey;
+}
+
+cache.invalidateFunc = (key) => {
+  cache.del(key);
+}
+
+cache.deregisterFunc = (key) => {
+  cache.invalidateFunc(key);
+  delete funcMap[key];
+}
+
+module.exports = cache;
