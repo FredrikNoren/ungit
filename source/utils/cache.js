@@ -23,7 +23,7 @@ cache.resolveFunc = (key) => {
 /**
  * @function registerFunc
  * @description Register a function to cache it's result. If same key exists, key is deregistered and registered again.
- * @param {ttl} [ttl=0] - ttl to be used for the cached result of function.
+ * @param {ttl} [ttl=0] - ttl in seconds to be used for the cached result of function.
  * @param {string} [key=md5 of func] - Key to retrive cached function result.
  * @param {function} [func] - Function to be executed to get the result.
  * @return {string} - key to retrive cached function result.

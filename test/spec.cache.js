@@ -2,6 +2,7 @@
 var expect = require('expect.js');
 var async = require('async');
 var cache = require('../src/utils/cache');
+var Bluebird = require('bluebird');
 
 describe('cache', function () {
   it('should be invokable several times', function(done) {
@@ -48,7 +49,6 @@ describe('cache', function () {
       .catch(done)
   });
 
-
   it('creating a same function with different keys', function(done) {
     var i = 0;
     var key1 = "func1";
@@ -73,4 +73,36 @@ describe('cache', function () {
       .catch(done)
   });
 
+  it('Testing ttl', function(done) {
+    var i = 0;
+    var func = function() { return i++; }
+    var key = cache.registerFunc(1, null, func);
+    this.timeout(3000);
+
+    cache.resolveFunc(key)
+      .then(function(val) { expect(val).to.be(0); })
+      .then(function() {
+        return new Bluebird(function(resolve) {
+          setTimeout(resolve, 500);
+        });
+      }).then(function() {
+        return cache.resolveFunc(key)
+      }).then(function(val) { expect(val).to.be(0); })
+      .then(function() {
+        return new Bluebird(function(resolve) {
+          setTimeout(resolve, 1000);
+        });
+      }).then(function() {
+        return cache.resolveFunc(key)
+      }).then(function(val) { expect(val).to.be(1); })
+      .then(function() {
+        return new Bluebird(function(resolve) {
+          setTimeout(resolve, 500);
+        });
+      }).then(function() {
+        return cache.resolveFunc(key)
+      }).then(function(val) { expect(val).to.be(1); })
+      .then(done)
+      .catch(done)
+  });
 });
