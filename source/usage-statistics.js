@@ -12,16 +12,15 @@ class UsageStatistics {
   constructor() {
     if (!config.sendUsageStatistics) return;
     this.keen = keenio.configure({ projectId: _PROJECT_ID, writeKey: _WRITE_KEY });
-    this.getDefaultData = cache((callback) => {
-      sysinfo.getUserHash()
-        .then((hash) => {
-          callback(null, { version: config.ungitDevVersion, userHash: hash });
+    this.getDefaultDataKey = cache.registerFunc(() => {
+      return sysinfo.getUserHash().then((hash) => {
+          return { version: config.ungitDevVersion, userHash: hash };
         });
     });
   }
 
   _mergeDataWithDefaultData(data, callback) {
-    this.getDefaultData((err, defaultData) => {
+    cache.resolveFunc(this.getDefaultDataKey).then((defaultData) => {
       data = data || {};
       for(const k in defaultData)
         data[k] = defaultData[k];
