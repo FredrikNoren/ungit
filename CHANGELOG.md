@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.8:
+    - Realtime text diff via invalidate diff on directory change
 - 1.1.7:
     - Fix diff flickering issue and optimization [#865](https://github.com/FredrikNoren/ungit/pull/865)
     - Fix credential dialog issue [#864](https://github.com/FredrikNoren/ungit/pull/864)

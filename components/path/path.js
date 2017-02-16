@@ -66,6 +66,7 @@ PathViewModel.prototype.updateStatus = function() {
         self.status(status.type);
         self.repository(null);
       }
+      return null;
     }).catch(function(err) { })
     .finally(function() { self.loadingProgressBar.stop() });
 }
