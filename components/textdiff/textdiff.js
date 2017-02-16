@@ -92,7 +92,7 @@ var TextDiffViewModel = function(args) {
   this.isParsed = ko.observable(false);
 
   programEvents.add(function(event) {
-    if (event.event === "invalidate-diff-and-render") {
+    if (event.event === "invalidate-diff-and-render" || event.event === "working-tree-changed") {
       self.invalidateDiff();
       if (self.isShowingDiffs()) self.render();
     }
@@ -141,7 +141,7 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
       return self.getDiffJson();
     }
   }).then(function() {
-    if (self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
+    if (!self.diffJson || self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
     var lineCount = 0;
 
     if (!self.diffJson[0].isTrimmed) {
