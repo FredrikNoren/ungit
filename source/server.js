@@ -90,8 +90,11 @@ if (config.allowedIPs) {
   app.use((req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
-    else res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
+    else {
+      res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
       '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
+      winston.warn(`Host trying but not authorized to connect: ${ip}`);
+    }
   });
 }
 
