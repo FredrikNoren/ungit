@@ -347,7 +347,7 @@ git.discardChangesInFile = (repoPath, filename) => {
 
 git.applyPatchedDiff = (repoPath, patchedDiff) => {
   if (patchedDiff) {
-    return git(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
+    return git(['apply', '--cached'], repoPath, null, null, `${patchedDiff}\n\n`);
   }
 }
 

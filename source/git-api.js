@@ -97,7 +97,7 @@ exports.registerApi = (env) => {
       return true;
     } else if (filename == path.join(".git", "HEAD")) {
       return true;   // Explicitly return true for ".git/HEAD" for branch changes
-    } else if (filename == ".git" || filename.startsWith(".git" + path.sep)) {
+    } else if (filename == ".git" || filename.startsWith(`.git${path.sep}`)) {
       return false;  // Ignore changes under ".git/*"
     } else {
       return true;

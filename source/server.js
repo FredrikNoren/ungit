@@ -28,7 +28,7 @@ process.on('uncaughtException', (err) => {
   ], () => process.exit());
 });
 
-console.log('Setting log level to ' + config.logLevel);
+console.log(`Setting log level to ${config.logLevel}`);
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {
   level: config.logLevel,
@@ -68,7 +68,7 @@ app.use((req, res, next) => {
   const rootPath = config.rootPath;
   if (req.url === rootPath) {
     // always have a trailing slash
-    res.redirect(req.url + '/');
+    res.redirect(`${req.url}/`);
     return;
   }
   if (req.url.indexOf(rootPath) === 0) {
@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 
 if (config.logRESTRequests) {
   app.use((req, res, next) => {
-    winston.info(req.method + ' ' + req.url);
+    winston.info(`${req.method} ${req.url}`);
     next();
   });
 }
@@ -90,8 +90,8 @@ if (config.allowedIPs) {
   app.use((req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
-    else res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
-      '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
+    else res.status(403).send(403, ```<h3>This host is not authorized to connect</h3>
+      <p>You are trying to connect to an Ungit instance from an unathorized host.</p>```);
   });
 }
 
@@ -110,7 +110,7 @@ if (config.autoShutdownTimeout) {
   const refreshAutoShutdownTimeout = () => {
     if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
     autoShutdownTimeout = setTimeout(() => {
-      winston.info('Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' + config.autoShutdownTimeout + 'ms)');
+      winston.info(`Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ${config.autoShutdownTimeout}ms)`);
       process.exit(0);
     }, config.autoShutdownTimeout);
   }
@@ -164,7 +164,7 @@ if (config.authentication) {
 
 const indexHtmlCacheKey = cache.registerFunc(() => {
   return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
-    return fs.readFileAsync(__dirname + '/../public/index.html').then((data) => {
+    return fs.readFileAsync(path.join(__dirname, '/../public/index.html')).then((data) => {
       return Bluebird.all(Object.keys(plugins).map((pluginName) => {
         return plugins[pluginName].compile();
       })).then((results) => {
@@ -187,14 +187,14 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use(serveStatic(__dirname + '/../public'));
+app.use(serveStatic(path.join(__dirname, '/../public')));
 
 // Socket-IO
 const socketIO = require('socket.io');
 const socketsById = {};
 let socketIdCounter = 0;
 const io = socketIO.listen(server, {
-  path: config.rootPath + '/socket.io',
+  path: `${config.rootPath}/socket.io`),
   logger: {
     debug: winston.debug.bind(winston),
     info: winston.info.bind(winston),
@@ -231,19 +231,19 @@ const loadPlugins = (plugins, pluginBasePath) => {
       !fs.existsSync(path.join(pluginPath, 'ungit-plugin.json'))) {
       return;
     }
-    winston.info('Loading plugin: ' + pluginPath);
+    winston.info(`Loading plugin: ${pluginPath}`);
     const plugin = new UngitPlugin({
       dir: pluginDir,
-      httpBasePath: 'plugins/' + pluginDir,
+      httpBasePath: `plugins/${pluginDir}`),
       path: pluginPath
     });
     if (plugin.manifest.disabled || plugin.config.disabled) {
-      winston.info('Plugin disabled: ' + pluginDir);
+      winston.info(`Plugin disabled: ${pluginDir}`);
       return;
     }
     plugin.init(apiEnvironment);
     plugins.push(plugin);
-    winston.info('Plugin loaded: ' + pluginDir);
+    winston.info(`Plugin loaded: ${pluginDir}`);
   });
 }
 const pluginsCacheKey = cache.registerFunc(() => {
@@ -351,7 +351,7 @@ app.use((err, req, res, next) => {
 exports.started = new signals.Signal();
 
 server.listen(config.port, () => {
-  winston.info('Listening on port ' + config.port);
+  winston.info(`Listening on port ${config.port}`);
   console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
   exports.started.dispatch();
 });
