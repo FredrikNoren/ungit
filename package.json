@@ -36,7 +36,7 @@
     "lodash": "~4.17.4",
     "mkdirp": "~0.5.1",
     "moment": "~2.17.1",
-    "nodecache": "0.0.2",
+    "node-cache": "~4.1.1",
     "npm": "~4.1.1",
     "npm-registry-client": "~7.4.5",
     "octicons": "~3.5.0",
