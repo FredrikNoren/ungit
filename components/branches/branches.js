@@ -1,7 +1,6 @@
 
 var ko = require('knockout');
 var _ = require('lodash');
-var async = require('async');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
 

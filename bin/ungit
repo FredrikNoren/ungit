@@ -5,7 +5,6 @@ var config = require('../src/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
-var async = require('async');
 
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
@@ -31,12 +30,9 @@ process.on('SIGTERM', cleanExit); // catch kill
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  async.parallel([
-    bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'),
-    usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception')
-  ], function() {
-    process.exit();
-  });
+  bugtracker.notify(err, 'ungit-launcher');
+  usageStatistics.addEvent('launcher-exception');
+  process.exit();
 });
 
 child.on('exit', function (res) {

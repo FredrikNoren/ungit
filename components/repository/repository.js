@@ -1,7 +1,6 @@
 
 var ko = require('knockout');
 var components = require('ungit-components');
-var async = require('async');
 var _ = require('lodash');
 
 components.register('repository', function(args) {

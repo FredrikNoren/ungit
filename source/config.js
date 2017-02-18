@@ -46,9 +46,6 @@ const defaultConfig = {
   // Set to false to show rebase and merge on drag and drop on all nodes.
   showRebaseAndMergeOnlyOnRefs: true,
 
-  // Maximum number of concurrent git operations
-  maxConcurrentGitOperations: 4,
-
   // Launch a browser window with ungit when ungit is started
   launchBrowser: true,
 
@@ -166,7 +163,6 @@ let argv = yargs
 .describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
 .describe('users', 'Map of username/passwords which are granted access')
 .describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')
-.describe('maxConcurrentGitOperations', 'Maximum number of concurrent git operations')
 .describe('forcedLaunchPath', 'Define path to be used on open. Can be set to null to force the home screen')
 .describe('autoShutdownTimeout', 'Closes the server after x ms of inactivity. Mainly used by the clicktesting')
 .describe('maxNAutoRestartOnCrash', 'Maximum number of automatic restarts after a crash. Undefined == unlimited')

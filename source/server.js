@@ -11,7 +11,6 @@ const LocalStrategy = require('passport-local').Strategy;
 const semver = require('semver');
 const path = require('path');
 const fs = require('./utils/fs-async');
-const async = require('async');
 const signals = require('signals');
 const os = require('os');
 const cache = require('./utils/cache');
@@ -22,10 +21,9 @@ const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
-  async.parallel([
-    bugtracker.notify.bind(bugtracker, err, 'ungit-server'),
-    usageStatistics.addEvent.bind(usageStatistics, 'server-exception')
-  ], () => process.exit());
+  bugtracker.notify(err, 'ungit-server');
+  usageStatistics.addEvent(usageStatistics, 'server-exception');
+  process.exit();
 });
 
 console.log(`Setting log level to ${config.logLevel}`);
