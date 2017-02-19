@@ -211,7 +211,7 @@ if (typeof currentRootPath !== 'string') {
 } else if (currentRootPath !== '') {
   // must start with a slash
   if (currentRootPath.charAt(0) !== '/') {
-    currentRootPath = `/${currentRootPath}`);
+    currentRootPath = `/${currentRootPath}`;
   }
   // can not end with a trailing slash
   if (currentRootPath.charAt(currentRootPath.length - 1) === '/') {

@@ -192,7 +192,7 @@ const socketIO = require('socket.io');
 const socketsById = {};
 let socketIdCounter = 0;
 const io = socketIO.listen(server, {
-  path: `${config.rootPath}/socket.io`),
+  path: `${config.rootPath}/socket.io`,
   logger: {
     debug: winston.debug.bind(winston),
     info: winston.info.bind(winston),
@@ -232,7 +232,7 @@ const loadPlugins = (plugins, pluginBasePath) => {
     winston.info(`Loading plugin: ${pluginPath}`);
     const plugin = new UngitPlugin({
       dir: pluginDir,
-      httpBasePath: `plugins/${pluginDir}`),
+      httpBasePath: `plugins/${pluginDir}`,
       path: pluginPath
     });
     if (plugin.manifest.disabled || plugin.config.disabled) {

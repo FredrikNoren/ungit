@@ -27,8 +27,58 @@ const isRetryableError = function(err) {
   }
 }
 
+const gitExecutor = (args, callback) => {
+  if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
+  let rejected = false;
+  let stdout = '';
+  let stderr = '';
+  const gitProcess = child_process.spawn(
+    'git',
+    args.commands,
+    {
+      cwd: args.repoPath,
+      maxBuffer: 1024 * 1024 * 100,
+      timeout: args.timeout
+    });
+
+  if (args.outPipe) {
+    gitProcess.stdout.pipe(args.outPipe);
+  } else {
+    gitProcess.stdout.on('data', (data) => stdout += data.toString());
+  }
+  if (args.inPipe) {
+    gitProcess.stdin.end(args.inPipe);
+  }
+  gitProcess.stderr.on('data', (data) => stderr += data.toString());
+  gitProcess.on('error', (error) => {
+    if (args.outPipe) args.outPipe.end();
+    rejected = true;
+    callback(error);
+  });
+
+  gitProcess.on('close', (code) => {
+    if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
+    if (rejected) return;
+    if (args.outPipe) args.outPipe.end();
+
+    if (code === 0 || (code === 1 && args.allowError)) {
+      callback(null, stdout);
+    } else {
+      callback(getGitError(args, stderr, stdout));
+    }
+  });
+}
+
 const gitExecutorProm = (args, retryCount) => {
-  return gitExecutorProm(args, retryCount).catch((err) => {
+  return new Bluebird((resolve, reject) => {
+    gitExecutor(args, (queueError, out) => {
+      if(queueError) {
+        reject(queueError);
+      } else {
+        resolve(out);
+      }
+    });
+  }).catch((err) => {
     if (retryCount > 0 && isRetryableError(err)) {
       return new Bluebird((resolve) => {
         // sleep random amount between 250 ~ 750 ms
