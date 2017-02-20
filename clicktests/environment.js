@@ -3,6 +3,7 @@ var child_process = require('child_process');
 var webpage = require('webpage');
 var async = require('async');
 var helpers = require('./helpers');
+var Bluebird = require('bluebird');
 
 module.exports = Environment;
 
@@ -43,25 +44,37 @@ Environment.prototype.shutdown = function(callback, doNotClose) {
 }
 Environment.prototype.createRepos = function(config, callback) {
   var self = this;
-  async.mapSeries(config, function(conf, callback) {
-    self.createFolder(conf.path, function() {
-      self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
-        if (conf.initCommits) {
-          async.timesSeries(conf.initCommits, function(x, callback) {
-            self.createTestFile(conf.path + '/testy' + x, function() {
-              self.backgroundAction('POST', self.url + '/api/commit', {
-                path: conf.path,
-                message: 'Init Commit ' + x,
-                files: [{ name: 'testy' + x }]
-              }, callback);
-            });
-          }, callback);
-        } else {
-          callback();
-        }
+
+  var createCommits = function(conf, x) {
+    return new Bluebird(function(resolve) {
+      self.createTestFile(conf.path + '/testy' + x, function() {
+        self.backgroundAction('POST', self.url + '/api/commit', {
+          path: conf.path,
+          message: 'Init Commit ' + x,
+          files: [{ name: 'testy' + x }]
+        }, resolve);
       });
     });
-  }, callback);
+  }
+
+  return Bluebird.map(config, function(conf) {
+    return new Bluebird(function(resolve) {
+      self.createFolder(conf.path, function() {
+        self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
+          if (conf.initCommits) {
+            var commits = [];
+            for(var n = 0; n < conf.initCommits; n++) {
+              commits.push(createCommits(conf, n));
+            }
+            Bluebird.all(commits).then(resolve);
+          } else {
+            resolve();
+          }
+        });
+      });
+    });
+  }).then(function() { callback(); })
+  .catch(callback)
 }
 Environment.prototype.setupPage = function() {
   var page = this.page;
