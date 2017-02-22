@@ -20,61 +20,48 @@ function Environment(page, config) {
   this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
 
-Environment.prototype.init = function(callback) {
+Environment.prototype.init = function() {
   var self = this;
   this.setupPage(this.page);
-  this.startServer(function(err) {
-    if (err) return callback(err);
-    self.createTempFolder(function(err, res) {
-      if (err) return callback(err);
-      self.path = res.path;
-      callback();
-    });
-  });
+
+  return this.startServer()
+    .then(function() { return self.createTempFolder() })
+    .then(function(res) { self.path = res.path; });
 }
-Environment.prototype.shutdown = function(callback, doNotClose) {
+Environment.prototype.shutdown = function(doNotClose) {
   var self = this;
-  this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
-  this.backgroundAction('POST', this.url + '/api/testing/cleanup', undefined, function() {
-    self.shutdownServer(function() {
-      callback();
-      if (!doNotClose) self.page.close();
-    });
-  });
+  return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
+    .then(function() { return self.shutdownServer(); })
+    .then(function() { if (!doNotClose) self.page.close(); });
 }
-Environment.prototype.createRepos = function(config, callback) {
+Environment.prototype.createRepos = function(config) {
   var self = this;
 
   var createCommits = function(conf, x) {
-    return new Bluebird(function(resolve) {
-      self.createTestFile(conf.path + '/testy' + x, function() {
-        self.backgroundAction('POST', self.url + '/api/commit', {
+    return self.createTestFile(conf.path + '/testy' + x)
+      .then(function() {
+        return self.backgroundAction('POST', self.url + '/api/commit', {
           path: conf.path,
           message: 'Init Commit ' + x,
           files: [{ name: 'testy' + x }]
-        }, resolve);
-      });
-    });
-  }
-
-  return Bluebird.map(config, function(conf) {
-    return new Bluebird(function(resolve) {
-      self.createFolder(conf.path, function() {
-        self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
-          if (conf.initCommits) {
-            var commits = [];
-            for(var n = 0; n < conf.initCommits; n++) {
-              commits.push(createCommits(conf, n));
-            }
-            Bluebird.all(commits).then(resolve);
-          } else {
-            resolve();
-          }
         });
       });
-    });
-  }).then(function() { callback(); })
-  .catch(callback)
+  };
+
+  return Bluebird.map(config, function(conf) {
+    return self.createFolder(conf.path)
+      .then(function() {
+        return self.initFolder({ bare: !!conf.bare, path: conf.path });
+      }).then(function() {
+        if (conf.initCommits) {
+          var commits = [];
+          for(var n = 0; n < conf.initCommits; n++) {
+            commits.push(createCommits(conf, n));
+          }
+          return Bluebird.all(commits);
+        }
+      });
+  });
 }
 Environment.prototype.setupPage = function() {
   var page = this.page;
@@ -111,7 +98,7 @@ Environment.prototype.setupPage = function() {
   this.page = page;
 }
 
-Environment.prototype.startServer = function(callback) {
+Environment.prototype.startServer = function() {
   var self = this;
   helpers.log('Starting ungit server...', this.config.serverStartupOptions);
   var hasStarted = false;
@@ -129,65 +116,70 @@ Environment.prototype.startServer = function(callback) {
     '--alwaysLoadActiveBranch',
     '--logGitCommands']
     .concat(this.config.serverStartupOptions);
-  var ungitServer = child_process.spawn('node', options);
-  ungitServer.stdout.on("data", function (data) {
-    if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
+  return new Bluebird(function(resolve, reject) {
+    var ungitServer = child_process.spawn('node', options);
+    ungitServer.stdout.on("data", function (data) {
+      if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
 
-    if (data.toString().indexOf('Ungit server already running') >= 0) {
-      callback('server-already-running');
-    }
+      if (data.toString().indexOf('Ungit server already running') >= 0) {
+        reject(new Error('server-already-running'));
+      }
 
-    if (data.toString().indexOf('## Ungit started ##') >= 0) {
-      if (hasStarted) throw new Error('Ungit started twice, probably crashed.');
-      hasStarted = true;
-      helpers.log('Ungit server started.');
-      callback();
-    }
+      if (data.toString().indexOf('## Ungit started ##') >= 0) {
+        if (hasStarted) throw new Error('Ungit started twice, probably crashed.');
+        hasStarted = true;
+        helpers.log('Ungit server started.');
+        resolve();
+      }
+    });
+    ungitServer.stderr.on("data", function (data) {
+      console.log(prependLines('[server ERROR] ', data));
+    });
+    ungitServer.on('exit', function() {
+      helpers.log('UNGIT SERVER EXITED');
+    });
   });
-  ungitServer.stderr.on("data", function (data) {
-    console.log(prependLines('[server ERROR] ', data));
-  });
-  ungitServer.on('exit', function() {
-    helpers.log('UNGIT SERVER EXITED');
-  })
 }
 
 var getRestSetting = function(method, body) {
   return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
 }
-Environment.prototype.backgroundAction = function(method, url, body, callback) {
+Environment.prototype.backgroundAction = function(method, url, body) {
   var tempPage = webpage.create();
-  tempPage.open(url, getRestSetting(method, body), function(status) {
-    if (status == 'fail') return callback({ status: status, content: tempPage.plainText });
-    tempPage.close();
-    var data = tempPage.plainText;
-    try { data = JSON.parse(data); } catch(ex) {}
-    callback(null, data);
+
+  return new Bluebird(function(resolve, reject) {
+    tempPage.open(url, getRestSetting(method, body), function(status) {
+      if (status == 'fail') return reject({ status: status, content: tempPage.plainText });
+      tempPage.close();
+      var data = tempPage.plainText;
+      try { data = JSON.parse(data); } catch(ex) {}
+      resolve(data);
+    });
   });
 }
-Environment.prototype.createTestFile = function(filename, callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/createfile', { file: filename }, callback);
+Environment.prototype.createTestFile = function(filename) {
+  return this.backgroundAction('POST', this.url + '/api/testing/createfile', { file: filename });
 }
-Environment.prototype.changeTestFile = function(filename, callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback);
+Environment.prototype.changeTestFile = function(filename) {
+  return this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename });
 }
-Environment.prototype.shutdownServer = function(callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
+Environment.prototype.shutdownServer = function() {
+  return this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined);
 }
-Environment.prototype.createTempFolder = function(callback) {
+Environment.prototype.createTempFolder = function() {
   console.log('Creating temp folder');
-  this.backgroundAction('POST', this.url + '/api/testing/createtempdir', undefined, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/createtempdir', undefined);
 }
-Environment.prototype.createFolder = function(dir, callback) {
+Environment.prototype.createFolder = function(dir) {
   console.log('Create folder: ' + dir);
-  this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
+  return this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir });
 }
-Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', this.url + '/api/init', options, callback);
+Environment.prototype.initFolder = function(options) {
+  return this.backgroundAction('POST', this.url + '/api/init', options);
 }
-Environment.prototype.gitCommand = function(options, callback) {
+Environment.prototype.gitCommand = function(options) {
   console.log(">>>>", JSON.stringify(options));
-  this.backgroundAction('POST', this.url + '/api/testing/git', options, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/git', options);
 }
 
 var prependLines = function(pre, text) {
