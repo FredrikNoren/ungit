@@ -2,6 +2,7 @@
 var async = require('async');
 var cliColor = require('ansi-color');
 var helpers = require('./helpers');
+var Bluebird = require('bluebird');
 
 var testsuites = {};
 module.exports = testsuites;
@@ -45,35 +46,31 @@ TestSuite.prototype.test = function(name, description) {
 TestSuite.prototype.run = function(suiteName, callback) {
   var self = this;
   var startTime = Date.now();
-  async.series(this.tests.map(function(test, index) {
+
+  return Bluebird.mapSeries(this.tests, function(test, index) {
     var testFullName = suiteName + ' - ' + pad(index, 2) + ' ' + test.name;
-    return function(callback) {
+    return new Bluebird(function(resolve, reject) {
       helpers.log(cliColor.set('## Running test : ' + testFullName, 'magenta'));
-      var timeout = setTimeout(function() {
-        self.page.render('clicktests/screenshots/timeout.png')
-        console.error('Test timeouted after ' + self.config.timeout + 'ms!');
-        callback('timeout');
-      }, self.config.timeout);
       self.page.render('clicktests/screenshots/' + testFullName + ' - before.png');
       test.description(function(err, res) {
-        clearTimeout(timeout);
         self.page.render('clicktests/screenshots/' + testFullName + '.png');
         if (err) {
           helpers.log(JSON.stringify(err));
           helpers.log(cliColor.set('## Test failed: ' + testFullName, 'red'));
+          reject(err);
+        } else {
+          helpers.log(cliColor.set('## Test ok: ' + testFullName, 'green'));
+          resolve(res);
         }
-        else helpers.log(cliColor.set('## Test ok: ' + testFullName, 'green'));
-        callback(err, res);
       });
-    }
-  }), function(err) {
-    if (err) {
-      console.error('Tests failed!');
-      phantom.exit(1);
-    } else {
-      console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
-      callback();
-    }
+    });
+  }).timeout(self.config.timeout)
+  .then(function() {
+    console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
+    callback();
+  }).catch(function(err) {
+    console.error('Tests failed! - ', err);
+    phantom.exit(1);
   });
 }
 
