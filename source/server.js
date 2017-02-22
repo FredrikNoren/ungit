@@ -165,27 +165,27 @@ if (config.authentication) {
   };
 }
 
-const indexHtmlCache = cache((callback) => {
-  pluginsCache((plugins) => {
-    fs.readFile(__dirname + '/../public/index.html', (err, data) => {
-      async.map(Object.keys(plugins), (pluginName, callback) => {
-        plugins[pluginName].compile(callback);
-      }, (err, result) => {
-        const html = result.join('\n\n');
-        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', html);
+const indexHtmlCacheKey = cache.registerFunc(() => {
+  return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
+    return fs.readFileAsync(__dirname + '/../public/index.html').then((data) => {
+      return Bluebird.all(Object.keys(plugins).map((pluginName) => {
+        return plugins[pluginName].compile();
+      })).then((results) => {
+        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
-        callback(null, data);
-      });
+
+        return data;
+      })
     });
   });
 });
 
 app.get('/', (req, res) => {
   if (config.dev) {
-    pluginsCache.invalidate();
-    indexHtmlCache.invalidate();
+    cache.invalidateFunc(pluginsCacheKey);
+    cache.invalidateFunc(indexHtmlCacheKey);
   }
-  indexHtmlCache((err, data) => {
+  cache.resolveFunc(indexHtmlCacheKey).then((data) => {
     res.end(data);
   });
 });
@@ -249,12 +249,13 @@ const loadPlugins = (plugins, pluginBasePath) => {
     winston.info('Plugin loaded: ' + pluginDir);
   });
 }
-const pluginsCache = cache((callback) => {
+const pluginsCacheKey = cache.registerFunc(() => {
   const plugins = [];
   loadPlugins(plugins, path.join(__dirname, '..', 'components'));
-  if (fs.existsSync(config.pluginDirectory))
+  if (fs.existsSync(config.pluginDirectory)) {
     loadPlugins(plugins, config.pluginDirectory);
-  callback(plugins);
+  }
+  return plugins;
 });
 
 app.get('/serverdata.js', (req, res) => {

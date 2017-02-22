@@ -1,10 +1,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const async = require('async');
 const express = require('express');
 const winston = require('winston');
 const config = require('./config');
+const Bluebird = require('bluebird');
 
 const assureArray = (obj) => { return Array.isArray(obj) ? obj : [obj]; }
 
@@ -38,54 +38,52 @@ class UngitPlugin {
     env.app.use(`/plugins/${this.name}`, express.static(this.path));
   }
 
-  compile(callback) {
+  compile() {
     winston.info(`Compiling plugin ${this.path}`);
     const exports = this.manifest.exports || {};
-    const tasks = [];
 
-    if (exports.raw) {
-      const raw = assureArray(exports.raw);
-      raw.forEach((rawSource) => {
-        tasks.push((callback) => {
-          fs.readFile(path.join(this.path, rawSource), (err, text) => {
-            callback(err, text + '\n');
+    return Bluebird.resolve().then(() => {
+      if (exports.raw) {
+        return Bluebird.all(assureArray(exports.raw).map((rawSource) => {
+          return fs.readFileAsync(path.join(this.path, rawSource)).then((text) => {
+            return text + '\n';
           });
+        })).then((result) => {
+          return result.join('\n');
         });
-      });
-    }
-
-    if (exports.javascript) {
-      const js = assureArray(exports.javascript);
-
-      js.forEach((filename) => {
-        tasks.push((callback) => {
-          callback(null, `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`);
-        });
-      });
-    }
-
-    if (exports.knockoutTemplates) {
-      Object.keys(exports.knockoutTemplates).forEach((templateName) => {
-        tasks.push((callback) => {
-          fs.readFile(path.join(this.path, exports.knockoutTemplates[templateName]), (err, text) => {
-            callback(err, `<script type="text/html" id="${templateName}">\n${text}\n</script>\n`);
+      } else {
+        return '';
+      }
+    }).then((result) => {
+      if (exports.javascript) {
+        return result + assureArray(exports.javascript).map(filename => {
+          return `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`;
+        }).join('\n');
+      } else {
+        return result;
+      }
+    }).then((result) => {
+      if (exports.knockoutTemplates) {
+        return Bluebird.all(Object.keys(exports.knockoutTemplates).map((templateName) => {
+          return fs.readFileAsync(path.join(this.path, exports.knockoutTemplates[templateName])).then((text) => {
+            return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
           });
+        })).then((templates) => {
+          return result + templates.join('\n');
         });
-      });
-    }
-
-    if (exports.css) {
-      const css = assureArray(exports.css);
-      css.forEach((cssSource) => {
-        tasks.push((callback) => {
-          callback(null, `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`);
-        });
-      });
-    }
-
-    async.parallel(tasks, (err, result) => {
-      if (err) throw err;
-      callback(err, `<!-- Component: ${this.name} -->\n${result.join('\n')}`)
+      } else {
+        return result;
+      }
+    }).then((result) => {
+      if (exports.css) {
+        return result + assureArray(exports.css).map((cssSource) => {
+          return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
+        }).join('\n');
+      } else {
+        return result;
+      }
+    }).then((result) => {
+      return `<!-- Component: ${this.name} -->\n${result}`;
     });
   }
 }
