@@ -23,7 +23,7 @@ describe('git-api branching', function () {
 	before(function(done) {
 		common.createEmptyRepo(req).then(function(dir) {
 			testDir = dir;
-			return common.get(req, '/gitconfig', { path: testDir }).then(function(err, res) {
+			return common.get(req, '/gitconfig', { path: testDir }).then(function(res) {
 				gitConfig = res.body;
 			});
 		}).then(function() { done(); }).catch(done);
@@ -35,9 +35,9 @@ describe('git-api branching', function () {
 
 	it('should be possible to commit to master', function(done) {
     common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-    .then(function() {
-      return common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] });
-    }).then(function() { done(); }).catch(done);
+      .then(function() {
+        return common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] });
+      }).then(function() { done(); }).catch(done);
 	});
 
 	it('listing branches should work', function(done) {
@@ -45,7 +45,6 @@ describe('git-api branching', function () {
 			expect(res.body.length).to.be(1);
 			expect(res.body[0].name).to.be('master');
 			expect(res.body[0].current).to.be(true);
-			done();
 		}).then(function() { done(); }).catch(done);
 	});
 
@@ -72,7 +71,7 @@ describe('git-api branching', function () {
 	});
 
 	it('listing branches should show the new branch as current', function(done) {
-		common.get(req, '/branches', { path: testDir }).then(function(err, res) {
+		common.get(req, '/branches', { path: testDir }).then(function(res) {
 			expect(res.body.length).to.be(2);
 			expect(res.body[0].name).to.be('master');
 			expect(res.body[0].current).to.be(undefined);
@@ -82,7 +81,7 @@ describe('git-api branching', function () {
 	});
 
 	it('get branch should show the new branch as current', function(done) {
-		common.get(req, '/checkout', { path: testDir }).then(function(err, res) {
+		common.get(req, '/checkout', { path: testDir }).then(function(res) {
 			expect(res.body).to.be(testBranch);
 		}).then(function() { done(); }).catch(done);
 	});
@@ -92,7 +91,7 @@ describe('git-api branching', function () {
 
 	it('should be possible to commit to the branch', function(done) {
 		common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) })
-      .then(common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }))
+      .then(function() { return common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }) })
       .then(function() { done(); }).catch(done);
 	});
 

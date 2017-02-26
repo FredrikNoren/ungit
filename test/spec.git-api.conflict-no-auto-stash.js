@@ -27,9 +27,10 @@ describe('git-api conflict checkout no auto stash', function () {
 		common.createEmptyRepo(req).then(function(dir) {
 			testDir = dir;
 			return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-        .then(common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] })
-        .then(common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' })
-				.then(common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
+        .then(function() { return common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }); })
+        .then(function() { return common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }); })
+				.then(function() { return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }); })
+        .then(function() { return common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }); })
 		}).then(function() { done(); }).catch(done);
 	});
 
@@ -46,6 +47,7 @@ describe('git-api conflict checkout no auto stash', function () {
 			.expect('Content-Type', /json/)
 			.expect(400)
 			.then(function(res) {
+        console.log(555, res.body)
 				expect(res.body.errorCode).to.be('local-changes-would-be-overwritten');
 			}).then(function() { done(); }).catch(done);
 	});

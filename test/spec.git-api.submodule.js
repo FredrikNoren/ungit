@@ -4,10 +4,9 @@ var request = require('supertest');
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
-var async = require('async');
 var restGit = require('../src/git-api');
 var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
+var Bluebird = require('bluebird');
 
 var app = express();
 app.use(require('body-parser').json());
@@ -24,26 +23,22 @@ describe('git-api submodule', function () {
 
 	before(function(done) {
 		// Set up two directories and init them and add some content
-		async.series([
-			common.createSmallRepo.bind(null, req),
-			common.createSmallRepo.bind(null, req),
-		], function(err, res) {
-			if (err) return done(err);
-			testDirMain = res[0];
-			testDirSecondary = res[1];
-			done();
-		});
+		Bluebird.all([common.createSmallRepo(req), common.createSmallRepo(req)])
+      .then(function(res) {
+  			testDirMain = res[0];
+  			testDirSecondary = res[1];
+  		}).then(function() { done(); }).catch(done);
 	});
 
 	var submodulePath = 'sub';
 
 	it('submodule add should work', function(done) {
-		common.post(req, '/submodules/add', { path: testDirMain, submodulePath: submodulePath, submoduleUrl: testDirSecondary }, done);
+		common.post(req, '/submodules/add', { path: testDirMain, submodulePath: submodulePath, submoduleUrl: testDirSecondary })
+      .then(function() { done(); }).catch(done);
 	});
 
 	it('submodule should show up in status', function(done) {
-		common.get(req, '/status', { path: testDirMain }, function(err, res) {
-			if (err) return done(err);
+		common.get(req, '/status', { path: testDirMain }).then(function(res) {
 			expect(Object.keys(res.body.files).length).to.be(2);
 			expect(res.body.files[submodulePath]).to.eql({
 				displayName: submodulePath,
@@ -67,31 +62,29 @@ describe('git-api submodule', function () {
 				additions: '3',
 				deletions: '0'
 			});
-			done();
-		});
+		}).then(function() { done(); }).catch(done);
 	});
 
 	it('commit should succeed', function(done) {
-		common.post(req, '/commit', { path: testDirMain, message: 'Add submodule', files: [{ name: submodulePath }, { name: '.gitmodules' }] }, done);
+		common.post(req, '/commit', { path: testDirMain, message: 'Add submodule', files: [{ name: submodulePath }, { name: '.gitmodules' }] })
+      .then(function() { done(); }).catch(done);
 	});
 
 	it('status should be empty after commit', function(done) {
-		common.get(req, '/status', { path: testDirMain }, function(err, res) {
-			if (err) return done(err);
+		common.get(req, '/status', { path: testDirMain }).then(function(res) {
 			expect(Object.keys(res.body.files).length).to.be(0);
-			done();
-		});
+		}).then(function() { done(); }).catch(done);
 	});
 
 	var testFile = path.join(submodulePath, 'testy.txt');
 
 	it('creating a test file in sub dir should work', function(done) {
-		common.post(req, '/testing/createfile', { file: path.join(testDirMain, testFile) }, done);
+		common.post(req, '/testing/createfile', { file: path.join(testDirMain, testFile) })
+      .then(function() { done(); }).catch(done);
 	});
 
 	it('submodule should show up in status when it\'s dirty', function(done) {
-		common.get(req, '/status', { path: testDirMain }, function(err, res) {
-			if (err) return done(err);
+		common.get(req, '/status', { path: testDirMain }).then(function(res) {
 			expect(Object.keys(res.body.files).length).to.be(1);
 			expect(res.body.files[submodulePath]).to.eql({
 				displayName: submodulePath,
@@ -104,21 +97,19 @@ describe('git-api submodule', function () {
 				additions: '0',
 				deletions: '0'
 			});
-			done();
-		});
+		}).then(function() { done(); }).catch(done);
 	});
 
 	it('diff on submodule should work', function(done) {
-		common.get(req, '/diff', { path: testDirMain, file: submodulePath }, function(err, res) {
-			if (err) return done(err);
+		common.get(req, '/diff', { path: testDirMain, file: submodulePath }).then(function(res) {
 			expect(res.body.indexOf('-Subproject commit')).to.be.above(-1);
 			expect(res.body.indexOf('+Subproject commit')).to.be.above(-1);
-			done();
-		});
+		}).then(function() { done(); }).catch(done);
 	});
 
 	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined, done);
+		common.post(req, '/testing/cleanup', undefined)
+      .then(function() { done(); }).catch(done);
 	});
 
 });

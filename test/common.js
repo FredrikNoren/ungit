@@ -4,17 +4,6 @@ var restGit = require('../src/git-api');
 
 var common = exports;
 
-common.wrapErrorHandler = function(callback) {
-	return function(err, res) {
-		var r = callback(err, res);
-		if (err && !r) {
-			console.log(res.req.method + ' ' + res.req.path);
-			console.dir(err);
-			console.dir(res.body);
-		}
-	}
-}
-
 common.get = function(req, path, payload) {
 	var r = req
 		.get(restGit.pathPrefix + path);
@@ -71,12 +60,13 @@ common.initRepo = function(req, config) {
 	return common.post(req, '/testing/createtempdir', config.path).then(function(res) {
 		expect(res.body.path).to.be.ok();
 		testDir = res.body.path;
-		return common.post(req, '/init', { path: testDir, bare: !!config.bare });
+		return common.post(req, '/init', { path: testDir, bare: !!config.bare })
+      .then(function() { return testDir; });
 	});
 }
 
 common.createEmptyRepo = function(req) {
-	return common.initRepo(req, {}, callback);
+	return common.initRepo(req, {});
 }
 
 common.createSmallRepo = function(req) {
@@ -85,7 +75,7 @@ common.createSmallRepo = function(req) {
     return common.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
       .then(function() {
         return common.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] });
-      });
+      }).then(function() { return dir; });
 	});
 }
 

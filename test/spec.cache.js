@@ -101,7 +101,6 @@ describe('cache', function () {
       }).then(function() {
         return cache.resolveFunc(key)
       }).then(function(val) { expect(val).to.be(1); })
-      .then(done)
-      .catch(done)
+      .then(function() { done(); }).catch(done);
   });
 });
