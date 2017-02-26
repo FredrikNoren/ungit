@@ -1,12 +1,9 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var restGit = require('../src/git-api');
-var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 app.use(require('body-parser').json());

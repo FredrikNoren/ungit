@@ -1,6 +1,5 @@
 
 var expect = require('expect.js');
-var async = require('async');
 var cache = require('../src/utils/cache');
 var Bluebird = require('bluebird');
 

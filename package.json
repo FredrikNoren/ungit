@@ -81,7 +81,7 @@
     "istanbul": "~0.4.5",
     "mocha": "~3.2.0",
     "phantomjs-prebuilt": "~2.1.14",
-    "supertest": "~0.15.0"
+    "supertest": "~3.0.0"
   },
   "engines": {
     "node": ">=0.10"
