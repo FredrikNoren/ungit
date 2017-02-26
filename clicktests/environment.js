@@ -1,7 +1,6 @@
 
 var child_process = require('child_process');
 var webpage = require('webpage');
-var async = require('async');
 var helpers = require('./helpers');
 var Bluebird = require('bluebird');
 

@@ -1,5 +1,3 @@
-
-var async = require('async');
 var cliColor = require('ansi-color');
 var helpers = require('./helpers');
 var Bluebird = require('bluebird');
