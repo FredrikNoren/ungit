@@ -194,7 +194,7 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
 
 TextDiffViewModel.prototype.loadMore = function() {
   this.loadCount += this.loadMoreCount();
-  this.render();
+  programEvents.dispatch({ event: 'invalidate-diff-and-render' });
 }
 
 TextDiffViewModel.prototype.getPatchCheckBox = function(symbol, index, isActive) {

@@ -226,6 +226,7 @@ StagingViewModel.prototype.resetMessages = function() {
     element.diff().invalidateDiff();
     element.patchLineList.removeAll();
     element.isShowingDiffs(false);
+    element.editState(element.editState() === 'patched' ? 'none' : element.editState())
   }
   this.amend(false);
 }
