@@ -15,8 +15,11 @@ cache.resolveFunc = (key) => {
     .catch({ errorcode: "ENOTFOUND" }, (e) => {
       if (!funcMap[key]) throw e;     // func associated with key is not found, throw not found error
       const result = funcMap[key].func();  // func is found, resolve, set with TTL and return result
-      return cache.setAsync(key, result, funcMap[key].ttl)
-        .then(() => { return result });
+      return (result.then ? result : Bluebird.resolve(result))
+        .then((r) => {
+          return cache.setAsync(key, r, funcMap[key].ttl)
+            .then(() => { return r; })
+        });
     });
 }
 
