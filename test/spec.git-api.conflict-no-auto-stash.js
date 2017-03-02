@@ -18,49 +18,49 @@ var req = request(app);
 
 describe('git-api conflict checkout no auto stash', function () {
 
-	this.timeout(8000);
+  this.timeout(8000);
 
-	var testBranch = 'testBranch';
-	var testFile1 = "testfile1.txt";
+  var testBranch = 'testBranch';
+  var testFile1 = "testfile1.txt";
 
-	before(function(done) {
-		common.createEmptyRepo(req).then(function(dir) {
-			testDir = dir;
-			return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
+  before(function(done) {
+    common.createEmptyRepo(req).then(function(dir) {
+      testDir = dir;
+      return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
         .then(function() { return common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }); })
         .then(function() { return common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }); })
-				.then(function() { return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }); })
+        .then(function() { return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }); })
         .then(function() { return common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }); })
-		}).then(function() { done(); }).catch(done);
-	});
+    }).then(function() { done(); }).catch(done);
+  });
 
-	it('should be possible to make some changes', function(done) {
-		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
+  it('should be possible to make some changes', function(done) {
+    common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
       .then(function() { done(); }).catch(done);
-	});
+  });
 
-	it('should not be possible to checkout with local files that will conflict', function(done) {
-		req
-			.post(restGit.pathPrefix + '/checkout')
-			.send({ path: testDir, name: testBranch })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(400)
-			.then(function(res) {
+  it('should not be possible to checkout with local files that will conflict', function(done) {
+    req
+      .post(restGit.pathPrefix + '/checkout')
+      .send({ path: testDir, name: testBranch })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .then(function(res) {
         console.log(555, res.body)
-				expect(res.body.errorCode).to.be('local-changes-would-be-overwritten');
-			}).then(function() { done(); }).catch(done);
-	});
+        expect(res.body.errorCode).to.be('local-changes-would-be-overwritten');
+      }).then(function() { done(); }).catch(done);
+  });
 
-	it('checkout should say we are still on master', function(done) {
-		common.get(req, '/checkout', { path: testDir }).then(function(res) {
-			expect(res.body).to.be('master');
-		}).then(function() { done(); }).catch(done);
-	});
+  it('checkout should say we are still on master', function(done) {
+    common.get(req, '/checkout', { path: testDir }).then(function(res) {
+      expect(res.body).to.be('master');
+    }).then(function() { done(); }).catch(done);
+  });
 
-	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined)
+  after(function(done) {
+    common.post(req, '/testing/cleanup', undefined)
       .then(function() { done(); }).catch(done);
-	});
+  });
 
 });
