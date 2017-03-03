@@ -22,8 +22,8 @@ const Bluebird = require('bluebird');
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
   bugtracker.notify(err, 'ungit-server');
-  usageStatistics.addEvent(usageStatistics, 'server-exception');
-  process.exit();
+  usageStatistics.addEvent(usageStatistics, 'server-exception')
+    .then(() => { process.exit(); });
 });
 
 console.log(`Setting log level to ${config.logLevel}`);

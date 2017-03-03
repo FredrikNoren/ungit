@@ -73,6 +73,7 @@ exports.registerApi = (env) => {
             // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
             // which is pretty weird, but hard to do anything about, so we just log them here.
             usageStatistics.addEvent('fs-watch-exception');
+            return null;
           }).finally(callback);
       });
     });

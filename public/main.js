@@ -14,8 +14,8 @@ var BrowserWindow = require('browser-window');  // Module to create native brows
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
   bugtracker.notify(err, 'ungit-launcher');
-  usageStatistics.addEvent('launcher-exception');
-  app.quit();
+  usageStatistics.addEvent('launcher-exception')
+    .then(() => { app.quit(); });
 });
 
 function launch(callback) {

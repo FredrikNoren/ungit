@@ -31,8 +31,8 @@ process.on('SIGTERM', cleanExit); // catch kill
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
   bugtracker.notify(err, 'ungit-launcher');
-  usageStatistics.addEvent('launcher-exception');
-  process.exit();
+  usageStatistics.addEvent('launcher-exception')
+    .then(function() { process.exit(); });
 });
 
 child.on('exit', function (res) {
