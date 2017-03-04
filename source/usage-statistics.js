@@ -32,8 +32,8 @@ class UsageStatistics {
     });
   }
 
-  addEvent(event, data, callback) {
-    if (!config.sendUsageStatistics) return;
+  addEvent(event, data) {
+    if (!config.sendUsageStatistics) return Bluebird.resolve();
     return this._mergeDataWithDefaultData(data).then((data) => {
       winston.info(`Sending to keen.io: event ${JSON.stringify(data)}`);
       return new Bluebird((resolve, reject) => {
