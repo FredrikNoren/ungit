@@ -285,7 +285,6 @@ module.exports = function(grunt) {
     b.require('lodash', { expose: 'lodash' });
     b.require('hasher', { expose: 'hasher' });
     b.require('crossroads', { expose: 'crossroads' });
-    b.require('async', { expose: 'async' });
     b.require('moment', { expose: 'moment' });
     b.require('blueimp-md5', { expose: 'blueimp-md5' });
     b.require('color', { expose: 'color' });
