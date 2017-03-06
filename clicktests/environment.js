@@ -45,6 +45,8 @@ Environment.prototype.createRepos = function(config, callback) {
   var self = this;
 
   var createCommits = function(conf, x) {
+    if (x < 0) return Bluebird.resolve();
+
     return new Bluebird(function(resolve) {
       self.createTestFile(conf.path + '/testy' + x, function() {
         self.backgroundAction('POST', self.url + '/api/commit', {
@@ -53,7 +55,9 @@ Environment.prototype.createRepos = function(config, callback) {
           files: [{ name: 'testy' + x }]
         }, resolve);
       });
-    });
+    }).then(function() {
+      createCommits(conf, x - 1);
+    })
   }
 
   return Bluebird.map(config, function(conf) {
@@ -61,11 +65,7 @@ Environment.prototype.createRepos = function(config, callback) {
       self.createFolder(conf.path, function() {
         self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
           if (conf.initCommits) {
-            var commits = [];
-            for(var n = 0; n < conf.initCommits; n++) {
-              commits.push(createCommits(conf, n));
-            }
-            Bluebird.all(commits).then(resolve);
+            createCommits(conf, conf.initCommits - 1).then(resolve);
           } else {
             resolve();
           }
