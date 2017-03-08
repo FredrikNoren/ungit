@@ -34,12 +34,13 @@ Environment.prototype.init = function(callback) {
 Environment.prototype.shutdown = function(callback, doNotClose) {
   var self = this;
   this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
-  this.backgroundAction('POST', this.url + '/api/testing/cleanup', undefined, function() {
-    self.shutdownServer(function() {
-      callback();
-      if (!doNotClose) self.page.close();
+  return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
+    .then(function() {
+      self.shutdownServer(function() {
+        callback();
+        if (!doNotClose) self.page.close();
+      });
     });
-  });
 }
 Environment.prototype.createCommits = function(config, limit, x) {
   var self = this;
@@ -51,7 +52,7 @@ Environment.prototype.createCommits = function(config, limit, x) {
         path: config.path,
         message: 'Init Commit ' + x,
         files: [{ name: 'testy' + x }]
-      }, resolve);
+      }).then(resolve)
     });
   }).then(function() {
     return self.createCommits(config, limit, x + 1);
@@ -149,39 +150,47 @@ Environment.prototype.startServer = function(callback) {
 var getRestSetting = function(method, body) {
   return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
 }
-Environment.prototype.backgroundAction = function(method, url, body, callback) {
+Environment.prototype.backgroundAction = function(method, url, body) {
   var tempPage = webpage.create();
-  tempPage.open(url, getRestSetting(method, body), function(status) {
-    if (status == 'fail') return callback({ status: status, content: tempPage.plainText });
-    tempPage.close();
-    var data = tempPage.plainText;
-    try { data = JSON.parse(data); } catch(ex) {}
-    callback(null, data);
+  return new Bluebird(function(resolve) {
+    tempPage.open(url, getRestSetting(method, body), function(status) {
+      if (status == 'fail') return resolve({ status: status, content: tempPage.plainText });
+      tempPage.close();
+      var data = tempPage.plainText;
+      try { data = JSON.parse(data); } catch(ex) {}
+      resolve(data);
+    });
   });
 }
 Environment.prototype.createTestFile = function(filename, callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/createfile', { file: filename }, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/createfile', { file: filename })
+    .then(callback.bind(null, null)).catch(callback)
 }
 Environment.prototype.changeTestFile = function(filename, callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/changefile', { file: filename }, callback)
+    .then(callback.bind(null, null)).catch(callback)
 }
 Environment.prototype.shutdownServer = function(callback) {
-  this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback)
+    .then(callback.bind(null, null)).catch(callback);
 }
 Environment.prototype.createTempFolder = function(callback) {
   console.log('Creating temp folder');
-  this.backgroundAction('POST', this.url + '/api/testing/createtempdir', undefined, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/createtempdir', undefined, callback)
+    .then(callback.bind(null, null)).catch(callback);
 }
 Environment.prototype.createFolder = function(dir, callback) {
   console.log('Create folder: ' + dir);
-  this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
+  return this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback)
+    .then(callback.bind(null, null)).catch(callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
-  this.backgroundAction('POST', this.url + '/api/init', options, callback);
+  return this.backgroundAction('POST', this.url + '/api/init', options, callback)
+    .then(callback.bind(null, null)).catch(callback);
 }
 Environment.prototype.gitCommand = function(options, callback) {
-  console.log(">>>>", JSON.stringify(options));
-  this.backgroundAction('POST', this.url + '/api/testing/git', options, callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/git', options, callback)
+    .then(callback.bind(null, null)).catch(callback)
 }
 
 var prependLines = function(pre, text) {
