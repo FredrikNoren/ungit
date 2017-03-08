@@ -41,39 +41,34 @@ Environment.prototype.shutdown = function(callback, doNotClose) {
     });
   });
 }
+Environment.prototype.createCommits = function(config, limit, x) {
+  var self = this;
+  x = x || 0
+  if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
+  return new Bluebird(function(resolve) {
+    self.createTestFile(config.path + '/testy' + x, function() {
+      self.backgroundAction('POST', self.url + '/api/commit', {
+        path: config.path,
+        message: 'Init Commit ' + x,
+        files: [{ name: 'testy' + x }]
+      }, resolve);
+    });
+  }).then(function() {
+    return self.createCommits(config, limit, x + 1);
+  });
+}
 Environment.prototype.createRepos = function(config, callback) {
   var self = this;
-
-  var createCommits = function(conf, x) {
-    if (x < 0) return Bluebird.resolve();
-
-    return new Bluebird(function(resolve) {
-      self.createTestFile(conf.path + '/testy' + x, function() {
-        self.backgroundAction('POST', self.url + '/api/commit', {
-          path: conf.path,
-          message: 'Init Commit ' + x,
-          files: [{ name: 'testy' + x }]
-        }, resolve);
-      });
-    }).then(function() {
-      createCommits(conf, x - 1);
-    })
-  }
-
   return Bluebird.map(config, function(conf) {
     return new Bluebird(function(resolve) {
       self.createFolder(conf.path, function() {
         self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
-          if (conf.initCommits) {
-            createCommits(conf, conf.initCommits - 1).then(resolve);
-          } else {
-            resolve();
-          }
+          self.createCommits(conf, conf.initCommits).then(resolve);
         });
       });
     });
   }).then(function() { callback(); })
-  .catch(callback)
+  .catch(callback);
 }
 Environment.prototype.setupPage = function() {
   var page = this.page;
