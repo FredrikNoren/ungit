@@ -31,15 +31,12 @@ Environment.prototype.init = function(callback) {
     });
   });
 }
-Environment.prototype.shutdown = function(callback, doNotClose) {
+Environment.prototype.shutdown = function() {
   var self = this;
   this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
     .then(function() {
-      self.shutdownServer(function() {
-        callback();
-        if (!doNotClose) self.page.close();
-      });
+      return self.shutdownServer(resolve);
     });
 }
 Environment.prototype.createCommits = function(config, limit, x) {
@@ -171,8 +168,7 @@ Environment.prototype.changeTestFile = function(filename, callback) {
     .then(callback.bind(null, null)).catch(callback)
 }
 Environment.prototype.shutdownServer = function(callback) {
-  return this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback)
-    .then(callback.bind(null, null)).catch(callback);
+  return this.backgroundAction('POST', this.url + '/api/testing/shutdown');
 }
 Environment.prototype.createTempFolder = function(callback) {
   console.log('Creating temp folder');

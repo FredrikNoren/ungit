@@ -55,7 +55,9 @@ suite.test('Filling out the authentication should bring you to the home screen',
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();

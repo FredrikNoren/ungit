@@ -97,7 +97,9 @@ suite.test('Create test directory with ampersand and open it', function(done) {
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();

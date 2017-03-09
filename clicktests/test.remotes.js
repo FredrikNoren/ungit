@@ -142,7 +142,9 @@ suite.test('Should be possible to force push a branch', function(done) {
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();

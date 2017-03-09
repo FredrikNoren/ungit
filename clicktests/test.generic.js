@@ -284,12 +284,10 @@ suite.test('Go to home screen', function(done) {
 });
 
 suite.test('Shutdown server should bring you to connection lost page', function(done) {
-  environment.shutdown(function() {
-    helpers.waitForElementVisible(page, '[data-ta-container="user-error-page"]', function() {
-      page.close();
-      done();
-    });
-  }, true);
+  environment.shutdown().then(function() {
+    self.page.close();
+    done();
+  }).catch(done);
 });
 
 testsuite.runAllSuits();

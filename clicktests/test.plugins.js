@@ -28,7 +28,9 @@ suite.test('Plugin should replace all of the app', function(done) {
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();

@@ -63,7 +63,9 @@ suite.test('Should be possible to pop a stash', function(done) {
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();

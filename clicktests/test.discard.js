@@ -65,9 +65,10 @@ suite.test('Should be possible to discard a created file without warning message
 
 suite.test('Shutdown', function(done) {
   environment.shutdown(function() {
+    self.page.close();
     page = webpage.create();
     done();
-  }, true);
+  }).catch(done);
 });
 
 suite.test('Init', function(done) {
@@ -113,7 +114,9 @@ suite.test('Should be possible to discard a created file and disable warn for aw
 });
 
 suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+  environment.shutdown()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 testsuite.runAllSuits();
