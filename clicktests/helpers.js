@@ -35,35 +35,37 @@ helpers.elementVisible = function(page, selector) {
   return element;
 }
 
-helpers.waitFor = function(page, query, callback) {
-  var tryFind = function() {
-    var res = query();
-    if (res) callback(res);
-    else setTimeout(tryFind, 250);
-  }
-  tryFind();
+helpers.waitFor = function(page, query) {
+  return new Bluebird(resolve) {
+    var tryFind = function() {
+      var res = query();
+      if (res) resolve(res);
+      else setTimeout(tryFind, 250);
+    }
+    tryFind();
+  });
 }
 
-helpers.waitForElementVisible = function(page, selector, callback) {
+helpers.waitForElementVisible = function(page, selector) {
   helpers.log('Waiting for element visible: ' + selector);
-  helpers.waitFor(page, function() {
+  return helpers.waitFor(page).then(function() {
     return helpers.elementVisible(page, selector);
-  }, callback);
+  });
 }
 
-helpers.waitForElementExists = function(page, selector, callback) {
+helpers.waitForElementExists = function(page, selector) {
   helpers.log('Waiting for element exists: ' + selector);
-  helpers.waitFor(page, function() {
+  return helpers.waitFor(page).then(function() {
     return helpers.elementExists(page, selector);
-  }, callback);
+  });
 }
 
-helpers.waitForElementNotVisible = function(page, selector, callback) {
+helpers.waitForElementNotVisible = function(page, selector) {
   helpers.log('Waiting for element not visible: ' + selector);
-  helpers.waitFor(page, function() {
+  return helpers.waitFor(page).then(function() {
     if (helpers.elementVisible(page, selector)) return false;
     else return true;
-  }, callback);
+  });
 }
 
 helpers.getClickPosition = function(page, selector) {
