@@ -13,49 +13,42 @@ var environment;
 var testRepoPath;
 
 var createAndDiscard = function(callback, dialogButtonToClick) {
-  environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
-    if (err) return callback(err);
-    helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
-      helpers.click(page, '[data-ta-clickable="discard-file"]');
+  return environment.createTestFile(testRepoPath + '/testfile2.txt')
+  .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
+  .then(function() {
+    helpers.click(page, '[data-ta-clickable="discard-file"]');
 
-      if (dialogButtonToClick) {
-        helpers.click(page, '[data-ta-clickable="' + dialogButtonToClick + '"]');
-      } else {
-        if (helpers.elementVisible(page, '[data-ta-clickable="yes"]'))
-          return callback(new Error('Should not see yes button'))
-      }
+    if (dialogButtonToClick) {
+      helpers.click(page, '[data-ta-clickable="' + dialogButtonToClick + '"]');
+    } else if (helpers.elementVisible(page, '[data-ta-clickable="yes"]')) {
+      throw new Error('Should not see yes button');
+    }
 
-      if (dialogButtonToClick !== 'no') {
-        helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
-          callback();
-        });
-      } else {
-        helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
-          callback();
-        });
-      }
-    });
-  });
+    if (dialogButtonToClick !== 'no') {
+      return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
+    } else {
+      return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]');
+    }
+  })
 }
 
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8453, serverStartupOptions: ['--disableDiscardWarning'] });
-  environment.init(function(err) {
-    if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
-  });
+  environment.init().then(function() {
+      testRepoPath = environment.path + '/testrepo';
+      return environment.createRepos([ { bare: false, path: testRepoPath } ]);
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 
 suite.test('Open repo screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      setTimeout(done, 1000); // Let it finnish loading
-    });
+    helpers.waitForElementVisible(page, '.graph')
+      .delay(1000)
+      .then(function() { done(); })
+      .catch(done);
   });
 });
 
@@ -64,6 +57,7 @@ suite.test('Should be possible to discard a created file without warning message
 });
 
 suite.test('Shutdown', function(done) {
+  var self = this;
   environment.shutdown(function() {
     self.page.close();
     page = webpage.create();
@@ -73,20 +67,19 @@ suite.test('Shutdown', function(done) {
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8454, serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
-  environment.init(function(err) {
-    if (err) return done(err);
+  environment.init().then(function() {
     testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
-  });
+    return environment.createRepos([ { bare: false, path: testRepoPath } ]);
+  }).then(function() { done(); })
+  .catch(done);
 });
 
 suite.test('Open repo screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      setTimeout(done, 1000); // Let it finnish loading
-    });
+    helpers.waitForElementVisible(page, '.graph')
+      .delay(100)
+      .then(function() { done(); })
+      .catch(done);
   });
 });
 

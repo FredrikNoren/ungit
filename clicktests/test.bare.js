@@ -12,30 +12,27 @@ var testRepoPath;
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8451 });
-  environment.init(function(err) {
-    if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: true, path: testRepoPath }
-      ], done);
-  });
+  environment.init().then(function() {
+      testRepoPath = environment.path + '/testrepo';
+      return environment.createRepos([ { bare: true, path: testRepoPath } ]);
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Open path screen', function(done) {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      done();
-    });
+    return helpers.waitForElementVisible(page, '.graph')
+      .then(function() { done(); })
+      .catch(done);
   });
 });
 
 suite.test('updateBranches button without branches', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"]', function(err) {
+  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"]').then(function(err) {
     helpers.click(page, '[data-ta-clickable="branch"]');
-    helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]', function() {
-      done();
-    });
-  });
+    return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]')
+  }).then(function() { done(); })
+  .catch(done);
 });
 
 suite.test('Shutdown', function(done) {
