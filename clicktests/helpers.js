@@ -1,4 +1,5 @@
 var helpers = exports;
+var Bluebird = require('bluebird');
 
 helpers.log = function(text) {
   console.log((new Date()).toISOString(), text);
@@ -36,7 +37,7 @@ helpers.elementVisible = function(page, selector) {
 }
 
 helpers.waitFor = function(page, query) {
-  return new Bluebird(resolve) {
+  return new Bluebird(function(resolve) {
     var tryFind = function() {
       var res = query();
       if (res) resolve(res);
@@ -48,24 +49,20 @@ helpers.waitFor = function(page, query) {
 
 helpers.waitForElementVisible = function(page, selector) {
   helpers.log('Waiting for element visible: ' + selector);
-  return helpers.waitFor(page).then(function() {
-    return helpers.elementVisible(page, selector);
-  });
+  return helpers.waitFor(page)
+    .then(function() { return helpers.elementVisible(page, selector); });
 }
 
 helpers.waitForElementExists = function(page, selector) {
   helpers.log('Waiting for element exists: ' + selector);
-  return helpers.waitFor(page).then(function() {
-    return helpers.elementExists(page, selector);
-  });
+  return helpers.waitFor(page)
+    .then(function() { return helpers.elementExists(page, selector); });
 }
 
 helpers.waitForElementNotVisible = function(page, selector) {
   helpers.log('Waiting for element not visible: ' + selector);
-  return helpers.waitFor(page).then(function() {
-    if (helpers.elementVisible(page, selector)) return false;
-    else return true;
-  });
+  return helpers.waitFor(page)
+    .then(function() { return !helpers.elementVisible(page, selector); });
 }
 
 helpers.getClickPosition = function(page, selector) {

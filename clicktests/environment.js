@@ -22,46 +22,36 @@ function Environment(page, config) {
 Environment.prototype.init = function(callback) {
   var self = this;
   this.setupPage(this.page);
-  return this.startServer().then(function() {
-      return self.createTempFolder();
-    }).then(function(res) {
-      self.path = res.path
-    }));
+  return this.startServer()
+    .then(function() { return self.createTempFolder(); })
+    .then(function(res) { self.path = res.path });
 }
 Environment.prototype.shutdown = function() {
   var self = this;
   this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
-    .then(function() {
-      return self.shutdownServer(resolve);
-    });
+    .then(function() { return self.shutdownServer(); });
 }
 Environment.prototype.createCommits = function(config, limit, x) {
   var self = this;
   x = x || 0
   if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
-  return new Bluebird(function(resolve) {
-    self.createTestFile(config.path + '/testy' + x, function() {
-      self.backgroundAction('POST', self.url + '/api/commit', {
+
+  return self.createTestFile(config.path + '/testy' + x)
+    .then(function() {
+      return self.backgroundAction('POST', self.url + '/api/commit', {
         path: config.path,
         message: 'Init Commit ' + x,
         files: [{ name: 'testy' + x }]
-      }).then(resolve)
-    });
-  }).then(function() {
-    return self.createCommits(config, limit, x + 1);
-  });
+      });
+    }).then(function() { return self.createCommits(config, limit, x + 1); })
 }
 Environment.prototype.createRepos = function(config) {
   var self = this;
   return Bluebird.map(config, function(conf) {
-    return new Bluebird(function(resolve) {
-      self.createFolder(conf.path, function() {
-        self.initFolder({ bare: !!conf.bare, path: conf.path }, function() {
-          self.createCommits(conf, conf.initCommits).then(resolve);
-        });
-      });
-    });
+    return self.createFolder(conf.path)
+      .then(function() { return self.initFolder({ bare: !!conf.bare, path: conf.path }); })
+      .then(function() { return self.createCommits(conf, conf.initCommits); })
   });
 }
 Environment.prototype.setupPage = function() {
