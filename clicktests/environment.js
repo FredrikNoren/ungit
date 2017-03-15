@@ -19,10 +19,11 @@ function Environment(page, config) {
   this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
 
-Environment.prototype.init = function(callback) {
+Environment.prototype.init = function() {
   var self = this;
   this.setupPage(this.page);
   return this.startServer()
+    .then(function() { return self.ensureStarted(5); })
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
 }
@@ -89,48 +90,62 @@ Environment.prototype.setupPage = function() {
   this.page = page;
 }
 
-Environment.prototype.startServer = function(callback) {
+Environment.prototype.ensureStarted = function(count) {
+  var self = this;
+  if (count < 0) return Bluebird.reject('Cant start up ungit!');
+  return Bluebird.resolve()
+    .then(function() {
+      if (!self.hasStarted) {
+        return Bluebird.resolve()
+          .delay(500)
+          .then(function() { return self.ensureStarted(count - 1); })
+      }
+    });
+}
+
+Environment.prototype.startServer = function() {
   var self = this;
   helpers.log('Starting ungit server...', this.config.serverStartupOptions);
 
-  return new Bluebird(function(resolve, reject) {
-    var hasStarted = false;
-    var options = ['bin/ungit',
-      '--cliconfigonly',
-      '--port=' + this.config.port,
-      '--rootPath=' + this.config.rootPath,
-      '--no-launchBrowser',
-      '--dev',
-      '--no-bugtracking',
-      '--no-sendUsageStatistics',
-      '--autoShutdownTimeout=' + this.config.serverTimeout,
-      '--maxNAutoRestartOnCrash=0',
-      '--no-autoCheckoutOnBranchCreate',
-      '--alwaysLoadActiveBranch',
-      '--logGitCommands']
-      .concat(this.config.serverStartupOptions);
-    var ungitServer = child_process.spawn('node', options);
-    ungitServer.stdout.on("data", function (data) {
-      if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
+  self.hasStarted = false;
+  var options = ['bin/ungit',
+    '--cliconfigonly',
+    '--port=' + self.config.port,
+    '--rootPath=' + self.config.rootPath,
+    '--no-launchBrowser',
+    '--dev',
+    '--no-bugtracking',
+    '--no-sendUsageStatistics',
+    '--autoShutdownTimeout=' + self.config.serverTimeout,
+    '--maxNAutoRestartOnCrash=0',
+    '--no-autoCheckoutOnBranchCreate',
+    '--alwaysLoadActiveBranch',
+    '--logGitCommands']
+    .concat(self.config.serverStartupOptions);
+  var ungitServer = child_process.spawn('node', options);
+  ungitServer.stdout.on("data", function (data) {
+    if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
 
-      if (data.toString().indexOf('Ungit server already running') >= 0) {
-        reject('server-already-running');
-      }
+    if (data.toString().indexOf('Ungit server already running') >= 0) {
+      helpers.log('server-already-running');
+    }
 
-      if (data.toString().indexOf('## Ungit started ##') >= 0) {
-        if (hasStarted) throw new Error('Ungit started twice, probably crashed.');
-        hasStarted = true;
+    if (data.toString().indexOf('## Ungit started ##') >= 0) {
+      if (self.hasStarted) {
+        helpers.log('Ungit started twice, probably crashed.');
+      } else {
+        self.hasStarted = true;
         helpers.log('Ungit server started.');
-        resolve();
       }
-    });
-    ungitServer.stderr.on("data", function (data) {
-      console.log(prependLines('[server ERROR] ', data));
-    });
-    ungitServer.on('exit', function() {
-      helpers.log('UNGIT SERVER EXITED');
-    });
+    }
   });
+  ungitServer.stderr.on("data", function (data) {
+    console.log(prependLines('[server ERROR] ', data));
+  });
+  ungitServer.on('exit', function() {
+    helpers.log('UNGIT SERVER EXITED');
+  });
+  return Bluebird.resolve();
 }
 
 var getRestSetting = function(method, body) {
