@@ -27,11 +27,12 @@ Environment.prototype.init = function() {
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
 }
-Environment.prototype.shutdown = function() {
+Environment.prototype.shutdown = function(doNotClose) {
   var self = this;
   this.page.onConsoleMessage = this.page.onResourceError = this.page.onError = undefined;
   return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
-    .then(function() { return self.shutdownServer(); });
+    .then(function() { return self.shutdownServer(); })
+    .then(function() { if (!doNotClose) self.page.close(); })
 }
 Environment.prototype.createCommits = function(config, limit, x) {
   var self = this;

@@ -63,6 +63,7 @@ uiInteractions.amendCommit = function(page) {
       helpers.click(page, '[data-bind="click: toggleAmend"]');
     }).delay(100)
     .then(function() {
+      helpers.click(page, '[data-ta-clickable="commit"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
     }).then(1000);
 }
