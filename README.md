@@ -4,7 +4,7 @@ ungit
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-The easiest way to use git. On any platform. Anywhere.
+The easiest way to use git. On any platform supporting node.js. Anywhere node.js is installed.
 
 [![xkcd](xkcd.png)](https://xkcd.com/1597/)
 
