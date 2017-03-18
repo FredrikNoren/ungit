@@ -12,36 +12,36 @@ var testRepoPath;
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8456 });
-  environment.init(function(err) {
-    if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
-  });
+  environment.init()
+    .then(function() {
+      testRepoPath = environment.path + '/testrepo';
+      return environment.createRepos([ { bare: false, path: testRepoPath } ]);
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 
 suite.test('Open path screen', function(done) {
   page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
     page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]', function() {
-        if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]'))
-          return done(new Error('Should not find remote error popup'));
-        done();
-      });
+      helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]')
+        .then(function() {
+          if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]')) {
+            throw new Error('Should not find remote error popup');
+          }
+        }).then(function() { done(); })
+        .catch(done);
     });
   });
 });
 
 
 suite.test('Check for refresh button', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="refresh-button"]', function(err) {
-    helpers.click(page, '[data-ta-clickable="refresh-button"]');
-    setTimeout(function() {
-      done();
-    }, 500);
-  });
+  helpers.waitForElementVisible(page, '[data-ta-clickable="refresh-button"]')
+    .then(function() { helpers.click(page, '[data-ta-clickable="refresh-button"]'); })
+    .delay(500)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Shutdown', function(done) {

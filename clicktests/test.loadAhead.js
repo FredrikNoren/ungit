@@ -50,7 +50,10 @@ suite.test('Should be possible to create and commit 3', function(done) {
   helpers.click(page, '[data-ta-clickable="branch-menu"]');
   helpers.waitForElementVisible(page, '[data-ta-clickable="checkoutbranch-1"]')
     .delay(500)
-    .then(function() { return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]'); })
+    .then(function() {
+      helpers.click(page, '[data-ta-clickable="checkoutbranch-1"]');
+      return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
+    })
     .then(function() { done(); })
     .catch(done);
 });

@@ -12,7 +12,7 @@ var suite = testsuite.newSuite('discard', page);
 var environment;
 var testRepoPath;
 
-var createAndDiscard = function(callback, dialogButtonToClick) {
+var createAndDiscard = function(dialogButtonToClick) {
   return environment.createTestFile(testRepoPath + '/testfile2.txt')
   .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
   .then(function() {
@@ -53,16 +53,18 @@ suite.test('Open repo screen', function(done) {
 });
 
 suite.test('Should be possible to discard a created file without warning message', function(done) {
-  createAndDiscard(done);
+  createAndDiscard()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Shutdown', function(done) {
   var self = this;
-  environment.shutdown(function() {
-    self.page.close();
-    page = webpage.create();
-    done();
-  }).catch(done);
+  environment.shutdown(true)
+    .then(function() {
+      page = webpage.create();
+      done();
+    }).catch(done);
 });
 
 suite.test('Init', function(done) {
@@ -84,11 +86,15 @@ suite.test('Open repo screen', function(done) {
 });
 
 suite.test('Should be possible to select no from discard', function(done) {
-  createAndDiscard(done, 'no');
+  createAndDiscard('no')
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Should be possible to discard a created file', function(done) {
-  createAndDiscard(done, 'yes');
+  createAndDiscard('yes')
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Should be possible to discard a created file and disable warn for awhile', function(done) {

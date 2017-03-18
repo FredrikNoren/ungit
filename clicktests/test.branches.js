@@ -133,9 +133,11 @@ suite.test('cherrypick success case', function(done) {
     helpers.click(page, '[data-ta-action="cherry-pick"][data-ta-visible="true"]');
   }).delay(500)
   .then(function() {
-    helpers.elementVisible(page, '[data-ta-action="abort"]')
-  }).then(function() { done("Cherry pick errored when success was expected."); })
-  .catch(function() { done(); });
+    if (helpers.elementVisible(page, '[data-ta-action="abort"]')) {
+      throw new Error("Cherry pick errored when success was expected.");
+    }
+  }).then(function() { done(); })
+  .catch(done);
 });
 
 suite.test('Auto checkout on branch creation.', function(done) {

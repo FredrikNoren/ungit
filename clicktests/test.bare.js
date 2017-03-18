@@ -12,7 +12,8 @@ var testRepoPath;
 
 suite.test('Init', function(done) {
   environment = new Environment(page, { port: 8451 });
-  environment.init().then(function() {
+  environment.init()
+    .then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: true, path: testRepoPath } ]);
     }).then(function() { done(); })
@@ -28,11 +29,12 @@ suite.test('Open path screen', function(done) {
 });
 
 suite.test('updateBranches button without branches', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"]').then(function(err) {
-    helpers.click(page, '[data-ta-clickable="branch"]');
-    return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]')
-  }).then(function() { done(); })
-  .catch(done);
+  helpers.waitForElementVisible(page, '[data-ta-clickable="branch"]')
+    .then(function(err) {
+      helpers.click(page, '[data-ta-clickable="branch"]');
+      return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"] [data-ta-element="progress-bar"]')
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Shutdown', function(done) {

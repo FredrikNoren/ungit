@@ -24,9 +24,11 @@ suite.test('Init', function(done) {
 
 suite.test('Open home screen should show authentication dialog', function(done) {
   page.open(environment.url, function() {
-      return helpers.waitForElementVisible(page, '[data-ta-container="login-page"]')
-    }).then(function() { done(); })
-    .catch(done);
+    page.render('/tmp/ungit.png');
+    helpers.waitForElementVisible(page, '[data-ta-container="login-page"]')
+      .then(function() { done(); })
+      .catch(done);
+  })
 });
 
 suite.test('Filling out the authentication with wrong details should result in an error', function(done) {
@@ -37,10 +39,11 @@ suite.test('Filling out the authentication with wrong details should result in a
   helpers.click(page, '[data-ta-container="login-page"] [data-ta-clickable="submit"]');
   helpers.waitForElementVisible(page, '[data-ta-element="login-error"]')
     .then(function() {
-      if (helpers.elementVisible(page, '[data-ta-container="home-page"]'))
-        return done(new Error('Should not see home page'));
-      done();
-    });
+      if (helpers.elementVisible(page, '[data-ta-container="home-page"]')) {
+        throw new Error('Should not see home page');
+      }
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Filling out the authentication should bring you to the home screen', function(done) {

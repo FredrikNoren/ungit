@@ -22,12 +22,9 @@ suite.test('Init', function(done) {
       return environment.createRepos([ { bare: false, path: testRepoPath } ]);
     }).then(function() {
       testRepoPathSubDir = testRepoPath + '/asubdir';
-      return new Bluebird(function(resolve, reject) {
-        fs.makeDirectory(testRepoPathSubDir, function(err) {
-          if (err) reject(err);
-          resolve();
-        });
-      });
+      if (!fs.makeDirectory(testRepoPathSubDir)) {
+        throw new Error("failed to create tempDir")
+      }
     }).then(function() { done(); })
     .catch(done);
 });
@@ -68,7 +65,7 @@ suite.test('Should be possible to amend a file', function(done) {
 suite.test('Should be able to add a new file to .gitignore', function(done) {
   environment.createTestFile(testRepoPath + '/addMeToIgnore.txt')
     .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
-    .then(function() { helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
+    .then(function() { helpers.click(page, '[data-ta-clickable="ignore-file"]'); })
     .delay(1000)
     .then(function() {
         helpers.click(page, '[data-ta-clickable="ignore-file"]');
@@ -119,7 +116,11 @@ suite.test('Should be possible to discard a created file and ensure patching is 
     .then(function() { helpers.click(page, '[data-ta-clickable="show-stage-diffs"]'); })
     .delay(1000)
     .then(function() { return helpers.waitForElementNotVisible(page, '[data-ta-container="patch-file"]'); })
-    .then(function() { return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]'); })
+    .then(function() {
+      helpers.click(page, '[data-ta-clickable="discard-file"]');
+      helpers.click(page, '[data-ta-clickable="yes"]');
+      return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
+    })
     .then(function() { done(); })
     .catch(done);
 });
@@ -266,8 +267,7 @@ suite.test('Go to home screen', function(done) {
 
 suite.test('Shutdown server should bring you to connection lost page', function(done) {
   var self = this;
-  environment.shutdown()
-    .then(function() { self.page.close(); })
+  environment.shutdown(true)
     .then(function() { done(); })
     .catch(done);
 });

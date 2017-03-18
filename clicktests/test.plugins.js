@@ -14,16 +14,20 @@ suite.test('Init', function(done) {
     port: 8457,
     serverStartupOptions: ['--pluginDirectory=' + phantom.libraryPath + '/test-plugins']
   });
-  environment.init(done);
+  environment.init()
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Plugin should replace all of the app', function(done) {
   page.open(environment.url, function() {
-    helpers.waitForElementVisible(page, '[data-ta-element="dummy-app"]', function() {
-      if (helpers.elementVisible(page, '[data-ta-container="app"]'))
-        return done(new Error('Should not find app'));
-      done();
-    });
+    helpers.waitForElementVisible(page, '[data-ta-element="dummy-app"]')
+      .then(function() {
+        if (helpers.elementVisible(page, '[data-ta-container="app"]')) {
+          throw new Error('Should not find app');
+        }
+      }).then(function() { done(); })
+      .catch(done);
   });
 });
 
