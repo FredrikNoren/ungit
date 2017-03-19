@@ -19,7 +19,7 @@ suite.test('Init', function(done) {
     .then(function() {
       subRepoPath = environment.path + '/subrepo';
       testRepoPath = environment.path + '/testrepo';
-      return environment.createRepos([ { bare: false, path: testRepoPath, initCommits: 1 }, { bare: false, path: testRepoPath } ]);
+      return environment.createRepos([ { bare: false, path: subRepoPath, initCommits: 1 }, { bare: false, path: testRepoPath } ]);
     }).then(function() { done(); })
     .catch(done);
 });
