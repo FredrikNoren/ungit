@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -24,7 +24,7 @@
     "color": "~1.0.3",
     "cookie-parser": "~1.4.3",
     "crossroads": "~0.12.2",
-    "diff2html": "~2.0.11",
+    "diff2html": "^2.3.0",
     "express": "~4.14.0",
     "express-session": "~1.14.2",
     "forever-monitor": "~1.1.0",
