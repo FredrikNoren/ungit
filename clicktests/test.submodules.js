@@ -4,6 +4,7 @@ var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
 var Bluebird = require('bluebird');
+var uiInteractions = require('./ui-interactions.js');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('submodules', page);
@@ -25,12 +26,11 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph')
-      .delay(1000)
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function () { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(1000)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Submodule add', function(done) {

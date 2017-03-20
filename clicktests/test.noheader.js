@@ -3,6 +3,7 @@ var helpers = require('./helpers');
 var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('noheader', page);
@@ -22,17 +23,15 @@ suite.test('Init', function(done) {
 
 
 suite.test('Open path screen', function(done) {
-  page.open('', function() { // Reset path, otherwise the next open don't do anything as it's the same uri
-    page.open(environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-      helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]')
-        .then(function() {
-          if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]')) {
-            throw new Error('Should not find remote error popup');
-          }
-        }).then(function() { done(); })
-        .catch(done);
-    });
-  });
+  uiInteractions.open(page, '')
+    .then(function() { return uiInteractions.open(page, environment.url + '/?noheader=true#/repository?path=' + encodeURIComponent(testRepoPath)); })
+    .then(function () { return helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]'); })
+    .then(function() {
+      if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]')) {
+        throw new Error('Should not find remote error popup');
+      }
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 

@@ -3,6 +3,7 @@ var helpers = require('./helpers');
 var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
 
 var muteGraceTimeDuration = 2000;
 
@@ -44,12 +45,11 @@ suite.test('Init', function(done) {
 
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph')
-      .delay(1000)
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(1000)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Should be possible to discard a created file without warning message', function(done) {
@@ -77,12 +77,11 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph')
-      .delay(100)
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(100)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Should be possible to select no from discard', function(done) {

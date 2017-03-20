@@ -3,6 +3,7 @@ var helpers = require('./helpers');
 var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('authentication', page);
@@ -23,12 +24,12 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open home screen should show authentication dialog', function(done) {
-  page.open(environment.url, function() {
-    page.render('/tmp/ungit.png');
-    helpers.waitForElementVisible(page, '[data-ta-container="login-page"]')
-      .then(function() { done(); })
-      .catch(done);
-  })
+  uiInteractions.open(page, environment.url)
+    .then(function() {
+      page.render('/tmp/ungit.png');
+      return helpers.waitForElementVisible(page, '[data-ta-container="login-page"]')
+    }).then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Filling out the authentication with wrong details should result in an error', function(done) {

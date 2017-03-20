@@ -3,6 +3,7 @@ var helpers = require('./helpers');
 var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('screens', page);
@@ -17,11 +18,10 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open home screen', function(done) {
-  page.open(environment.url, function() {
-    helpers.waitForElementVisible(page, '[data-ta-container="home-page"]')
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url)
+    .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="home-page"]'); })
+    .then(function() { done(); })
+    .catch(done);
 });
 
 var testRepoPath;

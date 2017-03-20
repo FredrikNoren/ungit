@@ -88,3 +88,10 @@ uiInteractions.patch = function(page, commitMessage) {
     return uiInteractions.commit(page, commitMessage);
   });
 }
+
+uiInteractions.open = function(page, url) {
+  console.log("opening...", url)
+  return new Bluebird(function(resolve) {
+    page.open(url, function(res) { resolve(res); });
+  });
+}

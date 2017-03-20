@@ -25,12 +25,11 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph')
-      .delay(1000)
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function () { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(1000)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Adding a remote', function(done) {

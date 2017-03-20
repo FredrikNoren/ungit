@@ -30,12 +30,11 @@ suite.test('Init', function(done) {
 });
 
 suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir), function () {
-    helpers.waitForElementVisible(page, '.graph')
-      .delay(100)
-      .then(function() { done(); })
-      .catch(done);
-  });
+  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir))
+    .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(100)
+    .then(function() { done(); })
+    .catch(done);
 });
 
 suite.test('Check for refresh button', function(done) {
@@ -266,7 +265,6 @@ suite.test('Go to home screen', function(done) {
 });
 
 suite.test('Shutdown server should bring you to connection lost page', function(done) {
-  var self = this;
   environment.shutdown(true)
     .then(function() { done(); })
     .catch(done);
