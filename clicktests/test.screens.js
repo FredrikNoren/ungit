@@ -10,100 +10,76 @@ var suite = testsuite.newSuite('screens', page);
 
 var environment;
 
-suite.test('Init', function(done) {
+suite.test('Init', function() {
   environment = new Environment(page, { port: 8459, showServerOutput: true });
-  environment.init()
-    .then(function() { done(); })
-    .catch(done);
+  return environment.init();
 });
 
-suite.test('Open home screen', function(done) {
-  uiInteractions.open(page, environment.url)
-    .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="home-page"]'); })
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Open home screen', function() {
+  return uiInteractions.open(page, environment.url)
+    .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="home-page"]'); });
 });
 
 var testRepoPath;
 
-suite.test('Create test directory', function(done) {
+suite.test('Create test directory', function() {
   testRepoPath = environment.path + '/testrepo';
-  environment.createFolder(testRepoPath)
-    .then(function() { done(); })
-    .catch(done);
+  return environment.createFolder(testRepoPath);
 });
 
-suite.test('Open path screen', function(done) {
+suite.test('Open path screen', function() {
   page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath));
-  helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]')
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]');
 });
 
-suite.test('Init repository should bring you to repo page', function(done) {
+suite.test('Init repository should bring you to repo page', function() {
   helpers.click(page, '[data-ta-clickable="init-repository"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]')
+  return helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]')
     .then(function() {
       if (helpers.elementVisible(page, '[data-ta-container="remote-error-popup"]')) {
         throw new Error('Should not find remote error popup');
       }
-    })
-    .then(function() { done(); })
-    .catch(done);
-});
-
-suite.test('Clicking logo should bring you to home screen', function(done) {
-  helpers.click(page, '[data-ta-clickable="home-link"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="home-page"]')
-    .then(function() { done(); })
-    .catch(done);
-});
-
-suite.test('Entering an invalid path and create directory in that location', function(done) {
-  helpers.click(page, '[data-ta-input="navigation-path"]');
-  helpers.write(page, environment.path + '/not/existing\n');
-  helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]')
-    .then(function() {
-      helpers.click(page, '[data-ta-clickable="create-dir"]');
-      return helpers.waitForElementVisible(page, '[data-ta-clickable="init-repository"]')
-    }).then(function() { done(); })
-    .catch(done);
-});
-
-suite.test('Entering an invalid path should bring you to an error screen', function(done) {
-  helpers.click(page, '[data-ta-input="navigation-path"]');
-  helpers.write(page, '/a/path/that/doesnt/exist\n');
-  helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]')
-    .then(function() { done(); })
-    .catch(done);
-});
-
-suite.test('Entering a path to a repo should bring you to that repo', function(done) {
-  helpers.click(page, '[data-ta-input="navigation-path"]');
-  helpers.selectAllText(page);
-  helpers.write(page, testRepoPath + '\n');
-  helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]')
-    .then(function() { done(); })
-    .catch(done);
-});
-
-suite.test('Create test directory with ampersand and open it', function(done) {
-  var specialRepoPath = environment.path + '/test & repo';
-  environment.createFolder(specialRepoPath)
-    .then(function() {
-      page.open('', function() {
-        page.open(environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath));
-        helpers.waitForElementVisible(page, '[data-ta-container="uninited-path-page"]')
-          .then(function() { done(); })
-          .catch(done);
-      });
     });
 });
 
-suite.test('Shutdown', function(done) {
-  environment.shutdown()
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Clicking logo should bring you to home screen', function() {
+  helpers.click(page, '[data-ta-clickable="home-link"]');
+  return helpers.waitForElementVisible(page, '[data-ta-container="home-page"]');
+});
+
+suite.test('Entering an invalid path and create directory in that location', function() {
+  helpers.click(page, '[data-ta-input="navigation-path"]');
+  helpers.write(page, environment.path + '/not/existing\n');
+  return helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]')
+    .then(function() {
+      helpers.click(page, '[data-ta-clickable="create-dir"]');
+      return helpers.waitForElementVisible(page, '[data-ta-clickable="init-repository"]');
+    });
+});
+
+suite.test('Entering an invalid path should bring you to an error screen', function() {
+  helpers.click(page, '[data-ta-input="navigation-path"]');
+  helpers.write(page, '/a/path/that/doesnt/exist\n');
+  return helpers.waitForElementVisible(page, '[data-ta-container="invalid-path"]');
+});
+
+suite.test('Entering a path to a repo should bring you to that repo', function() {
+  helpers.click(page, '[data-ta-input="navigation-path"]');
+  helpers.selectAllText(page);
+  helpers.write(page, testRepoPath + '\n');
+  return helpers.waitForElementVisible(page, '[data-ta-container="repository-view"]');
+});
+
+suite.test('Create test directory with ampersand and open it', function() {
+  var specialRepoPath = environment.path + '/test & repo';
+  var tempPage = webpage.create();
+  return environment.createFolder(specialRepoPath)
+    .then(function() { return uiInteractions.open(tempPage, environment.url + '/#/repository?path=' + encodeURIComponent(specialRepoPath)); })
+    .then(function() { return helpers.waitForElementVisible(tempPage, '[data-ta-container="uninited-path-page"]'); });
+});
+
+suite.test('Shutdown', function() {
+  return environment.shutdown()
 });
 
 testsuite.runAllSuits();

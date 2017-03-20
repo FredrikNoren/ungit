@@ -46,30 +46,25 @@ TestSuite.prototype.run = function(suiteName, callback) {
   var startTime = Date.now();
 
   return Bluebird.mapSeries(this.tests, function(test, index) {
-    var testFullName = suiteName + ' - ' + pad(index, 2) + ' ' + test.name;
-    return new Bluebird(function(resolve, reject) {
+      var testFullName = suiteName + ' - ' + pad(index, 2) + ' ' + test.name;
       helpers.log(cliColor.set('## Running test : ' + testFullName, 'magenta'));
       self.page.render('clicktests/screenshots/' + testFullName + ' - before.png');
-      test.description(function(err, res) {
-        self.page.render('clicktests/screenshots/' + testFullName + '.png');
-        if (err) {
+      return test.description()
+        .catch(function(err) {
           helpers.log(JSON.stringify(err));
           helpers.log(cliColor.set('## Test failed: ' + testFullName, 'red'));
-          reject(err);
-        } else {
+          throw err;
+        }).then(function() {
           helpers.log(cliColor.set('## Test ok: ' + testFullName, 'green'));
-          resolve(res);
-        }
-      });
+        });
+    }).timeout(self.config.timeout)
+    .then(function() {
+      console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
+      callback();
+    }).catch(function(err) {
+      console.error('Tests failed! - ', err);
+      phantom.exit(1);
     });
-  }).timeout(self.config.timeout)
-  .then(function() {
-    console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
-    callback();
-  }).catch(function(err) {
-    console.error('Tests failed! - ', err);
-    phantom.exit(1);
-  });
 }
 
 function pad(num, size) {

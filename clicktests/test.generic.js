@@ -14,10 +14,10 @@ var environment;
 var testRepoPath;
 var testRepoPathSubDir;
 
-suite.test('Init', function(done) {
+suite.test('Init', function() {
   environment = new Environment(page, { port: 8455, serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
 
-  environment.init().then(function() {
+  return environment.init().then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: testRepoPath } ]);
     }).then(function() {
@@ -25,92 +25,75 @@ suite.test('Init', function(done) {
       if (!fs.makeDirectory(testRepoPathSubDir)) {
         throw new Error("failed to create tempDir")
       }
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Open repo screen', function(done) {
-  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir))
+suite.test('Open repo screen', function() {
+  return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPathSubDir))
     .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
-    .delay(100)
-    .then(function() { done(); })
-    .catch(done);
+    .delay(100);
 });
 
-suite.test('Check for refresh button', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="refresh-button"]')
+suite.test('Check for refresh button', function() {
+  return helpers.waitForElementVisible(page, '[data-ta-clickable="refresh-button"]')
     .then(function() { helpers.click(page, '[data-ta-clickable="refresh-button"]'); })
-    .delay(500)
-    .then(function() { done(); })
-    .catch(done);
+    .delay(500);
 });
 
-suite.test('Should be possible to create and commit a file', function(done) {
-  environment.createTestFile(testRepoPath + '/testfile.txt')
+suite.test('Should be possible to create and commit a file', function() {
+  return environment.createTestFile(testRepoPath + '/testfile.txt')
     .then(function() { return uiInteractions.commit(page, 'Init'); })
-    .then(function() { return helpers.waitForElementVisible(page, '.commit'); })
-    .then(function() { done(); })
-    .catch(done);
+    .then(function() { return helpers.waitForElementVisible(page, '.commit'); });
 });
 
-suite.test('Should be possible to amend a file', function(done) {
-  environment.createTestFile(testRepoPath + '/testfile.txt')
+suite.test('Should be possible to amend a file', function() {
+  return environment.createTestFile(testRepoPath + '/testfile.txt')
     .then(function() { return uiInteractions.amendCommit(page); })
-    .then(function() { return helpers.waitForElementVisible(page, '.commit'); })
-    .then(function() { done(); })
-    .catch(done);
+    .then(function() { return helpers.waitForElementVisible(page, '.commit'); });
 });
 
-suite.test('Should be able to add a new file to .gitignore', function(done) {
-  environment.createTestFile(testRepoPath + '/addMeToIgnore.txt')
+suite.test('Should be able to add a new file to .gitignore', function() {
+  return environment.createTestFile(testRepoPath + '/addMeToIgnore.txt')
     .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
     .then(function() { helpers.click(page, '[data-ta-clickable="ignore-file"]'); })
     .delay(1000)
     .then(function() {
         helpers.click(page, '[data-ta-clickable="ignore-file"]');
         return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Test showing commit diff between two commits', function(done) {
-  helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-0"]').then(function() {
+suite.test('Test showing commit diff between two commits', function() {
+  return helpers.waitForElementVisible(page, '[data-ta-clickable="node-clickable-0"]').then(function() {
     helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
     return helpers.waitForElementVisible(page, '.diff-wrapper')
   }).then(function() {
     helpers.click(page, '[data-ta-clickable="commitDiffFileName"]');
     return helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]');
-  }).then(function() { done(); })
-  .catch(done);
+  });
 });
 
-suite.test('Test showing commit side by side diff between two commits', function(done) {
+suite.test('Test showing commit side by side diff between two commits', function() {
   helpers.click(page, '[data-ta-clickable="commit-sideBySideDiff"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]')
-    .delay(500)
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]')
+    .delay(500);
 });
 
-suite.test('Test wordwrap', function(done) {
+suite.test('Test wordwrap', function() {
   helpers.click(page, '[data-ta-clickable="commit-wordwrap"]');
-  helpers.waitForElementVisible(page, '.word-wrap')
-    .delay(500)
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '.word-wrap')
+    .delay(500);
 });
 
-suite.test('Test wordwrap', function(done) {
+suite.test('Test wordwrap', function() {
   helpers.click(page, '[data-ta-clickable="commit-whitespace"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]')
+  return helpers.waitForElementVisible(page, '[data-ta-container="commitLineDiffs"]')
     .delay(500)
-    .then(function() { helpers.click(page, '[data-ta-clickable="node-clickable-0"]'); })
-    .then(function() { done(); })
-    .catch(done);
+    .then(function() { helpers.click(page, '[data-ta-clickable="node-clickable-0"]'); });
 });
 
-suite.test('Should be possible to discard a created file and ensure patching is not avaliable for new file', function(done) {
-  environment.createTestFile(testRepoPath + '/testfile2.txt')
+suite.test('Should be possible to discard a created file and ensure patching is not avaliable for new file', function() {
+  return environment.createTestFile(testRepoPath + '/testfile2.txt')
     .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
     .then(function() { helpers.click(page, '[data-ta-clickable="show-stage-diffs"]'); })
     .delay(1000)
@@ -119,20 +102,16 @@ suite.test('Should be possible to discard a created file and ensure patching is 
       helpers.click(page, '[data-ta-clickable="discard-file"]');
       helpers.click(page, '[data-ta-clickable="yes"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
-    })
-    .then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Should be possible to create a branch', function(done) {
-  uiInteractions.createBranch(page, 'testbranch')
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Should be possible to create a branch', function() {
+  return uiInteractions.createBranch(page, 'testbranch');
 });
 
 
-suite.test('Should be possible to create and destroy a branch', function(done) {
-  uiInteractions.createBranch(page, 'willbedeleted')
+suite.test('Should be possible to create and destroy a branch', function() {
+  return uiInteractions.createBranch(page, 'willbedeleted')
     .then(function() {
       helpers.click(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
       helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
@@ -140,12 +119,11 @@ suite.test('Should be possible to create and destroy a branch', function(done) {
     }).then(function() {
       helpers.click(page, '[data-ta-clickable="yes"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Should be possible to create and destroy a tag', function(done) {
-  uiInteractions.createTag(page, 'tagwillbedeleted')
+suite.test('Should be possible to create and destroy a tag', function() {
+  return uiInteractions.createTag(page, 'tagwillbedeleted')
     .then(function() {
       helpers.click(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
       helpers.click(page, '[data-ta-action="delete"][data-ta-visible="true"]');
@@ -153,12 +131,11 @@ suite.test('Should be possible to create and destroy a tag', function(done) {
     }).then(function() {
       helpers.click(page, '[data-ta-clickable="yes"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Commit changes to a file', function(done) {
-  environment.changeTestFile(testRepoPath + '/testfile.txt')
+suite.test('Commit changes to a file', function() {
+  return environment.changeTestFile(testRepoPath + '/testfile.txt')
     .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
     .then(function() {
       helpers.click(page, '[data-ta-input="staging-commit-title"]')
@@ -167,12 +144,11 @@ suite.test('Commit changes to a file', function(done) {
     .then(function() {
       helpers.click(page, '[data-ta-clickable="commit"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Show stats for changed file and discard it', function(done) {
-  environment.changeTestFile(testRepoPath + '/testfile.txt')
+suite.test('Show stats for changed file and discard it', function() {
+  return environment.changeTestFile(testRepoPath + '/testfile.txt')
     .then(function() {
       return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"] .additions');
     }).then(function(element) {
@@ -182,92 +158,72 @@ suite.test('Show stats for changed file and discard it', function(done) {
       helpers.click(page, '[data-ta-clickable="discard-file"]');
       helpers.click(page, '[data-ta-clickable="yes"]');
       return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-// suite.test('Should be possible to patch a file', function(done) {
+// suite.test('Should be possible to patch a file', function() {
 //   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
-//     if (err) return done(err);
+//     if (err) return (err);
 //     uiInteractions.patch(page, 'Patch', function() {
 //       helpers.waitForElementVisible(page, '.commit', function() {
-//         done();
+//         ();
 //       });
 //     });
 //   });
 // });
 
-suite.test('Checkout a branch', function(done) {
-  uiInteractions.checkout(page, 'testbranch')
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Checkout a branch', function() {
+  return uiInteractions.checkout(page, 'testbranch')
 });
 
-suite.test('Create another commit', function(done) {
-  environment.createTestFile(testRepoPath + '/testy2.txt')
+suite.test('Create another commit', function() {
+  return environment.createTestFile(testRepoPath + '/testy2.txt')
     .then(function() { return uiInteractions.commit(page, 'Branch commit'); })
-    .then(function() { done(); })
-    .catch(done);
 });
 
-suite.test('Rebase', function(done) {
-  uiInteractions.refAction(page, 'testbranch', true, 'rebase')
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Rebase', function() {
+  return uiInteractions.refAction(page, 'testbranch', true, 'rebase')
 });
 
-suite.test('Checkout master again', function(done) {
-  uiInteractions.checkout(page, 'master')
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Checkout master again', function() {
+  return uiInteractions.checkout(page, 'master')
 });
 
-suite.test('Create yet another commit', function(done) {
-  environment.createTestFile(testRepoPath + '/testy3.txt')
-    .then(function() { return uiInteractions.commit(page, 'Branch commit', done); })
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Create yet another commit', function() {
+  return environment.createTestFile(testRepoPath + '/testy3.txt')
+    .then(function() { return uiInteractions.commit(page, 'Branch commit'); });
 });
 
-suite.test('Merge', function(done) {
-  uiInteractions.refAction(page, 'testbranch', true, 'merge')
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Merge', function() {
+  return uiInteractions.refAction(page, 'testbranch', true, 'merge');
 });
 
-suite.test('Revert merge', function(done) {
+suite.test('Revert merge', function() {
   helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
-  helpers.waitForElementVisible(page, '[data-ta-action="revert"]').then(function() {
+  return helpers.waitForElementVisible(page, '[data-ta-action="revert"]').then(function() {
     helpers.click(page, '[data-ta-action="revert"]');
     return helpers.waitForElementNotVisible(page, '[data-ta-container="user-error-page"]');
-  }).then(function() { done(); })
-  .catch(done);
+  });
 });
 
-suite.test('Should be possible to move a branch', function(done) {
-  uiInteractions.createBranch(page, 'movebranch', function() {
-    return uiInteractions.moveRef(page, 'movebranch', 'Init');
-  }).then(function() { done(); })
-  .catch(done);
+suite.test('Should be possible to move a branch', function() {
+  return uiInteractions.createBranch(page, 'movebranch')
+    .then(function() { return uiInteractions.moveRef(page, 'movebranch', 'Init'); });
 });
 
-suite.test('Should be possible to click refresh button', function(done) {
+suite.test('Should be possible to click refresh button', function() {
   helpers.click(page, 'button.refresh-button');
-  done();
+  return Bluebird.resolve();
 });
 
 // Shutdown
-suite.test('Go to home screen', function(done) {
+suite.test('Go to home screen', function() {
   helpers.click(page, '[data-ta-clickable="home-link"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="home-page"]')
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '[data-ta-container="home-page"]');
 });
 
-suite.test('Shutdown server should bring you to connection lost page', function(done) {
-  environment.shutdown(true)
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Shutdown server should bring you to connection lost page', function() {
+  return environment.shutdown(true);
 });
 
 testsuite.runAllSuits();

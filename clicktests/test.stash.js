@@ -11,27 +11,24 @@ var suite = testsuite.newSuite('discard', page);
 var environment;
 var testRepoPath;
 
-suite.test('Init', function(done) {
+suite.test('Init', function() {
   environment = new Environment(page, { port: 8461 });
-  environment.init()
+  return environment.init()
     .then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: testRepoPath, initCommits: 1 } ]);
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
 
-suite.test('Open repo screen', function(done) {
-  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+suite.test('Open repo screen', function() {
+  return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
     .then(function () { return helpers.waitForElementVisible(page, '.graph'); })
-    .delay(1000)
-    .then(function() { done(); })
-    .catch(done);
+    .delay(1000);
 });
 
-suite.test('Should be possible to stash a file', function(done) {
-  environment.createTestFile(testRepoPath + '/testfile2.txt')
+suite.test('Should be possible to stash a file', function() {
+  return environment.createTestFile(testRepoPath + '/testfile2.txt')
     .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
     .then(function() {
       helpers.click(page, '[data-ta-clickable="stash-all"]');
@@ -40,28 +37,20 @@ suite.test('Should be possible to stash a file', function(done) {
       }
       return helpers.waitForElementVisible(page, '[data-ta-container="stash-stash"]');
     })
-    .then(function() { done(); })
-    .catch(done);
 });
 
-suite.test('Should be possible to open stash diff', function(done) {
+suite.test('Should be possible to open stash diff', function() {
   helpers.click(page, '[data-ta-clickable="stash-diff"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="stash-diff"]')
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '[data-ta-container="stash-diff"]');
 });
 
-suite.test('Should be possible to pop a stash', function(done) {
+suite.test('Should be possible to pop a stash', function() {
   helpers.click(page, '[data-ta-clickable="stash-pop"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]')
-    .then(function() { done(); })
-    .catch(done);
+  return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]');
 });
 
-suite.test('Shutdown', function(done) {
-  environment.shutdown()
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Shutdown', function() {
+  return environment.shutdown();
 });
 
 testsuite.runAllSuits();

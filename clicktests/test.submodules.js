@@ -14,29 +14,26 @@ var environment;
 var subRepoPath;
 var testRepoPath;
 
-suite.test('Init', function(done) {
+suite.test('Init', function() {
   environment = new Environment(page, { port: 8460 });
-  environment.init()
+  return environment.init()
     .then(function() {
       subRepoPath = environment.path + '/subrepo';
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: subRepoPath, initCommits: 1 }, { bare: false, path: testRepoPath } ]);
-    }).then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Open repo screen', function(done) {
-  uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+suite.test('Open repo screen', function() {
+  return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
     .then(function () { return helpers.waitForElementVisible(page, '.graph'); })
-    .delay(1000)
-    .then(function() { done(); })
-    .catch(done);
+    .delay(1000);
 });
 
-suite.test('Submodule add', function(done) {
+suite.test('Submodule add', function() {
   helpers.click(page, '[data-ta-clickable="submodules-menu"]');
   helpers.click(page, '[data-ta-clickable="add-submodule"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="add-submodule"]')
+  return helpers.waitForElementVisible(page, '[data-ta-container="add-submodule"]')
     .then(function() {
       helpers.click(page, '[data-ta-container="add-submodule"] [data-ta-input="path"]');
       helpers.write(page, 'subrepo');
@@ -47,23 +44,17 @@ suite.test('Submodule add', function(done) {
     .then(function() {
       helpers.click(page, '[data-ta-clickable="submodules-menu"]');
       return helpers.waitForElementVisible(page, '[data-ta-container="submodules"] [data-ta-clickable="subrepo"]');
-    })
-    .then(function() { done(); })
-    .catch(done);
+    });
 });
 
-suite.test('Submodule update', function(done) {
+suite.test('Submodule update', function() {
   helpers.click(page, '[data-ta-clickable="update-submodule"]');
-  Bluebird.resolve()
+  return Bluebird.resolve()
     .delay(500)
-    .then(function() {
-      return helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]');
-    })
-    .then(function() { done(); })
-    .catch(done);
+    .then(function() { return helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]'); });
 });
 
-suite.test('Submodule delete check', function(done) {
+suite.test('Submodule delete check', function() {
   // Temporarily disabled to get the build running again
   /*helpers.click(page, '[data-ta-clickable="submodules-menu"]');
   helpers.waitForElementVisible(page, '[data-ta-clickable="subrepo-remove"]', function() {
@@ -72,18 +63,16 @@ suite.test('Submodule delete check', function(done) {
       helpers.click(page, '[data-ta-clickable="yes"]');
       setTimeout(function() { // Wait for progressbar
         helpers.waitForElementNotVisible(page, '[data-ta-element="progress-bar"]', function() {
-          done();
+          ();
         });
       }, 500);
     });
   });*/
-  done();
+  return Bluebird.resolve();
 });
 
-suite.test('Shutdown', function(done) {
-  environment.shutdown()
-    .then(function() { done(); })
-    .catch(done);
+suite.test('Shutdown', function() {
+  return environment.shutdown();
 });
 
 testsuite.runAllSuits();
