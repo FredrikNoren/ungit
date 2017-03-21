@@ -154,6 +154,7 @@ let argv = yargs
 .describe('ungitVersionCheckOverride', 'Ignore check for older version of ungit')
 .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this')
 .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
+.boolean('cliconfigonly')
 .describe('port', 'The port ungit is exposed on')
 .describe('urlBase', 'The base URL ungit will be accessible from')
 .describe('rootPath', 'The root path ungit will be accessible from')
@@ -190,23 +191,37 @@ let argv = yargs
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
-.describe('mergeTool', 'the git merge tool to use when resolving conflicts');
+.describe('mergeTool', 'the git merge tool to use when resolving conflicts')
+// rc return additional options that must be ignored
+.describe('config', false)
+.describe('configs', false);
+
+var argvConfig = argv.argv;
 
 // If not triggered by test, then do strict option check
-if (argv.$0.indexOf('mocha') === -1) {
+if (argvConfig.$0.indexOf('mocha') === -1) {
   argv = argv.strict();
 }
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
-if (argv.$0 === 'ungit' && argv._ && argv._.length > 0) {
+if (argvConfig.$0.indexOf('ungit') > -1 && argvConfig._ && argvConfig._.length > 0) {
   yargs.showHelp();
   process.exit(0);
-} else if (argv.cliconfigonly) {
-  module.exports = argv.default(defaultConfig).argv;
-} else {
-  module.exports = rc('ungit', argv.default(defaultConfig).argv);
 }
+
+var rcConfig = {};
+if (!argvConfig.cliconfigonly) {
+  try {
+    rcConfig = rc('ungit');
+  } catch (err) {
+    winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+    process.exit(0);
+  }
+}
+
+module.exports = argv.default(defaultConfig).default(rcConfig).argv;
+
 module.exports.homedir = homedir;
 
 let currentRootPath = module.exports.rootPath;

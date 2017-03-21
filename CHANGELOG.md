@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.11:
+    - Fix cli arguments [#871](https://github.com/FredrikNoren/ungit/pull/871)
+    - Stop if ~/.ungitrc contains syntax error
+    - Removed official support ini format of ~/.ungitrc, because internal API supports only JSON
 - 1.1.10: Fix broken diff out in some cases when diff contains table. [#881](https://github.com/FredrikNoren/ungit/pull/881)
 - 1.1.9: Fix around ubuntu's inability to cache promises. [#877](https://github.com/FredrikNoren/ungit/pull/878)
 - 1.1.8:
