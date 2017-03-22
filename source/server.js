@@ -305,11 +305,14 @@ app.get('/api/gitversion', (req, res) => {
 const userConfigPath = path.join(config.homedir, '.ungitrc');
 const readUserConfig = () => {
   return fs.isExists(userConfigPath).then((hasConfig) => {
-      if (!hasConfig) return {};
-      return fs.readFileAsync(userConfigPath, { encoding: 'utf8' }).then((content) => {
-          return JSON.parse(content.toString());
-        });
-    });
+    if (!hasConfig) return {};
+    return fs.readFileAsync(userConfigPath, { encoding: 'utf8' })
+      .then((content) => { return JSON.parse(content.toString()); })
+      .catch((err) => {
+        winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+        process.exit(0);
+      });
+  });
 }
 const writeUserConfig = (configContent) => {
   return fs.writeFileAsync(userConfigPath, JSON.stringify(configContent, undefined, 2));

@@ -44,7 +44,7 @@ This will launch the server and open up a browser with the ui.
 
 Configuring
 ---------
-Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on \*nix, `C:/Users/USERNAME/` on windows). Can be in either json or ini format. See [source/config.js](source/config.js) for available options.
+Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on \*nix, `C:/Users/USERNAME/` on windows). Configuration file must be in json format. See [source/config.js](source/config.js) for available options.
 
 You can also override configuration variables at launch by specifying them as command line arguments; `ungit --port=8080`. To disable boolean features use --no: `ungit --no-autoFetch`.
 
@@ -56,8 +56,6 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 	"bugtracking": true
 }
 ```
-
-Ungit uses [rc](https://github.com/dominictarr/rc) for configuration, which in turn uses [yargs](https://github.com/yargs/yargs) for command line arguments. See corresponding documentations for more details.
 
 External Merge Tools
 --------------------
