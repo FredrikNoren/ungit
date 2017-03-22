@@ -23,7 +23,9 @@ Environment.prototype.init = function() {
   var self = this;
   this.setupPage(this.page);
   return this.startServer()
-    .then(function() { return self.ensureStarted(5); })
+    .then(function() { return self.ensureStarted(); })
+    .timeout(7000)
+    .catch(function(err) { throw new Error("Cannot confirm ungit start!!")})
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
 }
@@ -91,15 +93,14 @@ Environment.prototype.setupPage = function() {
   this.page = page;
 }
 
-Environment.prototype.ensureStarted = function(count) {
+Environment.prototype.ensureStarted = function() {
   var self = this;
-  if (count < 0) return Bluebird.reject('Cant start up ungit!');
   return Bluebird.resolve()
     .then(function() {
       if (!self.hasStarted) {
         return Bluebird.resolve()
-          .delay(500)
-          .then(function() { return self.ensureStarted(count - 1); })
+          .delay(250)
+          .then(function() { return self.ensureStarted(); });
       }
     });
 }
