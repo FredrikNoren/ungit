@@ -629,7 +629,8 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, ensureAuthenticated, (req, res) => {
       //winston.info('Cleaned up: ' + JSON.stringify(cleaned));
-      res.json({ result: temp.cleanup() });
+      io.close();
+      setTimeout(() => { res.json({ result: temp.cleanup() }); }, 1000);
     });
     app.post(`${exports.pathPrefix}/testing/shutdown`, ensureAuthenticated, (req, res) => {
       res.json({});
