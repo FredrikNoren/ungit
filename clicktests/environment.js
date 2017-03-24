@@ -27,7 +27,9 @@ Environment.prototype.init = function() {
     .timeout(7000)
     .catch(function(err) { throw new Error("Cannot confirm ungit start!!")})
     .then(function() { return self.createTempFolder(); })
-    .then(function(res) { self.path = res.path });
+    .then(function(res) { self.path = res.path })
+    .delay(1500); // in some tests, it can start creating test files before
+                  // filewatch is set and screw with tests...
 }
 Environment.prototype.shutdown = function(doNotClose) {
   var self = this;
