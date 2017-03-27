@@ -10,6 +10,7 @@ const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 const ignore = require('ignore');
+const Bluebird = require('bluebird');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);
@@ -58,16 +59,18 @@ exports.registerApi = (env) => {
           .catch(() => {})
           .then(() => {
             socket.watcher = [];
-            watchPath([], socket.watcher, {"recursive": true});
             winston.info(`Start watching ${socket.watcherPath} recursively`);
-
+            return watchPath([], socket.watcher, {"recursive": true});
+          }).then(() => {
             if (!isMac && !isWindows) {
-              // recursive fs.watch only works on mac and windows
-              watchPath(['.git', 'HEAD'], socket.watcher);
-              watchPath(['.git', 'refs', 'heads'], socket.watcher);
-              watchPath(['.git', 'refs', 'remotes'], socket.watcher);
-              watchPath(['.git', 'refs', 'tags'], socket.watcher);
               winston.info(`Start watching with .git and .git/refs/[heads|remotes|tags]`);
+              // recursive fs.watch only works on mac and windows
+              const promises = [];
+              promises.push(watchPath(['.git', 'HEAD'], socket.watcher));
+              promises.push(watchPath(['.git', 'refs', 'heads'], socket.watcher));
+              promises.push(watchPath(['.git', 'refs', 'remotes'], socket.watcher));
+              promises.push(watchPath(['.git', 'refs', 'tags'], socket.watcher));
+              return Bluebird.all(promises);
             }
           }).catch((err) => {
             // Sometimes fs.watch crashes with errors such as ENOSPC (no space available)
