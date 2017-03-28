@@ -41,7 +41,7 @@ exports.registerApi = (env) => {
           .then(() => {
             socket.watcher = [];
             winston.info(`Start watching ${socket.watcherPath} recursively`);
-            return watchPath(socket, '.', {'recursive': true});
+            return watchPath(socket, undefined, {'recursive': true});
           }).then(() => {
             if (!isMac && !isWindows) {
               winston.info(`Start watching with .git and .git/refs/[heads|remotes|tags]`);
@@ -67,17 +67,24 @@ exports.registerApi = (env) => {
     const pathToWatch = path.join(socket.watcherPath, subfolderPath);
 
     return fs.isExists(pathToWatch).then((isExists) => {
-      if (!isExists) return;
-      socket.watcher.push(fs.watch(pathToWatch, options, (event, filename) => {
-        if (filename === null) return;
-        const filePath = path.join(subfolderPath, filename);
-        if (isFileWatched(filePath, socket.ignore)) {
-          winston.info(`FILE WATCH TRIGGERED: ${filePath}`);
-          emitGitDirectoryChanged(socket.watcherPath);
-          emitWorkingTreeChanged(socket.watcherPath);
-        }
-      }));
-    });
+        // Sometimes necessary folders, '.../.git/refs/head' and etc, are not created on git init
+        if (!isExists && subfolderPath) return new Bluebird((resolve, reject) => {
+          mkdirp(pathToWatch, (err) => {
+            if (err) reject(err);
+            else resolve();
+          })
+        });
+      }).then(() => {
+        socket.watcher.push(fs.watch(pathToWatch, options, (event, filename) => {
+          if (!filename) return;
+          const filePath = path.join(subfolderPath, filename);
+          if (isFileWatched(filePath, socket.ignore)) {
+            winston.info(`FILE WATCH TRIGGERED: ${filePath}`);
+            emitGitDirectoryChanged(socket.watcherPath);
+            emitWorkingTreeChanged(socket.watcherPath);
+          }
+        }));
+      });
   };
 
   const stopDirectoryWatch = (socket) => {
