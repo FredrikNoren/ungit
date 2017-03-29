@@ -40,11 +40,9 @@ exports.registerApi = (env) => {
           .catch(() => {})
           .then(() => {
             socket.watcher = [];
-            winston.info(`Start watching ${socket.watcherPath} recursively`);
-            return watchPath(socket, undefined, {'recursive': true});
+            return watchPath(socket, '.', {'recursive': true});
           }).then(() => {
             if (!isMac && !isWindows) {
-              winston.info(`Start watching with .git and .git/refs/[heads|remotes|tags]`);
               // recursive fs.watch only works on mac and windows
               const promises = [];
               promises.push(watchPath(socket, path.join('.git', 'HEAD')));
@@ -64,8 +62,8 @@ exports.registerApi = (env) => {
   }
 
   const watchPath = (socket, subfolderPath, options) => {
-    const pathToWatch = path.join(socket.watcherPath, subfolderPath);
-
+    const pathToWatch = path.join(socket.watcherPath, subfolderPath, '/');
+    winston.info(`Start watching ${pathToWatch} recursively`);
     return fs.isExists(pathToWatch).then((isExists) => {
         // Sometimes necessary folders, '.../.git/refs/head' and etc, are not created on git init
         if (!isExists && subfolderPath) return new Bluebird((resolve, reject) => {
