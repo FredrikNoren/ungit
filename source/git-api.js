@@ -77,7 +77,7 @@ exports.registerApi = (env) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
           if (isFileWatched(filePath, socket.ignore)) {
-            winston.info(`FILE WATCH TRIGGERED: ${filePath}`);
+            winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
