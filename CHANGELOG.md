@@ -7,6 +7,9 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
     - Fix cli arguments [#871](https://github.com/FredrikNoren/ungit/pull/871)
     - Stop if ~/.ungitrc contains syntax error
     - Removed official support ini format of ~/.ungitrc, because internal API supports only JSON
+    - Retain commit messages when commit fails [#882](https://github.com/FredrikNoren/ungit/pull/882)
+    - Fix rare edge case where remote node is gone during reset op.
+    - rescursively resolve all promises before caching them. [#878](https://github.com/FredrikNoren/ungit/pull/878)
 - 1.1.10: Fix broken diff out in some cases when diff contains table. [#881](https://github.com/FredrikNoren/ungit/pull/881)
 - 1.1.9: Fix around ubuntu's inability to cache promises. [#877](https://github.com/FredrikNoren/ungit/pull/878)
 - 1.1.8:
