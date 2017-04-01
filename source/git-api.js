@@ -65,7 +65,7 @@ exports.registerApi = (env) => {
     const pathToWatch = path.join(socket.watcherPath, subfolderPath, '/');
     winston.info(`Start watching ${pathToWatch} recursively`);
     return fs.isExists(pathToWatch).then((isExists) => {
-        // Sometimes necessary folders, '.../.git/refs/head' and etc, are not created on git init
+        // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
         if (!isExists && subfolderPath) return new Bluebird((resolve, reject) => {
           mkdirp(pathToWatch, (err) => {
             if (err) reject(err);

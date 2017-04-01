@@ -5,14 +5,14 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 
 - 1.1.12:
     - Refactor and promisify clicktests [#879](https://github.com/FredrikNoren/ungit/pull/879)
+    - Refactor to remove async and using more promises. [#878](https://github.com/FredrikNoren/ungit/pull/878)
 - 1.1.11:
     - Fix cli arguments [#871](https://github.com/FredrikNoren/ungit/pull/871)
     - Stop if ~/.ungitrc contains syntax error
     - Removed official support ini format of ~/.ungitrc, because internal API supports only JSON
 - 1.1.10:
     - Fix broken diff out in some cases when diff contains table. [#881](https://github.com/FredrikNoren/ungit/pull/881)
-    - Refactor to remove async and using more promises. [#878](https://github.com/FredrikNoren/ungit/pull/878)
-- 1.1.9: Fix around ubuntu's inability to cache promises. [#877](https://github.com/FredrikNoren/ungit/pull/878)
+- 1.1.9: Fix around ubuntu's inability to cache promises. [#877](https://github.com/FredrikNoren/ungit/pull/877)
 - 1.1.8:
     - Realtime text diff via invalidate diff on directory change [#867](https://github.com/FredrikNoren/ungit/pull/867)
     - Promisify `./source/utils/cache.js` [#870](https://github.com/FredrikNoren/ungit/pull/870)
