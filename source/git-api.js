@@ -70,12 +70,13 @@ exports.registerApi = (env) => {
           mkdirp(pathToWatch, (err) => {
             if (err) reject(err);
             else resolve();
-          })
+          });
         });
       }).then(() => {
         socket.watcher.push(fs.watch(pathToWatch, options, (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
+          winston.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
             winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
             emitGitDirectoryChanged(socket.watcherPath);
@@ -100,12 +101,12 @@ exports.registerApi = (env) => {
       return false;  // ignore files that are in .gitignore
     } else if (filename.endsWith(".lock")) {
       return false;
-    } else if (filename.startsWith(path.join(".git", "refs"))) {
-      return true;
+    } else if (filename.indexOf(path.join(".git", "refs")) > -1) {
+      return true;   // trigger for all changes under refs
     } else if (filename == path.join(".git", "HEAD")) {
       return true;   // Explicitly return true for ".git/HEAD" for branch changes
-    } else if (filename == ".git" || filename.startsWith(`.git${path.sep}`)) {
-      return false;  // Ignore changes under ".git/*"
+    } else if (filename.indexOf(".git") > -1) {
+      return false;  // Ignore other changes under ".git/*"
     } else {
       return true;
     }
