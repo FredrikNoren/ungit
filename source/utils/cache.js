@@ -14,13 +14,27 @@ cache.resolveFunc = (key) => {
   return cache.getAsync(key) // Cant do `cache.getAsync(key, true)` due to `get` argument ordering...
     .catch({ errorcode: "ENOTFOUND" }, (e) => {
       if (!funcMap[key]) throw e;     // func associated with key is not found, throw not found error
-      const result = funcMap[key].func();  // func is found, resolve, set with TTL and return result
-      return (result.then ? result : Bluebird.resolve(result))
+      return getHardValue(funcMap[key].func()) // func is found, resolve, set with TTL and return result
         .then((r) => {
           return cache.setAsync(key, r, funcMap[key].ttl)
             .then(() => { return r; })
         });
     });
+}
+
+/**
+ * @function getHardValue
+ * @description In Linux, or certain settings, it seems that cached promises
+ *   are not able to resolved and we need to cache raw result of promieses.
+ * @param {prom} - raw value or promise to be returned or resolved
+ * @param {promise} - a promise where next "then" will result in raw value.
+ */
+const getHardValue = (prom) => {
+  if (prom.then) {
+    return prom.then(getHardValue);
+  } else {
+    return Bluebird.resolve(prom);
+  }
 }
 
 /**
