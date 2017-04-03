@@ -14,7 +14,7 @@ function Environment(page, config) {
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
-  this.config.showServerOutput = this.config.showServerOutput || false;
+  this.config.showServerOutput = this.config.showServerOutput || true;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
   this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
@@ -112,6 +112,7 @@ Environment.prototype.startServer = function(callback) {
     '--no-sendUsageStatistics',
     '--autoShutdownTimeout=' + this.config.serverTimeout,
     '--maxNAutoRestartOnCrash=0',
+    '--logLevel=debug',
     '--no-autoCheckoutOnBranchCreate',
     '--alwaysLoadActiveBranch',
     '--logGitCommands']
