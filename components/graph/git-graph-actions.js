@@ -83,7 +83,8 @@ GraphActions.Reset = function(graph, node) {
     var context = self.graph.currentActionContext();
     if (context.node() != self.node) return false;
     var remoteRef = context.getRemoteRef(self.graph.currentRemote());
-    return remoteRef &&
+    return remoteRef && remoteRef.node() &&
+      context && context.node() &&
       remoteRef.node() != context.node() &&
       remoteRef.node().date < context.node().date;
   });
