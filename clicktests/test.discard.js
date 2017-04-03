@@ -71,7 +71,7 @@ suite.test('Init', function() {
 suite.test('Open repo screen', function() {
   return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
     .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
-    .delay(100);
+    .delay(1000);
 });
 
 suite.test('Should be possible to select no from discard', function() {
