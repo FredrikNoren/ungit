@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.13: Fix startup args bug: #896
 - 1.1.12:
   - Retain commit messages when commit fails [#882](https://github.com/FredrikNoren/ungit/pull/882)
   - Fix rare edge case where remote node is gone during reset op.
