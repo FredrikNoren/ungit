@@ -188,9 +188,7 @@ let argv = yargs
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
-// rc return additional options that must be ignored
-.describe('config', false)
-.describe('configs', false);
+;
 
 var argvConfig = argv.argv;
 
@@ -210,6 +208,9 @@ var rcConfig = {};
 if (!argvConfig.cliconfigonly) {
   try {
     rcConfig = rc('ungit');
+    // rc return additional options that must be ignored
+    delete rcConfig['config'];
+    delete rcConfig['configs'];
   } catch (err) {
     winston.error(`Stop at reading ~/.ungitrc because ${err}`);
     process.exit(0);
