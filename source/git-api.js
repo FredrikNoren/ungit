@@ -66,14 +66,17 @@ exports.registerApi = (env) => {
     winston.info(`Start watching ${pathToWatch}`);
     return fs.isExists(pathToWatch).then((isExists) => {
         // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
-        if (!isExists && subfolderPath) return new Bluebird((resolve, reject) => {
-          mkdirp(pathToWatch, (err) => {
-            if (err) reject(err);
-            else resolve();
+        if (!isExists) {
+          winston.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
+          return new Bluebird((resolve, reject) => {
+            mkdirp(pathToWatch, (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
           });
-        });
+        }
       }).then(() => {
-        socket.watcher.push(fs.watch(pathToWatch, options, (event, filename) => {
+        socket.watcher.push(fs.watch(pathToWatch, options || {}, (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
