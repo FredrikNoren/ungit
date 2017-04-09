@@ -3,8 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.14:
+- 1.1.15:
   - Refactor and promisify clicktests [#879](https://github.com/FredrikNoren/ungit/pull/879)
+- 1.1.14: Disable strict mode for startup params and config [#890](https://github.com/FredrikNoren/ungit/issues/890)
 - 1.1.13: Fix startup args bug: [#896](https://github.com/FredrikNoren/ungit/issues/896)
 - 1.1.12:
   - Retain commit messages when commit fails [#882](https://github.com/FredrikNoren/ungit/pull/882)

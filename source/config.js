@@ -192,11 +192,6 @@ let argv = yargs
 
 var argvConfig = argv.argv;
 
-// If not triggered by test, then do strict option check
-if (argvConfig.$0.indexOf('mocha') === -1) {
-  argv = argv.strict();
-}
-
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argvConfig.$0.indexOf('ungit') > -1 && argvConfig._ && argvConfig._.length > 0) {
