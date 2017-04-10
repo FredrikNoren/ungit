@@ -27,7 +27,7 @@ uiInteractions.createRef = function(page, name, type) {
     .then(function() {
       helpers.click(page, '[data-ta-clickable="create-' + type + '"]');
       return helpers.waitForElementVisible(page, '[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]');
-    });
+    }).delay(300);
 }
 uiInteractions.createBranch = function(page, name) {
   return uiInteractions.createRef(page, name, 'branch');
