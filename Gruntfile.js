@@ -1,7 +1,7 @@
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs-prebuilt');
 var path = require('path');
-var fs = require('fs');
+var fs = require('./source/utils/fs-async');
 var npm = require('npm');
 var semver = require('semver');
 var browserify = require('browserify');
@@ -337,14 +337,13 @@ module.exports = function(grunt) {
     }).then(this.async());
   });
 
-  var getClickTestFiles = function(callback) {
-    fs.readdir('clicktests', function(err, ls) {
-      if (err) callback(err)
-
-      callback(null, ls.filter(function(file) {
-        return file.startsWith("test.");
-      }));
-    });
+  var getClickTestFiles = function() {
+    return fs.readdirAsync('clicktests')
+      .then(function(files) {
+        return files.filter(function(file) {
+          return file.startsWith("test.");
+        });
+      });
   }
 
   var clickExecute = function(file, onOut, onErr) {
@@ -363,9 +362,7 @@ module.exports = function(grunt) {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
 
-    getClickTestFiles(function(err, clickTestFiles) {
-      if (err) done(err);
-
+    getClickTestFiles().then(function(clickTestFiles) {
       var onOut = function(data) { grunt.log.write(data); }
       var onErr = function(data) { grunt.log.error(data); }
       var onFinish = function(file) {
@@ -377,7 +374,7 @@ module.exports = function(grunt) {
       clickExecute(clickTestFiles.shift(), onOut, onErr)
         .then(onFinish)
         .catch(done.bind(null, false))
-    });
+    }).catch(done)
   });
 
   // This is purely for devs for faster churn of clicktest result
@@ -386,8 +383,7 @@ module.exports = function(grunt) {
   grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
     var done = this.async();
 
-    getClickTestFiles(function(err, clickTestFiles) {
-      if (err) done(err);
+    getClickTestFiles().then(function(clickTestFiles) {
       grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
       Bluebird.all(clickTestFiles.map(function(file) {
         var output = "";
@@ -413,7 +409,7 @@ module.exports = function(grunt) {
         });
         done(isSuccess);
       });
-    });
+    }).catch(done);
   });
 
   function bumpDependency(packageJson, packageName) {
