@@ -103,6 +103,6 @@ helpers.selectAllText = function(page) {
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
 }
 helpers.getPort = function() {
-  startPort += Math.floor((Math.random() * 1000));;
+  startPort += Math.floor((Math.random() * 1000));
   return startPort;
 }

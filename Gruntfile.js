@@ -358,6 +358,26 @@ module.exports = function(grunt) {
     });
   }
 
+  var running = 0;
+  var maxConcurrency = 5;
+  var acquireLock = function() {
+    if (running < maxConcurrency) {
+      running++;
+      return Bluebird.resolve();
+    }
+
+    return new Bluebird(function(resolve, reject) {
+      return Bluebird.resolve()
+        .delay(1000)
+        .then(acquireLock)
+        .then(resolve)
+    });
+  }
+  var releaseLock = function(result) {
+    --running;
+    return result;
+  }
+
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
@@ -388,15 +408,17 @@ module.exports = function(grunt) {
       Bluebird.all(clickTestFiles.map(function(file) {
         var output = "";
         var outStream = function(data) { output += data; }
-        grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
-        return clickExecute(file, outStream, outStream)
-          .then(function() {
-            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
-            return { name: file, output: output, isSuccess: true };
-          }).catch(function() {
-            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
-            return { name: file, output: output, isSuccess: false };
-          });
+        return acquireLock().then(function() {
+          grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
+          return clickExecute(file, outStream, outStream)
+            .then(function() {
+              grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+              return { name: file, output: output, isSuccess: true };
+            }).catch(function() {
+              grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+              return { name: file, output: output, isSuccess: false };
+            });
+          }).then(releaseLock);
       })).then(function(results) {
         var isSuccess = true;
         results.forEach(function(result) {

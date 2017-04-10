@@ -24,7 +24,7 @@ Environment.prototype.init = function() {
   this.setupPage(this.page);
   return this.startServer()
     .then(function() { return self.ensureStarted(); })
-    .timeout(15000)
+    .timeout(7000)
     .catch(function(err) { throw new Error("Cannot confirm ungit start!!")})
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
