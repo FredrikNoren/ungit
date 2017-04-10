@@ -80,7 +80,8 @@ Environment.prototype.setupPage = function() {
     helpers.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
   };
   page.onResourceRequested = function(requestData, networkRequest) {
-    helpers.log('Request (#' + requestData.id + '): ' + requestData.method + ' ' + requestData.url);
+    var requestUrl =  requestData.url.indexOf("data:application/font-woff") > -1 ? "[omitted font file...]" : requestData.url;
+    helpers.log('Request (#' + requestData.id + '): ' + requestData.method + ' ' + requestUrl);
     // Abort gravatar requests to speed up things (since they will anyway only fail)
     if (requestData.url.indexOf('http://www.gravatar.com/avatar/') == 0) {
       networkRequest.abort();
