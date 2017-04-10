@@ -15,7 +15,7 @@ var subRepoPath;
 var testRepoPath;
 
 suite.test('Init', function() {
-  environment = new Environment(page, { port: 8460 });
+  environment = new Environment(page, {});
   return environment.init()
     .then(function() {
       subRepoPath = environment.path + '/subrepo';

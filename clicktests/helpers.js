@@ -1,5 +1,6 @@
 var helpers = exports;
 var Bluebird = require('bluebird');
+var startPort = 45062; // it's like between port side and starboard...s
 
 helpers.log = function(text) {
   console.log((new Date()).toISOString(), text);
@@ -8,8 +9,8 @@ helpers.log = function(text) {
 helpers.elementExists = function(page, selector) {
   helpers.log('Querying element exists: ' + selector);
   var element = page.evaluate(function(selector) {
-    var element =  document.querySelector(selector);
-    return element ? { selector: selector, textContent: element.textContent } : null;
+    var dom =  document.querySelector(selector);
+    return dom ? { selector: selector, textContent: dom.textContent } : null;
   }, selector);
   if (element) {
     helpers.log('Element exists: ' + selector);
@@ -22,11 +23,11 @@ helpers.elementExists = function(page, selector) {
 helpers.elementVisible = function(page, selector) {
   helpers.log('Querying element visible: ' + selector);
   var element = page.evaluate(function(selector) {
-    var element = document.querySelector(selector);
-    if (!element) return null;
-    var rect = element.getBoundingClientRect();
+    var dom = document.querySelector(selector);
+    if (!dom) return null;
+    var rect = dom.getBoundingClientRect();
     if (rect.width == 0 || rect.height == 0) return null;
-    return { selector: selector, textContent: element.textContent };
+    return { selector: selector, textContent: dom.textContent };
   }, selector);
   if (element) {
     helpers.log('Element visible: ' + selector);
@@ -100,4 +101,8 @@ helpers.write = function(page, text) {
 helpers.selectAllText = function(page) {
   helpers.log('Trying to select all in focused element (ctrl-A)');
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
+}
+helpers.getPort = function() {
+  startPort += Math.floor((Math.random() * 1000));;
+  return startPort;
 }

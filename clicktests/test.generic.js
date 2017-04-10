@@ -15,7 +15,7 @@ var testRepoPath;
 var testRepoPathSubDir;
 
 suite.test('Init', function() {
-  environment = new Environment(page, { port: 8455, serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
+  environment = new Environment(page, { serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
 
   return environment.init().then(function() {
       testRepoPath = environment.path + '/testrepo';

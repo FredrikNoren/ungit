@@ -36,7 +36,7 @@ var createAndDiscard = function(dialogButtonToClick) {
 
 
 suite.test('Init', function() {
-  environment = new Environment(page, { port: 8453, serverStartupOptions: ['--disableDiscardWarning'] });
+  environment = new Environment(page, { serverStartupOptions: ['--disableDiscardWarning'] });
   return environment.init().then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: testRepoPath } ]);
@@ -61,7 +61,7 @@ suite.test('Shutdown', function() {
 });
 
 suite.test('Init', function() {
-  environment = new Environment(page, { port: 8454, serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
+  environment = new Environment(page, { serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
   return environment.init().then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: testRepoPath } ]);

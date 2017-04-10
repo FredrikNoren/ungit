@@ -13,7 +13,7 @@ var environment;
 var testRepoPath;
 
 suite.test('Init', function() {
-  environment = new Environment(page, { port: 8462, serverStartupOptions: ['--numberOfNodesPerLoad=1'] });
+  environment = new Environment(page, { serverStartupOptions: ['--numberOfNodesPerLoad=1'] });
   return environment.init().then(function() {
       testRepoPath = environment.path + '/testrepo';
       return environment.createRepos([ { bare: false, path: testRepoPath } ]);

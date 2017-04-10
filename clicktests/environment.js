@@ -9,14 +9,14 @@ module.exports = Environment;
 // Environment provides
 function Environment(page, config) {
   this.page = page;
+  this.port = helpers.getPort();
   this.config = config || {};
-  this.config.port = this.config.port || 8449;
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
   this.config.showServerOutput = this.config.showServerOutput || true;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
-  this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
+  this.url = 'http://localhost:' + this.port + this.config.rootPath;
 }
 
 Environment.prototype.init = function() {
@@ -24,7 +24,7 @@ Environment.prototype.init = function() {
   this.setupPage(this.page);
   return this.startServer()
     .then(function() { return self.ensureStarted(); })
-    .timeout(7000)
+    .timeout(15000)
     .catch(function(err) { throw new Error("Cannot confirm ungit start!!")})
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
@@ -99,7 +99,7 @@ Environment.prototype.ensureStarted = function() {
     .then(function() {
       if (!self.hasStarted) {
         return Bluebird.resolve()
-          .delay(250)
+          .delay(50)
           .then(function() { return self.ensureStarted(); });
       }
     });
@@ -112,7 +112,7 @@ Environment.prototype.startServer = function() {
   self.hasStarted = false;
   var options = ['bin/ungit',
     '--cliconfigonly',
-    '--port=' + self.config.port,
+    '--port=' + self.port,
     '--rootPath=' + self.config.rootPath,
     '--no-launchBrowser',
     '--dev',
@@ -143,7 +143,14 @@ Environment.prototype.startServer = function() {
     }
   });
   ungitServer.stderr.on("data", function (data) {
-    console.log(prependLines('[server ERROR] ', data));
+    helpers.log(prependLines('[server ERROR] ', data));
+    if (data.indexOf("EADDRINUSE") > -1) {
+      helpers.log("retrying with different port");
+      ungitServer.kill('SIGINT');
+      self.port = helpers.getPort();
+      self.url = 'http://localhost:' + self.port + self.config.rootPath;
+      self.startServer();
+    }
   });
   ungitServer.on('exit', function() {
     helpers.log('UNGIT SERVER EXITED');
