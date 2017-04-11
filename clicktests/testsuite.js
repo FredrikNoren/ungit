@@ -23,7 +23,7 @@ testsuites.runAllSuits = function() {
         helpers.log(cliColor.set('#### Done with suite: ' + suiteIdentifier, 'blue'));
       });
   }).then(function() {
-    console.log('Finished all test suites. Took ' + (Date.now() - startTime) / 1000 + 'sec (' + testsuites.suites.length + ' suites)');
+    helpers.log('Finished all test suites. Took ' + (Date.now() - startTime) / 1000 + 'sec (' + testsuites.suites.length + ' suites)');
     phantom.exit(0);
   });
 }
@@ -55,9 +55,9 @@ TestSuite.prototype.run = function(suiteName) {
         });
     }).timeout(self.config.timeout)
     .then(function() {
-      console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
+      helpers.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
     }).catch(function(err) {
-      console.error('Tests failed! - ', err);
+      helpers.error('Tests failed! - ', err);
       phantom.exit(1);
     });
 }

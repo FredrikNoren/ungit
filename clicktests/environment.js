@@ -62,17 +62,17 @@ Environment.prototype.setupPage = function() {
   var page = this.page;
   page.viewportSize = this.config.viewportSize;
   page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    console.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
+    helpers.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
     if (msg.indexOf('git-error') != -1) {
-      console.log('git-error found, page rendered to error.png');
+      helpers.log('git-error found, page rendered to error.png');
     }
   };
   page.onError = function(msg, trace) {
-    console.log(msg);
+    helpers.log(msg);
     trace.forEach(function(t) {
-      console.log(t.file + ':' + t.line + ' ' + t.function);
+      helpers.log(t.file + ':' + t.line + ' ' + t.function);
     });
-    console.error('Caught error');
+    helpers.error('Caught error');
     phantom.exit(1);
   };
   page.onResourceError = function(resourceError) {
@@ -128,7 +128,7 @@ Environment.prototype.startServer = function() {
     .concat(self.config.serverStartupOptions);
   var ungitServer = child_process.spawn('node', options);
   ungitServer.stdout.on("data", function (data) {
-    if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
+    if (self.config.showServerOutput) helpers.log(prependLines('[server] ', data));
 
     if (data.toString().indexOf('Ungit server already running') >= 0) {
       helpers.log('server-already-running');
@@ -184,11 +184,11 @@ Environment.prototype.shutdownServer = function() {
   return this.backgroundAction('POST', this.url + '/api/testing/shutdown');
 }
 Environment.prototype.createTempFolder = function() {
-  console.log('Creating temp folder');
+  helpers.log('Creating temp folder');
   return this.backgroundAction('POST', this.url + '/api/testing/createtempdir');
 }
 Environment.prototype.createFolder = function(dir) {
-  console.log('Create folder: ' + dir);
+  helpers.log('Create folder: ' + dir);
   return this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir });
 }
 Environment.prototype.initFolder = function(options) {
