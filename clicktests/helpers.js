@@ -37,30 +37,31 @@ helpers.elementVisible = function(page, selector) {
   return element;
 }
 
-helpers.waitFor = function(page, query) {
+var waitToBeTrue = function(resolve, toBeTrue) {
+  var res = toBeTrue();
+  if (res) resolve(res);
+  else setTimeout(waitToBeTrue.bind(null, resolve, toBeTrue), 250);
+}
+
+helpers.waitFor = function(toBeTrue) {
   return new Bluebird(function(resolve) {
-    var tryFind = function() {
-      var res = query();
-      if (res) resolve(res);
-      else setTimeout(tryFind, 250);
-    }
-    tryFind();
+    waitToBeTrue(resolve, toBeTrue);
   });
 }
 
 helpers.waitForElementVisible = function(page, selector) {
   helpers.log('Waiting for element visible: ' + selector);
-  return helpers.waitFor(page, function() { return helpers.elementVisible(page, selector); });
+  return helpers.waitFor(function() { return helpers.elementVisible(page, selector); });
 }
 
 helpers.waitForElementExists = function(page, selector) {
   helpers.log('Waiting for element exists: ' + selector);
-  return helpers.waitFor(page, function() { return helpers.elementExists(page, selector); });
+  return helpers.waitFor(function() { return helpers.elementExists(page, selector); });
 }
 
 helpers.waitForElementNotVisible = function(page, selector) {
   helpers.log('Waiting for element not visible: ' + selector);
-  return helpers.waitFor(page, function() { return !helpers.elementVisible(page, selector); });
+  return helpers.waitFor(function() { return !helpers.elementVisible(page, selector); });
 }
 
 helpers.getClickPosition = function(page, selector) {

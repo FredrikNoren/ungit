@@ -4,6 +4,7 @@ var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
 var uiInteractions = require('./ui-interactions.js');
+var Bluebird = require('bluebird');
 
 var page = webpage.create();
 var suite = testsuite.newSuite('commands', page);
@@ -46,12 +47,10 @@ suite.test('test branch create from command line', function() {
 suite.test('test branch move from command line', function() {
   var branchTagLoc = JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]'));
   return environment.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPath })
-    .delay(1000)
     .then(function() {
-      console.log(branchTagLoc, JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]')))
-      if (branchTagLoc == JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]'))) {
-        throw new Error("Branch haven't moved");
-      }
+      return helpers.waitFor(function() {
+        return branchTagLoc != JSON.stringify(helpers.getClickPosition(page, '[data-ta-name="gitCommandBranch"]'));
+      }).timeout(2000);
     });
 });
 
@@ -73,12 +72,10 @@ suite.test('test tag delete from command line', function() {
 suite.test('test reset from command line', function() {
   var headLoc = JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]'));
   return environment.gitCommand({ command: ["reset", "branch-1"], repo: testRepoPath })
-    .delay(500)
     .then(function() {
-      console.log(headLoc, JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]')))
-      if (headLoc == JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]'))) {
-        throw new Error("reset failed")
-      }
+      return helpers.waitFor(function() {
+        return headLoc != JSON.stringify(helpers.getClickPosition(page, '[data-ta-current="true"]'));
+      }).timeout(2000);
     });
 });
 
