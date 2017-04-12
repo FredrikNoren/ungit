@@ -35,7 +35,7 @@ helpers.elementVisible = function(page, selector) {
   return element;
 }
 
-helpers.waitFor = function(page, query, callback) {
+helpers.waitFor = function(query, callback) {
   var tryFind = function() {
     var res = query();
     if (res) callback(res);
@@ -46,21 +46,21 @@ helpers.waitFor = function(page, query, callback) {
 
 helpers.waitForElementVisible = function(page, selector, callback) {
   helpers.log('Waiting for element visible: ' + selector);
-  helpers.waitFor(page, function() {
+  helpers.waitFor(function() {
     return helpers.elementVisible(page, selector);
   }, callback);
 }
 
 helpers.waitForElementExists = function(page, selector, callback) {
   helpers.log('Waiting for element exists: ' + selector);
-  helpers.waitFor(page, function() {
+  helpers.waitFor(function() {
     return helpers.elementExists(page, selector);
   }, callback);
 }
 
 helpers.waitForElementNotVisible = function(page, selector, callback) {
   helpers.log('Waiting for element not visible: ' + selector);
-  helpers.waitFor(page, function() {
+  helpers.waitFor(function() {
     if (helpers.elementVisible(page, selector)) return false;
     else return true;
   }, callback);
