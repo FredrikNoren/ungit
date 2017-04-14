@@ -610,7 +610,7 @@ exports.registerApi = (env) => {
 
   if (config.dev) {
     app.post(`${exports.pathPrefix}/testing/createtempdir`, ensureAuthenticated, (req, res) => {
-      temp.mkdir('test-temp-dir', (err, path) => res.json({ path: path }));
+      temp.mkdir('test-temp-dir', (err, tempPath) => res.json({ path: path.normalize(tempPath) }));
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
