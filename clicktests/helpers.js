@@ -1,4 +1,6 @@
 var helpers = exports;
+var Bluebird = require('bluebird');
+var serverPort = 45062; // it's like between port side and starboard...s
 
 helpers.log = function(text) {
   console.log((new Date()).toISOString(), text);
@@ -104,4 +106,8 @@ helpers.write = function(page, text) {
 helpers.selectAllText = function(page) {
   helpers.log('Trying to select all in focused element (ctrl-A)');
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
+}
+helpers.getPort = function() {
+  serverPort += Math.floor((Math.random() * 1000));
+  return serverPort;
 }
