@@ -73,12 +73,12 @@ helpers.getClickPosition = function(page, selector) {
     return el.getBoundingClientRect();
   }, selector);
   if (!rect) {
-    console.log('getClickPosition error: No rect for: ' + selector);
+    helpers.log('getClickPosition error: No rect for: ' + selector);
     page.render('clicktests/screenshots/error.png');
     phantom.exit(1);
   }
   if (rect.width == 0 || rect.height == 0) {
-    console.log('getClickPosition error: Zero area for click selector: ' + selector);
+    helpers.log('getClickPosition error: Zero area for click selector: ' + selector);
     page.render('clicktests/screenshots/error.png');
     phantom.exit(1);
   }
