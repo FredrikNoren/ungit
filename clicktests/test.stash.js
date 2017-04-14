@@ -5,7 +5,7 @@ var Environment = require('./environment');
 var webpage = require('webpage');
 
 var page = webpage.create();
-var suite = testsuite.newSuite('discard', page);
+var suite = testsuite.newSuite('stash', page);
 
 var environment;
 var testRepoPath;
