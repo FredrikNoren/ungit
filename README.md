@@ -28,7 +28,7 @@ Installing
 ----------
 Requires [node.js](http://nodejs.org) (≥ 4.1), [npm](https://www.npmjs.com/) (≥ 2.14.3, comes with node.js) and [git](http://git-scm.com/) (≥ 1.8.x). To install ungit just type:
 
-	npm install -g ungit
+	sudo npm install -g ungit
 
 NOTE: If your system requires root access to install global npm packages, make sure you use the -H flag:
 
