@@ -359,6 +359,21 @@ module.exports = function(grunt) {
     });
   }
 
+  var nmClickExecute = function(file, outStream) {
+    return acquireLock().then(function() {
+      return new Bluebird(function(resolve, reject) {
+        var child = childProcess.execFile('node', [path.join(__dirname, 'nmclicktests', file)], { maxBuffer: 10*1024*1024 });
+        child.stdout.on('data', outStream);
+        child.stderr.on('data', outStream);
+        child.on('exit', function(code) {
+          var isSuccess = code === 0;
+          grunt.log.writeln(cliColor.set('Clicktest ' + isSuccess ? 'success' : 'fail' + '! \t' + file, 'green'));
+          resolve({ name: file, output: outStream.data, isSuccess: isSuccess });
+        });
+      });
+    }).then(releaseLock);
+  }
+
   var running = 0;
   var maxConcurrency = 5;
   var acquireLock = function() {
@@ -469,21 +484,14 @@ module.exports = function(grunt) {
     maxConcurrency = parallelLevel || 1; // set parallelLevel
     var done = this.async();
 
-    grunt.log.writeln('Running nightmare clicktests with parallel level of ', maxConcurrency);
-
+    grunt.log.writeln('Running nightmare clicktests with parallel level of', maxConcurrency);
     getClickTestFiles('nmclicktests').then(function(tests) {
-      return tests.map(function(testFileName) {
+      var clickTests = tests.map(function(filename) {
         var outStream = onOut.bind(null, maxConcurrency > 1 ? new ParallelStream() : grunt.log)
-
-        return acquireLock().nmClickExecute(file, outStream).then(function() {
-          grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
-          return { name: testFileName, output: outStream.data, isSuccess: true };
-        }).catch(function() {
-          grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
-          return { name: testFileName, output: outStream.data, isSuccess: false };
-        });
+        return nmClickExecute(filename, outStream);
       });
-    }).then(function(result) {
+      return Bluebird.all(clickTests);
+    }).then(function(results) {
       var isSuccess = true;
       results.forEach(function(result) {
         if (!result.isSuccess) {
