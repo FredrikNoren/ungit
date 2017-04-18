@@ -338,8 +338,8 @@ module.exports = function(grunt) {
     }).then(this.async());
   });
 
-  var getClickTestFiles = function() {
-    return fs.readdirAsync('clicktests')
+  var getClickTestFiles = function(folderName) {
+    return fs.readdirAsync(folderName)
       .then(function(files) {
         return files.filter(function(file) {
           return file.startsWith("test.");
@@ -383,7 +383,7 @@ module.exports = function(grunt) {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
 
-    getClickTestFiles().then(function(clickTestFiles) {
+    getClickTestFiles('clicktests').then(function(clickTestFiles) {
       var onOut = function(data) { grunt.log.write(data); }
       var onErr = function(data) { grunt.log.error(data); }
       var onFinish = function(file) {
@@ -453,6 +453,51 @@ module.exports = function(grunt) {
       });
     });
   }
+
+  var ParallelStream = function() {
+    this.data = "";
+    this.write = function(data) {
+      this.data += data;
+    }
+  }
+
+  var onOut = function(pipe, data) {
+    pipe.write(data)
+  }
+
+  grunt.registerTask('nmclicktest', 'Run clicktests.', function(parallelLevel) {
+    maxConcurrency = parallelLevel || 1; // set parallelLevel
+    var done = this.async();
+
+    grunt.log.writeln('Running nightmare clicktests with parallel level of ', maxConcurrency);
+
+    getClickTestFiles('nmclicktests').then(function(tests) {
+      return tests.map(function(testFileName) {
+        var outStream = onOut.bind(null, maxConcurrency > 1 ? new ParallelStream() : grunt.log)
+
+        return acquireLock().nmClickExecute(file, outStream).then(function() {
+          grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+          return { name: testFileName, output: outStream.data, isSuccess: true };
+        }).catch(function() {
+          grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+          return { name: testFileName, output: outStream.data, isSuccess: false };
+        });
+      });
+    }).then(function(result) {
+      var isSuccess = true;
+      results.forEach(function(result) {
+        if (!result.isSuccess) {
+          isSuccess = false;
+          if (maxConcurrency > 1) { // if parallel, output log
+            grunt.log.writeln("---- start of " + result.name + " log ----")
+            grunt.log.writeln(result.output);
+            grunt.log.writeln("---- end of " + result.name + " log ----\n\n")
+          }
+        }
+      });
+      done(isSuccess);
+    });
+  });
 
   function getGitLastCommitHash(callback) {
     childProcess.exec("git rev-parse --short HEAD", function(err, stdout, stderr) {
