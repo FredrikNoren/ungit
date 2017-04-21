@@ -243,7 +243,15 @@ StagingViewModel.prototype.commit = function() {
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
     .then(function() { self.resetMessages(); })
-    .catch(function() {})
+    .catch(function(err) {
+      programEvents.dispatch({ event: 'git-error', data: {
+        command: err.res.body.command,
+        error: err.errorSummary,
+        stdout: err.res.body.stdout,
+        stderr: err.res.body.stderr,
+        repoPath: err.res.body.workingDirectory
+      } });
+    })
     .finally(function() { self.committingProgressBar.stop(); });
 }
 StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
