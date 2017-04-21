@@ -1,15 +1,15 @@
 
 var child_process = require('child_process');
-var helpers = require('./helpers');
 var Bluebird = require('bluebird');
 var Nightmare = require('nightmare');
+var net = require('net');
+var portrange = 45032;
 
-module.exports = Environment;
+module.exports = function(config) { return new Environment(config); }
 
 // Environment provides
-function Environment(nightmare, config) {
-  this.nm = Nightmare({ Promise: require('bluebird') });
-  this.port = helpers.getPort();
+function Environment(config) {
+  this.nightmare = Nightmare({ Promise: require('bluebird') });
   this.config = config || {};
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
@@ -17,7 +17,27 @@ function Environment(nightmare, config) {
   this.config.viewHeight = 2000;
   this.config.showServerOutput = this.config.showServerOutput || true;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
-  this.url = 'http://localhost:' + this.port + this.config.rootPath;
+}
+
+Environment.prototype.getPort = function() {
+  var self = this;
+  portrange += 1;
+
+  return new Bluebird(function(resolve, reject) {
+    var server = net.createServer();
+
+    server.listen(portrange, function (err) {
+      server.once('close', function () {
+        self.port = portrange;
+        self.url = 'http://localhost:' + self.port + self.config.rootPath;
+        resolve();
+      });
+      server.close();
+    });
+    server.on('error', function (err) {
+      resolve(getPort());
+    });
+  });
 }
 
 Environment.prototype.log = function(text) {
@@ -27,10 +47,11 @@ Environment.prototype.log = function(text) {
 Environment.prototype.init = function() {
   var self = this;
   this.setupPage();
-  return this.startServer()
+  return this.getPort()
+    .then(function() { return self.startServer(); })
     .then(function() { return self.ensureStarted(); })
     .timeout(7000)
-    .catch(function(err) { throw new Error("Cannot confirm ungit start!!")})
+    .catch(function(err) { throw new Error("Cannot confirm ungit start!!"); })
     .then(function() { return self.createTempFolder(); })
     .then(function(res) { self.path = res.path });
 }
@@ -74,37 +95,6 @@ Environment.prototype.setupPage = function() {
       process.exit(1);
     }
   });
-
-
-  // page.onConsoleMessage = function(msg, lineNum, sourceId) {
-  //   this.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
-  //   if (msg.indexOf('git-error') != -1) {
-  //     this.log('git-error found, page rendered to error.png');
-  //   }
-  // };
-  // page.onError = function(msg, trace) {
-  //   this.log(msg);
-  //   trace.forEach(function(t) {
-  //     this.log(t.file + ':' + t.line + ' ' + t.function);
-  //   });
-  //   phantom.exit(1);
-  // };
-  // page.onResourceError = function(resourceError) {
-  //   this.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
-  //   this.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
-  // };
-  // page.onResourceRequested = function(requestData, networkRequest) {
-  //   var requestUrl =  requestData.url.indexOf("data:application/font-woff") > -1 ? "[omitted font file...]" : requestData.url;
-  //   this.log('Request (#' + requestData.id + '): ' + requestData.method + ' ' + requestUrl);
-  //   // Abort gravatar requests to speed up things (since they will anyway only fail)
-  //   if (requestData.url.indexOf('http://www.gravatar.com/avatar/') == 0) {
-  //     networkRequest.abort();
-  //   }
-  // };
-  // page.onResourceReceived = function(response) {
-  //   if (response.stage == 'end')
-  //     this.log('Response (#' + response.id + ', stage "' + response.stage + '")');
-  // };
 }
 
 Environment.prototype.ensureStarted = function() {
@@ -141,33 +131,31 @@ Environment.prototype.startServer = function() {
     .concat(self.config.serverStartupOptions);
   var ungitServer = child_process.spawn('node', options);
   ungitServer.stdout.on("data", function (data) {
-    if (self.config.showServerOutput) this.log(prependLines('[server] ', data));
+    if (self.config.showServerOutput) self.log(prependLines('[server] ', data.toString()));
 
     if (data.toString().indexOf('Ungit server already running') >= 0) {
-      this.log('server-already-running');
+      self.log('server-already-running');
     }
 
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
       if (self.hasStarted) {
-        this.log('Ungit started twice, probably crashed.');
+        self.log('Ungit started twice, probably crashed.');
       } else {
         self.hasStarted = true;
-        this.log('Ungit server started.');
+        self.log('Ungit server started.');
       }
     }
   });
   ungitServer.stderr.on("data", function (data) {
-    this.log(prependLines('[server ERROR] ', data));
+    self.log(prependLines('[server ERROR] ', data.toString()));
     if (data.indexOf("EADDRINUSE") > -1) {
-      this.log("retrying with different port");
+      self.log("retrying with different port");
       ungitServer.kill('SIGINT');
-      self.port = helpers.getPort();
-      self.url = 'http://localhost:' + self.port + self.config.rootPath;
-      self.startServer();
+      getPort().then(function() { return self.startServer(); });
     }
   });
   ungitServer.on('exit', function() {
-    this.log('UNGIT SERVER EXITED');
+    self.log('UNGIT SERVER EXITED');
   });
   return Bluebird.resolve();
 }
@@ -176,7 +164,7 @@ var getRestSetting = function(method, body) {
   return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
 }
 Environment.prototype.backgroundAction = function(method, url, body) {
-  return nightmare.goto(url, { method: getRestSetting(method, body) })
+  return this.nightmare.goto(url, { method: getRestSetting(method, body) })
     .evaluate(function() { return document.querySelector('pre').innerHTML; })
     .end()
     .then(function(data) {
