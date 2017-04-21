@@ -59,8 +59,7 @@ Environment.prototype.shutdown = function(doNotClose) {
   var self = this;
   return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
     .then(function() { return self.shutdownServer(); })
-    .end()
-    .then(function() { if (!doNotClose) self.nm.end(); });
+    .then(function() { if (!doNotClose) self.nightmare.end(); });
 }
 Environment.prototype.createCommits = function(config, limit, x) {
   var self = this;
@@ -160,13 +159,26 @@ Environment.prototype.startServer = function() {
   return Bluebird.resolve();
 }
 
-var getRestSetting = function(method, body) {
-  return { operation: method, encoding: 'utf8', headers: { 'Content-Type': 'application/json' }, data: JSON.stringify(body)};
+var getRestSetting = function(method) {
+  return { method: method, encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'};
 }
+
+var getURLArgument = function(arg) {
+  return Object.keys(data).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+    }).join('&')
+}
+
 Environment.prototype.backgroundAction = function(method, url, body) {
-  return this.nightmare.goto(url, { method: getRestSetting(method, body) })
+  if (method === 'GET') {
+    url += getURLArgument(body);
+    body = null;
+  } else {
+    body = JSON.stringify(body);
+  }
+
+  return this.nightmare.goto(url, getRestSetting(method), body)
     .evaluate(function() { return document.querySelector('pre').innerHTML; })
-    .end()
     .then(function(data) {
       try { data = JSON.parse(data); } catch(ex) {}
       return data;
