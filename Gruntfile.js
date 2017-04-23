@@ -178,6 +178,7 @@ module.exports = function(grunt) {
       mocha: {
         options: {
           node: true,
+          esnext: true,
           globals: {
             'it': true,
             'describe': true,
@@ -190,6 +191,7 @@ module.exports = function(grunt) {
         },
         src: [
           'test/**/*.js',
+          'nmclicktests/**/*.js'
         ]
       }
     },
