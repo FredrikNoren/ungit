@@ -1,15 +1,15 @@
 
-var child_process = require('child_process');
-var Bluebird = require('bluebird');
-var Nightmare = require('nightmare');
-var net = require('net');
-var portrange = 45032;
+const child_process = require('child_process');
+const Bluebird = require('bluebird');
+const Nightmare = require('nightmare');
+const net = require('net');
+let portrange = 45032;
 
-module.exports = function(config) { return new Environment(config); }
+module.exports = (config) => { return new Environment(config); }
 
 // Environment provides
 function Environment(config) {
-  this.nightmare = Nightmare({ Promise: require('bluebird') });
+  this.nightmare = Nightmare({ Promise: Bluebird });
   this.config = config || {};
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
@@ -166,15 +166,7 @@ Environment.prototype.startServer = function() {
   return Bluebird.resolve();
 }
 
-var getRestSetting = function(method) {
-  return { method: method, encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'};
-}
 
-var getUrlArgument = function(data) {
-  return Object.keys(data).map(function(k) {
-      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
-    }).join('&')
-}
 
 Environment.prototype.backgroundAction = function(method, url, body) {
   if (method === 'GET') {
@@ -215,6 +207,16 @@ Environment.prototype.gitCommand = function(options) {
   return this.backgroundAction('POST', this.url + '/api/testing/git', options);
 }
 
-var prependLines = function(pre, text) {
+const getRestSetting = (method) => {
+  return { method: method, encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'};
+}
+
+const getUrlArgument = (data) => {
+  return Object.keys(data).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+    }).join('&')
+}
+
+const prependLines = (pre, text) => {
   return text.split('\n').filter(function(l) { return l; }).map(function(line) { return pre + line; }).join('\n');
 }
