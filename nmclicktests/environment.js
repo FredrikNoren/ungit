@@ -17,6 +17,7 @@ function Environment(config) {
   this.config.viewHeight = 2000;
   this.config.showServerOutput = this.config.showServerOutput || true;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
+  this.shuttinDown = false;
 }
 
 Environment.prototype.getPort = function() {
@@ -35,7 +36,7 @@ Environment.prototype.getPort = function() {
       server.close();
     });
     server.on('error', function (err) {
-      resolve(getPort());
+      resolve(self.getPort());
     });
   });
 }
@@ -57,6 +58,7 @@ Environment.prototype.init = function() {
 }
 Environment.prototype.shutdown = function(doNotClose) {
   var self = this;
+  this.shuttinDown = true;
   return this.backgroundAction('POST', this.url + '/api/testing/cleanup')
     .then(function() { return self.shutdownServer(); })
     .then(function() { if (!doNotClose) self.nightmare.end(); });
@@ -86,10 +88,10 @@ Environment.prototype.createRepos = function(config) {
 Environment.prototype.setupPage = function() {
   var self = this;
   this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
-  this.nightmare.on('console', function(type) {
-    self.log('[ui] ' + arguments);
+  this.nightmare.on('console', function(type, msg) {
+    self.log(`[ui] ${type} - ${msg}`);
 
-    if (type === 'error') {
+    if (type === 'error' && !self.shuttinDown) {
       self.log('ERROR DETECTED!');
       process.exit(1);
     }
@@ -106,6 +108,11 @@ Environment.prototype.ensureStarted = function() {
           .then(function() { return self.ensureStarted(); });
       }
     });
+}
+
+Environment.prototype.goto = function(url) {
+  this.nightmare = this.nightmare.goto(url);
+  return this.nightmare;
 }
 
 Environment.prototype.startServer = function() {
@@ -150,7 +157,7 @@ Environment.prototype.startServer = function() {
     if (data.indexOf("EADDRINUSE") > -1) {
       self.log("retrying with different port");
       ungitServer.kill('SIGINT');
-      getPort().then(function() { return self.startServer(); });
+      self.getPort().then(function() { return self.startServer(); });
     }
   });
   ungitServer.on('exit', function() {
@@ -163,7 +170,7 @@ var getRestSetting = function(method) {
   return { method: method, encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'};
 }
 
-var getURLArgument = function(arg) {
+var getUrlArgument = function(data) {
   return Object.keys(data).map(function(k) {
       return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
     }).join('&')
@@ -171,7 +178,7 @@ var getURLArgument = function(arg) {
 
 Environment.prototype.backgroundAction = function(method, url, body) {
   if (method === 'GET') {
-    url += getURLArgument(body);
+    url += getUrlArgument(body);
     body = null;
   } else {
     body = JSON.stringify(body);
