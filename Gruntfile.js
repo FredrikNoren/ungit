@@ -555,7 +555,7 @@ module.exports = function(grunt) {
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
   grunt.registerTask('nmclicktest', ['mochaTest:click']);
-  grunt.registerTask('test', ['unittest', 'clicktest']);
+  grunt.registerTask('test', ['unittest', 'nmclicktest', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);
