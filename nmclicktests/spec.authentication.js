@@ -6,34 +6,29 @@ const environment = require('./environment')({
 });
 
 describe('test authentication', () => {
-  before('Environment init', () => {
-    return environment.init();
-  });
+  before('Environment init', () => environment.init());
+  after('Environment stop', () => environment.shutdown());
 
   it('Open home screen should show authentication dialog', () => {
     return environment.goto(environment.url)
-      .wait('[data-ta-container="login-page"]');
+      .wait('.login');
   });
 
   it('Filling out the authentication with wrong details should result in an error', () => {
     return environment.nightmare
-      .insert('[data-ta-container="login-page"] [data-ta-input="username"]', testuser.username)
-      .insert('[data-ta-container="login-page"] [data-ta-input="password"]', 'notthepassword')
-      .click('[data-ta-container="login-page"] [data-ta-clickable="submit"]')
-      .wait('[data-ta-element="login-error"]');
+      .insert('.login input[type="text"]', testuser.username)
+      .insert('.login input[type="password"]', 'notthepassword')
+      .click('.login input[type="submit"]')
+      .wait('.login .loginError');
   });
 
   it('Filling out the authentication should bring you to the home screen', () => {
     return environment.nightmare
-      .insert('[data-ta-container="login-page"] [data-ta-input="username"]')
-      .insert('[data-ta-container="login-page"] [data-ta-input="username"]', testuser.username)
-      .insert('[data-ta-container="login-page"] [data-ta-input="password"]')
-      .insert('[data-ta-container="login-page"] [data-ta-input="password"]', testuser.password)
-      .click('[data-ta-container="login-page"] [data-ta-clickable="submit"]')
-      .wait('[data-ta-container="home-page"]');
-  });
-
-  after('Environment stop', () => {
-    return environment.shutdown();
+      .insert('.login input[type="text"]')
+      .insert('.login input[type="text"]', testuser.username)
+      .insert('.login input[type="password"]')
+      .insert('.login input[type="password"]', testuser.password)
+      .click('.login input[type="submit"]')
+      .wait('.container.home');
   });
 });
