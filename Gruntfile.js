@@ -295,6 +295,7 @@ module.exports = function(grunt) {
     b.require('path', { expose: 'path' });
     b.require('diff2html', { expose: 'diff2html' });
     b.require('bluebird', { expose: 'bluebird' });
+    b.require('just-detect-adblock', { expose: 'just-detect-adblock' });
     b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
     var outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', function() {
