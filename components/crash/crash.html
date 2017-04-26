@@ -1,0 +1,36 @@
+<div class="container" >
+  <div class="panel panel-default crash" data-ta-container="user-error-page">
+    <div class="panel-body">
+      <h1>Whooops</h1>
+      Unfortunately ungit interrupted its work because: <code data-bind="html: eventcause"></code><br>
+      The following tips will help solve this problem depending on the error:
+      <br><br>
+      <ul>
+        <li>General:
+          <ul>
+            <li>something went wrong, reload the page to start over
+            <li>check server out or logs for errors
+            <li>~/.ungitrc must contain valid JSON. Minimal valid json is "{}"
+          </ul>
+        <li>Connection Lost:
+          <ul>
+            <li>check status of server or network connection to the ungit server
+          </ul>
+        <li>Ad Blockers and Privacy Extensions:
+            <ul>
+              <li>add ungit server url to adblocker exception (with port definition) or disable for a while
+            </ul>
+        <li>Git does not have enough permissions:
+          <ul>
+            <li>check if you could write to .git directory (preferably on unix systems)
+          </ul>
+        <li>Other:
+          <ul>
+            <li>Find or report bug at <a href=https://github.com/FredrikNoren/ungit/issues>ungit github</a>.<br>
+              Just common sense; do a quick search before posting, someone might already have created an issue (or resolved the problem!).<br>
+              If you're posting a bug; try to include as much relevant information as possible (ungit version, node and npm version, os, any git errors displayed, output from cli console and output from the browser console).
+          </ul>
+      </ul>
+    </div>
+  </div>
+</div>
