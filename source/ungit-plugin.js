@@ -46,7 +46,7 @@ class UngitPlugin {
       if (exports.raw) {
         return Bluebird.all(assureArray(exports.raw).map((rawSource) => {
           return fs.readFileAsync(path.join(this.path, rawSource)).then((text) => {
-            return text + '\n';
+            return `${text}\n`;
           });
         })).then((result) => {
           return result.join('\n');

@@ -8,10 +8,26 @@ const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
-const async = require('async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 
-const gitQueue = async.queue((args, callback) => {
+const isRetryableError = function(err) {
+  if (!err) {
+    return false;
+  } else if (!err.error) {
+    return false;
+  } else if (err.error.indexOf("index.lock': File exists") > -1) {
+    // Dued to git operation parallelization it is possible that race condition may happen
+    return true;
+  } else if (err.error.indexOf("index file open failed: Permission denied") > -1) {
+    // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
+    // can report "Permission denied" for the file locking issue.
+    return true;
+  } else {
+    return false;
+  }
+}
+
+const gitExecutor = (args, callback) => {
   if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
   let rejected = false;
   let stdout = '';
@@ -51,28 +67,11 @@ const gitQueue = async.queue((args, callback) => {
       callback(getGitError(args, stderr, stdout));
     }
   });
-}, config.maxConcurrentGitOperations);
-
-const isRetryableError = function(err) {
-  if (!err) {
-    return false;
-  } else if (!err.error) {
-    return false;
-  } else if (err.error.indexOf("index.lock': File exists") > -1) {
-    // Dued to git operation parallelization it is possible that race condition may happen
-    return true;
-  } else if (err.error.indexOf("index file open failed: Permission denied") > -1) {
-    // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
-    // can report "Permission denied" for the file locking issue.
-    return true;
-  } else {
-    return false;
-  }
 }
 
 const gitExecutorProm = (args, retryCount) => {
   return new Bluebird((resolve, reject) => {
-    gitQueue.push(args, (queueError, out) => {
+    gitExecutor(args, (queueError, out) => {
       if(queueError) {
         reject(queueError);
       } else {
@@ -347,7 +346,7 @@ git.discardChangesInFile = (repoPath, filename) => {
 
 git.applyPatchedDiff = (repoPath, patchedDiff) => {
   if (patchedDiff) {
-    return git(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
+    return git(['apply', '--cached'], repoPath, null, null, `${patchedDiff}\n\n`);
   }
 }
 

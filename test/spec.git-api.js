@@ -2,13 +2,11 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var restGit = require('../src/git-api');
 var common = require('./common.js');
 var mkdirp = require('mkdirp');
-var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 app.use(require('body-parser').json());
@@ -23,23 +21,19 @@ var req = request(app);
 describe('git-api', function () {
 
   it('creating test dir should work', function(done) {
-    common.post(req, '/testing/createtempdir', undefined, function(err, res) {
-      if (err) return done(err);
+    common.post(req, '/testing/createtempdir', undefined).then(function(res) {
       expect(res.body.path).to.be.ok();
       testDir = fs.realpathSync(res.body.path);
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('gitconfig should return config data', function(done) {
-    common.get(req, '/gitconfig', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/gitconfig', { path: testDir }).then(function(res) {
       expect(res.body).to.be.an('object');
       expect(res.body['user.name']).to.be.ok();
       expect(res.body['user.email']).to.be.ok();
       gitConfig = res.body;
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
 
@@ -50,18 +44,15 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(400)
-      .end(wrapErrorHandler(function(err, res) {
+      .then(function(res) {
         expect(res.body.errorCode).to.be('not-a-repository');
-        done();
-      }));
+      }).then(function() { done(); }).catch(done)
   });
 
   it('quickstatus should say uninited in uninited directory', function(done) {
-    common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/quickstatus', { path: testDir }).then(function(res) {
       expect(res.body).to.eql({ type: 'uninited', gitRootPath: testDir });
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('status should fail in non-existing directory', function(done) {
@@ -71,34 +62,31 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(400)
-      .end(wrapErrorHandler(function(err, res) {
+      .then(function(res) {
         expect(res.body.errorCode).to.be('no-such-path');
-        done();
-      }));
+      }).then(function() { done(); }).catch(done)
   });
 
   it('quickstatus should say false in non-existing directory', function(done) {
-    common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') }).then(function(res) {
       expect(res.body).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') });
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('init should succeed in uninited directory', function(done) {
-    common.post(req, '/init', { path: testDir }, done);
+    common.post(req, '/init', { path: testDir })
+      .then(function() { done(); }).catch(done)
   });
 
   it('status should succeed in inited directory', function(done) {
-    common.get(req, '/status', { path: testDir }, done);
+    common.get(req, '/status', { path: testDir })
+      .then(function() { done(); }).catch(done)
   });
 
   it('quickstatus should say inited in inited directory', function(done) {
-    common.get(req, '/quickstatus', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/quickstatus', { path: testDir }).then(function(res) {
       expect(res.body).to.eql({ type: 'inited', gitRootPath: testDir });
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('commit should fail on when there\'s no files to commit', function(done) {
@@ -108,27 +96,23 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(400)
-      .end(wrapErrorHandler(done));
+      .then(function() { done(); }).catch(done)
   });
 
   var testFile = 'somefile';
 
   it('log should be empty before first commit', function(done) {
-    common.get(req, '/log', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/log', { path: testDir }).then(function(res) {
       expect(res.body.nodes).to.be.a('array');
       expect(res.body.nodes.length).to.be(0);
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('head should be empty before first commit', function(done) {
-    common.get(req, '/head', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/head', { path: testDir }).then(function(res) {
       expect(res.body).to.be.a('array');
       expect(res.body.length).to.be(0);
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('commit should fail on non-existing file', function(done) {
@@ -138,16 +122,16 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(400)
-      .end(wrapErrorHandler(done));
+      .then(function() { done(); }).catch(done)
   });
 
   it('creating test file should work', function(done) {
-    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile) }, done);
+    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile) })
+      .then(function() { done(); }).catch(done)
   });
 
   it('status should list untracked file', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
         displayName: testFile,
@@ -160,10 +144,8 @@ describe('git-api', function () {
         additions: '-',
         deletions: '-'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
-
 
   var commitMessage = 'test';
 
@@ -174,45 +156,42 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(400)
-      .end(wrapErrorHandler(done));
+      .then(function() { done(); }).catch(done)
   });
 
   it('commit should succeed when there\'s files to commit', function(done) {
-    common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }] }, done);
+    common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }] })
+      .then(function() { done(); }).catch(done)
   });
 
   it('log should show latest commit', function(done) {
-    common.get(req, '/log', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/log', { path: testDir }).then(function(res) {
       expect(res.body.nodes).to.be.a('array');
       expect(res.body.nodes.length).to.be(1);
       expect(res.body.nodes[0].message.indexOf(commitMessage)).to.be(0);
       expect(res.body.nodes[0].authorName).to.be(gitConfig['user.name']);
       expect(res.body.nodes[0].authorEmail).to.be(gitConfig['user.email']);
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('head should show latest commit', function(done) {
-    common.get(req, '/head', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/head', { path: testDir }).then(function(res) {
       expect(res.body).to.be.a('array');
       expect(res.body.length).to.be(1);
       expect(res.body[0].message.indexOf(commitMessage)).to.be(0);
       expect(res.body[0].authorName).to.be(gitConfig['user.name']);
       expect(res.body[0].authorEmail).to.be(gitConfig['user.email']);
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
 
   it('modifying a test file should work', function(done) {
-    common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) }, done);
+    common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) })
+      .then(function() { done(); }).catch(done)
   });
 
   it('modified file should show up in status', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
         displayName: testFile,
@@ -225,39 +204,39 @@ describe('git-api', function () {
         additions: '1',
         deletions: '1'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done)
   });
 
   it('discarding changes should work', function(done) {
-    common.post(req, '/discardchanges', { path: testDir, file: testFile }, done);
+    common.post(req, '/discardchanges', { path: testDir, file: testFile })
+      .then(function() { done(); }).catch(done);
   });
 
   it('modifying a test file should work', function(done) {
-    common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) }, done);
+    common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) })
+      .then(function() { done(); }).catch(done);
   });
 
   it('commit ammend should work', function(done) {
-    common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }], amend: true }, done);
+    common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }], amend: true })
+      .then(function() { done(); }).catch(done);
   });
 
   it('amend should not produce additional log-entry', function(done) {
-    common.get(req, '/log', { path: testDir }, done, function(err, res) {
+    common.get(req, '/log', { path: testDir }).then(function(res) {
       expect(res.body.nodes.length).to.be(1);
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
-
 
   var testFile2 = 'my test.txt';
 
   it('creating a multi word test file should work', function(done) {
-    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }, done);
+    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) })
+      .then(function() { done(); }).catch(done);
   });
 
   it('status should list the new file', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile2]).to.eql({
         displayName: testFile2,
@@ -270,8 +249,7 @@ describe('git-api', function () {
         additions: '-',
         deletions: '-'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   it('discarding the new file should work', function(done) {
@@ -281,28 +259,30 @@ describe('git-api', function () {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .end(wrapErrorHandler(done));
+      .then(function() { done(); }).catch(done);
   });
 
   var testSubDir = 'sub';
 
   it('creating test sub dir should work', function(done) {
-    common.post(req, '/createdir', { dir: path.join(testDir, testSubDir) }, done);
+    common.post(req, '/createdir', { dir: path.join(testDir, testSubDir) })
+      .then(function() { done(); }).catch(done);
   });
 
   it('creating test multi layer dir should work', function(done) {
-    common.post(req, '/createdir', { dir: path.join(testDir, testSubDir + 'test/moretest/andmore') }, done);
+    common.post(req, '/createdir', { dir: path.join(testDir, testSubDir + 'test/moretest/andmore') })
+      .then(function() { done(); }).catch(done);
   });
 
   var testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
 
   it('creating a test file in sub dir should work', function(done) {
-    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile3) }, done);
+    common.post(req, '/testing/createfile', { file: path.join(testDir, testFile3) })
+      .then(function() { done(); }).catch(done);
   });
 
   it('status should list the new file', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile3]).to.eql({
         displayName: testFile3,
@@ -315,19 +295,18 @@ describe('git-api', function () {
         additions: '-',
         deletions: '-'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   var commitMessage3 = 'commit3';
 
   it('commit should succeed with file in sub dir', function(done) {
-    common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [{ name: testFile3 }] }, done);
+    common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [{ name: testFile3 }] })
+      .then(function() { done(); }).catch(done);
   });
 
   it('log should show last commit', function(done) {
-    common.get(req, '/log', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/log', { path: testDir }).then(function(res) {
       expect(res.body.nodes).to.be.a('array');
       expect(res.body.nodes.length).to.be(2);
       var HEAD = res.body.nodes[0];
@@ -340,17 +319,17 @@ describe('git-api', function () {
       expect(HEAD.committerName).to.be(gitConfig['user.name']);
       expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
       expect(HEAD.sha1).to.be.ok();
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
 
   it('removing a test file should work', function(done) {
-    common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) }, done);
+    common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) })
+      .then(function() { done(); }).catch(done);
   });
 
   it('status should list the removed file', function(done) {
-    common.get(req, '/status', { path: testDir }, done, function(err, res) {
+    common.get(req, '/status', { path: testDir }, done).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile]).to.eql({
         displayName: testFile,
@@ -363,33 +342,31 @@ describe('git-api', function () {
         additions: '0',
         deletions: '2'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   var commitMessage4 = 'Removed some file';
 
   it('commit on removed file should work', function(done) {
-    common.post(req, '/commit', { path: testDir, message: commitMessage4, files: [{ name: testFile }] }, done);
+    common.post(req, '/commit', { path: testDir, message: commitMessage4, files: [{ name: testFile }] })
+      .then(function() { done(); }).catch(done);
   });
 
   it('status should list nothing', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(0);
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   var testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
 
   it('renaming a file should work', function(done) {
-    common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile3, testFile4] }, done);
+    common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile3, testFile4] })
+      .then(function() { done(); }).catch(done);
   });
 
   it('status should list the renamed file', function(done) {
-    common.get(req, '/status', { path: testDir }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/status', { path: testDir }).then(function(res) {
       expect(Object.keys(res.body.files).length).to.be(1);
       expect(res.body.files[testFile4]).to.eql({
         displayName: testFile3 + ' -> ' + testFile4,
@@ -402,34 +379,34 @@ describe('git-api', function () {
         additions: '2',
         deletions: '0'
       });
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   it('log with limit should only return specified number of items', function(done) {
-    common.get(req, '/log', { path: testDir, limit: 1 }, function(err, res) {
-      if (err) return done(err);
+    common.get(req, '/log', { path: testDir, limit: 1 }).then(function(res) {
       expect(res.body.nodes).to.be.a('array');
       expect(res.body.nodes.length).to.be(1);
-      done();
-    });
+    }).then(function() { done(); }).catch(done);
   });
 
   it('get the baserepopath without base repo should work', function(done) {
     var baseRepoPathTestDir = path.join(testDir, 'depth1', 'depth2');
 
-    mkdirp(baseRepoPathTestDir, function(err, res) {
-      common.get(req, '/baserepopath', { path: baseRepoPathTestDir }, function(err, res) {
-        if (err) return done(err);
+    mkdirp(baseRepoPathTestDir, function(err, res){
+      if (err) {
+        done(err);
+        return;
+      }
+      common.get(req, '/baserepopath', { path: baseRepoPathTestDir }).then(function(res) {
         // Some oses uses symlink and path will be different as git will return resolved symlink
         expect(res.body.path).to.contain(testDir);
-        done();
-      });
+      }).then(function() { done(); }).catch(done);
     });
   });
 
   after(function(done) {
-    common.post(req, '/testing/cleanup', undefined, done);
+    common.post(req, '/testing/cleanup', undefined)
+      .then(function() { done(); }).catch(done);
   });
 
 })

@@ -1,6 +1,5 @@
 
 var expect = require('expect.js');
-var async = require('async');
 var cache = require('../src/utils/cache');
 var Bluebird = require('bluebird');
 
@@ -102,7 +101,6 @@ describe('cache', function () {
       }).then(function() {
         return cache.resolveFunc(key)
       }).then(function(val) { expect(val).to.be(1); })
-      .then(done)
-      .catch(done)
+      .then(function() { done(); }).catch(done);
   });
 });

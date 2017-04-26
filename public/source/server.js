@@ -28,9 +28,11 @@ Server.prototype.initSocket = function() {
     programEvents.dispatch({ event: 'connected' });
   });
   this.socket.on('working-tree-changed', function () {
+    console.log('working-tree-changed event triggered');
     programEvents.dispatch({ event: 'working-tree-changed' });
   });
   this.socket.on('git-directory-changed', function () {
+    console.log('git-directory-changed event triggered');
     programEvents.dispatch({ event: 'git-directory-changed' });
   });
   this.socket.on('request-credentials', function () {

@@ -1,12 +1,10 @@
 var expect = require('expect.js');
 var request = require('supertest');
 var express = require('express');
-var async = require('async');
 var fs = require('fs');
 var path = require('path');
 var restGit = require('../src/git-api');
 var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
 
 var app = express();
 app.use(require('body-parser').json());
@@ -19,41 +17,39 @@ var req = request(app);
 
 describe('git-api conflict rebase', function () {
 
-	this.timeout(8000);
+  this.timeout(8000);
 
-	var testFile1 = "testfile1.txt";
+  var testFile1 = "testfile1.txt";
 
-	before(function(done) {
-		common.createSmallRepo(req, function(err, dir) {
-			if (err) return done(err);
-			testDir = dir;
+  before(function(done) {
+    common.createSmallRepo(req).then(function(dir) {
+      testDir = dir;
 
-			async.series([
-				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); }
-			], done);
-		});
-	});
+      return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) });
+    }).then(function() { done(); }).catch(done);
+  });
 
-	it('should be possible to stash', function(done) {
-		common.post(req, '/stashes', { path: testDir }, done);
-	});
+  it('should be possible to stash', function(done) {
+    common.post(req, '/stashes', { path: testDir })
+      .then(function() { done(); }).catch(done);
+  });
 
-	it('stashes should list the stashed item', function(done) {
-		common.get(req, '/stashes', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].reflogId).to.be('0');
-			expect(res.body[0].reflogName).to.be('stash@{0}');
-			done();
-		});
-	});
+  it('stashes should list the stashed item', function(done) {
+    common.get(req, '/stashes', { path: testDir }, function(res) {
+      expect(res.body.length).to.be(1);
+      expect(res.body[0].reflogId).to.be('0');
+      expect(res.body[0].reflogName).to.be('stash@{0}');
+    }).then(function() { done(); }).catch(done);
+  });
 
-	it('should be possible to drop stash', function(done) {
-		common.delete(req, '/stashes/0', { path: testDir }, done);
-	});
-	
-	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined, done);
-	});
+  it('should be possible to drop stash', function(done) {
+    common.delete(req, '/stashes/0', { path: testDir })
+      .then(function() { done(); }).catch(done);
+  });
+
+  after(function(done) {
+    common.post(req, '/testing/cleanup', undefined)
+      .then(function() { done(); }).catch(done);
+  });
 
 });

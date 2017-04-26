@@ -3,6 +3,8 @@ var helpers = require('./helpers');
 var testsuite = require('./testsuite');
 var Environment = require('./environment');
 var webpage = require('webpage');
+var uiInteractions = require('./ui-interactions.js');
+var Bluebird = require('bluebird');
 
 var muteGraceTimeDuration = 2000;
 
@@ -12,108 +14,91 @@ var suite = testsuite.newSuite('discard', page);
 var environment;
 var testRepoPath;
 
-var createAndDiscard = function(callback, dialogButtonToClick) {
-  environment.createTestFile(testRepoPath + '/testfile2.txt', function(err) {
-    if (err) return callback(err);
-    helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
+var createAndDiscard = function(dialogButtonToClick) {
+  return environment.createTestFile(testRepoPath + '/testfile2.txt')
+    .then(function() { return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]'); })
+    .then(function() {
       helpers.click(page, '[data-ta-clickable="discard-file"]');
 
       if (dialogButtonToClick) {
         helpers.click(page, '[data-ta-clickable="' + dialogButtonToClick + '"]');
-      } else {
-        if (helpers.elementVisible(page, '[data-ta-clickable="yes"]'))
-          return callback(new Error('Should not see yes button'))
+      } else if (helpers.elementVisible(page, '[data-ta-clickable="yes"]')) {
+        throw new Error('Should not see yes button');
       }
 
       if (dialogButtonToClick !== 'no') {
-        helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
-          callback();
-        });
+        return helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]');
       } else {
-        helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
-          callback();
-        });
+        return helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]');
       }
     });
-  });
 }
 
 
-suite.test('Init', function(done) {
-  environment = new Environment(page, { port: 8453, serverStartupOptions: ['--disableDiscardWarning'] });
-  environment.init(function(err) {
-    if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
-  });
+suite.test('Init', function() {
+  environment = new Environment(page, { serverStartupOptions: ['--disableDiscardWarning'] });
+  return environment.init().then(function() {
+      testRepoPath = environment.path + '/testrepo';
+      return environment.createRepos([ { bare: false, path: testRepoPath } ]);
+    })
 });
 
 
-suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      setTimeout(done, 1000); // Let it finnish loading
+suite.test('Open repo screen', function() {
+  return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(1000)
+});
+
+suite.test('Should be possible to discard a created file without warning message', function() {
+  return createAndDiscard()
+});
+
+suite.test('Shutdown', function() {
+  var self = this;
+  return environment.shutdown(true)
+    .then(function() { page = webpage.create(); });
+});
+
+suite.test('Init', function() {
+  environment = new Environment(page, { serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
+  return environment.init().then(function() {
+      testRepoPath = environment.path + '/testrepo';
+      return environment.createRepos([ { bare: false, path: testRepoPath } ]);
     });
-  });
 });
 
-suite.test('Should be possible to discard a created file without warning message', function(done) {
-  createAndDiscard(done);
+suite.test('Open repo screen', function() {
+  return uiInteractions.open(page, environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    .then(function() { return helpers.waitForElementVisible(page, '.graph'); })
+    .delay(1000);
 });
 
-suite.test('Shutdown', function(done) {
-  environment.shutdown(function() {
-    page = webpage.create();
-    done();
-  }, true);
+suite.test('Should be possible to select no from discard', function() {
+  return createAndDiscard('no');
 });
 
-suite.test('Init', function(done) {
-  environment = new Environment(page, { port: 8454, serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
-  environment.init(function(err) {
-    if (err) return done(err);
-    testRepoPath = environment.path + '/testrepo';
-    environment.createRepos([
-      { bare: false, path: testRepoPath }
-      ], done);
-  });
+suite.test('Should be possible to discard a created file', function() {
+  return createAndDiscard('yes');
 });
 
-suite.test('Open repo screen', function(done) {
-  page.open(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath), function () {
-    helpers.waitForElementVisible(page, '.graph', function() {
-      setTimeout(done, 1000); // Let it finnish loading
-    });
-  });
-});
-
-suite.test('Should be possible to select no from discard', function(done) {
-  createAndDiscard(done, 'no');
-});
-
-suite.test('Should be possible to discard a created file', function(done) {
-  createAndDiscard(done, 'yes');
-});
-
-suite.test('Should be possible to discard a created file and disable warn for awhile', function(done) {
+suite.test('Should be possible to discard a created file and disable warn for awhile', function() {
   // Temporarily disabled to get the tests working
   /*createAndDiscard(function(err) {
-    if (err) done(err);
+    if (err) (err);
     createAndDiscard(function(err) {
-      if (err) done(err);
+      if (err) (err);
       setTimeout(function(err) {
-        if (err) done(err);
-        createAndDiscard(done, 'yes');
+        if (err) (err);
+        createAndDiscard(, 'yes');
       }, muteGraceTimeDuration + 500);
     });
   }, 'mute');*/
-  done();
+  return Bluebird.resolve();
 });
 
-suite.test('Shutdown', function(done) {
-  environment.shutdown(done);
+suite.test('Shutdown', function() {
+  return environment.shutdown()
 });
 
 testsuite.runAllSuits();

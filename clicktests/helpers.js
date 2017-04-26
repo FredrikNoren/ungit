@@ -1,4 +1,6 @@
 var helpers = exports;
+var Bluebird = require('bluebird');
+var startPort = 45062; // it's like between port side and starboard...s
 
 helpers.log = function(text) {
   console.log((new Date()).toISOString(), text);
@@ -7,8 +9,8 @@ helpers.log = function(text) {
 helpers.elementExists = function(page, selector) {
   helpers.log('Querying element exists: ' + selector);
   var element = page.evaluate(function(selector) {
-    var element =  document.querySelector(selector);
-    return element ? { selector: selector, textContent: element.textContent } : null;
+    var dom =  document.querySelector(selector);
+    return dom ? { selector: selector, textContent: dom.textContent } : null;
   }, selector);
   if (element) {
     helpers.log('Element exists: ' + selector);
@@ -21,11 +23,11 @@ helpers.elementExists = function(page, selector) {
 helpers.elementVisible = function(page, selector) {
   helpers.log('Querying element visible: ' + selector);
   var element = page.evaluate(function(selector) {
-    var element = document.querySelector(selector);
-    if (!element) return null;
-    var rect = element.getBoundingClientRect();
+    var dom = document.querySelector(selector);
+    if (!dom) return null;
+    var rect = dom.getBoundingClientRect();
     if (rect.width == 0 || rect.height == 0) return null;
-    return { selector: selector, textContent: element.textContent };
+    return { selector: selector, textContent: dom.textContent };
   }, selector);
   if (element) {
     helpers.log('Element visible: ' + selector);
@@ -35,35 +37,31 @@ helpers.elementVisible = function(page, selector) {
   return element;
 }
 
-helpers.waitFor = function(page, query, callback) {
-  var tryFind = function() {
-    var res = query();
-    if (res) callback(res);
-    else setTimeout(tryFind, 250);
-  }
-  tryFind();
+var waitToBeTrue = function(resolve, toBeTrue) {
+  var res = toBeTrue();
+  if (res) resolve(res);
+  else setTimeout(waitToBeTrue.bind(null, resolve, toBeTrue), 250);
 }
 
-helpers.waitForElementVisible = function(page, selector, callback) {
+helpers.waitFor = function(toBeTrue) {
+  return new Bluebird(function(resolve) {
+    waitToBeTrue(resolve, toBeTrue);
+  });
+}
+
+helpers.waitForElementVisible = function(page, selector) {
   helpers.log('Waiting for element visible: ' + selector);
-  helpers.waitFor(page, function() {
-    return helpers.elementVisible(page, selector);
-  }, callback);
+  return helpers.waitFor(function() { return helpers.elementVisible(page, selector); });
 }
 
-helpers.waitForElementExists = function(page, selector, callback) {
+helpers.waitForElementExists = function(page, selector) {
   helpers.log('Waiting for element exists: ' + selector);
-  helpers.waitFor(page, function() {
-    return helpers.elementExists(page, selector);
-  }, callback);
+  return helpers.waitFor(function() { return helpers.elementExists(page, selector); });
 }
 
-helpers.waitForElementNotVisible = function(page, selector, callback) {
+helpers.waitForElementNotVisible = function(page, selector) {
   helpers.log('Waiting for element not visible: ' + selector);
-  helpers.waitFor(page, function() {
-    if (helpers.elementVisible(page, selector)) return false;
-    else return true;
-  }, callback);
+  return helpers.waitFor(function() { return !helpers.elementVisible(page, selector); });
 }
 
 helpers.getClickPosition = function(page, selector) {
@@ -73,12 +71,12 @@ helpers.getClickPosition = function(page, selector) {
     return el.getBoundingClientRect();
   }, selector);
   if (!rect) {
-    console.log('getClickPosition error: No rect for: ' + selector);
+    helpers.log('getClickPosition error: No rect for: ' + selector);
     page.render('clicktests/screenshots/error.png');
     phantom.exit(1);
   }
   if (rect.width == 0 || rect.height == 0) {
-    console.log('getClickPosition error: Zero area for click selector: ' + selector);
+    helpers.log('getClickPosition error: Zero area for click selector: ' + selector);
     page.render('clicktests/screenshots/error.png');
     phantom.exit(1);
   }
@@ -104,4 +102,8 @@ helpers.write = function(page, text) {
 helpers.selectAllText = function(page) {
   helpers.log('Trying to select all in focused element (ctrl-A)');
   page.sendEvent('keypress', page.event.key.A, null, null, 0x04000000 );
+}
+helpers.getPort = function() {
+  startPort += Math.floor((Math.random() * 1000));
+  return startPort;
 }

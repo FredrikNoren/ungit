@@ -3,7 +3,6 @@ var config = require('../src/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
-var async = require('async');
 
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
@@ -14,12 +13,9 @@ var BrowserWindow = require('browser-window');  // Module to create native brows
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  async.parallel([
-    bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'),
-    usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception')
-  ], function() {
-    app.quit();
-  });
+  bugtracker.notify(err, 'ungit-launcher');
+  usageStatistics.addEvent('launcher-exception')
+    .then(() => { app.quit(); });
 });
 
 function launch(callback) {
