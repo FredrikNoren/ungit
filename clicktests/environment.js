@@ -10,7 +10,7 @@ module.exports = Environment;
 function Environment(page, config) {
   this.page = page;
   this.config = config || {};
-  this.config.port = this.config.port || 8449;
+  this.config.port = helpers.getPort();
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
@@ -121,7 +121,11 @@ Environment.prototype.startServer = function(callback) {
     if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
 
     if (data.toString().indexOf('Ungit server already running') >= 0) {
-      callback('server-already-running');
+      helpers.log("retrying with different port");
+      ungitServer.kill('SIGINT');
+      self.config.port = helpers.getPort();
+      self.url = 'http://localhost:' + self.port + self.config.rootPath;
+      self.startServer();
     }
 
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
