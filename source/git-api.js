@@ -48,6 +48,8 @@ exports.registerApi = (env) => {
             }
           };
 
+          console.log("!!!!", watcherPath)
+
           return fs.isExists(watcherPath).then((isExists) => {
             if (isExists) watchers.push(fs.watch(watcherPath, options || {}, runOnFileWatchEvent));
           })
