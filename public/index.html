@@ -9,21 +9,7 @@
 </head>
 <body>
 
-<!-- ko with: crash -->
-	<div class="container" data-ta-container="user-error-page">
-		<div class="panel panel-default crash">
-			<div class="panel-body">
-				<h1 data-bind="text: title"></h1>
-				<span data-bind="html: details"></span>
-			</div>
-		</div>
-	</div>
-<!-- /ko -->
-<!-- ko ifnot: crash -->
-	<!-- ko if: content -->
-	<!-- ko component: content --><!-- /ko -->
-	<!-- /ko -->
-<!-- /ko -->
+<!-- ko component: content --><!-- /ko -->
 
 <script type="text/javascript">ungit = {}</script>
 <script type="text/javascript" src="__ROOT_PATH__/serverdata.js"></script>
