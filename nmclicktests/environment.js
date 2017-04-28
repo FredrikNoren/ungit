@@ -1,4 +1,4 @@
-
+'use strict';
 const child_process = require('child_process');
 const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');

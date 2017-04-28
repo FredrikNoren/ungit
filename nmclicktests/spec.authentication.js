@@ -1,3 +1,4 @@
+'use strict';
 const expect = require('expect.js');
 const testuser = { username: 'testuser', password: 'testpassword' }
 const environment = require('./environment')({
