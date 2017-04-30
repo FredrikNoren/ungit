@@ -1,10 +1,9 @@
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs-prebuilt');
 var path = require('path');
-var fs = require('fs');
+var fs = require('./source/utils/fs-async');
 var npm = require('npm');
 var semver = require('semver');
-var async = require('async');
 var browserify = require('browserify');
 var electronPackager = require('electron-packager');
 var Bluebird = require('bluebird');
@@ -305,50 +304,48 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('browserify-components', '',  function() {
-    var done = this.async();
-    async.forEach(fs.readdirSync('components'), function(component, callback) {
-      var b = browserify({
-        bundleExternal: false,
-        debug: true
-      });
-      var src = './components/' + component + '/' + component + '.js';
-      if (!fs.existsSync(src)) {
-        grunt.log.error(src + ' does not exist. If this component is obsolete, ' +
-          'please remove that directory or perform a clean build.');
-        return;
-      }
-      b.add(src);
-      b.external(['ungit-components',
-              'ungit-program-events',
-              'ungit-navigation',
-              'ungit-main',
-              'ungit-address-parser',
-              'knockout',
-              'lodash',
-              'hasher',
-              'crossroads',
-              'async',
-              'moment',
-              'blueimp-md5']);
+    Bluebird.each(fs.readdirSync('components'), function(component) {
+      return new Bluebird(function(resolve, reject) {
+        var b = browserify({
+          bundleExternal: false,
+          debug: true
+        });
+        var src = './components/' + component + '/' + component + '.js';
+        if (!fs.existsSync(src)) {
+          grunt.log.error(src + ' does not exist. If this component is obsolete, ' +
+            'please remove that directory or perform a clean build.');
+          return;
+        }
+        b.add(src);
+        b.external(['ungit-components',
+                'ungit-program-events',
+                'ungit-navigation',
+                'ungit-main',
+                'ungit-address-parser',
+                'knockout',
+                'lodash',
+                'hasher',
+                'crossroads',
+                'async',
+                'moment',
+                'blueimp-md5']);
 
-      var outFile = fs.createWriteStream('./components/' + component + '/' + component + '.bundle.js');
-      outFile.on('close', function() {
-        callback();
+        var outFile = fs.createWriteStream('./components/' + component + '/' + component + '.bundle.js');
+        outFile.on('close', function() {
+          resolve();
+        });
+        b.bundle().pipe(outFile);
       });
-      b.bundle().pipe(outFile);
-    }, function() {
-      done();
-    });
+    }).then(this.async());
   });
 
-  var getClickTestFiles = function(callback) {
-    fs.readdir('clicktests', function(err, ls) {
-      if (err) callback(err)
-
-      callback(null, ls.filter(function(file) {
-        return file.startsWith("test.");
-      }));
-    });
+  var getClickTestFiles = function() {
+    return fs.readdirAsync('clicktests')
+      .then(function(files) {
+        return files.filter(function(file) {
+          return file.startsWith("test.");
+        });
+      });
   }
 
   var clickExecute = function(file, onOut, onErr) {
@@ -363,13 +360,31 @@ module.exports = function(grunt) {
     });
   }
 
+  var running = 0;
+  var maxConcurrency = 5;
+  var acquireLock = function() {
+    if (running < maxConcurrency) {
+      running++;
+      return Bluebird.resolve();
+    }
+
+    return new Bluebird(function(resolve, reject) {
+      return Bluebird.resolve()
+        .delay(1000)
+        .then(acquireLock)
+        .then(resolve)
+    });
+  }
+  var releaseLock = function(result) {
+    --running;
+    return result;
+  }
+
   grunt.registerTask('clicktest', 'Run clicktests.', function() {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
 
-    getClickTestFiles(function(err, clickTestFiles) {
-      if (err) done(err);
-
+    getClickTestFiles().then(function(clickTestFiles) {
       var onOut = function(data) { grunt.log.write(data); }
       var onErr = function(data) { grunt.log.error(data); }
       var onFinish = function(file) {
@@ -381,7 +396,7 @@ module.exports = function(grunt) {
       clickExecute(clickTestFiles.shift(), onOut, onErr)
         .then(onFinish)
         .catch(done.bind(null, false))
-    });
+    }).catch(done)
   });
 
   // This is purely for devs for faster churn of clicktest result
@@ -390,21 +405,22 @@ module.exports = function(grunt) {
   grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
     var done = this.async();
 
-    getClickTestFiles(function(err, clickTestFiles) {
-      if (err) done(err);
+    getClickTestFiles().then(function(clickTestFiles) {
       grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
       Bluebird.all(clickTestFiles.map(function(file) {
         var output = "";
         var outStream = function(data) { output += data; }
-        grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
-        return clickExecute(file, outStream, outStream)
-          .then(function() {
-            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
-            return { name: file, output: output, isSuccess: true };
-          }).catch(function() {
-            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
-            return { name: file, output: output, isSuccess: false };
-          });
+        return acquireLock().then(function() {
+          grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
+          return clickExecute(file, outStream, outStream)
+            .then(function() {
+              grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+              return { name: file, output: output, isSuccess: true };
+            }).catch(function() {
+              grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+              return { name: file, output: output, isSuccess: false };
+            });
+          }).then(releaseLock);
       })).then(function(results) {
         var isSuccess = true;
         results.forEach(function(result) {
@@ -417,22 +433,25 @@ module.exports = function(grunt) {
         });
         done(isSuccess);
       });
-    });
+    }).catch(done);
   });
 
-  function bumpDependency(packageJson, dependencyType, packageName, callback) {
-    var currentVersion = packageJson[dependencyType][packageName];
-    if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
-    npm.commands.show([packageName, 'versions'], true, function(err, data) {
-      if(err) return callback(err);
-      var versions = data[Object.keys(data)[0]].versions.filter(function(v) {
-        return v.indexOf('alpha') == -1;
+  function bumpDependency(packageJson, packageName) {
+    return new Bluebird(function(resolve, reject) {
+      var dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
+      var currentVersion = packageJson[dependencyType][packageName];
+      if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
+      npm.commands.show([packageName, 'versions'], true, function(err, data) {
+        if(err) reject(err);
+        var versions = data[Object.keys(data)[0]].versions.filter(function(v) {
+          return v.indexOf('alpha') == -1;
+        });
+        var latestVersion = versions[versions.length - 1];
+        if (semver.gt(latestVersion, currentVersion)) {
+          packageJson[dependencyType][packageName] = '~' + latestVersion;
+        }
+        resolve();
       });
-      var latestVersion = versions[versions.length - 1];
-      if (semver.gt(latestVersion, currentVersion)) {
-        packageJson[dependencyType][packageName] = '~' + latestVersion;
-      }
-      callback();
     });
   }
 
@@ -459,35 +478,27 @@ module.exports = function(grunt) {
     })
   });
 
-
   grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
     var done = this.async();
     grunt.log.writeln('Bumping dependencies...');
     npm.load(function() {
       var tempPackageJson = JSON.parse(JSON.stringify(packageJson));
+      var keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
 
-      async.parallel([
-        async.map.bind(null, Object.keys(tempPackageJson.dependencies), function(dep, callback) {
-          // Keep forever-monitor at 1.1.0 until https://github.com/nodejitsu/forever-monitor/issues/38 is fixed
-          if (dep == 'forever-monitor') return callback();
-          // Superagent 1.x has a new api, need to upgrade to that if we want to bump
-          if (dep == 'superagent') return callback();
-          // Octicon moved to SCSS instead of less
-          if (dep == 'octicons') return callback();
+      var bumps = Bluebird.map(keys, function(dep) {
+        if (dep == 'forever-monitor') return;
+        // Superagent 1.x has a new api, need to upgrade to that if we want to bump
+        if (dep == 'superagent') return
+        // Octicon moved to SCSS instead of less
+        if (dep == 'octicons') return;
 
-          bumpDependency(tempPackageJson, 'dependencies', dep, callback);
-        }),
-        async.map.bind(null, Object.keys(tempPackageJson.devDependencies), function(dep, callback) {
-          // For some reason supertest > 0.10 doesn't work with the tests. Haven't investigated why yet.
-          if (dep == 'supertest') return callback();
-          bumpDependency(tempPackageJson, 'devDependencies', dep, callback);
-        })
-      ], function() {
-        fs.writeFileSync('package.json', JSON.stringify(tempPackageJson, null, 2) + '\n');
-        grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
-        done();
+        return bumpDependency(tempPackageJson, dep);
       });
 
+      Bluebird.all(bumps).then(function() {
+        fs.writeFileSync('package.json', JSON.stringify(tempPackageJson, null, 2) + '\n');
+        grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
+      }).then(function() { done(); }).catch(done);
     });
   });
 
