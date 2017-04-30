@@ -182,10 +182,14 @@ class Environment {
     } else {
       body = JSON.stringify(body);
     }
-
+    console.log("^^^^")
     return this.nightmare.goto(url, getRestSetting(method), body)
-      .evaluate(() => document.querySelector('pre').innerHTML)
+      .evaluate(() => {
+        console.log("****")
+        return document.querySelector('pre').innerHTML
+      })
       .then((data) => {
+        console.log("!!!!!")
         try { data = JSON.parse(data); } catch(ex) {}
         return data;
       });
