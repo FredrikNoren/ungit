@@ -14,7 +14,7 @@ function Environment(page, config) {
   this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
   this.config.serverTimeout = this.config.serverTimeout || 15000;
   this.config.viewportSize = this.config.viewportSize || { width: 2000, height: 2000 };
-  this.config.showServerOutput = this.config.showServerOutput || false;
+  this.config.showServerOutput = this.config.showServerOutput || true;
   this.config.serverStartupOptions = this.config.serverStartupOptions || [];
   this.url = 'http://localhost:' + this.config.port + this.config.rootPath;
 }
@@ -67,15 +67,15 @@ Environment.prototype.setupPage = function() {
   var page = this.page;
   page.viewportSize = this.config.viewportSize;
   page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    console.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
+    helpers.log('[ui] ' + sourceId + ':' + lineNum + ' ' + msg);
     if (msg.indexOf('git-error') != -1) {
-      console.log('git-error found, page rendered to error.png');
+      helpers.log('git-error found, page rendered to error.png');
     }
   };
   page.onError = function(msg, trace) {
-    console.log(msg);
+    helpers.log(msg);
     trace.forEach(function(t) {
-      console.log(t.file + ':' + t.line + ' ' + t.function);
+      helpers.log(t.file + ':' + t.line + ' ' + t.function);
     });
     console.error('Caught error');
     phantom.exit(1);
@@ -114,11 +114,12 @@ Environment.prototype.startServer = function(callback) {
     '--maxNAutoRestartOnCrash=0',
     '--no-autoCheckoutOnBranchCreate',
     '--alwaysLoadActiveBranch',
+    '--logLevel=debug',
     '--logGitCommands']
     .concat(this.config.serverStartupOptions);
   var ungitServer = child_process.spawn('node', options);
   ungitServer.stdout.on("data", function (data) {
-    if (self.config.showServerOutput) console.log(prependLines('[server] ', data));
+    if (self.config.showServerOutput) helpers.log(prependLines('[server] ', data));
 
     if (data.toString().indexOf('Ungit server already running') >= 0) {
       callback('server-already-running');
@@ -132,7 +133,7 @@ Environment.prototype.startServer = function(callback) {
     }
   });
   ungitServer.stderr.on("data", function (data) {
-    console.log(prependLines('[server ERROR] ', data));
+    helpers.log(prependLines('[server ERROR] ', data));
   });
   ungitServer.on('exit', function() {
     helpers.log('UNGIT SERVER EXITED');
@@ -162,18 +163,18 @@ Environment.prototype.shutdownServer = function(callback) {
   this.backgroundAction('POST', this.url + '/api/testing/shutdown', undefined, callback);
 }
 Environment.prototype.createTempFolder = function(callback) {
-  console.log('Creating temp folder');
+  helpers.log('Creating temp folder');
   this.backgroundAction('POST', this.url + '/api/testing/createtempdir', undefined, callback);
 }
 Environment.prototype.createFolder = function(dir, callback) {
-  console.log('Create folder: ' + dir);
+  helpers.log('Create folder: ' + dir);
   this.backgroundAction('POST', this.url + '/api/createdir', { dir: dir }, callback);
 }
 Environment.prototype.initFolder = function(options, callback) {
   this.backgroundAction('POST', this.url + '/api/init', options, callback);
 }
 Environment.prototype.gitCommand = function(options, callback) {
-  console.log(">>>>", JSON.stringify(options));
+  helpers.log(">>>>", JSON.stringify(options));
   this.backgroundAction('POST', this.url + '/api/testing/git', options, callback);
 }
 
