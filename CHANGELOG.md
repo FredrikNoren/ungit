@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.16:
+- 1.1.16 (not release yet):
+  - clicktests logging correction and using wait for within tests.
+  - Refactor filewatch and using normalized test path
   - throttle parallel test's parellelization limit
   - Initial refactoring of click test using nightmare and mocha
 - 1.1.15: Updating crash page with instructions and adblock detection
