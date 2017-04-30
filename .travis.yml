@@ -21,6 +21,7 @@ addons:
     - g++-4.8
 before_script:
   - npm cache clean
+  - npm install -g npm@^3
   - npm install -g grunt-cli
   - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   - git config --global user.email "test@testy.com"
