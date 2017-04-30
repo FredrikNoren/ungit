@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "crash": "crash.html"
+    },
+    "javascript": "crash.bundle.js"
+  }
+}

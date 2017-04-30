@@ -19,7 +19,7 @@ testsuites.runAllSuits = function() {
   var i = 0;
   function runNext() {
     if (i == testsuites.suites.length) {
-      console.log('Finnished all test suites. Took ' + (Date.now() - startTime) / 1000 + 'sec (' + testsuites.suites.length + ' suites)');
+      helpers.log('Finnished all test suites. Took ' + (Date.now() - startTime) / 1000 + 'sec (' + testsuites.suites.length + ' suites)');
       phantom.exit(0);
     }
     var suite = testsuites.suites[i];
@@ -71,7 +71,7 @@ TestSuite.prototype.run = function(suiteName, callback) {
       console.error('Tests failed!');
       phantom.exit(1);
     } else {
-      console.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
+      helpers.log('All tests in suite ok! Took ' + (Date.now() - startTime) / 1000 + 'sec (' + self.tests.length + ' tests)');
       callback();
     }
   });
