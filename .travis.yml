@@ -20,6 +20,7 @@ addons:
     packages:
     - g++-4.8
 before_script:
+  - sudo apt-get install libxss1
   - npm cache clean
   - npm install -g npm@^3
   - npm install -g grunt-cli
