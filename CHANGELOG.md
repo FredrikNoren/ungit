@@ -7,6 +7,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - clicktests logging correction and using wait for within tests.
   - Refactor filewatch and using normalized test path
   - throttle parallel test's parellelization limit
+  - dependency bump
 - 1.1.15: Updating crash page with instructions and adblock detection
 - 1.1.14: Disable strict mode for startup params and config [#890](https://github.com/FredrikNoren/ungit/issues/890)
 - 1.1.13: Fix startup args bug: [#896](https://github.com/FredrikNoren/ungit/issues/896)
