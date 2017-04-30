@@ -7,8 +7,8 @@ const environment = require('./environment')({
 });
 
 describe('test authentication', () => {
-  before('Environment init', () => { return environment.init(); });
-  after('Environment stop', () => { return environment.shutdown(); });
+  before('Environment init', () => environment.init());
+  after('Environment stop', () => environment.shutdown());
 
   it('Open home screen should show authentication dialog', () => {
     return environment.goto(environment.url)
