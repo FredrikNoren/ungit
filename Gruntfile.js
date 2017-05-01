@@ -77,7 +77,7 @@ module.exports = function(grunt) {
           reporter: 'spec',
           timeout: 15000
         },
-        src: 'nmclicktests/spec.branches.js'
+        src: 'nmclicktests/*.js'
       }
     },
 
