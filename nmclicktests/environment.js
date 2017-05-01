@@ -8,6 +8,86 @@ let portrange = 45032;
 
 module.exports = (config) => new Environment(config);
 
+const log = (text) => console.log((new Date()).toISOString(), text)
+
+Nightmare.action('ug', {
+  'log': function(message, done) {
+    log(message);
+    done();
+  },
+  'commit': function(commitMessage, done) {
+    this.wait('[data-ta-container="staging-file"]')
+      .insert('[data-ta-input="staging-commit-title"]', commitMessage)
+      .wait(100)
+      .click('[data-ta-clickable="commit"]')
+      .wait((selector) => !document.querySelector(selector), '[data-ta-container="staging-file"]')
+      .wait(1000)
+      .then(done);
+  },
+  'backgroundAction': function(method, url, body, done) {
+    let req;
+    if (method === 'GET') {
+      req = request.get(url).query(body);
+    } else if (method === 'POST') {
+      req = request.post(url).send(body);
+    } else if (method === 'DELETE') {
+      req = request.delete(url).send(body);
+    }
+
+    req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
+
+    req.end((err, res) => {
+      let data = (res || {}).body
+      if (err) {
+        done(err);
+      } else {
+        try { data = JSON.parse(data); } catch(ex) {}
+        done(null, data);
+      }
+    });
+  },
+  'createTestFile': function(url, filename, done) {
+    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/createfile`, { file: filename }));
+  },
+  'shutdownServer': function(url, done) {
+    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/shutdown`, undefined));
+  },
+
+  'changeTestFile': function(url, filename, done) {
+    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/changefile`, { file: filename }));
+  },
+  'createTempFolder': function(url, done) {
+    log('Creating temp folder');
+    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/createtempdir`, undefined));
+  },
+  'createFolder': function(url, dir, done) {
+    log(`Create folder: ${dir}`);
+    done(null, this.ug.backgroundAction('POST', `${url}/api/createdir`, { dir: dir }));
+  },
+  'initFolder': function(url, options, done) {
+    done(null, this.ug.backgroundAction('POST', `${url}/api/init`, options));
+  },
+  'gitCommand': function(url, options, done) {
+    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/git`, options));
+  },
+  'waitForElementNotVisible': function(selector, done) {
+    this.wait((selector) => !document.querySelector(selector), selector)
+      .then(done);
+  },
+  'createRef': function(env, name, type, done) {
+    log('Createing branch ' + name);
+    this.click('[data-ta-clickable="show-new-branch-form"]')
+      .insert('[data-ta-input="new-branch-name"]', name)
+      .wait(100)
+      .click('[data-ta-clickable="create-' + type + '"]')
+      .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
+      .then(done);
+  },
+  'createBranch': function(env, name, done) {
+    done(null, this.ug.createRef(env, name, 'branch'));
+  }
+});
+
 const prependLines = (pre, text) => {
   return text.split('\n').filter((l) => l)
     .map((line) => pre + line)
@@ -34,10 +114,10 @@ class Environment {
     // init
     this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
     this.nightmare.on('console', (type, msg) => {
-      this.log(`[ui] ${type} - ${msg}`);
+      log(`[ui] ${type} - ${msg}`);
 
       if (type === 'error' && !this.shuttinDown) {
-        this.log('ERROR DETECTED!');
+        log('ERROR DETECTED!');
         process.exit(1);
       }
     })
@@ -63,10 +143,6 @@ class Environment {
     });
   }
 
-  log(text) {
-    console.log((new Date()).toISOString(), text);
-  }
-
   ensureStarted() {
     return Bluebird.resolve()
       .then(() => {
@@ -84,22 +160,22 @@ class Environment {
       .then(() => this.ensureStarted())
       .timeout(7000)
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
-      .then(() => this.createTempFolder())
+      .then(() => this.nightmare.ug.createTempFolder(this.url))
       .then((res) => this.path = res.path);
   }
 
   createRepos(config) {
     return Bluebird.map(config, (conf) => {
-      return this.createFolder(conf.path)
-        .then(() => this.initFolder({ bare: !!conf.bare, path: conf.path }))
+      return this.nightmare.ug.createFolder(this.url, conf.path)
+        .ug.initFolder(this.url, { bare: !!conf.bare, path: conf.path })
         .then(() => this.createCommits(conf, conf.initCommits))
     });
   }
 
   shutdown(doNotClose) {
     this.shuttinDown = true;
-    return this.backgroundAction('POST', `${this.url}/api/testing/cleanup`)
-      .then(() => this.shutdownServer())
+    return this.nightmare.ug.backgroundAction('POST', `${this.url}/api/testing/cleanup`, null)
+      .ug.shutdownServer(this.url)
       .then(() => { if (!doNotClose) this.nightmare.end(); });
   }
 
@@ -107,9 +183,9 @@ class Environment {
     x = x || 0
     if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
 
-    return this.createTestFile(`${config.path}/testy${x}`)
+    return this.nightmare.ug.createTestFile(this.url, `${config.path}/testy${x}`)
       .then(() => {
-        return this.backgroundAction('POST', `${this.url}/api/commit`, {
+        return this.nightmare.ug.backgroundAction('POST', `${this.url}/api/commit`, {
           path: config.path,
           message: `Init Commit ${x}`,
           files: [{ name: `testy${x}` }]
@@ -123,7 +199,7 @@ class Environment {
   }
 
   startServer() {
-    this.log('Starting ungit server...', this.config.serverStartupOptions);
+    log('Starting ungit server...', this.config.serverStartupOptions);
 
     this.hasStarted = false;
     const options = ['bin/ungit',
@@ -143,84 +219,30 @@ class Environment {
       .concat(this.config.serverStartupOptions);
     const ungitServer = child_process.spawn('node', options);
     ungitServer.stdout.on('data', (data) => {
-      if (this.config.showServerOutput) this.log(prependLines('[server] ', data.toString()));
+      if (this.config.showServerOutput) log(prependLines('[server] ', data.toString()));
 
       if (data.toString().indexOf('Ungit server already running') >= 0) {
-        this.log('server-already-running');
+        log('server-already-running');
       }
 
       if (data.toString().indexOf('## Ungit started ##') >= 0) {
         if (this.hasStarted) {
-          this.log('Ungit started twice, probably crashed.');
+          log('Ungit started twice, probably crashed.');
         } else {
           this.hasStarted = true;
-          this.log('Ungit server started.');
+          log('Ungit server started.');
         }
       }
     });
     ungitServer.stderr.on("data", (data) => {
-      this.log(prependLines('[server ERROR] ', data.toString()));
+      log(prependLines('[server ERROR] ', data.toString()));
       if (data.indexOf("EADDRINUSE") > -1) {
-        this.log("retrying with different port");
+        log("retrying with different port");
         ungitServer.kill('SIGINT');
         this.getPort().then(() => this.startServer());
       }
     });
-    ungitServer.on('exit', () => this.log('UNGIT SERVER EXITED'));
+    ungitServer.on('exit', () => log('UNGIT SERVER EXITED'));
     return Bluebird.resolve();
-  }
-
-  backgroundAction(method, url, body) {
-    let req;
-    if (method === 'GET') {
-      req = request.get(url).query(body);
-    } else if (method === 'POST') {
-      req = request.post(url).send(body);
-    } else if (method === 'DELETE') {
-      req = request.delete(url).send(body);
-    }
-    req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
-
-    return new Bluebird((resolve, reject) => {
-      req.end((err, res) => {
-        let data = res.body
-        if (err) {
-          reject(err);
-        } else {
-          try { data = JSON.parse(data); } catch(ex) {}
-          resolve(data);
-        }
-      })
-    });
-  }
-
-  createTestFile(filename) {
-    return this.backgroundAction('POST', `${this.url}/api/testing/createfile`, { file: filename });
-  }
-  changeTestFile(filename) {
-    return this.backgroundAction('POST', `${this.url}/api/testing/changefile`, { file: filename });
-  }
-  shutdownServer() {
-    return this.backgroundAction('POST', `${this.url}/api/testing/shutdown`);
-  }
-  createTempFolder() {
-    this.log('Creating temp folder');
-    return this.backgroundAction('POST', `${this.url}/api/testing/createtempdir`);
-  }
-  createFolder(dir) {
-    this.log(`Create folder: ${dir}`);
-    return this.backgroundAction('POST', `${this.url}/api/createdir`, { dir: dir });
-  }
-  initFolder(options) {
-    return this.backgroundAction('POST', `${this.url}/api/init`, options);
-  }
-  gitCommand(options) {
-    return this.backgroundAction('POST', `${this.url}/api/testing/git`, options);
-  }
-
-  waitForElementNotVisible(selector) {
-    return this.nightmare.wait((selector) => {
-      return !document.querySelector(selector)
-    }, selector);
   }
 }
