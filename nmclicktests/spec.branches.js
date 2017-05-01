@@ -17,7 +17,7 @@ describe('test branches', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.goto(environment.url + '/#/repository?path=' + encodeURIComponent(testRepoPath))
+    return environment.goto(environment.getRootUrl() + '/#/repository?path=' + encodeURIComponent(testRepoPath))
       .wait('.graph');
   });
 
@@ -29,7 +29,7 @@ describe('test branches', () => {
 
   it('add a branch', () => {
     return environment.nightmare
-      .ug.createTestFile(environment.url, testRepoPath + '/testfile.txt')
+      .ug.createTestFile(testRepoPath + '/testfile.txt')
       .ug.commit('commit-1')
       .wait('.commit')
       .ug.createBranch(environment, 'branch-1');

@@ -11,7 +11,7 @@ describe('test authentication', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open home screen should show authentication dialog', () => {
-    return environment.goto(environment.url)
+    return environment.goto(environment.getRootUrl())
       .wait('.login');
   });
 

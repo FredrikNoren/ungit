@@ -5,6 +5,7 @@ const Nightmare = require('nightmare');
 const net = require('net');
 const request = require('superagent');
 let portrange = 45032;
+let rootUrl;
 
 module.exports = (config) => new Environment(config);
 
@@ -46,29 +47,29 @@ Nightmare.action('ug', {
       }
     });
   },
-  'createTestFile': function(url, filename, done) {
-    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/createfile`, { file: filename }));
+  'createTestFile': function(filename, done) {
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename }));
   },
-  'shutdownServer': function(url, done) {
-    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/shutdown`, undefined));
+  'shutdownServer': function(done) {
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/shutdown`, undefined));
   },
 
-  'changeTestFile': function(url, filename, done) {
-    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/changefile`, { file: filename }));
+  'changeTestFile': function(filename, done) {
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename }));
   },
-  'createTempFolder': function(url, done) {
+  'createTempFolder': function(done) {
     log('Creating temp folder');
-    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/createtempdir`, undefined));
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined));
   },
-  'createFolder': function(url, dir, done) {
+  'createFolder': function(dir, done) {
     log(`Create folder: ${dir}`);
-    done(null, this.ug.backgroundAction('POST', `${url}/api/createdir`, { dir: dir }));
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir }));
   },
-  'initFolder': function(url, options, done) {
-    done(null, this.ug.backgroundAction('POST', `${url}/api/init`, options));
+  'initFolder': function(options, done) {
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options));
   },
-  'gitCommand': function(url, options, done) {
-    done(null, this.ug.backgroundAction('POST', `${url}/api/testing/git`, options));
+  'gitCommand': function(options, done) {
+    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/git`, options));
   },
   'waitForElementNotVisible': function(selector, done) {
     this.wait((selector) => !document.querySelector(selector), selector)
@@ -123,6 +124,8 @@ class Environment {
     })
   }
 
+  getRootUrl() { return rootUrl; }
+
   getPort() {
     portrange += 1;
 
@@ -132,7 +135,7 @@ class Environment {
       server.listen(portrange, (err) => {
         server.once('close', () => {
           this.port = portrange;
-          this.url = `http://localhost:${this.port}${this.config.rootPath}`
+          rootUrl = `http://localhost:${this.port}${this.config.rootPath}`
           resolve();
         });
         server.close();
@@ -160,22 +163,22 @@ class Environment {
       .then(() => this.ensureStarted())
       .timeout(7000)
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
-      .then(() => this.nightmare.ug.createTempFolder(this.url))
+      .then(() => this.nightmare.ug.createTempFolder())
       .then((res) => this.path = res.path);
   }
 
   createRepos(config) {
     return Bluebird.map(config, (conf) => {
-      return this.nightmare.ug.createFolder(this.url, conf.path)
-        .ug.initFolder(this.url, { bare: !!conf.bare, path: conf.path })
+      return this.nightmare.ug.createFolder(conf.path)
+        .ug.initFolder({ bare: !!conf.bare, path: conf.path })
         .then(() => this.createCommits(conf, conf.initCommits))
     });
   }
 
   shutdown(doNotClose) {
     this.shuttinDown = true;
-    return this.nightmare.ug.backgroundAction('POST', `${this.url}/api/testing/cleanup`, null)
-      .ug.shutdownServer(this.url)
+    return this.nightmare.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
+      .ug.shutdownServer()
       .then(() => { if (!doNotClose) this.nightmare.end(); });
   }
 
@@ -183,9 +186,9 @@ class Environment {
     x = x || 0
     if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
 
-    return this.nightmare.ug.createTestFile(this.url, `${config.path}/testy${x}`)
+    return this.nightmare.ug.createTestFile(`${config.path}/testy${x}`)
       .then(() => {
-        return this.nightmare.ug.backgroundAction('POST', `${this.url}/api/commit`, {
+        return this.nightmare.ug.backgroundAction('POST', `${rootUrl}/api/commit`, {
           path: config.path,
           message: `Init Commit ${x}`,
           files: [{ name: `testy${x}` }]
