@@ -14,6 +14,10 @@ const prependLines = (pre, text) => {
     .join('\n');
 }
 
+const visibleCheck = (nm, selector) => {
+  return nm.wait(50).visible()
+}
+
 // Environment provides
 class Environment {
   constructor(config) {
@@ -212,5 +216,11 @@ class Environment {
   }
   gitCommand(options) {
     return this.backgroundAction('POST', `${this.url}/api/testing/git`, options);
+  }
+
+  waitForElementNotVisible(selector) {
+    return this.nightmare.wait((selector) => {
+      return !document.querySelector(selector)
+    }, selector);
   }
 }
