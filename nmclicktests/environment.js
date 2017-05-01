@@ -3,19 +3,10 @@ const child_process = require('child_process');
 const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
 const net = require('net');
+const request = require('superagent');
 let portrange = 45032;
 
 module.exports = (config) => new Environment(config);
-
-const getRestSetting = (method) => {
-  return { method: method, encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'};
-}
-
-const getUrlArgument = (data) => {
-  return Object.keys(data).map((k) => {
-      return `${encodeURIComponent(k)}=${encodeURIComponent(data[k])}`
-    }).join('&')
-}
 
 const prependLines = (pre, text) => {
   return text.split('\n').filter((l) => l)
@@ -97,7 +88,7 @@ class Environment {
     return Bluebird.map(config, (conf) => {
       return this.createFolder(conf.path)
         .then(() => this.initFolder({ bare: !!conf.bare, path: conf.path }))
-        .then(() => this.createCommits(conf, conf.initCommits));
+        .then(() => this.createCommits(conf, conf.initCommits))
     });
   }
 
@@ -176,23 +167,27 @@ class Environment {
   }
 
   backgroundAction(method, url, body) {
+    let req;
     if (method === 'GET') {
-      url += getUrlArgument(body);
-      body = null;
-    } else {
-      body = JSON.stringify(body);
+      req = request.get(url).query(body);
+    } else if (method === 'POST') {
+      req = request.post(url).send(body);
+    } else if (method === 'DELETE') {
+      req = request.delete(url).send(body);
     }
-    console.log("^^^^")
-    return this.nightmare.goto(url, getRestSetting(method), body)
-      .evaluate(() => {
-        console.log("****")
-        return document.querySelector('pre').innerHTML
+    req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
+
+    return new Bluebird((resolve, reject) => {
+      req.end((err, res) => {
+        let data = res.body
+        if (err) {
+          reject(err);
+        } else {
+          try { data = JSON.parse(data); } catch(ex) {}
+          resolve(data);
+        }
       })
-      .then((data) => {
-        console.log("!!!!!")
-        try { data = JSON.parse(data); } catch(ex) {}
-        return data;
-      });
+    });
   }
 
   createTestFile(filename) {
