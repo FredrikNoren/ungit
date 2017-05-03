@@ -120,7 +120,7 @@ AppViewModel.prototype.showDialog = function(dialog) {
     return dialog;
   }));
 }
-var gitSetUserConfig = function(bugTracking, sendUsageStatistics) {
+AppViewModel.prototype.gitSetUserConfig = function(bugTracking, sendUsageStatistics) {
   var self = this;
   this.server.getPromise('/userconfig')
     .then(function(userConfig) {
@@ -131,10 +131,10 @@ var gitSetUserConfig = function(bugTracking, sendUsageStatistics) {
     }).catch(function(err) { })
 }
 AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
-  gitSetUserConfig(true, true)
+  this.gitSetUserConfig(true, true);
 }
 AppViewModel.prototype.enableBugtracking = function() {
-  gitSetUserConfig(true);
+  this.gitSetUserConfig(true);
 }
 AppViewModel.prototype.dismissBugtrackingNagscreen = function() {
   localStorage.setItem('bugtrackingNagscreenDismissed', true);
