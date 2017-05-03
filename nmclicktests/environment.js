@@ -9,11 +9,9 @@ let rootUrl;
 
 module.exports = (config) => new Environment(config);
 
-const log = (text) => console.log((new Date()).toISOString(), text)
-
 Nightmare.action('ug', {
   'log': function(message, done) {
-    log(message);
+    console.log(`>>> ${message}`);
     done();
   },
   'commit': function(commitMessage, done) {
@@ -21,7 +19,7 @@ Nightmare.action('ug', {
       .insert('[data-ta-input="staging-commit-title"]', commitMessage)
       .wait(100)
       .click('[data-ta-clickable="commit"]')
-      .wait((selector) => !document.querySelector(selector), '[data-ta-container="staging-file"]')
+      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
       .wait(1000)
       .then(done);
   },
@@ -58,11 +56,11 @@ Nightmare.action('ug', {
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename }));
   },
   'createTempFolder': function(done) {
-    log('Creating temp folder');
+    console.log('Creating temp folder');
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined));
   },
   'createFolder': function(dir, done) {
-    log(`Create folder: ${dir}`);
+    console.log(`Create folder: ${dir}`);
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir }));
   },
   'initFolder': function(options, done) {
@@ -75,8 +73,8 @@ Nightmare.action('ug', {
     this.wait((selector) => !document.querySelector(selector), selector)
       .then(done);
   },
-  'createRef': function(env, name, type, done) {
-    log('Createing branch ' + name);
+  'createRef': function(name, type, done) {
+    console.log('Createing branch ' + name);
     this.click('[data-ta-clickable="show-new-branch-form"]')
       .insert('[data-ta-input="new-branch-name"]', name)
       .wait(100)
@@ -84,8 +82,15 @@ Nightmare.action('ug', {
       .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
       .then(done);
   },
-  'createBranch': function(env, name, done) {
-    done(null, this.ug.createRef(env, name, 'branch'));
+  'createBranch': function(name, done) {
+    done(null, this.ug.createRef(name, 'branch'));
+  },
+  'click': function(selector, done) {
+    this.wait(selector)
+      .wait(300)
+      .click(selector)
+      .wait(300)
+      .then(done);
   }
 });
 
@@ -115,10 +120,10 @@ class Environment {
     // init
     this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
     this.nightmare.on('console', (type, msg) => {
-      log(`[ui] ${type} - ${msg}`);
+      console.log(`[ui] ${type} - ${msg}`);
 
       if (type === 'error' && !this.shuttinDown) {
-        log('ERROR DETECTED!');
+        console.log('ERROR DETECTED!');
         process.exit(1);
       }
     })
@@ -157,13 +162,13 @@ class Environment {
       });
   }
 
-  init() {
+  init(isSkipTempCreate) {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
       .timeout(7000)
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
-      .then(() => this.nightmare.ug.createTempFolder())
+      .then(() => !isSkipTempCreate ? this.nightmare.ug.createTempFolder() : {})
       .then((res) => this.path = res.path);
   }
 
@@ -202,7 +207,7 @@ class Environment {
   }
 
   startServer() {
-    log('Starting ungit server...', this.config.serverStartupOptions);
+    console.log('Starting ungit server...', this.config.serverStartupOptions);
 
     this.hasStarted = false;
     const options = ['bin/ungit',
@@ -222,30 +227,30 @@ class Environment {
       .concat(this.config.serverStartupOptions);
     const ungitServer = child_process.spawn('node', options);
     ungitServer.stdout.on('data', (data) => {
-      if (this.config.showServerOutput) log(prependLines('[server] ', data.toString()));
+      if (this.config.showServerOutput) console.log(prependLines('[server] ', data.toString()));
 
       if (data.toString().indexOf('Ungit server already running') >= 0) {
-        log('server-already-running');
+        console.log('server-already-running');
       }
 
       if (data.toString().indexOf('## Ungit started ##') >= 0) {
         if (this.hasStarted) {
-          log('Ungit started twice, probably crashed.');
+          console.log('Ungit started twice, probably crashed.');
         } else {
           this.hasStarted = true;
-          log('Ungit server started.');
+          console.log('Ungit server started.');
         }
       }
     });
     ungitServer.stderr.on("data", (data) => {
-      log(prependLines('[server ERROR] ', data.toString()));
+      console.log(prependLines('[server ERROR] ', data.toString()));
       if (data.indexOf("EADDRINUSE") > -1) {
-        log("retrying with different port");
+        console.log("retrying with different port");
         ungitServer.kill('SIGINT');
         this.getPort().then(() => this.startServer());
       }
     });
-    ungitServer.on('exit', () => log('UNGIT SERVER EXITED'));
+    ungitServer.on('exit', () => console.log('UNGIT SERVER EXITED'));
     return Bluebird.resolve();
   }
 }

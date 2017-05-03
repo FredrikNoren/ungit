@@ -7,8 +7,8 @@ const environment = require('./environment')({
 });
 
 describe('test authentication', () => {
-  before('Environment init', () => environment.init());
-  after('Environment stop', () => environment.shutdown());
+  before('Environment init without temp folder', () => environment.init(true));
+  after('Close nightmare', () => environment.nightmare.end());
 
   it('Open home screen should show authentication dialog', () => {
     return environment.goto(environment.getRootUrl())
