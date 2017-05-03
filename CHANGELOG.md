@@ -3,11 +3,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.16 (not release yet):
+- 1.1.16:
   - clicktests logging correction and using wait for within tests.
   - Refactor filewatch and using normalized test path
   - throttle parallel test's parellelization limit
   - dependency bump
+  - Fix context issue for `gitSetUserConfig` [#912](https://github.com/FredrikNoren/ungit/issues/912)
 - 1.1.15: Updating crash page with instructions and adblock detection
 - 1.1.14: Disable strict mode for startup params and config [#890](https://github.com/FredrikNoren/ungit/issues/890)
 - 1.1.13: Fix startup args bug: [#896](https://github.com/FredrikNoren/ungit/issues/896)
