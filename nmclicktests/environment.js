@@ -74,9 +74,9 @@ Nightmare.action('ug', {
       .then(done);
   },
   'createRef': function(name, type, done) {
-    console.log('Createing branch ' + name);
-    this.click('[data-ta-clickable="show-new-branch-form"]')
-      .insert('[data-ta-input="new-branch-name"]', name)
+    console.log(`Creating ${name} as ${type}`);
+    this.click('.current ~ .newRef button.showBranchingForm')
+      .insert('.newRef.editing input', name)
       .wait(100)
       .click('[data-ta-clickable="create-' + type + '"]')
       .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
@@ -119,8 +119,8 @@ class Environment {
 
     // init
     this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
-    this.nightmare.on('console', (type, msg) => {
-      console.log(`[ui] ${type} - ${msg}`);
+    this.nightmare.on('console', function(type, msg1, msg2) {
+      console.log(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
 
       if (type === 'error' && !this.shuttinDown) {
         console.log('ERROR DETECTED!');
