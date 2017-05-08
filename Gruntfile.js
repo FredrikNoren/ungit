@@ -186,7 +186,8 @@ module.exports = function(grunt) {
             'after': true,
             'window': true,
             'document': true,
-            'navigator': true
+            'navigator': true,
+            'ungit': true
           }
         },
         src: [

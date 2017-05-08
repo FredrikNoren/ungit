@@ -97,11 +97,9 @@ describe('test branches', () => {
   });
 
   it('Auto checkout on branch creation.', () => {
-    let ungit;
-    return environment.nightmare//.evaluate(() => { console.log(99999, JSON.stringify(ungit.config.autoCheckoutOnBranchCreate), 77); ungit.config.autoCheckoutOnBranchCreate = true; })
+    return environment.nightmare.evaluate(() => { ungit.config.autoCheckoutOnBranchCreate = true; })
       .ug.createBranch('autoCheckout')
       .wait(1000)
-      .screenshot('/tmp/888.png')
       .wait('[data-ta-name="autoCheckout"][data-ta-current="true"]');
   });
 });
