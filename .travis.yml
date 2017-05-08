@@ -1,12 +1,9 @@
 sudo: required
 language: node_js
 node_js:
-  - "4.1"
-  - "5.3"
-  - "6.0"
-branches:
-  only:
-    - master
+  - "6"
+  - "7"
+  - "node"
 env:
   global:
     - CXX=g++-4.8
