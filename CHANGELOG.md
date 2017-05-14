@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.17: Fix checking out remote refs
 - 1.1.16:
   - clicktests logging correction and using wait for within tests.
   - Refactor filewatch and using normalized test path

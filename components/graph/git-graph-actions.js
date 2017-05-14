@@ -2,6 +2,7 @@
 var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
+var Promise = require('bluebird');
 var RefViewModel = require('./git-ref.js');
 var HoverActions = require('./hover-actions');
 var RebaseViewModel = HoverActions.RebaseViewModel;
@@ -229,21 +230,18 @@ GraphActions.Checkout.prototype.perform = function() {
   var context = this.graph.currentActionContext();
   var refName = context instanceof RefViewModel ? context.refName : context.sha1;
 
-  return this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: refName })
-    .then(function() {
-      if (context instanceof RefViewModel && context.isRemoteBranch) {
-        return self.server.postPromise('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' })
-          .then(function() {
-            self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-          }).catch(function(err) {
-            if (err.errorCode == 'merge-failed') throw err
-          })
-      } else {
+  var movePromise = Promise.resolve();
+  if (context instanceof RefViewModel && context.isRemoteBranch) {
+    movePromise = context.getLocalRef().moveTo(context.name);
+  }
+  return movePromise.then(function() {
+    return self.server.postPromise('/checkout', { path: self.graph.repoPath(), name: refName })
+      .then(function() {
         self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-      }
-    }).catch(function(err) {
-      if (err.errorCode != 'merge-failed') { throw err; }
-    });
+      });
+  }).catch(function(err) {
+    if (err.errorCode != 'merge-failed') { throw err; }
+  });
 }
 
 GraphActions.Delete = function(graph, node) {
