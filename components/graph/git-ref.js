@@ -133,6 +133,15 @@ RefViewModel.prototype.remove = function() {
     });
 }
 
+RefViewModel.prototype.getLocalRef = function() {
+  return this.graph.getRef(this.getLocalRefFullName(), false);
+}
+RefViewModel.prototype.getLocalRefFullName = function() {
+  if (this.isRemoteBranch) return 'refs/heads/' + this.refName;
+  if (this.isRemoteTag) return 'tag: ' + this.refName;
+  return null;
+}
+
 RefViewModel.prototype.getRemoteRef = function(remote) {
   return this.graph.getRef(this.getRemoteRefFullName(remote), false);
 }
