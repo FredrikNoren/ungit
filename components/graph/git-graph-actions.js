@@ -232,7 +232,12 @@ GraphActions.Checkout.prototype.perform = function() {
 
   var movePromise = Promise.resolve();
   if (context instanceof RefViewModel && context.isRemoteBranch) {
-    movePromise = context.getLocalRef().moveTo(context.name);
+    movePromise = this.server.postPromise('/branches', {
+      path: this.graph.repoPath(),
+      name: context.refName,
+      sha1: context.name,
+      force: true
+    });
   }
   return movePromise.then(function() {
     return self.server.postPromise('/checkout', { path: self.graph.repoPath(), name: refName })
