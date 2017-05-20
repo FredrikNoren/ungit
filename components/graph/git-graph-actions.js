@@ -231,7 +231,9 @@ GraphActions.Checkout.prototype.perform = function() {
   var refName = context instanceof RefViewModel ? context.refName : context.sha1;
 
   var movePromise = Promise.resolve();
-  if (context instanceof RefViewModel && context.isRemoteBranch) {
+  var isRemote = context instanceof RefViewModel && context.isRemoteBranch;
+  var isLocalCurrent = context.getLocalRef() && context.getLocalRef().current();
+  if (isRemote && !isLocalCurrent) {
     movePromise = this.server.postPromise('/branches', {
       path: this.graph.repoPath(),
       name: context.refName,
@@ -239,14 +241,21 @@ GraphActions.Checkout.prototype.perform = function() {
       force: true
     });
   }
-  return movePromise.then(function() {
-    return self.server.postPromise('/checkout', { path: self.graph.repoPath(), name: refName })
-      .then(function() {
+  return this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: refName })
+    .then(function() {
+      if (isRemote && isLocalCurrent) {
+        return self.server.postPromise('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' })
+          .then(function() {
+            self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
+          }).catch(function(err) {
+            if (err.errorCode == 'merge-failed') throw err
+          })
+      } else {
         self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
-      });
-  }).catch(function(err) {
-    if (err.errorCode != 'merge-failed') { throw err; }
-  });
+      }
+    }).catch(function(err) {
+      if (err.errorCode != 'merge-failed') { throw err; }
+    });
 }
 
 GraphActions.Delete = function(graph, node) {
