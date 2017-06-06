@@ -2,7 +2,7 @@
 const expect = require('expect.js');
 const testuser = { username: 'testuser', password: 'testpassword' }
 const environment = require('./environment')({
-  serverStartupOptions: ['--authentication', '--users.' + testuser.username + '=' + testuser.password],
+  serverStartupOptions: ['--authentication', `--users.${testuser.username}=${testuser.password}`],
   showServerOutput: true
 });
 

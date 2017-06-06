@@ -1,23 +1,19 @@
 'use strict';
 const expect = require('expect.js');
-const testuser = { username: 'testuser', password: 'testpassword' }
 const environment = require('./environment')();
 
-let testRepoPath;
+let testRepoPaths;
 
 describe('test branches', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => {
-        testRepoPath = environment.path + '/testrepo';
-        return environment.createRepos([{ bare: false, path: testRepoPath }]);
-      });
+      .then(() => environment.createRepos([{ bare: false }]))
+      .then((repos) => testRepoPaths = repos);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.goto(environment.getRootUrl() + '/#/repository?path=' + encodeURIComponent(testRepoPath))
-      .wait('.graph');
+    return environment.nightmare.ug.openUngit(testRepoPaths[0])
   });
 
   it('updateBranches button without branches', () => {
@@ -28,7 +24,7 @@ describe('test branches', () => {
 
   it('add a branch', () => {
     return environment.nightmare
-      .ug.createTestFile(`${testRepoPath}/testfile.txt`)
+      .ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .ug.commit('commit-1')
       .wait('.commit')
       .ug.createBranch('branch-1');
@@ -40,7 +36,7 @@ describe('test branches', () => {
   });
 
   it('add second branch', () => {
-    return environment.nightmare.ug.createTestFile(`${testRepoPath}/testfile2.txt`)
+    return environment.nightmare.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .ug.commit('commit-2')
       .wait('.commit')
       .ug.createBranch('branch-2')
@@ -65,7 +61,7 @@ describe('test branches', () => {
   });
 
   it('add a commit', () => {
-    return environment.nightmare.ug.createTestFile(`${testRepoPath}/testfile2.txt`)
+    return environment.nightmare.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .ug.commit('commit-3');
   });
 

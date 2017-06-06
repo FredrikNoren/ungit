@@ -34,12 +34,15 @@ Nightmare.action('ug', {
     }
 
     req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
+    console.log(2222, url, body)
 
     req.end((err, res) => {
       let data = (res || {}).body
       if (err) {
+        console.log(8888, err)
         done(err);
       } else {
+        console.log(7777, data)
         try { data = JSON.parse(data); } catch(ex) {}
         done(null, data);
       }
@@ -63,8 +66,13 @@ Nightmare.action('ug', {
     console.log(`Create folder: ${dir}`);
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir }));
   },
-  'initFolder': function(options, done) {
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options));
+  'initRepo': function(options, done) {
+    this.ug.createTempFolder()
+      .then((res) => {
+        // options.path = res.path;
+        options.path = "/tmp/testdir"
+        done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options))
+      });
   },
   'gitCommand': function(options, done) {
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/git`, options));
@@ -90,6 +98,11 @@ Nightmare.action('ug', {
       .wait(300)
       .click(selector)
       .wait(300)
+      .then(done);
+  },
+  'openUngit': function(tempDirPath, done) {
+    this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
+      .wait('.graph')
       .then(done);
   }
 });
@@ -119,7 +132,7 @@ class Environment {
 
     // init
     this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
-    this.nightmare.on('console', function(type, msg1, msg2) {
+    this.nightmare.on('console', (type, msg1, msg2) => {
       console.log(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
 
       if (type === 'error' && !this.shuttinDown) {
@@ -168,15 +181,14 @@ class Environment {
       .then(() => this.ensureStarted())
       .timeout(7000)
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
-      .then(() => !isSkipTempCreate ? this.nightmare.ug.createTempFolder() : {})
-      .then((res) => this.path = res.path);
   }
 
   createRepos(config) {
     return Bluebird.map(config, (conf) => {
-      return this.nightmare.ug.createFolder(conf.path)
-        .ug.initFolder({ bare: !!conf.bare, path: conf.path })
+      conf.bare = !!conf.bare;
+      return this.nightmare.ug.initRepo(conf)
         .then(() => this.createCommits(conf, conf.initCommits))
+        .then(() => conf.path);
     });
   }
 
@@ -184,7 +196,11 @@ class Environment {
     this.shuttinDown = true;
     return this.nightmare.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
       .ug.shutdownServer()
-      .then(() => { if (!doNotClose) this.nightmare.end(); });
+      .then(() => {
+        if (!doNotClose) {
+          this.nightmare.end();
+        }
+      });
   }
 
   createCommits(config, limit, x) {
