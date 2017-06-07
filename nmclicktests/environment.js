@@ -4,6 +4,8 @@ const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
 const net = require('net');
 const request = require('superagent');
+const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
+const rimraf = Bluebird.promisify(require("rimraf"));
 let portrange = 45032;
 let rootUrl;
 
@@ -34,15 +36,12 @@ Nightmare.action('ug', {
     }
 
     req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
-    console.log(2222, url, body)
 
     req.end((err, res) => {
       let data = (res || {}).body
       if (err) {
-        console.log(8888, err)
         done(err);
       } else {
-        console.log(7777, data)
         try { data = JSON.parse(data); } catch(ex) {}
         done(null, data);
       }
@@ -67,10 +66,9 @@ Nightmare.action('ug', {
     done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir }));
   },
   'initRepo': function(options, done) {
-    this.ug.createTempFolder()
+    (options.path ? rimraf(options.path).then(() => mkdirp(options.path)) : this.ug.createTempFolder())
       .then((res) => {
-        // options.path = res.path;
-        options.path = "/tmp/testdir"
+        options.path = res.path ? res.path : res;
         done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options))
       });
   },
