@@ -96,11 +96,11 @@ describe('test branches', () => {
   // a legitimate bug.  We can see that `/log` result is not including newly
   // created `autoCheckout` branch and it seems that it needs to wait.  I think
   // it passes within phantomjs due to other activity triggering another refresh
-  // it('Auto checkout on branch creation.', () => {
-  //   return environment.nightmare.evaluate(() => { ungit.config.autoCheckoutOnBranchCreate = true; })
-  //     .wait(250)
-  //     .ug.createBranch('autoCheckout')
-  //     .wait(1000)
-  //     .wait('[data-ta-name="autoCheckout"][data-ta-current="true"]');
-  // });
+  it('Auto checkout on branch creation.', () => {
+    return environment.nightmare.evaluate(() => { ungit.config.autoCheckoutOnBranchCreate = true; })
+      .wait(250)
+      .ug.createBranch('autoCheckout')
+      .wait(1000)
+      .wait('[data-ta-name="autoCheckout"][data-ta-current="true"]');
+  });
 });

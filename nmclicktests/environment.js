@@ -23,7 +23,7 @@ Nightmare.action('ug', {
       .click('[data-ta-clickable="commit"]')
       .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
       .wait(1000)
-      .then(done);
+      .then(done.bind(null, null), done);
   },
   'backgroundAction': function(method, url, body, done) {
     let req;
@@ -48,36 +48,43 @@ Nightmare.action('ug', {
     });
   },
   'createTestFile': function(filename, done) {
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename }));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename })
+      .then(done.bind(null, null), done);
   },
   'shutdownServer': function(done) {
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/shutdown`, undefined));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/shutdown`, undefined)
+      .then(done.bind(null, null), done);
   },
 
   'changeTestFile': function(filename, done) {
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename }));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename })
+      .then(done.bind(null, null), done);
   },
   'createTempFolder': function(done) {
     console.log('Creating temp folder');
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined)
+      .then(done.bind(null, null), done);
   },
   'createFolder': function(dir, done) {
     console.log(`Create folder: ${dir}`);
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir }));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir })
+      .then(done.bind(null, null), done);
   },
   'initRepo': function(options, done) {
     (options.path ? rimraf(options.path).then(() => mkdirp(options.path)) : this.ug.createTempFolder())
       .then((res) => {
         options.path = res.path ? res.path : res;
-        done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options))
-      });
+        console.log(44222, res)
+        return this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options)
+      }).then(done.bind(null, null), done);
   },
   'gitCommand': function(options, done) {
-    done(null, this.ug.backgroundAction('POST', `${rootUrl}/api/testing/git`, options));
+    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/git`, options)
+      .then(done.bind(null, null), done);
   },
   'waitForElementNotVisible': function(selector, done) {
     this.wait((selector) => !document.querySelector(selector), selector)
-      .then(done);
+      .then(done.bind(null, null), done);
   },
   'createRef': function(name, type, done) {
     console.log(`Creating ${name} as ${type}`);
@@ -86,22 +93,23 @@ Nightmare.action('ug', {
       .wait(100)
       .click('[data-ta-clickable="create-' + type + '"]')
       .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
-      .then(done);
+      .then(done.bind(null, null), done);
   },
   'createBranch': function(name, done) {
-    done(null, this.ug.createRef(name, 'branch'));
+    this.ug.createRef(name, 'branch')
+      .then(done.bind(null, null), done);
   },
   'click': function(selector, done) {
     this.wait(selector)
       .wait(300)
       .click(selector)
       .wait(300)
-      .then(done);
+      .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {
     this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
       .wait('.graph')
-      .then(done);
+      .then(done.bind(null, null), done);
   }
 });
 
