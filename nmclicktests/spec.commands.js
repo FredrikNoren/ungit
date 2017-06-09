@@ -34,34 +34,21 @@ describe('test commands', () => {
   it('test branch create from command line', () => {
     return environment.nightmare
       .ug.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPaths[0] })
-      .then((cc) => {
-        console.log(1111111, cc)
-        return environment.nightmare.wait('[data-ta-name="gitCommandBranch"]')
-      })
-
+      .then((cc) => environment.nightmare.wait('[data-ta-name="gitCommandBranch"]'));
   });
 
   it('test branch move from command line', () => {
     let branchTagLoc;
     return environment.nightmare
-      .evaluate(function() {
-        const oldLoc = document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect();
-        console.log(`current gitCommandBranch coordinate: ${oldLoc}`)
-        return oldLoc;
-      }).then((oldLoc) => {
+      .evaluate(() => document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect())
+      .then((oldLoc) => {
         branchTagLoc = oldLoc;
-        console.log(4123123123, branchTagLoc)
         return environment.nightmare.ug.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPaths[0] })
-      })
-      .wait(function (oldLoc) {
-        let newLoc = document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect();
-        console.log(`current gitCommandBranch coordinate: ${oldLoc}`)
-        console.log(`new gitCommandBranch coordinate: ${newLoc}`);
-        console.log(999, newLoc.top)
-        console.log(234, oldLoc.top)
-        console.log(222, newLoc.left, oldLoc.left);
-        return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
-      }, branchTagLoc);
+          .wait((oldLoc) => {
+            let newLoc = document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect();
+            return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
+          }, branchTagLoc);
+      });
   });
 
   it('test branch delete from command line', () => {
@@ -83,8 +70,16 @@ describe('test commands', () => {
   });
 
   it('test reset from command line', () => {
+    let commandTagLoc;
     return environment.nightmare
-      .ug.gitCommand({ command: ["reset", "branch-1"], repo: testRepoPaths[0] })
-      .wait('fix selector for branch move')
+      .evaluate(() => document.querySelector('[data-ta-name="branch-1"]').getBoundingClientRect())
+      .then((oldLoc) => {
+        commandTagLoc = oldLoc;
+        return environment.nightmare.ug.gitCommand({ command: ["reset", "branch-1"], repo: testRepoPaths[0] })
+          .wait((oldLoc) => {
+            let newLoc = document.querySelector('[data-ta-name="branch-1"]').getBoundingClientRect();
+            return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
+          }, commandTagLoc);
+      });
   });
 });
