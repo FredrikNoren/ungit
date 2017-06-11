@@ -33,9 +33,15 @@ StashItemViewModel.prototype.pop = function() {
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
-  this.stashPopProgressBar.start();
-  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath() }).finally(function() {
-    self.stashPopProgressBar.stop();
+  components.create('yesnodialog', { title: 'Are you sure you want to drop the stash?', details: 'This operation cannot be undone.'})
+    .show()
+    .closeThen(function(diag) {
+      if (diag.result()) {
+          self.stashPopProgressBar.start();
+          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() }).finally(function() {
+              self.stashPopProgressBar.stop();
+          });
+      }
   });
 }
 StashItemViewModel.prototype.toggleShowCommitDiffs = function() {

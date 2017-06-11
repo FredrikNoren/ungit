@@ -2,6 +2,7 @@
 var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
+var Promise = require('bluebird');
 var RefViewModel = require('./git-ref.js');
 var HoverActions = require('./hover-actions');
 var RebaseViewModel = HoverActions.RebaseViewModel;
@@ -229,9 +230,20 @@ GraphActions.Checkout.prototype.perform = function() {
   var context = this.graph.currentActionContext();
   var refName = context instanceof RefViewModel ? context.refName : context.sha1;
 
+  var movePromise = Promise.resolve();
+  var isRemote = context instanceof RefViewModel && context.isRemoteBranch;
+  var isLocalCurrent = context.getLocalRef() && context.getLocalRef().current();
+  if (isRemote && !isLocalCurrent) {
+    movePromise = this.server.postPromise('/branches', {
+      path: this.graph.repoPath(),
+      name: context.refName,
+      sha1: context.name,
+      force: true
+    });
+  }
   return this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: refName })
     .then(function() {
-      if (context instanceof RefViewModel && context.isRemoteBranch) {
+      if (isRemote && isLocalCurrent) {
         return self.server.postPromise('/reset', { path: self.graph.repoPath(), to: context.name, mode: 'hard' })
           .then(function() {
             self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);

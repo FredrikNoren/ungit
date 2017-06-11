@@ -2,11 +2,13 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.1.15",
+  "version": "1.1.19",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "grunt",
+    "watch": "grunt watch"
   },
   "repository": {
     "type": "git",
