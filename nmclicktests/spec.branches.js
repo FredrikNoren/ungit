@@ -13,30 +13,29 @@ describe('test branches', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nightmare.ug.openUngit(testRepoPaths[0])
+    return environment.nm.ug.openUngit(testRepoPaths[0])
   });
 
   it('updateBranches button without branches', () => {
-    return environment.nightmare.wait('[data-ta-clickable="branch"]')
+    return environment.nm.wait('[data-ta-clickable="branch"]')
       .click('[data-ta-clickable="branch"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
   });
 
   it('add a branch', () => {
-    return environment.nightmare
-      .ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .ug.commit('commit-1')
       .wait('.commit')
       .ug.createBranch('branch-1');
   });
 
   it('updateBranches button with one branch', () => {
-    return environment.nightmare.ug.click('[data-ta-clickable="branch"]')
+    return environment.nm.ug.click('[data-ta-clickable="branch"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
   });
 
   it('add second branch', () => {
-    return environment.nightmare.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .ug.commit('commit-2')
       .wait('.commit')
       .ug.createBranch('branch-2')
@@ -44,13 +43,13 @@ describe('test branches', () => {
   });
 
   it('Check out a branch via selection', () => {
-    return environment.nightmare.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
       .ug.click('[data-ta-clickable="checkoutbranch-2"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-element="progress-bar"]')
   });
 
   it('Delete a branch via selection', () => {
-    return environment.nightmare.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.click('[data-ta-clickable="branch-menu"]')
       .wait('[data-ta-clickable="branch-3-remove"]')
       .wait(500)
       .click('[data-ta-clickable="branch-3-remove"]')
@@ -61,18 +60,18 @@ describe('test branches', () => {
   });
 
   it('add a commit', () => {
-    return environment.nightmare.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .ug.commit('commit-3');
   });
 
   it('checkout chery pick base', () => {
-    return environment.nightmare.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-element="progress-bar"]')
   });
 
   it('cherrypick fail case', () => {
-    return environment.nightmare.ug.click('[data-ta-clickable="node-clickable-0"]')
+    return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-action="cherry-pick"][data-ta-visible="true"] [role=button]')
       .ug.click('[data-ta-action="abort"]')
       .ug.click('[data-ta-clickable="yes"]')
@@ -80,7 +79,7 @@ describe('test branches', () => {
   });
 
   it('cherrypick success case', () => {
-    return environment.nightmare.ug.click('[data-ta-clickable="node-clickable-1"]')
+    return environment.nm.ug.click('[data-ta-clickable="node-clickable-1"]')
       .ug.click('[data-ta-action="cherry-pick"][data-ta-visible="true"] [role=button]')
       .wait(500)
       .visible('[data-ta-action="abort"]')
@@ -97,7 +96,7 @@ describe('test branches', () => {
   // created `autoCheckout` branch and it seems that it needs to wait.  I think
   // it passes within phantomjs due to other activity triggering another refresh
   it('Auto checkout on branch creation.', () => {
-    return environment.nightmare.evaluate(() => { ungit.config.autoCheckoutOnBranchCreate = true; })
+    return environment.nm.evaluate(() => { ungit.config.autoCheckoutOnBranchCreate = true; })
       .wait(250)
       .ug.createBranch('autoCheckout')
       .wait(1000)

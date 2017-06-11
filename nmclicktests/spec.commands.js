@@ -4,6 +4,19 @@ const environment = require('./environment')();
 
 let testRepoPaths;
 
+const testForBranchMove = (branch, command) => {
+  let branchTagLoc;
+  return environment.nm.evaluate((branch) => document.querySelector(branch).getBoundingClientRect(), branch)
+    .then((oldLoc) => {
+      branchTagLoc = oldLoc;
+      return environment.nm.ug.gitCommand({ command: command, repo: testRepoPaths[0] })
+        .wait((branch, oldLoc) => {
+          let newLoc = document.querySelector(branch).getBoundingClientRect();
+          return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
+        }, branch, branchTagLoc);
+    });
+}
+
 describe('test commands', () => {
   before('Environment init', () => {
     return environment.init()
@@ -12,74 +25,48 @@ describe('test commands', () => {
   });
 
   it('Open path screen', () => {
-    return environment.nightmare.ug.openUngit(testRepoPaths[0]);
+    return environment.nm.ug.openUngit(testRepoPaths[0]);
   });
 
   it('add a branch-1', () => {
-    return environment.nightmare
-      .ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .ug.commit('commit-1')
       .wait('.commit')
       .ug.createBranch('branch-1');
   });
 
   it('add a branch-2', () =>{
-    return environment.nightmare
-      .ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .ug.commit('commit-1')
       .wait('.commit')
       .ug.createBranch('branch-2');
   });
 
   it('test branch create from command line', () => {
-    return environment.nightmare
-      .ug.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPaths[0] })
-      .then((cc) => environment.nightmare.wait('[data-ta-name="gitCommandBranch"]'));
+    return environment.nm.ug.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPaths[0] })
+      .then((cc) => environment.nm.wait('[data-ta-name="gitCommandBranch"]'));
   });
 
   it('test branch move from command line', () => {
-    let branchTagLoc;
-    return environment.nightmare
-      .evaluate(() => document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect())
-      .then((oldLoc) => {
-        branchTagLoc = oldLoc;
-        return environment.nightmare.ug.gitCommand({ command: ["branch", "-f", "gitCommandBranch", "branch-1"], repo: testRepoPaths[0] })
-          .wait((oldLoc) => {
-            let newLoc = document.querySelector('[data-ta-name="gitCommandBranch"]').getBoundingClientRect();
-            return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
-          }, branchTagLoc);
-      });
+    return testForBranchMove('[data-ta-name="gitCommandBranch"]', ["branch", "-f", "gitCommandBranch", "branch-1"]);
   });
 
   it('test branch delete from command line', () => {
-    return environment.nightmare
-      .ug.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPaths[0] })
+    return environment.nm.ug.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPaths[0] })
       .ug.waitForElementNotVisible('[data-ta-name="gitCommandBranch');
   });
 
   it('test tag create from command line', () => {
-    return environment.nightmare
-      .ug.gitCommand({ command: ["tag", "tag1"], repo: testRepoPaths[0] })
+    return environment.nm.ug.gitCommand({ command: ["tag", "tag1"], repo: testRepoPaths[0] })
       .wait('[data-ta-name="tag1"]')
   });
 
   it('test tag delete from command line', () => {
-    return environment.nightmare
-      .ug.gitCommand({ command: ["tag", "-d", "tag1"], repo: testRepoPaths[0] })
+    return environment.nm.ug.gitCommand({ command: ["tag", "-d", "tag1"], repo: testRepoPaths[0] })
       .ug.waitForElementNotVisible('[data-ta-name="tag1"]');
   });
 
   it('test reset from command line', () => {
-    let commandTagLoc;
-    return environment.nightmare
-      .evaluate(() => document.querySelector('[data-ta-name="branch-1"]').getBoundingClientRect())
-      .then((oldLoc) => {
-        commandTagLoc = oldLoc;
-        return environment.nightmare.ug.gitCommand({ command: ["reset", "branch-1"], repo: testRepoPaths[0] })
-          .wait((oldLoc) => {
-            let newLoc = document.querySelector('[data-ta-name="branch-1"]').getBoundingClientRect();
-            return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
-          }, commandTagLoc);
-      });
+    return testForBranchMove('[data-ta-name="branch-1"]', ["reset", "branch-1"]);
   });
 });

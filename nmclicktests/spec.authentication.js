@@ -8,7 +8,7 @@ const environment = require('./environment')({
 
 describe('test authentication', () => {
   before('Environment init without temp folder', () => environment.init(true));
-  after('Close nightmare', () => environment.nightmare.end());
+  after('Close nightmare', () => environment.nm.end());
 
   it('Open home screen should show authentication dialog', () => {
     return environment.goto(environment.getRootUrl())
@@ -16,16 +16,14 @@ describe('test authentication', () => {
   });
 
   it('Filling out the authentication with wrong details should result in an error', () => {
-    return environment.nightmare
-      .insert('.login input[type="text"]', testuser.username)
+    return environment.nm.insert('.login input[type="text"]', testuser.username)
       .insert('.login input[type="password"]', 'notthepassword')
       .click('.login input[type="submit"]')
       .wait('.login .loginError');
   });
 
   it('Filling out the authentication should bring you to the home screen', () => {
-    return environment.nightmare
-      .insert('.login input[type="text"]')
+    return environment.nm.insert('.login input[type="text"]')
       .insert('.login input[type="text"]', testuser.username)
       .insert('.login input[type="password"]')
       .insert('.login input[type="password"]', testuser.password)

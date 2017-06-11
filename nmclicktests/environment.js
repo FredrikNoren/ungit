@@ -39,12 +39,8 @@ Nightmare.action('ug', {
 
     req.end((err, res) => {
       let data = (res || {}).body
-      if (err) {
-        done(err);
-      } else {
-        try { data = JSON.parse(data); } catch(ex) {}
-        done(null, data);
-      }
+      try { data = JSON.parse(data); } catch(ex) {}
+      done(err, data)
     });
   },
   'createTestFile': function(filename, done) {
@@ -74,7 +70,6 @@ Nightmare.action('ug', {
     (options.path ? rimraf(options.path).then(() => mkdirp(options.path)) : this.ug.createTempFolder())
       .then((res) => {
         options.path = res.path ? res.path : res;
-        console.log(44222, res)
         return this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options)
       }).then(done.bind(null, null), done);
   },
@@ -119,14 +114,10 @@ const prependLines = (pre, text) => {
     .join('\n');
 }
 
-const visibleCheck = (nm, selector) => {
-  return nm.wait(50).visible()
-}
-
 // Environment provides
 class Environment {
   constructor(config) {
-    this.nightmare = Nightmare({ Promise: Bluebird });
+    this.nm = Nightmare({ Promise: Bluebird });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 15000;
@@ -137,8 +128,8 @@ class Environment {
     this.shuttinDown = false;
 
     // init
-    this.nightmare.viewport(this.config.viewWidth, this.config.viewHeight);
-    this.nightmare.on('console', (type, msg1, msg2) => {
+    this.nm.viewport(this.config.viewWidth, this.config.viewHeight);
+    this.nm.on('console', (type, msg1, msg2) => {
       console.log(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
 
       if (type === 'error' && !this.shuttinDown) {
@@ -192,7 +183,7 @@ class Environment {
   createRepos(config) {
     return Bluebird.map(config, (conf) => {
       conf.bare = !!conf.bare;
-      return this.nightmare.ug.initRepo(conf)
+      return this.nm.ug.initRepo(conf)
         .then(() => this.createCommits(conf, conf.initCommits))
         .then(() => conf.path);
     });
@@ -200,11 +191,11 @@ class Environment {
 
   shutdown(doNotClose) {
     this.shuttinDown = true;
-    return this.nightmare.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
+    return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
       .ug.shutdownServer()
       .then(() => {
         if (!doNotClose) {
-          this.nightmare.end();
+          this.nm.end();
         }
       });
   }
@@ -213,9 +204,9 @@ class Environment {
     x = x || 0
     if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
 
-    return this.nightmare.ug.createTestFile(`${config.path}/testy${x}`)
+    return this.nm.ug.createTestFile(`${config.path}/testy${x}`)
       .then(() => {
-        return this.nightmare.ug.backgroundAction('POST', `${rootUrl}/api/commit`, {
+        return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/commit`, {
           path: config.path,
           message: `Init Commit ${x}`,
           files: [{ name: `testy${x}` }]
@@ -224,8 +215,8 @@ class Environment {
   }
 
   goto(url) {
-    this.nightmare = this.nightmare.goto(url);
-    return this.nightmare;
+    this.nm = this.nm.goto(url);
+    return this.nm;
   }
 
   startServer() {
