@@ -72,9 +72,13 @@ describe('test branches', () => {
 
   it('cherrypick fail case', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
+      .ug.log("clicked first node")
       .ug.click('[data-ta-action="cherry-pick"][data-ta-visible="true"] [role=button]')
+      .ug.log("cherrypick button clicked")
       .ug.click('[data-ta-action="abort"]')
+      .ug.log("cherrypick aborted")
       .ug.click('[data-ta-clickable="yes"]')
+      .ug.log("clicked yes")
       .wait(500)
   });
 
