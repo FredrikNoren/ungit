@@ -468,17 +468,6 @@ module.exports = function(grunt) {
     });
   }
 
-  var ParallelStream = function() {
-    this.data = "";
-    this.write = function(data) {
-      this.data += data;
-    }
-  }
-
-  var onOut = function(pipe, data) {
-    pipe.write(data)
-  }
-
   function getGitLastCommitHash(callback) {
     childProcess.exec("git rev-parse --short HEAD", function(err, stdout, stderr) {
       callback(stdout.trim());
