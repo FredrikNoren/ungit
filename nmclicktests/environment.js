@@ -98,7 +98,7 @@ Nightmare.action('ug', {
     this.wait(selector)
       .wait(300)
       .click(selector)
-      .wait(300)
+      .wait(800)
       .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {
