@@ -17,7 +17,8 @@ var AppViewModel = function(appContainer, server) {
   this.dialog = ko.observable(null);
 
   var repoList=JSON.parse(localStorage.getItem('repositories') || '[]');
-  Array.prototype.unshift.apply(repoList, ungit.config.repos);
+  var configRepoList = ungit.config.repos;
+  this.configRepoList = ko.observableArray(configRepoList);
   this.repoList = ko.observableArray(repoList);
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
 
@@ -100,6 +101,8 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 }
 AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   var repoPath = event.repoPath;
+  if (this.configRepoList.indexOf(repoPath) != -1) return;
+  this.confogRepoList.push(repoPath);
   if (this.repoList.indexOf(repoPath) != -1) return;
   this.repoList.push(repoPath);
 }
