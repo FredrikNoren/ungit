@@ -16,11 +16,11 @@ env:
     - GIT_VERSION=edge
 matrix:
   exclude:
-    - node_js: 5.3
+    - node_js: "5.3"
       env: GIT_VERSION=edge
-    - node_js: 6.11
+    - node_js: "6.11"
       env: GIT_VERSION=edge
-    - node_js: 7.10
+    - node_js: "7.10"
       env: GIT_VERSION=edge
 addons:
   apt:
@@ -34,7 +34,7 @@ install:
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - npm install
 before_script:
-  - npm cache clean
+  - if [[ `npm --version` != 5* ]]; then npm cache clean; fi
   - npm install -g grunt-cli
   - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   - git config --global user.email "test@testy.com"
