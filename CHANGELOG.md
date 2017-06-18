@@ -6,6 +6,8 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - 1.1.19:
   - Ask before deleting a stash
   - Initial refactoring of click test using nightmare and mocha
+  - **Dropping support for node 4.x.**
+  - **Adding tests with node 7.x and the latest node. (currently 8.x)**
 - 1.1.18: Fix checking out remote refs (again)
 - 1.1.17: Fix checking out remote refs
 - 1.1.16:
