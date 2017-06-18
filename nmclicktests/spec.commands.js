@@ -44,7 +44,7 @@ describe('test commands', () => {
 
   it('test branch create from command line', () => {
     return environment.nm.ug.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPaths[0] })
-      .then((cc) => environment.nm.wait('[data-ta-name="gitCommandBranch"]'));
+      .then(() => environment.nm.wait('[data-ta-name="gitCommandBranch"]'));
   });
 
   it('test branch move from command line', () => {

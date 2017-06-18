@@ -167,12 +167,12 @@ class Environment {
         if (!this.hasStarted) {
           return Bluebird.resolve()
             .delay(50)
-            .then(() => { return this.ensureStarted(); });
+            .then(() => this.ensureStarted());
         }
       });
   }
 
-  init(isSkipTempCreate) {
+  init() {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
@@ -239,14 +239,15 @@ class Environment {
       '--logGitCommands']
       .concat(this.config.serverStartupOptions);
     const ungitServer = child_process.spawn('node', options);
-    ungitServer.stdout.on('data', (data) => {
-      if (this.config.showServerOutput) console.log(prependLines('[server] ', data.toString()));
+    ungitServer.stdout.on('data', (stdout) => {
+      const stdoutStr = stdout.toString();
+      if (this.config.showServerOutput) console.log(prependLines('[server] ', stdoutStr));
 
-      if (data.toString().indexOf('Ungit server already running') >= 0) {
+      if (stdoutStr.indexOf('Ungit server already running') >= 0) {
         console.log('server-already-running');
       }
 
-      if (data.toString().indexOf('## Ungit started ##') >= 0) {
+      if (stdoutStr.indexOf('## Ungit started ##') >= 0) {
         if (this.hasStarted) {
           console.log('Ungit started twice, probably crashed.');
         } else {
@@ -255,9 +256,10 @@ class Environment {
         }
       }
     });
-    ungitServer.stderr.on("data", (data) => {
-      console.log(prependLines('[server ERROR] ', data.toString()));
-      if (data.indexOf("EADDRINUSE") > -1) {
+    ungitServer.stderr.on("data", (stderr) => {
+      const stderrStr = stderr.toString();
+      console.err(prependLines('[server ERROR] ', stderrStr));
+      if (stderrStr.indexOf("EADDRINUSE") > -1) {
         console.log("retrying with different port");
         ungitServer.kill('SIGINT');
         this.getPort().then(() => this.startServer());

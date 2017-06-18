@@ -64,7 +64,7 @@ describe('test branches', () => {
       .ug.commit('commit-3');
   });
 
-  it('checkout chery pick base', () => {
+  it('checkout cherypick base', () => {
     return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-element="progress-bar"]')
@@ -91,7 +91,6 @@ describe('test branches', () => {
         if (isVisible) {
           throw new Error("Cherry pick errored when success was expected.");
         }
-        return;
       });
   });
 

@@ -12,7 +12,7 @@ describe('test bare repo', () => {
   });
   after('Environment stop', () => environment.shutdown());
 
-  it('Open path screenz', () => {
+  it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0]);
   });
 

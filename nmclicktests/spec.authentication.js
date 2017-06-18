@@ -7,7 +7,7 @@ const environment = require('./environment')({
 });
 
 describe('test authentication', () => {
-  before('Environment init without temp folder', () => environment.init(true));
+  before('Environment init without temp folder', () => environment.init());
   after('Close nightmare', () => environment.nm.end());
 
   it('Open home screen should show authentication dialog', () => {
