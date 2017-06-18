@@ -1,14 +1,12 @@
 'use strict';
 const expect = require('expect.js');
 const environment = require('./environment')();
-
-let testRepoPaths;
+const testRepoPaths = [];
 
 describe('test branches', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos([{ bare: false }]))
-      .then((repos) => testRepoPaths = repos);
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
   after('Environment stop', () => environment.shutdown());
 

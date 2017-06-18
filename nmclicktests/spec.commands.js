@@ -1,8 +1,7 @@
 'use strict';
 const expect = require('expect.js');
 const environment = require('./environment')();
-
-let testRepoPaths;
+const testRepoPaths = [];
 
 const testForBranchMove = (branch, command) => {
   let branchTagLoc;
@@ -20,8 +19,7 @@ const testForBranchMove = (branch, command) => {
 describe('test commands', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos([{ bare: false }]))
-      .then((repos) => testRepoPaths = repos);
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
 
   it('Open path screen', () => {

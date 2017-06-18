@@ -180,12 +180,14 @@ class Environment {
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
   }
 
-  createRepos(config) {
+  createRepos(testRepoPaths, config) {
     return Bluebird.map(config, (conf) => {
       conf.bare = !!conf.bare;
       return this.nm.ug.initRepo(conf)
         .then(() => this.createCommits(conf, conf.initCommits))
         .then(() => conf.path);
+    }).then((paths) => {
+      if (testRepoPaths) testRepoPaths.push(...paths)
     });
   }
 
@@ -258,7 +260,7 @@ class Environment {
     });
     ungitServer.stderr.on("data", (stderr) => {
       const stderrStr = stderr.toString();
-      console.err(prependLines('[server ERROR] ', stderrStr));
+      console.error(prependLines('[server ERROR] ', stderrStr));
       if (stderrStr.indexOf("EADDRINUSE") > -1) {
         console.log("retrying with different port");
         ungitServer.kill('SIGINT');
