@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.20:
+- 1.1.21:
   - remove deprecated visitedRepositories
   - New configuration option `repos` allow set array of repos that prepend in home screen repos list
 - 1.1.19: Ask before deleting a stash

@@ -8,10 +8,11 @@
     </div>
   </div>
   <div class="list-group" data-bind="foreach: configrepos">
-    <a class="list-group-item repository" data-bind="attr: { href: link }, css: { 'path-removed': pathRemoved }">
+    <a class="list-group-item repository repository--configrepo" data-bind="attr: { href: link }, css: { 'path-removed': pathRemoved }">
       <span class="glyphicon glyphicon-arrow-right glyphicon-circled pull-left"></span>
       <h4 class="list-group-item-heading" data-bind="text: title"></h4>
       <p class="list-group-item-text" data-bind="text: remote"></p>
+      <i class="repository__lockicon glyphicon glyphicon-lock" title="from config"></i>
     </a>
   </div>
   <div class="list-group" data-bind="foreach: repos">

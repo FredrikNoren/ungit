@@ -102,7 +102,6 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   var repoPath = event.repoPath;
   if (this.configRepoList.indexOf(repoPath) != -1) return;
-  this.confogRepoList.push(repoPath);
   if (this.repoList.indexOf(repoPath) != -1) return;
   this.repoList.push(repoPath);
 }
