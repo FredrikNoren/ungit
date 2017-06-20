@@ -197,7 +197,7 @@ class Environment {
       .ug.shutdownServer()
       .then(() => {
         if (!doNotClose) {
-          this.nm.end();
+          return this.nm.end();
         }
       });
   }
