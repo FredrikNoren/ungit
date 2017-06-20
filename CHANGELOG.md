@@ -3,11 +3,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.19:
-  - Ask before deleting a stash
+- 1.1.20:
   - Initial refactoring of click test using nightmare and mocha
-  - **Dropping support for node 4.x.**
+  - **Dropping support for node 4.x and 5.x!**
   - **Adding tests with node 7.x and the latest node. (currently 8.x)**
+- 1.1.19: Ask before deleting a stash
 - 1.1.18: Fix checking out remote refs (again)
 - 1.1.17: Fix checking out remote refs
 - 1.1.16:
