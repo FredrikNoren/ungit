@@ -16,7 +16,10 @@ var AppViewModel = function(appContainer, server) {
     this.header = components.create('header', { app: this });
   this.dialog = ko.observable(null);
 
-  this.repoList = ko.observableArray(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
+  var repoList=JSON.parse(localStorage.getItem('repositories') || '[]');
+  var configRepoList = ungit.config.repos;
+  this.configRepoList = ko.observableArray(configRepoList);
+  this.repoList = ko.observableArray(repoList);
   this.repoList.subscribe(function(newValue) { localStorage.setItem('repositories', JSON.stringify(newValue)); });
 
   this.content = ko.observable(components.create('home', { app: this }));
@@ -98,6 +101,7 @@ AppViewModel.prototype.onProgramEvent = function(event) {
 }
 AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   var repoPath = event.repoPath;
+  if (this.configRepoList.indexOf(repoPath) != -1) return;
   if (this.repoList.indexOf(repoPath) != -1) return;
   this.repoList.push(repoPath);
 }

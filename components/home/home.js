@@ -33,9 +33,10 @@ HomeRepositoryViewModel.prototype.remove = function() {
 function HomeViewModel(app) {
   var self = this;
   this.app = app;
+  this.configrepos = ko.observableArray();
   this.repos = ko.observableArray();
   this.showNux = ko.computed(function() {
-    return self.repos().length == 0;
+    return (self.repos().length+self.configrepos().length) == 0;
   });
 }
 HomeViewModel.prototype.updateNode = function(parentElement) {
@@ -48,7 +49,13 @@ HomeViewModel.prototype.shown = function() {
 HomeViewModel.prototype.update = function() {
   var self = this;
   var reposByPath = {};
+  this.configrepos().forEach(function(repo) { reposByPath[repo.path] = repo; });
   this.repos().forEach(function(repo) { reposByPath[repo.path] = repo; });
+  this.configrepos(this.app.configRepoList().sort().map(function(path) {
+    if (!reposByPath[path])
+      reposByPath[path] = new HomeRepositoryViewModel(self, path);
+    return reposByPath[path];
+  }));
   this.repos(this.app.repoList().sort().map(function(path) {
     if (!reposByPath[path])
       reposByPath[path] = new HomeRepositoryViewModel(self, path);
