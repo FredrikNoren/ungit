@@ -85,9 +85,10 @@ Nightmare.action('ug', {
     console.log(`Creating ${name} as ${type}`);
     this.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
-      .wait(500)
+      .wait(100)
       .click('[data-ta-clickable="create-' + type + '"]')
       .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
+      .wait(300)
       .then(done.bind(null, null), done);
   },
   'createBranch': function(name, done) {
