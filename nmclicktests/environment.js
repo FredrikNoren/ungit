@@ -85,7 +85,7 @@ Nightmare.action('ug', {
     console.log(`Creating ${name} as ${type}`);
     this.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
-      .wait(100)
+      .wait(500)
       .click('[data-ta-clickable="create-' + type + '"]')
       .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
       .then(done.bind(null, null), done);
