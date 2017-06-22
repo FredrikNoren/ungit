@@ -22,7 +22,7 @@ HomeRepositoryViewModel.prototype.updateState = function() {
   this.server.getPromise('/fs/exists?path=' + encodeURIComponent(this.path))
     .then(function(exists) { self.pathRemoved(!exists); });
   this.server.getPromise('/remotes/origin?path=' + encodeURIComponent(this.path))
-    .then(function(remote) { self.remote(remote.address); })
+    .then(function(remote) {	self.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
     .catch(function(err) { self.remote(''); });
 }
 HomeRepositoryViewModel.prototype.remove = function() {

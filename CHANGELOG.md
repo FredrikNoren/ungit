@@ -6,6 +6,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - 1.1.21:
   - remove deprecated visitedRepositories
   - New configuration option `repos` allow set array of repos that prepend in home screen repos list
+- 1.1.20: Hide crentials in remote urls at home repo list
 - 1.1.19: Ask before deleting a stash
 - 1.1.18: Fix checking out remote refs (again)
 - 1.1.17: Fix checking out remote refs
