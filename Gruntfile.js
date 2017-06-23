@@ -66,11 +66,21 @@ module.exports = function(grunt) {
     },
     // Run mocha tests
     mochaTest: {
-      options: {
-        reporter: 'spec'
+      unit: {
+        options: {
+          reporter: 'spec'
+        },
+        src: 'test/*.js'
       },
-      src: 'test/*.js'
+      click: {
+        options: {
+          reporter: 'spec',
+          timeout: 15000
+        },
+        src: 'nmclicktests/spec.commands.js'
+      }
     },
+
     // Plato code analysis
     plato: {
       all: {
@@ -168,6 +178,7 @@ module.exports = function(grunt) {
       mocha: {
         options: {
           node: true,
+          esnext: true,
           globals: {
             'it': true,
             'describe': true,
@@ -175,11 +186,13 @@ module.exports = function(grunt) {
             'after': true,
             'window': true,
             'document': true,
-            'navigator': true
+            'navigator': true,
+            'ungit': true
           }
         },
         src: [
           'test/**/*.js',
+          'nmclicktests/**/*.js'
         ]
       }
     },
@@ -339,8 +352,8 @@ module.exports = function(grunt) {
     }).then(this.async());
   });
 
-  var getClickTestFiles = function() {
-    return fs.readdirAsync('clicktests')
+  var getClickTestFiles = function(folderName) {
+    return fs.readdirAsync(folderName)
       .then(function(files) {
         return files.filter(function(file) {
           return file.startsWith("test.");
@@ -384,7 +397,7 @@ module.exports = function(grunt) {
     var done = this.async();
     grunt.log.writeln('Running clicktests...');
 
-    getClickTestFiles().then(function(clickTestFiles) {
+    getClickTestFiles('clicktests').then(function(clickTestFiles) {
       var onOut = function(data) { grunt.log.write(data); }
       var onErr = function(data) { grunt.log.error(data); }
       var onFinish = function(file) {
@@ -531,8 +544,9 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests without compile (use watcher or manually build)
-  grunt.registerTask('unittest', ['mochaTest']);
-  grunt.registerTask('test', ['unittest', 'clicktest']);
+  grunt.registerTask('unittest', ['mochaTest:unit']);
+  grunt.registerTask('nmclicktest', ['mochaTest:click']);
+  grunt.registerTask('test', ['unittest', 'nmclicktest', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);

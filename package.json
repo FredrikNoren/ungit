@@ -55,7 +55,7 @@
     "signals": "~1.0.0",
     "snapsvg": "~0.5.1",
     "socket.io": "~1.7.3",
-    "superagent": "^0.21.0",
+    "superagent": "~3.5.2",
     "temp": "~0.8.3",
     "winston": "~2.3.1",
     "yargs": "~8.0.0-candidate.0"
@@ -67,6 +67,7 @@
     "browserify": "~14.3.0",
     "electron-packager": "~8.6.0",
     "expect.js": "~0.3.1",
+    "extract-zip":"=1.6.0",
     "grunt": "~1.0.1",
     "grunt-babel": "~6.0.0",
     "grunt-contrib-clean": "~1.1.0",
@@ -83,6 +84,7 @@
     "grunt-release": "~0.14.0",
     "istanbul": "~0.4.5",
     "mocha": "~3.3.0",
+    "nightmare": "~2.10.0",
     "phantomjs-prebuilt": "~2.1.14",
     "supertest": "~3.0.0"
   },
