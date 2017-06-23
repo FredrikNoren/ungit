@@ -105,6 +105,7 @@ Nightmare.action('ug', {
   'openUngit': function(tempDirPath, done) {
     this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
       .wait('.graph')
+      .wait(1000)
       .then(done.bind(null, null), done);
   }
 });
@@ -177,7 +178,6 @@ class Environment {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
-      .timeout(7000)
       .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
   }
 
