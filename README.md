@@ -53,7 +53,8 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 ```json
 {
 	"port": 8080,
-	"bugtracking": true
+	"bugtracking": true,
+	"diffType": "textdiff" | "sidebysidediff"
 }
 ```
 
