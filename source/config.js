@@ -8,6 +8,8 @@ const homedir = require('os-homedir')();
 const winston = require('winston');
 const child_process = require('child_process');
 
+const isWindows = /^win/.test(process.platform);
+
 const defaultConfig = {
 
   // The port ungit is exposed on.
@@ -104,6 +106,10 @@ const defaultConfig = {
   // "pluginConfigs": { "gerrit": { "disabled": true } }
   pluginConfigs: {},
 
+  // full path to git executable. If not set, system default will be used
+  // (in this case, git should be available on PATH)
+  gitCommand: null,
+
   // Don't show errors when the user is using a bad or undecidable git version
   gitVersionCheckOverride: false,
 
@@ -192,6 +198,7 @@ let argv = yargs
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
+.describe('gitCommand', 'the full path to git command (you should better consider having git on your PATH)')
 ;
 
 var argvConfig = argv.argv;
@@ -220,20 +227,41 @@ module.exports = argv.default(defaultConfig).default(rcConfig).argv;
 
 module.exports.homedir = homedir;
 
+let fileSeparator = module.exports.fileSeparator;
+
 let currentRootPath = module.exports.rootPath;
 if (typeof currentRootPath !== 'string') {
   currentRootPath = '';
 } else if (currentRootPath !== '') {
-  // must start with a slash
-  if (currentRootPath.charAt(0) !== '/') {
-    currentRootPath = '/' + currentRootPath;
+  // must start with a slash (on unix-like systems)
+  if (currentRootPath.charAt(0) !== fileSeparator && isWindows !== true) {
+    currentRootPath = path.join('/', currentRootPath);
   }
   // can not end with a trailing slash
-  if (currentRootPath.charAt(currentRootPath.length - 1) === '/') {
+  if (currentRootPath.charAt(currentRootPath.length - 1) === fileSeparator) {
     currentRootPath = currentRootPath.substring(0, currentRootPath.length - 1);
   }
 }
 module.exports.rootPath = currentRootPath;
+
+let currentGitCommand = module.exports.gitCommand;
+if (typeof currentGitCommand !== 'string') {
+  currentGitCommand = '';
+} else if (currentGitCommand !== '') {
+  // must start with a slash (on unix-like systems)
+  if (currentGitCommand.charAt(0) !== fileSeparator && isWindows !== true) {
+    currentGitCommand = path.join('/', currentGitCommand);
+  }
+  // can not end with a trailing slash - it should be a command
+  if (currentGitCommand.charAt(currentGitCommand.length - 1) === fileSeparator) {
+    currentGitCommand = currentGitCommand.substring(0, currentGitCommand.length - 1);
+  }
+}
+// finally set default if empty
+if (currentGitCommand === '') {
+    currentGitCommand = 'git';
+}
+module.exports.gitCommand = currentGitCommand;
 
 // Errors can not be serialized with JSON.stringify without this fix
 // http://stackoverflow.com/a/18391400
@@ -249,16 +277,17 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 });
 
 try {
-  module.exports.gitVersion = /.*?(\d+[.]\d+[.]\d+).*/.exec(child_process.execSync('git --version').toString())[1];
+  module.exports.gitVersion = /.*?(\d+[.]\d+[.]\d+).*/.exec(child_process.execSync(module.exports.gitCommand + ' --version').toString())[1];
 } catch (e) {
-  winston.error('Can\'t run "git --version". Is git installed and available in your path?', e.stderr);
+  winston.error('Can\'t run "' + module.exports.gitCommand + ' --version". Is git installed and available in your path?', e.stderr);
+  winston.error('Alternatively you can set the full path to git command via "gitCommand" setting in .ungitrc or with --gitCommand', e.stderr);
   throw e;
 }
 
 module.exports.ungitPackageVersion = require('../package.json').version;
 
 if (fs.existsSync(path.join(__dirname, '..', '.git'))){
-  const revision = child_process.execSync('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') })
+  const revision = child_process.execSync(module.exports.gitCommand + ' rev-parse --short HEAD', { cwd: path.join(__dirname, '..') })
     .toString()
     .replace('\n', ' ')
     .trim();
