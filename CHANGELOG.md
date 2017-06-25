@@ -6,6 +6,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - 1.1.21:
   - Initial refactoring of click test using nightmare and mocha
   - **Dropping support for node 4.x and 5.x!, 6.x and later is now supported.**
+  - fixes #929 - Added a config setting to allow setting the default diff type - See [README.md](./README.md)
 - 1.1.20: Hide credentials in remote urls at home repo list
 - 1.1.19: Ask before deleting a stash
 - 1.1.18: Fix checking out remote refs (again)
