@@ -54,9 +54,11 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 {
 	"port": 8080,
 	"bugtracking": true,
-	"diffType": "textdiff" | "sidebysidediff"
+	"diffType": "sidebysidediff"
 }
 ```
+
+`diffType`: Can be `"textdiff"` or `"sidebysidediff"` - default is `"textdiff"`
 
 External Merge Tools
 --------------------
