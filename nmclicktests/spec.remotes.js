@@ -9,7 +9,7 @@ const testRepoPaths = [];
 describe('test remotes', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ path: '/tmp/00', bare: true }, { path: '/tmp/01', bare: false, initCommits: 2 }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: true }, { bare: false, initCommits: 2 }]))
       .then(() => testRepoPaths.push(testRepoPaths[1] + "-cloned")) // A directory to test cloning
       .then(() => rimraf(testRepoPaths[2]))   // clean clone test dir
       .then(() => mkdirp(testRepoPaths[2]));  // create clone test dir
@@ -67,22 +67,21 @@ describe('test remotes', () => {
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
   });
 
-  // it('Should be possible to fetch', (done) => {
-  //   return environment.nm.ug.click('[data-ta-clickable="fetch"]')
-  //     .wait('[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]')
-  //     .ug.waitForElementNotVisible('[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]');
-  // });
-  //
-  // it('Should be possible to create and push a branch', () => {
-  //   return environment.nm.ug.createBranch('branchinclone')
-  //     .ug.refAction('branchinclone', true, 'push');
-  // });
-  //
-  // it('Should be possible to force push a branch', (done) => {
-  //   return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
-  //     .ug.click('[data-ta-clickable="branch"][data-ta-name="branchinclone"][data-ta-local="true"]')
-  //     .ug.click('[data-ta-action="push"][data-ta-visible="true"]')
-  //     .ug.click('[data-ta-clickable="yes"]')
-  //     .ug.waitForElementNotVisible('[data-ta-action="push"][data-ta-visible="true"]')
-  // });
+  it('Should be possible to fetch', () => {
+    return environment.nm.click('[data-ta-clickable="fetch"]')
+      .wait('[data-ta-clickable="fetch"] [data-ta-element="progress-bar"]')
+      .ug.waitForElementNotVisible('[data-ta-clickable="fetch"][data-ta-element="progress-bar"]');
+  });
+
+  it('Should be possible to create and push a branch', () => {
+    return environment.nm.ug.createBranch('branchinclone')
+      .ug.refAction('branchinclone', true, 'push')
+      .wait('[data-ta-name="origin/branchinclone"]');
+  });
+
+  it('Should be possible to force push a branch', () => {
+    return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
+      .ug.refAction('branchinclone', true, 'push')
+      .ug.waitForElementNotVisible('[data-ta-action="push"][data-ta-visible="true"]')
+  });
 });

@@ -81,6 +81,20 @@ Nightmare.action('ug', {
     this.wait((selector) => !document.querySelector(selector), selector)
       .then(done.bind(null, null), done);
   },
+  'refAction': function(ref, local, action, done) {
+    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]')
+      .ug.click('[data-ta-action="' + action + '"][data-ta-visible="true"] [role="button"]')
+      .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
+      .wait(200)
+      .then(done.bind(null, null), done);
+  },
+  'moveRef': function(ref, targetNodeCommitTitle, done) {
+    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"]')
+      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"] [role="button"]')
+      .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
+      .wait(200)
+      .then(done.bind(null, null), done);
+  },
   'createRef': function(name, type, done) {
     console.log(`Creating ${name} as ${type}`);
     this.click('.current ~ .newRef button.showBranchingForm')
