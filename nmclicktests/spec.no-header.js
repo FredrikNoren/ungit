@@ -13,7 +13,7 @@ describe('test no-header', () => {
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0])
       .wait('[data-ta-container="repository-view"]')
-      .visible('[data-ta-container="remote-error-popup"]')
+      .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
   });
 
@@ -21,7 +21,7 @@ describe('test no-header', () => {
     return environment.nm.wait('[data-ta-clickable="refresh-button"]')
       .click('[data-ta-clickable="refresh-button"]')
       .wait(2000)
-      .visible('[data-ta-container="remote-error-popup"]')
+      .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
   });
 });
