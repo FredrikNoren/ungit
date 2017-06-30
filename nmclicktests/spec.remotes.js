@@ -17,8 +17,7 @@ describe('test remotes', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[1])
-      .wait('.graph');
+    return environment.nm.ug.openUngit(testRepoPaths[1]);
   });
 
   it('Adding a remote', () => {

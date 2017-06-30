@@ -11,7 +11,7 @@ describe('test load-ahead', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0])
+    return environment.nm.ug.openUngit(testRepoPaths[0]);
   });
 
   it('Should be possible to create and commit 1', () => {
