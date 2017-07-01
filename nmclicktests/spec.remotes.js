@@ -10,7 +10,7 @@ describe('test remotes', () => {
   before('Environment init', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: true }, { bare: false, initCommits: 2 }]))
-      .then(() => testRepoPaths.push(testRepoPaths[1] + "-cloned")) // A directory to test cloning
+      .then(() => testRepoPaths.push(`${testRepoPaths[1]}-cloned`)) // A directory to test cloning
       .then(() => rimraf(testRepoPaths[2]))   // clean clone test dir
       .then(() => mkdirp(testRepoPaths[2]));  // create clone test dir
   });
