@@ -104,136 +104,73 @@ describe('test generic', () => {
       .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
   });
 
-});
+  it('Commit changes to a file', () => {
+    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
+      .wait('[data-ta-container="staging-file"]')
+      .insert('[data-ta-input="staging-commit-title"]', 'My commit message')
+      .click('[data-ta-clickable="commit"]')
+      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+  });
 
+  it('Show stats for changed file and discard it', () => {
+    return environment.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
+      .wait('[data-ta-container="staging-file"] .additions')
+      .wait('[data-ta-container="staging-file"] .deletions')
+      .ug.click('[data-ta-clickable="discard-file"]')
+      .ug.click('[data-ta-clickable="yes"]')
+      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+  });
 
+  it.skip('Should be possible to patch a file', () => {
+    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]/testfile.txt}`)
+      .patch('patch')
+      .waitForElementVisible('.commit');
+  });
 
+  it('Checkout a branch', () => {
+    return environment.nm.ug.checkout('testbranch');
+  });
 
-var testRepoPath; testRepoPaths[0]
-var testRepoPathSubDir = testRepoPath/asubdir // testRepoPaths[1]
+  it('Create another commit', () => {
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testy2.txt`)
+      .commit('Branch commit');
+  });
 
+  it('Rebase', () => {
+    return environment.nm.ug.refaction('testbranch', true, 'rebase');
+  });
 
+  it('Checkout master again', () => {
+    return environment.nm.ug.checkout('master');
+  });
 
+  it('Create yet another commit', () => {
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testy3.txt`)
+      .ug.commit('Branch commit');
+  });
 
+  it('Merge', () => {
+    return environment.nm.ug.refAction('testbranch', true, 'merge');
+  });
 
+  it('Revert merge', () => {
+    return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
+      .wait('[data-ta-action="revert"]')
+      .ug.click('[data-ta-action="revert"]')
+      .ug.waitForElementNotVisible('[data-ta-container="user-error-page"]');
+  });
 
+  it('Should be possible to move a branch', () => {
+    return environment.nm.ug.createBranch('movebranch')
+      .moveRef('movebranch', 'Init');
+  });
 
+  it('Should be possible to click refresh button', () => {
+    return environment.nm.ug.click('button.refresh-button');
+  });
 
-
-it('Commit changes to a file', () => {
-environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
-  if (err) return done(err);
-  helpers.waitForElementVisible(page, '[data-ta-container="staging-file"]', function() {
-    helpers.click(page, '[data-ta-input="staging-commit-title"]')
-    helpers.write(page, 'My commit message');
-    setTimeout(function() {
-      helpers.click(page, '[data-ta-clickable="commit"]');
-      helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
-        done();
-        });
-      }, 100);
-    });
+  it('Go to home screen', () => {
+    return environment.nm.ug.click('[data-ta-clickable="home-link"]')
+      .wait('[data-ta-container="home-page"]');
   });
 });
-
-it('Show stats for changed file and discard it', () => {
-  environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
-    if (err) return done(err);
-    helpers.waitForElementVisible(page, '[data-ta-container="staging-file"] .additions', function(element) {
-      if (element.textContent != '+1') {
-        return done(new Error('file additions do not match: expected: "+1" but was "' + element.textContent + '"'));
-      }
-      helpers.waitForElementVisible(page, '[data-ta-container="staging-file"] .deletions', function(element) {
-        if (element.textContent != '-1') {
-          return done(new Error('file deletions do not match: expected: "-1" but was "' + element.textContent + '"'));
-        }
-        helpers.click(page, '[data-ta-clickable="discard-file"]');
-        helpers.click(page, '[data-ta-clickable="yes"]');
-        helpers.waitForElementNotVisible(page, '[data-ta-container="staging-file"]', function() {
-          done();
-        });
-      });
-    });
-  });
-});
-
-// it('Should be possible to patch a file', () => {
-//   environment.changeTestFile(testRepoPath + '/testfile.txt', function(err) {
-//     if (err) return done(err);
-//     uiInteractions.patch(page, 'Patch', function() {
-//       helpers.waitForElementVisible(page, '.commit', function() {
-//         done();
-//       });
-//     });
-//   });
-// });
-
-it('Checkout a branch', () => {
-  uiInteractions.checkout(page, 'testbranch', done);
-});
-
-it('Create another commit', () => {
-  environment.createTestFile(testRepoPath + '/testy2.txt', function(err) {
-    if (err) return done(err);
-    uiInteractions.commit(page, 'Branch commit', done);
-  });
-});
-
-it('Rebase', () => {
-  uiInteractions.refAction(page, 'testbranch', true, 'rebase', done);
-});
-
-it('Checkout master again', () => {
-  uiInteractions.checkout(page, 'master', done);
-});
-
-it('Create yet another commit', () => {
-  environment.createTestFile(testRepoPath + '/testy3.txt', function(err) {
-    if (err) return done(err);
-    uiInteractions.commit(page, 'Branch commit', done);
-  });
-});
-
-it('Merge', () => {
-  uiInteractions.refAction(page, 'testbranch', true, 'merge', done);
-});
-
-it('Revert merge', () => {
-  helpers.click(page, '[data-ta-clickable="node-clickable-0"]');
-  helpers.waitForElementVisible(page, '[data-ta-action="revert"]', function() {
-    helpers.click(page, '[data-ta-action="revert"]');
-    helpers.waitForElementNotVisible(page, '[data-ta-container="user-error-page"]', function() {
-      done();
-    });
-  });
-});
-
-it('Should be possible to move a branch', () => {
-  uiInteractions.createBranch(page, 'movebranch', function() {
-    uiInteractions.moveRef(page, 'movebranch', 'Init', done);
-  });
-});
-
-it('Should be possible to click refresh button', () => {
-  helpers.click(page, 'button.refresh-button');
-  done();
-});
-
-// Shutdown
-it('Go to home screen', () => {
-  helpers.click(page, '[data-ta-clickable="home-link"]');
-  helpers.waitForElementVisible(page, '[data-ta-container="home-page"]', function() {
-    done();
-  });
-});
-
-it('Shutdown server should bring you to connection lost page', () => {
-  environment.shutdown(function() {
-    helpers.waitForElementVisible(page, '[data-ta-container="user-error-page"]', function() {
-      page.close();
-      done();
-    });
-  }, true);
-});
-
-testsuite.runAllSuits();
