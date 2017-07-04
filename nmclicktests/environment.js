@@ -25,6 +25,24 @@ Nightmare.action('ug', {
       .wait(1000)
       .then(done.bind(null, null), done);
   },
+  'amendCommit': function(done) {
+    this.ug.click('[data-bind="click: toggleAmend"]')
+      .click('[data-ta-clickable="commit"]')
+      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .wait(1000)
+      .then(done.bind(null, null), done);
+  },
+  'createTag': function(name, done) {
+    this.ug.createRef(page, name, 'tag')
+      .then(done.bind(null, null), done);
+  },
+  'patch': function(commitMessage, done) {
+    this.ug.click('[data-ta-container="staging-file"]')
+      .ug.click('[data-ta-clickable="patch-file"]')
+      .wait('[data-ta-clickable="patch-line-input"]')
+      .ug.commit('[data-ta-clickable="patch-line-input"]')
+      .then(done.bind(null, null), done);
+  },
   'backgroundAction': function(method, url, body, done) {
     let req;
     if (method === 'GET') {
