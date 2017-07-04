@@ -1,5 +1,4 @@
 'use strict';
-const expect = require('expect.js');
 const muteGraceTimeDuration = 2000;
 const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
@@ -21,7 +20,7 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
     });
 }
 
-describe('test discard with --disableDiscardWarning', () => {
+describe('[DISCARD - noWarn]', () => {
   const environment = require('./environment')({ serverStartupOptions: ['--disableDiscardWarning'] });
   const testRepoPaths = [];
 
@@ -39,7 +38,7 @@ describe('test discard with --disableDiscardWarning', () => {
   });
 });
 
-describe('test discard with --no-disableDiscardWarning and discard mute', () => {
+describe('[DISCARD - withWarn]', () => {
   const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
   const testRepoPaths = [];
 

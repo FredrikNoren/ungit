@@ -1,12 +1,11 @@
 'use strict';
-const expect = require('expect.js');
 const environment = require('./environment')();
 const Bluebird = require('bluebird');
 const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
 const rimraf = Bluebird.promisify(require("rimraf"));
 const testRepoPaths = [];
 
-describe('test screens', () => {
+describe('[SCREENS]', () => {
   before('Environment init', () => environment.init());
 
   after('Environment stop', () => environment.shutdown());

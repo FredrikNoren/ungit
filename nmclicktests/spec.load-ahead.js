@@ -1,9 +1,8 @@
 'use strict';
-const expect = require('expect.js');
 const environment = require('./environment')({ serverStartupOptions: ['--numberOfNodesPerLoad=1'] });
 const testRepoPaths = [];
 
-describe('test load-ahead', () => {
+describe('[LOAD-AHEAD]', () => {
   before('Environment init', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));

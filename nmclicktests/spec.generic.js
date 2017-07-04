@@ -1,12 +1,11 @@
 'use strict';
-const expect = require('expect.js');
 const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
 const Bluebird = require('bluebird');
 const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
 const rimraf = Bluebird.promisify(require("rimraf"));
 const testRepoPaths = [];
 
-describe('test generic', () => {
+describe('[GENERIC]', () => {
   before('Environment init', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))

@@ -1,12 +1,11 @@
 'use strict';
-const expect = require('expect.js');
 const testuser = { username: 'testuser', password: 'testpassword' }
 const environment = require('./environment')({
   serverStartupOptions: ['--authentication', `--users.${testuser.username}=${testuser.password}`],
   showServerOutput: true
 });
 
-describe('test authentication', () => {
+describe('[AUTHENTICATION]', () => {
   before('Environment init without temp folder', () => environment.init());
   after('Close nightmare', () => environment.nm.end());
 
