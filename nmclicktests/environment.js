@@ -33,7 +33,13 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'createTag': function(name, done) {
-    this.ug.createRef(page, name, 'tag')
+    this.ug.createRef(name, 'tag')
+      .then(done.bind(null, null), done);
+  },
+  'checkout': function(branch, done) {
+    this.ug.click('[data-ta-clickable="branch"][data-ta-name="' + branch + '"]')
+      .ug.click('[data-ta-action="checkout"][data-ta-visible="true"] [role="button"]')
+      .wait('[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]')
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {

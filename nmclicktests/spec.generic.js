@@ -9,7 +9,7 @@ const testRepoPaths = [];
 describe('test generic', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, path: testRepoPat }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
       // create a sub dir and change working dir to sub dir to prove functionality within subdir
       .then(() => testRepoPaths.push(`${testRepoPaths[0]}/asubdir`))
       .then(() => rimraf(testRepoPaths[1]))
@@ -22,13 +22,13 @@ describe('test generic', () => {
   });
 
   it('Check for refresh button', () => {
-    return environment.nm.ug.wait('[data-ta-clickable="refresh-button"]')
-      .ug.clcik('[data-ta-clickable="refresh-button"]');
+    return environment.nm.wait('[data-ta-clickable="refresh-button"]')
+      .ug.click('[data-ta-clickable="refresh-button"]');
   });
 
   it('Should be possible to create and commit a file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('init')
+      .ug.commit('Init')
       .wait('.commit');
   });
 
@@ -47,7 +47,7 @@ describe('test generic', () => {
   });
 
   it('Test showing commit diff between two commits', () => {
-    return environment.nm.ug.wait('[data-ta-clickable="node-clickable-0"]')
+    return environment.nm.wait('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-clickable="node-clickable-0"]')
       .wait('.diff-wrapper')
       .ug.click('[data-ta-clickable="commitDiffFileName"]')
@@ -89,7 +89,7 @@ describe('test generic', () => {
   it('Should be possible to create and destroy a branch', () => {
     return environment.nm.ug.createBranch('willbedeleted')
       .ug.click('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"]')
+      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
@@ -98,7 +98,7 @@ describe('test generic', () => {
   it('Should be possible to create and destroy a tag', () => {
     return environment.nm.ug.createTag('tagwillbedeleted')
       .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"]')
+      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
@@ -113,7 +113,7 @@ describe('test generic', () => {
   });
 
   it('Show stats for changed file and discard it', () => {
-    return environment.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
+    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .wait('[data-ta-container="staging-file"] .additions')
       .wait('[data-ta-container="staging-file"] .deletions')
       .ug.click('[data-ta-clickable="discard-file"]')
@@ -122,7 +122,7 @@ describe('test generic', () => {
   });
 
   it.skip('Should be possible to patch a file', () => {
-    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]/testfile.txt}`)
+    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .patch('patch')
       .waitForElementVisible('.commit');
   });
@@ -133,11 +133,11 @@ describe('test generic', () => {
 
   it('Create another commit', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testy2.txt`)
-      .commit('Branch commit');
+      .ug.commit('Branch commit');
   });
 
   it('Rebase', () => {
-    return environment.nm.ug.refaction('testbranch', true, 'rebase');
+    return environment.nm.ug.refAction('testbranch', true, 'rebase');
   });
 
   it('Checkout master again', () => {
@@ -162,7 +162,7 @@ describe('test generic', () => {
 
   it('Should be possible to move a branch', () => {
     return environment.nm.ug.createBranch('movebranch')
-      .moveRef('movebranch', 'Init');
+      .ug.moveRef('movebranch', 'Init');
   });
 
   it('Should be possible to click refresh button', () => {
