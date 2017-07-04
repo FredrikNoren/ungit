@@ -147,18 +147,6 @@ module.exports = function(grunt) {
           }
         ]
       },
-      phantomjs: {
-        options: {
-          phantom: true,
-          browser: true,
-          globals: {
-            '$': true,
-            'module': true,
-            'ungit': true
-          }
-        },
-        src: ['clicktests/**/*.js']
-      },
       node: {
         options: {
           node: true,
@@ -352,103 +340,6 @@ module.exports = function(grunt) {
     }).then(this.async());
   });
 
-  var getClickTestFiles = function(folderName) {
-    return fs.readdirAsync(folderName)
-      .then(function(files) {
-        return files.filter(function(file) {
-          return file.startsWith("test.");
-        });
-      });
-  }
-
-  var clickExecute = function(file, onOut, onErr) {
-    return new Bluebird(function(resolve, reject) {
-      var child = childProcess.execFile(phantomjs.path, [path.join(__dirname, 'clicktests', file)], { maxBuffer: 10*1024*1024 });
-      child.stdout.on('data', onOut);
-      child.stderr.on('data', onErr);
-      child.on('exit', function(code) {
-        if (code == 0) resolve(file);
-        else reject();
-      });
-    });
-  }
-
-  var running = 0;
-  var maxConcurrency = 5;
-  var acquireLock = function() {
-    if (running < maxConcurrency) {
-      running++;
-      return Bluebird.resolve();
-    }
-
-    return new Bluebird(function(resolve, reject) {
-      return Bluebird.resolve()
-        .delay(1000)
-        .then(acquireLock)
-        .then(resolve)
-    });
-  }
-  var releaseLock = function(result) {
-    --running;
-    return result;
-  }
-
-  grunt.registerTask('clicktest', 'Run clicktests.', function() {
-    var done = this.async();
-    grunt.log.writeln('Running clicktests...');
-
-    getClickTestFiles('clicktests').then(function(clickTestFiles) {
-      var onOut = function(data) { grunt.log.write(data); }
-      var onErr = function(data) { grunt.log.error(data); }
-      var onFinish = function(file) {
-        grunt.log.writeln(file + ' Clicktest success!');
-        if (clickTestFiles.length > 0) return clickExecute(clickTestFiles.shift(), onOut, onErr).then(onFinish)
-        else done(true);
-      }
-
-      clickExecute(clickTestFiles.shift(), onOut, onErr)
-        .then(onFinish)
-        .catch(done.bind(null, false))
-    }).catch(done)
-  });
-
-  // This is purely for devs for faster churn of clicktest result
-  // Each individual click test files will be excuted in it's own threads.
-  // TODO: need to even out test loads of each tests and better spread clicktest loads.
-  grunt.registerTask('clickParallel', 'Run clicktests in parallel for faster code dev churn.', function() {
-    var done = this.async();
-
-    getClickTestFiles().then(function(clickTestFiles) {
-      grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
-      Bluebird.all(clickTestFiles.map(function(file) {
-        var output = "";
-        var outStream = function(data) { output += data; }
-        return acquireLock().then(function() {
-          grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
-          return clickExecute(file, outStream, outStream)
-            .then(function() {
-              grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
-              return { name: file, output: output, isSuccess: true };
-            }).catch(function() {
-              grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
-              return { name: file, output: output, isSuccess: false };
-            });
-          }).then(releaseLock);
-      })).then(function(results) {
-        var isSuccess = true;
-        results.forEach(function(result) {
-          if (!result.isSuccess) {
-            grunt.log.writeln("---- start of " + result.name + " log ----")
-            grunt.log.writeln(result.output);
-            grunt.log.writeln("---- end of " + result.name + " log ----")
-            isSuccess = false;
-          }
-        });
-        done(isSuccess);
-      });
-    }).catch(done);
-  });
-
   function bumpDependency(packageJson, packageName) {
     return new Bluebird(function(resolve, reject) {
       var dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
@@ -546,7 +437,7 @@ module.exports = function(grunt) {
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
   grunt.registerTask('nmclicktest', ['mochaTest:click']);
-  grunt.registerTask('test', ['unittest', 'nmclicktest', 'clicktest']);
+  grunt.registerTask('test', ['unittest', 'nmclicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);

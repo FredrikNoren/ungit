@@ -85,7 +85,6 @@
     "istanbul": "~0.4.5",
     "mocha": "~3.3.0",
     "nightmare": "~2.10.0",
-    "phantomjs-prebuilt": "~2.1.14",
     "supertest": "~3.0.0"
   },
   "engines": {
