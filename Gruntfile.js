@@ -1,5 +1,4 @@
 var childProcess = require('child_process');
-var phantomjs = require('phantomjs-prebuilt');
 var path = require('path');
 var fs = require('./source/utils/fs-async');
 var npm = require('npm');
