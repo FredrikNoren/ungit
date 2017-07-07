@@ -52,7 +52,7 @@ Nightmare.action('ug', {
   'backgroundAction': function(method, url, body, done) {
     let req;
     if (method === 'GET') {
-      req = request.get(url).query(body);
+      req = request.get(url).withCredentials().query(body);
     } else if (method === 'POST') {
       req = request.post(url).send(body);
     } else if (method === 'DELETE') {
@@ -174,7 +174,6 @@ class Environment {
 
       if (type === 'error' && !this.shuttinDown) {
         console.log('ERROR DETECTED!');
-        process.exit(1);
       }
     })
   }

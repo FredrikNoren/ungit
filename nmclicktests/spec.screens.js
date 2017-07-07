@@ -59,13 +59,14 @@ describe('[SCREENS]', () => {
   });
 
   // getting odd cross-domain-error.
-  // it('Create test directory with ampersand and open it', () =>  {
-  //   var specialRepoPath = `${testRepoPaths[0]}-test1/test & repo`;
-  //   return rimraf(specialRepoPath)
-  //     .then(() => mkdirp(specialRepoPath))
-  //     .then(() => {
-  //       return environment.nm.goto(`${environment.getRootUrl()}/#/repository?path=${specialRepoPath}`)
-  //         .wait('[data-ta-container="uninited-path-page"]')
-  //     });
-  // });
+  it('Create test directory with ampersand and open it', () =>  {
+    var specialRepoPath = `${testRepoPaths[0]}-test1/test & repo`;
+    return rimraf(specialRepoPath)
+      .then(() => mkdirp(specialRepoPath))
+      .then(() => {
+        return environment.nm.wait(2000)
+          .goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(specialRepoPath)}`)
+          .wait('[data-ta-container="uninited-path-page"]')
+      });
+  });
 });
