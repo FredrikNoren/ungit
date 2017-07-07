@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.22: finalize nightmare click test
+- 1.1.23: finalize nightmare click test
+- 1.1.22: Add a config setting to allow setting the default diff type. [#929](https://github.com/FredrikNoren/ungit/issues/929)
 - 1.1.21:
   - Initial refactoring of click test using nightmare and mocha
   - **Dropping support for node 4.x and 5.x!, 6.x and later is now supported.**

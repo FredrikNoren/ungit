@@ -63,7 +63,7 @@ If you have your own merge tool that you would like to use, such as Kaleidoscope
 
 Auto Refresh
 ------------
-Ungit will watch git directory recursively upon page view and automatically refresh contents on git operations or changes on files that are not configured to be ignored in `.gitignore`.  
+Ungit will watch git directory recursively upon page view and automatically refresh contents on git operations or changes on files that are not configured to be ignored in `.gitignore`.
 
 One caveat is that node's [`fs.watch()`](https://nodejs.org/docs/latest/api/fs.html#fs_fs_watch_filename_options_listener) with `recursive: true` option is only available in Mac and Windows.  For non Mac and Windows machines, git operations will be automatically refreshed but file changes may require manual refreshes as `fs.watch()` is unable to detect changes within nested directory hierarchy.
 
@@ -81,6 +81,10 @@ Text Editor Integrations
 * [Codiad-OpenUngit](https://github.com/viharm/Codiad-OpenUngit) for [Codiad](http://codiad.com/) by [@viharm](https://github.com/viharm)
 
 ![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
+
+* [vscode-ungit-tab](https://github.com/RomanValihura/vscode-ungit-tab) for [Visual Studio Code](https://code.visualstudio.com/) by [@RomanValihura](https://github.com/RomanValihura)
+ 
+![VSCode-UngitTab screenshot](https://raw.githubusercontent.com/RomanValihura/vscode-ungit-tab/master/samples/ungit-vs.gif)
 
 
 Developing

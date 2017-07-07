@@ -5,73 +5,79 @@ var diff2html = require('diff2html').Diff2Html;
 var programEvents = require('ungit-program-events');
 var Promise = require("bluebird");
 
-components.register('textdiff', function(args) {
+components.register('textdiff', function (args) {
   return new TextDiffViewModel(args);
 });
 
-components.register('textdiff.type', function() {
+components.register('textdiff.type', function () {
   return new Type();
 });
 
-components.register('textdiff.wordwrap', function() {
+components.register('textdiff.wordwrap', function () {
   return new WordWrap();
 });
 
-components.register('textdiff.whitespace', function() {
+components.register('textdiff.whitespace', function () {
   return new WhiteSpace();
 });
 
 var loadLimit = 100;
 
-var WordWrap = function() {
+var WordWrap = function () {
   var self = this;
 
   this.text = ko.observable("No Wrap");
   this.value = ko.observable(false);
-  this.value.subscribe(function(value) {
+  this.value.subscribe(function (value) {
     self.text(value ? "Word Wrap" : "No Wrap");
   });
-  this.toggle = function() {
+  this.toggle = function () {
     self.value(!self.value());
   }
-  this.isActive = ko.computed(function() { return !!self.value(); });
+  this.isActive = ko.computed(function () { return !!self.value(); });
 }
 
-var Type = function() {
+var Type = function () {
   var self = this;
   var sideBySideDiff = 'sidebysidediff'
   var textDiff = 'textdiff'
 
   this.text = ko.observable("Default");
-  this.value = ko.observable(textDiff);
-  this.value.subscribe(function(value) {
+
+  if (!!ungit.config.diffType && ungit.config.diffType !== 'textdiff' && ungit.config.diffType !== 'sidebysidediff') {
+    ungit.config.diffType = 'textdiff';
+    console.log('Config "diffType" must be either "textdiff" or "sidebysidediff".');
+  }
+
+  this.value = ko.observable(ungit.config.diffType || textDiff);
+  this.value.subscribe(function (value) {
     self.text(value === textDiff ? "Default" : "Side By Side");
     programEvents.dispatch({ event: 'invalidate-diff-and-render' });
   });
-  this.toggle = function() {
+  this.toggle = function () {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
   }
-  this.isActive = ko.computed(function() {
+  this.isActive = ko.computed(function () {
     return self.value() === 'textdiff';
   });
 }
 
-var WhiteSpace = function() {
+var WhiteSpace = function () {
   var self = this;
 
   this.text = ko.observable("Showing White Space diff");
   this.value = ko.observable(false);
-  this.value.subscribe(function(value) {
+  this.value.subscribe(function (value) {
     self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
     programEvents.dispatch({ event: 'invalidate-diff-and-render' });
   });
-  this.toggle = function() {
+  this.toggle = function () {
     self.value(!self.value());
   }
-  this.isActive = ko.computed(function() { return !self.value(); });
+  this.isActive = ko.computed(function () { return !self.value(); });
 }
 
-var TextDiffViewModel = function(args) {
+var TextDiffViewModel = function (args) {
   var self = this;
   this.filename = args.filename;
   this.repoPath = args.repoPath;
@@ -91,23 +97,23 @@ var TextDiffViewModel = function(args) {
   this.htmlSrc = undefined;
   this.isParsed = ko.observable(false);
 
-  programEvents.add(function(event) {
+  programEvents.add(function (event) {
     if (event.event === "invalidate-diff-and-render" || event.event === "working-tree-changed") {
       self.invalidateDiff();
       if (self.isShowingDiffs()) self.render();
     }
   });
 
-  this.isShowingDiffs.subscribe(function(newValue) {
+  this.isShowingDiffs.subscribe(function (newValue) {
     if (newValue) self.render();
   });
 
   if (this.isShowingDiffs()) { this.render(); }
 }
-TextDiffViewModel.prototype.updateNode = function(parentElement) {
+TextDiffViewModel.prototype.updateNode = function (parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
 }
-TextDiffViewModel.prototype.getDiffArguments = function() {
+TextDiffViewModel.prototype.getDiffArguments = function () {
   return {
     file: this.filename,
     path: this.repoPath(),
@@ -116,17 +122,17 @@ TextDiffViewModel.prototype.getDiffArguments = function() {
   };
 }
 
-TextDiffViewModel.prototype.invalidateDiff = function() {
+TextDiffViewModel.prototype.invalidateDiff = function () {
   this.diffJson = null;
 }
 
-TextDiffViewModel.prototype.getDiffJson = function() {
+TextDiffViewModel.prototype.getDiffJson = function () {
   var self = this;
-  return self.server.getPromise('/diff', self.getDiffArguments()).then(function(diffs) {
+  return self.server.getPromise('/diff', self.getDiffArguments()).then(function (diffs) {
     if (typeof diffs == 'string') {
       self.diffJson = diff2html.getJsonFromDiff(diffs);
     }
-  }).catch(function(err) {
+  }).catch(function (err) {
     // The file existed before but has been removed, but we're trying to get a diff for it
     // Most likely it will just disappear with the next refresh of the staging area
     // so we just ignore the error here
@@ -134,18 +140,18 @@ TextDiffViewModel.prototype.getDiffJson = function() {
   });
 }
 
-TextDiffViewModel.prototype.render = function(isInvalidate) {
+TextDiffViewModel.prototype.render = function (isInvalidate) {
   var self = this;
-  return Promise.resolve().then(function() {
+  return Promise.resolve().then(function () {
     if (!self.diffJson || isInvalidate) {
       return self.getDiffJson();
     }
-  }).then(function() {
+  }).then(function () {
     if (!self.diffJson || self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
     var lineCount = 0;
 
     if (!self.diffJson[0].isTrimmed) {
-      self.diffJson[0].blocks = self.diffJson[0].blocks.reduce(function(blocks, block) {
+      self.diffJson[0].blocks = self.diffJson[0].blocks.reduce(function (blocks, block) {
         var length = block.lines.length;
         if (lineCount < self.loadCount) {
           block.lines = block.lines.slice(0, self.loadCount - lineCount);
@@ -192,19 +198,19 @@ TextDiffViewModel.prototype.render = function(isInvalidate) {
   });
 };
 
-TextDiffViewModel.prototype.loadMore = function() {
+TextDiffViewModel.prototype.loadMore = function () {
   this.loadCount += this.loadMoreCount();
   programEvents.dispatch({ event: 'invalidate-diff-and-render' });
 }
 
-TextDiffViewModel.prototype.getPatchCheckBox = function(symbol, index, isActive) {
+TextDiffViewModel.prototype.getPatchCheckBox = function (symbol, index, isActive) {
   if (isActive) {
     this.numberOfSelectedPatchLines++;
   }
   return '<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== \'patched\'">' + symbol + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-ta-clickable="patch-line-input" data-bind="visible: editState() === \'patched\', click: togglePatchLine.bind($data, ' + index + ')"></input>';
 }
 
-TextDiffViewModel.prototype.togglePatchLine = function(index) {
+TextDiffViewModel.prototype.togglePatchLine = function (index) {
   this.patchLineList()[index] = !this.patchLineList()[index];
 
   if (this.patchLineList()[index]) {
