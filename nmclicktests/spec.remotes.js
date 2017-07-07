@@ -54,8 +54,7 @@ describe('[REMOTES]', () => {
   });
 
   it('Clone repository should bring you to repo page', () => {
-    return environment.nm.screenshot('/tmp/test1.png')
-      .insert('[data-ta-input="clone-url"]', testRepoPaths[1])
+    return environment.nm.insert('[data-ta-input="clone-url"]', testRepoPaths[1])
       .insert('[data-ta-input="clone-target"]', testRepoPaths[2])
       .ug.click('[data-ta-clickable="clone-repository"]')
       .refresh()  // this is currently neccessary as cloning -> repo view transition is not straight forward
