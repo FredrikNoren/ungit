@@ -136,7 +136,10 @@ const defaultConfig = {
 
   // Specifies a custom git merge tool to use when resolving conflicts. Your git configuration must be set up to use this!
   // A true value will use the default tool while a string value will use the tool of that specified name.
-  mergeTool: false
+  mergeTool: false,
+
+  // Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
+	diffType: undefined,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -192,6 +195,7 @@ let argv = yargs
 .describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
+.describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
 ;
 
 var argvConfig = argv.argv;
