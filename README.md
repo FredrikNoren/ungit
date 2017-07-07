@@ -82,6 +82,10 @@ Text Editor Integrations
 
 ![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
 
+* [vscode-ungit-tab](https://github.com/RomanValihura/vscode-ungit-tab) for [Visual Studio Code](https://code.visualstudio.com/) by [@RomanValihura](https://github.com/RomanValihura)
+ 
+![VSCode-UngitTab screenshot](https://raw.githubusercontent.com/RomanValihura/vscode-ungit-tab/master/samples/ungit-vs.gif)
+
 
 Developing
 ----------
