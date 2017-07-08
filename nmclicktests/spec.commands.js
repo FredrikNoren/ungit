@@ -1,5 +1,4 @@
 'use strict';
-const expect = require('expect.js');
 const environment = require('./environment')();
 const testRepoPaths = [];
 
@@ -16,11 +15,12 @@ const testForBranchMove = (branch, command) => {
     });
 }
 
-describe('test commands', () => {
+describe('[COMMANDS]', () => {
   before('Environment init', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
+  after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0]);

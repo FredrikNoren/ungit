@@ -25,10 +25,34 @@ Nightmare.action('ug', {
       .wait(1000)
       .then(done.bind(null, null), done);
   },
+  'amendCommit': function(done) {
+    this.ug.click('[data-bind="click: toggleAmend"]')
+      .click('[data-ta-clickable="commit"]')
+      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .wait(1000)
+      .then(done.bind(null, null), done);
+  },
+  'createTag': function(name, done) {
+    this.ug.createRef(name, 'tag')
+      .then(done.bind(null, null), done);
+  },
+  'checkout': function(branch, done) {
+    this.ug.click('[data-ta-clickable="branch"][data-ta-name="' + branch + '"]')
+      .ug.click('[data-ta-action="checkout"][data-ta-visible="true"] [role="button"]')
+      .wait('[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]')
+      .then(done.bind(null, null), done);
+  },
+  'patch': function(commitMessage, done) {
+    this.ug.click('[data-ta-container="staging-file"]')
+      .ug.click('[data-ta-clickable="patch-file"]')
+      .wait('[data-ta-clickable="patch-line-input"]')
+      .ug.commit('[data-ta-clickable="patch-line-input"]')
+      .then(done.bind(null, null), done);
+  },
   'backgroundAction': function(method, url, body, done) {
     let req;
     if (method === 'GET') {
-      req = request.get(url).query(body);
+      req = request.get(url).withCredentials().query(body);
     } else if (method === 'POST') {
       req = request.post(url).send(body);
     } else if (method === 'DELETE') {
@@ -79,6 +103,20 @@ Nightmare.action('ug', {
   },
   'waitForElementNotVisible': function(selector, done) {
     this.wait((selector) => !document.querySelector(selector), selector)
+      .then(done.bind(null, null), done);
+  },
+  'refAction': function(ref, local, action, done) {
+    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]')
+      .ug.click('[data-ta-action="' + action + '"][data-ta-visible="true"] [role="button"]')
+      .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
+      .wait(200)
+      .then(done.bind(null, null), done);
+  },
+  'moveRef': function(ref, targetNodeCommitTitle, done) {
+    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"]')
+      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"] [role="button"]')
+      .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
+      .wait(200)
       .then(done.bind(null, null), done);
   },
   'createRef': function(name, type, done) {
@@ -136,7 +174,6 @@ class Environment {
 
       if (type === 'error' && !this.shuttinDown) {
         console.log('ERROR DETECTED!');
-        process.exit(1);
       }
     })
   }

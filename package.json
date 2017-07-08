@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.1.22",
+  "version": "1.1.23",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -85,7 +85,6 @@
     "istanbul": "~0.4.5",
     "mocha": "~3.3.0",
     "nightmare": "~2.10.0",
-    "phantomjs-prebuilt": "~2.1.14",
     "supertest": "~3.0.0"
   },
   "engines": {

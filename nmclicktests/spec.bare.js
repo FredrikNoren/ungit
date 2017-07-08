@@ -1,9 +1,8 @@
 'use strict';
-const expect = require('expect.js');
 const environment = require('./environment')();
 const testRepoPaths = [];
 
-describe('test bare repo', () => {
+describe('[BARE]', () => {
   before('Environment init', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: true }]));
