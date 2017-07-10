@@ -76,7 +76,7 @@ Text Editor Integrations
 
 * [brackets-ungit](https://github.com/Hirse/brackets-ungit) for [Brackets.io](http://brackets.io/) by [@hirse](https://github.com/Hirse)
 
-![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/screenshots/viewer.png)
+![atom-brackets Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/images/viewer.png)
 
 * [Codiad-OpenUngit](https://github.com/viharm/Codiad-OpenUngit) for [Codiad](http://codiad.com/) by [@viharm](https://github.com/viharm)
 
