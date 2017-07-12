@@ -91,8 +91,7 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
     .closeThen(function(diag) {
       if(diag.isSubmitted()) {
         return self.server.postPromise('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() })
-          .then(function() { self.updateRemotes(); })
-          .catch(function() {});
+          .then(function() { self.updateRemotes(); });
       }
     });
 }

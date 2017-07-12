@@ -72,7 +72,7 @@ PathViewModel.prototype.updateStatus = function() {
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
-  return this.server.postPromise('/init', { path: this.repoPath() }).catch(function() {})
+  return this.server.postPromise('/init', { path: this.repoPath() })
     .finally(function(res) { self.updateStatus(); });
 }
 PathViewModel.prototype.onProgramEvent = function(event) {
@@ -91,8 +91,7 @@ PathViewModel.prototype.cloneRepository = function() {
 
   return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }).then(function(res) {
       navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
-    }).catch(function() {})
-    .finally(function() { self.cloningProgressBar.stop() })
+    }).finally(function() { self.cloningProgressBar.stop() })
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;

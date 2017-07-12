@@ -59,8 +59,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
       self.fetchProgressBar.start();
       self.server.postPromise('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }).then(function() {
           programEvents.dispatch({ event: 'submodule-fetch' });
-        }).catch(function() {})
-        .finally(function() { self.fetchProgressBar.stop(); });
+        }).finally(function() { self.fetchProgressBar.stop(); });
     });
 }
 
