@@ -119,7 +119,6 @@ RefViewModel.prototype.remove = function() {
   if (this.isRemote) url = '/remote' + url;
 
   return this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName })
-    .catch(function() {})
     .then(function() {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;

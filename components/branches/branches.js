@@ -37,7 +37,6 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   this.fetchingProgressBar.start();
   this.server.postPromise('/checkout', { path: this.repoPath(), name: branch.name })
     .then(function() { self.current(branch.name); })
-    .catch(function() {})
     .finally(function() { self.fetchingProgressBar.stop(); });
 }
 BranchesViewModel.prototype.updateBranches = function() {
@@ -70,8 +69,7 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
     .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
-      self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() }).then(function(err) {
-        programEvents.dispatch({ event: 'working-tree-changed' });
-      }).catch(function() {});
+      self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() })
+        .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); });
     });
 }

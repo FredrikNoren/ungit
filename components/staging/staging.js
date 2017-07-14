@@ -243,7 +243,6 @@ StagingViewModel.prototype.commit = function() {
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
     .then(function() { self.resetMessages(); })
-    .catch(function() {})
     .finally(function() { self.committingProgressBar.stop(); });
 }
 StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
@@ -252,7 +251,6 @@ StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
   this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
-    .catch(function(){})
     .finally(function(err, res) {
       self.resetMessages();
       progressBar.stop();
