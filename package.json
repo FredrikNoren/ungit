@@ -67,7 +67,7 @@
     "browserify": "~14.3.0",
     "electron-packager": "~8.6.0",
     "expect.js": "~0.3.1",
-    "extract-zip":"=1.6.0",
+    "extract-zip": "=1.6.0",
     "grunt": "~1.0.1",
     "grunt-babel": "~6.0.0",
     "grunt-contrib-clean": "~1.1.0",
