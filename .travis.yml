@@ -28,6 +28,8 @@ addons:
     packages:
       - g++-4.8
       - xvfb
+before_install:
+  - "if [[ `npm -v` == 5* ]]; then npm install -g npm@4.6.1; fi "
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
