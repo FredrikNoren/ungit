@@ -31,7 +31,7 @@ describe('[STASH]', () => {
   });
 
   it('Should be possible to pop a stash', () => {
-    return environment.nm.click('[data-ta-clickable="stash-pop"]')
+    return environment.nm.click('[data-ta-clickable="stash-apply"]')
       .wait('[data-ta-container="staging-file"]')
   });
 });
