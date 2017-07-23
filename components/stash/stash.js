@@ -24,10 +24,10 @@ function StashItemViewModel(stash, data) {
     server: stash.server
   }));
 }
-StashItemViewModel.prototype.pop = function() {
+StashItemViewModel.prototype.apply = function() {
   var self = this;
   this.stashPopProgressBar.start();
-  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), pop: true }).finally(function() {
+  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true }).finally(function() {
     self.stashPopProgressBar.stop();
   });
 }

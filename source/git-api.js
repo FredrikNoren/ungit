@@ -564,7 +564,7 @@ exports.registerApi = (env) => {
   });
 
   app.delete(`${exports.pathPrefix}/stashes/:id`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const type = req.query.pop === 'true' ? 'pop' : 'drop';
+    const type = req.query.apply === 'true' ? 'apply' : 'drop';
     jsonResultOrFailProm(res, gitPromise(['stash', type, `stash@{${req.params.id}}`], req.query.path))
       .finally(emitGitDirectoryChanged.bind(null, req.query.path))
       .finally(emitWorkingTreeChanged.bind(null, req.query.path));

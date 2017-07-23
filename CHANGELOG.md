@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.25: fix invalid path input for autocomplete causing front end crash [#942](https://github.com/FredrikNoren/ungit/issues/942)
+- 1.1.26: fix invalid path input for autocomplete causing front end crash [#942](https://github.com/FredrikNoren/ungit/issues/942)
+- 1.1.25: Change stash pop operation to stash apply [#919](https://github.com/FredrikNoren/ungit/issues/919)
 - 1.1.24: fix some commands not properly reporting git error [#933](https://github.com/FredrikNoren/ungit/issues/933)
 - 1.1.23: finalize nightmare click test
 - 1.1.22: Add a config setting to allow setting the default diff type. [#929](https://github.com/FredrikNoren/ungit/issues/929)
