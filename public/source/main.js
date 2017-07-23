@@ -62,7 +62,9 @@ ko.bindingHandlers.autocomplete = {
           });
           $(element).autocomplete("search", value);
         }).catch(function(err) {
-          if (err.errorCode !== 'read-dir-failed') throw err;
+          if (!err.errorSummary.startsWith('ENOENT: no such file or directory') && err.errorCode !== 'read-dir-failed') {
+            throw err;
+          }
         });
       } else if (event.keyCode == 39) { // '/'
         $(element).val(value + ungit.config.fileSeparator);

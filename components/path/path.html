@@ -60,7 +60,7 @@
   <!-- ko if: status() == 'no-such-path' -->
   <div data-ta-container="invalid-path" data-bind="visible: status() == 'no-such-path'">
     <h2>Invalid path</h2>
-    <p>"<span data-bind="text: path"></span>" doesn&#39;t seem to be a valid path.</p>
+    <p>"<span data-bind="text: repoPath"></span>" doesn&#39;t seem to be a valid path.</p>
     <div class="create-dir">
       <button class="btn btn-primary btn-lg" data-ta-clickable="create-dir" data-bind="click: createDir">Create directory</button>
     </div>
