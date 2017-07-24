@@ -3,6 +3,7 @@ var md5 = require('blueimp-md5');
 var Selectable = require('./selectable');
 var programEvents = require('ungit-program-events');
 var components = require('ungit-components');
+var Promise = require('bluebird');
 
 var RefViewModel = function(fullRefName, graph) {
   var self = this;
@@ -79,12 +80,27 @@ RefViewModel.prototype.moveTo = function(target) {
   var promise;
 
   if (this.isLocal) {
-    if (this.current()) {
-      promise = this.server.postPromise('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' });
-    } else if (this.isTag) {
-      promise = this.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
+    var toNode = this.graph.nodesById[target];
+    if (this.node().date > toNode.date) {
+      promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.'})
+        .show()
+        .closePromise;
     } else {
-      promise = this.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
+      promise = Promise.resolve({result: function() { return true; }});
+    }
+
+    if (this.current()) {
+      promise = promise.then(function(diag) {
+        return diag.result() ? self.server.postPromise('/reset', { path: self.graph.repoPath(), to: target, mode: 'hard' }) : Promise.resolve();
+      });
+    } else if (this.isTag) {
+      promise = promise.then(function(diag) {
+        return diag.result() ? self.server.postPromise('/tags', { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true }) : Promise.resolve();
+      });
+    } else {
+      promise = promise.then(function(diag) {
+        return diag.result() ? self.server.postPromise('/branches', { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true }) : Promise.resolve();
+      });
     }
   } else {
     var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
