@@ -78,29 +78,28 @@ RefViewModel.prototype.dragEnd = function() {
 RefViewModel.prototype.moveTo = function(target) {
   var self = this;
   var promise;
-
   if (this.isLocal) {
     var toNode = this.graph.nodesById[target];
+    var args = { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true, to: target, mode: 'hard' };
+    var operation;
+    if (this.current()) {
+      operation = '/reset';
+    } else if (this.isTag) {
+      operation = '/tags';
+    } else {
+      operation = '/branches';
+    }
+
     if (this.node().date > toNode.date) {
       promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.'})
         .show()
-        .closePromise;
+        .closeThen(function(diag) {
+          if (diag.result()) {
+            return self.server.postPromise(operation, args);
+          }
+        }).closePromise;
     } else {
-      promise = Promise.resolve({result: function() { return true; }});
-    }
-
-    if (this.current()) {
-      promise = promise.then(function(diag) {
-        return diag.result() ? self.server.postPromise('/reset', { path: self.graph.repoPath(), to: target, mode: 'hard' }) : Promise.resolve();
-      });
-    } else if (this.isTag) {
-      promise = promise.then(function(diag) {
-        return diag.result() ? self.server.postPromise('/tags', { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true }) : Promise.resolve();
-      });
-    } else {
-      promise = promise.then(function(diag) {
-        return diag.result() ? self.server.postPromise('/branches', { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true }) : Promise.resolve();
-      });
+      promise = self.server.postPromise(operation, args);
     }
   } else {
     var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
@@ -113,7 +112,7 @@ RefViewModel.prototype.moveTo = function(target) {
               if (!diag.result()) return false;
               pushReq.force = true;
               return self.server.postPromise('/push', pushReq);
-            })
+            }).closePromise;
         }
       });
   }
