@@ -108,16 +108,22 @@ Nightmare.action('ug', {
   'refAction': function(ref, local, action, done) {
     this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]')
       .ug.click('[data-ta-action="' + action + '"][data-ta-visible="true"] [role="button"]')
-      .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
-      .wait(200)
-      .then(done.bind(null, null), done);
+      .visible('[data-ta-clickable="yes"]')
+      .then((isVisible) => {
+        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
+          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
+          .wait(200)
+      }).then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
     this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"]')
       .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"] [role="button"]')
-      .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
-      .wait(200)
-      .then(done.bind(null, null), done);
+      .visible('[data-ta-clickable="yes"]')
+      .then((isVisible) => {
+        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
+          .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
+          .wait(200)
+      }).then(done.bind(null, null), done);
   },
   'createRef': function(name, type, done) {
     console.log(`Creating ${name} as ${type}`);
@@ -157,7 +163,7 @@ const prependLines = (pre, text) => {
 // Environment provides
 class Environment {
   constructor(config) {
-    this.nm = Nightmare({ Promise: Bluebird });
+    this.nm = Nightmare({ Promise: Bluebird, show: true });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 15000;
