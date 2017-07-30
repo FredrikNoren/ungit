@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.27: Add alert when moving back in time. [#914](https://github.com/FredrikNoren/ungit/issues/914)
 - 1.1.26:
   - fix invalid path input for autocomplete causing front end crash [#942](https://github.com/FredrikNoren/ungit/issues/942)
   - bump and checking in package-lock.json
