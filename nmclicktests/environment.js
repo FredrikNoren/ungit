@@ -17,18 +17,18 @@ Nightmare.action('ug', {
     done();
   },
   'commit': function(commitMessage, done) {
-    this.wait('[data-ta-container="staging-file"]')
-      .insert('[data-ta-input="staging-commit-title"]', commitMessage)
+    this.wait('.files .file')
+      .insert('.staging input.form-control', commitMessage)
       .wait(100)
-      .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .click('commit-btn')
+      .ug.waitForElementNotVisible('.files .file')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
     this.ug.click('[data-bind="click: toggleAmend"]')
       .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .ug.waitForElementNotVisible('.files .file')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
@@ -43,7 +43,7 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
-    this.ug.click('[data-ta-container="staging-file"]')
+    this.ug.click('.files .file')
       .ug.click('[data-ta-clickable="patch-file"]')
       .wait('[data-ta-clickable="patch-line-input"]')
       .ug.commit('[data-ta-clickable="patch-line-input"]')

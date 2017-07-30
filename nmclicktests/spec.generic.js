@@ -39,10 +39,10 @@ describe('[GENERIC]', () => {
 
   it('Should be able to add a new file to .gitignore', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`)
-      .wait('[data-ta-container="staging-file"]')
+      .wait('.files .file')
       .ug.click('[data-ta-clickable="ignore-file"]')
       .ug.click('[data-ta-clickable="ignore-file"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .ug.waitForElementNotVisible('.files .file');
   });
 
   it('Test showing commit diff between two commits', () => {
@@ -71,14 +71,14 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to discard a created file and ensure patching is not avaliable for new file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .wait('[data-ta-container="staging-file"]')
+      .wait('.files .file')
       .ug.click('[data-ta-clickable="show-stage-diffs"]')
-      .wait('[data-ta-container="staging-file"]')
+      .wait('.files .file')
       .ug.click('[data-ta-clickable="show-stage-diffs"]')
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
       .ug.click('[data-ta-clickable="discard-file"]')
       .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .ug.waitForElementNotVisible('.files .file')
   });
 
   it('Should be possible to create a branch', () => {
@@ -105,19 +105,19 @@ describe('[GENERIC]', () => {
 
   it('Commit changes to a file', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('[data-ta-container="staging-file"]')
+      .wait('.files .file')
       .insert('[data-ta-input="staging-commit-title"]', 'My commit message')
       .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .ug.waitForElementNotVisible('.files .file');
   });
 
   it('Show stats for changed file and discard it', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('[data-ta-container="staging-file"] .additions')
-      .wait('[data-ta-container="staging-file"] .deletions')
+      .wait('.files .file .additions')
+      .wait('.files .file .deletions')
       .ug.click('[data-ta-clickable="discard-file"]')
       .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .ug.waitForElementNotVisible('.files .file');
   });
 
   it.skip('Should be possible to patch a file', () => {
