@@ -3,6 +3,7 @@ var md5 = require('blueimp-md5');
 var Selectable = require('./selectable');
 var programEvents = require('ungit-program-events');
 var components = require('ungit-components');
+var Promise = require('bluebird');
 
 var RefViewModel = function(fullRefName, graph) {
   var self = this;
@@ -77,14 +78,28 @@ RefViewModel.prototype.dragEnd = function() {
 RefViewModel.prototype.moveTo = function(target) {
   var self = this;
   var promise;
-
   if (this.isLocal) {
+    var toNode = this.graph.nodesById[target];
+    var args = { path: self.graph.repoPath(), name: self.refName, sha1: target, force: true, to: target, mode: 'hard' };
+    var operation;
     if (this.current()) {
-      promise = this.server.postPromise('/reset', { path: this.graph.repoPath(), to: target, mode: 'hard' });
+      operation = '/reset';
     } else if (this.isTag) {
-      promise = this.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
+      operation = '/tags';
     } else {
-      promise = this.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.refName, sha1: target, force: true });
+      operation = '/branches';
+    }
+
+    if (this.node().date > toNode.date) {
+      promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.'})
+        .show()
+        .closeThen(function(diag) {
+          if (diag.result()) {
+            return self.server.postPromise(operation, args);
+          }
+        }).closePromise;
+    } else {
+      promise = self.server.postPromise(operation, args);
     }
   } else {
     var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
@@ -97,7 +112,7 @@ RefViewModel.prototype.moveTo = function(target) {
               if (!diag.result()) return false;
               pushReq.force = true;
               return self.server.postPromise('/push', pushReq);
-            })
+            }).closePromise;
         }
       });
   }
