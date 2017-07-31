@@ -107,7 +107,7 @@ describe('[GENERIC]', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .wait('.files .file')
       .insert('[data-ta-input="staging-commit-title"]', 'My commit message')
-      .click('[data-ta-clickable="commit"]')
+      .click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file');
   });
 

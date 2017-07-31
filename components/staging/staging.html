@@ -5,7 +5,7 @@
       <div class="arrow"></div>
     </div>
     <div data-bind="visible: showNux" class="nux">
-      Nothing to commit. <a href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
+      Nothing to commit. <a class="amend-link" href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
     </div>
     <div class="row" data-bind="visible: !showNux()">
       <div class="col-lg-3">
@@ -13,12 +13,12 @@
         <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
         <div>
           <span class="amend" data-bind="visible: canAmend">
-                  <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-                          <a href="#" data-bind="click: toggleAmend">Amend last commit</a>
-                  </span>
-                  <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
+            <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
+            <a class="amend-link" href="#" data-bind="click: toggleAmend">Amend last commit</a>
+          </span>
+          <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-        <button class="btn btn-primary btn-lg commit-btn" data-ta-clickable="commit" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
+        <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
           Commit
           <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>

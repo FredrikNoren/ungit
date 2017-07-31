@@ -26,8 +26,8 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
-    this.ug.click('[data-bind="click: toggleAmend"]')
-      .click('[data-ta-clickable="commit"]')
+    this.ug.click('.amend-link')
+      .click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file')
       .wait(1000)
       .then(done.bind(null, null), done);
