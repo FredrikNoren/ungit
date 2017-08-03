@@ -87,17 +87,17 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a branch', () => {
     return environment.nm.ug.createBranch('willbedeleted')
-      .ug.click('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
+      .ug.click('.branch[data-ta-name="willbedeleted"]')
+      .ug.click('[data-ta-action="delete"]:visible .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
+      .ug.waitForElementNotVisible('.branch[data-ta-name="willbedeleted"]');
   });
 
   it('Should be possible to create and destroy a tag', () => {
     return environment.nm.ug.createTag('tagwillbedeleted')
       .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
+      .ug.click('[data-ta-action="delete"]:visible .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');

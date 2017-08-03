@@ -14,9 +14,9 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button without branches', () => {
-    return environment.nm.wait('[data-ta-clickable="branch"]')
-      .click('[data-ta-clickable="branch"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
+    return environment.nm.wait('.btn-group.branch .btn-main')
+      .click('.btn-group.branch .btn-main')
+      .ug.waitForElementNotVisible('.branch [data-ta-element="progress-bar"]');
   });
 
   it('add a branch', () => {
@@ -27,8 +27,8 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button with one branch', () => {
-    return environment.nm.ug.click('[data-ta-clickable="branch"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
+    return environment.nm.ug.click('.btn-group.branch .btn-main')
+      .ug.waitForElementNotVisible('.btn-group.branch .btn-main [data-ta-element="progress-bar"]');
   });
 
   it('add second branch', () => {
@@ -42,7 +42,7 @@ describe('[BRANCHES]', () => {
   it('Check out a branch via selection', () => {
     return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
       .ug.click('[data-ta-clickable="checkoutbranch-2"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-element="progress-bar"]')
+      .ug.waitForElementNotVisible('.btn-group.branch .btn-main [data-ta-element="progress-bar"]')
   });
 
   it('Delete a branch via selection', () => {
@@ -52,7 +52,7 @@ describe('[BRANCHES]', () => {
       .click('[data-ta-clickable="branch-3-remove"]')
       .wait(500)
       .click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]')
+      .ug.waitForElementNotVisible('.btn-group.branch .btn-main [data-ta-element="progress-bar"]')
       .wait(500);
   });
 
@@ -64,13 +64,13 @@ describe('[BRANCHES]', () => {
   it('checkout cherypick base', () => {
     return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-element="progress-bar"]')
+      .ug.waitForElementNotVisible('.btn-group.branch .btn-main [data-ta-element="progress-bar"]')
   });
 
   it('cherrypick fail case', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .ug.log("clicked first node")
-      .ug.click('[data-ta-action="cherry-pick"][data-ta-visible="true"] [role=button]')
+      .ug.click('[data-ta-action="cherry-pick"]:visible [role=button]')
       .ug.log("cherrypick button clicked")
       .ug.click('[data-ta-action="abort"]')
       .ug.log("cherrypick aborted")
@@ -81,7 +81,7 @@ describe('[BRANCHES]', () => {
 
   it('cherrypick success case', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-1"]')
-      .ug.click('[data-ta-action="cherry-pick"][data-ta-visible="true"] [role=button]')
+      .ug.click('[data-ta-action="cherry-pick"]:visible [role=button]')
       .wait(500)
       .visible('[data-ta-action="abort"]')
       .then((isVisible) => {

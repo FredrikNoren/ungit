@@ -37,9 +37,9 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'checkout': function(branch, done) {
-    this.ug.click('[data-ta-clickable="branch"][data-ta-name="' + branch + '"]')
-      .ug.click('[data-ta-action="checkout"][data-ta-visible="true"] [role="button"]')
-      .wait('[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]')
+    this.ug.click(`.branch[data-ta-name="${branch}"]`)
+      .ug.click('[data-ta-action="checkout"]:visible .dropmask')
+      .wait(`.ref.branch[data-ta-name="${branch}"][data-ta-current="true"]`)
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
@@ -106,22 +106,22 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'refAction': function(ref, local, action, done) {
-    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]')
-      .ug.click('[data-ta-action="' + action + '"][data-ta-visible="true"] [role="button"]')
+    this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
+      .ug.click('[data-ta-action="' + action + '"]:visible .dropmask')
       .visible('[data-ta-clickable="yes"]')
       .then((isVisible) => {
         return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
+          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"]:visible')
           .wait(200)
       }).then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
-    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"]')
-      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"] [role="button"]')
+    this.click(`.branch[data-ta-name="${ref}"]`)
+      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"]:visible .dropmask')
       .visible('[data-ta-clickable="yes"]')
       .then((isVisible) => {
         return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
+          .ug.waitForElementNotVisible('[data-ta-action="move"]:visible')
           .wait(200)
       }).then(done.bind(null, null), done);
   },

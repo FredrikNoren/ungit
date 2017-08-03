@@ -79,6 +79,6 @@ describe('[REMOTES]', () => {
   it('Should be possible to force push a branch', () => {
     return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
       .ug.refAction('branchinclone', true, 'push')
-      .ug.waitForElementNotVisible('[data-ta-action="push"][data-ta-visible="true"]')
+      .ug.waitForElementNotVisible('[data-ta-action="push"]:visible')
   });
 });
