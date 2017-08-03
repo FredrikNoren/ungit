@@ -15,7 +15,7 @@ describe('[STASH]', () => {
 
   it('Should be possible to stash a file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .wait('.files .file')
+      .wait('.files .file .btn-default')
       .ug.click('[data-ta-clickable="stash-all"]')
       .visible('[data-ta-clickable="stash-toggle"]')
       .then((isVisible) => {
@@ -32,6 +32,6 @@ describe('[STASH]', () => {
 
   it('Should be possible to pop a stash', () => {
     return environment.nm.click('[data-ta-clickable="stash-apply"]')
-      .wait('.files .file')
+      .wait('.files .file .btn-default')
   });
 });

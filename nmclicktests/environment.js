@@ -17,18 +17,18 @@ Nightmare.action('ug', {
     done();
   },
   'commit': function(commitMessage, done) {
-    this.wait('.files .file')
+    this.wait('.files .file .btn-default .btn-default')
       .insert('.staging input.form-control', commitMessage)
       .wait(100)
       .click('commit-btn')
-      .ug.waitForElementNotVisible('.files .file')
+      .ug.waitForElementNotVisible('.files .file .btn-default .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
     this.ug.click('.amend-link')
       .click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file')
+      .ug.waitForElementNotVisible('.files .file .btn-default .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
@@ -43,7 +43,7 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
-    this.ug.click('.files .file')
+    this.ug.click('.files .file .btn-default .btn-default ')
       .ug.click('[data-ta-clickable="patch-file"]')
       .wait('[data-ta-clickable="patch-line-input"]')
       .ug.commit('[data-ta-clickable="patch-line-input"]')

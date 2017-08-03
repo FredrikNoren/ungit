@@ -2,7 +2,7 @@
 const muteGraceTimeDuration = 2000;
 const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
-    .wait('.files .file')
+    .wait('.files .file .btn-default')
     .ug.click('[data-ta-clickable="discard-file"]')
     .then(() => {
       if (dialogButtonToClick) {
@@ -13,9 +13,9 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
       }
     }).then(() => {
       if (dialogButtonToClick !== 'no') {
-        return env.nm.ug.waitForElementNotVisible('.files .file');
+        return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
       } else {
-        return env.nm.wait('.files .file');
+        return env.nm.wait('.files .file .btn-default');
       }
     });
 }
