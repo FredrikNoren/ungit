@@ -88,7 +88,7 @@ describe('[GENERIC]', () => {
   it('Should be possible to create and destroy a branch', () => {
     return environment.nm.ug.createBranch('willbedeleted')
       .ug.click('.branch[data-ta-name="willbedeleted"]')
-      .ug.click('[data-ta-action="delete"]:visible .dropmask')
+      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('.branch[data-ta-name="willbedeleted"]');
@@ -97,7 +97,7 @@ describe('[GENERIC]', () => {
   it('Should be possible to create and destroy a tag', () => {
     return environment.nm.ug.createTag('tagwillbedeleted')
       .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
-      .ug.click('[data-ta-action="delete"]:visible .dropmask')
+      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
@@ -113,8 +113,8 @@ describe('[GENERIC]', () => {
 
   it('Show stats for changed file and discard it', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('.files .file .btn-default .additions')
-      .wait('.files .file .btn-default .deletions')
+      .wait('.files .file .additions')
+      .wait('.files .file .deletions')
       .ug.click('[data-ta-clickable="discard-file"]')
       .ug.click('[data-ta-clickable="yes"]')
       .ug.waitForElementNotVisible('.files .file .btn-default');

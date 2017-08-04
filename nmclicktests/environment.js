@@ -17,18 +17,18 @@ Nightmare.action('ug', {
     done();
   },
   'commit': function(commitMessage, done) {
-    this.wait('.files .file .btn-default .btn-default')
+    this.wait('.files .file .btn-default')
       .insert('.staging input.form-control', commitMessage)
       .wait(100)
-      .click('commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default .btn-default')
+      .click('.commit-btn')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
     this.ug.click('.amend-link')
       .click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default .btn-default')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
@@ -38,12 +38,12 @@ Nightmare.action('ug', {
   },
   'checkout': function(branch, done) {
     this.ug.click(`.branch[data-ta-name="${branch}"]`)
-      .ug.click('[data-ta-action="checkout"]:visible .dropmask')
+      .ug.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask')
       .wait(`.ref.branch[data-ta-name="${branch}"][data-ta-current="true"]`)
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
-    this.ug.click('.files .file .btn-default .btn-default ')
+    this.ug.click('.files .file .btn-default')
       .ug.click('[data-ta-clickable="patch-file"]')
       .wait('[data-ta-clickable="patch-line-input"]')
       .ug.commit('[data-ta-clickable="patch-line-input"]')
@@ -107,21 +107,21 @@ Nightmare.action('ug', {
   },
   'refAction': function(ref, local, action, done) {
     this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
-      .ug.click('[data-ta-action="' + action + '"]:visible .dropmask')
+      .ug.click('[data-ta-action="' + action + '"]:not([style*="display: none"]) .dropmask')
       .visible('[data-ta-clickable="yes"]')
       .then((isVisible) => {
         return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"]:visible')
+          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"]:not([style*="display: none"])')
           .wait(200)
       }).then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
     this.click(`.branch[data-ta-name="${ref}"]`)
-      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"]:visible .dropmask')
+      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask')
       .visible('[data-ta-clickable="yes"]')
       .then((isVisible) => {
         return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="move"]:visible')
+          .ug.waitForElementNotVisible('[data-ta-action="move"]:not([style*="display: none"])')
           .wait(200)
       }).then(done.bind(null, null), done);
   },
