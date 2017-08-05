@@ -5,8 +5,12 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
     .wait('.files .file .btn-default')
     .ug.click('[data-ta-clickable="discard-file"]')
     .then(() => {
-      if (dialogButtonToClick) {
-        return env.nm.click('[data-ta-clickable="' + dialogButtonToClick + '"]');
+      if (dialogButtonToClick === "yes") {
+        return env.nm.ug.click('.modal-dialog .btn-primary');
+      } else if (dialogButtonToClick === "mute") {
+        return env.nm.ug.click('.modal-dialog .btn-mute');
+      } else if (dialogButtonToClick === "no") {
+        return env.nm.ug.click('.modal-dialog .btn-default:last-child');
       } else {
         return env.nm.visible('.modal-dialog .btn-primary')
           .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
@@ -60,7 +64,6 @@ describe('[DISCARD - withWarn]', () => {
   });
 
   it('Should be possible to discard a created file and disable warn for awhile', () => {
-    // Temporarily disabled to get the tests working
     return createAndDiscard(environment, testRepoPaths[0], 'mute')
       .then(() => createAndDiscard(environment, testRepoPaths[0]))
       .delay(muteGraceTimeDuration + 500)

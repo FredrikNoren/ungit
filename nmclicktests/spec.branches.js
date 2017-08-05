@@ -40,13 +40,13 @@ describe('[BRANCHES]', () => {
   });
 
   it('Check out a branch via selection', () => {
-    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutbranch-2"]')
       .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
   });
 
   it('Delete a branch via selection', () => {
-    return environment.nm.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.click('.branch .dropdown-toggle')
       .wait('[data-ta-clickable="branch-3-remove"]')
       .wait(500)
       .click('[data-ta-clickable="branch-3-remove"]')
@@ -62,7 +62,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('checkout cherypick base', () => {
-    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
       .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
   });
@@ -70,7 +70,7 @@ describe('[BRANCHES]', () => {
   it('cherrypick fail case', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask')
-      .ug.click('[data-ta-action="abort"]')
+      .ug.click('.staging .btn-stg-abort')
       .ug.click('.modal-dialog .btn-primary')
       .wait(500)
   });
@@ -79,7 +79,7 @@ describe('[BRANCHES]', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-1"]')
       .ug.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask')
       .wait(500)
-      .visible('[data-ta-action="abort"]')
+      .visible('.staging .btn-stg-abort')
       .then((isVisible) => {
         if (isVisible) {
           throw new Error("Cherry pick errored when success was expected.");
@@ -96,6 +96,6 @@ describe('[BRANCHES]', () => {
       .wait(250)
       .ug.createBranch('autoCheckout')
       .wait(1000)
-      .wait('[data-ta-name="autoCheckout"][data-ta-current="true"]');
+      .wait('[data-ta-name="autoCheckout"].current');
   });
 });

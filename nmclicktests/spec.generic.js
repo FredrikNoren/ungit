@@ -49,23 +49,23 @@ describe('[GENERIC]', () => {
     return environment.nm.wait('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-clickable="node-clickable-0"]')
       .wait('.diff-wrapper')
-      .ug.click('[data-ta-clickable="commitDiffFileName"]')
-      .wait('[data-ta-container="commitLineDiffs"]');
+      .ug.click('.commit-diff-filename')
+      .wait('.commit-line-diffs');
   });
 
   it('Test showing commit side by side diff between two commits', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-sideBySideDiff"]')
-      .wait('[data-ta-container="commitLineDiffs"]');
+    return environment.nm.ug.click('.commit-sideBySideDiff')
+      .wait('.commit-line-diffs');
   });
 
   it('Test wordwrap', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-wordwrap"]')
+    return environment.nm.ug.click('.commit-wordwrap')
       .wait('.word-wrap');
   });
 
   it('Test wordwrap', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-whitespace"]')
-      .wait('[data-ta-container="commitLineDiffs"]')
+    return environment.nm.ug.click('.commit-whitespace')
+      .wait('.commit-line-diffs')
       .ug.click('[data-ta-clickable="node-clickable-0"]');
   });
 
@@ -106,7 +106,7 @@ describe('[GENERIC]', () => {
   it('Commit changes to a file', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .wait('.files .file .btn-default')
-      .insert('[data-ta-input="staging-commit-title"]', 'My commit message')
+      .insert('.staging input.form-control', 'My commit message')
       .click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });
@@ -156,7 +156,7 @@ describe('[GENERIC]', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .wait('[data-ta-action="revert"]')
       .ug.click('[data-ta-action="revert"]')
-      .ug.waitForElementNotVisible('[data-ta-container="user-error-page"]');
+      .ug.waitForElementNotVisible('.crash');
   });
 
   it('Should be possible to move a branch', () => {

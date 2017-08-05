@@ -32,14 +32,10 @@ Nightmare.action('ug', {
       .wait(1000)
       .then(done.bind(null, null), done);
   },
-  'createTag': function(name, done) {
-    this.ug.createRef(name, 'tag')
-      .then(done.bind(null, null), done);
-  },
   'checkout': function(branch, done) {
     this.ug.click(`.branch[data-ta-name="${branch}"]`)
       .ug.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask')
-      .wait(`.ref.branch[data-ta-name="${branch}"][data-ta-current="true"]`)
+      .wait(`.ref.branch[data-ta-name="${branch}"].current`)
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
@@ -125,18 +121,22 @@ Nightmare.action('ug', {
           .wait(200)
       }).then(done.bind(null, null), done);
   },
-  'createRef': function(name, type, done) {
-    console.log(`Creating ${name} as ${type}`);
+  'createTag': function(name, done) {
     this.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
       .wait(100)
-      .click(`[data-ta-clickable="create-${type}"]`)
-      .wait(`[data-ta-clickable="${type}"][data-ta-name="${name}"]`)
+      .click('.newRef .btn-default')
+      .wait(`.ref.tag[data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);
   },
   'createBranch': function(name, done) {
-    this.ug.createRef(name, 'branch')
+    this.click('.current ~ .newRef button.showBranchingForm')
+      .insert('.newRef.editing input', name)
+      .wait(100)
+      .click(`.newRef .btn-primary`)
+      .wait(`.ref.branch[data-ta-name="${name}"]`)
+      .wait(300)
       .then(done.bind(null, null), done);
   },
   'click': function(selector, done) {

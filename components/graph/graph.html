@@ -12,10 +12,10 @@
 
       <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
         <!-- ko foreach: branches -->
-        <span class="ref branch" data-ta-clickable="branch" draggable="true" tabIndex="-1"
+        <span class="ref branch" draggable="true" tabIndex="-1"
             data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               click: selected,
-              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current, 'data-ta-local': isLocal }" >
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-local': isLocal }" >
           <span class="octicon octicon-broadcast" data-bind="visible: isRemoteBranch"></span>
           <span class="octicon octicon-git-branch"></span>
           <span class="name" data-bind="text: localRefName"></span>
@@ -26,7 +26,7 @@
         <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0"
             data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               click: selected,
-              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-current': current }">
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }">
           <span class="octicon octicon-globe" data-bind="visible: isRemote"></span>
           <span class="octicon octicon-tag"></span>
           <span class="name" data-bind="text: localRefName"></span>
@@ -34,7 +34,7 @@
         <!-- /ko -->
 
         <!-- ko foreach: dropareaGraphActions -->
-        <span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style, 'data-ta-visible': visible }, event: { mouseover: mouseover, mouseout: mouseout }">
+        <span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
           <!-- ko if: icon --><span data-bind="css: icon" class="icon"></span><!-- /ko -->
           <span data-bind="text: text"></span>
           <div class="dropmask" tabIndex="0" role="button" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
@@ -48,8 +48,8 @@
           <!-- ko if: branchingFormVisible -->
           <div class="form-inline">
             <input class="name form-control" data-ta-input="new-branch-name" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
-            <button class="btn btn-primary" data-ta-clickable="create-branch" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
-            <button class="btn btn-default" data-ta-clickable="create-tag" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+            <button class="btn btn-primary" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
+            <button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
           </div>
           <!-- /ko -->
         </span>

@@ -27,7 +27,7 @@ describe('[LOAD-AHEAD]', () => {
   });
 
   it('Should be possible to create and commit 3', () => {
-    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('.branch .dropdown-toggle')
       .wait('[data-ta-clickable="checkoutbranch-1"]')
       .wait(500)
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')

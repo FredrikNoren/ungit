@@ -207,7 +207,7 @@ TextDiffViewModel.prototype.getPatchCheckBox = function (symbol, index, isActive
   if (isActive) {
     this.numberOfSelectedPatchLines++;
   }
-  return '<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== \'patched\'">' + symbol + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-ta-clickable="patch-line-input" data-bind="visible: editState() === \'patched\', click: togglePatchLine.bind($data, ' + index + ')"></input>';
+  return '<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== \'patched\'">' + symbol + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-bind="visible: editState() === \'patched\', click: togglePatchLine.bind($data, ' + index + ')"></input>';
 }
 
 TextDiffViewModel.prototype.togglePatchLine = function (index) {
