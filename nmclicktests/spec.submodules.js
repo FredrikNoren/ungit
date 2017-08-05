@@ -36,7 +36,7 @@ describe('[SUMBODULES]', () => {
       .wait('[data-ta-clickable="subrepo-remove"]')
       .ug.click('[data-ta-clickable="subrepo-remove"]')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .wait(500)
       .ug.waitForElementNotVisible('[data-ta-element="progress-bar"]')
   });

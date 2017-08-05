@@ -44,9 +44,9 @@ Nightmare.action('ug', {
   },
   'patch': function(commitMessage, done) {
     this.ug.click('.files .file .btn-default')
-      .ug.click('[data-ta-clickable="patch-file"]')
-      .wait('[data-ta-clickable="patch-line-input"]')
-      .ug.commit('[data-ta-clickable="patch-line-input"]')
+      .ug.click('.patch')
+      .wait('.d2h-diff-tbody input')
+      .ug.commit(commitMessage)
       .then(done.bind(null, null), done);
   },
   'backgroundAction': function(method, url, body, done) {
@@ -107,20 +107,20 @@ Nightmare.action('ug', {
   },
   'refAction': function(ref, local, action, done) {
     this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
-      .ug.click('[data-ta-action="' + action + '"]:not([style*="display: none"]) .dropmask')
-      .visible('[data-ta-clickable="yes"]')
+      .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
+      .visible('.modal-dialog .btn-primary')
       .then((isVisible) => {
-        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"]:not([style*="display: none"])')
+        return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
+          .ug.waitForElementNotVisible(`[data-ta-action="${action}"]:not([style*="display: none"])`)
           .wait(200)
       }).then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
     this.click(`.branch[data-ta-name="${ref}"]`)
-      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask')
-      .visible('[data-ta-clickable="yes"]')
+      .ug.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`)
+      .visible('.modal-dialog .btn-primary')
       .then((isVisible) => {
-        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
+        return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
           .ug.waitForElementNotVisible('[data-ta-action="move"]:not([style*="display: none"])')
           .wait(200)
       }).then(done.bind(null, null), done);
@@ -130,8 +130,8 @@ Nightmare.action('ug', {
     this.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
       .wait(100)
-      .click('[data-ta-clickable="create-' + type + '"]')
-      .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
+      .click(`[data-ta-clickable="create-${type}"]`)
+      .wait(`[data-ta-clickable="${type}"][data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);
   },

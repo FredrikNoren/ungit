@@ -77,7 +77,7 @@ describe('[GENERIC]', () => {
       .ug.click('[data-ta-clickable="show-stage-diffs"]')
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
       .ug.click('[data-ta-clickable="discard-file"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default')
   });
 
@@ -90,7 +90,7 @@ describe('[GENERIC]', () => {
       .ug.click('.branch[data-ta-name="willbedeleted"]')
       .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.branch[data-ta-name="willbedeleted"]');
   });
 
@@ -99,7 +99,7 @@ describe('[GENERIC]', () => {
       .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
       .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
   });
 
@@ -116,7 +116,7 @@ describe('[GENERIC]', () => {
       .wait('.files .file .additions')
       .wait('.files .file .deletions')
       .ug.click('[data-ta-clickable="discard-file"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 

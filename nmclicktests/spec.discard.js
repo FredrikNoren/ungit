@@ -8,7 +8,7 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
       if (dialogButtonToClick) {
         return env.nm.click('[data-ta-clickable="' + dialogButtonToClick + '"]');
       } else {
-        return env.nm.visible('[data-ta-clickable="yes"]')
+        return env.nm.visible('.modal-dialog .btn-primary')
           .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
       }
     }).then(() => {

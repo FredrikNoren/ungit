@@ -51,7 +51,7 @@ describe('[BRANCHES]', () => {
       .wait(500)
       .click('[data-ta-clickable="branch-3-remove"]')
       .wait(500)
-      .click('[data-ta-clickable="yes"]')
+      .click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
       .wait(500);
   });
@@ -71,7 +71,7 @@ describe('[BRANCHES]', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask')
       .ug.click('[data-ta-action="abort"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .wait(500)
   });
 

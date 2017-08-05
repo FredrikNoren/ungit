@@ -40,7 +40,7 @@ describe('[REMOTES]', () => {
   it('Remote delete check', () => {
     return environment.nm.click('[data-ta-clickable="remotes-menu"]')
       .ug.click('[data-ta-clickable="myremote-remove"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('[data-ta-element="progress-bar"]')
       .ug.click('[data-ta-clickable="remotes-menu"]')
       .exists('[data-ta-clickable="myremote"]')
