@@ -14,7 +14,7 @@
         <div>
           <span class="amend" data-bind="visible: canAmend">
             <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-            <a class="amend-link" href="#" >Amend last commit</a>
+            <a class="amend-link" href="#" data-bind="click: toggleAmend">Amend last commit</a>
           </span>
           <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>

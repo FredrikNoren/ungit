@@ -10,7 +10,7 @@
     </h4>
     <div class="list-group" data-bind="foreach: stashedChanges">
       <div class="list-group-item">
-        <a href="#" class="stash-apply" data-bind="click: apply" class="glyphicon glyphicon-pencil glyphicon-circled pull-left" data-toggle="tooltip" title="Apply this stash"></a>
+        <a href="#" class="stash-apply glyphicon glyphicon-pencil glyphicon-circled pull-left" data-bind="click: apply" data-toggle="tooltip" title="Apply this stash"></a>
         <a href="#" class="toggle-show-commit-diffs" data-bind="click: toggleShowCommitDiffs" data-toggle="tooltip" title="Show stash diff">
           <h4 class="list-group-item-heading" data-bind="text: title"></h4>
           <p class="list-group-item-text" data-bind="text: message"></p>
