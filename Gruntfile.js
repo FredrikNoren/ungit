@@ -74,7 +74,8 @@ module.exports = function(grunt) {
       click: {
         options: {
           reporter: 'spec',
-          timeout: 15000
+          timeout: 15000,
+          bail: true
         },
         src: 'nmclicktests/spec.*.js'
       }
