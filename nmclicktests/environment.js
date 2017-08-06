@@ -101,43 +101,40 @@ Nightmare.action('ug', {
     this.wait((selector) => !document.querySelector(selector), selector)
       .then(done.bind(null, null), done);
   },
-  'refAction': function(ref, local, action, done) {
-    this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
-      .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
-      .visible('.modal-dialog .btn-primary')
+  '_verifyRefAction': function(action, done) {
+    this.visible('.modal-dialog .btn-primary')
       .then((isVisible) => {
         return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
           .ug.waitForElementNotVisible(`[data-ta-action="${action}"]:not([style*="display: none"])`)
           .wait(200)
       }).then(done.bind(null, null), done);
   },
+  'refAction': function(ref, local, action, done) {
+    this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
+      .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
+      .then(() => this.ug._verifyRefAction(action))
+      .then(done.bind(null, null), done);
+  },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
     this.click(`.branch[data-ta-name="${ref}"]`)
       .ug.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`)
-      .visible('.modal-dialog .btn-primary')
-      .then((isVisible) => {
-        return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="move"]:not([style*="display: none"])')
-          .wait(200)
-      }).then(done.bind(null, null), done);
+      .then(() => this.ug._verifyRefAction('move'))
+      .then(done.bind(null, null), done);
+  },
+  '_createRef': function(type, name, done) {
+    this.click('.current ~ .newRef button.showBranchingForm')
+      .insert('.newRef.editing input', name)
+      .wait(100)
+      .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
+      .wait(`.ref.${type}[data-ta-name="${name}"]`)
+      .wait(300)
+      .then(done.bind(null, null), done);
   },
   'createTag': function(name, done) {
-    this.click('.current ~ .newRef button.showBranchingForm')
-      .insert('.newRef.editing input', name)
-      .wait(100)
-      .click('.newRef .btn-default')
-      .wait(`.ref.tag[data-ta-name="${name}"]`)
-      .wait(300)
-      .then(done.bind(null, null), done);
+    this.ug._createRef('tag', name).then(done.bind(null, null), done);
   },
   'createBranch': function(name, done) {
-    this.click('.current ~ .newRef button.showBranchingForm')
-      .insert('.newRef.editing input', name)
-      .wait(100)
-      .click(`.newRef .btn-primary`)
-      .wait(`.ref.branch[data-ta-name="${name}"]`)
-      .wait(300)
-      .then(done.bind(null, null), done);
+    this.ug._createRef('branch', name).then(done.bind(null, null), done);
   },
   'click': function(selector, done) {
     this.wait(selector)
