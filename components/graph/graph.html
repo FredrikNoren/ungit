@@ -1,10 +1,10 @@
 
-<div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick" data-ta-clickable="graph">
+<div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick">
 
   <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
 
   <div class="nodes" data-bind="foreach: nodes">
-    <div class="nodeContainer animation" data-ta-container="node" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
+    <div class="nodeContainer animation" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
       <div class="commit-container animation" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
         <!-- ko component: commitComponent -->
         <!-- /ko -->
@@ -23,7 +23,7 @@
         <!-- /ko -->
 
         <!-- ko foreach: tags -->
-        <span class="ref tag" data-ta-clickable="tag" draggable="true" tabIndex="0"
+        <span class="ref tag" draggable="true" tabIndex="0"
             data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               click: selected,
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }">
@@ -44,10 +44,10 @@
 
         <!-- ko if: showNewRefAction -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showBranchingForm" data-ta-clickable="show-new-branch-form" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+          <button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
           <!-- ko if: branchingFormVisible -->
           <div class="form-inline">
-            <input class="name form-control" data-ta-input="new-branch-name" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
+            <input class="name form-control" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
             <button class="btn btn-primary" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
             <button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
           </div>

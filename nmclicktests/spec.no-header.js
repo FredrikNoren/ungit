@@ -11,14 +11,14 @@ describe('[NO-HEADER]', () => {
 
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0])
-      .wait('[data-ta-container="repository-view"]')
+      .wait('.repository-view')
       .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
   });
 
   it('Check for refresh button', () => {
-    return environment.nm.wait('[data-ta-clickable="refresh-button"]')
-      .click('[data-ta-clickable="refresh-button"]')
+    return environment.nm.wait('.refresh-button')
+      .click('.refresh-button')
       .wait(2000)
       .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });

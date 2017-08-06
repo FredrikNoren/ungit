@@ -21,8 +21,8 @@ describe('[GENERIC]', () => {
   });
 
   it('Check for refresh button', () => {
-    return environment.nm.wait('[data-ta-clickable="refresh-button"]')
-      .ug.click('[data-ta-clickable="refresh-button"]');
+    return environment.nm.wait('.refresh-button')
+      .ug.click('.refresh-button');
   });
 
   it('Should be possible to create and commit a file', () => {
@@ -40,8 +40,8 @@ describe('[GENERIC]', () => {
   it('Should be able to add a new file to .gitignore', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`)
       .wait('.files .file .btn-default')
-      .ug.click('[data-ta-clickable="ignore-file"]')
-      .ug.click('[data-ta-clickable="ignore-file"]')
+      .ug.click('.files span.ignore')
+      .ug.click('.files span.ignore')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
@@ -72,11 +72,11 @@ describe('[GENERIC]', () => {
   it('Should be possible to discard a created file and ensure patching is not avaliable for new file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .wait('.files .file .btn-default')
-      .ug.click('[data-ta-clickable="show-stage-diffs"]')
+      .ug.click('.files button')
       .wait('.files .file .btn-default')
-      .ug.click('[data-ta-clickable="show-stage-diffs"]')
+      .ug.click('.files button')
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
-      .ug.click('[data-ta-clickable="discard-file"]')
+      .ug.click('.files span.discard')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default')
   });
@@ -96,11 +96,11 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a tag', () => {
     return environment.nm.ug.createTag('tagwillbedeleted')
-      .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
+      .ug.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]')
       .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
+      .ug.waitForElementNotVisible('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
   it('Commit changes to a file', () => {
@@ -115,7 +115,7 @@ describe('[GENERIC]', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .wait('.files .file .additions')
       .wait('.files .file .deletions')
-      .ug.click('[data-ta-clickable="discard-file"]')
+      .ug.click('.files span.discard')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });
@@ -169,7 +169,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Go to home screen', () => {
-    return environment.nm.ug.click('[data-ta-clickable="home-link"]')
-      .wait('[data-ta-container="home-page"]');
+    return environment.nm.ug.click('.navbar .backlink')
+      .wait('.home');
   });
 });

@@ -3,7 +3,7 @@ const muteGraceTimeDuration = 2000;
 const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
     .wait('.files .file .btn-default')
-    .ug.click('[data-ta-clickable="discard-file"]')
+    .ug.click('.files span.discard')
     .then(() => {
       if (dialogButtonToClick === "yes") {
         return env.nm.ug.click('.modal-dialog .btn-primary');
