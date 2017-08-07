@@ -166,7 +166,7 @@ class Environment {
     this.nm = Nightmare({ Promise: Bluebird });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
-    this.config.serverTimeout = this.config.serverTimeout || 15000;
+    this.config.serverTimeout = this.config.serverTimeout || 20000;
     this.config.viewWidth = 2000;
     this.config.viewHeight = 2000;
     this.config.showServerOutput = this.config.showServerOutput || true;
@@ -187,7 +187,7 @@ class Environment {
   getRootUrl() { return rootUrl; }
 
   getPort() {
-    portrange += 1;
+    portrange += Math.floor((Math.random() * 5000));
 
     return new Bluebird((resolve, reject) => {
       const server = net.createServer();
