@@ -1,14 +1,14 @@
-<div class="btn-group fetchButton">
-  <button type="button" class="btn btn-default btn-main" data-ta-clickable="fetch" data-bind="click: function() {}">
+<div class="btn-group fetchButton submodule">
+  <button type="button" class="btn btn-default btn-main" data-bind="click: function() {}">
     <span class="glyphicon glyphicon-th-large"></span>
     <span data-bind="text: 'Submodules'"></span>
     <!-- ko component: updateProgressBar --><!-- /ko -->
     <!-- ko component: fetchProgressBar --><!-- /ko -->
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="submodules-menu">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
     <span class="caret"></span>
   </button>
-  <ul class="dropdown-menu pull-right" role="menu" data-ta-container="submodules">
+  <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: submodules -->
     <li>
       <a href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
@@ -17,8 +17,8 @@
     </li>
     <!-- /ko -->
     <li class="divider"></li>
-    <li><a href="#" data-bind="click: updateSubmodules" data-ta-clickable="update-submodule">Update Submodules</a></li>
+    <li><a href="#" class="update-submodule" data-bind="click: updateSubmodules">Update Submodules</a></li>
     <li class="divider"></li>
-    <li><a href="#" data-bind="click: showAddSubmoduleDialog" data-ta-clickable="add-submodule">Add Submodules</a></li>
+    <li><a href="#" class="add-submodule" data-bind="click: showAddSubmoduleDialog">Add Submodules</a></li>
   </ul>
 </div>

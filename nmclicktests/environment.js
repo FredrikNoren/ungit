@@ -17,36 +17,32 @@ Nightmare.action('ug', {
     done();
   },
   'commit': function(commitMessage, done) {
-    this.wait('[data-ta-container="staging-file"]')
-      .insert('[data-ta-input="staging-commit-title"]', commitMessage)
+    this.wait('.files .file .btn-default')
+      .insert('.staging input.form-control', commitMessage)
       .wait(100)
-      .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .click('.commit-btn')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
-    this.ug.click('[data-bind="click: toggleAmend"]')
-      .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+    this.ug.click('.amend-link')
+      .click('.commit-btn')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
-  'createTag': function(name, done) {
-    this.ug.createRef(name, 'tag')
-      .then(done.bind(null, null), done);
-  },
   'checkout': function(branch, done) {
-    this.ug.click('[data-ta-clickable="branch"][data-ta-name="' + branch + '"]')
-      .ug.click('[data-ta-action="checkout"][data-ta-visible="true"] [role="button"]')
-      .wait('[data-ta-clickable="branch"][data-ta-name="' + branch + '"][data-ta-current="true"]')
+    this.ug.click(`.branch[data-ta-name="${branch}"]`)
+      .ug.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask')
+      .wait(`.ref.branch[data-ta-name="${branch}"].current`)
       .then(done.bind(null, null), done);
   },
   'patch': function(commitMessage, done) {
-    this.ug.click('[data-ta-container="staging-file"]')
-      .ug.click('[data-ta-clickable="patch-file"]')
-      .wait('[data-ta-clickable="patch-line-input"]')
-      .ug.commit('[data-ta-clickable="patch-line-input"]')
+    this.ug.click('.files .file .btn-default')
+      .ug.click('.patch')
+      .wait('.d2h-diff-tbody input')
+      .ug.commit(commitMessage)
       .then(done.bind(null, null), done);
   },
   'backgroundAction': function(method, url, body, done) {
@@ -105,39 +101,40 @@ Nightmare.action('ug', {
     this.wait((selector) => !document.querySelector(selector), selector)
       .then(done.bind(null, null), done);
   },
-  'refAction': function(ref, local, action, done) {
-    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"][data-ta-local="' + local + '"]')
-      .ug.click('[data-ta-action="' + action + '"][data-ta-visible="true"] [role="button"]')
-      .visible('[data-ta-clickable="yes"]')
+  '_verifyRefAction': function(action, done) {
+    this.visible('.modal-dialog .btn-primary')
       .then((isVisible) => {
-        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="' + action + '"][data-ta-visible="true"]')
+        return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
+          .ug.waitForElementNotVisible(`[data-ta-action="${action}"]:not([style*="display: none"])`)
           .wait(200)
       }).then(done.bind(null, null), done);
+  },
+  'refAction': function(ref, local, action, done) {
+    this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
+      .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
+      .then(() => this.ug._verifyRefAction(action))
+      .then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
-    this.click('[data-ta-clickable="branch"][data-ta-name="' + ref + '"]')
-      .ug.click('[data-ta-node-title="' + targetNodeCommitTitle + '"] [data-ta-action="move"][data-ta-visible="true"] [role="button"]')
-      .visible('[data-ta-clickable="yes"]')
-      .then((isVisible) => {
-        return (isVisible ? this.ug.click('[data-ta-clickable="yes"]') : this)
-          .ug.waitForElementNotVisible('[data-ta-action="move"][data-ta-visible="true"]')
-          .wait(200)
-      }).then(done.bind(null, null), done);
+    this.click(`.branch[data-ta-name="${ref}"]`)
+      .ug.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`)
+      .then(() => this.ug._verifyRefAction('move'))
+      .then(done.bind(null, null), done);
   },
-  'createRef': function(name, type, done) {
-    console.log(`Creating ${name} as ${type}`);
+  '_createRef': function(type, name, done) {
     this.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
       .wait(100)
-      .click('[data-ta-clickable="create-' + type + '"]')
-      .wait('[data-ta-clickable="' + type + '"][data-ta-name="' + name + '"]')
+      .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
+      .wait(`.ref.${type}[data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);
   },
+  'createTag': function(name, done) {
+    this.ug._createRef('tag', name).then(done.bind(null, null), done);
+  },
   'createBranch': function(name, done) {
-    this.ug.createRef(name, 'branch')
-      .then(done.bind(null, null), done);
+    this.ug._createRef('branch', name).then(done.bind(null, null), done);
   },
   'click': function(selector, done) {
     this.wait(selector)
@@ -148,7 +145,7 @@ Nightmare.action('ug', {
   },
   'openUngit': function(tempDirPath, done) {
     this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
-      .wait('.graph')
+      .wait('.repository-actions')
       .wait(1000)
       .then(done.bind(null, null), done);
   }

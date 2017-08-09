@@ -206,8 +206,7 @@ StagingViewModel.prototype.toggleAmend = function() {
   if (!this.amend() && !this.commitMessageTitle()) {
     this.commitMessageTitle(this.HEAD().title);
     this.commitMessageBody(this.HEAD().body);
-  }
-  else if(this.amend()) {
+  } else if(this.amend()) {
     var isPrevDefaultMsg =
       this.commitMessageTitle() == this.HEAD().title &&
       this.commitMessageBody() == this.HEAD().body;

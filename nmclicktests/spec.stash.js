@@ -15,23 +15,23 @@ describe('[STASH]', () => {
 
   it('Should be possible to stash a file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .wait('[data-ta-container="staging-file"]')
-      .ug.click('[data-ta-clickable="stash-all"]')
-      .visible('[data-ta-clickable="stash-toggle"]')
+      .wait('.files .file .btn-default')
+      .ug.click('.stash-all')
+      .visible('.stash-toggle')
       .then((isVisible) => {
         // if stash is currently collapsed show it. (localStorage['showStash'] might already be 'true')
-        return (isVisible ? environment.nm.click('[data-ta-clickable="stash-toggle"]') : environment.nm)
-          .wait('[data-ta-container="stash-stash"]')
+        return (isVisible ? environment.nm.click('.stash-toggle') : environment.nm)
+          .wait('.stash .list-group-item')
       });
   });
 
   it('Should be possible to open stash diff', () => {
-    return environment.nm.click('[data-ta-clickable="stash-diff"]')
-      .wait('[data-ta-container="stash-diff"]')
+    return environment.nm.click('.toggle-show-commit-diffs')
+      .wait('.stash .diff-wrapper')
   });
 
   it('Should be possible to pop a stash', () => {
-    return environment.nm.click('[data-ta-clickable="stash-apply"]')
-      .wait('[data-ta-container="staging-file"]')
+    return environment.nm.click('.stash .stash-apply')
+      .wait('.files .file .btn-default')
   });
 });
