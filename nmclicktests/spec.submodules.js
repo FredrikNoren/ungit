@@ -14,30 +14,30 @@ describe('[SUMBODULES]', () => {
   });
 
   it('Submodule add', () => {
-    return environment.nm.ug.click('[data-ta-clickable="submodules-menu"]')
-      .ug.click('[data-ta-clickable="add-submodule"]')
-      .wait('[data-ta-container="add-submodule"]')
-      .insert('[data-ta-container="add-submodule"] [data-ta-input="path"]', 'subrepo')
-      .insert('[data-ta-container="add-submodule"] [data-ta-input="url"]', testRepoPaths[0])
-      .click('[data-ta-container="add-submodule"] [data-ta-clickable="submit"]')
+    return environment.nm.ug.click('.submodule .dropdown-toggle')
+      .ug.click('.fetchButton .add-submodule')
+      .wait('.modal')
+      .insert('.modal #Path', 'subrepo')
+      .insert('.modal #Url', testRepoPaths[0])
+      .click('.modal .modal-footer input')
       .wait(500)
-      .click('[data-ta-clickable="submodules-menu"]')
-      .wait('[data-ta-container="submodules"] [data-ta-clickable="subrepo"]');
+      .click('.submodule .dropdown-toggle')
+      .wait('.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]');
   });
 
   it('Submodule update', () => {
-    return environment.nm.ug.click('[data-ta-clickable="update-submodule"]')
+    return environment.nm.ug.click('.fetchButton .update-submodule')
       .wait(500)
-      .ug.waitForElementNotVisible('[data-ta-element="progress-bar"]');
+      .ug.waitForElementNotVisible('.progress');
   });
 
   it('Submodule delete check', () => {
-    return environment.nm.click('[data-ta-clickable="submodules-menu"]')
+    return environment.nm.click('.submodule .dropdown-toggle')
       .wait('[data-ta-clickable="subrepo-remove"]')
       .ug.click('[data-ta-clickable="subrepo-remove"]')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
+      .ug.click('.modal-dialog .btn-primary')
       .wait(500)
-      .ug.waitForElementNotVisible('[data-ta-element="progress-bar"]')
+      .ug.waitForElementNotVisible('.progress')
   });
 });

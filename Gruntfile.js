@@ -74,7 +74,8 @@ module.exports = function(grunt) {
       click: {
         options: {
           reporter: 'spec',
-          timeout: 15000
+          timeout: 15000,
+          bail: true
         },
         src: 'nmclicktests/spec.*.js'
       }
@@ -488,8 +489,8 @@ module.exports = function(grunt) {
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
-  grunt.registerTask('nmclicktest', ['mochaTest:click']);
-  grunt.registerTask('test', ['unittest', 'nmclicktest']);
+  grunt.registerTask('clicktest', ['mochaTest:click']);
+  grunt.registerTask('test', ['unittest', 'clicktest']);
 
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
   grunt.registerTask('publish', ['default', 'test', 'release:patch']);

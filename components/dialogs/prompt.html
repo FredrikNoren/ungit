@@ -10,7 +10,7 @@
 			</div>
 			<div class="modal-footer">
 				<!-- ko foreach: alternatives -->
-				<button type="button" class="btn btn-default" data-bind="css: { 'btn-primary': primary }, text: label, click: click, attr: { 'data-ta-clickable': taId }"></button>
+				<button type="button" class="btn btn-default" data-bind="css: { 'btn-primary': primary, 'btn-mute': taId === 'mute' }, text: label, click: click"></button>
 				<!-- /ko -->
 			</div>
 		</div>

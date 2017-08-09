@@ -21,8 +21,8 @@ describe('[GENERIC]', () => {
   });
 
   it('Check for refresh button', () => {
-    return environment.nm.wait('[data-ta-clickable="refresh-button"]')
-      .ug.click('[data-ta-clickable="refresh-button"]');
+    return environment.nm.wait('.refresh-button')
+      .ug.click('.refresh-button');
   });
 
   it('Should be possible to create and commit a file', () => {
@@ -39,46 +39,46 @@ describe('[GENERIC]', () => {
 
   it('Should be able to add a new file to .gitignore', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`)
-      .wait('[data-ta-container="staging-file"]')
-      .ug.click('[data-ta-clickable="ignore-file"]')
-      .ug.click('[data-ta-clickable="ignore-file"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .wait('.files .file .btn-default')
+      .ug.click('.files span.ignore')
+      .ug.click('.files span.ignore')
+      .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
   it('Test showing commit diff between two commits', () => {
     return environment.nm.wait('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-clickable="node-clickable-0"]')
       .wait('.diff-wrapper')
-      .ug.click('[data-ta-clickable="commitDiffFileName"]')
-      .wait('[data-ta-container="commitLineDiffs"]');
+      .ug.click('.commit-diff-filename')
+      .wait('.commit-line-diffs');
   });
 
   it('Test showing commit side by side diff between two commits', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-sideBySideDiff"]')
-      .wait('[data-ta-container="commitLineDiffs"]');
+    return environment.nm.ug.click('.commit-sideBySideDiff')
+      .wait('.commit-line-diffs');
   });
 
   it('Test wordwrap', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-wordwrap"]')
+    return environment.nm.ug.click('.commit-wordwrap')
       .wait('.word-wrap');
   });
 
   it('Test wordwrap', () => {
-    return environment.nm.ug.click('[data-ta-clickable="commit-whitespace"]')
-      .wait('[data-ta-container="commitLineDiffs"]')
+    return environment.nm.ug.click('.commit-whitespace')
+      .wait('.commit-line-diffs')
       .ug.click('[data-ta-clickable="node-clickable-0"]');
   });
 
   it('Should be possible to discard a created file and ensure patching is not avaliable for new file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .wait('[data-ta-container="staging-file"]')
-      .ug.click('[data-ta-clickable="show-stage-diffs"]')
-      .wait('[data-ta-container="staging-file"]')
-      .ug.click('[data-ta-clickable="show-stage-diffs"]')
+      .wait('.files .file .btn-default')
+      .ug.click('.files button')
+      .wait('.files .file .btn-default')
+      .ug.click('.files button')
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
-      .ug.click('[data-ta-clickable="discard-file"]')
-      .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]')
+      .ug.click('.files span.discard')
+      .ug.click('.modal-dialog .btn-primary')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
   });
 
   it('Should be possible to create a branch', () => {
@@ -87,37 +87,37 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a branch', () => {
     return environment.nm.ug.createBranch('willbedeleted')
-      .ug.click('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
+      .ug.click('.branch[data-ta-name="willbedeleted"]')
+      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"][data-ta-name="willbedeleted"]');
+      .ug.click('.modal-dialog .btn-primary')
+      .ug.waitForElementNotVisible('.branch[data-ta-name="willbedeleted"]');
   });
 
   it('Should be possible to create and destroy a tag', () => {
     return environment.nm.ug.createTag('tagwillbedeleted')
-      .ug.click('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]')
-      .ug.click('[data-ta-action="delete"][data-ta-visible="true"] [role="button"]')
+      .ug.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]')
+      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
       .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="tag"][data-ta-name="tagwillbedeleted"]');
+      .ug.click('.modal-dialog .btn-primary')
+      .ug.waitForElementNotVisible('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
   it('Commit changes to a file', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('[data-ta-container="staging-file"]')
-      .insert('[data-ta-input="staging-commit-title"]', 'My commit message')
-      .click('[data-ta-clickable="commit"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .wait('.files .file .btn-default')
+      .insert('.staging input.form-control', 'My commit message')
+      .click('.commit-btn')
+      .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
   it('Show stats for changed file and discard it', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('[data-ta-container="staging-file"] .additions')
-      .wait('[data-ta-container="staging-file"] .deletions')
-      .ug.click('[data-ta-clickable="discard-file"]')
-      .ug.click('[data-ta-clickable="yes"]')
-      .ug.waitForElementNotVisible('[data-ta-container="staging-file"]');
+      .wait('.files .file .additions')
+      .wait('.files .file .deletions')
+      .ug.click('.files span.discard')
+      .ug.click('.modal-dialog .btn-primary')
+      .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
   it.skip('Should be possible to patch a file', () => {
@@ -156,7 +156,7 @@ describe('[GENERIC]', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .wait('[data-ta-action="revert"]')
       .ug.click('[data-ta-action="revert"]')
-      .ug.waitForElementNotVisible('[data-ta-container="user-error-page"]');
+      .ug.waitForElementNotVisible('.crash');
   });
 
   it('Should be possible to move a branch', () => {
@@ -169,7 +169,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Go to home screen', () => {
-    return environment.nm.ug.click('[data-ta-clickable="home-link"]')
-      .wait('[data-ta-container="home-page"]');
+    return environment.nm.ug.click('.navbar .backlink')
+      .wait('.home');
   });
 });

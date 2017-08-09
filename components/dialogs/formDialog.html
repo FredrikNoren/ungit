@@ -1,5 +1,5 @@
 
-<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }, attr: { 'data-ta-container': taDialogName }">
+<div class="modal fade" data-bind="modal: { onclose: onclose, closer: setCloser }">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -12,12 +12,12 @@
 						<label data-bind="text: name, attr: { for: name }" class="col-lg-2 control-label"></label>
 						<div class="col-lg-10">
 							<input class="form-control" id="inputName"
-								data-bind="value: value, attr: { id: name, placeholder: placeholder, type: type, autofocus: autofocus, 'data-ta-input': taName }">
+								data-bind="value: value, attr: { id: name, placeholder: placeholder, type: type, autofocus: autofocus }">
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<input type="submit" class="btn btn-primary" value="Submit" data-ta-clickable="submit">
+					<input type="submit" class="btn btn-primary" value="Submit">
 					<button class="btn btn-default" data-bind="click: close, visible: showCancel">Cancel</button>
 				</div>
 			</form>

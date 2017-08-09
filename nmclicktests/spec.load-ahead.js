@@ -27,16 +27,16 @@ describe('[LOAD-AHEAD]', () => {
   });
 
   it('Should be possible to create and commit 3', () => {
-    return environment.nm.ug.click('[data-ta-clickable="branch-menu"]')
+    return environment.nm.ug.click('.branch .dropdown-toggle')
       .wait('[data-ta-clickable="checkoutbranch-1"]')
       .wait(500)
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
-      .ug.waitForElementNotVisible('[data-ta-clickable="branch"] [data-ta-element="progress-bar"]');
+      .ug.waitForElementNotVisible('.branch .progress');
   });
 
   it('Open path screen again and should see only 1 commit', () => {
     return environment.nm.refresh()
-      .wait('[data-ta-container="nodes-skipped"]')
+      .wait('.loadAhead')
       .ug.waitForElementNotVisible('[data-ta-clickable="node-clickable-1"]');
   });
 
@@ -45,8 +45,8 @@ describe('[LOAD-AHEAD]', () => {
   });
 
   it('Load ahead', () => {
-    return environment.nm.ug.click('[data-ta-container="nodes-skipped"]')
+    return environment.nm.ug.click('.load-ahead-button')
       .wait('[data-ta-clickable="node-clickable-1"]')
-      .ug.waitForElementNotVisible('[data-ta-container="nodes-skipped"]')
+      .ug.waitForElementNotVisible('.loadAhead')
   });
 });

@@ -1,4 +1,4 @@
-<div class="stash-toggle stash-toggle-text" data-ta-clickable="stash-toggle" data-bind="click: toggleShowStash, visible: !isShow()" >
+<div class="stash-toggle stash-toggle-text" data-bind="click: toggleShowStash, visible: !isShow()" >
   <span class="glyphicon glyphicon-chevron-up"></span>
   Stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
@@ -9,14 +9,14 @@
       Stashed changes (<span data-bind="text: stashedChanges().length"></span>)
     </h4>
     <div class="list-group" data-bind="foreach: stashedChanges">
-      <div class="list-group-item" data-ta-container="stash-stash">
-        <a href="#" data-bind="click: apply" class="glyphicon glyphicon-pencil glyphicon-circled pull-left" data-ta-clickable="stash-apply" data-toggle="tooltip" title="Apply this stash"></a>
-        <a href="#" data-bind="click: toggleShowCommitDiffs" data-ta-clickable="stash-diff" data-toggle="tooltip" title="Show stash diff">
+      <div class="list-group-item">
+        <a href="#" class="stash-apply glyphicon glyphicon-pencil glyphicon-circled pull-left" data-bind="click: apply" data-toggle="tooltip" title="Apply this stash"></a>
+        <a href="#" class="toggle-show-commit-diffs" data-bind="click: toggleShowCommitDiffs" data-toggle="tooltip" title="Show stash diff">
           <h4 class="list-group-item-heading" data-bind="text: title"></h4>
           <p class="list-group-item-text" data-bind="text: message"></p>
         </a>
         <!-- ko if: showCommitDiff() -->
-        <div class="diff-wrapper" data-ta-container="stash-diff">
+        <div class="diff-wrapper">
           <div class="diff-inner" data-bind="component: commitDiff"></div>
         </div>
         <!-- /ko -->

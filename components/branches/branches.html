@@ -1,13 +1,13 @@
-<div class="btn-group">
-  <button type="button" class="btn btn-default btn-main" data-ta-clickable="branch" data-bind="click: updateBranches">
+<div class="btn-group branch">
+  <button type="button" class="btn btn-default btn-main" data-bind="click: updateBranches">
     <span class="octicon octicon-git-branch"></span>
     <span data-bind="text: fetchLabel"></span>
     <!-- ko component: fetchingProgressBar --><!-- /ko -->
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-ta-clickable="branch-menu">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
     <span class="caret"></span>
   </button>
-  <ul class="dropdown-menu pull-right" role="menu" data-ta-container="branches">
+  <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: branches -->
     <li>
       <a href="#" data-bind="text: name, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
