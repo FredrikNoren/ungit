@@ -399,7 +399,7 @@ module.exports = function(grunt) {
           return file.startsWith("spec.");
         });
       }).then(function(tests) {
-        grunt.log.writeln('Running click tests in parallel... (this will take a while...) \t');
+        grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Bluebird.map(tests, function(file) {
           var output = "";
           var outStream = function(data) { output += data; }

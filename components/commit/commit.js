@@ -32,7 +32,7 @@ function CommitViewModel(gitNode) {
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();
   this.authorGravatar = ko.computed(function() {
-    return md5((self.authorEmail() || "").trim().toLowerCase);
+    return md5((self.authorEmail() || "").trim().toLowerCase());
   });
 
   this.showCommitDiff = ko.computed(function() {
