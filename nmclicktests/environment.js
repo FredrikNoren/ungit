@@ -6,7 +6,7 @@ const net = require('net');
 const request = require('superagent');
 const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
 const rimraf = Bluebird.promisify(require("rimraf"));
-let portrange = 45032;
+const portrange = 45032;
 let rootUrl;
 
 module.exports = (config) => new Environment(config);
@@ -184,14 +184,14 @@ class Environment {
   getRootUrl() { return rootUrl; }
 
   getPort() {
-    portrange += 1;
+    const tmpPortrange = portrange + Math.floor((Math.random() * 5000));
 
     return new Bluebird((resolve, reject) => {
       const server = net.createServer();
 
-      server.listen(portrange, (err) => {
+      server.listen(tmpPortrange, (err) => {
         server.once('close', () => {
-          this.port = portrange;
+          this.port = tmpPortrange;
           rootUrl = `http://localhost:${this.port}${this.config.rootPath}`
           resolve();
         });
@@ -218,7 +218,7 @@ class Environment {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
-      .catch((err) => { throw new Error("Cannot confirm ungit start!!"); })
+      .catch((err) => { console.log(err); throw new Error("Cannot confirm ungit start!!", err); })
   }
 
   createRepos(testRepoPaths, config) {

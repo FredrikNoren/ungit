@@ -8,6 +8,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - `grunt nmclicktest` -> `grunt clicktest`
   - Stabilize ungit open test of clicktest via using a tag that is guaranteed to be generated
   - Add click test bailout on tes failure
+  - Add parallel click test `grunt clickParallel`
   - Remove deps to fix config init bug for the `credentials-helper`. [#838](https://github.com/FredrikNoren/ungit/issues/838)
 - 1.1.27: Add alert when moving back in time. [#914](https://github.com/FredrikNoren/ungit/issues/914)
 - 1.1.26:
