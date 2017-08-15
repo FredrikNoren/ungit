@@ -382,6 +382,59 @@ module.exports = function(grunt) {
     })
   });
 
+  var maxConcurrency = 5;
+  /**
+   * Run clicktest in parallel at test suite level.
+   * This test does intermittently fails depends on the maxConcurrency level set
+   * above and the capacity of the computer as sometimes lack of resource allocation
+   * triggers timeouts.
+   * Use at own discretion.
+   */
+  grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
+    var done = this.async();
+
+    fs.readdirAsync('./nmclicktests')
+      .then(function(files) {
+        return files.filter(function(file) {
+          return file.startsWith("spec.");
+        });
+      }).then(function(tests) {
+        grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
+        return Bluebird.map(tests, function(file) {
+          var output = "";
+          var outStream = function(data) { output += data; }
+
+          grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
+          return new Bluebird(function(resolve, reject) {
+            var child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'nmclicktests', file), '--timeout=20000', '-b'], { maxBuffer: 10*1024*1024 });
+            child.stdout.on('data', outStream);
+            child.stderr.on('data', outStream);
+            child.on('exit', function(code) {
+              if (code == 0) resolve(file);
+              else reject();
+            });
+          }).then(function() {
+            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+            return { name: file, output: output, isSuccess: true };
+          }).catch(function() {
+            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+            return { name: file, output: output, isSuccess: false };
+          });
+        }, { concurrency: maxConcurrency });
+      }).then(function(results) {
+        var isSuccess = true;
+        results.forEach(function(result) {
+          if (!result.isSuccess) {
+            grunt.log.writeln("---- start of " + result.name + " log ----")
+            grunt.log.writeln(result.output);
+            grunt.log.writeln("---- end of " + result.name + " log ----")
+            isSuccess = false;
+          }
+        });
+        done(isSuccess);
+      });
+  });
+
   grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
     var done = this.async();
     grunt.log.writeln('Bumping dependencies...');
