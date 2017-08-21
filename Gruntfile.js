@@ -144,7 +144,7 @@ module.exports = (grunt) => {
           {
             src: ['public/source/**/*.js', 'components/**/*.js'],
             // Filter out the "compiled" components files; see the browserify task for components
-            filter: (src) => src.indexOf('bundle.js') == -1;
+            filter: (src) => src.indexOf('bundle.js') == -1
           }
         ]
       },
@@ -271,7 +271,7 @@ module.exports = (grunt) => {
     }
   });
 
-  grunt.registerTask('browserify-common', '', () => {
+  grunt.registerTask('browserify-common', '', function() {
     const done = this.async();
     const b = browserify({
       noParse: ['public/vendor/js/superagent.js'],
@@ -304,7 +304,7 @@ module.exports = (grunt) => {
     b.bundle().pipe(outFile);
   });
 
-  grunt.registerTask('browserify-components', '',  () => {
+  grunt.registerTask('browserify-components', '',  function() {
     Bluebird.each(fs.readdirSync('components'), (component) => {
       return new Bluebird((resolve, reject) => {
         const b = browserify({
@@ -330,17 +330,17 @@ module.exports = (grunt) => {
                 'moment',
                 'blueimp-md5']);
 
-        const outFile = fs.createWriteStream(`./components/${component}/${component}.bundles.js`);
+        const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
         outFile.on('close', resolve);
         b.bundle().pipe(outFile);
       });
     }).then(this.async());
   });
 
-  bumpDependency(packageJson, packageName) => {
+  const bumpDependency = (packageJson, packageName) => {
     return new Bluebird((resolve, reject) => {
       const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
-      const currentVersion = packageJson[dependencyType][packageName];
+      let currentVersion = packageJson[dependencyType][packageName];
       if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
       npm.commands.show([packageName, 'versions'], true, (err, data) => {
         if(err) reject(err);
@@ -356,27 +356,17 @@ module.exports = (grunt) => {
     });
   }
 
-  getGitLastCommitHash(callback) => {
-    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
-      callback(stdout.trim());
-    });
-  }
-  updatePackageJsonBuildVersion(commitHash) => {
+  const updatePackageJsonBuildVersion = (commitHash) => {
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
     packageJson.version += `+${commitHash}`;
     fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
   }
-  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', () => {
+  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
     const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
       console.log('Skipping travis npm publish');
       return done();
     }
-    getGitLastCommitHash((hash) => {
-      updatePackageJsonBuildVersion(hash);
-      fs.writeFileSync('.npmrc', `//registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}`);
-      childProcess.exec("npm publish", done());
-    })
   });
 
   /**
@@ -386,7 +376,7 @@ module.exports = (grunt) => {
    * triggers timeouts.
    * Use at own discretion.
    */
-  grunt.registerTask('clickParallel', 'Parallelized click tests.', () => {
+  grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
     const done = this.async();
 
     fs.readdirAsync('./nmclicktests')
@@ -394,8 +384,8 @@ module.exports = (grunt) => {
       .then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Bluebird.map(tests, (file) => {
-          const output = "";
-          const outStream = (data) => { output += data; }
+          let output = "";
+          const outStream = (data) => output += data
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
           return new Bluebird((resolve, reject) => {
@@ -415,7 +405,7 @@ module.exports = (grunt) => {
           });
         }, { concurrency: maxConcurrency });
       }).then((results) => {
-        const isSuccess = true;
+        let isSuccess = true;
         results.forEach((result) => {
           if (!result.isSuccess) {
             grunt.log.writeln(`---- start of ${result.name} log ----`)
@@ -428,7 +418,7 @@ module.exports = (grunt) => {
       });
   });
 
-  grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', () => {
+  grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
     const done = this.async();
     grunt.log.writeln('Bumping dependencies...');
     npm.load(() => {
@@ -452,7 +442,7 @@ module.exports = (grunt) => {
     });
   });
 
-  grunt.registerMultiTask('electron', 'Package Electron apps', () => {
+  grunt.registerMultiTask('electron', 'Package Electron apps', function() {
     electronPackager(this.options(), this.async());
   });
 
