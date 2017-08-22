@@ -436,7 +436,7 @@ module.exports = (grunt) => {
       });
 
       Bluebird.all(bumps).then(() => {
-        fs.writeFileSync('package.json', `JSON.stringify(tempPackageJson, null, 2)\n`);
+        fs.writeFileSync('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`);
         grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
       }).then(() => { done(); }).catch(done);
     });
