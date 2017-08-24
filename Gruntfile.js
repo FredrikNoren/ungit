@@ -331,7 +331,7 @@ module.exports = (grunt) => {
                 'blueimp-md5']);
 
         const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
-        outFile.on('close', resolve);
+        outFile.on('close', () => resolve);
         b.bundle().pipe(outFile);
       });
     }).then(this.async());
@@ -367,6 +367,12 @@ module.exports = (grunt) => {
       console.log('Skipping travis npm publish');
       return done();
     }
+    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
+      const hash = stdout.trim();
+      updatePackageJsonBuildVersion(hash);
+      fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
+      childProcess.exec("npm publish", () => { done(); });
+    });
   });
 
   /**
