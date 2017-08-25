@@ -331,7 +331,7 @@ module.exports = (grunt) => {
                 'blueimp-md5']);
 
         const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
-        outFile.on('close', () => resolve);
+        outFile.on('close', () => resolve());
         b.bundle().pipe(outFile);
       });
     }).then(this.async());
