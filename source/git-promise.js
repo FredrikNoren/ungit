@@ -332,12 +332,19 @@ git.discardChangesInFile = (repoPath, filename) => {
         // If it's just a new file, remove it
         if (fileStatus.isNew) {
           return fs.unlinkAsync(path.join(repoPath, filename))
-            .catch((err) => {
-              throw { command: 'unlink', error: err };
-            });
+            .catch((err) => { throw { command: 'unlink', error: err }; });
         // If it's a changed file, reset the changes
         } else {
-          return git(['checkout', 'HEAD', '--', filename], repoPath);
+          return fs.lstatAsync(path.join(repoPath, filename)).then((stats) => {
+            if (stats.isDirectory()) {
+              // file is a dir, which means it's a subrepo changes.
+              return git(['submodule', 'sync'], repoPath)
+                .then(() => git(['submodule', 'update', '--init', '-f', '--recursive', filename], repoPath));
+            } else {
+              // normal file discard
+              return git(['checkout', 'HEAD', '--', filename], repoPath);
+            }
+          });
         }
       } else {
         return git(['rm', '-f', filename], repoPath);
