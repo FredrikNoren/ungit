@@ -1,15 +1,16 @@
-var childProcess = require('child_process');
-var path = require('path');
-var fs = require('./source/utils/fs-async');
-var npm = require('npm');
-var semver = require('semver');
-var browserify = require('browserify');
-var electronPackager = require('electron-packager');
-var Bluebird = require('bluebird');
-var cliColor = require('ansi-color');
+const childProcess = require('child_process');
+const path = require('path');
+const fs = require('./source/utils/fs-async');
+const npm = require('npm');
+const semver = require('semver');
+const browserify = require('browserify');
+const electronPackager = require('electron-packager');
+const Bluebird = require('bluebird');
+const cliColor = require('ansi-color');
+const maxConcurrency = 5;
 
-module.exports = function(grunt) {
-  var packageJson = grunt.file.readJSON('package.json');
+module.exports = (grunt) => {
+  const packageJson = grunt.file.readJSON('package.json');
 
   grunt.initConfig({
     pkg: packageJson,
@@ -121,7 +122,7 @@ module.exports = function(grunt) {
     },
     jshint: {
       options: {
-        undef: true, // check for usage of undefined variables
+        undef: true, // check for usage of undefined constiables
         indent: 2,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
@@ -143,7 +144,7 @@ module.exports = function(grunt) {
           {
             src: ['public/source/**/*.js', 'components/**/*.js'],
             // Filter out the "compiled" components files; see the browserify task for components
-            filter: function(src) { return src.indexOf('bundle.js') == -1; }
+            filter: (src) => src.indexOf('bundle.js') == -1
           }
         ]
       },
@@ -157,6 +158,7 @@ module.exports = function(grunt) {
       bin: {
         options: {
           node: true,
+          esnext: true
         },
         src: [
           'Gruntfile.js',
@@ -270,8 +272,8 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('browserify-common', '', function() {
-    var done = this.async();
-    var b = browserify({
+    const done = this.async();
+    const b = browserify({
       noParse: ['public/vendor/js/superagent.js'],
       debug: true
     });
@@ -297,24 +299,21 @@ module.exports = function(grunt) {
     b.require('bluebird', { expose: 'bluebird' });
     b.require('just-detect-adblock', { expose: 'just-detect-adblock' });
     b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
-    var outFile = fs.createWriteStream('./public/js/ungit.js');
-    outFile.on('close', function() {
-      done();
-    });
+    const outFile = fs.createWriteStream('./public/js/ungit.js');
+    outFile.on('close', () => done());
     b.bundle().pipe(outFile);
   });
 
   grunt.registerTask('browserify-components', '',  function() {
-    Bluebird.each(fs.readdirSync('components'), function(component) {
-      return new Bluebird(function(resolve, reject) {
-        var b = browserify({
+    Bluebird.each(fs.readdirSync('components'), (component) => {
+      return new Bluebird((resolve, reject) => {
+        const b = browserify({
           bundleExternal: false,
           debug: true
         });
-        var src = './components/' + component + '/' + component + '.js';
+        const src = `./components/${component}/${component}.js`;
         if (!fs.existsSync(src)) {
-          grunt.log.error(src + ' does not exist. If this component is obsolete, ' +
-            'please remove that directory or perform a clean build.');
+          grunt.log.error(`${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
           return;
         }
         b.add(src);
@@ -331,26 +330,24 @@ module.exports = function(grunt) {
                 'moment',
                 'blueimp-md5']);
 
-        var outFile = fs.createWriteStream('./components/' + component + '/' + component + '.bundle.js');
-        outFile.on('close', function() {
-          resolve();
-        });
+        const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
+        outFile.on('close', () => resolve());
         b.bundle().pipe(outFile);
       });
     }).then(this.async());
   });
 
-  function bumpDependency(packageJson, packageName) {
-    return new Bluebird(function(resolve, reject) {
-      var dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
-      var currentVersion = packageJson[dependencyType][packageName];
+  const bumpDependency = (packageJson, packageName) => {
+    return new Bluebird((resolve, reject) => {
+      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
+      let currentVersion = packageJson[dependencyType][packageName];
       if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
-      npm.commands.show([packageName, 'versions'], true, function(err, data) {
+      npm.commands.show([packageName, 'versions'], true, (err, data) => {
         if(err) reject(err);
-        var versions = data[Object.keys(data)[0]].versions.filter(function(v) {
+        const versions = data[Object.keys(data)[0]].versions.filter((v) => {
           return v.indexOf('alpha') == -1;
         });
-        var latestVersion = versions[versions.length - 1];
+        const latestVersion = versions[versions.length - 1];
         if (semver.gt(latestVersion, currentVersion)) {
           packageJson[dependencyType][packageName] = '~' + latestVersion;
         }
@@ -359,30 +356,25 @@ module.exports = function(grunt) {
     });
   }
 
-  function getGitLastCommitHash(callback) {
-    childProcess.exec("git rev-parse --short HEAD", function(err, stdout, stderr) {
-      callback(stdout.trim());
-    });
-  }
-  function updatePackageJsonBuildVersion(commitHash) {
-    var packageJson = JSON.parse(fs.readFileSync('package.json'));
-    packageJson.version += '+' + commitHash;
-    fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+  const updatePackageJsonBuildVersion = (commitHash) => {
+    const packageJson = JSON.parse(fs.readFileSync('package.json'));
+    packageJson.version += `+${commitHash}`;
+    fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
   }
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
-    var done = this.async();
+    const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
       console.log('Skipping travis npm publish');
       return done();
     }
-    getGitLastCommitHash(function(hash) {
+    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
+      const hash = stdout.trim();
       updatePackageJsonBuildVersion(hash);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec("npm publish", function() { done(); });
-    })
+      childProcess.exec("npm publish", () => { done(); });
+    });
   });
 
-  var maxConcurrency = 5;
   /**
    * Run clicktest in parallel at test suite level.
    * This test does intermittently fails depends on the maxConcurrency level set
@@ -391,43 +383,40 @@ module.exports = function(grunt) {
    * Use at own discretion.
    */
   grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
-    var done = this.async();
+    const done = this.async();
 
     fs.readdirAsync('./nmclicktests')
-      .then(function(files) {
-        return files.filter(function(file) {
-          return file.startsWith("spec.");
-        });
-      }).then(function(tests) {
+      .then((files) => files.filter((file) => file.startsWith("spec.")))
+      .then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
-        return Bluebird.map(tests, function(file) {
-          var output = "";
-          var outStream = function(data) { output += data; }
+        return Bluebird.map(tests, (file) => {
+          let output = "";
+          const outStream = (data) => output += data
 
-          grunt.log.writeln(cliColor.set('Clicktest started! \t' + file, 'blue'));
-          return new Bluebird(function(resolve, reject) {
-            var child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'nmclicktests', file), '--timeout=20000', '-b'], { maxBuffer: 10*1024*1024 });
+          grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
+          return new Bluebird((resolve, reject) => {
+            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'nmclicktests', file), '--timeout=20000', '-b'], { maxBuffer: 10*1024*1024 });
             child.stdout.on('data', outStream);
             child.stderr.on('data', outStream);
-            child.on('exit', function(code) {
+            child.on('exit', (code) => {
               if (code == 0) resolve(file);
               else reject();
             });
-          }).then(function() {
-            grunt.log.writeln(cliColor.set('Clicktest success! \t' + file, 'green'));
+          }).then(() => {
+            grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
             return { name: file, output: output, isSuccess: true };
-          }).catch(function() {
-            grunt.log.writeln(cliColor.set('Clicktest fail! \t' + file, 'red'));
+          }).catch(() => {
+            grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
             return { name: file, output: output, isSuccess: false };
           });
         }, { concurrency: maxConcurrency });
-      }).then(function(results) {
-        var isSuccess = true;
-        results.forEach(function(result) {
+      }).then((results) => {
+        let isSuccess = true;
+        results.forEach((result) => {
           if (!result.isSuccess) {
-            grunt.log.writeln("---- start of " + result.name + " log ----")
+            grunt.log.writeln(`---- start of ${result.name} log ----`)
             grunt.log.writeln(result.output);
-            grunt.log.writeln("---- end of " + result.name + " log ----")
+            grunt.log.writeln(`----- end of ${result.name} log -----`)
             isSuccess = false;
           }
         });
@@ -436,13 +425,13 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
-    var done = this.async();
+    const done = this.async();
     grunt.log.writeln('Bumping dependencies...');
-    npm.load(function() {
-      var tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      var keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
+    npm.load(() => {
+      const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
+      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
 
-      var bumps = Bluebird.map(keys, function(dep) {
+      const bumps = Bluebird.map(keys, (dep) => {
         if (dep == 'forever-monitor') return;
         // Superagent 1.x has a new api, need to upgrade to that if we want to bump
         if (dep == 'superagent') return
@@ -452,22 +441,21 @@ module.exports = function(grunt) {
         return bumpDependency(tempPackageJson, dep);
       });
 
-      Bluebird.all(bumps).then(function() {
-        fs.writeFileSync('package.json', JSON.stringify(tempPackageJson, null, 2) + '\n');
+      Bluebird.all(bumps).then(() => {
+        fs.writeFileSync('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`);
         grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
-      }).then(function() { done(); }).catch(done);
+      }).then(() => { done(); }).catch(done);
     });
   });
 
-  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
+  grunt.registerMultiTask('electron', 'Package Electron apps', function() {
     electronPackager(this.options(), this.async());
   });
 
-  grunt.event.on('coverage', function(lcovFileContents, done){
+  grunt.event.on('coverage', (lcovFileContents) => {
     // Check below on the section "The coverage event"
     console.log(lcovFileContents);
     console.log('\n\n=== html report: ./coverage/coverage-unit/lcove-report/index.html ===\n\n');
-    done();
   });
 
   grunt.loadNpmTasks('grunt-contrib-less');
