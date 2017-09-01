@@ -1,108 +1,92 @@
 
-var expect = require('expect.js');
-var async = require('async');
-var cache = require('../src/utils/cache');
-var Bluebird = require('bluebird');
+const expect = require('expect.js');
+const async = require('async');
+const cache = require('../src/utils/cache');
+const Bluebird = require('bluebird');
 
 describe('cache', function () {
-  it('should be invokable several times', function(done) {
-    var i = 0;
-    var key = cache.registerFunc(function() {
-      return i++;
-    });
+  it('should be invokable several times', () => {
+    let i = 0;
+    const key = cache.registerFunc(() => i ++);
 
-    cache.resolveFunc(key)
-      .then(function(val) { expect(val).to.be(0); })
-      .then(function() { return cache.resolveFunc(key); })
-      .then(function(val) { expect(val).to.be(0); })
-      .then(done)
-      .catch(done)
+    return cache.resolveFunc(key)
+      .then((val) => { expect(val).to.be(0); })
+      .then(() => cache.resolveFunc(key))
+      .then((val) => expect(val).to.be(0))
   });
 
-  it('should work when failing', function(done) {
-    var errorMsg = "A nasty error...";
-    var key = cache.registerFunc(function() {
-      throw new Error(errorMsg);
-    });
+  it('should work when failing', () => {
+    const errorMsg = "A nasty error...";
+    const key = cache.registerFunc(() => { throw new Error(errorMsg) });
 
-    cache.resolveFunc(key)
-      .then(function() { done("should have thrown exception!"); })
-      .catch(function(e) {
-        if (e.message === errorMsg) done();
-        else done("error message does not match!");
+    return cache.resolveFunc(key)
+      .then(() => { throw new Error("should have thrown exception!"); })
+      .catch((e) => {
+        if (e.message !== errorMsg) throw new Error("error message does not match!");
       });
   });
 
-  it('should be possible to invalidate cache', function(done) {
-    var i = 0;
-    var key = cache.registerFunc(function() {
-      return i++;
-    });
+  it('should be possible to invalidate cache', () => {
+    let i = 0;
+    const key = cache.registerFunc(() => i++);
 
-    cache.resolveFunc(key)
-      .then(function(val) { expect(val).to.be(0); })
-      .then(function() {
+    return cache.resolveFunc(key)
+      .then((val) => { expect(val).to.be(0); })
+      .then(() => {
         cache.invalidateFunc(key);
         return cache.resolveFunc(key);
-      }).then(function(val) { expect(val).to.be(1); })
-      .then(done)
-      .catch(done)
+      }).then((val) => { expect(val).to.be(1); })
   });
 
-  it('creating a same function with different keys', function(done) {
-    var i = 0;
-    var key1 = "func1";
-    var key2 = "func2";
-    var func = function() { return i++; }
+  it('creating a same function with different keys', () => {
+    let i = 0;
+    const key1 = "func1";
+    const key2 = "func2";
+    const func = () => i++
     cache.registerFunc(key1, func);
-    cache.registerFunc(key2, func)
+    cache.registerFunc(key2, func);
 
-    cache.resolveFunc(key1)
-      .then(function(val) { expect(val).to.be(0); })
-      .then(function() { return cache.resolveFunc(key1); })
-      .then(function(val) { expect(val).to.be(0); })
-      .then(function() { return cache.resolveFunc(key2); })
-      .then(function(val) { expect(val).to.be(1); })
-      .then(function() {
+    return cache.resolveFunc(key1)
+      .then((val) => { expect(val).to.be(0); })
+      .then(() => cache.resolveFunc(key1))
+      .then((val) => { expect(val).to.be(0); })
+      .then(() => cache.resolveFunc(key2))
+      .then((val) => { expect(val).to.be(1); })
+      .then(() => {
         cache.invalidateFunc(key1);
         return cache.resolveFunc(key1);
-      }).then(function(val) { expect(val).to.be(2); })
-      .then(function() { return cache.resolveFunc(key2); })
-      .then(function(val) { expect(val).to.be(1); })
-      .then(done)
-      .catch(done)
+      }).then((val) => { expect(val).to.be(2); })
+      .then(() => cache.resolveFunc(key2))
+      .then((val) => { expect(val).to.be(1); })
   });
 
-  it('Testing ttl', function(done) {
-    var i = 0;
-    var func = function() { return i++; }
-    var key = cache.registerFunc(1, null, func);
+  it('Testing ttl', function() {
+    let i = 0;
+    const func = () => i++
+    const key = cache.registerFunc(1, null, func);
     this.timeout(3000);
 
-    cache.resolveFunc(key)
-      .then(function(val) { expect(val).to.be(0); })
-      .then(function() {
-        return new Bluebird(function(resolve) {
+    return cache.resolveFunc(key)
+      .then((val) => { expect(val).to.be(0); })
+      .then(() => {
+        return new Bluebird((resolve) => {
           setTimeout(resolve, 500);
         });
-      }).then(function() {
+      }).then(() => {
         return cache.resolveFunc(key)
-      }).then(function(val) { expect(val).to.be(0); })
-      .then(function() {
-        return new Bluebird(function(resolve) {
+      }).then((val) => { expect(val).to.be(0); })
+      .then(() => {
+        return new Bluebird((resolve) => {
           setTimeout(resolve, 1000);
         });
-      }).then(function() {
+      }).then(() => {
         return cache.resolveFunc(key)
-      }).then(function(val) { expect(val).to.be(1); })
-      .then(function() {
-        return new Bluebird(function(resolve) {
+      }).then((val) => { expect(val).to.be(1); })
+      .then(() => {
+        return new Bluebird((resolve) => {
           setTimeout(resolve, 500);
         });
-      }).then(function() {
-        return cache.resolveFunc(key)
-      }).then(function(val) { expect(val).to.be(1); })
-      .then(done)
-      .catch(done)
+      }).then(() => cache.resolveFunc(key))
+      .then((val) => { expect(val).to.be(1); })
   });
 });
