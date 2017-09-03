@@ -17,7 +17,7 @@ exports.makeRequest = (method, req, path, payload) => {
 
   if (payload) {
     payload.socketId = 'ignore';
-    ((method === 'POST') ? r.send : r.query)(payload);
+    method === 'POST' ? r.send(payload) : r.query(payload);
   }
 
   return new Bluebird((resolve, reject) => {
@@ -27,7 +27,6 @@ exports.makeRequest = (method, req, path, payload) => {
           console.log(path);
           console.dir(err);
           console.dir(res.body);
-          reject(err);
         } else {
           let data = (res || {}).body;
           try { data = JSON.parse(data); } catch(ex) {}
@@ -37,19 +36,18 @@ exports.makeRequest = (method, req, path, payload) => {
   });
 }
 
-exports.get = (req, path, payload) => this.makeRequest.bind(this, 'GET');
-exports.getPng = (req, path, payload) => this.makeRequest.bind(this, 'PNG');
-exports.post = (req, path, payload) => this.makeRequest.bind(this, 'POST');
-exports.delete = (req, path, payload) => this.makeRequest.bind(this, 'DELETE');
-
+exports.get = this.makeRequest.bind(this, 'GET');
+exports.getPng = this.makeRequest.bind(this, 'PNG');
+exports.post = this.makeRequest.bind(this, 'POST');
+exports.delete = this.makeRequest.bind(this, 'DELETE');
 
 exports.initRepo = (req, config) => {
   config = config || {};
   return this.post(req, '/testing/createtempdir', config.path)
     .then(res => {
-      expect(res.body.path).to.be.ok();
-      return this.post(req, '/init', { path: res.body.path, bare: !!config.bare })
-        .then(() => res.body.path);
+      expect(res.path).to.be.ok();
+      return this.post(req, '/init', { path: res.path, bare: !!config.bare })
+        .then(() => res.path);
     });
 }
 
