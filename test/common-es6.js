@@ -17,7 +17,11 @@ exports.makeRequest = (method, req, path, payload) => {
 
   if (payload) {
     payload.socketId = 'ignore';
-    method === 'POST' ? r.send(payload) : r.query(payload);
+    if (method === 'POST') {
+      r.send(payload)
+    } else {
+      r.query(payload);
+    }
   }
 
   return new Bluebird((resolve, reject) => {
@@ -56,7 +60,8 @@ exports.createSmallRepo = (req) => {
     .then((dir) => {
       const testFile = 'smalltestfile.txt';
       return this.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
-        .then(() => this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] }) )
+        .then(() => this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] }))
+        .then(() => dir)
     });
 }
 
