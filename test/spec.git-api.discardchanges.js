@@ -16,8 +16,6 @@ restGit.registerApi({ app: app, config: { dev: true } });
 var req = request(app);
 
 describe('git-api discardchanges', function() {
-
-
   it('should be able to discard a new file', function(done) {
     common.createSmallRepo(req, function(err, dir) {
       if (err) return done(err);
@@ -112,6 +110,40 @@ describe('git-api discardchanges', function() {
           });
         },
       ], done);
+    });
+  });
+
+  it('should be able to discard discard submodule changes', (done) => {
+    let testFile = 'smalltestfile.txt';
+    let submodulePath = 'subrepo';
+
+    common.createSmallRepo(req, (err, dir) => {
+      if (err) return done(err);
+      common.createSmallRepo(req, (err, subrepoDir) => {
+        if (err) return done(err);
+        common.post(req, '/submodules/add', {
+          "submoduleUrl": subrepoDir,
+          "submodulePath": submodulePath,
+          "path": dir,
+        }, (err, res) => {
+          if (err) return done(err);
+
+          common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] }, (err, res) => {
+            if (err) return done(err);
+            common.post(req, '/testing/changefile', { file: path.join(dir, submodulePath, testFile) }, (err) => {
+              if (err) return done(err);
+              common.post(req, '/discardchanges', { path: dir, file: submodulePath }, (err) => {
+                if (err) return done(err);
+                common.get(req, '/status', { path: dir }, (err, res) => {
+                  if (err) return done(err);
+                  expect(Object.keys(res.body.files).length).to.be(0);
+                  done();
+                });
+              });
+            });
+          });
+        });
+      });
     });
   });
 
