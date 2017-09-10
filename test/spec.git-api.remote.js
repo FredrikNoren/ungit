@@ -3,9 +3,7 @@ const expect = require('expect.js');
 const request = require('supertest');
 const _ = require('lodash');
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
-const async = require('async');
 const restGit = require('../src/git-api');
 const common = require('./common-es6.js');
 

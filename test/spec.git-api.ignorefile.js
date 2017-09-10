@@ -4,7 +4,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const restGit = require('../src/git-api');
-const common = require('./common.js');
+const common = require('./common-es6.js');
 
 const app = express();
 app.use(require('body-parser').json());
@@ -71,7 +71,7 @@ describe('git-api: test ignorefile call', () => {
         .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
         .then(() => {
           return common.get(req, '/status', { path: dir }).then(res => {
-            expect(Object.keys(res.body.files).toString()).to.be('.gitignore');
+            expect(Object.keys(res.files).toString()).to.be('.gitignore');
           });
         }).then(() => {
           return fs.readFileAsync(path.join(dir, '.gitignore')).then((data) => {

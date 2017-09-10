@@ -1,128 +1,105 @@
-var expect = require('expect.js');
-var request = require('supertest');
-var express = require('express');
-var async = require('async');
-var fs = require('fs');
-var path = require('path');
-var restGit = require('../src/git-api');
-var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
+const expect = require('expect.js');
+const request = require('supertest');
+const express = require('express');
+const path = require('path');
+const restGit = require('../src/git-api');
+const common = require('./common-es6.js');
 
-var app = express();
+const app = express();
 app.use(require('body-parser').json());
 
 restGit.registerApi({ app: app, config: { dev: true } });
 
-var testDir;
-var gitConfig;
+let testDir;
+let gitConfig;
 
-var req = request(app);
+const req = request(app);
 
 describe('git-api branching', function () {
-
 	this.timeout(8000);
 
-	before(function(done) {
-		common.createEmptyRepo(req, function(err, dir) {
-			if (err) return done(err);
-			testDir = dir;
-			common.get(req, '/gitconfig', { path: testDir }, function(err, res) {
-				if (err) return done(err);
-				gitConfig = res.body;
-				done();
-			});
+	before(() => {
+		return common.initRepo(req)
+      .then((res) => { testDir = res; })
+      .then(() => common.get(req, '/gitconfig', { path: testDir }))
+      .then((res) => { gitConfig = res; });
+	});
+  after(() => common.post(req, '/testing/cleanup'));
+
+	const commitMessage = 'Commit 1';
+	const testFile1 = "testfile1.txt";
+
+	it('should be possible to commit to master', () => {
+    return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
+      .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
+	});
+
+	it('listing branches should work', () => {
+		return common.get(req, '/branches', { path: testDir }).then((res) => {
+			expect(res.length).to.be(1);
+			expect(res[0].name).to.be('master');
+			expect(res[0].current).to.be(true);
+    });
+	});
+
+	const testBranch = 'testBranch';
+
+	it('creating a branch should work', () => {
+		return common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' });
+	});
+
+	it('listing branches should show the new branch', () => {
+		return common.get(req, '/branches', { path: testDir }).then((res) => {
+			expect(res.length).to.be(2);
+			expect(res[0].name).to.be('master');
+			expect(res[0].current).to.be(true);
+			expect(res[1].name).to.be(testBranch);
+			expect(res[1].current).to.be(undefined);
+    });
+	});
+
+	it('should be possible to switch to a branch', () => {
+		return common.post(req, '/checkout', { path: testDir, name: testBranch });
+	});
+
+	it('listing branches should show the new branch as current', () => {
+		return common.get(req, '/branches', { path: testDir }).then(res => {
+			expect(res.length).to.be(2);
+			expect(res[0].name).to.be('master');
+			expect(res[0].current).to.be(undefined);
+			expect(res[1].name).to.be(testBranch);
+			expect(res[1].current).to.be(true);
 		});
 	});
 
-	var commitMessage = 'Commit 1';
-
-	var testFile1 = "testfile1.txt";
-
-	it('should be possible to commit to master', function(done) {
-		async.series([
-			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }, done); }
-		], done);
+	it('get branch should show the new branch as current', () => {
+		return common.get(req, '/checkout', { path: testDir })
+      .then(res => expect(res).to.be(testBranch));
 	});
 
-	it('listing branches should work', function(done) {
-		common.get(req, '/branches', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(true);
-			done();
-		});
+	const commitMessage3 = 'Commit 3';
+	const testFile2 = "testfile2.txt";
+
+	it('should be possible to commit to the branch', () => {
+		return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) })
+			.then(() => common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }));
 	});
 
-	var testBranch = 'testBranch';
+	it('log should show both branches and all commits', () => {
+		return common.get(req, '/log', { path: testDir }).then(res => {
+      expect(res.skip).to.be(0);
+      expect(res.limit).to.be(25);
 
-	it('creating a branch should work', function(done) {
-		common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done);
-	});
-
-	it('listing branches should show the new branch', function(done) {
-		common.get(req, '/branches', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(2);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(true);
-			expect(res.body[1].name).to.be(testBranch);
-			expect(res.body[1].current).to.be(undefined);
-			done();
-		});
-	});
-
-	it('should be possible to switch to a branch', function(done) {
-		common.post(req, '/checkout', { path: testDir, name: testBranch }, done);
-	});
-
-	it('listing branches should show the new branch as current', function(done) {
-		common.get(req, '/branches', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(2);
-			expect(res.body[0].name).to.be('master');
-			expect(res.body[0].current).to.be(undefined);
-			expect(res.body[1].name).to.be(testBranch);
-			expect(res.body[1].current).to.be(true);
-			done();
-		});
-	});
-
-	it('get branch should show the new branch as current', function(done) {
-		common.get(req, '/checkout', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body).to.be(testBranch);
-			done();
-		});
-	});
-
-	var commitMessage3 = 'Commit 3';
-	var testFile2 = "testfile2.txt";
-
-	it('should be possible to commit to the branch', function(done) {
-		async.series([
-			function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }, done); },
-			function(done) { common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }, done); }
-		], done);
-	});
-
-	it('log should show both branches and all commits', function(done) {
-		common.get(req, '/log', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-      expect(res.body.skip).to.be(0);
-      expect(res.body.limit).to.be(25);
-
-      var nodes = res.body.nodes
+      const nodes = res.nodes
 			expect(nodes).to.be.a('array');
 			expect(nodes.length).to.be(2);
-			var objs = {};
-			nodes.forEach(function(obj) {
+			const objs = {};
+			nodes.forEach((obj) => {
 				obj.refs.sort();
 				objs[obj.refs[0]] = obj;
 			});
-			var master = objs['refs/heads/master'];
-			var HEAD = objs['HEAD'];
+			const master = objs['refs/heads/master'];
+			const HEAD = objs['HEAD'];
 			expect(master.message.indexOf(commitMessage)).to.be(0);
 			expect(master.authorDate).to.be.a('string');
 			expect(master.authorName).to.be(gitConfig['user.name']);
@@ -144,23 +121,21 @@ describe('git-api branching', function () {
 			expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
 			expect(HEAD.parents).to.eql([master.sha1]);
 			expect(HEAD.sha1).to.be.ok();
-			done();
 		});
 	});
 
-	it('should be possible to modify some local file', function(done) {
-		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done);
+	it('should be possible to modify some local file', () => {
+		return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) });
 	});
 
-	it('should be possible to checkout another branch with local modifications', function(done) {
-		common.post(req, '/checkout', { path: testDir, name: 'master' }, done);
+	it('should be possible to checkout another branch with local modifications', () => {
+		return common.post(req, '/checkout', { path: testDir, name: 'master' });
 	});
 
-	it('status should list the changed file', function(done) {
-		common.get(req, '/status', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(Object.keys(res.body.files).length).to.be(1);
-			expect(res.body.files[testFile1]).to.eql({
+	it('status should list the changed file', () => {
+		return common.get(req, '/status', { path: testDir }).then(res => {
+			expect(Object.keys(res.files).length).to.be(1);
+			expect(res.files[testFile1]).to.eql({
 				displayName: testFile1,
 				isNew: false,
 				staged: false,
@@ -171,49 +146,34 @@ describe('git-api branching', function () {
 				additions: '1',
 				deletions: '1'
 			});
-			done();
 		});
 	});
 
 
-	it('should be possible to create a tag', function(done) {
-		common.post(req, '/tags', { path: testDir, name: 'v1.0' }, done);
+	it('should be possible to create a tag', () => {
+		return common.post(req, '/tags', { path: testDir, name: 'v1.0' });
 	});
 
-	it('should be possible to list tag', function(done) {
-		common.get(req, '/tags', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			done();
-		});
+	it('should be possible to list tag', () => {
+		return common.get(req, '/tags', { path: testDir })
+      .then(res => expect(res.length).to.be(1));
 	});
 
-	it('should be possible to delete a tag', function(done) {
-		common.delete(req, '/tags', { path: testDir, name: 'v1.0' }, done);
+	it('should be possible to delete a tag', () => {
+		return common.delete(req, '/tags', { path: testDir, name: 'v1.0' });
 	});
 
-	it('tag should be removed', function(done) {
-		common.get(req, '/tags', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(0);
-			done();
-		});
+	it('tag should be removed', () => {
+		return common.get(req, '/tags', { path: testDir })
+      .then(res => expect(res.length).to.be(0));
 	});
 
-	it('should be possible to delete a branch', function(done) {
-		common.delete(req, '/branches', { path: testDir, name: testBranch }, done);
+	it('should be possible to delete a branch', () => {
+		return common.delete(req, '/branches', { path: testDir, name: testBranch });
 	});
 
-	it('branch should be removed', function(done) {
-		common.get(req, '/branches', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			done();
-		});
+	it('branch should be removed', () => {
+		return common.get(req, '/branches', { path: testDir })
+      .then(res => expect(res.length).to.be(1));
 	});
-
-	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined, done);
-	});
-
 });

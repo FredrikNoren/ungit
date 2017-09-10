@@ -4,7 +4,7 @@ const path = require('path');
 const gitParser = require('../src/git-parser');
 
 describe('git-parser stash show', () => {
-  it('should be possible to parse stashed show', function() {
+  it('should be possible to parse stashed show', () => {
     const text = ' New Text Document (2).txt | 5 +++++\n 1 file changed, 5 insertions(+)\n';
     const res = gitParser.parseGitStashShow(text);
     expect(res).to.be.an('array');

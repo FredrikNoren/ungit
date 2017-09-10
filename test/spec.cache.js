@@ -1,10 +1,9 @@
 
 const expect = require('expect.js');
-const async = require('async');
 const cache = require('../src/utils/cache');
 const Bluebird = require('bluebird');
 
-describe('cache', function () {
+describe('cache', () => {
   it('should be invokable several times', () => {
     let i = 0;
     const key = cache.registerFunc(() => i ++);
