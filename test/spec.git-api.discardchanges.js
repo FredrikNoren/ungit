@@ -22,7 +22,6 @@ describe('git-api discardchanges', () => {
       return common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
         .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
         .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => common.get(req, '/status', { path: dir }))
         .then((res) => expect(Object.keys(res.files).length).to.be(0));
     });
   });
@@ -76,6 +75,27 @@ describe('git-api discardchanges', () => {
         .then(() => common.get(req, '/status', { path: dir }))
         .then((res) => expect(Object.keys(res.files).length).to.be(0));
     });
+  });
+
+  it('should be able to discard discard submodule changes', () => {
+    const testFile = 'smalltestfile.txt';
+    const submodulePath = 'subrepo';
+
+    return common.createSmallRepo(req).then((dir) => {
+        return common.createSmallRepo(req).then((subrepoDir) => {
+            return common.post(req, '/submodules/add', {
+                "submoduleUrl": subrepoDir,
+                "submodulePath": submodulePath,
+                "path": dir,
+              }).then(() => dir)
+          });
+      }).then((dir) => {
+        return common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] })
+          .then(() => common.post(req, '/testing/changefile', { file: path.join(dir, submodulePath, testFile) }))
+          .then(() => common.post(req, '/discardchanges', { path: dir, file: submodulePath }))
+          .then(() => common.get(req, '/status', { path: dir }))
+          .then((res) => expect(Object.keys(res.files).length).to.be(0))
+      });
   });
 
   // Need to make discardchanges even more powerful to handle this

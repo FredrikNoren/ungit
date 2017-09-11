@@ -327,21 +327,27 @@ git.discardChangesInFile = (repoPath, filename) => {
     .then((status) => {
       if (Object.keys(status.files).length == 0) throw new Error(`No files in status in discard, filename: ${filename}`);
       const fileStatus = status.files[Object.keys(status.files)[0]];
+      const fullPath = path.join(repoPath, filename);
 
-      if (!fileStatus.staged) {
-        // If it's just a new file, remove it
-        if (fileStatus.isNew) {
-          return fs.unlinkAsync(path.join(repoPath, filename))
-            .catch((err) => {
-              throw { command: 'unlink', error: err };
-            });
-        // If it's a changed file, reset the changes
-        } else {
-          return git(['checkout', 'HEAD', '--', filename], repoPath);
-        }
-      } else {
+      if (fileStatus.staged) {
+        // if staged, just remove from git
         return git(['rm', '-f', filename], repoPath);
+      } else if (fileStatus.isNew) {
+        // new file, junst unlink
+        return fs.unlinkAsync(fullPath)
+          .catch((err) => { throw { command: 'unlink', error: err }; });
       }
+
+      return fs.isExists(fullPath)
+        .then((isExists) => isExists ? fs.lstatAsync(fullPath).then((stats) => stats.isDirectory()) : false)
+        .then((isSubrepoChange) => {
+          if (isSubrepoChange) {
+            return git(['submodule', 'sync'], repoPath)
+              .then(() => git(['submodule', 'update', '--init', '-f', '--recursive', filename], repoPath));
+          } else {
+            return git(['checkout', 'HEAD', '--', filename], repoPath);
+          }
+        });
     });
 }
 
