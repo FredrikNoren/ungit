@@ -67,10 +67,10 @@ exports.createSmallRepo = (req) => {
 
 // Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.
 exports.initDummyBrowserEnvironment = () => {
-	window = {};
-	document = {
-		createElement: () => { return { getElementsByTagName: () => [] } },
-		createComment: () => { return {} }
-	};
-	navigator = {};
+  window = {};
+  document = {
+    createElement: () => { return { getElementsByTagName: () => [] } },
+    createComment: () => { return {} }
+  };
+  navigator = {};
 }
