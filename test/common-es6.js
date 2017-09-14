@@ -28,9 +28,10 @@ exports.makeRequest = (method, req, path, payload) => {
     r.expect('Content-Type', method === 'PNG' ? 'image/png' : /json/)
       .end((err, res) => {
         if (err) {
-          console.log(path);
+          console.log(`failed path: ${path}`);
           console.dir(err);
-          console.dir(res.body);
+          console.dir(res ? res.body : "");
+          reject(err)
         } else {
           let data = (res || {}).body;
           try { data = JSON.parse(data); } catch(ex) {}

@@ -101,6 +101,7 @@ describe('git-api remote', function() {
   it('creating and pushing a commit in "local1" repo should work', () => {
     const testFile = path.join(testDirLocal1, "testfile2.txt");
     return common.post(req, '/testing/createfile', { file: testFile })
+      .delay(500)
       .then(() => common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [{ name: testFile }] }))
       .then(() => common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }))
   });
@@ -149,6 +150,7 @@ describe('git-api remote', function() {
   it('creating a commit in "local2" repo should work', () => {
     const testFile = path.join(testDirLocal2, "testfile3.txt");
     return common.post(req, '/testing/createfile', { file: testFile })
+      .delay(500)
       .then(() => common.post(req, '/commit', { path: testDirLocal2, message: "Commit3", files: [{ name: testFile }] }));
   });
 
