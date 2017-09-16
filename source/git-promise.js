@@ -17,7 +17,7 @@ const gitQueue = async.queue((args, callback) => {
   let stdout = '';
   let stderr = '';
   const gitProcess = child_process.spawn(
-    'git',
+    'LANG=en_US.UTF-8 git',
     args.commands,
     {
       cwd: args.repoPath,
