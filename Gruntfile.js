@@ -432,7 +432,6 @@ module.exports = (grunt) => {
       const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
 
       const bumps = Bluebird.map(keys, (dep) => {
-        if (dep == 'forever-monitor') return;
         // Superagent 1.x has a new api, need to upgrade to that if we want to bump
         if (dep == 'superagent') return
         // Octicon moved to SCSS instead of less
