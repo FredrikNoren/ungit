@@ -374,7 +374,5 @@ GraphActions.Squash.prototype.createHoverGraphic = function() {
   return new SquashViewModel(onto, path.slice(0, -1));
 }
 GraphActions.Squash.prototype.perform = function() {
-  console.log('yolo')
-  // return this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
-  //   .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
+  return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.node.sha1 });
 }
