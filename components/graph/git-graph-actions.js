@@ -369,9 +369,9 @@ GraphActions.Squash.prototype.createHoverGraphic = function() {
   var onto = this.graph.currentActionContext();
   if (!onto) return;
   if (onto instanceof RefViewModel) onto = onto.node();
-  var path = onto.getPathToCommonAncestor(this.node);
-
-  return new SquashViewModel(this.node, path);
+  var path = this.node.getPathToCommonAncestor(onto);
+  // remove last element as it would be a common ancestor.
+  return new SquashViewModel(onto, path.slice(0, -1));
 }
 GraphActions.Squash.prototype.perform = function() {
   console.log('yolo')
