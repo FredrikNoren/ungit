@@ -9,6 +9,7 @@ var RebaseViewModel = HoverActions.RebaseViewModel;
 var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
 var PushViewModel = HoverActions.PushViewModel;
+var SquashViewModel = HoverActions.SquashViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -346,4 +347,34 @@ GraphActions.Revert.prototype.icon = 'octicon octicon-history';
 GraphActions.Revert.prototype.perform = function() {
   var self = this;
   return this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 });
+}
+
+GraphActions.Squash = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      (self.node.refs().length > 0) &&
+      self.graph.currentActionContext().current() &&
+      self.graph.currentActionContext().node() != self.node;
+  });
+}
+inherits(GraphActions.Squash, GraphActions.ActionBase);
+GraphActions.Squash.prototype.text = 'Squash';
+GraphActions.Squash.prototype.style = 'squash';
+GraphActions.Squash.prototype.icon = 'octicon octicon-fold';
+GraphActions.Squash.prototype.createHoverGraphic = function() {
+  var onto = this.graph.currentActionContext();
+  if (!onto) return;
+  if (onto instanceof RefViewModel) onto = onto.node();
+  var path = onto.getPathToCommonAncestor(this.node);
+
+  return new SquashViewModel(this.node, path);
+}
+GraphActions.Squash.prototype.perform = function() {
+  console.log('yolo')
+  // return this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
+  //   .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
 }

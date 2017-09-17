@@ -75,3 +75,21 @@ function PushViewModel(fromNode, toNode) {
   this.fgEdges = [getEdgeModel(fromNode.cx(), fromNode.cy(), toNode.cx(), (toNode.cy() + 40), 'rgb(61, 139, 255)', '15', '10, 5', 'url(#pushArrowEnd)' )];
 }
 exports.PushViewModel = PushViewModel;
+
+function SquashViewModel(onto, nodesThatWillMove) {
+  var self = this;
+  HoverViewModel.call(this);
+  nodesThatWillMove = nodesThatWillMove.slice(0, -1);
+
+  if (nodesThatWillMove.length == 0) return;
+
+  this.bgEdges.push(getEdgeModel(onto.cx(), onto.cy(), onto.cx(), onto.cy() - 60));
+  nodesThatWillMove.forEach(function(node, i) {
+    var cy = onto.cy() + (-90 * (i + 1));
+    self.nodes.push(getNodeModel(onto.cx(), cy, 28, 'transparent'));
+    if (i + 1 < nodesThatWillMove.length) {
+      self.bgEdges.push(getEdgeModel(onto.cx(), (cy - 25), onto.cx(), (cy - 65)));
+    }
+  });
+}
+exports.SquashViewModel = SquashViewModel;
