@@ -1,71 +1,48 @@
-var expect = require('expect.js');
-var request = require('supertest');
-var express = require('express');
-var async = require('async');
-var fs = require('fs');
-var path = require('path');
-var restGit = require('../src/git-api');
-var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
+const expect = require('expect.js');
+const request = require('supertest');
+const express = require('express');
+const path = require('path');
+const restGit = require('../src/git-api');
+const common = require('./common-es6.js');
 
-var app = express();
+const app = express();
 app.use(require('body-parser').json());
+const req = request(app);
 
 restGit.registerApi({ app: app, config: { dev: true, autoStashAndPop: false } });
 
-var testDir;
-
-var req = request(app);
-
+let testDir;
 
 describe('git-api conflict checkout no auto stash', function () {
+  this.timeout(8000);
+  const testBranch = 'testBranch';
+  const testFile1 = "testfile1.txt";
 
-	this.timeout(8000);
+  before(() => {
+    return common.initRepo(req).then((dir) => {
+      testDir = dir;
+      return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
+        .then(() => common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }))
+        .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }))
+    });
+  });
+  after(() => {
+    return common.post(req, '/testing/cleanup')
+  });
 
-	var testBranch = 'testBranch';
-	var testFile1 = "testfile1.txt";
+  it('should be possible to make some changes', () => {
+    return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) });
+  });
 
-	before(function(done) {
-		common.createEmptyRepo(req, function(err, dir) {
-			if (err) return done(err);
-			testDir = dir;
-			async.series([
-				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }, done); },
-				function(done) { common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }, done); },
-				function(done) { common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done); },
-				function(done) { common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }, done); },
-			], done);
-		});
-	});
+  it('should not be possible to checkout with local files that will conflict', () => {
+    return common.post(req, `${restGit.pathPrefix}/checkout`, { path: testDir, name: testBranch })
+      .then((gitErr) => expect(gitErr.errorCode).to.be('local-changes-would-be-overwritten'));
+  });
 
-	it('should be possible to make some changes', function(done) {
-		common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }, done);
-	});
-
-	it('should not be possible to checkout with local files that will conflict', function(done) {
-		req
-			.post(restGit.pathPrefix + '/checkout')
-			.send({ path: testDir, name: testBranch })
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(400)
-			.end(wrapErrorHandler(function(err, res) {
-				expect(res.body.errorCode).to.be('local-changes-would-be-overwritten');
-				done();
-			}));
-	});
-
-	it('checkout should say we are still on master', function(done) {
-		common.get(req, '/checkout', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body).to.be('master');
-			done();
-		});
-	});
-
-	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined, done);
-	});
-
+  it('checkout should say we are still on master', () => {
+    return common.get(req, '/checkout', { path: testDir })
+      .then((res) => expect(res).to.be('master'));
+  });
 });

@@ -1,59 +1,44 @@
-var expect = require('expect.js');
-var request = require('supertest');
-var express = require('express');
-var async = require('async');
-var fs = require('fs');
-var path = require('path');
-var restGit = require('../src/git-api');
-var common = require('./common.js');
-var wrapErrorHandler = common.wrapErrorHandler;
+const expect = require('expect.js');
+const request = require('supertest');
+const express = require('express');
+const path = require('path');
+const restGit = require('../src/git-api');
+const common = require('./common-es6.js');
 
-var app = express();
+const app = express();
 app.use(require('body-parser').json());
 
 restGit.registerApi({ app: app, config: { dev: true } });
 
-var testDir;
+let testDir;
 
-var req = request(app);
+const req = request(app);
 
 describe('git-api conflict rebase', function () {
+  this.timeout(8000);
 
-	this.timeout(8000);
+  const testFile1 = "testfile1.txt";
 
-	var testFile1 = "testfile1.txt";
+  before(() => {
+    return common.createSmallRepo(req)
+      .then((dir) => { testDir = dir })
+      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }))
+  });
 
-	before(function(done) {
-		common.createSmallRepo(req, function(err, dir) {
-			if (err) return done(err);
-			testDir = dir;
+  after(() => common.post(req, '/testing/cleanup'));
 
-			async.series([
-				function(done) { common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }, done); }
-			], done);
-		});
-	});
+  it('should be possible to stash', () => common.post(req, '/stashes', { path: testDir }));
 
-	it('should be possible to stash', function(done) {
-		common.post(req, '/stashes', { path: testDir }, done);
-	});
+  it('stashes should list the stashed item', () => {
+    return common.get(req, '/stashes', { path: testDir })
+      .then(res => {
+        expect(res.length).to.be(1);
+        expect(res[0].reflogId).to.be('0');
+        expect(res[0].reflogName).to.be('stash@{0}');
+      });
+  });
 
-	it('stashes should list the stashed item', function(done) {
-		common.get(req, '/stashes', { path: testDir }, function(err, res) {
-			if (err) return done(err);
-			expect(res.body.length).to.be(1);
-			expect(res.body[0].reflogId).to.be('0');
-			expect(res.body[0].reflogName).to.be('stash@{0}');
-			done();
-		});
-	});
-
-	it('should be possible to drop stash', function(done) {
-		common.delete(req, '/stashes/0', { path: testDir }, done);
-	});
-	
-	after(function(done) {
-		common.post(req, '/testing/cleanup', undefined, done);
-	});
-
+  it('should be possible to drop stash', () => {
+    return common.delete(req, '/stashes/0', { path: testDir });
+  });
 });
