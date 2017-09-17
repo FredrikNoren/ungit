@@ -38,7 +38,7 @@ describe('git-api conflict rebase', function () {
 
   it('should be possible to rebase on master', (done) => {
     req
-      .post(restGit.pathPrefix + '/rebase')
+      .post(`${restGit.pathPrefix}/rebase`)
       .send({ path: testDir, onto: 'master' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -104,7 +104,7 @@ describe('git-api conflict checkout', function() {
 
   it('should be possible to checkout with local files that will conflict', (done) => {
     req
-      .post(restGit.pathPrefix + '/checkout')
+      .post(`${restGit.pathPrefix}/checkout`)
       .send({ path: testDir, name: testBranch })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -158,7 +158,7 @@ describe('git-api conflict merge', function () {
 
   it('should be possible to merge the branches', (done) => {
     req
-      .post(restGit.pathPrefix + '/merge')
+      .post(`${restGit.pathPrefix}/merge`)
       .send({ path: testDir, with: 'master' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -228,7 +228,7 @@ describe('git-api conflict solve by deleting', function () {
 
   it('should be possible to rebase on master', (done) => {
     req
-      .post(restGit.pathPrefix + '/rebase')
+      .post(`${restGit.pathPrefix}/rebase`)
       .send({ path: testDir, onto: 'master' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)

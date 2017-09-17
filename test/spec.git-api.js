@@ -41,7 +41,7 @@ describe('git-api', () => {
 
   it('status should fail in uninited directory', (done) => {
     req
-      .get(restGit.pathPrefix + '/status')
+      .get(`${restGit.pathPrefix}/status`)
       .query({ path: path.join(testDir, 'nowhere') })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -82,7 +82,7 @@ describe('git-api', () => {
 
   it('commit should fail on when there\'s no files to commit', (done) => {
     req
-      .post(restGit.pathPrefix + '/commit')
+      .post(`${restGit.pathPrefix}/commit`)
       .send({ path: testDir, message: 'test', files: [] })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -108,7 +108,7 @@ describe('git-api', () => {
 
   it('commit should fail on non-existing file', (done) => {
     req
-      .post(restGit.pathPrefix + '/commit')
+      .post(`${restGit.pathPrefix}/commit`)
       .send({ path: testDir, message: 'test', files: [{ name: testFile }] })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -142,7 +142,7 @@ describe('git-api', () => {
 
   it('commit should fail without commit message', (done) => {
     req
-      .post(restGit.pathPrefix + '/commit')
+      .post(`${restGit.pathPrefix}/commit`)
       .send({ path: testDir, message: undefined, files: [{ name: testFile }] })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
@@ -238,7 +238,7 @@ describe('git-api', () => {
 
   it('discarding the new file should work', (done) => {
     req
-     .post(restGit.pathPrefix + '/discardchanges')
+     .post(`${restGit.pathPrefix}/discardchanges`)
      .send({ path: testDir, file: testFile2 })
      .set('Accept', 'application/json')
      .expect('Content-Type', /json/)
@@ -253,7 +253,7 @@ describe('git-api', () => {
   });
 
   it('creating test multi layer dir should work', () => {
-    return common.post(req, '/createdir', { dir: path.join(testDir, testSubDir + 'test/moretest/andmore') });
+    return common.post(req, '/createdir', { dir: path.join(testDir, `${testSubDir}test/moretest/andmore`) });
   });
 
   const testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
@@ -348,7 +348,7 @@ describe('git-api', () => {
     return common.get(req, '/status', { path: testDir }).then((res) => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile4]).to.eql({
-        displayName: testFile3 + ' -> ' + testFile4,
+        displayName: `${testFile3} -> ${testFile4}`,
         isNew: false,
         staged: false,
         removed: false,

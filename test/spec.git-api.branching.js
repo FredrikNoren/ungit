@@ -118,7 +118,7 @@ describe('git-api branching', function () {
       expect(HEAD.commitDate).to.be.a('string');
       expect(HEAD.committerName).to.be(gitConfig['user.name']);
       expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
-      expect(HEAD.refs).to.eql(['HEAD', 'refs/heads/' + testBranch]);
+      expect(HEAD.refs).to.eql(['HEAD', `refs/heads/${testBranch}`]);
       expect(HEAD.parents).to.eql([master.sha1]);
       expect(HEAD.sha1).to.be.ok();
     });

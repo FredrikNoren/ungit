@@ -11,7 +11,7 @@ describe('credentials-helper', () => {
     const socketId = Math.floor(Math.random() * 1000);
     const payload = { username: 'testuser', password: 'testpassword' };
     const server = http.createServer((req, res) => {
-      expect(req.url).to.be('/api/credentials?socketId=' + socketId);
+      expect(req.url).to.be(`/api/credentials?socketId=${socketId}`);
       res.writeHead(200, {'Content-Type': 'application/json'});
       res.end(JSON.stringify(payload));
     });

@@ -19,7 +19,7 @@ const testPatch = (req, testDir, testFileName, contentsToPatch, files) => {
   return common.post(req, '/testing/createfile', { file: path.join(testDir, testFileName), content: contentsToPatch[0] })
     .then(() => common.post(req, '/commit', { path: testDir, message: `a commit for ${testFileName}`, files: [{ name: testFileName }] }))
     .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFileName), content: contentsToPatch[1] }))
-    .then(() => common.post(req, '/commit', { path: testDir, message: 'patched commit ' + testFileName, files: files }));
+    .then(() => common.post(req, '/commit', { path: testDir, message: `patched commit ${testFileName}`, files: files }));
 }
 
 const getPatchLineList = (size, notSelected) => {
