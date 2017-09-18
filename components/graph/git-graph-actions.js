@@ -356,7 +356,7 @@ GraphActions.Squash = function(graph, node) {
   this.visible = ko.computed(function() {
     if (self.performProgressBar.running()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
-      (self.node.refs().length > 0) &&
+      self.node.refs().length > 0 &&
       self.graph.currentActionContext().current() &&
       self.graph.currentActionContext().node() != self.node;
   });

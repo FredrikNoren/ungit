@@ -80,11 +80,10 @@ function SquashViewModel(onto, nodesThatWillBeSquashed) {
   var self = this;
   HoverViewModel.call(this);
 
-  if (nodesThatWillBeSquashed.length < 0) return;
+  if (nodesThatWillBeSquashed.length == 0) return;
 
   var squashedNode = getNodeModel(onto.cx(), onto.cy() - 120, 28, 'transparent')
   self.nodes.push(squashedNode);
-  self.fgEdges = [];
   nodesThatWillBeSquashed.forEach(function(node) {
     self.fgEdges.push(getEdgeModel(node.cx(), node.cy(), onto.cx() + 25, onto.cy() - 85, 'rgb(61, 139, 255)', '15', '10, 5', 'url(#pushArrowEnd)' ))
   });
