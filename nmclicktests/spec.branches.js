@@ -98,4 +98,13 @@ describe('[BRANCHES]', () => {
       .wait(1000)
       .wait('[data-ta-name="autoCheckout"].current');
   });
+
+  it('test squash', () => {
+    return environment.nm.ug.click('.branch .dropdown-toggle')
+      .ug.click('[data-ta-clickable="checkoutmaster"]')
+      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
+      .ug.click('[data-ta-name="master"]')
+      .ug.click('[data-ta-node-title="commit-3"] .squash .dropmask')
+      .wait('.staging .files')
+  })
 });
