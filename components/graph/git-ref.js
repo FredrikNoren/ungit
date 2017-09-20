@@ -75,7 +75,7 @@ RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
 }
-RefViewModel.prototype.moveTo = function(target) {
+RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
   var self = this;
   var promise;
   if (this.isLocal) {
@@ -90,7 +90,7 @@ RefViewModel.prototype.moveTo = function(target) {
       operation = '/branches';
     }
 
-    if (this.node().date > toNode.date) {
+    if (!rewindWarnOverride && this.node().date > toNode.date) {
       promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.'})
         .show()
         .closeThen(function(diag) {

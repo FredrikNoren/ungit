@@ -124,6 +124,7 @@ module.exports = (grunt) => {
       options: {
         undef: true, // check for usage of undefined constiables
         indent: 2,
+        esnext: true,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
@@ -150,15 +151,13 @@ module.exports = (grunt) => {
       },
       node: {
         options: {
-          node: true,
-          esnext: true
+          node: true
         },
         src: ['source/**/*.js']
       },
       bin: {
         options: {
-          node: true,
-          esnext: true
+          node: true
         },
         src: [
           'Gruntfile.js',
@@ -168,7 +167,6 @@ module.exports = (grunt) => {
       mocha: {
         options: {
           node: true,
-          esnext: true,
           globals: {
             'it': true,
             'describe': true,
