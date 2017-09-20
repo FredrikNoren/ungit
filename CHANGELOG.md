@@ -5,6 +5,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 
 - 1.1.30: **NOT PUBLISHED YET**
   - move unit tests to es6
+  - Add squash feature [#129](https://github.com/FredrikNoren/ungit/issues/129)
 - 1.1.29: move `Gruntfile.js` to es6
 - 1.1.28: please append your changes to here instead of new version.
   - Refactoring to remove static data-ta tags from tests
