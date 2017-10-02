@@ -5,7 +5,7 @@ const testRepoPaths = [];
 describe('[BRANCHES]', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, path: "/tmp/testdir" }]));
   });
   after('Environment stop', () => environment.shutdown());
 
@@ -97,5 +97,20 @@ describe('[BRANCHES]', () => {
       .ug.createBranch('autoCheckout')
       .wait(1000)
       .wait('[data-ta-name="autoCheckout"].current');
+  });
+
+  it('test backward squash from own lineage', () => {
+    return environment.nm.ug.click('.ref.branch.current')
+      .ug.click('[data-ta-node-title="commit-1"] .squash .dropmask')
+      .wait('.staging .files .file')
+      .ug.click('.files span.discard')
+      .ug.click('.modal-dialog .btn-primary')
+      .ug.waitForElementNotVisible('.staging .files .file')
+  });
+
+  it('test forward squash from different lineage', () => {
+    return environment.nm.ug.click('.ref.branch.current')
+      .ug.click('[data-ta-node-title="commit-3"] .squash .dropmask')
+      .wait('.staging .files .file')
   });
 });

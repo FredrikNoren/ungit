@@ -75,3 +75,22 @@ function PushViewModel(fromNode, toNode) {
   this.fgEdges = [getEdgeModel(fromNode.cx(), fromNode.cy(), toNode.cx(), (toNode.cy() + 40), 'rgb(61, 139, 255)', '15', '10, 5', 'url(#pushArrowEnd)' )];
 }
 exports.PushViewModel = PushViewModel;
+
+function SquashViewModel(from, onto) {
+  HoverViewModel.call(this);
+
+  let path = from.getPathToCommonAncestor(onto);
+
+  if (path.length == 0) {
+    return;
+  } else if (path.length == 1) {
+    path = onto.getPathToCommonAncestor(from)
+  } else {
+    this.nodes.push(getNodeModel(onto.cx(), onto.cy() - 120, 28, 'transparent'));
+  }
+
+  path.slice(0, -1).forEach((node) => {
+    this.nodes.push(getNodeModel(node.cx(), node.cy(), node.r() + 2, 'rgba(100, 60, 222, 0.8)'));
+  });
+}
+exports.SquashViewModel = SquashViewModel;
