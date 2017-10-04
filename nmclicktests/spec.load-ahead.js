@@ -35,7 +35,8 @@ describe('[LOAD-AHEAD]', () => {
   });
 
   it('Open path screen again and should see only 1 commit', () => {
-    return environment.nm.refresh()
+    return environment.nm.wait(500)
+      .refresh()
       .wait('.loadAhead')
       .ug.waitForElementNotVisible('[data-ta-clickable="node-clickable-1"]');
   });

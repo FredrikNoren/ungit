@@ -83,7 +83,7 @@ Text Editor Integrations
 ![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
 
 * [vscode-ungit-tab](https://github.com/RomanValihura/vscode-ungit-tab) for [Visual Studio Code](https://code.visualstudio.com/) by [@RomanValihura](https://github.com/RomanValihura)
- 
+
 ![VSCode-UngitTab screenshot](https://raw.githubusercontent.com/RomanValihura/vscode-ungit-tab/master/samples/ungit-vs.gif)
 
 
@@ -104,6 +104,7 @@ Known issues
 * Ubuntu users may have trouble installing because the node executable is named differently on Ubuntu, see [#401](https://github.com/FredrikNoren/ungit/issues/401) for details.
 * Debian Wheezy's supported git and nodejs packages are too old, therefore download newest [git](https://github.com/git/git/releases) and [nodejs](https://nodejs.org/download/) tarballs and [build from source](http://www.control-escape.com/linux/lx-swinstall-tar.html).
 * Adblocker may block Ungit! Some ad blockers, such as [Adblock plus](https://adblockplus.org) and [uBlock](https://www.ublock.org/), don't like localhost api calls and assume that it is a cross domain attack.  Please whitelist `{localhost|127.0.0.1|$UngitURL}:{ungit port number}`. [#887](https://github.com/FredrikNoren/ungit/issues/887) [#892](https://github.com/FredrikNoren/ungit/issues/892)
+* Running git in non English language will result in unexpected behavior!  Ungit parses git command results in English to detect repos' states and this causes confusion when git results are not in English. [#959](https://github.com/FredrikNoren/ungit/issues/959)
 
 Changelog
 ---------
