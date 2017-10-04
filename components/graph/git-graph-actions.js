@@ -9,6 +9,7 @@ var RebaseViewModel = HoverActions.RebaseViewModel;
 var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
 var PushViewModel = HoverActions.PushViewModel;
+var SquashViewModel = HoverActions.SquashViewModel;
 
 var GraphActions = {};
 module.exports = GraphActions;
@@ -346,4 +347,55 @@ GraphActions.Revert.prototype.icon = 'octicon octicon-history';
 GraphActions.Revert.prototype.perform = function() {
   var self = this;
   return this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 });
+}
+
+GraphActions.Squash = function(graph, node) {
+  var self = this;
+  GraphActions.ActionBase.call(this, graph);
+  this.node = node;
+  this.visible = ko.computed(function() {
+    if (self.performProgressBar.running()) return true;
+    return self.graph.currentActionContext() instanceof RefViewModel &&
+      self.graph.currentActionContext().current() &&
+      self.graph.currentActionContext().node() != self.node;
+  });
+}
+inherits(GraphActions.Squash, GraphActions.ActionBase);
+GraphActions.Squash.prototype.text = 'Squash';
+GraphActions.Squash.prototype.style = 'squash';
+GraphActions.Squash.prototype.icon = 'octicon octicon-fold';
+GraphActions.Squash.prototype.createHoverGraphic = function() {
+  let onto = this.graph.currentActionContext();
+  if (!onto) return;
+  if (onto instanceof RefViewModel) onto = onto.node();
+
+  return new SquashViewModel(this.node, onto);
+}
+GraphActions.Squash.prototype.perform = function() {
+  let onto = this.graph.currentActionContext();
+  if (!onto) return;
+  if (onto instanceof RefViewModel) onto = onto.node();
+  // remove last element as it would be a common ancestor.
+  const path = this.node.getPathToCommonAncestor(onto).slice(0, -1);
+
+  if (path.length > 0) {
+    // squashing branched out lineage
+    // c is checkout with squash target of e, results in staging changes
+    // from d and e on top of c
+    //
+    // a - b - (c)        a - b - (c) - [de]
+    //  \           ->     \
+    //   d  - <e>           d - <e>
+    return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.node.sha1 });
+  } else {
+    // squashing backward from same lineage
+    // c is checkout with squash target of a, results in current ref moved
+    // to a and staging changes within b and c on top of a
+    //
+    // <a> - b - (c)       (a) - b - c
+    //                ->     \
+    //                        [bc]
+    return this.graph.currentActionContext().moveTo(this.node.sha1, true)
+      .then(() => this.server.postPromise('/squash', { path: this.graph.repoPath(), target: onto.sha1 }))
+  }
 }

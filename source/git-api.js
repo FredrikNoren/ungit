@@ -459,6 +459,11 @@ exports.registerApi = (env) => {
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
+  app.post(`${exports.pathPrefix}/squash`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    jsonResultOrFailProm(res, gitPromise(['merge', '--squash', req.body.target.trim()], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
+  });
 
   app.post(`${exports.pathPrefix}/rebase`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(res, gitPromise(['rebase', req.body.onto.trim()], req.body.path))

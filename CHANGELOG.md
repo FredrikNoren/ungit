@@ -3,9 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.31: Bump dependencies
 - 1.1.30:
   - move unit tests to es6
-  - bump dependencies
+  - Add squash feature [#129](https://github.com/FredrikNoren/ungit/issues/129)
 - 1.1.29: move `Gruntfile.js` to es6
 - 1.1.28: please append your changes to here instead of new version.
   - Refactoring to remove static data-ta tags from tests
