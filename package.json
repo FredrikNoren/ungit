@@ -29,7 +29,6 @@
     "diff2html": "^2.3.0",
     "express": "~4.15.4",
     "express-session": "~1.15.5",
-    "forever-monitor": "~1.1.0",
     "getmac": "~1.2.1",
     "hasher": "~1.2.0",
     "ignore": "~3.3.5",
