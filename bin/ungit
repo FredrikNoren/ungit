@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var startLaunchTime = Date.now();
-var forever = require('forever-monitor');
 var config = require('../src/config');
 var open = require('open');
 var path = require('path');
@@ -11,19 +10,10 @@ var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 var usageStatistics = require('../src/usage-statistics');
 
-var child = new (forever.Monitor)(path.join(__dirname, '..', 'src', 'server.js'), {
-  silent: false,
-  minUptime: 2000,
-  max: config.maxNAutoRestartOnCrash,
-  cwd: path.join(process.cwd(), '..'),
-  options: process.argv.slice(2),
-  env: { LANG: 'en_US.UTF-8' }
-});
-
-process.on('exit', function() {
-  child.kill();
-  console.log('Exit: killed children')
-});
+var child = child_process.spawn(`node`,
+  [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
+  { cwd: path.join(process.cwd(), '..') }
+);
 
 var cleanExit = function() { process.exit() };
 process.on('SIGINT', cleanExit); // catch ctrl-c
@@ -100,8 +90,5 @@ checkIfUngitIsRunning(function(err1, ungitRunning) {
     launch(function(err) {
       if (err) console.log(err);
     });
-  }
-  else {
-    child.start();
   }
 });
