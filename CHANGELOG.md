@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.1.31: Bump dependencies
+- 1.1.31:
+  - Bump dependencies
+  - Remove forever-monitor [#961](https://github.com/FredrikNoren/ungit/issues/961)
 - 1.1.30:
   - move unit tests to es6
   - Add squash feature [#129](https://github.com/FredrikNoren/ungit/issues/129)
