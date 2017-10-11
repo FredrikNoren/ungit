@@ -96,6 +96,7 @@ Maintainers
 -----------
 * [FredrikNoren](https://github.com/FredrikNoren)
 * [codingtwinky](https://github.com/codingtwinky)
+* [campersau](https://github.com/campersau)
 
 Known issues
 ------------
