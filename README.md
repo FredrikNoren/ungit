@@ -111,12 +111,19 @@ Changelog
 ---------
 See [CHANGELOG.md](CHANGELOG.md).
 
-License (MIT)
--------------
+Commercial license
+------------------
+
+Ungit is free for individuals and small businesses. If you are representing a business with a revenue of at least $1M / year, or budget of $1M / year, you need to acquire a license. You can get a license here: [https://licenseyourcode.com/product/Ungit](https://licenseyourcode.com/product/Ungit). You can read about why here: ["Trying a new open source model"](https://medium.com/@fredriknoren/trying-a-new-open-source-model-93a1a5a16a40).
+
+Ungit license (LYC)
+-------------------
 
 Copyright (C) 2013-2017 Fredrik Norén
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies ("Use") of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+If you are a commercial entity with a revenue in excess of $1,000,000 of the previous fiscal year, and/or organization with a budget in excess of $1,000,000, you must acquire a commercial license grant from Fredrik Norén to Use this software. A commercial license grant can be acquired at [https://licenseyourcode.com/product/Ungit](https://licenseyourcode.com/product/Ungit). Acquiring a commercial license grant affords you no additional rights, guarantees, support or services.
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
