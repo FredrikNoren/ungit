@@ -4,6 +4,8 @@ ungit
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[![LYC](https://licenseyourcode.com/product/ungit/badge)](https://licenseyourcode.com/product/ungit)
+
 The easiest way to use git. On any platform. Anywhere.
 
 [![xkcd](xkcd.png)](https://xkcd.com/1597/)
@@ -111,13 +113,10 @@ Changelog
 ---------
 See [CHANGELOG.md](CHANGELOG.md).
 
-Commercial license
-------------------
-
-Ungit is free for individuals and small businesses. If you are representing a business with a revenue of at least $1M / year, or budget of $1M / year, you need to acquire a license. You can get a license here: [https://licenseyourcode.com/product/Ungit](https://licenseyourcode.com/product/Ungit). You can read about why here: ["Trying a new open source model"](https://medium.com/@fredriknoren/trying-a-new-open-source-model-93a1a5a16a40).
-
 Ungit license (LYC)
 -------------------
+
+(Discussion about our license here: https://github.com/FredrikNoren/ungit/issues/974)
 
 Copyright (C) 2013-2017 Fredrik Norén
 
