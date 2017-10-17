@@ -4,7 +4,7 @@ ungit
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![LYC](https://licenseyourcode.com/product/ungit/badge)](https://licenseyourcode.com/product/ungit)
+[![LYC](https://licenseyourcode.com/product/ungit/badge)](https://licenseyourcode.com/product/ungit?utm_source=github&utm_medium=badge&utm_campaign=ungit)
 
 The easiest way to use git. On any platform. Anywhere.
 
