@@ -26,7 +26,7 @@ process.on('uncaughtException', (err) => {
 });
 
 const launch = () => {
-  const child = child_process.spawn('node',
+  const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
     [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
     { cwd: path.join(process.cwd(), '..') }
   );
