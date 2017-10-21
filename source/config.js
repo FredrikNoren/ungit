@@ -58,9 +58,6 @@ const defaultConfig = {
   // Closes the server after x ms of inactivity. Mainly used by the clicktesting.
   autoShutdownTimeout: undefined,
 
-  // Maximum number of automatic restarts after a crash. Undefined == unlimited.
-  maxNAutoRestartOnCrash: undefined,
-
   // Don't fast forward git mergers. See git merge --no-ff documentation
   noFFMerge: true,
 
@@ -173,7 +170,6 @@ let argv = yargs
 .describe('maxConcurrentGitOperations', 'Maximum number of concurrent git operations')
 .describe('forcedLaunchPath', 'Define path to be used on open. Can be set to null to force the home screen')
 .describe('autoShutdownTimeout', 'Closes the server after x ms of inactivity. Mainly used by the clicktesting')
-.describe('maxNAutoRestartOnCrash', 'Maximum number of automatic restarts after a crash. Undefined == unlimited')
 .describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')
 .describe('autoFetch', 'Automatically fetch from remote when entering a repository using ungit')
 .describe('dev', 'Used for development purposes')
