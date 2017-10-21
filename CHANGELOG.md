@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.1.33: Make Logo and favicon HiDpi [#589](https://github.com/FredrikNoren/ungit/issues/589)
 - 1.1.32: Update license [#974](https://github.com/FredrikNoren/ungit/issues/974)
 - 1.1.31: Bump dependencies
 - 1.1.30:
