@@ -1,107 +1,85 @@
 #!/usr/bin/env node
-var startLaunchTime = Date.now();
-var forever = require('forever-monitor');
-var config = require('../src/config');
-var open = require('open');
-var path = require('path');
-var child_process = require('child_process');
-var async = require('async');
+const startLaunchTime = Date.now();
+const config = require('../src/config');
+const open = require('open');
+const path = require('path');
+const child_process = require('child_process');
 
-var BugTracker = require('../src/bugtracker');
-var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../src/usage-statistics');
+const BugTracker = require('../src/bugtracker');
+const bugtracker = new BugTracker('launcher');
+const usageStatistics = require('../src/usage-statistics');
+const Bluebird = require('bluebird');
+// Fastest way to find out if a port is used or not/i.e. if ungit is running
+const net = require('net');
+const server = net.createServer();
+const cleanExit = () => process.exit();
 
-var child = new (forever.Monitor)(path.join(__dirname, '..', 'src', 'server.js'), {
-  silent: false,
-  minUptime: 2000,
-  max: config.maxNAutoRestartOnCrash,
-  cwd: path.join(process.cwd(), '..'),
-  options: process.argv.slice(2),
-  env: { LANG: 'en_US.UTF-8' }
-});
-
-process.on('exit', function() {
-  child.kill();
-  console.log('Exit: killed children')
-});
-
-var cleanExit = function() { process.exit() };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
-
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', (err) => {
   console.error(err.stack.toString());
-  async.parallel([
-    bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'),
-    usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception')
-  ], function() {
-    process.exit();
+
+  Bluebird.all([
+    Bluebird.resolve().then(() => bugtracker.notify(err, 'ungit-launcher')),
+    Bluebird.resolve().then(() => usageStatistics.addEvent('launcher-exception'))
+  ]).then(cleanExit)
+});
+
+const launch = () => {
+  const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
+    [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
+    { cwd: path.join(process.cwd(), '..') }
+  );
+
+  child.on('exit', (res) => {
+    console.log('Stopped keeping ungit alive');
   });
-});
 
-child.on('exit', function (res) {
-  console.log('Stopped keeping ungit alive');
-});
+  let currentUrl = `${config.urlBase}:${config.port}${config.rootPath}`
+  if (config.forcedLaunchPath === undefined) {
+    currentUrl += `/#/repository?path=${encodeURIComponent(process.cwd())}`
+  } else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') {
+    currentUrl += `/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
+  }
 
-function launch(callback) {
-  var currentUrl = config.urlBase + ':' + config.port + config.rootPath;
-  if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
-  else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
-  console.log('Browse to ' + currentUrl);
   if (config.launchBrowser && !config.launchCommand) {
+    console.log(`Browse to ${currentUrl}`);
     open(currentUrl);
   } else if (config.launchCommand) {
-    var command = config.launchCommand.replace(/%U/g, currentUrl);
-    console.log('Running custom launch command: ' + command);
-    child_process.exec(command, function(err, stdout, stderr) {
+    const command = config.launchCommand.replace(/%U/g, currentUrl);
+    console.log(`Running custom launch command: ${command}`);
+    child_process.exec(command, (err, stdout, stderr) => {
       if (err) {
-        callback(err);
+        console.log(err)
         return;
       }
-      if (config.launchBrowser)
+      if (config.launchBrowser) {
         open(currentUrl);
+      }
     });
   }
-}
 
-function startupListener(data) {
-  if (data.toString().indexOf('## Ungit started ##') >= 0) {
-    launch(function(err) {
-      if (err) console.log(err);
-    });
-    child.removeListener('stdout', startupListener);
-    var launchTime = (Date.now() - startLaunchTime);
-    console.log('Took ' + launchTime + 'ms to start server.');
-    usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
-  }
-}
-
-child.on('stdout', startupListener);
-
-function checkIfUngitIsRunning(callback) {
-  // Fastest way to find out if a port is used or not/i.e. if ungit is running
-  var net = require('net');
-  var server = net.createServer(function(c) { });
-  server.listen(config.port, function(err) {
-    server.close(function() {
-      callback(null, false);
-    });
-  });
-  server.on('error', function (e) {
-    if (e.code == 'EADDRINUSE') {
-      callback(null, true);
+  const startupListener = (data) => {
+    if (data.toString().indexOf('## Ungit started ##') >= 0) {
+      child.removeListener('stdout', startupListener);
+      child.stdout.on('data', (data) => console.log(data.toString().trim()))
+      const launchTime = (Date.now() - startLaunchTime);
+      console.log(data.toString());
+      console.log(`Took ${launchTime}ms to start server.`);
+      usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
     }
-  });
+  }
+
+  child.stdout.on('data', startupListener);
+  child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
 }
 
-checkIfUngitIsRunning(function(err1, ungitRunning) {
-  if (ungitRunning) {
+server.listen(config.port, (err) => {
+  server.close(launch);
+});
+server.on('error', (e) => {
+  if (e.code == 'EADDRINUSE') {
     console.log('Ungit server already running');
-    launch(function(err) {
-      if (err) console.log(err);
-    });
-  }
-  else {
-    child.start();
+    cleanExit();
   }
 });
