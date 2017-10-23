@@ -116,7 +116,7 @@ function WindowTitle() {
   this.crash = false;
 }
 WindowTitle.prototype.update = function() {
-  var title = this.path.replace('\\', '/').split('/').filter(function(x) { return x; }).reverse().join(' < ');
+  var title = this.path.replace(/\\/g, '/').split('/').filter(function(x) { return x; }).reverse().join(' < ');
   if (this.crash) title = ':( ungit crash ' + title;
   document.title = title;
 }
