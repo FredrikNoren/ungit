@@ -72,12 +72,11 @@ ko.bindingHandlers.autocomplete = {
         event.preventDefault();
         navigation.browseTo('repository?path=' + encodeURIComponent(value));
       } else if (localStorage.repositories && value.indexOf("/") === -1 && value.indexOf("\\") === -1) {
-        var folderNames = localStorage.repositories.replace(/("|\[|\])/g, "")
-          .split(",")
+        var folderNames = JSON.parse(localStorage.repositories)
           .map(function(value) {
             return {
               value: value,
-              label: value.substring(value.lastIndexOf("/") + 1)
+              label: value.substring(value.lastIndexOf(ungit.config.fileSeparator) + 1)
             };
           });
 
