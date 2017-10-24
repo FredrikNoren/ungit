@@ -53,7 +53,8 @@ ko.bindingHandlers.autocomplete = {
       var lastChar = value.slice(-1);
       if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
         server.getPromise('/fs/listDirectories', {term: value}).then(function(directoryList) {
-          $(element).val(directoryList.shift() + ungit.config.fileSeparator);
+          const currentDir = directoryList.shift();
+          $(element).val(currentDir.endsWith(ungit.config.fileSeparator) ? currentDir : currentDir + ungit.config.fileSeparator);
           $(element).autocomplete({
             source: directoryList,
             messages: {
