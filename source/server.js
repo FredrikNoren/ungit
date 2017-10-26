@@ -128,9 +128,15 @@ let ensureAuthenticated = (req, res, next) => { next(); };
 
 if (config.authentication) {
   const cookieParser = require('cookie-parser');
+  const session = require('express-session')
+  const MemoryStore = require('memorystore')(session)
   app.use(cookieParser());
-  const session = require('express-session');
-  app.use(session({ secret: 'ungit' }));
+  app.use(session({
+    store: new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    secret: 'ungit'
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
 
