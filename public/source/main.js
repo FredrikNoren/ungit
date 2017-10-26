@@ -51,7 +51,7 @@ ko.bindingHandlers.autocomplete = {
     var handleKeyEvent = function(event) {
       var value = $(element).val();
       var lastChar = value.slice(-1);
-      if (lastChar == '/' || lastChar == '\\') {  // When "/" or "\"
+      if (lastChar == ungit.config.fileSeparator) {  // When "/" or "\"
         server.getPromise('/fs/listDirectories', {term: value}).then(function(directoryList) {
           const currentDir = directoryList.shift();
           $(element).val(currentDir.endsWith(ungit.config.fileSeparator) ? currentDir : currentDir + ungit.config.fileSeparator);
@@ -86,7 +86,7 @@ ko.bindingHandlers.autocomplete = {
           source: folderNames,
           messages: {
             noResults: '',
-            results: function() {}
+            results: () => {}
           }
         });
       }
