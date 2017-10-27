@@ -338,18 +338,18 @@ app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
-  const dir = req.query.term.trim();
+  const dir = path.resolve(req.query.term.trim()).replace("/~", "");
+
   fs.readdirAsync(dir).then(filenames => {
     return filenames.map((filename) => path.join(dir, filename));
   }).filter((filepath) => {
-    return fs.statAsync(filepath).then((stat) => {
-      return stat.isDirectory();
-    }).catch(function() { return false; });
+    return fs.statAsync(filepath)
+      .then((stat) => stat.isDirectory())
+      .catch(() => false);
   }).then(filteredFiles => {
-    res.json(filteredFiles)
-  }).catch((err) => {
-    res.status(400).json(err)
-  });
+    filteredFiles.unshift(dir);
+    res.json(filteredFiles);
+  }).catch((err) => res.status(400).json(err));
 });
 
 // Error handling
