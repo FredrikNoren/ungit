@@ -175,6 +175,7 @@ GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
 }
 GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
+  const self = this;
   this.refSearchFormVisible(true);
 
   const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
@@ -188,6 +189,17 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
   $(textBox).autocomplete({
     source: source,
     minLength: 0,
+    select: function(event, ui) {
+      const ref = self.refs().filter((r) => r.localRefName === ui.item.label)[0];
+
+      if (ref.isTag && self.tagsToDisplay.indexOf(ref) === -1) {
+        self.tagsToDisplay.pop();
+        self.tagsToDisplay.push(ref);
+      } else if (ref.isBranch && self.branchesToDisplay.indexOf(ref) === -1) {
+        self.branchesToDisplay.pop();
+        self.branchesToDisplay.push(ref);
+      }
+    },
     messages: {
       noResults: '',
       results: () => {}
