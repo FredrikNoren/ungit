@@ -138,7 +138,8 @@ module.exports = (grunt) => {
             'ungit': true,
             'io': true,
             'keen': true,
-            'Raven': true
+            'Raven': true,
+            '$': true
           }
         },
         files: [

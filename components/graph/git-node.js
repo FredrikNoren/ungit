@@ -79,8 +79,8 @@ var GitNodeViewModel = function(graph, sha1) {
     return !graph.currentActionContext();
   });
   this.newBranchName = ko.observable();
-  this.newBranchNameHasFocus = ko.observable(true);
-  this.newBranchNameHasFocus.subscribe(function(newValue) {
+  this.branchingFormVisible = ko.observable(false);
+  this.branchingFormVisible.subscribe(function(newValue) {
     if (!newValue) {
       // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
       setTimeout(function() {
@@ -88,7 +88,6 @@ var GitNodeViewModel = function(graph, sha1) {
       }, 200);
     }
   });
-  this.branchingFormVisible = ko.observable(false);
   this.canCreateRef = ko.computed(function() {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
   });
@@ -96,8 +95,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.aboveNode = undefined;
   this.belowNode = undefined;
   this.refSearchFormVisible = ko.observable(false);
-  this.refSearchFormHasFocus = ko.observable(true);
-  this.refSearchFormHasFocus.subscribe((newValue) => {
+  this.refSearchFormVisible.subscribe((newValue) => {
     if (!newValue) {
       // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
       setTimeout(() => {
@@ -134,6 +132,7 @@ GitNodeViewModel.prototype.setGraphAttr = function(val) {
   this.element().setAttribute('y', val[1] - 30);
 }
 GitNodeViewModel.prototype.render = function() {
+  this.refSearchFormVisible(false);
   if (!this.isInited) return;
   if (this.ancestorOfHEAD()) {
     this.r(30);
@@ -174,11 +173,27 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
-  this.newBranchNameHasFocus(true);
 }
-GitNodeViewModel.prototype.showRefSearchForm = function() {
+GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
   this.refSearchFormVisible(true);
-  this.refSearchFormHasFocus(true);
+
+  const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
+  const source = this.refs().map((r) => {
+    const splitedName = r.localRefName.split('/');
+    return {
+      value: splitedName[splitedName.length - 1],
+      label: r.localRefName
+    }
+  })
+  $(textBox).autocomplete({
+    source: source,
+    minLength: 0,
+    messages: {
+      noResults: '',
+      results: () => {}
+    }
+  });
+  $(textBox).autocomplete('search', '');
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
