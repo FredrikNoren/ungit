@@ -4,6 +4,8 @@ var Selectable = require('./selectable');
 var Animateable = require('./animateable');
 var programEvents = require('ungit-program-events');
 var GraphActions = require('./git-graph-actions');
+const maxTagsToDisplay = 1;
+const maxBranchesToDisplay = 1;
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
@@ -30,6 +32,38 @@ var GitNodeViewModel = function(graph, sha1) {
     });
     return rs;
   });
+  // These are split up like this because branches and local tags can be found in the git log,
+  // whereas remote tags needs to be fetched with another command (which is much slower)
+  this.branches = ko.observableArray();
+  this.branchesToDisplay = ko.observableArray();
+  this.tags = ko.observableArray();
+  this.tagsToDisplay = ko.observableArray();
+  this.showOverflowRefs = ko.observable();
+  this.refs.subscribe((newValue) => {
+    if (newValue) {
+      this.branches(newValue.filter((r) => r.isBranch));
+      this.tags(newValue.filter((r) => r.isTag));
+
+      if (newValue.length > maxTagsToDisplay + maxBranchesToDisplay) {
+        this.showOverflowRefs(true);
+        const tagsCount = Math.min(this.tags.length, maxTagsToDisplay);
+        const branchesCount = maxTagsToDisplay + maxBranchesToDisplay - tagsCount;
+
+        this.branchesToDisplay(this.branches.slice(0, branchesCount));
+        this.tagsToDisplay(this.tags.slice(0, tagsCount));
+      } else {
+        this.showOverflowRefs(false);
+        this.branchesToDisplay(this.branches());
+        this.tagsToDisplay(this.tags());
+      }
+    } else {
+      this.showOverflowRefs(false);
+      this.branches.removeAll();
+      this.tags.removeAll();
+      this.branchesToDisplay.removeAll();
+      this.tags.removeAll();
+    }
+  });
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
   this.commitContainerVisible = ko.computed(function() {
@@ -40,14 +74,6 @@ var GitNodeViewModel = function(graph, sha1) {
   });
   this.selected.subscribe(function() {
     programEvents.dispatch({ event: 'graph-render' });
-  });
-  // These are split up like this because branches and local tags can be found in the git log,
-  // whereas remote tags needs to be fetched with another command (which is much slower)
-  this.branches = ko.computed(function() {
-    return self.refs().filter(function(r) { return r.isBranch; });
-  });
-  this.tags = ko.computed(function() {
-    return self.refs().filter(function(r) { return r.isTag; });
   });
   this.showNewRefAction = ko.computed(function() {
     return !graph.currentActionContext();
@@ -69,6 +95,16 @@ var GitNodeViewModel = function(graph, sha1) {
   this.branchOrder = ko.observable();
   this.aboveNode = undefined;
   this.belowNode = undefined;
+  this.refSearchFormVisible = ko.observable(false);
+  this.refSearchFormHasFocus = ko.observable(true);
+  this.refSearchFormHasFocus.subscribe((newValue) => {
+    if (!newValue) {
+      // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
+      setTimeout(() => {
+        this.refSearchFormVisible(false);
+      }, 200);
+    }
+  });
   this.commitComponent = components.create('commit', this);
   this.r = ko.observable();
   this.cx = ko.observable();
@@ -139,6 +175,10 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
   this.newBranchNameHasFocus(true);
+}
+GitNodeViewModel.prototype.showRefSearchForm = function() {
+  this.refSearchFormVisible(true);
+  this.refSearchFormHasFocus(true);
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
