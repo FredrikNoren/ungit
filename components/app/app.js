@@ -156,6 +156,12 @@ AppViewModel.prototype.dismissNewVersion = function() {
 AppViewModel.prototype.dismissLicenseScreen = function() {
   this.showLicenseScreen(false);
   localStorage.setItem('licenseScreenDismissed', true);
+  keen.addEvent('dismiss-license', {
+    version: ungit.version,
+    userHash: ungit.userHash,
+    bugtrackingEnabled: ungit.config.bugtracking,
+    sendUsageStatistics: ungit.config.sendUsageStatistics
+  });
 }
 AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
