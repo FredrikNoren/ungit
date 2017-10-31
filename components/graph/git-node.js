@@ -79,8 +79,9 @@ var GitNodeViewModel = function(graph, sha1) {
     return !graph.currentActionContext();
   });
   this.newBranchName = ko.observable();
+  this.newBranchNameHasFocus = ko.observable(true);
   this.branchingFormVisible = ko.observable(false);
-  this.branchingFormVisible.subscribe(function(newValue) {
+  this.newBranchNameHasFocus.subscribe(function(newValue) {
     if (!newValue) {
       // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
       setTimeout(function() {
@@ -173,6 +174,7 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
 }
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
+  this.newBranchNameHasFocus(true);
 }
 GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
   const self = this;
@@ -183,28 +185,37 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
     const splitedName = r.localRefName.split('/');
     return {
       value: splitedName[splitedName.length - 1],
-      label: r.localRefName
+      label: r.localRefName,
+      dom: `${r.localRefName}<span class='octicon ${r.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`,
+      ref: r
     }
-  })
+  });
   $(textBox).autocomplete({
     source: source,
     minLength: 0,
     select: function(event, ui) {
-      const ref = self.refs().filter((r) => r.localRefName === ui.item.label)[0];
-
+      const ref = ui.item.ref;
       if (ref.isTag && self.tagsToDisplay.indexOf(ref) === -1) {
-        self.tagsToDisplay.pop();
+        self.tagsToDisplay.shift();
         self.tagsToDisplay.push(ref);
       } else if (ref.isBranch && self.branchesToDisplay.indexOf(ref) === -1) {
-        self.branchesToDisplay.pop();
+        self.branchesToDisplay.shift();
         self.branchesToDisplay.push(ref);
       }
+      self.refSearchFormVisible(false);
     },
     messages: {
       noResults: '',
       results: () => {}
     }
-  });
+  }).focus(function() {
+    $(this).autocomplete('search', $(this).val());
+  }).data("ui-autocomplete")._renderItem = function (ul, item) {
+    return $("<li></li>")
+      .data("item.autocomplete", item)
+      .append(`<a>${item.dom}</a>`)
+      .appendTo(ul);
+  }
   $(textBox).autocomplete('search', '');
 }
 GitNodeViewModel.prototype.createBranch = function() {
