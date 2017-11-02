@@ -8,6 +8,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - Fix document title on windows [#983](https://github.com/FredrikNoren/ungit/pull/983)
   - parse local storage as json instead of regex [#981](https://github.com/FredrikNoren/ungit/pull/981)
   - resolve path keywords such as `~` at server side [#980](https://github.com/FredrikNoren/ungit/issues/975)
+  - fix for not launching browser when executed at the git repo [#986](https://github.com/FredrikNoren/ungit/issues/986)
 - 1.1.33:
   - Make Logo and favicon HiDpi [#589](https://github.com/FredrikNoren/ungit/issues/589)
   - Remove forever-monitor [#961](https://github.com/FredrikNoren/ungit/issues/961)
