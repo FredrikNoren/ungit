@@ -25,16 +25,7 @@ process.on('uncaughtException', (err) => {
   ]).then(cleanExit)
 });
 
-const launch = () => {
-  const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
-    [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
-    { cwd: path.join(process.cwd(), '..') }
-  );
-
-  child.on('exit', (res) => {
-    console.log('Stopped keeping ungit alive');
-  });
-
+const navigate = (override) => {
   let currentUrl = `${config.urlBase}:${config.port}${config.rootPath}`
   if (config.forcedLaunchPath === undefined) {
     currentUrl += `/#/repository?path=${encodeURIComponent(process.cwd())}`
@@ -42,7 +33,7 @@ const launch = () => {
     currentUrl += `/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
   }
 
-  if (config.launchBrowser && !config.launchCommand) {
+  if (override || (config.launchBrowser && !config.launchCommand)) {
     console.log(`Browse to ${currentUrl}`);
     open(currentUrl);
   } else if (config.launchCommand) {
@@ -58,6 +49,19 @@ const launch = () => {
       }
     });
   }
+}
+
+const launch = () => {
+  const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
+    [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
+    { cwd: path.join(process.cwd(), '..') }
+  );
+
+  child.on('exit', (res) => {
+    console.log('Stopped keeping ungit alive');
+  });
+
+  navigate();
 
   const startupListener = (data) => {
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
@@ -80,6 +84,7 @@ server.listen(config.port, (err) => {
 server.on('error', (e) => {
   if (e.code == 'EADDRINUSE') {
     console.log('Ungit server already running');
+    navigate(true);
     cleanExit();
   }
 });
