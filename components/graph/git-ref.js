@@ -40,11 +40,11 @@ var RefViewModel = function(fullRefName, graph) {
   if (this.isRemoteTag) {
     this.localRefName = this.name.slice('remote-tag: '.length);
   }
+  const splitedName = this.localRefName.split('/')
   if (this.isRemote) {
     // get rid of the origin/ part of origin/branchname
-    var s = this.localRefName.split('/');
-    this.remote = s[0];
-    this.refName = s.slice(1).join('/');
+    this.remote = splitedName[0];
+    this.refName = splitedName.slice(1).join('/');
   }
   this.show = true;
   this.server = this.graph.server;
@@ -60,6 +60,11 @@ var RefViewModel = function(fullRefName, graph) {
   this.node.subscribe(function(newNode) {
     if (newNode) newNode.pushRef(self);
   });
+
+  // This optimization is for autocomplete display
+  this.value = splitedName[splitedName.length - 1]
+  this.label = this.localRefName
+  this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`
 };
 module.exports = RefViewModel;
 

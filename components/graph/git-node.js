@@ -181,20 +181,11 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
   this.refSearchFormVisible(true);
 
   const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
-  const source = this.refs().map((r) => {
-    const splitedName = r.localRefName.split('/');
-    return {
-      value: splitedName[splitedName.length - 1],
-      label: r.localRefName,
-      dom: `${r.localRefName}<span class='octicon ${r.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`,
-      ref: r
-    }
-  });
   $(textBox).autocomplete({
-    source: source,
+    source: this.refs(),
     minLength: 0,
     select: function(event, ui) {
-      const ref = ui.item.ref;
+      const ref = ui.item;
       if (ref.isTag && self.tagsToDisplay.indexOf(ref) === -1) {
         self.tagsToDisplay.shift();
         self.tagsToDisplay.push(ref);
