@@ -31,6 +31,8 @@ var AppViewModel = function(appContainer, server) {
     return !self.bugtrackingEnabled() && !self.bugtrackingNagscreenDismissed();
   });
 
+  this.showLicenseScreen = ko.observable(!localStorage.getItem('licenseScreenDismissed'));
+
   this.gitVersionErrorDismissed = ko.observable(localStorage.getItem('gitVersionErrorDismissed'));
   this.gitVersionError = ko.observable();
   this.gitVersionErrorVisible = ko.computed(function() {
@@ -150,6 +152,16 @@ AppViewModel.prototype.dismissNPSSurvey = function() {
 }
 AppViewModel.prototype.dismissNewVersion = function() {
   this.showNewVersionAvailable(false);
+}
+AppViewModel.prototype.dismissLicenseScreen = function() {
+  this.showLicenseScreen(false);
+  localStorage.setItem('licenseScreenDismissed', true);
+  keen.addEvent('dismiss-license', {
+    version: ungit.version,
+    userHash: ungit.userHash,
+    bugtrackingEnabled: ungit.config.bugtracking,
+    sendUsageStatistics: ungit.config.sendUsageStatistics
+  });
 }
 AppViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
