@@ -39,26 +39,22 @@ var GitNodeViewModel = function(graph, sha1) {
   this.branchesToDisplay = ko.observableArray();
   this.tags = ko.observableArray();
   this.tagsToDisplay = ko.observableArray();
-  this.showOverflowRefs = ko.observable();
   this.refs.subscribe((newValue) => {
     if (newValue) {
       this.branches(newValue.filter((r) => r.isBranch));
       this.tags(newValue.filter((r) => r.isTag));
 
       if (newValue.length > maxTagsToDisplay + maxBranchesToDisplay) {
-        this.showOverflowRefs(true);
         const tagsCount = Math.min(this.tags.length, maxTagsToDisplay);
         const branchesCount = maxTagsToDisplay + maxBranchesToDisplay - tagsCount;
 
         this.branchesToDisplay(this.branches.slice(0, branchesCount));
         this.tagsToDisplay(this.tags.slice(0, tagsCount));
       } else {
-        this.showOverflowRefs(false);
         this.branchesToDisplay(this.branches());
         this.tagsToDisplay(this.tags());
       }
     } else {
-      this.showOverflowRefs(false);
       this.branches.removeAll();
       this.tags.removeAll();
       this.branchesToDisplay.removeAll();
@@ -187,13 +183,11 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
     minLength: 0,
     select: function(event, ui) {
       const ref = ui.item;
-      if (ref.isTag && self.tagsToDisplay.indexOf(ref) === -1) {
-        self.tagsToDisplay.shift();
-        self.tagsToDisplay.push(ref);
-      } else if (ref.isBranch && self.branchesToDisplay.indexOf(ref) === -1) {
-        self.branchesToDisplay.shift();
-        self.branchesToDisplay.push(ref);
-      }
+      const ray = ref.isTag ? self.tagsToDisplay : self.branchesToDisplay;
+
+      // if ref is in display, remove it, else remove last in array.
+      ray.splice(ray.indexOf(ref), 1);
+      ray.push(ref);
       self.refSearchFormVisible(false);
     },
     messages: {
