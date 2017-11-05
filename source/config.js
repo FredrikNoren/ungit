@@ -137,6 +137,9 @@ const defaultConfig = {
 
   // Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
 	diffType: undefined,
+
+  // Number of refs to show on git commit bubbles to limit too many refs to appear.
+  numRefsToShow: 5,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -192,6 +195,7 @@ let argv = yargs
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
+.describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 ;
 
 var argvConfig = argv.argv;

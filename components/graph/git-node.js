@@ -1,11 +1,12 @@
-var ko = require('knockout');
-var components = require('ungit-components');
-var Selectable = require('./selectable');
-var Animateable = require('./animateable');
-var programEvents = require('ungit-program-events');
-var GraphActions = require('./git-graph-actions');
-const maxTagsToDisplay = 1;
-const maxBranchesToDisplay = 1;
+const ko = require('knockout');
+const components = require('ungit-components');
+const Selectable = require('./selectable');
+const Animateable = require('./animateable');
+const programEvents = require('ungit-program-events');
+const GraphActions = require('./git-graph-actions');
+
+const maxBranchesToDisplay = parseInt(ungit.config.numRefsToShow / 5 * 3);  // 3/5 of refs to show to branches
+const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
