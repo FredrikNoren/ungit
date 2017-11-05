@@ -43,7 +43,7 @@
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->
-        <span class="newRef" data-bind="click: function() {console.log(3333333)}, css: { editing: branchingFormVisible }">
+        <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
           <button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
           <!-- ko if: branchingFormVisible -->
           <div class="form-inline">
@@ -55,6 +55,7 @@
         </span>
         <!-- /ko -->
 
+        <!-- ko if: refs().length > 0 -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
           <button class="showSearchForm octicon octicon-search" data-bind="click: showRefSearchForm, visible: !refSearchFormVisible()"></button>
           <!-- ko if: refSearchFormVisible -->
@@ -63,6 +64,7 @@
           </div>
           <!-- /ko -->
         </span>
+        <!-- /ko -->
 
       </div>
 

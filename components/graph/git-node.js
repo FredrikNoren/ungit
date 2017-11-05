@@ -27,6 +27,8 @@ var GitNodeViewModel = function(graph, sha1) {
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
+      if (b.current()) return 1;
+      if (a.current()) return -1;
       if (a.isLocal && !b.isLocal) return -1;
       if (!a.isLocal && b.isLocal) return 1;
       return a.refName < b.refName ? -1 : 1;
@@ -43,17 +45,8 @@ var GitNodeViewModel = function(graph, sha1) {
     if (newValue) {
       this.branches(newValue.filter((r) => r.isBranch));
       this.tags(newValue.filter((r) => r.isTag));
-
-      if (newValue.length > maxTagsToDisplay + maxBranchesToDisplay) {
-        const tagsCount = Math.min(this.tags.length, maxTagsToDisplay);
-        const branchesCount = maxTagsToDisplay + maxBranchesToDisplay - tagsCount;
-
-        this.branchesToDisplay(this.branches.slice(0, branchesCount));
-        this.tagsToDisplay(this.tags.slice(0, tagsCount));
-      } else {
-        this.branchesToDisplay(this.branches());
-        this.tagsToDisplay(this.tags());
-      }
+      this.tagsToDisplay(this.tags.slice(0, maxTagsToDisplay));
+      this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - this.tagsToDisplay().length));
     } else {
       this.branches.removeAll();
       this.tags.removeAll();
@@ -179,7 +172,7 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
 
   const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
   $(textBox).autocomplete({
-    source: this.refs(),
+    source: this.refs().filter(ref => !ref.isHEAD),
     minLength: 0,
     select: function(event, ui) {
       const ref = ui.item;
@@ -187,7 +180,7 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
 
       // if ref is in display, remove it, else remove last in array.
       ray.splice(ray.indexOf(ref), 1);
-      ray.push(ref);
+      ray.unshift(ref);
       self.refSearchFormVisible(false);
     },
     messages: {
