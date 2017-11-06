@@ -86,14 +86,6 @@ var GitNodeViewModel = function(graph, sha1) {
   this.aboveNode = undefined;
   this.belowNode = undefined;
   this.refSearchFormVisible = ko.observable(false);
-  this.refSearchFormVisible.subscribe((newValue) => {
-    if (!newValue) {
-      // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
-      setTimeout(() => {
-        this.refSearchFormVisible(false);
-      }, 200);
-    }
-  });
   this.commitComponent = components.create('commit', this);
   this.r = ko.observable();
   this.cx = ko.observable();
