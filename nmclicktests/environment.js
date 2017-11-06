@@ -160,7 +160,7 @@ const prependLines = (pre, text) => {
 // Environment provides
 class Environment {
   constructor(config) {
-    this.nm = Nightmare({ Promise: Bluebird });
+    this.nm = Nightmare({ Promise: Bluebird, typeInterval: 500 });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 15000;
@@ -279,6 +279,7 @@ class Environment {
       '--maxNAutoRestartOnCrash=0',
       '--no-autoCheckoutOnBranchCreate',
       '--alwaysLoadActiveBranch',
+      `--numRefsToShow=${this.config.numRefsToShow || 5}`,
       '--logGitCommands']
       .concat(this.config.serverStartupOptions);
     const ungitServer = child_process.spawn('node', options);
