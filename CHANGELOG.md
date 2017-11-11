@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.2.3: Bump license text to v0.2.1 (fixes typo). [Faircode License changelog](https://github.com/faircodeio/faircode-license/blob/master/CHANGELOG.md)
 - 1.2.2: Bump license text to v0.2 to fix two small inconsistencies: Clarify currency (USD) and remove "no additional rights" clause as it's problematic and superfluous. License changelog at https://github.com/faircodeio/faircode-license/blob/master/CHANGELOG.md [#947](https://github.com/FredrikNoren/ungit/issues/974)
 - 1.2.1: fix for not launching browser when executed at the git repo [#986](https://github.com/FredrikNoren/ungit/issues/986)
 - 1.2.0:
