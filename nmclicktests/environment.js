@@ -144,7 +144,7 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {
-    this.goto(`${rootUrl}/?faircode_ps=true#/repository?path=${encodeURIComponent(tempDirPath)}`)
+    this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
       .wait('.repository-actions')
       .wait(1000)
       .then(done.bind(null, null), done);
@@ -181,7 +181,7 @@ class Environment {
     })
   }
 
-  getRootUrl() { return rootUrl + '?faircode_ps=true'; }
+  getRootUrl() { return rootUrl; }
 
   getPort() {
     const tmpPortrange = portrange + Math.floor((Math.random() * 5000));
