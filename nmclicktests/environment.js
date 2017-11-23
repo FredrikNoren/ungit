@@ -144,7 +144,7 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {
-    this.goto(`${rootUrl}/?faircode=ps=true#/repository?path=${encodeURIComponent(tempDirPath)}`)
+    this.goto(`${rootUrl}/?faircode_ps=true#/repository?path=${encodeURIComponent(tempDirPath)}`)
       .wait('.repository-actions')
       .wait(1000)
       .then(done.bind(null, null), done);
