@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -62,9 +62,9 @@
   },
   "devDependencies": {
     "ansi-color": "~0.2.1",
-    "babel-core": "~7.0.0-beta.0",
-    "babel-preset-es2015": "~7.0.0-beta.0",
-    "babel-preset-stage-0": "~7.0.0-beta.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "~6.24.1",
+    "babel-preset-stage-0": "~6.24.1",
     "browserify": "~14.4.0",
     "electron-packager": "~9.1.0",
     "expect.js": "~0.3.1",
