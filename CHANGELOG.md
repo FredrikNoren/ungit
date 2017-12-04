@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.3.2: Adding in ref search box and limit num of ref display [#973](https://github.com/FredrikNoren/ungit/issues/973)
 - 1.3.1: Add link to plans & license in header [#947](https://github.com/FredrikNoren/ungit/issues/974)
 - 1.3.0: Switch to Faircode paywall instead of license popup [#947](https://github.com/FredrikNoren/ungit/issues/974)
 - 1.2.3: Bump license text to v0.2.1 (fixes typo). [Faircode License changelog](https://github.com/faircodeio/faircode-license/blob/master/CHANGELOG.md)

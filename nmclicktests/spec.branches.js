@@ -5,13 +5,42 @@ const testRepoPaths = [];
 describe('[BRANCHES]', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, path: "/tmp/testdir" }]));
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0])
   });
+
+  it('add a commit', () => {
+    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
+      .ug.commit('commit-1');
+  })
+
+  // < branch search test >
+  it('add branches', () => {
+    return environment.nm.ug.createBranch("search-1")
+      .ug.createBranch("search-2")
+      .ug.createBranch("search-3")
+      .ug.createBranch("search-4")
+      .wait('[data-ta-name="search-4"]')
+  });
+
+  it('add tag should make one of the branch disappear', () => {
+    return environment.nm.ug.createTag('tag-1')
+      .ug.waitForElementNotVisible('[data-ta-name="search-4"]');
+  });
+
+  // https://github.com/segmentio/nightmare/issues/932
+  it.skip('search for the hidden branch', () => {
+    return environment.nm.wait(5000) // sleep to avoid `git-directory-changed` event, which refreshes git nodes and closes search box
+      .nm.click('.showSearchForm')
+      .wait(200)
+      .type('input.name', '-4\u0028\u000d')
+      .wait('[data-ta-name="search-4"]')
+  });
+  // < /branch search test>
 
   it('updateBranches button without branches', () => {
     return environment.nm.wait('.btn-group.branch .btn-main')
@@ -20,10 +49,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('add a branch', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('commit-1')
-      .wait('.commit')
-      .ug.createBranch('branch-1');
+    return environment.nm.ug.createBranch('branch-1');
   });
 
   it('updateBranches button with one branch', () => {

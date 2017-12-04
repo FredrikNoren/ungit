@@ -1,9 +1,12 @@
-var ko = require('knockout');
-var components = require('ungit-components');
-var Selectable = require('./selectable');
-var Animateable = require('./animateable');
-var programEvents = require('ungit-program-events');
-var GraphActions = require('./git-graph-actions');
+const ko = require('knockout');
+const components = require('ungit-components');
+const Selectable = require('./selectable');
+const Animateable = require('./animateable');
+const programEvents = require('ungit-program-events');
+const GraphActions = require('./git-graph-actions');
+
+const maxBranchesToDisplay = parseInt(ungit.config.numRefsToShow / 5 * 3);  // 3/5 of refs to show to branches
+const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 var GitNodeViewModel = function(graph, sha1) {
   var self = this;
@@ -24,11 +27,32 @@ var GitNodeViewModel = function(graph, sha1) {
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
     rs.sort(function(a, b) {
+      if (b.current()) return 1;
+      if (a.current()) return -1;
       if (a.isLocal && !b.isLocal) return -1;
       if (!a.isLocal && b.isLocal) return 1;
       return a.refName < b.refName ? -1 : 1;
     });
     return rs;
+  });
+  // These are split up like this because branches and local tags can be found in the git log,
+  // whereas remote tags needs to be fetched with another command (which is much slower)
+  this.branches = ko.observableArray();
+  this.branchesToDisplay = ko.observableArray();
+  this.tags = ko.observableArray();
+  this.tagsToDisplay = ko.observableArray();
+  this.refs.subscribe((newValue) => {
+    if (newValue) {
+      this.branches(newValue.filter((r) => r.isBranch));
+      this.tags(newValue.filter((r) => r.isTag));
+      this.tagsToDisplay(this.tags.slice(0, maxTagsToDisplay));
+      this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - this.tagsToDisplay().length));
+    } else {
+      this.branches.removeAll();
+      this.tags.removeAll();
+      this.branchesToDisplay.removeAll();
+      this.tags.removeAll();
+    }
   });
   this.ancestorOfHEAD = ko.observable(false);
   this.nodeIsMousehover = ko.observable(false);
@@ -41,19 +65,12 @@ var GitNodeViewModel = function(graph, sha1) {
   this.selected.subscribe(function() {
     programEvents.dispatch({ event: 'graph-render' });
   });
-  // These are split up like this because branches and local tags can be found in the git log,
-  // whereas remote tags needs to be fetched with another command (which is much slower)
-  this.branches = ko.computed(function() {
-    return self.refs().filter(function(r) { return r.isBranch; });
-  });
-  this.tags = ko.computed(function() {
-    return self.refs().filter(function(r) { return r.isTag; });
-  });
   this.showNewRefAction = ko.computed(function() {
     return !graph.currentActionContext();
   });
   this.newBranchName = ko.observable();
   this.newBranchNameHasFocus = ko.observable(true);
+  this.branchingFormVisible = ko.observable(false);
   this.newBranchNameHasFocus.subscribe(function(newValue) {
     if (!newValue) {
       // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
@@ -62,13 +79,13 @@ var GitNodeViewModel = function(graph, sha1) {
       }, 200);
     }
   });
-  this.branchingFormVisible = ko.observable(false);
   this.canCreateRef = ko.computed(function() {
     return self.newBranchName() && self.newBranchName().trim() && self.newBranchName().indexOf(' ') == -1;
   });
   this.branchOrder = ko.observable();
   this.aboveNode = undefined;
   this.belowNode = undefined;
+  this.refSearchFormVisible = ko.observable(false);
   this.commitComponent = components.create('commit', this);
   this.r = ko.observable();
   this.cx = ko.observable();
@@ -98,6 +115,7 @@ GitNodeViewModel.prototype.setGraphAttr = function(val) {
   this.element().setAttribute('y', val[1] - 30);
 }
 GitNodeViewModel.prototype.render = function() {
+  this.refSearchFormVisible(false);
   if (!this.isInited) return;
   if (this.ancestorOfHEAD()) {
     this.r(30);
@@ -139,6 +157,37 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
   this.newBranchNameHasFocus(true);
+}
+GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
+  const self = this;
+  this.refSearchFormVisible(true);
+
+  const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
+  $(textBox).autocomplete({
+    source: this.refs().filter(ref => !ref.isHEAD),
+    minLength: 0,
+    select: function(event, ui) {
+      const ref = ui.item;
+      const ray = ref.isTag ? self.tagsToDisplay : self.branchesToDisplay;
+
+      // if ref is in display, remove it, else remove last in array.
+      ray.splice(ray.indexOf(ref), 1);
+      ray.unshift(ref);
+      self.refSearchFormVisible(false);
+    },
+    messages: {
+      noResults: '',
+      results: () => {}
+    }
+  }).focus(function() {
+    $(this).autocomplete('search', $(this).val());
+  }).data("ui-autocomplete")._renderItem = function (ul, item) {
+    return $("<li></li>")
+      .data("item.autocomplete", item)
+      .append(`<a>${item.dom}</a>`)
+      .appendTo(ul);
+  }
+  $(textBox).autocomplete('search', '');
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;

@@ -11,7 +11,7 @@
       </div>
 
       <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
-        <!-- ko foreach: branches -->
+        <!-- ko foreach: branchesToDisplay -->
         <span class="ref branch" draggable="true" tabIndex="-1"
             data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               click: selected,
@@ -22,7 +22,7 @@
         </span>
         <!-- /ko -->
 
-        <!-- ko foreach: tags -->
+        <!-- ko foreach: tagsToDisplay -->
         <span class="ref tag" draggable="true" tabIndex="0"
             data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               click: selected,
@@ -50,6 +50,17 @@
             <input class="name form-control" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
             <button class="btn btn-primary" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
             <button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+          </div>
+          <!-- /ko -->
+        </span>
+        <!-- /ko -->
+
+        <!-- ko if: refs().length > 0 -->
+        <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+          <button class="showSearchForm octicon octicon-search" data-bind="click: showRefSearchForm, visible: !refSearchFormVisible()"></button>
+          <!-- ko if: refSearchFormVisible -->
+          <div class="form-inline">
+            <input class="name form-control" type="text" data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeydown'"/>
           </div>
           <!-- /ko -->
         </span>
