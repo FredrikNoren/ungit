@@ -51,7 +51,7 @@ var GitNodeViewModel = function(graph, sha1) {
       this.branches.removeAll();
       this.tags.removeAll();
       this.branchesToDisplay.removeAll();
-      this.tags.removeAll();
+      this.tagsToDisplay.removeAll();
     }
   });
   this.ancestorOfHEAD = ko.observable(false);
