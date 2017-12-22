@@ -4,8 +4,6 @@ ungit
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Faircode](https://faircode.io/product/Ungit/badge)](https://faircode.io/product/Ungit?utm_source=badge&utm_medium=badgelarge&utm_campaign=Ungit)
-
 The easiest way to use git. On any platform. Anywhere.
 
 xkcd's take on GIT: [https://xkcd.com/1597/](https://xkcd.com/1597/)
@@ -113,9 +111,9 @@ Changelog
 ---------
 See [CHANGELOG.md](CHANGELOG.md).
 
-License
--------
-See [LICENSE.md](LICENSE.md).
+License (MIT)
+-------------
+See [LICENSE.md](LICENSE.md). To read about the Faircode experiment go to [#974](https://github.com/FredrikNoren/ungit/issues/974). Ungit is now once again MIT.
 
 [![Dependency Status](https://david-dm.org/FredrikNoren/ungit.svg)](https://david-dm.org/FredrikNoren/ungit)
 [![devDependency Status](https://david-dm.org/FredrikNoren/ungit/dev-status.svg)](https://david-dm.org/FredrikNoren/ungit#info=devDependencies)

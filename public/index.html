@@ -67,14 +67,7 @@
 		console.log('Keen.io inited');
 	}
 
-	if (window.location.href.indexOf('faircode_pc') !== -1) {
-		window.localStorage.faircode_pc = true;
-	}
-	if (!window.localStorage.faircode_pc && window.location.href.indexOf('faircode_ps') === -1 && !ungit.config.dev) {
-		window.location.href = 'https://faircode.io/product/Ungit/paywall?utm_source=startup&utm_medium=paywall&utm_campaign=Ungit&redirectUrl=' + encodeURIComponent(window.location.href);
-	} else {
-		require('ungit-main').start();
-	}
+	require('ungit-main').start();
 </script>
 
 </body>
