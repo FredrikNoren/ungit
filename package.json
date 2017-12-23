@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.3.4",
+  "version": "1.4.1",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -91,7 +91,7 @@
   "engines": {
     "node": ">=0.10"
   },
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "main": "public/main.js",
   "window": {
     "title": "Ungit",
