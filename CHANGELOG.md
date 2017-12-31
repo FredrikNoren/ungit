@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.1:
+  - fix the issue where browser opens before ungit start. [#994](https://github.com/FredrikNoren/ungit/issues/994)
+  - including xkcd art back [#999](https://github.com/FredrikNoren/ungit/issues/999)
 - 1.4.0: Revert to MIT [#947](https://github.com/FredrikNoren/ungit/issues/974)
 - 1.3.3: fix `tagsToDisplay` clearing issue. [#973](https://github.com/FredrikNoren/ungit/issues/973)
 - 1.3.2: Adding in ref search box and limit num of ref display [#973](https://github.com/FredrikNoren/ungit/issues/973)

@@ -61,8 +61,6 @@ const launch = () => {
     console.log('Stopped keeping ungit alive');
   });
 
-  navigate();
-
   const startupListener = (data) => {
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
       child.removeListener('stdout', startupListener);
@@ -71,6 +69,7 @@ const launch = () => {
       console.log(data.toString());
       console.log(`Took ${launchTime}ms to start server.`);
       usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
+      navigate();
     }
   }
 
