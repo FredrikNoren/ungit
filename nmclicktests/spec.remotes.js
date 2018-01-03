@@ -57,8 +57,6 @@ describe('[REMOTES]', () => {
     return environment.nm.insert('#cloneFromInput', testRepoPaths[1])
       .insert('#cloneToInput', testRepoPaths[2])
       .ug.click('.uninited input[type="submit"]')
-      .refresh()  // this is currently neccessary as cloning -> repo view transition is not straight forward
-                  // and previous test depends on mouse wiggle that triggers refresh.
       .wait('.repository-view')
       .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });

@@ -89,9 +89,12 @@ PathViewModel.prototype.cloneRepository = function() {
   this.cloningProgressBar.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-  return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest }).then(function(res) {
-      navigation.browseTo('repository?path=' + encodeURIComponent(res.path));
-    }).finally(function() { self.cloningProgressBar.stop() })
+  return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
+    .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
+    .finally(() => {
+      self.cloningProgressBar.stop();
+      programEvents.dispatch({ event: 'working-tree-changed' });
+    })
 }
 PathViewModel.prototype.createDir = function() {
   var self = this;
