@@ -110,19 +110,19 @@ Nightmare.action('ug', {
       }).then(done.bind(null, null), done);
   },
   'refAction': function(ref, local, action, done) {
-    this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
+    this.ug.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
       .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
       .then(() => this.ug._verifyRefAction(action))
       .then(done.bind(null, null), done);
   },
   'moveRef': function(ref, targetNodeCommitTitle, done) {
-    this.click(`.branch[data-ta-name="${ref}"]`)
+    this.ug.click(`.branch[data-ta-name="${ref}"]`)
       .ug.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`)
       .then(() => this.ug._verifyRefAction('move'))
       .then(done.bind(null, null), done);
   },
   '_createRef': function(type, name, done) {
-    this.click('.current ~ .newRef button.showBranchingForm')
+    this.ug.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
       .wait(100)
       .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
@@ -140,7 +140,7 @@ Nightmare.action('ug', {
     this.wait(selector)
       .wait(300)
       .click(selector)
-      .wait(800)
+      .wait(500)
       .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {
