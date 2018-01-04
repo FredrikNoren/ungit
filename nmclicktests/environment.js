@@ -279,8 +279,7 @@ class Environment {
       '--maxNAutoRestartOnCrash=0',
       '--no-autoCheckoutOnBranchCreate',
       '--alwaysLoadActiveBranch',
-      `--numRefsToShow=${this.config.numRefsToShow || 5}`,
-      '--logGitCommands']
+      `--numRefsToShow=${this.config.numRefsToShow || 5}`]
       .concat(this.config.serverStartupOptions);
     const ungitServer = child_process.spawn('node', options);
     ungitServer.stdout.on('data', (stdout) => {
