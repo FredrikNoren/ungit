@@ -4,6 +4,11 @@ var components = require('ungit-components');
 var addressParser = require('ungit-address-parser');
 var navigation = require('ungit-navigation');
 var programEvents = require('ungit-program-events');
+const NProgress = require('nprogress');
+NProgress.configure({
+  trickleRate: 0.06,
+  trickleSpeed: 200
+});
 
 components.register('path', function(args) {
   return new PathViewModel(args.server, args.path);
@@ -19,13 +24,8 @@ var PathViewModel = function(server, path) {
                    .slice(-1)[0] || '/';
 
   this.status = ko.observable('loading');
-  this.loadingProgressBar = components.create('progressBar', { predictionMemoryKey: 'path-loading-' + path });
-  this.loadingProgressBar.start();
-  this.cloningProgressBar = components.create('progressBar', {
-    predictionMemoryKey: 'path-cloning-' + path,
-    fallbackPredictedTimeMs: 10000
-  });
   this.cloneUrl = ko.observable();
+  NProgress.start();
   this.showDirectoryCreatedAlert = ko.observable(false);
   this.cloneDestinationImplicit = ko.computed(function() {
     var defaultText = 'destination folder';
@@ -67,8 +67,8 @@ PathViewModel.prototype.updateStatus = function() {
         self.repository(null);
       }
       return null;
-    }).catch(function(err) { })
-    .finally(function() { self.loadingProgressBar.stop() });
+    }).catch((err) => { })
+    .finally(() => { NProgress.done(); });
 }
 PathViewModel.prototype.initRepository = function() {
   var self = this;
@@ -76,9 +76,7 @@ PathViewModel.prototype.initRepository = function() {
     .finally(function(res) { self.updateStatus(); });
 }
 PathViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-credentials') this.cloningProgressBar.pause();
-  else if (event.event == 'request-credentials-response') this.cloningProgressBar.unpause();
-  else if (event.event == 'working-tree-changed') this.updateStatus();
+  if (event.event == 'working-tree-changed') this.updateStatus();
   else if (event.event == 'request-app-content-refresh') this.updateStatus();
 
   if (this.repository()) this.repository().onProgramEvent(event);
@@ -86,13 +84,13 @@ PathViewModel.prototype.onProgramEvent = function(event) {
 PathViewModel.prototype.cloneRepository = function() {
   var self = this;
   self.status('cloning');
-  this.cloningProgressBar.start();
+  NProgress.start();
   var dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
   return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
     .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
     .finally(() => {
-      self.cloningProgressBar.stop();
+      NProgress.done();
       programEvents.dispatch({ event: 'working-tree-changed' });
     })
 }

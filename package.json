@@ -42,6 +42,7 @@
     "node-cache": "~4.1.1",
     "npm": "~5.6.0",
     "npm-registry-client": "~8.5.0",
+    "nprogress": "^0.2.0",
     "octicons": "~3.5.0",
     "open": "~0.0.5",
     "os-homedir": "~1.0.2",
