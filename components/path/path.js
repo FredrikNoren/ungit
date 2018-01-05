@@ -4,11 +4,6 @@ const components = require('ungit-components');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
-const NProgress = require('nprogress');
-NProgress.configure({
-  trickleRate: 0.06,
-  trickleSpeed: 200
-});
 
 components.register('path', (args) => {
   return new PathViewModel(args.server, args.path);
@@ -25,7 +20,7 @@ class PathViewModel {
 
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
-    NProgress.start();
+    nprogress.start();
     this.showDirectoryCreatedAlert = ko.observable(false);
     this.cloneDestinationImplicit = ko.computed(() => {
       const defaultText = 'destination folder';
@@ -62,8 +57,9 @@ class PathViewModel {
           this.status(status.type);
           this.repository(null);
         }
+        return null;
       }).catch((err) => { })
-      .finally(() => { NProgress.done(); });
+      .finally(() => { nprogress.done(); });
   }
   initRepository() {
     return this.server.postPromise('/init', { path: this.repoPath() })
@@ -77,19 +73,19 @@ class PathViewModel {
   }
   cloneRepository() {
     this.status('cloning');
-    NProgress.start();
+    nprogress.start();
     const dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
     return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
       .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
       .finally(() => {
-        NProgress.done();
+        nprogress.done();
         programEvents.dispatch({ event: 'working-tree-changed' });
       })
   }
   createDir() {
     this.showDirectoryCreatedAlert(true);
     return this.server.postPromise('/createDir',  { dir: this.repoPath() })
-      .then(() => { this.updateStatus(); });
+      .then(() => this.updateStatus());
   }
 }

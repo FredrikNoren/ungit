@@ -139,7 +139,8 @@ module.exports = (grunt) => {
             'io': true,
             'keen': true,
             'Raven': true,
-            '$': true
+            '$': true,
+            'nprogress': true
           }
         },
         files: [
