@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.3: changing to path navigation to `nprogress` bar. [#1001](https://github.com/FredrikNoren/ungit/issues/1001)
 - 1.4.2:
   - fix navigation redirection on git clone and adding xkcd image
   - dependency bump
