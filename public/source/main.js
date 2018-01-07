@@ -2,11 +2,6 @@
 var _ = require('lodash');
 var ko = require('knockout');
 var $ = require('../vendor/js/jquery-2.0.0.min');
-nprogress = require('nprogress');
-nprogress.configure({
-  trickleRate: 0.06,
-  trickleSpeed: 200
-});
 require('../vendor/js/jquery.dnd_page_scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');

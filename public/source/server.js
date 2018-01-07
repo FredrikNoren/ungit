@@ -5,6 +5,12 @@ var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
 var winston = require('winston');
+var nprogress = require('nprogress');
+nprogress.configure({
+  trickleRate: 0.06,
+  trickleSpeed: 200,
+  showSpinner: false
+});
 
 function Server() {
 }
