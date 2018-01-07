@@ -20,7 +20,6 @@ class PathViewModel {
 
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
-    nprogress.start();
     this.showDirectoryCreatedAlert = ko.observable(false);
     this.cloneDestinationImplicit = ko.computed(() => {
       const defaultText = 'destination folder';
@@ -59,7 +58,6 @@ class PathViewModel {
         }
         return null;
       }).catch((err) => { })
-      .finally(() => { nprogress.done(); });
   }
   initRepository() {
     return this.server.postPromise('/init', { path: this.repoPath() })
@@ -73,13 +71,11 @@ class PathViewModel {
   }
   cloneRepository() {
     this.status('cloning');
-    nprogress.start();
     const dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
     return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
       .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
       .finally(() => {
-        nprogress.done();
         programEvents.dispatch({ event: 'working-tree-changed' });
       })
   }

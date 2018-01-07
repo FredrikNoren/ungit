@@ -89,7 +89,6 @@ var TextDiffViewModel = function (args) {
   this.textDiffType = args.textDiffType;
   this.whiteSpace = args.whiteSpace;
   this.isShowingDiffs = args.isShowingDiffs;
-  this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
   this.patchLineList = args.patchLineList;

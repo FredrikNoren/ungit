@@ -4,6 +4,7 @@ var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
+var winston = require('winston');
 
 function Server() {
 }
@@ -107,6 +108,7 @@ Server.prototype.queryPromise = function(method, path, body) {
   if (method == 'GET' || method == 'DELETE') request.query = body;
   else request.body = body;
 
+  nprogress.start();
   return new Promise(function (resolve, reject) {
     self._httpJsonRequest(request, function(error, res) {
       if (error) {
@@ -140,7 +142,10 @@ Server.prototype.queryPromise = function(method, path, body) {
         resolve(res);
       }
     });
-  });
+  }).catch((e) => {
+    if (ungit.dev) winston.info(`API call: ${path} errored.\n`, e)
+    throw e;
+  }).finally(() => nprogress.done(true));
 }
 Server.prototype.getPromise = function(url, arg) {
   return this.queryPromise('GET', url, arg);
@@ -161,7 +166,6 @@ Promise.onPossiblyUnhandledRejection(function(err, promise) {
     if (ungit.config && ungit.config.sendUsageStatistics) {
       keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
     }
-    console.log('git-error', err); // Used by the clicktests
     programEvents.dispatch({ event: 'git-error', data: {
       command: err.res.body.command,
       error: err.res.body.error,
@@ -171,7 +175,7 @@ Promise.onPossiblyUnhandledRejection(function(err, promise) {
     } });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error("Unhandled Promise ERROR: ", err, promise);
+    winston.error("Unhandled Promise ERROR: ", err, promise);
     programEvents.dispatch({ event: 'git-crash-error' });
     Raven.captureException(promise.reason());
   }

@@ -15,32 +15,26 @@ var GraphActions = {};
 module.exports = GraphActions;
 
 GraphActions.ActionBase = function(graph) {
-  var self = this;
   this.graph = graph;
   this.server = graph.server;
-  this.performProgressBar = components.create('progressBar', {
-    predictionMemoryKey: 'action-' + this.style + '-' + graph.repoPath(),
-    fallbackPredictedTimeMs: 1000,
-    temporary: true
+  this.isRunning = ko.observable(false);
+  this.isHighlighted = ko.computed(() => {
+    return !graph.hoverGraphAction() || graph.hoverGraphAction() == this;
   });
-
-  this.isHighlighted = ko.computed(function() {
-    return !graph.hoverGraphAction() || graph.hoverGraphAction() == self;
-  });
-  this.cssClasses = ko.computed(function() {
-    var c = self.style;
-    if (!self.isHighlighted()) c += ' dimmed';
-    return c;
+  this.cssClasses = ko.computed(() => {
+    if (!this.isHighlighted() || this.isRunning()) {
+      return `${this.style} dimmed`
+    } else {
+      return this.style
+    }
   })
 }
 GraphActions.ActionBase.prototype.icon = null;
 GraphActions.ActionBase.prototype.doPerform = function() {
-  var self = this;
+  if (this.isRunning()) return;
   this.graph.hoverGraphAction(null);
-  self.performProgressBar.start();
-  this.perform().finally(function() {
-    self.performProgressBar.stop();
-  });
+  this.isRunning(true);
+  this.perform().finally(() => { this.isRunning(false); });
 }
 GraphActions.ActionBase.prototype.dragEnter = function() {
   if (!this.visible()) return;
@@ -62,7 +56,7 @@ GraphActions.Move = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().node() != self.node;
   });
@@ -80,7 +74,7 @@ GraphActions.Reset = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     if (!(self.graph.currentActionContext() instanceof RefViewModel)) return false;
     var context = self.graph.currentActionContext();
     if (context.node() != self.node) return false;
@@ -120,7 +114,7 @@ GraphActions.Rebase = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       (!ungit.config.showRebaseAndMergeOnlyOnRefs || self.node.refs().length > 0) &&
       self.graph.currentActionContext().current() &&
@@ -148,7 +142,7 @@ GraphActions.Merge = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     if (!self.graph.checkedOutRef() || !self.graph.checkedOutRef().node()) return false;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       !self.graph.currentActionContext().current() &&
@@ -175,7 +169,7 @@ GraphActions.Push = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().node() == self.node &&
       self.graph.currentActionContext().canBePushed(self.graph.currentRemote());
@@ -200,8 +194,7 @@ GraphActions.Push.prototype.perform = function() {
   if (remoteRef) {
     return remoteRef.moveTo(ref.node().sha1)
   } else {
-    return ref.createRemoteRef()
-      .then(function() {
+    return ref.createRemoteRef().then(function() {
         if (self.graph.HEAD().name == ref.name) {
           self.grah.HEADref().node(ref.node());
         }
@@ -214,7 +207,7 @@ GraphActions.Checkout = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     if (self.graph.currentActionContext() instanceof RefViewModel)
       return self.graph.currentActionContext().node() == self.node &&
         !self.graph.currentActionContext().current();
@@ -264,7 +257,7 @@ GraphActions.Delete = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().node() == self.node &&
       !self.graph.currentActionContext().current();
@@ -289,7 +282,7 @@ GraphActions.CherryPick = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     var context = self.graph.currentActionContext();
     return context === self.node && self.graph.HEAD() && context.sha1 !== self.graph.HEAD().sha1
   });
@@ -309,7 +302,7 @@ GraphActions.Uncommit = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() == self.node &&
       self.graph.HEAD() == self.node;
   });
@@ -336,7 +329,7 @@ GraphActions.Revert = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() == self.node;
   });
 }
@@ -354,7 +347,7 @@ GraphActions.Squash = function(graph, node) {
   GraphActions.ActionBase.call(this, graph);
   this.node = node;
   this.visible = ko.computed(function() {
-    if (self.performProgressBar.running()) return true;
+    if (self.isRunning()) return true;
     return self.graph.currentActionContext() instanceof RefViewModel &&
       self.graph.currentActionContext().current() &&
       self.graph.currentActionContext().node() != self.node;
