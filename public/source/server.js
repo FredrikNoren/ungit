@@ -4,7 +4,6 @@ var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
-var winston = require('winston');
 var nprogress = require('nprogress');
 nprogress.configure({
   trickleRate: 0.06,
@@ -148,9 +147,6 @@ Server.prototype.queryPromise = function(method, path, body) {
         resolve(res);
       }
     });
-  }).catch((e) => {
-    if (ungit.dev) winston.info(`API call: ${path} errored.\n`, e)
-    throw e;
   }).finally(() => nprogress.done(true));
 }
 Server.prototype.getPromise = function(url, arg) {
@@ -181,7 +177,7 @@ Promise.onPossiblyUnhandledRejection(function(err, promise) {
     } });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    winston.error("Unhandled Promise ERROR: ", err, promise);
+    console.error("Unhandled Promise ERROR: ", err, promise);
     programEvents.dispatch({ event: 'git-crash-error' });
     Raven.captureException(promise.reason());
   }
