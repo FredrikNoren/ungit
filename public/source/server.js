@@ -162,7 +162,7 @@ Server.prototype.emptyPromise = function() {
   return Promise.resolve();
 }
 
-Promise.onPossiblyUnhandledRejection(function(err, promise) {
+Promise.onUnhandledRejectionHandled(function(err, promise) {
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res && err.res.body && err.res.body.isGitError) {
     if (ungit.config && ungit.config.sendUsageStatistics) {
