@@ -15,6 +15,6 @@ describe('[BARE]', () => {
 
   it('update branches button without branches', () => {
     return environment.nm.ug.click('.btn-group.branch .btn-main')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress');
+      .ug.waitForElementNotVisible('#nprogress');
   });
 });

@@ -34,14 +34,14 @@ describe('[REMOTES]', () => {
   it('Fetch from newly added remote', () => {
     return environment.nm.click('.fetchButton .btn-main')
       .wait(500)
-      .ug.waitForElementNotVisible('.fetchButton .btn-main .progress')
+      .ug.waitForElementNotVisible('#nprogress')
   });
 
   it('Remote delete check', () => {
     return environment.nm.click('.fetchButton .dropdown-toggle')
       .ug.click('[data-ta-clickable="myremote-remove"]')
       .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.progress')
+      .ug.waitForElementNotVisible('#nprogress')
       .ug.click('.fetchButton .dropdown-toggle')
       .exists('[data-ta-clickable="myremote"]')
       .then((isVisible) => { if (isVisible) throw new Error('Remote exists after delete'); });
@@ -64,8 +64,8 @@ describe('[REMOTES]', () => {
 
   it('Should be possible to fetch', () => {
     return environment.nm.click('.fetchButton .btn-main')
-      .wait('.fetchButton .btn-main .progress')
-      .ug.waitForElementNotVisible('.fetchButton .btn-main.progress');
+      .wait('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Should be possible to create and push a branch', () => {
