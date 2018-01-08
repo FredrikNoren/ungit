@@ -78,7 +78,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
         }
       }
     }).catch(function(err) {
-      if (err.errorCode != 'not-a-repository') throw err;
+      if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
     });
 }
 RemotesViewModel.prototype.showAddRemoteDialog = function() {

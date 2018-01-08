@@ -162,7 +162,7 @@ Server.prototype.emptyPromise = function() {
   return Promise.resolve();
 }
 
-Promise.onUnhandledRejectionHandled(function(err, promise) {
+Server.prototype.unhandledRejection = function(err) {
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res && err.res.body && err.res.body.isGitError) {
     if (ungit.config && ungit.config.sendUsageStatistics) {
@@ -177,8 +177,8 @@ Promise.onUnhandledRejectionHandled(function(err, promise) {
     } });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error("Unhandled Promise ERROR: ", err, promise);
+    console.error("Unhandled Promise ERROR: ", err);
     programEvents.dispatch({ event: 'git-crash-error' });
-    Raven.captureException(promise.reason());
+    Raven.captureException(err);
   }
-});
+}

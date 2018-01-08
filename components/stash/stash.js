@@ -77,7 +77,7 @@ StashViewModel.prototype.refresh = function() {
         self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
       }
     }).catch(function(err) {
-      if (err.errorCode != 'no-such-path') throw err
+      if (err.errorCode != 'no-such-path') self.server.unhandledRejection(err);
     })
 }
 StashViewModel.prototype.toggleShowStash = function() {

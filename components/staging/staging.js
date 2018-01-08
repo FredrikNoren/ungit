@@ -131,7 +131,7 @@ StagingViewModel.prototype.refreshContent = function() {
         else self.HEAD(null);
       }).catch(function(err) {
         if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-          throw err;
+          self.server.unhandledRejection(err);
         }
       }),
     this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
@@ -157,7 +157,7 @@ StagingViewModel.prototype.refreshContent = function() {
         }
       }).catch(function(err) {
         if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-          throw err;
+          self.server.unhandledRejection(err);
         }
       })]);
 }
@@ -372,14 +372,15 @@ FileViewModel.prototype.discardChanges = function() {
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() }).catch(function(err) {
-    if (err.errorCode == 'file-already-git-ignored') {
-      // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
-      programEvents.dispatch({ event: 'working-tree-changed' });
-    } else {
-      throw err;
-    }
-  });
+  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
+    .catch(function(err) {
+      if (err.errorCode == 'file-already-git-ignored') {
+        // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
+        programEvents.dispatch({ event: 'working-tree-changed' });
+      } else {
+        self.server.unhandledRejection(err);
+      }
+    });
 }
 FileViewModel.prototype.resolveConflict = function() {
   this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });

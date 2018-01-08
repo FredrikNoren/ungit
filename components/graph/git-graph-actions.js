@@ -134,7 +134,7 @@ GraphActions.Rebase.prototype.createHoverGraphic = function() {
 }
 GraphActions.Rebase.prototype.perform = function() {
   return this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
-    .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
+    .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); })
 }
 
 GraphActions.Merge = function(graph, node) {
@@ -161,7 +161,7 @@ GraphActions.Merge.prototype.createHoverGraphic = function() {
 }
 GraphActions.Merge.prototype.perform = function() {
   return this.server.postPromise('/merge', { path: this.graph.repoPath(), with: this.graph.currentActionContext().localRefName })
-    .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
+    .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); })
 }
 
 GraphActions.Push = function(graph, node) {
@@ -242,13 +242,13 @@ GraphActions.Checkout.prototype.perform = function() {
           .then(function() {
             self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
           }).catch(function(err) {
-            if (err.errorCode == 'merge-failed') throw err
-          })
+            if (err.errorCode == 'merge-failed') self.server.unhandledRejection(err);
+          });
       } else {
         self.graph.HEADref().node(context instanceof RefViewModel ? context.node() : context);
       }
     }).catch(function(err) {
-      if (err.errorCode != 'merge-failed') { throw err; }
+      if (err.errorCode != 'merge-failed') self.server.unhandledRejection(err);
     });
 }
 
@@ -294,7 +294,7 @@ GraphActions.CherryPick.prototype.icon = 'octicon octicon-circuit-board';
 GraphActions.CherryPick.prototype.perform = function() {
   var self = this;
   return this.server.postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
-    .catch(function(err) { if (err.errorCode != 'merge-failed') throw err; })
+    .catch(function(err) { if (err.errorCode != 'merge-failed') self.server.unhandledRejection(err); })
 }
 
 GraphActions.Uncommit = function(graph, node) {

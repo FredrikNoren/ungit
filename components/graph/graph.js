@@ -295,7 +295,7 @@ GraphViewModel.prototype.updateBranches = function() {
   this.server.getPromise('/checkout', { path: this.repoPath() })
     .then(function(res) { self.checkedOutBranch(res); })
     .catch(function(err) {
-      if (err.errorCode != 'not-a-repository') throw err;
+      if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
     })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
