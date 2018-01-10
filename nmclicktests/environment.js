@@ -160,7 +160,7 @@ const prependLines = (pre, text) => {
 // Environment provides
 class Environment {
   constructor(config) {
-    this.nm = Nightmare({ Promise: Bluebird, typeInterval: 500 });
+    this.nm = Nightmare({ Promise: Bluebird, typeInterval: 500, show: false });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 15000;

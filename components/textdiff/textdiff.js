@@ -89,7 +89,6 @@ var TextDiffViewModel = function (args) {
   this.textDiffType = args.textDiffType;
   this.whiteSpace = args.whiteSpace;
   this.isShowingDiffs = args.isShowingDiffs;
-  this.diffProgressBar = args.diffProgressBar;
   this.editState = args.editState;
   this.wordWrap = args.wordWrap;
   this.patchLineList = args.patchLineList;
@@ -136,7 +135,7 @@ TextDiffViewModel.prototype.getDiffJson = function () {
     // The file existed before but has been removed, but we're trying to get a diff for it
     // Most likely it will just disappear with the next refresh of the staging area
     // so we just ignore the error here
-    if (err.errorCode != 'no-such-file') throw err;
+    if (err.errorCode != 'no-such-file') self.server.unhandledRejection(err);
   });
 }
 

@@ -23,36 +23,33 @@ function RemotesViewModel(server, repoPath) {
     else return 'No remotes specified';
   })
 
-  this.fetchingProgressBar = components.create('progressBar', { predictionMemoryKey: 'fetching-' + this.repoPath(), temporary: true });
-
   this.fetchEnabled = ko.computed(function() {
     return self.remotes().length > 0;
   });
 
   this.shouldAutoFetch = ungit.config.autoFetch;
   this.updateRemotes();
+  this.isFetching = false;
 }
 RemotesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('remotes', this, {}, parentElement);
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-credentials') this.fetchingProgressBar.pause();
-  else if (event.event == 'request-credentials-response') this.fetchingProgressBar.unpause();
-  else if (event.event == 'request-fetch-tags') this.fetch({ tags: true });
+  if (event.event == 'request-fetch-tags') this.fetch({ tags: true });
 }
 RemotesViewModel.prototype.fetch = function(options) {
-  if (this.fetchingProgressBar.running()) return;
+  if (this.isFetching) return;
   var self = this;
 
-  this.fetchingProgressBar.start();
+  this.isFetching = true;
   var tagPromise = options.tags ? self.server.getPromise('/remote/tags', { path: self.repoPath(), remote: self.currentRemote() }) : null;
   var fetchPromise = options.nodes ? self.server.postPromise('/fetch', { path: self.repoPath(), remote: self.currentRemote() }) : null;
   return Promise.props({tag: tagPromise, fetch: fetchPromise})
-    .then(function(result) {
-      if (options.tags) programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
-    }).finally(function() {
-      self.fetchingProgressBar.stop();
+    .then((result) => {
+      if (options.tags) {
+        programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
+      }
     });
 }
 
@@ -81,7 +78,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
         }
       }
     }).catch(function(err) {
-      if (err.errorCode != 'not-a-repository') throw err;
+      if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
     });
 }
 RemotesViewModel.prototype.showAddRemoteDialog = function() {
@@ -102,11 +99,8 @@ RemotesViewModel.prototype.remoteRemove = function(remote) {
     .show()
     .closeThen(function(diag) {
       if (diag.result()) {
-        self.fetchingProgressBar.start();
         return self.server.delPromise('/remotes/' + remote.name, { path: self.repoPath() })
-          .then(function() { self.updateRemotes(); })
-          .catch(console.log)
-          .finally(function() { self.fetchingProgressBar.stop(); });
+          .then(() => { self.updateRemotes(); });
       }
     });
 }

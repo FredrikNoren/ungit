@@ -31,7 +31,7 @@ describe('[LOAD-AHEAD]', () => {
       .wait('[data-ta-clickable="checkoutbranch-1"]')
       .wait(500)
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
-      .ug.waitForElementNotVisible('.branch .progress');
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Open path screen again and should see only 1 commit', () => {

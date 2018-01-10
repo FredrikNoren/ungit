@@ -45,7 +45,7 @@ describe('[BRANCHES]', () => {
   it('updateBranches button without branches', () => {
     return environment.nm.wait('.btn-group.branch .btn-main')
       .click('.btn-group.branch .btn-main')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress');
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('add a branch', () => {
@@ -54,7 +54,7 @@ describe('[BRANCHES]', () => {
 
   it('updateBranches button with one branch', () => {
     return environment.nm.ug.click('.btn-group.branch .btn-main')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress');
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('add second branch', () => {
@@ -68,7 +68,7 @@ describe('[BRANCHES]', () => {
   it('Check out a branch via selection', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutbranch-2"]')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
+      .ug.waitForElementNotVisible('#nprogress')
   });
 
   it('Delete a branch via selection', () => {
@@ -78,7 +78,7 @@ describe('[BRANCHES]', () => {
       .click('[data-ta-clickable="branch-3-remove"]')
       .wait(500)
       .click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
+      .ug.waitForElementNotVisible('#nprogress')
       .wait(500);
   });
 
@@ -90,7 +90,7 @@ describe('[BRANCHES]', () => {
   it('checkout cherypick base', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutbranch-1"]')
-      .ug.waitForElementNotVisible('.btn-group.branch .btn-main .progress')
+      .ug.waitForElementNotVisible('#nprogress')
   });
 
   it('cherrypick fail case', () => {

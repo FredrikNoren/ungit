@@ -14,7 +14,6 @@ function StashItemViewModel(stash, data) {
   this.sha1 = data.sha1;
   this.title = data.reflogName + ' ' + moment(new Date(data.commitDate)).fromNow();
   this.message = data.message;
-  this.stashPopProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-pop', temporary: true });
   this.showCommitDiff = ko.observable(false);
 
   this.commitDiff = ko.observable(components.create('commitDiff', {
@@ -26,10 +25,7 @@ function StashItemViewModel(stash, data) {
 }
 StashItemViewModel.prototype.apply = function() {
   var self = this;
-  this.stashPopProgressBar.start();
-  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true }).finally(function() {
-    self.stashPopProgressBar.stop();
-  });
+  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true });
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
@@ -37,10 +33,7 @@ StashItemViewModel.prototype.drop = function() {
     .show()
     .closeThen(function(diag) {
       if (diag.result()) {
-          self.stashPopProgressBar.start();
-          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() }).finally(function() {
-              self.stashPopProgressBar.stop();
-          });
+          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() });
       }
   });
 }
@@ -84,7 +77,7 @@ StashViewModel.prototype.refresh = function() {
         self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
       }
     }).catch(function(err) {
-      if (err.errorCode != 'no-such-path') throw err
+      if (err.errorCode != 'no-such-path') self.server.unhandledRejection(err);
     })
 }
 StashViewModel.prototype.toggleShowStash = function() {

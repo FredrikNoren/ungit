@@ -1,19 +1,6 @@
 
 <div class="path" data-bind="shown: shown">
 
-  <!-- ko if: status() == 'loading' -->
-  <div class='animated fadeInLeft'>
-    <!-- ko component: loadingProgressBar --><!-- /ko -->
-  </div>
-  <!-- /ko -->
-
-  <!-- ko if: status() == 'cloning' -->
-  <div class='animated fadeInLeft'>
-    <h2>Cloning...</h2>
-    <!-- ko component: cloningProgressBar --><!-- /ko -->
-  </div>
-  <!-- /ko -->
-
   <!-- ko if: status() == 'uninited' -->
   <div class="uninited">
     <div class="container">

@@ -20,15 +20,12 @@
         </div>
         <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
           Commit
-          <!-- ko component: committingProgressBar --><!-- /ko -->
         </button>
         <button class="btn btn-primary" data-bind="click: conflictContinue, visible: conflictText, enable: !commitValidationError()">
           Continue <span data-bind="text: conflictText"/>
-          <!-- ko component: conflictContinueProgressBar --><!-- /ko -->
         </button>
         <button class="btn btn-warning btn-stg-abort" data-bind="click: conflictAbort, visible: conflictText">
           Abort <span data-bind="text: conflictText"/>
-          <!-- ko component: conflictAbortProgressBar --><!-- /ko -->
         </button>
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
@@ -46,7 +43,6 @@
           <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
-            <!-- ko component: stashProgressBar --><!-- /ko -->
           </button>
           <div class="btn-group pull-right btn-group-sm">
             <button class="btn btn-default bootstrap-tooltip" data-bind="click: whiteSpace.toggle, css: {active: whiteSpace.isActive}" data-toggle="tooltip" data-placement="bottom" data-original-title="Ignore whitespaces" data-delay='{"show":"2000", "hide":"0"}'>
@@ -72,7 +68,6 @@
             </div>
             <button class="name btn btn-default" data-bind="click: toggleDiffs">
               <span data-bind="text: displayName"></span>
-              <!-- ko component: diffProgressBar --><!-- /ko -->
             </button>
             <span class="new" data-bind="visible: isNew">New</span>
             <span class="deleted" data-bind="visible: removed">Removed</span>

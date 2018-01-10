@@ -12,9 +12,7 @@ function SubmodulesViewModel(server, repoPath) {
   this.repoPath = repoPath;
   this.server = server;
   this.submodules = ko.observableArray();
-
-  this.updateProgressBar = components.create('progressBar', { predictionMemoryKey: 'Updating Submodules', temporary: true });
-  this.fetchProgressBar = components.create('progressBar', { predictionMemoryKey: 'Adding Submodule', temporary: true });
+  this.isUpdating = false;
 }
 
 SubmodulesViewModel.prototype.onProgramEvent = function(event) {
@@ -36,30 +34,22 @@ SubmodulesViewModel.prototype.fetchSubmodules = function() {
     });
 }
 
-SubmodulesViewModel.prototype.isRunning = function() {
-  return (this.updateProgressBar.running() || this.fetchProgressBar.running());
-}
-
 SubmodulesViewModel.prototype.updateSubmodules = function() {
-  if (this.isRunning()) return;
-  var self = this;
-
-  this.updateProgressBar.start();
-  return this.server.postPromise('/submodules/update', { path: this.repoPath() }).finally(function() {
-    self.updateProgressBar.stop();
-  });
+  if (this.isUpdating) return;
+  this.isUpdating = true;
+  return this.server.postPromise('/submodules/update', { path: this.repoPath() })
+    .finally(() => { this.isUpdating = false; });
 }
 
 SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
-  var self = this;
   components.create('addsubmoduledialog')
     .show()
-    .closeThen(function(diag) {
+    .closeThen((diag) => {
       if (!diag.isSubmitted()) return;
-      self.fetchProgressBar.start();
-      self.server.postPromise('/submodules/add', { path: self.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() }).then(function() {
-          programEvents.dispatch({ event: 'submodule-fetch' });
-        }).finally(function() { self.fetchProgressBar.stop(); });
+      this.isUpdating = true;
+      this.server.postPromise('/submodules/add', { path: this.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() })
+        .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); })
+        .finally(() => { this.isUpdating = false; });
     });
 }
 
@@ -77,12 +67,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
     .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
-      self.fetchProgressBar.start();
-      self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name }).catch(function(err, result) {
-        console.log(err);
-      }).then(function() {
-        programEvents.dispatch({ event: 'submodule-fetch' });
-        self.fetchProgressBar.stop();
-      })
+      self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name })
+        .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); });
     });
 }

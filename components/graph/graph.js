@@ -18,11 +18,6 @@ function GraphViewModel(server, repoPath) {
   this.skip = ko.observable(0);
   this.server = server;
   this.currentRemote = ko.observable();
-  this.nodesLoader = components.create('progressBar', {
-    predictionMemoryKey: 'gitgraph-' + self.repoPath(),
-    fallbackPredictedTimeMs: 1000,
-    temporary: true
-  });
   this.nodes = ko.observableArray();
   this.edges = ko.observableArray();
   this.refs = ko.observableArray();
@@ -108,7 +103,6 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
   var self = this;
   var nodeSize = self.nodes().length;
 
-  this.nodesLoader.start();
   return this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
     .then(function(log) {
       // set new limit and skip
@@ -152,7 +146,6 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
       }
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
     }).finally(function() {
-      self.nodesLoader.stop();
       if (window.innerHeight - self.graphHeight() > 0 && nodeSize != self.nodes().length) {
         self.scrolledToEnd();
       }
@@ -302,7 +295,7 @@ GraphViewModel.prototype.updateBranches = function() {
   this.server.getPromise('/checkout', { path: this.repoPath() })
     .then(function(res) { self.checkedOutBranch(res); })
     .catch(function(err) {
-      if (err.errorCode != 'not-a-repository') throw err;
+      if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
     })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {

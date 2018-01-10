@@ -28,7 +28,7 @@ describe('[SUMBODULES]', () => {
   it('Submodule update', () => {
     return environment.nm.ug.click('.fetchButton .update-submodule')
       .wait(500)
-      .ug.waitForElementNotVisible('.progress');
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Submodule delete check', () => {
@@ -38,6 +38,6 @@ describe('[SUMBODULES]', () => {
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('.modal-dialog .btn-primary')
       .wait(500)
-      .ug.waitForElementNotVisible('.progress')
+      .ug.waitForElementNotVisible('#nprogress')
   });
 });

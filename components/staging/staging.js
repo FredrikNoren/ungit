@@ -34,12 +34,12 @@ var StagingViewModel = function(server, repoPath) {
   this.inCherry = ko.observable(false);
   this.conflictText = ko.computed(function() {
     if (self.inMerge()) {
-      self.conflictContinue = self.conflictResolution.bind(self, '/merge/continue', self.conflictContinueProgressBar)
-      self.conflictAbort = self.conflictResolution.bind(self, '/merge/abort', self.conflictAbortProgressBar)
+      self.conflictContinue = self.conflictResolution.bind(self, '/merge/continue');
+      self.conflictAbort = self.conflictResolution.bind(self, '/merge/abort');
       return "Merge";
     } else if (self.inRebase()) {
-      self.conflictContinue = self.conflictResolution.bind(self, '/rebase/continue', self.conflictContinueProgressBar)
-      self.conflictAbort = self.conflictResolution.bind(self, '/rebase/abort', self.conflictAbortProgressBar)
+      self.conflictContinue = self.conflictResolution.bind(self, '/rebase/continue');
+      self.conflictAbort = self.conflictResolution.bind(self, '/rebase/abort');
       return "Rebase";
     } else if (self.inCherry()) {
       self.conflictContinue = self.commit;
@@ -77,10 +77,6 @@ var StagingViewModel = function(server, repoPath) {
   this.showNux = ko.computed(function() {
     return self.files().length == 0 && !self.amend() && !self.inRebase();
   });
-  this.committingProgressBar = components.create('progressBar', { predictionMemoryKey: 'committing-' + this.repoPath(), temporary: true });
-  this.conflictContinueProgressBar = components.create('progressBar', { predictionMemoryKey: 'conflict-continue-' + this.repoPath(), temporary: true });
-  this.conflictAbortProgressBar = components.create('progressBar', { predictionMemoryKey: 'conflict-abort-' + this.repoPath(), temporary: true });
-  this.stashProgressBar = components.create('progressBar', { predictionMemoryKey: 'stash-' + this.repoPath(), temporary: true });
   this.commitValidationError = ko.computed(function() {
     if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
       return "No files to commit";
@@ -135,7 +131,7 @@ StagingViewModel.prototype.refreshContent = function() {
         else self.HEAD(null);
       }).catch(function(err) {
         if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-          throw err;
+          self.server.unhandledRejection(err);
         }
       }),
     this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
@@ -161,7 +157,7 @@ StagingViewModel.prototype.refreshContent = function() {
         }
       }).catch(function(err) {
         if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-          throw err;
+          self.server.unhandledRejection(err);
         }
       })]);
 }
@@ -231,7 +227,6 @@ StagingViewModel.prototype.resetMessages = function() {
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;
-  this.committingProgressBar.start();
   var files = this.files().filter(function(file) {
     return file.editState() !== 'none';
   }).map(function(file) {
@@ -241,19 +236,14 @@ StagingViewModel.prototype.commit = function() {
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
-    .then(function() { self.resetMessages(); })
-    .finally(function() { self.committingProgressBar.stop(); });
+    .then(() => { self.resetMessages(); })
 }
-StagingViewModel.prototype.conflictResolution = function(apiPath, progressBar) {
+StagingViewModel.prototype.conflictResolution = function(apiPath) {
   var self = this;
-  progressBar.start();
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
   this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
-    .finally(function(err, res) {
-      self.resetMessages();
-      progressBar.stop();
-    });
+    .finally((err) => { self.resetMessages(); });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
@@ -270,10 +260,7 @@ StagingViewModel.prototype.discardAllChanges = function() {
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
-  this.stashProgressBar.start();
-  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() }).finally(function() {
-    self.stashProgressBar.stop();
-  });
+  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() });
 }
 StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
@@ -307,7 +294,6 @@ var FileViewModel = function(staging, name) {
   this.conflict = ko.observable(false);
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
-  this.diffProgressBar = components.create('progressBar', { predictionMemoryKey: 'diffs-' + this.staging.repoPath(), temporary: true });
   this.additions = ko.observable('');
   this.deletions = ko.observable('');
   this.fileType = ko.observable('text');
@@ -341,7 +327,6 @@ FileViewModel.prototype.getSpecificDiff = function() {
     textDiffType: this.staging.textDiffType,
     whiteSpace: this.staging.whiteSpace,
     isShowingDiffs: this.isShowingDiffs,
-    diffProgressBar: this.diffProgressBar,
     patchLineList: this.patchLineList,
     editState: this.editState,
     wordWrap: this.staging.wordWrap
@@ -387,14 +372,15 @@ FileViewModel.prototype.discardChanges = function() {
 }
 FileViewModel.prototype.ignoreFile = function() {
   var self = this;
-  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() }).catch(function(err) {
-    if (err.errorCode == 'file-already-git-ignored') {
-      // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
-      programEvents.dispatch({ event: 'working-tree-changed' });
-    } else {
-      throw err;
-    }
-  });
+  this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
+    .catch(function(err) {
+      if (err.errorCode == 'file-already-git-ignored') {
+        // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
+        programEvents.dispatch({ event: 'working-tree-changed' });
+      } else {
+        self.server.unhandledRejection(err);
+      }
+    });
 }
 FileViewModel.prototype.resolveConflict = function() {
   this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });

@@ -4,6 +4,12 @@ var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
+var nprogress = require('nprogress');
+nprogress.configure({
+  trickleRate: 0.06,
+  trickleSpeed: 200,
+  showSpinner: false
+});
 
 function Server() {
 }
@@ -107,6 +113,7 @@ Server.prototype.queryPromise = function(method, path, body) {
   if (method == 'GET' || method == 'DELETE') request.query = body;
   else request.body = body;
 
+  nprogress.start();
   return new Promise(function (resolve, reject) {
     self._httpJsonRequest(request, function(error, res) {
       if (error) {
@@ -140,7 +147,7 @@ Server.prototype.queryPromise = function(method, path, body) {
         resolve(res);
       }
     });
-  });
+  }).finally(() => nprogress.done(true));
 }
 Server.prototype.getPromise = function(url, arg) {
   return this.queryPromise('GET', url, arg);
@@ -155,13 +162,12 @@ Server.prototype.emptyPromise = function() {
   return Promise.resolve();
 }
 
-Promise.onPossiblyUnhandledRejection(function(err, promise) {
+Server.prototype.unhandledRejection = function(err) {
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res && err.res.body && err.res.body.isGitError) {
     if (ungit.config && ungit.config.sendUsageStatistics) {
       keen.addEvent('git-error', { version: ungit.version, userHash: ungit.userHash });
     }
-    console.log('git-error', err); // Used by the clicktests
     programEvents.dispatch({ event: 'git-error', data: {
       command: err.res.body.command,
       error: err.res.body.error,
@@ -171,8 +177,8 @@ Promise.onPossiblyUnhandledRejection(function(err, promise) {
     } });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error("Unhandled Promise ERROR: ", err, promise);
+    console.error("Unhandled Promise ERROR: ", err);
     programEvents.dispatch({ event: 'git-crash-error' });
-    Raven.captureException(promise.reason());
+    Raven.captureException(err);
   }
-});
+}
