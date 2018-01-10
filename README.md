@@ -94,7 +94,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Maintainers
 -----------
-* [FredrikNoren](https://github.com/FredrikNoren)
+
+* [FredrikNoren](https://github.com/FredrikNoren) [Fredrik's Patreon page for donations](https://www.patreon.com/fredriknoren)
 * [codingtwinky](https://github.com/codingtwinky)
 * [campersau](https://github.com/campersau)
 
