@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.4:
+  - fix a bug where fetch is disabled after page load
+  - make `forceLaunchPath` to supersede `launchBrowser` [#1006](https://github.com/FredrikNoren/ungit/issues/1006)
 - 1.4.3: changing to path navigation to `nprogress` bar. [#1001](https://github.com/FredrikNoren/ungit/issues/1001)
 - 1.4.2:
   - fix navigation redirection on git clone and adding xkcd image
