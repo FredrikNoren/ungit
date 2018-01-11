@@ -50,7 +50,7 @@ RemotesViewModel.prototype.fetch = function(options) {
       if (options.tags) {
         programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
       }
-    });
+    }).finally(() => { this.isFetching = false; })
 }
 
 RemotesViewModel.prototype.updateRemotes = function() {
