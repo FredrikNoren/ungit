@@ -128,9 +128,14 @@ TextDiffViewModel.prototype.invalidateDiff = function () {
 TextDiffViewModel.prototype.getDiffJson = function () {
   var self = this;
   return self.server.getPromise('/diff', self.getDiffArguments()).then(function (diffs) {
-    if (typeof diffs == 'string') {
-      self.diffJson = diff2html.getJsonFromDiff(diffs);
+    if (typeof diffs !== 'string') {
+      // Invalid value means there is no changes, show dummy diff withotu any changes
+      diffs = `diff --git a/${this.filename} b/${this.filename}
+                index aaaaaaaa..bbbbbbbb 111111
+                --- a/${this.filename}
+                +++ b/${this.filename}`;
     }
+    self.diffJson = diff2html.getJsonFromDiff(diffs);
   }).catch(function (err) {
     // The file existed before but has been removed, but we're trying to get a diff for it
     // Most likely it will just disappear with the next refresh of the staging area
