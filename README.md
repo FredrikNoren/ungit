@@ -96,7 +96,7 @@ Maintainers
 -----------
 
 * [FredrikNoren](https://github.com/FredrikNoren) [Fredrik's Patreon page for donations](https://www.patreon.com/fredriknoren)
-* [codingtwinky](https://github.com/codingtwinky)
+* [Jung-Kim](https://github.com/jung-kim) [JK's (codingtwinky) Patreon page for donations](https://www.patreon.com/jungkim)
 * [campersau](https://github.com/campersau)
 
 Known issues
