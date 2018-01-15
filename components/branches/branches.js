@@ -41,20 +41,26 @@ BranchesViewModel.prototype.updateBranches = function() {
 
   this.server.getPromise('/branches', { path: this.repoPath() })
     .then(function(branches) {
-      var sorted = branches.sort(function(a, b) {
-        if (a.name < b.name)
-           return -1;
-        if (a.name > b.name)
-          return 1;
-        return 0;
-      });
+      const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
+        .map((b) => {
+          if (b.current) self.current(b.name);
+          b.displayName = b.name.replace('remotes/', '<span class="octicon octicon-broadcast"></span> ');
+          return b;
+        }).sort((a, b) => {
+          const isARemote = a.name.indexOf('remotes/')
+          const isBRemote = b.name.indexOf('remotes/')
+          if (isARemote === isBRemote) {
+            if (a.name < b.name)
+               return -1;
+            if (a.name > b.name)
+              return 1;
+            return 0;
+          } else {
+            return isARemote ? -1 : 1;
+          }
+          return 0;
+        });
       self.branches(sorted);
-      self.current(undefined);
-      branches.forEach(function(branch) {
-        if (branch.current) {
-          self.current(branch.name);
-        }
-      });
     }).catch(function(err) { self.current("~error"); });
 }
 

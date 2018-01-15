@@ -9,7 +9,7 @@
   <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: branches -->
     <li>
-      <a href="#" data-bind="text: name, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
+      <a href="#" data-bind="html: displayName, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
       <a href="#" class="list-link list-remove" data-bind="click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }">X</a>
     </li>
     <!-- /ko -->

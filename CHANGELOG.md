@@ -6,6 +6,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - 1.4.6:
   - dependency bump to fix dependency's security problem.
   - Add emphasis if remote branch delete for confirmation dialog. [#947](https://github.com/FredrikNoren/ungit/issues/947)
+  - add remote branches to the branch list. [#966](https://github.com/FredrikNoren/ungit/issues/966)
 - 1.4.5: fix a bug where no diff wasn't properly showing [#969](https://github.com/FredrikNoren/ungit/issues/969)
 - 1.4.4:
   - fix a bug where fetch is disabled after page load

@@ -338,7 +338,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['branch'], req.query.path).then(gitParser.parseGitBranches));
+    jsonResultOrFailProm(res, gitPromise(['branch', '-a'], req.query.path).then(gitParser.parseGitBranches));
   });
 
   app.post(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
