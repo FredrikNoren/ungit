@@ -338,7 +338,9 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['branch', '-a'], req.query.path).then(gitParser.parseGitBranches));
+    const isFetchRemoteBranches = req.query.isFetchRemoteBranches == 'true'
+    jsonResultOrFailProm(res, gitPromise(['branch', isFetchRemoteBranches ? '-a' : ''], req.query.path)
+      .then(gitParser.parseGitBranches));
   });
 
   app.post(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {

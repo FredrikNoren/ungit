@@ -7,6 +7,11 @@
     <span class="caret"></span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
+    <div class="option" onclick="event.stopPropagation()">
+      Is fetch remote?
+      <input type="checkbox" data-bind="checked: isFetchRemoteBranches, "></input>
+    </div>
+    <div class="dropdown-divider"></div>
     <!-- ko foreach: branches -->
     <li>
       <a href="#" data-bind="html: displayName, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>

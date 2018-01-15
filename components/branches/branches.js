@@ -4,6 +4,7 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
+const isFetchRemoteBranches = 'isFetchRemoteBranches';
 
 components.register('branches', function(args) {
   return new BranchesViewModel(args.server, args.repoPath);
@@ -15,6 +16,12 @@ function BranchesViewModel(server, repoPath) {
   this.server = server;
   this.branches = ko.observableArray();
   this.current = ko.observable();
+  this.isFetchRemoteBranches = ko.observable(localStorage.getItem(isFetchRemoteBranches) == 'true');
+  this.isFetchRemoteBranches.subscribe((value) => {
+    localStorage.setItem(isFetchRemoteBranches, value);
+    this.updateBranches();
+    return value;
+  });
   this.fetchLabel = ko.computed(function() {
     if (self.current()) {
       return self.current();
@@ -39,7 +46,7 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
 
-  this.server.getPromise('/branches', { path: this.repoPath() })
+  this.server.getPromise('/branches', { path: this.repoPath(), isFetchRemoteBranches: this.isFetchRemoteBranches() })
     .then(function(branches) {
       const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
         .map((b) => {
