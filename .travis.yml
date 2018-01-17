@@ -15,8 +15,6 @@ env:
     - GIT_VERSION=edge
 matrix:
   exclude:
-    - node_js: "5.3"
-      env: GIT_VERSION=edge
     - node_js: "6.11"
       env: GIT_VERSION=edge
     - node_js: "7.10"

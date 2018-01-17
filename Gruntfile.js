@@ -433,8 +433,10 @@ module.exports = (grunt) => {
       const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
 
       const bumps = Bluebird.map(keys, (dep) => {
-        // Superagent 1.x has a new api, need to upgrade to that if we want to bump
-        if (dep == 'superagent') return
+        // winston 3.x has different API
+        if (dep == 'winston') return;
+        // babel 7.x.x has alot of changes.... :(
+        if (dep.indexOf('babel') > -1) return;
         // Octicon moved to SCSS instead of less
         if (dep == 'octicons') return;
 
