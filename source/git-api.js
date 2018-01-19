@@ -11,6 +11,7 @@ const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 const ignore = require('ignore');
 const Bluebird = require('bluebird');
+const crypto = require('crypto');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);
@@ -404,7 +405,6 @@ exports.registerApi = (env) => {
   });
 
   const createBranchIfPossible = (branchName, path, retry) => {
-    retry = retry || 3;
     return gitPromise(['branch', branchName], path).catch((e) => {
         if (retry > -1) {
           return createBranchIfPossible(`ungit-${crypto.randomBytes(4).toString('hex')}`, path, retry - 1);
@@ -422,9 +422,9 @@ exports.registerApi = (env) => {
         if (isRemote) {
           // preferred branch name will not work as expected when remote or branch nae has '/'
           const preferredBranchName = `${req.body.name.splice('/').slice(2).join('/')}`
-          return createBranchIfPossible(preferredBranchName, req.body.path)
+          return createBranchIfPossible(preferredBranchName, req.body.path, 3)
             // sucessfully create the branch, checkout and be marry
-            .then((createdName) => return gitPromise(['checkout', createdName], req.body.path));
+            .then((createdName) => gitPromise(['checkout', createdName], req.body.path));
         }
       })).then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
