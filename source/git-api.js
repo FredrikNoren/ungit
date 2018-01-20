@@ -406,7 +406,7 @@ exports.registerApi = (env) => {
 
   const createBranchIfPossible = (branchName, path, retry) => {
     return gitPromise(['branch', branchName], path).catch((e) => {
-        if (retry > -1) {
+        if (retry > 0) {
           return createBranchIfPossible(`ungit-${crypto.randomBytes(4).toString('hex')}`, path, retry - 1);
         } else {
           throw e;
