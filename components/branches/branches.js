@@ -40,8 +40,7 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
-  const refName = `refs/${branch.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${branch.name}`;
-  this.graph.getRef(refName).checkout();
+  branch.checkout();
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
@@ -50,17 +49,15 @@ BranchesViewModel.prototype.updateBranches = function() {
     .then(function(branches) {
       const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
         .map((b) => {
-          b.isRemote = b.name.indexOf('remotes/') === 0;
-          b.displayName = b.name.replace('remotes/', '<span class="octicon octicon-broadcast"></span> ');
+          const refName = `refs/${b.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${b.name}`;
           if (b.current) {
             self.current(b.name);
-            b.displayName = `<span class="octicon octicon-chevron-right"></span> ${b.name}`
           }
-          return b;
+          return self.graph.getRef(refName);
         }).sort((a, b) => {
-          if (a.current || b.current) {
-            return a.current ? -1 : 1;
-          } else if (a.isRemote === b.isRemote) {
+          if (a.current() || b.current()) {
+            return a.current() ? -1 : 1;
+          } else if (a.isRemoteBranch === b.isRemoteBranch) {
             if (a.name < b.name) {
                return -1;
             } if (a.name > b.name) {
@@ -68,7 +65,7 @@ BranchesViewModel.prototype.updateBranches = function() {
             }
             return 0;
           } else {
-            return a.isRemote ? 1 : -1;
+            return a.isRemoteBranch ? 1 : -1;
           }
         });
       self.branches(sorted);
