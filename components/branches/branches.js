@@ -4,7 +4,7 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
-const isFetchRemoteBranches = 'isFetchRemoteBranches';
+const isLocalBranchOnly = 'isLocalBranchOnly';
 
 components.register('branches', function(args) {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
@@ -16,10 +16,10 @@ function BranchesViewModel(server, graph, repoPath) {
   this.server = server;
   this.branches = ko.observableArray();
   this.current = ko.observable();
-  this.isFetchRemoteBranches = ko.observable(localStorage.getItem(isFetchRemoteBranches) == 'true');
+  this.isLocalBranchOnly = ko.observable(localStorage.getItem(isLocalBranchOnly) == 'true');
   this.graph = graph;
-  this.isFetchRemoteBranches.subscribe((value) => {
-    localStorage.setItem(isFetchRemoteBranches, value);
+  this.isLocalBranchOnly.subscribe((value) => {
+    localStorage.setItem(isLocalBranchOnly, value);
     this.updateBranches();
     return value;
   });
@@ -45,7 +45,7 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
 
-  this.server.getPromise('/branches', { path: this.repoPath(), isFetchRemoteBranches: this.isFetchRemoteBranches() })
+  this.server.getPromise('/branches', { path: this.repoPath(), isLocalBranchOnly: this.isLocalBranchOnly() })
     .then(function(branches) {
       const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
         .map((b) => {
