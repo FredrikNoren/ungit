@@ -7,16 +7,17 @@ var programEvents = require('ungit-program-events');
 const isFetchRemoteBranches = 'isFetchRemoteBranches';
 
 components.register('branches', function(args) {
-  return new BranchesViewModel(args.server, args.repoPath);
+  return new BranchesViewModel(args.server, args.graph, args.repoPath);
 });
 
-function BranchesViewModel(server, repoPath) {
+function BranchesViewModel(server, graph, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
   this.branches = ko.observableArray();
   this.current = ko.observable();
   this.isFetchRemoteBranches = ko.observable(localStorage.getItem(isFetchRemoteBranches) == 'true');
+  this.graph = graph;
   this.isFetchRemoteBranches.subscribe((value) => {
     localStorage.setItem(isFetchRemoteBranches, value);
     this.updateBranches();
@@ -39,9 +40,8 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
-  var self = this;
-  this.server.postPromise('/checkout', { path: this.repoPath(), name: branch.name })
-    .then(function() { self.current(branch.name); });
+  const refName = `refs/${branch.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${branch.name}`;
+  this.graph.getRef(refName).checkout();
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;

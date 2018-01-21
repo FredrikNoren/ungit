@@ -186,3 +186,27 @@ RefViewModel.prototype.createRemoteRef = function() {
       newRef.node(self.node());
     });
 }
+RefViewModel.prototype.checkout = function() {
+  const isRemote = this.isRemoteBranch;
+  const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
+
+  return Promise.resolve().then(() => {
+      if (isRemote && !isLocalCurrent) {
+        return this.server.postPromise('/branches', {
+          path: this.graph.repoPath(),
+          name: this.refName,
+          sha1: this.name,
+          force: true
+        });
+      }
+    }).then(() => this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName }))
+    .then(() => {
+      if (isRemote && isLocalCurrent) {
+        return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: this.name, mode: 'hard' });
+      }
+    }).then(() => {
+      this.graph.HEADref().node(this.node());
+    }).catch((err) => {
+      if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+    });
+}
