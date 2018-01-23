@@ -82,8 +82,25 @@
 }
 
 .dropdown-menu {
+  max-height: 500px;
+  height: auto;
+  overflow-y: scroll;
+  min-width: 205px;
+  width: auto;
+  .option {
+    padding-left: 20px;
+    font-size: 120%;
+    color: black;
+  }
+  .dropdown-divider {
+    height: 0;
+    margin: .5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #e9ecef;
+  }
   li {
     a {
+      padding-right: 30px;
       &.list-url {
         padding: 0px 4px 0px 4px;
         margin-right: 30px;

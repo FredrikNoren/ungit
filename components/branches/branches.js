@@ -4,17 +4,25 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
+const isLocalBranchOnly = 'isLocalBranchOnly';
 
 components.register('branches', function(args) {
-  return new BranchesViewModel(args.server, args.repoPath);
+  return new BranchesViewModel(args.server, args.graph, args.repoPath);
 });
 
-function BranchesViewModel(server, repoPath) {
+function BranchesViewModel(server, graph, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
   this.branches = ko.observableArray();
   this.current = ko.observable();
+  this.isLocalBranchOnly = ko.observable(localStorage.getItem(isLocalBranchOnly) == 'true');
+  this.graph = graph;
+  this.isLocalBranchOnly.subscribe((value) => {
+    localStorage.setItem(isLocalBranchOnly, value);
+    this.updateBranches();
+    return value;
+  });
   this.fetchLabel = ko.computed(function() {
     if (self.current()) {
       return self.current();
@@ -32,29 +40,35 @@ BranchesViewModel.prototype.onProgramEvent = function(event) {
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
-  var self = this;
-  this.server.postPromise('/checkout', { path: this.repoPath(), name: branch.name })
-    .then(function() { self.current(branch.name); });
+  branch.checkout();
 }
 BranchesViewModel.prototype.updateBranches = function() {
   var self = this;
 
-  this.server.getPromise('/branches', { path: this.repoPath() })
+  this.server.getPromise('/branches', { path: this.repoPath(), isLocalBranchOnly: this.isLocalBranchOnly() })
     .then(function(branches) {
-      var sorted = branches.sort(function(a, b) {
-        if (a.name < b.name)
-           return -1;
-        if (a.name > b.name)
-          return 1;
-        return 0;
-      });
+      const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
+        .map((b) => {
+          const refName = `refs/${b.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${b.name}`;
+          if (b.current) {
+            self.current(b.name);
+          }
+          return self.graph.getRef(refName);
+        }).sort((a, b) => {
+          if (a.current() || b.current()) {
+            return a.current() ? -1 : 1;
+          } else if (a.isRemoteBranch === b.isRemoteBranch) {
+            if (a.name < b.name) {
+               return -1;
+            } if (a.name > b.name) {
+              return 1;
+            }
+            return 0;
+          } else {
+            return a.isRemoteBranch ? 1 : -1;
+          }
+        });
       self.branches(sorted);
-      self.current(undefined);
-      branches.forEach(function(branch) {
-        if (branch.current) {
-          self.current(branch.name);
-        }
-      });
     }).catch(function(err) { self.current("~error"); });
 }
 

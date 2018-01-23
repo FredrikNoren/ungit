@@ -33,7 +33,6 @@ describe('[SUMBODULES]', () => {
 
   it('Submodule delete check', () => {
     return environment.nm.click('.submodule .dropdown-toggle')
-      .wait('[data-ta-clickable="subrepo-remove"]')
       .ug.click('[data-ta-clickable="subrepo-remove"]')
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('.modal-dialog .btn-primary')

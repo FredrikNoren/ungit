@@ -67,17 +67,14 @@ describe('[BRANCHES]', () => {
 
   it('Check out a branch via selection', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
-      .ug.click('[data-ta-clickable="checkoutbranch-2"]')
+      .ug.click('[data-ta-clickable="checkoutrefs/heads/branch-2"]')
       .ug.waitForElementNotVisible('#nprogress')
   });
 
   it('Delete a branch via selection', () => {
     return environment.nm.click('.branch .dropdown-toggle')
-      .wait('[data-ta-clickable="branch-3-remove"]')
-      .wait(500)
-      .click('[data-ta-clickable="branch-3-remove"]')
-      .wait(500)
-      .click('.modal-dialog .btn-primary')
+      .ug.click('[data-ta-clickable="refs/heads/branch-3-remove"]')
+      .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('#nprogress')
       .wait(500);
   });
@@ -89,7 +86,7 @@ describe('[BRANCHES]', () => {
 
   it('checkout cherypick base', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
-      .ug.click('[data-ta-clickable="checkoutbranch-1"]')
+      .ug.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]')
       .ug.waitForElementNotVisible('#nprogress')
   });
 

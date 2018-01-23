@@ -313,7 +313,7 @@ var FileViewModel = function(staging, name) {
 
   this.editState.subscribe(function (value) {
     if (value === 'none') {
-      self.patchLineList([]);
+      self.patchLineList.removeAll();
     } else if (value === 'patched') {
       if (self.diff().render) self.diff().render();
     }

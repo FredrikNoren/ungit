@@ -65,6 +65,15 @@ var RefViewModel = function(fullRefName, graph) {
   this.value = splitedName[splitedName.length - 1]
   this.label = this.localRefName
   this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`
+  this.displayName = ko.computed(function() {
+    if (self.isRemoteBranch) {
+      return self.name.replace('refs/remotes/', '<span class="octicon octicon-broadcast"></span> ');
+    } else if (self.current()) {
+      return `<span class="octicon octicon-chevron-right"></span> ${self.name.replace('refs/', '')}`
+    } else {
+      return self.name.replace('refs/', '');
+    }
+  });
 };
 module.exports = RefViewModel;
 
@@ -184,5 +193,29 @@ RefViewModel.prototype.createRemoteRef = function() {
     refSpec: this.refName, remoteBranch: this.refName }).then(function() {
       var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
       newRef.node(self.node());
+    });
+}
+RefViewModel.prototype.checkout = function() {
+  const isRemote = this.isRemoteBranch;
+  const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
+
+  return Promise.resolve().then(() => {
+      if (isRemote && !isLocalCurrent) {
+        return this.server.postPromise('/branches', {
+          path: this.graph.repoPath(),
+          name: this.refName,
+          sha1: this.name,
+          force: true
+        });
+      }
+    }).then(() => this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName }))
+    .then(() => {
+      if (isRemote && isLocalCurrent) {
+        return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: this.name, mode: 'hard' });
+      }
+    }).then(() => {
+      this.graph.HEADref().node(this.node());
+    }).catch((err) => {
+      if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
     });
 }
