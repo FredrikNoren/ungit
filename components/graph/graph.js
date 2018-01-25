@@ -116,7 +116,7 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
         updatedRefs = updatedRefs.concat(logEntry.refs);
       });
       Object.keys(self.refsByRefName).forEach(function(refName) {
-        if (updatedRefs.indexOf(refName) < 0) {
+        if (!self.refsByRefName[refName].isRemoteTag && updatedRefs.indexOf(refName) < 0) {
           self.refs.remove(self.refsByRefName[refName]);
           var ref = self.refsByRefName[refName];
           if (ref) { ref.node(null); }
