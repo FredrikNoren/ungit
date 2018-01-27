@@ -79,6 +79,7 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
     .closeThen(function(diag) {
       if (!diag.result()) return;
       self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() })
-        .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); });
+        .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); })
+        .catch((e) => this.server.unhandledRejection(e));
     });
 }

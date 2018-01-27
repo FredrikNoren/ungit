@@ -237,12 +237,14 @@ StagingViewModel.prototype.commit = function() {
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
     .then(() => { self.resetMessages(); })
+    .catch((e) => this.server.unhandledRejection(e));
 }
 StagingViewModel.prototype.conflictResolution = function(apiPath) {
   var self = this;
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
   this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
+    .catch((e) => this.server.unhandledRejection(e))
     .finally((err) => { self.resetMessages(); });
 }
 StagingViewModel.prototype.invalidateFilesDiffs = function() {
@@ -255,12 +257,16 @@ StagingViewModel.prototype.discardAllChanges = function() {
   components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'})
     .show()
     .closeThen(function(diag) {
-      if (diag.result()) self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true });
+      if (diag.result()) {
+        self.server.postPromise('/discardchanges', { path: self.repoPath(), all: true })
+          .catch((e) => this.server.unhandledRejection(e))
+      }
     });
 }
 StagingViewModel.prototype.stashAll = function() {
   var self = this;
-  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() });
+  this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() })
+    .catch((e) => this.server.unhandledRejection(e));
 }
 StagingViewModel.prototype.toggleAllStages = function() {
   var self = this;
@@ -360,12 +366,16 @@ FileViewModel.prototype.toggleStaged = function() {
 FileViewModel.prototype.discardChanges = function() {
   var self = this;
   if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
-    self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+    self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() })
+      .catch((e) => this.server.unhandledRejection(e));
   } else {
     components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'})
       .show()
       .closeThen(function(diag) {
-        if (diag.result()) self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() });
+        if (diag.result()) {
+          self.server.postPromise('/discardchanges', { path: self.staging.repoPath(), file: self.name() })
+            .catch((e) => this.server.unhandledRejection(e));
+        }
         if (diag.result() === "mute") self.staging.mutedTime = new Date().getTime();
       });
   }
@@ -383,10 +393,12 @@ FileViewModel.prototype.ignoreFile = function() {
     });
 }
 FileViewModel.prototype.resolveConflict = function() {
-  this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] });
+  this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] })
+    .catch((e) => this.server.unhandledRejection(e));
 }
 FileViewModel.prototype.launchMergeTool = function() {
-  this.server.postPromise('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool });
+  this.server.postPromise('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool })
+    .catch((e) => this.server.unhandledRejection(e));
 }
 FileViewModel.prototype.toggleDiffs = function() {
   if (this.renamed()) return; // do not show diffs for renames
