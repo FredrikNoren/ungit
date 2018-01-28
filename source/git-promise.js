@@ -362,7 +362,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
-    if ((!(Array.isArray(files)) || files.length == 0) && !amend) {
+    if ((!(Array.isArray(files)) || files.length == 0) && !amend && !emptyCommit) {
       reject({ error: 'Must specify files or amend to commit' });
     }
     resolve();
