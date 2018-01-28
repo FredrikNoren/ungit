@@ -110,26 +110,20 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
       self.skip(parseInt(log.skip));
       return log.nodes || [];
     }).then(function(nodes) {
-      // check for deleted refs to update the UI
-      var updatedRefs = [];
-      nodes.forEach(function(logEntry) {
-        updatedRefs = updatedRefs.concat(logEntry.refs);
-      });
-      Object.keys(self.refsByRefName).forEach(function(refName) {
-        const isRemoteTag = self.refsByRefName[refName] && self.refsByRefName[refName].isRemoteTag
-        if (!isRemoteTag && updatedRefs.indexOf(refName) < 0) {
-          self.refs.remove(self.refsByRefName[refName]);
-          var ref = self.refsByRefName[refName];
+      let updatedRefs = [];
+      // create and/or calculate nodes
+      const ungitNodes = self.computeNode(nodes.map(function(logEntry) {
+        updatedRefs = updatedRefs.concat(logEntry.refs);  // track all active refs
+        return self.getNode(logEntry.sha1, logEntry);     // convert to node object
+      }));
+      Object.values(self.refsByRefName).forEach(function(ref) {
+        if (!(ref && ref.isRemoteTag) && updatedRefs.indexOf(ref.name) < 0) {
+          self.refs.remove(ref);
           if (ref) { ref.node(null); }
-          delete self.refsByRefName[refName]
+          delete self.refsByRefName[ref.name];
         }
       });
-      return nodes;
-    }).then(function(nodes) {
-      // create and/or calculate nodes
-      return self.computeNode(nodes.map(function(logEntry) {
-        return self.getNode(logEntry.sha1, logEntry);
-      }));
+      return ungitNodes;
     }).then(function(nodes) {
       // create edges
       var edges = [];
