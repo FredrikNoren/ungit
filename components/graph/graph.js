@@ -117,9 +117,10 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
         return self.getNode(logEntry.sha1, logEntry);     // convert to node object
       }));
       Object.values(self.refsByRefName).forEach(function(ref) {
-        if (!(ref && ref.isRemoteTag) && updatedRefs.indexOf(ref.name) < 0) {
+        ref = ref || {};
+        if (!ref.isRemoteTag && updatedRefs.indexOf(ref.name) < 0) {
           self.refs.remove(ref);
-          if (ref) { ref.node(null); }
+          if (ref.node) { ref.node(null); }
           delete self.refsByRefName[ref.name];
         }
       });
