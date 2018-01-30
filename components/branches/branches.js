@@ -74,11 +74,17 @@ BranchesViewModel.prototype.updateBranches = function() {
 
 BranchesViewModel.prototype.branchRemove = function(branch) {
   var self = this;
-  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + branch.name + ' branch cannot be undone with ungit.'})
+  var details = `"${branch.refName}"`;
+  if (branch.isRemoteBranch) {
+    details = `<code style='font-size: 100%'>REMOTE</code> ${details}`;
+  }
+  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + details + ' branch cannot be undone with ungit.'})
     .show()
     .closeThen(function(diag) {
       if (!diag.result()) return;
-      self.server.delPromise('/branches', { name: branch.name, path: self.repoPath() })
+      var url = '/branches';
+      if (branch.isRemote) url = '/remote' + url;
+      self.server.delPromise(url, { path: self.graph.repoPath(), remote: branch.isRemote ? branch.remote : null, name: branch.refName })
         .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); });
     });
 }
