@@ -357,12 +357,12 @@ git.applyPatchedDiff = (repoPath, patchedDiff) => {
   }
 }
 
-git.commit = (repoPath, amend, message, files) => {
+git.commit = (repoPath, amend, emptyCommit, message, files) => {
   return (new Bluebird((resolve, reject) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
-    if ((!(Array.isArray(files)) || files.length == 0) && !amend) {
+    if ((!(Array.isArray(files)) || files.length == 0) && !amend && !emptyCommit) {
       reject({ error: 'Must specify files or amend to commit' });
     }
     resolve();
@@ -400,7 +400,7 @@ git.commit = (repoPath, amend, message, files) => {
 
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
-    return git(['commit', (amend ? '--amend' : ''), '--file=-'], repoPath, null, null, message);
+    return git(['commit', (amend ? '--amend' : ''), ((emptyCommit ||amend) ? '--allow-empty' : ''), '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
     // ignore the case where nothing were added to be committed
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1) {
