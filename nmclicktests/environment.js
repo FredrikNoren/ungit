@@ -166,7 +166,7 @@ class Environment {
     this.config.serverTimeout = this.config.serverTimeout || 15000;
     this.config.viewWidth = 2000;
     this.config.viewHeight = 2000;
-    this.config.showServerOutput = this.config.showServerOutput || true;
+    this.config.showServerOutput = this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
     this.shuttinDown = false;
 
