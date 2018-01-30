@@ -66,13 +66,13 @@ var RefViewModel = function(fullRefName, graph) {
   this.label = this.localRefName
   this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`
   this.displayName = ko.computed(function() {
+    var prefix = ''
     if (self.isRemoteBranch) {
-      return self.name.replace('refs/remotes/', '<span class="octicon octicon-broadcast"></span> ');
+      prefix = '<span class="octicon octicon-broadcast"></span> ';
     } else if (self.current()) {
-      return `<span class="octicon octicon-chevron-right"></span> ${self.name.replace('refs/', '')}`
-    } else {
-      return self.name.replace('refs/', '');
+      prefix = '<span class="octicon octicon-chevron-right"></span> '
     }
+    return prefix + self.localRefName;
   });
 };
 module.exports = RefViewModel;
