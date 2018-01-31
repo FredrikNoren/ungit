@@ -5,7 +5,9 @@
       <div class="arrow"></div>
     </div>
     <div data-bind="visible: showNux" class="nux">
-      Nothing to commit. <a class="amend-link" href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
+      Nothing to commit.
+      <a class="amend-link" href="#" data-bind="click: toggleAmend, visible: canAmend">Amend previous commit?</a>
+      <a class="empty-commit-link" href="#" data-bind="click: toggleEmptyCommit, visible: canEmptyCommit">Create an empty commit?</a>
     </div>
     <div class="row" data-bind="visible: !showNux()">
       <div class="col-lg-3">

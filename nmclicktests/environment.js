@@ -32,6 +32,13 @@ Nightmare.action('ug', {
       .wait(1000)
       .then(done.bind(null, null), done);
   },
+  'emptyCommit': function(done) {
+    this.ug.click('.empty-commit-link')
+      .click('.commit-btn')
+      .ug.waitForElementNotVisible('.files .file .btn-default')
+      .wait(1000)
+      .then(done.bind(null, null), done);
+  },
   'checkout': function(branch, done) {
     this.ug.click(`.branch[data-ta-name="${branch}"]`)
       .ug.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask')

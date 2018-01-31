@@ -69,16 +69,20 @@ var StagingViewModel = function(server, repoPath) {
   });
   this.amend = ko.observable(false);
   this.canAmend = ko.computed(function() {
+    return self.HEAD() && !self.inRebase() && !self.inMerge() && !self.emptyCommit();
+  });
+  this.emptyCommit = ko.observable(false);
+  this.canEmptyCommit = ko.computed(function() {
     return self.HEAD() && !self.inRebase() && !self.inMerge();
   });
   this.canStashAll = ko.computed(function() {
     return !self.amend();
   });
   this.showNux = ko.computed(function() {
-    return self.files().length == 0 && !self.amend() && !self.inRebase();
+    return self.files().length == 0 && !self.amend() && !self.inRebase() && !self.emptyCommit();
   });
   this.commitValidationError = ko.computed(function() {
-    if (!self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
+    if (!self.emptyCommit() && !self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
       return "No files to commit";
 
     if (self.files().some(function(file) { return file.conflict(); }))
@@ -199,6 +203,7 @@ StagingViewModel.prototype.setFiles = function(files) {
   programEvents.dispatch({ event: 'init-tooltip' });
 }
 StagingViewModel.prototype.toggleAmend = function() {
+  
   if (!this.amend() && !this.commitMessageTitle()) {
     this.commitMessageTitle(this.HEAD().title);
     this.commitMessageBody(this.HEAD().body);
@@ -213,6 +218,11 @@ StagingViewModel.prototype.toggleAmend = function() {
   }
   this.amend(!this.amend());
 }
+StagingViewModel.prototype.toggleEmptyCommit = function() {
+  this.commitMessageTitle("Empty commit");
+  this.commitMessageBody();
+  this.emptyCommit(true);
+}
 StagingViewModel.prototype.resetMessages = function() {
   this.commitMessageTitle('');
   this.commitMessageBody('');
@@ -224,6 +234,7 @@ StagingViewModel.prototype.resetMessages = function() {
     element.editState(element.editState() === 'patched' ? 'none' : element.editState())
   }
   this.amend(false);
+  this.emptyCommit(false);
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;
@@ -235,7 +246,7 @@ StagingViewModel.prototype.commit = function() {
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 
-  this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend() })
+  this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
     .then(() => { self.resetMessages(); })
     .catch((e) => this.server.unhandledRejection(e));
 }
