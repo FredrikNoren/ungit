@@ -85,6 +85,7 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
       var url = '/branches';
       if (branch.isRemote) url = '/remote' + url;
       self.server.delPromise(url, { path: self.graph.repoPath(), remote: branch.isRemote ? branch.remote : null, name: branch.refName })
-        .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); });
+        .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); })
+        .catch((e) => this.server.unhandledRejection(e));
     });
 }

@@ -20,7 +20,8 @@ function HomeRepositoryViewModel(home, path) {
 HomeRepositoryViewModel.prototype.updateState = function() {
   var self = this;
   this.server.getPromise('/fs/exists?path=' + encodeURIComponent(this.path))
-    .then(function(exists) { self.pathRemoved(!exists); });
+    .then(function(exists) { self.pathRemoved(!exists); })
+    .catch((e) => this.server.unhandledRejection(e));
   this.server.getPromise('/remotes/origin?path=' + encodeURIComponent(this.path))
     .then(function(remote) {	self.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
     .catch(function(err) { self.remote(''); });

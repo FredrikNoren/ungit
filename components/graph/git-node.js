@@ -197,7 +197,8 @@ GitNodeViewModel.prototype.createBranch = function() {
   this.graph.server.postPromise(command, { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
     .then(function() {
       self.graph.getRef('refs/heads/' + self.newBranchName()).node(self);
-    }).finally(function() {
+    }).catch((e) => this.server.unhandledRejection(e))
+    .finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
       programEvents.dispatch({ event: 'branch-updated' });
@@ -210,7 +211,8 @@ GitNodeViewModel.prototype.createTag = function() {
     .then(function() {
       var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
       newRef.node(self);
-    }).finally(function() {
+    }).catch((e) => this.server.unhandledRejection(e))
+    .finally(function() {
       self.branchingFormVisible(false);
       self.newBranchName('');
     });

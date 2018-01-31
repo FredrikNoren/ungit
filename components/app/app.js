@@ -67,7 +67,8 @@ AppViewModel.prototype.shown = function() {
     // since ungit may have crashed without the server crashing since we enabled bugtracking,
     // and we don't want to show the nagscreen twice in that case.
     this.server.getPromise('/userconfig')
-      .then(function(userConfig) { self.bugtrackingEnabled(userConfig.bugtracking); });
+      .then(function(userConfig) { self.bugtrackingEnabled(userConfig.bugtracking); })
+      .catch((e) => this.server.unhandledRejection(e));
   }
 
   this.server.getPromise('/latestversion')
@@ -76,13 +77,13 @@ AppViewModel.prototype.shown = function() {
       self.currentVersion(version.currentVersion);
       self.latestVersion(version.latestVersion);
       self.showNewVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
-    });
+    }).catch((e) => this.server.unhandledRejection(e));
   this.server.getPromise('/gitversion')
     .then(function(gitversion) {
       if (gitversion && !gitversion.satisfied) {
         self.gitVersionError(gitversion.error);
       }
-    });
+    }).catch((e) => this.server.unhandledRejection(e));
 }
 AppViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.content() && this.content().updateAnimationFrame) this.content().updateAnimationFrame(deltaT);
@@ -128,7 +129,7 @@ AppViewModel.prototype.gitSetUserConfig = function(bugTracking, sendUsageStatist
       if (sendUsageStatistics != undefined) userConfig.sendUsageStatistics = sendUsageStatistics;
       return self.server.postPromise('/userconfig', userConfig)
         .then(function() { self.bugtrackingEnabled(bugTracking); });
-    }).catch(function(err) { })
+    });
 }
 AppViewModel.prototype.enableBugtrackingAndStatistics = function() {
   this.gitSetUserConfig(true, true);

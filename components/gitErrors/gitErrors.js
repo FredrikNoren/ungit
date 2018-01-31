@@ -39,8 +39,7 @@ function GitErrorViewModel(gitErrors, server, data) {
 
   if (!data.shouldSkipReport && !ungit.config.bugtracking) {
     this.server.getPromise('/userconfig')
-      .then(function(userConfig) { self.showEnableBugtracking(!userConfig.bugtracking); })
-      .catch(function(err) {});
+      .then(function(userConfig) { self.showEnableBugtracking(!userConfig.bugtracking); });
   }
 }
 GitErrorViewModel.prototype.dismiss = function() {
@@ -54,5 +53,5 @@ GitErrorViewModel.prototype.enableBugtrackingAndStatistics = function() {
       userConfig.sendUsageStatistics = true;
       return self.server.postPromise('/userconfig', userConfig)
         .then(function() { self.showEnableBugtracking(false); })
-    }).catch(function(err) {});
+    });
 }

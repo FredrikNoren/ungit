@@ -34,7 +34,9 @@ GraphActions.ActionBase.prototype.doPerform = function() {
   if (this.isRunning()) return;
   this.graph.hoverGraphAction(null);
   this.isRunning(true);
-  this.perform().finally(() => { this.isRunning(false); });
+  this.perform()
+    .catch((e) => this.server.unhandledRejection(e))
+    .finally(() => { this.isRunning(false); });
 }
 GraphActions.ActionBase.prototype.dragEnter = function() {
   if (!this.visible()) return;

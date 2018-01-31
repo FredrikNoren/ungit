@@ -25,7 +25,8 @@ function StashItemViewModel(stash, data) {
 }
 StashItemViewModel.prototype.apply = function() {
   var self = this;
-  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true });
+  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true })
+    .catch((e) => this.server.unhandledRejection(e));
 }
 StashItemViewModel.prototype.drop = function() {
   var self = this;
@@ -33,7 +34,8 @@ StashItemViewModel.prototype.drop = function() {
     .show()
     .closeThen(function(diag) {
       if (diag.result()) {
-          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() });
+          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() })
+            .catch((e) => this.server.unhandledRejection(e));
       }
   });
 }

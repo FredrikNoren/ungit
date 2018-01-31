@@ -31,13 +31,14 @@ SubmodulesViewModel.prototype.fetchSubmodules = function() {
     .then(function(submodules) {
       self.submodules(submodules && Array.isArray(submodules) ? submodules : []);
       return self;
-    });
+    }).catch((e) => this.server.unhandledRejection(e));
 }
 
 SubmodulesViewModel.prototype.updateSubmodules = function() {
   if (this.isUpdating) return;
   this.isUpdating = true;
   return this.server.postPromise('/submodules/update', { path: this.repoPath() })
+    .catch((e) => this.server.unhandledRejection(e))
     .finally(() => { this.isUpdating = false; });
 }
 
@@ -49,6 +50,7 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
       this.isUpdating = true;
       this.server.postPromise('/submodules/add', { path: this.repoPath(), submoduleUrl: diag.url(), submodulePath: diag.path() })
         .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); })
+        .catch((e) => this.server.unhandledRejection(e))
         .finally(() => { this.isUpdating = false; });
     });
 }
@@ -68,6 +70,7 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
     .closeThen(function(diag) {
       if (!diag.result()) return;
       self.server.delPromise('/submodules', { path: self.repoPath(), submodulePath: submodule.path, submoduleName: submodule.name })
-        .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); });
+        .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); })
+        .catch((e) => this.server.unhandledRejection(e));
     });
 }

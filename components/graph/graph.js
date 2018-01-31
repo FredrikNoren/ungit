@@ -145,7 +145,8 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
         self.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
-    }).finally(function() {
+    }).catch((e) => this.server.unhandledRejection(e))
+    .finally(function() {
       if (window.innerHeight - self.graphHeight() > 0 && nodeSize != self.nodes().length) {
         self.scrolledToEnd();
       }
