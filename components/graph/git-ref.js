@@ -66,13 +66,13 @@ var RefViewModel = function(fullRefName, graph) {
   this.label = this.localRefName
   this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`
   this.displayName = ko.computed(function() {
+    var prefix = ''
     if (self.isRemoteBranch) {
-      return self.name.replace('refs/remotes/', '<span class="octicon octicon-broadcast"></span> ');
+      prefix = '<span class="octicon octicon-broadcast"></span> ';
     } else if (self.current()) {
-      return `<span class="octicon octicon-chevron-right"></span> ${self.name.replace('refs/', '')}`
-    } else {
-      return self.name.replace('refs/', '');
+      prefix = '<span class="octicon octicon-chevron-right"></span> '
     }
+    return prefix + self.localRefName;
   });
 };
 module.exports = RefViewModel;
@@ -139,7 +139,7 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
         self.graph.HEADref().node(targetNode);
       }
       self.node(targetNode);
-    });
+    }).catch((e) => this.server.unhandledRejection(e));
 }
 
 RefViewModel.prototype.remove = function() {
@@ -151,7 +151,8 @@ RefViewModel.prototype.remove = function() {
     .then(function() {
       self.node().removeRef(self);
       self.graph.refsByRefName[self.name] = undefined;
-    }).finally(function() {
+    }).catch((e) => this.server.unhandledRejection(e))
+    .finally(function() {
       if (url == '/remote/tags') {
         programEvents.dispatch({ event: 'request-fetch-tags' });
       } else {
@@ -189,11 +190,11 @@ RefViewModel.prototype.canBePushed = function(remote) {
 
 RefViewModel.prototype.createRemoteRef = function() {
   var self = this;
-  return this.server.postPromise('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(),
-    refSpec: this.refName, remoteBranch: this.refName }).then(function() {
+  return this.server.postPromise('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(), refSpec: this.refName, remoteBranch: this.refName })
+    .then(function() {
       var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
       newRef.node(self.node());
-    });
+    }).catch((e) => this.server.unhandledRejection(e));
 }
 RefViewModel.prototype.checkout = function() {
   const isRemote = this.isRemoteBranch;

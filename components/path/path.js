@@ -61,6 +61,7 @@ class PathViewModel {
   }
   initRepository() {
     return this.server.postPromise('/init', { path: this.repoPath() })
+      .catch((e) => this.server.unhandledRejection(e))
       .finally((res) => { this.updateStatus(); });
   }
   onProgramEvent(event) {
@@ -75,6 +76,7 @@ class PathViewModel {
 
     return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
       .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
+      .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         programEvents.dispatch({ event: 'working-tree-changed' });
       })
@@ -82,6 +84,7 @@ class PathViewModel {
   createDir() {
     this.showDirectoryCreatedAlert(true);
     return this.server.postPromise('/createDir',  { dir: this.repoPath() })
+      .catch((e) => this.server.unhandledRejection(e))
       .then(() => this.updateStatus());
   }
 }

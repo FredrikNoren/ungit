@@ -50,7 +50,8 @@ RemotesViewModel.prototype.fetch = function(options) {
       if (options.tags) {
         programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
       }
-    }).finally(() => { this.isFetching = false; })
+    }).catch((e) => this.server.unhandledRejection(e))
+    .finally(() => { this.isFetching = false; })
 }
 
 RemotesViewModel.prototype.updateRemotes = function() {
@@ -88,7 +89,8 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
     .closeThen(function(diag) {
       if(diag.isSubmitted()) {
         return self.server.postPromise('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() })
-          .then(function() { self.updateRemotes(); });
+          .then(function() { self.updateRemotes(); })
+          .catch((e) => this.server.unhandledRejection(e));
       }
     });
 }
@@ -100,7 +102,8 @@ RemotesViewModel.prototype.remoteRemove = function(remote) {
     .closeThen(function(diag) {
       if (diag.result()) {
         return self.server.delPromise('/remotes/' + remote.name, { path: self.repoPath() })
-          .then(() => { self.updateRemotes(); });
+          .then(() => { self.updateRemotes(); })
+          .catch((e) => this.server.unhandledRejection(e));
       }
     });
 }

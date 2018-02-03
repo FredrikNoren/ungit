@@ -164,6 +164,18 @@ describe('[GENERIC]', () => {
       .ug.moveRef('movebranch', 'Init');
   });
 
+  it('Should be possible to create an empty commit', () => {
+    return environment.nm.ug.emptyCommit()
+      .wait('.commit');
+  });
+
+  it('Should be possible to ammend an empty commit', () => {
+    return environment.nm.ug.emptyCommit()
+      .wait('.commit')
+      .ug.amendCommit()
+      .wait('.commit');
+  });
+
   it('Should be possible to click refresh button', () => {
     return environment.nm.ug.click('button.refresh-button');
   });
