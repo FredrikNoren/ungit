@@ -142,23 +142,25 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
     }).catch((e) => this.server.unhandledRejection(e));
 }
 
-RefViewModel.prototype.remove = function() {
+RefViewModel.prototype.remove = function(isClientOnly) {
   var self = this;
   var url = this.isTag ? '/tags' : '/branches';
   if (this.isRemote) url = '/remote' + url;
 
-  return this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName })
-    .then(function() {
-      self.node().removeRef(self);
-      self.graph.refsByRefName[self.name] = undefined;
+  return (isClientOnly ? Promise.resolve() : this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }))
+    .then(() => {
+      this.node().removeRef(self);
+      this.graph.refs.remove(self);
+      delete this.graph.refsByRefName[self.name];
     }).catch((e) => this.server.unhandledRejection(e))
-    .finally(function() {
-      if (url == '/remote/tags') {
-        programEvents.dispatch({ event: 'request-fetch-tags' });
-      } else {
-        programEvents.dispatch({ event: 'branch-updated' });
+    .finally(() => {
+      if (!isClientOnly) {
+        if (url == '/remote/tags') {
+          programEvents.dispatch({ event: 'request-fetch-tags' });
+        } else {
+          programEvents.dispatch({ event: 'branch-updated' });
+        }
       }
-      return self.graph.loadNodesFromApi();
     });
 }
 

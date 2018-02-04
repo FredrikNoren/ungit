@@ -43,17 +43,18 @@ BranchesViewModel.prototype.checkoutBranch = function(branch) {
   branch.checkout();
 }
 BranchesViewModel.prototype.updateBranches = function() {
-  var self = this;
-
-  this.server.getPromise('/branches', { path: this.repoPath(), isLocalBranchOnly: this.isLocalBranchOnly() })
-    .then(function(branches) {
+  return this.server.getPromise('/branches', { path: this.repoPath(), isLocalBranchOnly: this.isLocalBranchOnly() })
+    .then((branches) => {
+      const version = Date.now();
       const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
         .map((b) => {
           const refName = `refs/${b.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${b.name}`;
           if (b.current) {
-            self.current(b.name);
+            this.current(b.name);
           }
-          return self.graph.getRef(refName);
+          const ref = this.graph.getRef(refName);
+          ref.version = version;
+          return ref;
         }).sort((a, b) => {
           if (a.current() || b.current()) {
             return a.current() ? -1 : 1;
@@ -68,8 +69,14 @@ BranchesViewModel.prototype.updateBranches = function() {
             return a.isRemoteBranch ? 1 : -1;
           }
         });
-      self.branches(sorted);
-    }).catch(function(err) { self.current("~error"); });
+      this.branches(sorted);
+      this.graph.refs().forEach((ref) => {
+        // branch was removed from another source
+        if (ref.value !== 'HEAD' && ref.isBranch && ref.version !== version) {
+          ref.remove(true);
+        }
+      });
+    }).catch((err) => { this.current("~error"); });
 }
 
 BranchesViewModel.prototype.branchRemove = function(branch) {
@@ -88,4 +95,11 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
         .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); })
         .catch((e) => this.server.unhandledRejection(e));
     });
+}
+BranchesViewModel.prototype.onProgramEvent = function(event) {
+  if (event.event == 'git-directory-changed') {
+    this.updateBranches();
+  } else if (event.event == 'request-app-content-refresh') {
+    this.updateBranches();
+  }
 }
