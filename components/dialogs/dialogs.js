@@ -10,7 +10,7 @@ components.register('formdialog', function(args) {
 });
 
 components.register('credentialsdialog', function(args) {
-  return new CredentialsDialogViewModel();
+  return new CredentialsDialogViewModel(args.remote);
 });
 
 components.register('addremotedialog', function(args) {
@@ -72,9 +72,9 @@ FormDialogViewModel.prototype.submit = function() {
 }
 
 
-function CredentialsDialogViewModel() {
+function CredentialsDialogViewModel(remote) {
   FormDialogViewModel.call(this);
-  this.title('Remote requires authentication');
+  this.title('Remote "' + remote + '" requires authentication');
   this.taDialogName('credentials-dialog');
   this.showCancel(false);
   this.username = ko.observable();

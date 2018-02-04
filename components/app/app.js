@@ -102,13 +102,13 @@ AppViewModel.prototype._handleRequestRememberRepo = function(event) {
   if (this.repoList.indexOf(repoPath) != -1) return;
   this.repoList.push(repoPath);
 }
-AppViewModel.prototype._handleCredentialsRequested = function() {
+AppViewModel.prototype._handleCredentialsRequested = function(event) {
   var self = this;
   // Only show one credentials dialog if we're asked to show another one while the first one is open
   // This happens for instance when we fetch nodes and remote tags at the same time
   if (!this._isShowingCredentialsDialog) {
     this._isShowingCredentialsDialog = true;
-    components.create('credentialsdialog').show().closeThen(function(diag) {
+    components.create('credentialsdialog', {remote: event.args.remote}).show().closeThen(function(diag) {
       self._isShowingCredentialsDialog = false;
       programEvents.dispatch({ event: 'request-credentials-response', username: diag.username(), password: diag.password() });
     });
