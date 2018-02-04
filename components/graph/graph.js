@@ -285,15 +285,13 @@ GraphViewModel.prototype.updateBranches = function() {
     })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
-  var self = this;
-  var nodeIdsToRemoteTags = {};
   const version = Date.now();
-  remoteTags.forEach(function(ref) {
-    if (ref.name.indexOf('^{}') != -1) {
-      var tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
-      var name = 'remote-tag: ' + ref.remote + '/' + tagRef.split('/')[2];
-      self.getRef(name).node(self.getNode(ref.sha1));
-      self.getRef(name).version = version;
+  remoteTags.forEach((ref) => {
+    if (ref.name.indexOf('^{}') !== -1) {
+      const tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
+      const name = `remote-tag: ${ref.remote}/${tagRef.split('/')[2]}`;
+      this.getRef(name).node(this.getNode(ref.sha1));
+      this.getRef(name).version = version;
     }
   });
   this.refs().forEach((ref) => {

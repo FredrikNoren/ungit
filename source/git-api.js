@@ -398,9 +398,12 @@ exports.registerApi = (env) => {
   });
 
   app.delete(`${exports.pathPrefix}/remote/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = credentialsOption(req.query.socketId).concat(['push', `${req.query.remote} :"refs/tags${req.query.name.trim()}"`]);
+    const commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote, `:refs/tags/${req.query.name.trim()}`]);
+    const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
+      .catch(() => {})  // might have already deleted, so ignoring error
+      .then(() => gitPromise(commands, req.query.path))
 
-    jsonResultOrFailProm(res, gitPromise(commands, req.query.path))
+    jsonResultOrFailProm(res, task)
       .finally(emitGitDirectoryChanged.bind(null, req.query.path));
   });
 
