@@ -209,7 +209,7 @@ GitNodeViewModel.prototype.createTag = function() {
   var self = this;
   this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
     .then(function() {
-      var newRef = self.graph.getRef('tag: refs/tags/' + self.newBranchName());
+      var newRef = self.graph.getRef('refs/tags/' + self.newBranchName());
       newRef.node(self);
     }).catch((e) => this.server.unhandledRejection(e))
     .finally(function() {

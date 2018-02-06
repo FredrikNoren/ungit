@@ -195,10 +195,7 @@ RefViewModel.prototype.canBePushed = function(remote) {
 RefViewModel.prototype.createRemoteRef = function() {
   var self = this;
   return this.server.postPromise('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(), refSpec: this.refName, remoteBranch: this.refName })
-    .then(function() {
-      var newRef = self.graph.getRef("refs/remotes/" + self.graph.currentRemote() + "/" + self.refName);
-      newRef.node(self.node());
-    }).catch((e) => this.server.unhandledRejection(e));
+    .catch((e) => this.server.unhandledRejection(e));
 }
 RefViewModel.prototype.checkout = function() {
   const isRemote = this.isRemoteBranch;

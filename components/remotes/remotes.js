@@ -37,7 +37,8 @@ RemotesViewModel.prototype.updateNode = function(parentElement) {
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event === 'working-tree-changed' || event.event == 'request-app-content-refresh' || event.event == 'request-fetch-tags') {
+  if (event.event === 'working-tree-changed' || event.event === 'request-app-content-refresh' ||
+    event.event === 'request-fetch-tags' || event.event === 'git-directory-changed') {
     this.fetchDebounced();
   }
 }

@@ -338,6 +338,30 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(res, task);
   });
 
+  app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const task = gitPromise(credentialsOption(req.query.socketId).concat(['fetch', '--all']), req.query.path)
+      .then(() => gitPromise(['show-ref', '-d'], req.query.path))
+      .then((refs) => {
+        const results = [];
+
+        refs.trim().split('\n').forEach((n) => {
+          const splitted = n.split(' ');
+          const sha1 = splitted[0]
+          const name = splitted[1]
+          if (name.indexOf('refs/tags') > -1 && name.indexOf('^{}') > -1) {
+            results[results.length - 1].sha1 = sha1;
+          } else {
+            results.push({
+              name: name,
+              sha1: sha1
+            });
+          }
+        });
+        return results;
+      })
+    jsonResultOrFailProm(res, task);
+  });
+
   app.get(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const isLocalBranchOnly = req.query.isLocalBranchOnly == 'false';
     jsonResultOrFailProm(res, gitPromise(['branch', isLocalBranchOnly ? '-a' : ''], req.query.path)
