@@ -119,7 +119,7 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
     var pushReq = { path: this.graph.repoPath(), remote: this.remote, refSpec: target, remoteBranch: this.refName };
     promise = this.server.postPromise('/push', pushReq)
       .catch(function(err) {
-        if (err.errorCode == 'non-fast-forward') {
+        if (err.errorCode === 'non-fast-forward') {
           return components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' })
             .show()
             .closeThen(function(diag) {
@@ -127,6 +127,8 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
               pushReq.force = true;
               return self.server.postPromise('/push', pushReq);
             }).closePromise;
+        } else {
+          throw err;
         }
       });
   }
@@ -149,7 +151,7 @@ RefViewModel.prototype.remove = function(isClientOnly) {
 
   return (isClientOnly ? Promise.resolve() : this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }))
     .then(() => {
-      this.node().removeRef(self);
+      if (this.node()) this.node().removeRef(self);
       this.graph.refs.remove(self);
       delete this.graph.refsByRefName[self.name];
     }).catch((e) => this.server.unhandledRejection(e))

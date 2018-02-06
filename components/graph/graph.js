@@ -296,7 +296,7 @@ GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   });
   this.refs().forEach((ref) => {
     // tag is removed from another source
-    if (ref.isTag && ref.version !== version) {
+    if (ref.isRemoteTag && (!ref.version || ref.version < version)) {
       ref.remove(true);
     }
   });

@@ -28,7 +28,7 @@ function BranchesViewModel(server, graph, repoPath) {
       return self.current();
     }
   });
-  this.updateBranches();
+  this.updateBranchesDebounced = _.debounce(this.updateBranches, 500);
 }
 BranchesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('branches', this, {}, parentElement);
@@ -36,7 +36,7 @@ BranchesViewModel.prototype.updateNode = function(parentElement) {
 BranchesViewModel.prototype.clickFetch = function() { this.updateBranches(); }
 BranchesViewModel.prototype.onProgramEvent = function(event) {
   if (event.event === 'working-tree-changed' || event.event == 'request-app-content-refresh' || event.event == 'branch-updated') {
-    this.updateBranches();
+    this.updateBranchesDebounced();
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
@@ -72,7 +72,7 @@ BranchesViewModel.prototype.updateBranches = function() {
       this.branches(sorted);
       this.graph.refs().forEach((ref) => {
         // branch was removed from another source
-        if (ref.value !== 'HEAD' && ref.isBranch && ref.version !== version) {
+        if (ref.isBranch && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
           ref.remove(true);
         }
       });
@@ -95,11 +95,4 @@ BranchesViewModel.prototype.branchRemove = function(branch) {
         .then(function() { programEvents.dispatch({ event: 'working-tree-changed' }); })
         .catch((e) => this.server.unhandledRejection(e));
     });
-}
-BranchesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'git-directory-changed') {
-    this.updateBranches();
-  } else if (event.event == 'request-app-content-refresh') {
-    this.updateBranches();
-  }
 }
