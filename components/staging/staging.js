@@ -81,6 +81,9 @@ var StagingViewModel = function(server, repoPath) {
   this.showNux = ko.computed(function() {
     return self.files().length == 0 && !self.amend() && !self.inRebase() && !self.emptyCommit();
   });
+  this.showCancelButton = ko.computed(function() {
+    return self.amend() || self.emptyCommit();
+  });
   this.commitValidationError = ko.computed(function() {
     if (!self.emptyCommit() && !self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
       return "No files to commit";
@@ -262,6 +265,10 @@ StagingViewModel.prototype.invalidateFilesDiffs = function() {
   this.files().forEach(function(file) {
     file.diff().invalidateDiff();
   });
+}
+StagingViewModel.prototype.cancelAmendEmpty = function() {
+  var self = this;
+  self.resetMessages();
 }
 StagingViewModel.prototype.discardAllChanges = function() {
   var self = this;
