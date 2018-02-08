@@ -74,10 +74,6 @@ BranchesViewModel.prototype.updateRefs = function() {
       });
       this.branchesAndLocalTags(sorted);
       this.graph.refs().forEach((ref) => {
-        if (ref.isTag) {
-          console.log(1111, ref)
-        }
-
         // ref was removed from another source
         if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
           ref.remove(true);
