@@ -39,10 +39,10 @@ Server.prototype.initSocket = function() {
   this.socket.on('git-directory-changed', function () {
     programEvents.dispatch({ event: 'git-directory-changed' });
   });
-  this.socket.on('request-credentials', function () {
+  this.socket.on('request-credentials', function (args) {
     self._getCredentials(function(credentials) {
       self.socket.emit('credentials', credentials);
-    });
+    }, args);
   });
 }
 Server.prototype._queryToString = function(query) {
@@ -91,9 +91,9 @@ Server.prototype._isConnected = function(callback) {
 Server.prototype._onDisconnect = function() {
   programEvents.dispatch({ event: 'disconnected' });
 }
-Server.prototype._getCredentials = function(callback) {
+Server.prototype._getCredentials = function(callback, args) {
   // Push out a program event, hoping someone will respond! (Which the app component will)
-  programEvents.dispatch({ event: 'request-credentials' });
+  programEvents.dispatch({ event: 'request-credentials', remote: args.remote });
   var credentialsBinding = programEvents.add(function(event) {
     if (event.event != 'request-credentials-response') return;
     credentialsBinding.detach();

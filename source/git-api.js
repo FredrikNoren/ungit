@@ -167,9 +167,9 @@ exports.registerApi = (env) => {
       });
   }
 
-  const credentialsOption = (socketId) => {
+  const credentialsOption = (socketId, remote) => {
     const credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-    return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${config.port}`];
+    return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${config.port} ${remote}`];
   }
 
   const getNumber = (value, nullValue) => {
@@ -197,7 +197,7 @@ exports.registerApi = (env) => {
     let url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
     const task = gitPromise({
-      commands: credentialsOption(req.body.socketId).concat(['clone', url, req.body.destinationDir.trim()]),
+      commands: credentialsOption(req.body.socketId, url).concat(['clone', url, req.body.destinationDir.trim()]),
       repoPath: req.body.path,
       timeout: timeoutMs
     }).then(() => {
@@ -214,7 +214,7 @@ exports.registerApi = (env) => {
     if (res.setTimeout) res.setTimeout(timeoutMs);
 
     const task = gitPromise({
-      commands: credentialsOption(req.body.socketId).concat([
+      commands: credentialsOption(req.body.socketId, req.body.remote).concat([
           'fetch',
           req.body.remote,
           req.body.ref ? req.body.ref : '',
@@ -232,7 +232,7 @@ exports.registerApi = (env) => {
     const timeoutMs = 10 * 60 * 1000;
     if (res.setTimeout) res.setTimeout(timeoutMs);
     const task = gitPromise({
-      commands: credentialsOption(req.body.socketId).concat([
+      commands: credentialsOption(req.body.socketId, req.body.remote).concat([
           'push',
           req.body.remote,
           (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
@@ -357,7 +357,7 @@ exports.registerApi = (env) => {
   });
 
   app.delete(`${exports.pathPrefix}/remote/branches`, ensureAuthenticated, ensurePathExists, ensureValidSocketId, (req, res) => {
-    const commands = credentialsOption(req.query.socketId).concat(['push', req.query.remote, `:${req.query.name.trim()}`]);
+    const commands = credentialsOption(req.query.socketId, req.query.remote).concat(['push', req.query.remote, `:${req.query.name.trim()}`]);
     const task = gitPromise(commands, req.query.path)
       .catch(err => {
         if (!(err.stderr && err.stderr.indexOf("remote ref does not exist") > -1)) {
@@ -376,7 +376,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/remote/tags`, ensureAuthenticated, ensurePathExists, ensureValidSocketId, (req, res) => {
-    const task = gitPromise(credentialsOption(req.query.socketId).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
+    const task = gitPromise(credentialsOption(req.query.socketId, req.query.remote).concat(['ls-remote', '--tags', req.query.remote]), req.query.path)
       .then(gitParser.parseGitLsRemote)
       .then((result) => {
         result.forEach((r) => { r.remote = req.query.remote; });
@@ -398,7 +398,7 @@ exports.registerApi = (env) => {
   });
 
   app.delete(`${exports.pathPrefix}/remote/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = credentialsOption(req.query.socketId).concat(['push', `${req.query.remote} :"refs/tags${req.query.name.trim()}"`]);
+    const commands = credentialsOption(req.query.socketId, req.query.remote).concat(['push', `${req.query.remote} :"refs/tags${req.query.name.trim()}"`]);
 
     jsonResultOrFailProm(res, gitPromise(commands, req.query.path))
       .finally(emitGitDirectoryChanged.bind(null, req.query.path));
@@ -593,6 +593,7 @@ exports.registerApi = (env) => {
       return;
     }
     const socket = socketsById[req.query.socketId];
+    const remote = req.query.remote;
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
@@ -600,7 +601,7 @@ exports.registerApi = (env) => {
       res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', (data) => res.json(data));
-      socket.emit('request-credentials');
+      socket.emit('request-credentials', {remote: remote});
     }
   });
 
