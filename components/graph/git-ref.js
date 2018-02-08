@@ -128,7 +128,7 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
               return self.server.postPromise('/push', pushReq);
             }).closePromise;
         } else {
-          throw err;
+          self.server.unhandledRejection(err);
         }
       });
   }
