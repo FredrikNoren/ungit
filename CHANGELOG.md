@@ -9,8 +9,8 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - fix remote tag push not creating remote tag
   - change ref refresh logic
   - show error on incorrect credentials [#1042](https://github.com/FredrikNoren/ungit/pull/1042)
-  - allow credential handling for remotes [#1041](https://github.com/FredrikNoren/ungit/pull/1041)
-  - add cancel button for empty commits and amends [#1036](https://github.com/FredrikNoren/ungit/pull/1036)
+  - allow credential handling for remotes [#1039](https://github.com/FredrikNoren/ungit/issues/1039)
+  - add cancel button for empty commits and amends [#1029](https://github.com/FredrikNoren/ungit/issues/1029)
 - 1.4.7: add remote branches to the branch list. [#966](https://github.com/FredrikNoren/ungit/issues/966)
 - 1.4.6:
   - dependency bump to fix dependency's security problem.
