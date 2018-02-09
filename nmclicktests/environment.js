@@ -20,21 +20,21 @@ Nightmare.action('ug', {
     this.wait('.files .file .btn-default')
       .insert('.staging input.form-control', commitMessage)
       .wait(100)
-      .click('.commit-btn')
+      .ug.click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'amendCommit': function(done) {
     this.ug.click('.amend-link')
-      .click('.commit-btn')
+      .ug.click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
   },
   'emptyCommit': function(done) {
     this.ug.click('.empty-commit-link')
-      .click('.commit-btn')
+      .ug.click('.commit-btn')
       .ug.waitForElementNotVisible('.files .file .btn-default')
       .wait(1000)
       .then(done.bind(null, null), done);
@@ -131,8 +131,7 @@ Nightmare.action('ug', {
   '_createRef': function(type, name, done) {
     this.ug.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
-      .wait(100)
-      .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
+      .ug.click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
       .wait(`.ref.${type}[data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);
