@@ -47,7 +47,7 @@ BranchesViewModel.prototype.updateRefs = function() {
   this.server.getPromise('/branches', { path: this.repoPath() })
     .then((branches) => {
       branches.forEach((b) => { if (b.current) { this.current(b.name); }});
-    }).catch((err) => { this.current("~error"); })
+    }).catch((err) => { this.current("~error"); });
 
   // refreshes tags branches and remote branches
   return this.server.getPromise('/refs', { path: this.repoPath() })
@@ -79,7 +79,7 @@ BranchesViewModel.prototype.updateRefs = function() {
           ref.remove(true);
         }
       });
-    });
+    }).catch((e) => this.server.unhandledRejection(e))
 }
 
 BranchesViewModel.prototype.branchRemove = function(branch) {

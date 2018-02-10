@@ -339,26 +339,35 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(credentialsOption(req.query.socketId).concat(['fetch', '--all']), req.query.path)
+    // Fetch may fail as it may lack correct credentials for each of the remotes
+    // We could iterate through each of the remotes and refresh but it will be super annoying
+    // for as this path will get hit quite frequently, on commits, push, and etc.
+    //
+    // People should really store their creds on .ssh or manage it so that it would
+    // work without password prompts. it's 2018, we shouldn't use passwords.
+    const task = gitPromise(['fetch', '--all'], req.query.path)
       .then(() => gitPromise(['show-ref', '-d'], req.query.path))
+      // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
+      .catch((e) => { if (e.message !== '') throw e; })
       .then((refs) => {
         const results = [];
-
-        refs.trim().split('\n').forEach((n) => {
-          const splitted = n.split(' ');
-          const sha1 = splitted[0]
-          const name = splitted[1]
-          if (name.indexOf('refs/tags') > -1 && name.indexOf('^{}') > -1) {
-            results[results.length - 1].sha1 = sha1;
-          } else {
-            results.push({
-              name: name,
-              sha1: sha1
-            });
-          }
-        });
+        if (refs) {
+          refs.trim().split('\n').forEach((n) => {
+            const splitted = n.split(' ');
+            const sha1 = splitted[0]
+            const name = splitted[1]
+            if (name.indexOf('refs/tags') > -1 && name.indexOf('^{}') > -1) {
+              results[results.length - 1].sha1 = sha1;
+            } else {
+              results.push({
+                name: name,
+                sha1: sha1
+              });
+            }
+          });
+        }
         return results;
-      })
+      });
     jsonResultOrFailProm(res, task);
   });
 

@@ -43,7 +43,7 @@ RemotesViewModel.prototype.onProgramEvent = function(event) {
   }
 }
 RemotesViewModel.prototype.fetch = function(options) {
-  if (this.isFetching) return;
+  if (this.isFetching || !this.currentRemote()) return;
   var self = this;
 
   this.isFetching = true;

@@ -131,7 +131,9 @@ Nightmare.action('ug', {
   '_createRef': function(type, name, done) {
     this.ug.click('.current ~ .newRef button.showBranchingForm')
       .insert('.newRef.editing input', name)
-      .ug.click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
+      .wait(100)
+      // cannot use .ug.click as wait op will defocus and doms will disappear
+      .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
       .wait(`.ref.${type}[data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);
