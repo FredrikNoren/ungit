@@ -3,10 +3,14 @@ skip_branch_with_pr: true
 environment:
   matrix:
   - nodejs_version: "6.0"
+  APPVEYOR_RDP_PASSWORD: "ungit-rdp"
 
 branches:
   only:
     - master
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   - ps: Install-Product node $env:nodejs_version
@@ -23,3 +27,6 @@ test_script:
   - npm test
 
 build: off
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
