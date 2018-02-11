@@ -11,13 +11,14 @@ var muteGraceTimeDuration = 60 * 1000 * 5;
 var mergeTool = ungit.config.mergeTool;
 
 components.register('staging', function(args) {
-  return new StagingViewModel(args.server, args.repoPath);
+  return new StagingViewModel(args.server, args.repoPath, args.graph);
 });
 
-var StagingViewModel = function(server, repoPath) {
+var StagingViewModel = function(server, repoPath, graph) {
   var self = this;
   this.server = server;
   this.repoPath = repoPath;
+  this.graph = graph;
   this.filesByPath = {};
   this.files = ko.observableArray();
   this.commitMessageTitleCount = ko.observable(0);
@@ -252,6 +253,34 @@ StagingViewModel.prototype.commit = function() {
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
     .then(() => { self.resetMessages(); })
     .catch((e) => this.server.unhandledRejection(e));
+}
+StagingViewModel.prototype.commitnpush = function() {
+  var self = this;
+  var files = this.files().filter(function(file) {
+    return file.editState() !== 'none';
+  }).map(function(file) {
+    return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
+  });
+  var commitMessage = this.commitMessageTitle();
+  if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
+
+  this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
+    .then(() => { 
+      self.resetMessages();
+      return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote() })
+    })
+    .catch(function(err) {
+      if (err.errorCode == 'non-fast-forward') {
+        return components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' })
+          .show()
+          .closeThen(function(diag) {
+            if (!diag.result()) return false;
+            return self.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote(), force: true });
+          }).closePromise;
+      } else {
+        self.server.unhandledRejection(err);      
+      }
+    });
 }
 StagingViewModel.prototype.conflictResolution = function(apiPath) {
   var self = this;
