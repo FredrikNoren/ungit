@@ -15,6 +15,7 @@ const crypto = require('crypto');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);
+const tenMinTimeoutMs = 10 * 60 * 1000;
 
 exports.pathPrefix = '';
 
@@ -210,8 +211,7 @@ exports.registerApi = (env) => {
 
   app.post(`${exports.pathPrefix}/fetch`, ensureAuthenticated, ensurePathExists, ensureValidSocketId, (req, res) => {
     // Allow a little longer timeout on fetch (10min)
-    const timeoutMs = 10 * 60 * 1000;
-    if (res.setTimeout) res.setTimeout(timeoutMs);
+    if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
 
     const task = gitPromise({
       commands: credentialsOption(req.body.socketId, req.body.remote).concat([
@@ -220,7 +220,7 @@ exports.registerApi = (env) => {
           req.body.ref ? req.body.ref : '',
           config.autoPruneOnFetch ? '--prune' : '']),
       repoPath: req.body.path,
-      timeout: timeoutMs
+      timeout: tenMinTimeoutMs
     });
 
     jsonResultOrFailProm(res, task)
@@ -229,8 +229,7 @@ exports.registerApi = (env) => {
 
   app.post(`${exports.pathPrefix}/push`, ensureAuthenticated, ensurePathExists, ensureValidSocketId, (req, res) => {
     // Allow a little longer timeout on push (10min)
-    const timeoutMs = 10 * 60 * 1000;
-    if (res.setTimeout) res.setTimeout(timeoutMs);
+    if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
     const task = gitPromise({
       commands: credentialsOption(req.body.socketId, req.body.remote).concat([
           'push',
@@ -238,7 +237,7 @@ exports.registerApi = (env) => {
           (req.body.refSpec ? req.body.refSpec : 'HEAD') + (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
           (req.body.force ? '-f' : '')]),
       repoPath: req.body.path,
-      timeout: timeoutMs
+      timeout: tenMinTimeoutMs
     });
 
     jsonResultOrFailProm(res, task)
@@ -339,14 +338,21 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    // Fetch may fail as it may lack correct credentials for each of the remotes
-    // We could iterate through each of the remotes and refresh but it will be super annoying
-    // for as this path will get hit quite frequently, on commits, push, and etc.
-    //
-    // People should really store their creds on .ssh or manage it so that it would
-    // work without password prompts. it's 2018, we shouldn't use passwords.
-    const task = gitPromise(['fetch', '--all'], req.query.path)
-      .then(() => gitPromise(['show-ref', '-d'], req.query.path))
+    if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
+
+    const task = gitPromise(['remote'], req.query.path)
+      .then((remoteText) => {
+        const remotes = remoteText.trim().split('\n');
+
+        // making calls serially as credential helpers may get confused to which cred to get.
+        return Bluebird.each(remotes, (remote) => {
+          return gitPromise({
+            commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
+            repoPath: req.query.path,
+            timeout: tenMinTimeoutMs
+          });
+        });
+      }).then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
       .catch((e) => { if (e.message !== '') throw e; })
       .then((refs) => {
