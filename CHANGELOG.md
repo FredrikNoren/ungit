@@ -11,6 +11,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - show error on incorrect credentials [#1042](https://github.com/FredrikNoren/ungit/pull/1042)
   - allow credential handling for remotes [#1039](https://github.com/FredrikNoren/ungit/issues/1039)
   - add cancel button for empty commits and amends [#1029](https://github.com/FredrikNoren/ungit/issues/1029)
+  - cleanup clicktest output [#1035](https://github.com/FredrikNoren/ungit/pull/1035)
 - 1.4.7: add remote branches to the branch list. [#966](https://github.com/FredrikNoren/ungit/issues/966)
 - 1.4.6:
   - dependency bump to fix dependency's security problem.

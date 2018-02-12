@@ -68,7 +68,8 @@ module.exports = (grunt) => {
     mochaTest: {
       unit: {
         options: {
-          reporter: 'spec'
+          reporter: 'spec',
+          require: './test/spec.helper.js'
         },
         src: 'test/*.js'
       },
@@ -76,7 +77,8 @@ module.exports = (grunt) => {
         options: {
           reporter: 'spec',
           timeout: 15000,
-          bail: true
+          bail: true,
+          require: './test/spec.helper.js'
         },
         src: 'nmclicktests/spec.*.js'
       }
