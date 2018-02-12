@@ -346,11 +346,12 @@ exports.registerApi = (env) => {
 
         // making calls serially as credential helpers may get confused to which cred to get.
         return Bluebird.each(remotes, (remote) => {
+          if (!remote || remote === '') return;
           return gitPromise({
             commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
             repoPath: req.query.path,
             timeout: tenMinTimeoutMs
-          });
+          }).catch((e) => winston.warn("err during remote fetch for /refs", e)) // ignore fetch err as it is most likely credential
         });
       }).then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
