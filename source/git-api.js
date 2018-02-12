@@ -487,7 +487,7 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/resolveconflicts`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    console.log('resolve conflicts');
+    winston.info('resolve conflicts');
     jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });

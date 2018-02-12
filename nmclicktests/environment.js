@@ -1,4 +1,5 @@
 'use strict';
+const winston = require('winston');
 const child_process = require('child_process');
 const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
@@ -13,7 +14,7 @@ module.exports = (config) => new Environment(config);
 
 Nightmare.action('ug', {
   'log': function(message, done) {
-    console.log(`>>> ${message}`);
+    winston.info(`>>> ${message}`);
     done();
   },
   'commit': function(commitMessage, done) {
@@ -84,12 +85,12 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   'createTempFolder': function(done) {
-    console.log('Creating temp folder');
+    winston.info('Creating temp folder');
     this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined)
       .then(done.bind(null, null), done);
   },
   'createFolder': function(dir, done) {
-    console.log(`Create folder: ${dir}`);
+    winston.info(`Create folder: ${dir}`);
     this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir })
       .then(done.bind(null, null), done);
   },
@@ -180,10 +181,10 @@ class Environment {
     // init
     this.nm.viewport(this.config.viewWidth, this.config.viewHeight);
     this.nm.on('console', (type, msg1, msg2) => {
-      console.log(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
+      winston.info(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
 
       if (type === 'error' && !this.shuttinDown) {
-        console.log('ERROR DETECTED!');
+        winston.info('ERROR DETECTED!');
       }
     })
   }
@@ -225,7 +226,7 @@ class Environment {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
-      .catch((err) => { console.log(err); throw new Error("Cannot confirm ungit start!!", err); })
+      .catch((err) => { winston.error(err); throw new Error("Cannot confirm ungit start!!", err); })
   }
 
   createRepos(testRepoPaths, config) {
@@ -270,7 +271,7 @@ class Environment {
   }
 
   startServer() {
-    console.log('Starting ungit server...', this.config.serverStartupOptions);
+    winston.info('Starting ungit server...', this.config.serverStartupOptions);
 
     this.hasStarted = false;
     const options = ['bin/ungit',
@@ -291,31 +292,31 @@ class Environment {
     const ungitServer = child_process.spawn('node', options);
     ungitServer.stdout.on('data', (stdout) => {
       const stdoutStr = stdout.toString();
-      if (this.config.showServerOutput) console.log(prependLines('[server] ', stdoutStr));
+      if (this.config.showServerOutput) winston.verbose(prependLines('[server] ', stdoutStr));
 
       if (stdoutStr.indexOf('Ungit server already running') >= 0) {
-        console.log('server-already-running');
+        winston.info('server-already-running');
       }
 
       if (stdoutStr.indexOf('## Ungit started ##') >= 0) {
         if (this.hasStarted) {
-          console.log('Ungit started twice, probably crashed.');
+          winston.info('Ungit started twice, probably crashed.');
         } else {
           this.hasStarted = true;
-          console.log('Ungit server started.');
+          winston.info('Ungit server started.');
         }
       }
     });
     ungitServer.stderr.on("data", (stderr) => {
       const stderrStr = stderr.toString();
-      console.error(prependLines('[server ERROR] ', stderrStr));
+      winston.error(prependLines('[server ERROR] ', stderrStr));
       if (stderrStr.indexOf("EADDRINUSE") > -1) {
-        console.log("retrying with different port");
+        winston.info("retrying with different port");
         ungitServer.kill('SIGINT');
         this.getPort().then(() => this.startServer());
       }
     });
-    ungitServer.on('exit', () => console.log('UNGIT SERVER EXITED'));
+    ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
     return Bluebird.resolve();
   }
 }
