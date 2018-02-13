@@ -93,6 +93,7 @@ describe('[BRANCHES]', () => {
   it('cherrypick fail case', () => {
     return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
       .ug.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask')
+      .wait(3000) // on windows clicking on cherry pick which results in conflicts might take some time
       .ug.click('.staging .btn-stg-abort')
       .ug.click('.modal-dialog .btn-primary')
       .wait(500)
