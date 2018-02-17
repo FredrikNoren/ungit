@@ -278,7 +278,7 @@ StagingViewModel.prototype.commitnpush = function() {
           .show()
           .closeThen(function(diag) {
             if (!diag.result()) return false;
-            return self.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote(), force: true });
+            return self.server.postPromise('/push', { path: self.repoPath(), remote: self.graph.currentRemote(), force: true });
           }).closePromise;
       } else {
         self.server.unhandledRejection(err);      
