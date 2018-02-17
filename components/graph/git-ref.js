@@ -185,6 +185,7 @@ RefViewModel.prototype.getRemoteRefFullName = function(remote) {
 
 RefViewModel.prototype.canBePushed = function(remote) {
   if (!this.isLocal) return false;
+  if (!remote) return false;
   var remoteRef = this.getRemoteRef(remote);
   if (!remoteRef) return true;
   return this.node() != remoteRef.node();
