@@ -20,9 +20,17 @@
           </span>
           <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
-        <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, visible: isStageValid, enable: !commitValidationError()">
-          Commit
-        </button>
+        <div class="btn-group commit-grp" data-bind="visible: isStageValid">
+          <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, enable: !commitValidationError()">
+            Commit
+          </button>
+          <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" data-bind="enable: !commitValidationError()">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#" data-bind="click: commitnpush, css: { disabled: commitValidationError() }" class="commitnpush">Commit & Push</a></li>
+          </ul>
+        </div>
         <button class="btn btn-warning btn-lg btn-stg-cancel" data-bind="click: cancelAmendEmpty, visible: showCancelButton">
           Cancel
         </button>

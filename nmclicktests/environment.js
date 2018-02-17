@@ -25,6 +25,13 @@ Nightmare.action('ug', {
       .wait(1000)
       .then(done.bind(null, null), done);
   },
+  'commitnpush': function(commitMessage, done) {
+    this.wait('.files .file .btn-default')
+      .insert('.staging input.form-control', commitMessage)
+      .ug.click('.commit-grp .dropdown-toggle')
+      .ug.click('.commitnpush')
+      .then(done.bind(null, null), done);
+  },
   'amendCommit': function(done) {
     this.ug.click('.amend-link')
       .click('.commit-btn')
