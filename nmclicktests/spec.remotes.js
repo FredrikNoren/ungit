@@ -100,4 +100,18 @@ describe('[REMOTES]', () => {
       .wait(200)
       .wait('[data-ta-name="branchinclone"][data-ta-local="true"]')
   });
+
+  it('Should be possible to commitnpush', () => {
+    return environment.nm.ug.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`)
+      .ug.commitnpush('Commit & Push')
+      .wait('.nux')
+  });
+
+  it('Should be possible to commitnpush with ff', () => {
+    return environment.nm.ug.click('.amend-link')
+      .ug.click('.commit-grp .dropdown-toggle')
+      .ug.click('.commitnpush')
+      .ug.click('.modal-dialog .btn-primary')
+      .wait('.nux')
+  });
 });
