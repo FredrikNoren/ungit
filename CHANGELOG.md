@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
-- 1.4.10:
+- 1.4.11:
   - differentiate remote vs local tag. [#1016](https://github.com/FredrikNoren/ungit/issues/1016)
   - fix push not throwing giterror
   - fix remote tag push not creating remote tag
@@ -12,6 +12,14 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - allow credential handling for remotes [#1039](https://github.com/FredrikNoren/ungit/issues/1039)
   - add cancel button for empty commits and amends [#1029](https://github.com/FredrikNoren/ungit/issues/1029)
   - cleanup clicktest output [#1035](https://github.com/FredrikNoren/ungit/pull/1035)
+- 1.4.10:
+  - hide / disable push option if there is no remote [#1050](https://github.com/FredrikNoren/ungit/issues/1050)
+  - add commit & push option [#1038](https://github.com/FredrikNoren/ungit/issues/1038)
+- 1.4.9:
+  - handle failed promises [#1017](https://github.com/FredrikNoren/ungit/issues/1017)
+  - empty commit [#1028](https://github.com/FredrikNoren/ungit/issues/1028)
+  - fix commit detail layout while hovering over commit node [#1025](https://github.com/FredrikNoren/ungit/issues/1025)
+- 1.4.8: fix remote branches display name and delete action [#1032](https://github.com/FredrikNoren/ungit/issues/1032), [#1031](https://github.com/FredrikNoren/ungit/issues/1031)
 - 1.4.7: add remote branches to the branch list. [#966](https://github.com/FredrikNoren/ungit/issues/966)
 - 1.4.6:
   - dependency bump to fix dependency's security problem.

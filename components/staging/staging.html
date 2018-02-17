@@ -28,7 +28,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu" role="menu">
-            <li><a href="#" data-bind="click: commitnpush, css: { disabled: commitValidationError() }" class="commitnpush">Commit & Push</a></li>
+            <li><a href="#" data-bind="click: commitnpush, css: { disabled: !canPush() }" class="commitnpush">Commit & Push</a></li>
           </ul>
         </div>
         <button class="btn btn-warning btn-lg btn-stg-cancel" data-bind="click: cancelAmendEmpty, visible: showCancelButton">
