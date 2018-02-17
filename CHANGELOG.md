@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.10:
+  - hide / disable push option if there is no remote [#1050](https://github.com/FredrikNoren/ungit/issues/1050)
+  - add commit & push option [#1038](https://github.com/FredrikNoren/ungit/issues/1038)
 - 1.4.9:
   - handle failed promises [#1017](https://github.com/FredrikNoren/ungit/issues/1017)
   - empty commit [#1028](https://github.com/FredrikNoren/ungit/issues/1028)

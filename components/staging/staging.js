@@ -79,6 +79,9 @@ var StagingViewModel = function(server, repoPath, graph) {
   this.canStashAll = ko.computed(function() {
     return !self.amend();
   });
+  this.canPush = ko.computed(function() {
+    return !!self.graph.currentRemote();
+  });
   this.showNux = ko.computed(function() {
     return self.files().length == 0 && !self.amend() && !self.inRebase() && !self.emptyCommit();
   });

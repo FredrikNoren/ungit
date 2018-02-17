@@ -19,6 +19,17 @@ describe('[REMOTES]', () => {
     return environment.nm.ug.openUngit(testRepoPaths[1]);
   });
 
+  it('Should not be possible to push without remote', () => {
+    return environment.nm.ug.click(`.branch[data-ta-name="master"][data-ta-local="true"]`)
+      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
+  });
+
+  it('Should not be possible to commit & push without remote', () => {
+    return environment.nm.ug.click('.amend-link')
+      .ug.click('.commit-grp .dropdown-toggle')
+      .wait('.commitnpush.disabled');
+  });
+
   it('Adding a remote', () => {
     return environment.nm.ug.click('.fetchButton .dropdown-toggle')
       .ug.click('.add-new-remote')
