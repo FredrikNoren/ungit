@@ -191,7 +191,8 @@ module.exports = (grunt) => {
         files: [
           // includes files within path
           { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.ttf'], dest: 'public/css/' },
-          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.woff'], dest: 'public/css/' }
+          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.woff'], dest: 'public/css/' },
+          { expand: true, flatten: true, src: ['node_modules/nprogress/nprogress.css'], dest: 'public/css/' }
         ]
       },
       electron: {
