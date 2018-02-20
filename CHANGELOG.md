@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.11:
+  - differentiate remote vs local tag. [#1016](https://github.com/FredrikNoren/ungit/issues/1016)
+  - fix push not throwing giterror
+  - fix remote tag push not creating remote tag
+  - change ref refresh logic
+  - show error on incorrect credentials [#1042](https://github.com/FredrikNoren/ungit/pull/1042)
+  - allow credential handling for remotes [#1039](https://github.com/FredrikNoren/ungit/issues/1039)
+  - add cancel button for empty commits and amends [#1029](https://github.com/FredrikNoren/ungit/issues/1029)
+  - cleanup clicktest output [#1035](https://github.com/FredrikNoren/ungit/pull/1035)
 - 1.4.10:
   - hide / disable push option if there is no remote [#1050](https://github.com/FredrikNoren/ungit/issues/1050)
   - add commit & push option [#1038](https://github.com/FredrikNoren/ungit/issues/1038)

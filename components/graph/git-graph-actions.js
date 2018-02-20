@@ -5,6 +5,7 @@ var components = require('ungit-components');
 var Promise = require('bluebird');
 var RefViewModel = require('./git-ref.js');
 var HoverActions = require('./hover-actions');
+var programEvents = require('ungit-program-events');
 var RebaseViewModel = HoverActions.RebaseViewModel;
 var MergeViewModel = HoverActions.MergeViewModel;
 var ResetViewModel = HoverActions.ResetViewModel;
@@ -34,7 +35,7 @@ GraphActions.ActionBase.prototype.doPerform = function() {
   if (this.isRunning()) return;
   this.graph.hoverGraphAction(null);
   this.isRunning(true);
-  this.perform()
+  return this.perform()
     .catch((e) => this.server.unhandledRejection(e))
     .finally(() => { this.isRunning(false); });
 }
@@ -189,18 +190,18 @@ GraphActions.Push.prototype.createHoverGraphic = function() {
   return new PushViewModel(remoteRef.node(), context.node());
 }
 GraphActions.Push.prototype.perform = function() {
-  var self = this;
   var ref = this.graph.currentActionContext();
   var remoteRef = ref.getRemoteRef(this.graph.currentRemote());
 
   if (remoteRef) {
-    return remoteRef.moveTo(ref.node().sha1)
+    return remoteRef.moveTo(ref.node().sha1);
   } else {
-    return ref.createRemoteRef().then(function() {
-        if (self.graph.HEAD().name == ref.name) {
-          self.grah.HEADref().node(ref.node());
+    return ref.createRemoteRef()
+      .then(() => {
+        if (this.graph.HEAD().name == ref.name) {
+          this.grah.HEADref().node(ref.node());
         }
-      });
+      }).finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
   }
 }
 

@@ -14,13 +14,13 @@ function BranchesViewModel(server, graph, repoPath) {
   var self = this;
   this.repoPath = repoPath;
   this.server = server;
-  this.branches = ko.observableArray();
+  this.branchesAndLocalTags = ko.observableArray();
   this.current = ko.observable();
   this.isLocalBranchOnly = ko.observable(localStorage.getItem(isLocalBranchOnly) == 'true');
   this.graph = graph;
   this.isLocalBranchOnly.subscribe((value) => {
     localStorage.setItem(isLocalBranchOnly, value);
-    this.updateBranches();
+    this.updateRefs();
     return value;
   });
   this.fetchLabel = ko.computed(function() {
@@ -28,48 +28,58 @@ function BranchesViewModel(server, graph, repoPath) {
       return self.current();
     }
   });
-  this.updateBranches();
+  this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
 }
 BranchesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('branches', this, {}, parentElement);
 }
-BranchesViewModel.prototype.clickFetch = function() { this.updateBranches(); }
+BranchesViewModel.prototype.clickFetch = function() { this.updateRefs(); }
 BranchesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event === 'working-tree-changed' || event.event == 'request-app-content-refresh' || event.event == 'branch-updated') {
-    this.updateBranches();
+  if (event.event === 'working-tree-changed' || event.event === 'request-app-content-refresh' ||
+    event.event === 'branch-updated' || event.event === 'git-directory-changed') {
+    this.updateRefsDebounced();
   }
 }
 BranchesViewModel.prototype.checkoutBranch = function(branch) {
   branch.checkout();
 }
-BranchesViewModel.prototype.updateBranches = function() {
-  var self = this;
+BranchesViewModel.prototype.updateRefs = function() {
+  this.server.getPromise('/branches', { path: this.repoPath() })
+    .then((branches) => {
+      branches.forEach((b) => { if (b.current) { this.current(b.name); }});
+    }).catch((err) => { this.current("~error"); });
 
-  this.server.getPromise('/branches', { path: this.repoPath(), isLocalBranchOnly: this.isLocalBranchOnly() })
-    .then(function(branches) {
-      const sorted = branches.filter((b) => b.name.indexOf('->') === -1)
-        .map((b) => {
-          const refName = `refs/${b.name.indexOf('remotes/') === 0 ? '' : 'heads/'}${b.name}`;
-          if (b.current) {
-            self.current(b.name);
+  // refreshes tags branches and remote branches
+  return this.server.getPromise('/refs', { path: this.repoPath() })
+    .then((refs) => {
+      const version = Date.now();
+      const sorted = refs.map((r) => {
+        const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
+        ref.node(this.graph.getNode(r.sha1));
+        ref.version = version;
+        return ref;
+      }).sort((a, b) => {
+        if (a.current() || b.current()) {
+          return a.current() ? -1 : 1;
+        } else if (a.isRemoteBranch === b.isRemoteBranch) {
+          if (a.name < b.name) {
+             return -1;
+          } if (a.name > b.name) {
+            return 1;
           }
-          return self.graph.getRef(refName);
-        }).sort((a, b) => {
-          if (a.current() || b.current()) {
-            return a.current() ? -1 : 1;
-          } else if (a.isRemoteBranch === b.isRemoteBranch) {
-            if (a.name < b.name) {
-               return -1;
-            } if (a.name > b.name) {
-              return 1;
-            }
-            return 0;
-          } else {
-            return a.isRemoteBranch ? 1 : -1;
-          }
-        });
-      self.branches(sorted);
-    }).catch(function(err) { self.current("~error"); });
+          return 0;
+        } else {
+          return a.isRemoteBranch ? 1 : -1;
+        }
+      });
+      this.branchesAndLocalTags(sorted);
+      this.graph.refs().forEach((ref) => {
+        // ref was removed from another source
+        if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
+          ref.remove(true);
+        }
+      });
+    }).catch((e) => this.server.unhandledRejection(e))
 }
 
 BranchesViewModel.prototype.branchRemove = function(branch) {

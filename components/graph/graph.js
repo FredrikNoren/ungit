@@ -110,24 +110,9 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
       self.skip(parseInt(log.skip));
       return log.nodes || [];
     }).then(function(nodes) {
-      // check for deleted refs to update the UI
-      var updatedRefs = [];
-      nodes.forEach(function(logEntry) {
-        updatedRefs = updatedRefs.concat(logEntry.refs);
-      });
-      Object.keys(self.refsByRefName).forEach(function(refName) {
-        if (updatedRefs.indexOf(refName) < 0) {
-          self.refs.remove(self.refsByRefName[refName]);
-          var ref = self.refsByRefName[refName];
-          if (ref) { ref.node(null); }
-          delete self.refsByRefName[refName]
-        }
-      });
-      return nodes;
-    }).then(function(nodes) {
       // create and/or calculate nodes
-      return self.computeNode(nodes.map(function(logEntry) {
-        return self.getNode(logEntry.sha1, logEntry);
+      return self.computeNode(nodes.map((logEntry) => {
+        return self.getNode(logEntry.sha1, logEntry);     // convert to node object
       }));
     }).then(function(nodes) {
       // create edges
@@ -300,13 +285,19 @@ GraphViewModel.prototype.updateBranches = function() {
     })
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
-  var self = this;
-  var nodeIdsToRemoteTags = {};
-  remoteTags.forEach(function(ref) {
-    if (ref.name.indexOf('^{}') != -1) {
-      var tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
-      var name = 'remote-tag: ' + ref.remote + '/' + tagRef.split('/')[2];
-      self.getRef(name).node(self.getNode(ref.sha1));
+  const version = Date.now();
+  remoteTags.forEach((ref) => {
+    if (ref.name.indexOf('^{}') !== -1) {
+      const tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
+      const name = `remote-tag: ${ref.remote}/${tagRef.split('/')[2]}`;
+      this.getRef(name).node(this.getNode(ref.sha1));
+      this.getRef(name).version = version;
+    }
+  });
+  this.refs().forEach((ref) => {
+    // tag is removed from another source
+    if (ref.isRemoteTag && (!ref.version || ref.version < version)) {
+      ref.remove(true);
     }
   });
 }

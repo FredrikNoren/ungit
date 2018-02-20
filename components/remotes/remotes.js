@@ -30,16 +30,20 @@ function RemotesViewModel(server, repoPath) {
   this.shouldAutoFetch = ungit.config.autoFetch;
   this.updateRemotes();
   this.isFetching = false;
+  this.fetchDebounced = _.debounce(() => this.fetch({ tags: true }), 500);
 }
 RemotesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('remotes', this, {}, parentElement);
 }
 RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
 RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-fetch-tags') this.fetch({ tags: true });
+  if (event.event === 'working-tree-changed' || event.event === 'request-app-content-refresh' ||
+    event.event === 'request-fetch-tags' || event.event === 'git-directory-changed') {
+    this.fetchDebounced();
+  }
 }
 RemotesViewModel.prototype.fetch = function(options) {
-  if (this.isFetching) return;
+  if (this.isFetching || !this.currentRemote()) return;
   var self = this;
 
   this.isFetching = true;
