@@ -37,6 +37,10 @@ components.register('toomanyfilesdialogviewmodel', function(args) {
   return new TooManyFilesDialogViewModel(args.title, args.details);
 });
 
+components.register('texteditdialog', function(args) {
+  return new TextEditDialog(args.title);
+});
+
 function DialogViewModel(title) {
   var self = this;
   this.onclose = null;
@@ -157,3 +161,15 @@ function TooManyFilesDialogViewModel(title, details) {
   ]);
 }
 inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
+
+function TextEditDialog(title) {
+  PromptDialogViewModel.call(this, title, '<textarea name="gitignore-content" class="gitignore-edit" rows="50" cols="120" ></textarea>');
+  var self = this;
+  this.taDialogName('yes-no-dialog');
+  this.result = ko.observable(false);
+  this.alternatives([
+    { label: "Save", primary: true, taId: 'save', click: function() { self.result(false); self.close(); } },
+    { label: 'Cancel', primary: false, taId: 'cancel', click: function() { self.result(true); self.close(); } },
+  ]);
+}
+inherits(TextEditDialog, PromptDialogViewModel);
