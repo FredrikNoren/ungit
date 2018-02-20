@@ -660,6 +660,17 @@ exports.registerApi = (env) => {
     });
   });
 
+  app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    fs.readFileAsync(path.join(req.query.path, ".gitignore"))
+      .then((ignoreContent) => res.status(400).json(ignoreContent.toString()))
+      .catch((e) => res.status(500).json(e));
+  });
+  app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
+      .then(() => res.status(400).json({}))
+      .catch((e) => res.status(500).json(e))
+  });
+
   if (config.dev) {
     app.post(`${exports.pathPrefix}/testing/createtempdir`, ensureAuthenticated, (req, res) => {
       temp.mkdir('test-temp-dir', (err, tempPath) => res.json({ path: path.normalize(tempPath) }));
