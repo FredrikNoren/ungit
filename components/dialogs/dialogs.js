@@ -33,7 +33,7 @@ components.register('yesnomutedialog', function(args) {
   return new YesNoMuteDialogViewModel(args.title, args.details);
 });
 
-components.register('TooManyFilesDialogViewModel', function(args) {
+components.register('toomanyfilesdialogviewmodel', function(args) {
   return new TooManyFilesDialogViewModel(args.title, args.details);
 });
 
