@@ -663,10 +663,15 @@ exports.registerApi = (env) => {
   app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
     fs.readFileAsync(path.join(req.query.path, ".gitignore"))
       .then((ignoreContent) => res.status(200).json({ content: ignoreContent.toString() }))
-      .catch((e) => res.status(500).json(e));
+      .catch((e) => {
+        if (e && e.message && e.message.indexOf('no such file or directory') > -1) {
+          res.status(200).json({ content: '' });
+        } else {
+          res.status(500).json(e);
+        }
+      });
   });
   app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    console.log(999, req.body)
     if (!req.body.data || req.body.data == '') {
       return res.status(500).json({ message: "Invalid .gitignore content"});
     }

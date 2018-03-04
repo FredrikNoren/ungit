@@ -96,8 +96,8 @@ RepositoryViewModel.prototype.editGitignore = function() {
     }).catch(e => {
       // Not a git error but we are going to treat like one
       programEvents.dispatch({ event: 'git-error', data: {
-        command: `fs.write "${this.repoPath}/.gitignore"`,
-        error: e.message,
+        command: `fs.write "${this.repoPath()}/.gitignore"`,
+        error: e.message || e.errorSummary,
         stdout: '',
         stderr: e.stack,
         repoPath: this.repoPath()
