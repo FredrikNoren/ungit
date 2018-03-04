@@ -662,12 +662,16 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
     fs.readFileAsync(path.join(req.query.path, ".gitignore"))
-      .then((ignoreContent) => res.status(400).json(ignoreContent.toString()))
+      .then((ignoreContent) => res.status(200).json({ content: ignoreContent.toString() }))
       .catch((e) => res.status(500).json(e));
   });
   app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    console.log(999, req.body)
+    if (!req.body.data || req.body.data == '') {
+      return res.status(500).json({ message: "Invalid .gitignore content"});
+    }
     fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
-      .then(() => res.status(400).json({}))
+      .then(() => res.status(200).json({}))
       .catch((e) => res.status(500).json(e))
   });
 

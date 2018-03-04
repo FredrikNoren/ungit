@@ -83,19 +83,20 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
 }
 
 RepositoryViewModel.prototype.editGitignore = function() {
+  var self = this;
   return this.server.getPromise('/gitignore', { path: this.repoPath() })
-    .then((content) => {
-      return components.create('texteditdialog', { titile: `editing .gitignore for '${this.repoPath()}'`, content: content })
+    .then((res) => {
+      return components.create('texteditdialog', { title: `${this.repoPath()}/.gitignore`, content: res.content })
         .show()
         .closeThen(function(diag) {
           if (diag.result()) {
-            // return self.server.putPromise('/gitignore', diag);
+            return self.server.putPromise('/gitignore', { path: self.repoPath(), data: diag.textAreaContent });
           }
-        }).closePromise;
+        });
     }).catch(e => {
       // Not a git error but we are going to treat like one
       programEvents.dispatch({ event: 'git-error', data: {
-        command: 'fs.write',
+        command: `fs.write "${this.repoPath}/.gitignore"`,
         error: e.message,
         stdout: '',
         stderr: e.stack,

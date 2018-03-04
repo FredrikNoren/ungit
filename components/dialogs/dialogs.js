@@ -38,7 +38,7 @@ components.register('toomanyfilesdialogviewmodel', function(args) {
 });
 
 components.register('texteditdialog', function(args) {
-  return new TextEditDialog(args.title);
+  return new TextEditDialog(args.title, args.content);
 });
 
 function DialogViewModel(title) {
@@ -162,14 +162,19 @@ function TooManyFilesDialogViewModel(title, details) {
 }
 inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
 
-function TextEditDialog(title) {
-  PromptDialogViewModel.call(this, title, '<textarea name="gitignore-content" class="gitignore-edit" rows="50" cols="120" ></textarea>');
+function TextEditDialog(title, content) {
+  PromptDialogViewModel.call(this, title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px">${content}</textarea>`);
   var self = this;
-  this.taDialogName('yes-no-dialog');
+  this.taDialogName('text-edit-dialog');
   this.result = ko.observable(false);
   this.alternatives([
-    { label: "Save", primary: true, taId: 'save', click: function() { self.result(false); self.close(); } },
-    { label: 'Cancel', primary: false, taId: 'cancel', click: function() { self.result(true); self.close(); } },
+    { label: "Save", primary: true, taId: 'save', click: function() {
+        self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
+        self.result(true);
+        self.close();
+      }
+    },
+    { label: 'Cancel', primary: false, taId: 'cancel', click: function() { self.result(false); self.close(); } },
   ]);
 }
 inherits(TextEditDialog, PromptDialogViewModel);
