@@ -1,6 +1,6 @@
 
 <!-- ko foreach: gitErrors -->
-<div class="alert alert-danger">
+<div class="alert" data-bind="css: { 'alert-danger': !isWarning, 'alert-warning': isWarning }">
   <button type="button" class="close" data-bind="click: dismiss">&times;</button>
   <h3><span class="glyphicon glyphicon-warning-sign"></span> Unhandled git error!</h3>
   <p>

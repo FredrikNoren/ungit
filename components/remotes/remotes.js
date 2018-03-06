@@ -54,8 +54,30 @@ RemotesViewModel.prototype.fetch = function(options) {
       if (options.tags) {
         programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
       }
-    }).catch((e) => this.server.unhandledRejection(e))
-    .finally(() => { this.isFetching = false; })
+      if (!this.server.isInternetConnected) {
+        this.server.isInternetConnected = true;
+      }
+    }).catch((err) => {
+      let errorMessage;
+      try { errorMessage = err.res.body.error; }
+      catch (e) { errorMessage = ''; }
+
+      if (errorMessage.indexOf('Could not resolve host') > -1) {
+        if (this.server.isInternetConnected) {
+          programEvents.dispatch({ event: 'git-error', data: {
+            isWarning: true,
+            command: err.res.body.command,
+            error: err.res.body.error,
+            stdout: 'This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.',
+            stderr: '',
+            repoPath: err.res.body.workingDirectory
+          } });
+          this.server.isInternetConnected = false;
+        }
+      } else {
+        this.server.unhandledRejection(err);
+      }
+    }).finally(() => { this.isFetching = false; });
 }
 
 RemotesViewModel.prototype.updateRemotes = function() {
