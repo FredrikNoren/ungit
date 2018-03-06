@@ -86,7 +86,7 @@ RepositoryViewModel.prototype.editGitignore = function() {
   var self = this;
   return this.server.getPromise('/gitignore', { path: this.repoPath() })
     .then((res) => {
-      return components.create('texteditdialog', { title: `${this.repoPath()}/.gitignore`, content: res.content })
+      return components.create('texteditdialog', { title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`, content: res.content })
         .show()
         .closeThen(function(diag) {
           if (diag.result()) {
@@ -96,7 +96,7 @@ RepositoryViewModel.prototype.editGitignore = function() {
     }).catch(e => {
       // Not a git error but we are going to treat like one
       programEvents.dispatch({ event: 'git-error', data: {
-        command: `fs.write "${this.repoPath()}/.gitignore"`,
+        command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
         error: e.message || e.errorSummary,
         stdout: '',
         stderr: e.stack,
