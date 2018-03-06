@@ -12,6 +12,7 @@ nprogress.configure({
 });
 
 function Server() {
+  this.isInternetConnected = true;
 }
 module.exports = Server;
 
