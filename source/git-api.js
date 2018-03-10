@@ -660,6 +660,26 @@ exports.registerApi = (env) => {
     });
   });
 
+  app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    fs.readFileAsync(path.join(req.query.path, ".gitignore"))
+      .then((ignoreContent) => res.status(200).json({ content: ignoreContent.toString() }))
+      .catch((e) => {
+        if (e && e.message && e.message.indexOf('no such file or directory') > -1) {
+          res.status(200).json({ content: '' });
+        } else {
+          res.status(500).json(e);
+        }
+      });
+  });
+  app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    if (!req.body.data || req.body.data == '') {
+      return res.status(500).json({ message: "Invalid .gitignore content"});
+    }
+    fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
+      .then(() => res.status(200).json({}))
+      .catch((e) => res.status(500).json(e))
+  });
+
   if (config.dev) {
     app.post(`${exports.pathPrefix}/testing/createtempdir`, ensureAuthenticated, (req, res) => {
       temp.mkdir('test-temp-dir', (err, tempPath) => res.json({ path: path.normalize(tempPath) }));

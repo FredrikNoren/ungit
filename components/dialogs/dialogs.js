@@ -33,8 +33,12 @@ components.register('yesnomutedialog', function(args) {
   return new YesNoMuteDialogViewModel(args.title, args.details);
 });
 
-components.register('TooManyFilesDialogViewModel', function(args) {
+components.register('toomanyfilesdialogviewmodel', function(args) {
   return new TooManyFilesDialogViewModel(args.title, args.details);
+});
+
+components.register('texteditdialog', function(args) {
+  return new TextEditDialog(args.title, args.content);
 });
 
 function DialogViewModel(title) {
@@ -157,3 +161,20 @@ function TooManyFilesDialogViewModel(title, details) {
   ]);
 }
 inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
+
+function TextEditDialog(title, content) {
+  PromptDialogViewModel.call(this, title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px">${content}</textarea>`);
+  var self = this;
+  this.taDialogName('text-edit-dialog');
+  this.result = ko.observable(false);
+  this.alternatives([
+    { label: "Save", primary: true, taId: 'save', click: function() {
+        self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
+        self.result(true);
+        self.close();
+      }
+    },
+    { label: 'Cancel', primary: false, taId: 'cancel', click: function() { self.result(false); self.close(); } },
+  ]);
+}
+inherits(TextEditDialog, PromptDialogViewModel);

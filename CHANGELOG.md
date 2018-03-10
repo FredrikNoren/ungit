@@ -4,7 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
 - 1.4.12:
-  - Adding internet disconnected state handling [#1014]((https://github.com/FredrikNoren/ungit/issues/1014))
+  - Adding internet disconnected state handling [#1014](https://github.com/FredrikNoren/ungit/issues/1014)
+  - Allow editing .gitignore via ungit [#976](https://github.com/FredrikNoren/ungit/issues/1014)
 - 1.4.11:
   - differentiate remote vs local tag. [#1016](https://github.com/FredrikNoren/ungit/issues/1016)
   - fix push not throwing giterror

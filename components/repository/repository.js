@@ -3,6 +3,7 @@ var ko = require('knockout');
 var components = require('ungit-components');
 var async = require('async');
 var _ = require('lodash');
+const programEvents = require('ungit-program-events');
 
 components.register('repository', function(args) {
   return new RepositoryViewModel(args.server, args.path);
@@ -79,4 +80,27 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
       self.parentModuleLink(undefined);
       self.parentModulePath(undefined);
     });
+}
+
+RepositoryViewModel.prototype.editGitignore = function() {
+  var self = this;
+  return this.server.getPromise('/gitignore', { path: this.repoPath() })
+    .then((res) => {
+      return components.create('texteditdialog', { title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`, content: res.content })
+        .show()
+        .closeThen(function(diag) {
+          if (diag.result()) {
+            return self.server.putPromise('/gitignore', { path: self.repoPath(), data: diag.textAreaContent });
+          }
+        });
+    }).catch(e => {
+      // Not a git error but we are going to treat like one
+      programEvents.dispatch({ event: 'git-error', data: {
+        command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
+        error: e.message || e.errorSummary,
+        stdout: '',
+        stderr: e.stack,
+        repoPath: this.repoPath()
+      }});
+    })
 }

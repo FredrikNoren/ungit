@@ -152,7 +152,7 @@ StagingViewModel.prototype.refreshContent = function() {
             return;
           }
           self.isDiagOpen = true;
-          return components.create('TooManyFilesDialogViewModel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
+          return components.create('toomanyfilesdialogviewmodel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
             .show()
             .closeThen(function(diag) {
               self.isDiagOpen = false;
@@ -210,7 +210,6 @@ StagingViewModel.prototype.setFiles = function(files) {
   programEvents.dispatch({ event: 'init-tooltip' });
 }
 StagingViewModel.prototype.toggleAmend = function() {
-  
   if (!this.amend() && !this.commitMessageTitle()) {
     this.commitMessageTitle(this.HEAD().title);
     this.commitMessageBody(this.HEAD().body);
@@ -268,7 +267,7 @@ StagingViewModel.prototype.commitnpush = function() {
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
-    .then(() => { 
+    .then(() => {
       self.resetMessages();
       return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote() })
     })
@@ -281,7 +280,7 @@ StagingViewModel.prototype.commitnpush = function() {
             return self.server.postPromise('/push', { path: self.repoPath(), remote: self.graph.currentRemote(), force: true });
           }).closePromise;
       } else {
-        self.server.unhandledRejection(err);      
+        self.server.unhandledRejection(err);
       }
     });
 }
