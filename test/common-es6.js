@@ -11,13 +11,15 @@ exports.makeRequest = (method, req, path, payload) => {
     r = req.post(`${restGit.pathPrefix}${path}`);
   } else if (method === 'DELETE') {
     r = req.del(`${restGit.pathPrefix}${path}`);
+  } else if (method === 'PUT') {
+    r = req.put(`${restGit.pathPrefix}${path}`);
   } else {
     throw new Error({message: `invalid method of ${method}`});
   }
 
   if (payload) {
     payload.socketId = 'ignore';
-    if (method === 'POST') {
+    if (method === 'POST' || method === 'PUT') {
       r.send(payload)
     } else {
       r.query(payload);
@@ -45,6 +47,7 @@ exports.get = this.makeRequest.bind(this, 'GET');
 exports.getPng = this.makeRequest.bind(this, 'PNG');
 exports.post = this.makeRequest.bind(this, 'POST');
 exports.delete = this.makeRequest.bind(this, 'DELETE');
+exports.put = this.makeRequest.bind(this, 'PUT');
 
 exports.initRepo = (req, config) => {
   config = config || {};
