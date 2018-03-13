@@ -169,9 +169,12 @@ exports.registerApi = (env) => {
   }
 
   const credentialsOption = (socketId, remote) => {
-    const rootPath = _.trim(config.rootPath || '', '/'); // remove '/', because of windows git issue
+    let portAndRootPath = `${config.port}`;
+    if(config.rootPath){
+      portAndRootPath = `${config.port}${config.rootPath}`
+    }
     const credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
-    return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${config.port} ${remote} ${rootPath}`];
+    return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${portAndRootPath} ${remote}`];
   }
 
   const getNumber = (value, nullValue) => {
