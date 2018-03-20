@@ -29,7 +29,7 @@ const navigate = (override) => {
   let pathToNavigateTo = null;
   if (config.forcedLaunchPath !== undefined && config.forcedLaunchPath !== '') {
     pathToNavigateTo = `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
-  } else if (override || config.launchBrowser) {
+  } else if (override || config.launchBrowser || config.launchCommand) {
     pathToNavigateTo = `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(process.cwd())}`
   }
 
