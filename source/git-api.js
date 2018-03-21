@@ -170,7 +170,7 @@ exports.registerApi = (env) => {
 
   const credentialsOption = (socketId, remote) => {
     let portAndRootPath = `${config.port}`;
-    if(config.rootPath){
+    if (config.rootPath) {
       portAndRootPath = `${config.port}${config.rootPath}`
     }
     const credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
