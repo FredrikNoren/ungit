@@ -4,6 +4,8 @@ const child_process = require('child_process');
 const path = require('path');
 const http = require('http');
 const config = require('../src/config');
+const url = require('url');
+const querystring = require('querystring');
 
 describe('credentials-helper', () => {
 
@@ -12,7 +14,13 @@ describe('credentials-helper', () => {
     const remote = "origin";
     const payload = { username: 'testuser', password: 'testpassword' };
     const server = http.createServer((req, res) => {
-      expect(req.url).to.be(`/api/credentials?socketId=${socketId}&remote=${remote}`);
+      const reqUrl = url.parse(req.url);
+      expect(reqUrl.pathname).to.be(`/api/credentials`);
+
+      const params = querystring.parse(reqUrl.query);
+      expect(params['remote']).to.be(`${remote}`);
+      expect(params['socketId']).to.be(`${socketId}`);
+
       res.writeHead(200, {'Content-Type': 'application/json'});
       res.end(JSON.stringify(payload));
     });
