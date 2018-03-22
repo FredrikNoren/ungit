@@ -163,7 +163,7 @@ function TooManyFilesDialogViewModel(title, details) {
 inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
 
 function TextEditDialog(title, content) {
-  PromptDialogViewModel.call(this, title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px">${content}</textarea>`);
+  PromptDialogViewModel.call(this, title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px;width: 100%">${content}</textarea>`);
   var self = this;
   this.taDialogName('text-edit-dialog');
   this.result = ko.observable(false);
