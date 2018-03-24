@@ -173,7 +173,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
     if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
     var ideologicalBranch = node.ideologicalBranch();
 
-    // First occurence of the branch, find an empty slot for the branch
+    // First occurrence of the branch, find an empty slot for the branch
     if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
       ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
       ideologicalBranch.branchOrder = branchSlotCounter++

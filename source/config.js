@@ -135,7 +135,7 @@ const defaultConfig = {
   // A true value will use the default tool while a string value will use the tool of that specified name.
   mergeTool: false,
 
-  // Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
+  // Preferred default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
 	diffType: undefined,
 
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
@@ -201,7 +201,7 @@ let argv = yargs
 var argvConfig = argv.argv;
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
-// When ungit is started normaly, $0 == ungit, and non-hyphenated options exists, show help and exit.
+// When ungit is started normally, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argvConfig.$0.indexOf('ungit') > -1 && argvConfig._ && argvConfig._.length > 0) {
   yargs.showHelp();
   process.exit(0);

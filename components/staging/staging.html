@@ -45,15 +45,15 @@
       <div class="col-lg-9 file-area">
         <div class="commands btn-group btn-group-sm">
           <button class="btn btn-default" disabled data-bind="text: stats"></button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommited files for commit" data-delay='{"show":"1000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" data-original-title="Toggle all uncommitted files for commit" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
             Toggle all
           </button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" data-original-title="Discard all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" data-original-title="Discard all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon glyphicon-trash"></span>
             Discard all
           </button>
-          <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommited file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+          <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" data-original-title="Stash all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
             <span class="glyphicon glyphicon-paperclip"></span>
             Stash all
           </button>
