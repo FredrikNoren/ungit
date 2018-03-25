@@ -434,7 +434,7 @@ FileViewModel.prototype.ignoreFile = function() {
   this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
     .catch(function(err) {
       if (err.errorCode == 'file-already-git-ignored') {
-        // The file was already in the .gitignore, so force an update of the staging area (to hopefull clear away this file)
+        // The file was already in the .gitignore, so force an update of the staging area (to hopefully clear away this file)
         programEvents.dispatch({ event: 'working-tree-changed' });
       } else {
         self.server.unhandledRejection(err);

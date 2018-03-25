@@ -75,7 +75,7 @@ describe('[GENERIC]', () => {
       .ug.click('[data-ta-clickable="node-clickable-0"]');
   });
 
-  it('Should be possible to discard a created file and ensure patching is not avaliable for new file', () => {
+  it('Should be possible to discard a created file and ensure patching is not available for new file', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
       .wait('.files .file .btn-default')
       .ug.click('.files button')
@@ -181,7 +181,7 @@ describe('[GENERIC]', () => {
       .wait('.commit');
   });
 
-  it('Should be possible to ammend an empty commit', () => {
+  it('Should be possible to amend an empty commit', () => {
     return environment.nm.ug.emptyCommit()
       .wait('.commit')
       .ug.amendCommit()

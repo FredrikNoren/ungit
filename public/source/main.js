@@ -63,7 +63,7 @@ ko.bindingHandlers.autocomplete = {
       const value = $(element).val();
       const lastChar = value.slice(-1);
       if (lastChar == ungit.config.fileSeparator) {
-        // When file seprator is entered, list what is in given path, and rest auto complete options
+        // When file separator is entered, list what is in given path, and rest auto complete options
         server.getPromise('/fs/listDirectories', {term: value}).then((directoryList) => {
           const currentDir = directoryList.shift();
           $(element).val(currentDir.endsWith(ungit.config.fileSeparator) ? currentDir : currentDir + ungit.config.fileSeparator);
