@@ -2,9 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
+<<<<<<< HEAD
 
 - 1.4.16:
   - Move version number to below logo.
+=======
+- 1.5.16:
+  - fix: textarea with in dialog when editing .gitignore
+>>>>>>> fc7e96118c8c3bffdcdbd6431c7c86c31417881f
 - 1.4.15:
   - fix not setting `pathToNavigateTo` properly when `launchBrowser` is false and `launchCommand` is set [#1065](https://github.com/FredrikNoren/ungit/issues/1065)
 - 1.4.14:
