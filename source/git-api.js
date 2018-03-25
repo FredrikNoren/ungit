@@ -681,6 +681,7 @@ exports.registerApi = (env) => {
     }
     fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
       .then(() => res.status(200).json({}))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .catch((e) => res.status(500).json(e))
   });
 
