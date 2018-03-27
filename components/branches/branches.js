@@ -53,12 +53,7 @@ BranchesViewModel.prototype.updateRefs = function() {
   return this.server.getPromise('/refs', { path: this.repoPath() })
     .then((refs) => {
       const version = Date.now();
-      let filteredRefs;
-      if (this.isLocalBranchOnly()) {
-        filteredRefs = refs.filter(r => !r.name.startsWith("refs/tags/") && !r.name.startsWith("refs/remotes/"));
-      } else {
-        filteredRefs = refs;
-      }
+      const filteredRefs = this.isLocalBranchOnly() ? refs.filter(r => r.name.startsWith("refs/heads/")) : refs;
       const sorted = filteredRefs.map((r) => {
         const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
         ref.node(this.graph.getNode(r.sha1));
