@@ -4,7 +4,9 @@ var _ = require('lodash');
 var async = require('async');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
-const isLocalBranchOnly = 'isLocalBranchOnly';
+const showRemote = 'showRemote';
+const showBranch = 'showBranch';
+const showTag = 'showTag';
 
 components.register('branches', function(args) {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
@@ -16,10 +18,22 @@ function BranchesViewModel(server, graph, repoPath) {
   this.server = server;
   this.branchesAndLocalTags = ko.observableArray();
   this.current = ko.observable();
-  this.isLocalBranchOnly = ko.observable(localStorage.getItem(isLocalBranchOnly) == 'true');
+  this.isShowRemote = ko.observable(localStorage.getItem(showRemote) != 'false');
+  this.isShowBranch = ko.observable(localStorage.getItem(showBranch) != 'false');
+  this.isShowTag = ko.observable(localStorage.getItem(showTag) != 'false');
   this.graph = graph;
-  this.isLocalBranchOnly.subscribe((value) => {
-    localStorage.setItem(isLocalBranchOnly, value);
+  this.isShowRemote.subscribe((value) => {
+    localStorage.setItem(showRemote, value);
+    this.updateRefs();
+    return value;
+  });
+  this.isShowBranch.subscribe((value) => {
+    localStorage.setItem(showBranch, value);
+    this.updateRefs();
+    return value;
+  });
+  this.isShowTag.subscribe((value) => {
+    localStorage.setItem(showTag, value);
     this.updateRefs();
     return value;
   });
@@ -53,8 +67,7 @@ BranchesViewModel.prototype.updateRefs = function() {
   return this.server.getPromise('/refs', { path: this.repoPath() })
     .then((refs) => {
       const version = Date.now();
-      const filteredRefs = this.isLocalBranchOnly() ? refs.filter(r => r.name.startsWith("refs/heads/")) : refs;
-      const sorted = filteredRefs.map((r) => {
+      const sorted = refs.map((r) => {
         const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
         ref.node(this.graph.getNode(r.sha1));
         ref.version = version;
@@ -72,6 +85,12 @@ BranchesViewModel.prototype.updateRefs = function() {
         } else {
           return a.isRemoteBranch ? 1 : -1;
         }
+      }).filter((ref) => {
+        if (ref.localRefName.endsWith("/HEAD"))   return false;
+        if (!this.isShowRemote() && ref.isRemote) return false;
+        if (!this.isShowBranch() && ref.isBranch) return false;
+        if (!this.isShowTag() && ref.isTag)       return false;
+        return true;
       });
       this.branchesAndLocalTags(sorted);
       this.graph.refs().forEach((ref) => {

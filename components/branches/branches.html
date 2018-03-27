@@ -8,8 +8,12 @@
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <div class="option" onclick="event.stopPropagation()">
-      Only local branch?
-      <input type="checkbox" data-bind="checked: isLocalBranchOnly"></input>
+      Remote
+      <input type="checkbox" data-bind="checked: isShowRemote"/>
+      Branch
+      <input type="checkbox" data-bind="checked: isShowBranch"/>
+      Tag
+      <input type="checkbox" data-bind="checked: isShowTag"/>
     </div>
     <div class="dropdown-divider"></div>
     <!-- ko foreach: branchesAndLocalTags -->

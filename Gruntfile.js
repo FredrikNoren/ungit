@@ -11,25 +11,16 @@ const maxConcurrency = 5;
 
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
+  const lessFiles = {
+    "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/less/d2h.less"]
+  }
+  fs.readdirSync("./components").map((component) => `components/${component}/${component}`)
+    .forEach((str) => lessFiles[`${str}.css`] = `${str}.less`);
 
   grunt.initConfig({
     pkg: packageJson,
     less: {
-      production: {
-        files: {
-          "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/less/d2h.less"],
-          "components/commit/commit.css": ["components/commit/commit.less"],
-          "components/commitdiff/commitdiff.css": ["components/commitdiff/commitdiff.less"],
-          "components/graph/graph.css": ["components/graph/graph.less"],
-          "components/header/header.css": ["components/header/header.less"],
-          "components/home/home.css": ["components/home/home.less"],
-          "components/imagediff/imagediff.css": ["components/imagediff/imagediff.less"],
-          "components/repository/repository.css": ["components/repository/repository.less"],
-          "components/staging/staging.css": ["components/staging/staging.less"],
-          "components/stash/stash.css": ["components/stash/stash.less"],
-          "components/refreshbutton/refreshbutton.css": ["components/refreshbutton/refreshbutton.less"],
-        }
-      }
+      production: { files: lessFiles }
     },
     watch: {
       scripts: {
