@@ -86,7 +86,8 @@ BranchesViewModel.prototype.updateRefs = function() {
           return a.isRemoteBranch ? 1 : -1;
         }
       }).filter((ref) => {
-        if (ref.localRefName.endsWith("/HEAD"))   return false;
+        if (ref.localRefName == 'refs/stash')     return false;
+        if (ref.localRefName.endsWith('/HEAD'))   return false;
         if (!this.isShowRemote() && ref.isRemote) return false;
         if (!this.isShowBranch() && ref.isBranch) return false;
         if (!this.isShowTag() && ref.isTag)       return false;
