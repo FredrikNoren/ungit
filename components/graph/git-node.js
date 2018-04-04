@@ -191,30 +191,27 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
 }
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
-  var self = this;
-  var command = ungit.config.autoCheckoutOnBranchCreate ? "/checkout" : "/branches";
-
-  this.graph.server.postPromise(command, { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
-    .then(function() {
-      self.graph.getRef('refs/heads/' + self.newBranchName()).node(self);
-    }).catch((e) => this.server.unhandledRejection(e))
-    .finally(function() {
-      self.branchingFormVisible(false);
-      self.newBranchName('');
+  this.graph.server.postPromise("/branches", { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
+    .then(() => {
+      this.graph.getRef('refs/heads/' + this.newBranchName()).node(this)
+      if (ungit.config.autoCheckoutOnBranchCreate) {
+        return this.graph.server.postPromise("/checkout", { path: this.graph.repoPath(), name: this.newBranchName() })
+      }
+    }).catch((e) => this.graph.server.unhandledRejection(e))
+    .finally(() => {
+      this.branchingFormVisible(false);
+      this.newBranchName('');
       programEvents.dispatch({ event: 'branch-updated' });
     });
 }
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
-  var self = this;
   this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
-    .then(function() {
-      var newRef = self.graph.getRef('refs/tags/' + self.newBranchName());
-      newRef.node(self);
-    }).catch((e) => this.server.unhandledRejection(e))
-    .finally(function() {
-      self.branchingFormVisible(false);
-      self.newBranchName('');
+    .then(() => this.graph.getRef('refs/tags/' + this.newBranchName()).node(this) )
+    .catch((e) => this.graph.server.unhandledRejection(e))
+    .finally(() => {
+      this.branchingFormVisible(false);
+      this.newBranchName('');
     });
 }
 GitNodeViewModel.prototype.toggleSelected = function() {
