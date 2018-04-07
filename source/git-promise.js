@@ -170,6 +170,7 @@ const getGitError = (args, stderr, stdout) => {
 }
 
 git.status = (repoPath, file) => {
+  const gitDir = gitParser.findGitDir(repoPath)
   return Bluebird.props({
     numStatsStaged: git(['diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
@@ -179,17 +180,17 @@ git.status = (repoPath, file) => {
       .then(gitParser.parseGitStatus)
       .then((status) => {
         return Bluebird.props({
-          isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
-          isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
-          isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
-          inCherry: fs.isExists(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD'))
+          isRebaseMerge: fs.isExists(path.join(gitDir, 'rebase-merge')),
+          isRebaseApply: fs.isExists(path.join(gitDir, 'rebase-apply')),
+          isMerge: fs.isExists(path.join(gitDir, 'MERGE_HEAD')),
+          inCherry: fs.isExists(path.join(gitDir, 'CHERRY_PICK_HEAD'))
         }).then((result) => {
           status.inRebase = result.isRebaseMerge || result.isRebaseApply;
           status.inMerge = result.isMerge;
           status.inCherry = result.inCherry;
         }).then(() => {
           if (status.inMerge || status.inCherry) {
-            return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+            return fs.readFileAsync(path.join(gitDir, 'MERGE_MSG'), { encoding: 'utf8' })
               .then((commitMessage) => {
                 status.commitMessage = commitMessage;
                 return status;
@@ -304,16 +305,15 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
 }
 
 git.getCurrentBranch = (repoPath) => {
-  return git.revParse(repoPath).then(revResult => {
-    const HEADFile = path.join(revResult.gitRootPath, '.git', 'HEAD');
-    return fs.isExists(HEADFile).then(isExist => {
-      if (!isExist) throw { errorCode: 'not-a-repository', error: `No such file: ${HEADFile}` };
-    }).then(() => {
-      return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
-    }).then(text => {
-      const rows = text.toString().split('\n');
-      return rows[0].slice('ref: refs/heads/'.length);
-    });
+  const gitDir = gitParser.findGitDir(repoPath)
+  const HEADFile = path.join(gitDir, 'HEAD');
+  return fs.isExists(HEADFile).then(isExist => {
+    if (!isExist) throw { errorCode: 'not-a-repository', error: `No such file: ${HEADFile}` };
+  }).then(() => {
+    return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
+  }).then(text => {
+    const rows = text.toString().split('\n');
+    return rows[0].slice('ref: refs/heads/'.length);
   });
 }
 
