@@ -169,8 +169,16 @@ const getGitError = (args, stderr, stdout) => {
   return err;
 }
 
+
+// determine the git directory, always an absolute path
+// TODO: This method does not handle errors, it assumes that repoPath is a valid git repository path
+git.findGitDir = (repoPath) => {
+  const gitDir = child_process.execSync('git rev-parse --absolute-git-dir', {cwd: repoPath}).toString().trim();
+  return gitDir;
+}
+
 git.status = (repoPath, file) => {
-  const gitDir = gitParser.findGitDir(repoPath)
+  const gitDir = git.findGitDir(repoPath)
   return Bluebird.props({
     numStatsStaged: git(['diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
@@ -305,7 +313,7 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
 }
 
 git.getCurrentBranch = (repoPath) => {
-  const gitDir = gitParser.findGitDir(repoPath)
+  const gitDir = git.findGitDir(repoPath)
   const HEADFile = path.join(gitDir, 'HEAD');
   return fs.isExists(HEADFile).then(isExist => {
     if (!isExist) throw { errorCode: 'not-a-repository', error: `No such file: ${HEADFile}` };

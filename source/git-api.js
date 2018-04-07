@@ -47,7 +47,7 @@ exports.registerApi = (env) => {
             if (!isMac && !isWindows) {
               // recursive fs.watch only works on mac and windows
               const promises = [];
-              const gitDir = gitParser.findGitDir(data.path)
+              const gitDir = gitPromise.findGitDir(data.path)
 
               promises.push(watchPath(socket, path.join(gitDir, 'HEAD')));
               promises.push(watchPath(socket, path.join(gitDir, 'refs', 'heads')));
@@ -559,7 +559,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/baserepopath`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const gitDir = gitParser.findGitDir(req.query.path)
+    const gitDir = gitPromise.findGitDir(req.query.path)
 
     jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], gitDir)
       .then((baseRepoPath) => {
@@ -603,7 +603,7 @@ exports.registerApi = (env) => {
     const task = gitPromise(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
       .then(gitPromise.bind(null, ['rm', '-f', req.query.submoduleName], req.query.path))
       .then(() => {
-        const gitDir = gitParser.findGitDir(req.query.path)
+        const gitDir = gitPromise.findGitDir(req.query.path)
 
         rimraf.sync(path.join(req.query.path, req.query.submodulePath));
         rimraf.sync(path.join(gitDir, 'modules', req.query.submodulePath));

@@ -337,10 +337,3 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
     return null;
   }
 }
-
-// determine the git directory, always an absolute path
-// TODO: This method does not handle errors, it assumes that repoPath is a valid git repository path
-exports.findGitDir = (repoPath) => {
-  const gitDir = child_process.execSync('git rev-parse --absolute-git-dir', {cwd: repoPath}).toString().trim();
-  return gitDir;
-}
