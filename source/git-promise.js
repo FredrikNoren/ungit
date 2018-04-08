@@ -11,23 +11,17 @@ const fs = require('./utils/fs-async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 
+// only allows ${config.maxConcurrentGitOperations} count of parallel git operations
 const rateLimiter = () => new Bluebird((resolve) => { gitSem.wait(() => { resolve(); }); });
 
-const isRetryableError = function(err) {
-  if (!err) {
-    return false;
-  } else if (!err.error) {
-    return false;
-  } else if (err.error.indexOf("index.lock': File exists") > -1) {
-    // Dued to git operation parallelization it is possible that race condition may happen
-    return true;
-  } else if (err.error.indexOf("index file open failed: Permission denied") > -1) {
-    // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
-    // can report "Permission denied" for the file locking issue.
-    return true;
-  } else {
-    return false;
-  }
+const isRetryableError = (err) => {
+  const errMsg = ((err || {}).error || '');
+  // Dued to git operation parallelization it is possible that race condition may happen
+  if (errMsg.indexOf("index.lock': File exists") > -1) return true;
+  // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
+  // can report "Permission denied" for the file locking issue.
+  if (errMsg.indexOf("index file open failed: Permission denied") > -1) return true;
+  return false;
 }
 
 const gitExecutorProm = (args, retryCount) => {
@@ -72,6 +66,7 @@ const gitExecutorProm = (args, retryCount) => {
   }).catch((err) => {
     if (retryCount > 0 && isRetryableError(err)) {
       return new Bluebird((resolve) => {
+        winston.warn(`retrying git commands after lock acquired fail. (If persists, lower 'maxConcurrentGitOperations')`);
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));
