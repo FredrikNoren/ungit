@@ -1,7 +1,7 @@
 
 var _ = require('lodash');
+var $ = require('jquery');
 var ko = require('knockout');
-var $ = require('../vendor/js/jquery-2.0.0.min');
 
 ko.bindingHandlers.debug = {
   init: function(element, valueAccessor) {

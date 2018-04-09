@@ -255,7 +255,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    var isIgnoreWhiteSpace = req.query.whiteSpace === "true" ? true : false;
+    const isIgnoreWhiteSpace = req.query.whiteSpace === "true" ? true : false;
     jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.sha1, isIgnoreWhiteSpace));
   });
 
