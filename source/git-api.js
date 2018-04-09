@@ -108,7 +108,7 @@ exports.registerApi = (env) => {
       return false;  // ignore files that are in .gitignore
     } else if (filename.endsWith(".lock")) {
       return false;
-    } else if (filename.indexOf(path.join("", "refs")) > -1) {
+    } else if (filename.indexOf("refs") > -1) {
       // trigger for all changes under directory named refs
       // NOTE: This check will catch some other refs directories, but we can't look for .git
       // in case the git directory has been relocated
