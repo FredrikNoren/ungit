@@ -297,7 +297,6 @@ module.exports = (grunt) => {
     b.require('nprogress', { expose: 'nprogress' });
     b.require('jquery', { expose: 'jquery' });
     b.require('jquery-ui', { expose: 'jquery-ui' });
-    // b.require('./node_modules/dnd-page-scroll/lib/dnd-page-scroll.js', { expose: 'dnd-page-scroll' });
     b.require('dnd-page-scroll', { expose: 'dnd-page-scroll' });
     const outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', () => done());
