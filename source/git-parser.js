@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const fileType = require('./utils/file-type.js');
 const _ = require('lodash')
+const child_process = require('child_process');
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');

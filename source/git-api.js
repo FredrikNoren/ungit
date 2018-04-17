@@ -47,10 +47,12 @@ exports.registerApi = (env) => {
             if (!isMac && !isWindows) {
               // recursive fs.watch only works on mac and windows
               const promises = [];
-              promises.push(watchPath(socket, path.join('.git', 'HEAD')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'heads')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'remotes')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'tags')));
+              const gitDir = gitPromise.findGitDir(data.path)
+
+              promises.push(watchPath(socket, path.join(gitDir, 'HEAD')));
+              promises.push(watchPath(socket, path.join(gitDir, 'refs', 'heads')));
+              promises.push(watchPath(socket, path.join(gitDir, 'refs', 'remotes')));
+              promises.push(watchPath(socket, path.join(gitDir, 'refs', 'tags')));
               return Bluebird.all(promises);
             }
           }).catch((err) => {
@@ -106,12 +108,21 @@ exports.registerApi = (env) => {
       return false;  // ignore files that are in .gitignore
     } else if (filename.endsWith(".lock")) {
       return false;
-    } else if (filename.indexOf(path.join(".git", "refs")) > -1) {
-      return true;   // trigger for all changes under refs
-    } else if (filename == path.join(".git", "HEAD")) {
-      return true;   // Explicitly return true for ".git/HEAD" for branch changes
+    } else if (filename.indexOf("refs") > -1) {
+      // trigger for all changes under directory named refs
+      // NOTE: This check will catch some other refs directories, but we can't look for .git
+      // in case the git directory has been relocated
+      return true;
+    } else if (filename.endsWith("HEAD")) {
+      // Explicitly return true for ".git/HEAD" for branch changes
+      // NOTE: This check will catch some other HEAD files, but we can't look for .git
+      // in case the git directory has been relocated
+      return true;
     } else if (filename.indexOf(".git") > -1) {
-      return false;  // Ignore other changes under ".git/*"
+      // Ignore other changes under ".git/*"
+      // NOTE: If the git directory has been relocated to a path that doesn't contain
+      // ".git" in the path, then we will end up monitoring it.
+      return false;
     } else {
       return true;
     }
@@ -548,8 +559,9 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/baserepopath`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const currentPath = path.resolve(path.join(req.query.path, '..'));
-    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], currentPath)
+    const gitDir = gitPromise.findGitDir(req.query.path)
+
+    jsonResultOrFailProm(res, gitPromise(['rev-parse', '--show-toplevel'], gitDir)
       .then((baseRepoPath) => {
         return { path: path.resolve(baseRepoPath.trim()) };
       }).catch((e) => {
@@ -591,8 +603,10 @@ exports.registerApi = (env) => {
     const task = gitPromise(['submodule', 'deinit', "-f", req.query.submoduleName], req.query.path)
       .then(gitPromise.bind(null, ['rm', '-f', req.query.submoduleName], req.query.path))
       .then(() => {
+        const gitDir = gitPromise.findGitDir(req.query.path)
+
         rimraf.sync(path.join(req.query.path, req.query.submodulePath));
-        rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
+        rimraf.sync(path.join(gitDir, 'modules', req.query.submodulePath));
       });
 
     jsonResultOrFailProm(res, task);
