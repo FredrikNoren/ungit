@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.19:
+  - fix credential helper not fetching all the authentication data [#1078](https://github.com/FredrikNoren/ungit/pull/1078)
 - 1.4.18:
   - fix inaccurate git state issue when new branch name conflict and `autoCheckoutOnBranchCreate` is enabled.
   - Add content refresh on .gitignore file change
