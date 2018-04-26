@@ -3,23 +3,20 @@ var config = require('../src/config');
 var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
-var async = require('async');
-
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 var usageStatistics = require('../src/usage-statistics');
 
+const Bluebird = require('bluebird');
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  async.parallel([
-    bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'),
-    usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception')
-  ], function() {
-    app.quit();
-  });
+  Bluebird.all([
+    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); }),
+    new Bluebird((resolve) => { usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception'); resolve(); })
+  ]).then(() => { app.quit(); });
 });
 
 function launch(callback) {

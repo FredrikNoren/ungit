@@ -3,12 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.20:
+  - deleted checked in 3rd party codes and manage by npm.
+  - remove dependencies on async lib
 - 1.4.19:
   - fix credential helper not fetching all the authentication data [#1078](https://github.com/FredrikNoren/ungit/pull/1078)
 - 1.4.18:
   - fix inaccurate git state issue when new branch name conflict and `autoCheckoutOnBranchCreate` is enabled.
   - Add content refresh on .gitignore file change
-  - fix reference filtering 
+  - fix reference filtering
 - 1.4.17: fix textarea with in dialog when editing .gitignore [#1068](https://github.com/FredrikNoren/ungit/pull/1068)
 - 1.4.16: Move version number to below logo. [#1069](https://github.com/FredrikNoren/ungit/pull/1069)
 - 1.4.15: fix not setting `pathToNavigateTo` properly when `launchBrowser` is false and `launchCommand` is set [#1065](https://github.com/FredrikNoren/ungit/issues/1065)

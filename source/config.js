@@ -198,7 +198,7 @@ let argv = yargs
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 ;
 
-var argvConfig = argv.argv;
+const argvConfig = argv.argv;
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normally, $0 == ungit, and non-hyphenated options exists, show help and exit.
@@ -207,7 +207,7 @@ if (argvConfig.$0.indexOf('ungit') > -1 && argvConfig._ && argvConfig._.length >
   process.exit(0);
 }
 
-var rcConfig = {};
+let rcConfig = {};
 if (!argvConfig.cliconfigonly) {
   try {
     rcConfig = rc('ungit');

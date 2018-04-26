@@ -8,80 +8,65 @@ const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
-const async = require('async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 
-const gitQueue = async.queue((args, callback) => {
-  if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
-  let rejected = false;
-  let stdout = '';
-  let stderr = '';
-  const gitProcess = child_process.spawn(
-    'git',
-    args.commands,
-    {
-      cwd: args.repoPath,
-      maxBuffer: 1024 * 1024 * 100,
-      timeout: args.timeout
-    });
+// only allows ${config.maxConcurrentGitOperations} count of parallel git operations
+const rateLimiter = () => new Bluebird((resolve) => { gitSem.wait(() => { resolve(); }); });
 
-  if (args.outPipe) {
-    gitProcess.stdout.pipe(args.outPipe);
-  } else {
-    gitProcess.stdout.on('data', (data) => stdout += data.toString());
-  }
-  if (args.inPipe) {
-    gitProcess.stdin.end(args.inPipe);
-  }
-  gitProcess.stderr.on('data', (data) => stderr += data.toString());
-  gitProcess.on('error', (error) => {
-    if (args.outPipe) args.outPipe.end();
-    rejected = true;
-    callback(error);
-  });
-
-  gitProcess.on('close', (code) => {
-    if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
-    if (rejected) return;
-    if (args.outPipe) args.outPipe.end();
-
-    if (code === 0 || (code === 1 && args.allowError)) {
-      callback(null, stdout);
-    } else {
-      callback(getGitError(args, stderr, stdout));
-    }
-  });
-}, config.maxConcurrentGitOperations);
-
-const isRetryableError = function(err) {
-  if (!err) {
-    return false;
-  } else if (!err.error) {
-    return false;
-  } else if (err.error.indexOf("index.lock': File exists") > -1) {
-    // Dued to git operation parallelization it is possible that race condition may happen
-    return true;
-  } else if (err.error.indexOf("index file open failed: Permission denied") > -1) {
-    // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
-    // can report "Permission denied" for the file locking issue.
-    return true;
-  } else {
-    return false;
-  }
+const isRetryableError = (err) => {
+  const errMsg = ((err || {}).error || '');
+  // Dued to git operation parallelization it is possible that race condition may happen
+  if (errMsg.indexOf("index.lock': File exists") > -1) return true;
+  // TODO: Issue #796, based on the conversation with Appveyor team, I guess Windows system
+  // can report "Permission denied" for the file locking issue.
+  if (errMsg.indexOf("index file open failed: Permission denied") > -1) return true;
+  return false;
 }
 
 const gitExecutorProm = (args, retryCount) => {
-  return new Bluebird((resolve, reject) => {
-    gitQueue.push(args, (queueError, out) => {
-      if(queueError) {
-        reject(queueError);
+  return rateLimiter().then(() => {
+    return new Bluebird((resolve, reject) => {
+      if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
+      let rejected = false;
+      let stdout = '';
+      let stderr = '';
+      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout }
+      const gitProcess = child_process.spawn('git', args.commands, procOpts);
+
+      if (args.outPipe) {
+        gitProcess.stdout.pipe(args.outPipe);
       } else {
-        resolve(out);
+        gitProcess.stdout.on('data', (data) => stdout += data.toString());
       }
+      if (args.inPipe) {
+        gitProcess.stdin.end(args.inPipe);
+      }
+      gitProcess.stderr.on('data', (data) => stderr += data.toString());
+      gitProcess.on('error', (error) => {
+        if (args.outPipe) args.outPipe.end();
+        rejected = true;
+        gitSem.signal();
+        reject(error);
+      });
+
+      gitProcess.on('close', (code) => {
+        if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
+        if (rejected) return;
+        if (args.outPipe) args.outPipe.end();
+        gitSem.signal();
+
+        if (code === 0 || (code === 1 && args.allowError)) {
+          resolve(stdout);
+        } else {
+          reject(getGitError(args, stderr, stdout));
+        }
+      });
     });
   }).catch((err) => {
     if (retryCount > 0 && isRetryableError(err)) {
       return new Bluebird((resolve) => {
+        winston.warn(`retrying git commands after lock acquired fail. (If persists, lower 'maxConcurrentGitOperations')`);
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
       }).then(gitExecutorProm.bind(null, args, retryCount - 1));

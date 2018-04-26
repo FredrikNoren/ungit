@@ -2,18 +2,18 @@
 
 // USED BY FRONT END
 // DO NOT GO ES6
-var addressWindowsLocalRegexp = /[a-zA-Z]:\\([^\\]+\\?)*/;
-var addressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
-var addressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
-var addressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
-var addressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
-var addressHttpsRegexp = /https:\/\/([^\/]*)\/([^.]*)(\.git)?$/;
-var addressUnixLocalRegexp = /.*\/([^\/]+)/;
+const addressWindowsLocalRegexp = /[a-zA-Z]:\\([^\\]+\\?)*/;
+const addressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
+const addressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
+const addressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
+const addressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
+const addressHttpsRegexp = /https:\/\/([^\/]*)\/([^.]*)(\.git)?$/;
+const addressUnixLocalRegexp = /.*\/([^\/]+)/;
 
-exports.parseAddress = function(remote) {
-  var match = addressWindowsLocalRegexp.exec(remote);
+exports.parseAddress = (remote) => {
+  let match = addressWindowsLocalRegexp.exec(remote);
   if (match) {
-    var project = match[1];
+    let project = match[1];
     if (project[project.length - 1] == '\\') project = project.slice(0, project.length - 1);
     return { address: remote, host: 'localhost', project: project, shortProject: project };
   }
