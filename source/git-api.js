@@ -201,8 +201,14 @@ exports.registerApi = (env) => {
 
     let url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
+
+    const commands = ['clone', url, req.body.destinationDir.trim()];
+    if (req.body.isRecursiveSubmodule) {
+      commands.push('--recurse-submodules');
+    }
+
     const task = gitPromise({
-      commands: credentialsOption(req.body.socketId, url).concat(['clone', url, req.body.destinationDir.trim()]),
+      commands: credentialsOption(req.body.socketId, url).concat(commands),
       repoPath: req.body.path,
       timeout: timeoutMs
     }).then(() => {
