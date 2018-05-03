@@ -30,7 +30,7 @@ class PathViewModel {
     });
     this.cloneDestination = ko.observable();
     this.repository = ko.observable();
-    this.isRecursiveSubmodule = ko.observable(false);
+    this.isRecursiveSubmodule = ko.observable(true);
   }
 
   updateNode(parentElement) {
