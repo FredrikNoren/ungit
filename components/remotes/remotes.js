@@ -58,25 +58,29 @@ RemotesViewModel.prototype.fetch = function(options) {
         this.server.isInternetConnected = true;
       }
     }).catch((err) => {
-      let errorMessage;
-      try { errorMessage = err.res.body.error; }
+      let errorMessage, stdout, stderr;
+      try {
+        errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
+        stdout = err.res.body.stdout;
+        stderr = err.res.body.stderr;
+      }
       catch (e) { errorMessage = ''; }
 
-      if (errorMessage.indexOf('Could not resolve host') > -1) {
-        if (this.server.isInternetConnected) {
-          programEvents.dispatch({ event: 'git-error', data: {
-            isWarning: true,
-            command: err.res.body.command,
-            error: err.res.body.error,
-            stdout: 'This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.',
-            stderr: '',
-            repoPath: err.res.body.workingDirectory
-          } });
-          this.server.isInternetConnected = false;
-        }
-      } else {
-        this.server.unhandledRejection(err);
+      if (errorMessage.indexOf('Could not resolve host') > -1 && this.server.isInternetConnected) {
+        this.server.isInternetConnected = false;
+        errorMessage = `Could not resolve host.  This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.`;
+        stdout = '';
+        stderr = '';
       }
+
+      programEvents.dispatch({ event: 'git-error', data: {
+        isWarning: true,
+        command: err.res.body.command,
+        error: err.res.body.error,
+        stdout: stdout,
+        stderr: stderr,
+        repoPath: err.res.body.workingDirectory
+      } });
     }).finally(() => { this.isFetching = false; });
 }
 
