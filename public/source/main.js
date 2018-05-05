@@ -8,6 +8,13 @@ require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/bootstrap/tooltip');
 require('jquery-ui');
+require('jquery-ui/ui/version');
+require('jquery-ui/ui/keycode');
+require('jquery-ui/ui/position');
+require('jquery-ui/ui/safe-active-element');
+require('jquery-ui/ui/unique-id');
+require('jquery-ui/ui/widgets/menu');
+require('jquery-ui/ui/widgets/autocomplete');
 require('./knockout-bindings');
 var components = require('ungit-components');
 var Server = require('./server');
@@ -57,7 +64,11 @@ ko.bindingHandlers.autocomplete = {
           noResults: '',
           results: () => {}
         }
-      });
+      }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        return $("<li></li>")
+          .append($("<a>").text(item.label))
+          .appendTo(ul);
+      };
     }
 
     const handleKeyEvent = (event) => {
