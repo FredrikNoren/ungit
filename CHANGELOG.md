@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.22: Fix missing jQuery and jQuery UI references [#1086](https://github.com/FredrikNoren/ungit/issues/1086)
 - 1.4.21: Treat remote fetch fail as an warning rather than error [#1081](https://github.com/FredrikNoren/ungit/issues/1081)
 - 1.4.20:
   - deleted checked in 3rd party codes and manage by npm.
