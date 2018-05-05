@@ -57,7 +57,11 @@ ko.bindingHandlers.autocomplete = {
           noResults: '',
           results: () => {}
         }
-      });
+      }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        return $("<li></li>")
+          .append($("<a>").text(item.label))
+          .appendTo(ul);
+      };
     }
 
     const handleKeyEvent = (event) => {

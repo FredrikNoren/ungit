@@ -1,3 +1,4 @@
+const $ = require('jquery');
 const ko = require('knockout');
 const components = require('ungit-components');
 const Selectable = require('./selectable');
@@ -183,7 +184,6 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
     $(this).autocomplete('search', $(this).val());
   }).data("ui-autocomplete")._renderItem = function (ul, item) {
     return $("<li></li>")
-      .data("item.autocomplete", item)
       .append(`<a>${item.dom}</a>`)
       .appendTo(ul);
   }
