@@ -75,7 +75,6 @@ ko.bindingHandlers.autocomplete = {
           setAutoCompleteOptions(directoryList)
           $(element).autocomplete('search', value);
         }).catch((err) => {
-          console.log(111, err)
           if (!err.errorSummary.startsWith('ENOENT: no such file or directory') && err.errorCode !== 'read-dir-failed') {
             throw err;
           }
