@@ -81,7 +81,7 @@ describe('git-api remote', function() {
   });
 
   it('cloning "remote" to "local2" should work', () => {
-    return common.post(req, '/clone', { path: testDirLocal2, url: testDirRemote, destinationDir: '.' });
+    return common.post(req, '/clone', { path: testDirLocal2, url: testDirRemote, destinationDir: '.', isRecursiveSubmodule: true });
   });
 
   it('log in "local2" should show the init commit', () => {
