@@ -33,6 +33,10 @@
                   <label for="cloneToInput">to</label>
                   <input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
                 </div>
+                <div class="form-group" style="display: flex;">
+                  <label style="width: 230px; padding-top: 11px;">is recurse submodule?</label>
+                  <input class="form-control" type="checkbox" data-bind="checked: isRecursiveSubmodule, attr: { placeholder: cloneDestinationImplicit }">
+                </div>
                 <input type="submit" class="btn btn-primary btn-lg" value="Clone repository">
               </form>
             </div>

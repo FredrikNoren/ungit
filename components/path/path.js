@@ -30,6 +30,7 @@ class PathViewModel {
     });
     this.cloneDestination = ko.observable();
     this.repository = ko.observable();
+    this.isRecursiveSubmodule = ko.observable(true);
   }
 
   updateNode(parentElement) {
@@ -74,7 +75,7 @@ class PathViewModel {
     this.status('cloning');
     const dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-    return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest })
+    return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest, isRecursiveSubmodule: this.isRecursiveSubmodule() })
       .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {

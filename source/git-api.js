@@ -143,13 +143,13 @@ exports.registerApi = (env) => {
       io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
       winston.info('emitting working-tree-changed to sockets, manually triggered');
     }
-  }, 250, { 'maxWait': 1000 })
+  }, 500, { 'maxWait': 2000 })
   const emitGitDirectoryChanged = _.debounce((repoPath) => {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
       winston.info('emitting git-directory-changed to sockets, manually triggered');
     }
-  }, 250, { 'maxWait': 1000 })
+  }, 500, { 'maxWait': 2000 })
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
     if (config.autoStashAndPop) {
@@ -201,8 +201,14 @@ exports.registerApi = (env) => {
 
     let url = req.body.url.trim();
     if (url.indexOf('git clone ') == 0) url = url.slice('git clone '.length);
+
+    const commands = ['clone', url, req.body.destinationDir.trim()];
+    if (req.body.isRecursiveSubmodule) {
+      commands.push('--recurse-submodules');
+    }
+
     const task = gitPromise({
-      commands: credentialsOption(req.body.socketId, url).concat(['clone', url, req.body.destinationDir.trim()]),
+      commands: credentialsOption(req.body.socketId, url).concat(commands),
       repoPath: req.body.path,
       timeout: timeoutMs
     }).then(() => {
