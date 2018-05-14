@@ -64,16 +64,16 @@ PGP
 - `git config -global commit.gpgsign true` (or without `-global` at the repo)
 - Add `isForceGPGSign: true` to `ungit.rc` file
 
-Currently, Ungit __DOES NOT__ support PGP key authentication!  While git allows robust programmatic authentication via [`credential-helper`](https://help.github.com/articles/telling-git-about-your-gpg-key/), I could not find an easy way to do something equivalent with GPG.  
+Currently, Ungit __DOES NOT__ support GPG authentication!  While git allows robust programmatic authentication via [`credential-helper`](https://help.github.com/articles/telling-git-about-your-gpg-key/), I could not find an easy way to do something equivalent with GPG.  
 
-Therefor, password-less gpg authentication must be configured when using Ungit to commit with gpg.
+Therefor, password-less gpg authentication or 3rd party gpg password must be configured when using Ungit to commit with gpg.
 Below are several way to enable password-less gpg authentication for various OSs.
 
 - [Cache GnuPG passphrase](https://superuser.com/questions/624343/keep-gnupg-credentials-cached-for-entire-user-session)
-- Mac keychain
+- gpg-agent with pinentry-mac
   1. `brew install gnupg gpg-agent pinentry-mac`
-  2. `echo "test" | gpg --clearsign` # trigger gpg sign action to see below password prompt.
-  3. ![gpg_save_screenshot](gpg_save_screenshot.png)
+  2. `echo "test" | gpg --clearsign` # See gpg authentication prompt when gpg is accessed.
+  3. Optionally you can save it to keychain. ![gpg_save_screenshot](gpg_save_screenshot.png)
 
 I understand this is not convenient, but I security is hard.  And I'd much rather have bit of inconvenience than Ungit having security exposure.
 
