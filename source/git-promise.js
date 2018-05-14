@@ -385,7 +385,10 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
 
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
-    return git(['commit', (amend ? '--amend' : ''), ((emptyCommit ||amend) ? '--allow-empty' : ''), '--file=-'], repoPath, null, null, message);
+    const ammendFlag = (amend ? '--amend' : '');
+    const allowedEmptyFlag = ((emptyCommit ||amend) ? '--allow-empty' : '');
+    const isGPGSign = (config.isForceGPGSign ? '-S' : '');
+    return git(['commit', ammendFlag, allowedEmptyFlag, isGPGSign, '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
     // ignore the case where nothing were added to be committed
     if (!err.stdout || err.stdout.indexOf("Changes not staged for commit") === -1) {

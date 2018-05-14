@@ -436,7 +436,10 @@ exports.registerApi = (env) => {
   });
 
   app.post(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = ['tag', (req.body.force ? '-f' : ''), '-a', req.body.name.trim(), '-m', req.body.name.trim(), (req.body.sha1 || 'HEAD').trim()];
+    const annotateFlag = (config.isForceGPGSign ? '-s' : '-a');
+    const forceFlag = (req.body.force ? '-f' : '');
+    const sha1 = (req.body.sha1 || 'HEAD').trim();
+    const commands = ['tag', forceFlag, annotateFlag, req.body.name.trim(), '-m', req.body.name.trim(), sha1];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path));
