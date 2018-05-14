@@ -3,8 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.24: add git pgp signing docs and code [#740](https://www.gnupg.org/documentation/manpage.html)
 - 1.4.23:
-  - add feature to do `--recurse-submodules` for git clone [#1080](https://github.com/FredrikNoren/ungit/issues/1080)
+  - add feature to do `--recurse-submodules` for git clone [#1080](https://www.gnupg.org/documentation/manpage.html
   - increase debounce 250->500 wait and 1000->2000 sec so UI can pick up server changes more accurately
 - 1.4.22: Fix missing jQuery and jQuery UI references [#1086](https://github.com/FredrikNoren/ungit/issues/1086)
 - 1.4.21: Treat remote fetch fail as an warning rather than error [#1081](https://github.com/FredrikNoren/ungit/issues/1081)

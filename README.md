@@ -57,6 +57,27 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 }
 ```
 
+PGP
+---
+[Git](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work) and [github](https://help.github.com/articles/signing-commits-using-gpg/) both supports PGP signing.  Within Ungit these features can be enabled via doing either one of the below two actions.
+
+- `git config -global commit.gpgsign true` (or without `-global` at the repo)
+- Add `isForceGPGSign: true` to `ungit.rc` file
+
+Currently, Ungit __DOES NOT__ support PGP key authentication!  While git allows robust programmatic authentication via [`credential-helper`](https://help.github.com/articles/telling-git-about-your-gpg-key/), I could not find an easy way to do something equivalent with GPG.  
+
+Therefor, password-less gpg authentication must be configured when using Ungit to commit with gpg.
+Below are several way to enable password-less gpg authentication for various OSs.
+
+- [Cache GnuPG passphrase](https://superuser.com/questions/624343/keep-gnupg-credentials-cached-for-entire-user-session)
+- Mac keychain
+  1. `brew install gnupg gpg-agent pinentry-mac`
+  2. `echo "test" | gpg --clearsign` # trigger gpg sign action to see below password prompt.
+  3. ![gpg_save_screenshot](gpg_save_screenshot.png)
+
+I understand this is not convenient, but I security is hard.  And I'd much rather have bit of inconvenience than Ungit having security exposure.
+
+
 External Merge Tools
 --------------------
 If you have your own merge tool that you would like to use, such as Kaleidoscope or p4merge, you can configure ungit to use it. See [MERGETOOL.md](MERGETOOL.md).
