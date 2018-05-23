@@ -120,8 +120,9 @@ const getGitError = (args, stderr, stdout) => {
   err.message = err.error.split('\n')[0];
   err.stderr = stderr;
   err.stdout = stdout;
-  err.stderrLower = stderr.toLowerCase();
-  if (err.stderrLowerLower.indexOf('not a git repository') >= 0) {
+  err.stdoutLower = (stdout || "").toLowerCase();
+  err.stderrLower = (stderr || "").toLowerCase();
+  if (err.stderrLower.indexOf('not a git repository') >= 0) {
     err.errorCode = 'not-a-repository';
   } else if (err.stderrLower.indexOf('connection timed out') != -1) {
     err.errorCode = 'remote-timeout';
@@ -140,11 +141,11 @@ const getGitError = (args, stderr, stdout) => {
     err.errorCode = 'no-git-name-email-configured';
   } else if (err.stderrLower.indexOf('fatal error: disconnected: no supported authentication methods available (server sent: publickey)') == 0) {
     err.errorCode = 'no-supported-authentication-provided';
-  } else if (stderr.indexOf('fatal: no remote repository specified.') == 0) {
+  } else if (err.stderrLower.indexOf('fatal: no remote repository specified.') == 0) {
     err.errorCode = 'no-remote-specified';
   } else if (err.stderrLower.indexOf('non-fast-forward') != -1) {
     err.errorCode = 'non-fast-forward';
-  } else if (err.stderrLower.indexOf('failed to merge in the changes.') == 0 || err.stdout.indexOf('conflict (content): merge conflict in') != -1 || err.stderrLower.indexOf('after resolving the conflicts') != -1) {
+  } else if (err.stderrLower.indexOf('failed to merge in the changes.') == 0 || err.stdoutLower.indexOf('conflict (content): merge conflict in') != -1 || err.stderrLower.indexOf('after resolving the conflicts') != -1) {
     err.errorCode = 'merge-failed';
   } else if (err.stderrLower.indexOf('this operation must be run in a work tree') != -1) {
     err.errorCode = 'must-be-in-working-tree';
