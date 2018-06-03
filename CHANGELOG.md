@@ -4,8 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
 - 1.4.24:
-  - change `/api/log` -> `/api/gitlog` as ad blockers really hates This
-  - 
+  - change `/api/log` -> `/api/gitlog` as soem ad blockers really hates This
+  - Fix excessive error messaging when disconnected from internet
+  - Fix Raven initialization error when disconnected from internet
 - 1.4.23:
   - add feature to do `--recurse-submodules` for git clone [#1080](https://github.com/FredrikNoren/ungit/issues/1080)
   - increase debounce 250->500 wait and 1000->2000 sec so UI can pick up server changes more accurately
