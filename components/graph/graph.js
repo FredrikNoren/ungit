@@ -110,6 +110,7 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
       self.skip(parseInt(log.skip));
       return log.nodes || [];
     }).then(function(nodes) {
+      console.log(3333, nodes)
       // create and/or calculate nodes
       return self.computeNode(nodes.map((logEntry) => {
         return self.getNode(logEntry.sha1, logEntry);     // convert to node object
