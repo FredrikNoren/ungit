@@ -86,15 +86,15 @@ const gitLogHeaders = {
   'gpg': (currentCommit, data) => {
     if (data.startsWith('Signature made')) {
       // extract sign date
-      currentCommit.signatureMade = data.slice('Signature made '.length)
-        .replace('[ultimate]', '')
-        .trim();
+      currentCommit.signatureDate = data.slice('Signature made '.length);
     } else if (data.indexOf('Good signature from') > -1) {
       // fully verified.
-      currentCommit.signedBy = data.slice('Good signature from '.length);
+      currentCommit.signatureMade = data.slice('Good signature from '.length)
+        .replace('[ultimate]', '')
+        .trim();
     } else if (data.indexOf('Can\'t check signature') > -1) {
       // pgp signature attempt is made but failed to verify
-      delete currentCommit.signatureMade;
+      delete currentCommit.signatureDate;
     }
   }
 };

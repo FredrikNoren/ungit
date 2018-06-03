@@ -18,6 +18,7 @@ function CommitViewModel(gitNode) {
   this.highlighted = gitNode.highlighted;
   this.nodeIsMousehover = gitNode.nodeIsMousehover;
   this.selected = gitNode.selected;
+  this.pgpVerifiedString = gitNode.pgpVerifiedString;
   this.element = ko.observable();
   this.commitTime = ko.observable();
   this.authorTime = ko.observable();

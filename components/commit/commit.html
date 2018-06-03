@@ -13,9 +13,12 @@
           <div>
             <span class="title" data-bind="text: (title().length > 72 ? title().substring(0, 72) + '...' : title)"></span>
             <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+            <!-- ko if: pgpVerifiedString() -->
+              <span class="octicon octicon-key" data-bind="attr: { title: pgpVerifiedString() }" class="bootstrap-tooltip" data-toggle="tooltip" data-placement="top" ></span>
+            <!-- /ko -->
           </div>
           <div class="text-muted nodeSummaryContainer">
-            <span data-bind="text: authorDateFromNow, attr: { 'data-original-title': authorDate }" class="bootstrap-tooltip" data-toggle="tooltip" data-placement="bottom" data-delay='{"show":"2000", "hide":"0"}'></span> |
+            <span data-bind="text: authorDateFromNow, attr: { title: authorDate }" class="bootstrap-tooltip" data-toggle="tooltip" data-placement="bottom" data-delay='{"show":"2000", "hide":"0"}'></span> |
             +<span data-bind="text: numberOfAddedLines"></span>,
             -<span data-bind="text: numberOfRemovedLines"></span>
              |
