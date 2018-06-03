@@ -390,6 +390,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
     const ammendFlag = (amend ? '--amend' : '');
     const allowedEmptyFlag = ((emptyCommit ||amend) ? '--allow-empty' : '');
     const isGPGSign = (config.isForceGPGSign ? '-S' : '');
+    console.log(333, isGPGSign)
     return git(['commit', ammendFlag, allowedEmptyFlag, isGPGSign, '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
     // ignore the case where nothing were added to be committed

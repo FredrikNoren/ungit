@@ -7,6 +7,9 @@ components.register('login', function(args) {
   return new LoginViewModel(args.server);
 });
 
+
+
+
 var LoginViewModel = function(server) {
   var self = this;
   this.server = server;
