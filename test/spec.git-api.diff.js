@@ -132,7 +132,7 @@ describe('git-api diff', () => {
     // first add remote and push all commits
     return common.post(req, '/remotes/barerepository', { path: testDir, url: testBareDir })
       .then(() => common.post(req, '/push', { path: testDir, remote: 'barerepository' }))
-      .then(() => common.get(req, '/log', { path: testDir }))
+      .then(() => common.get(req, '/gitlog', { path: testDir }))
       .then((res) => {
         // find a commit which contains the testFile
         const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff[2] == testFile))[0];

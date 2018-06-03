@@ -86,7 +86,7 @@ describe('git-api branching', function () {
   });
 
   it('log should show both branches and all commits', () => {
-    return common.get(req, '/log', { path: testDir }).then(res => {
+    return common.get(req, '/gitlog', { path: testDir }).then(res => {
       expect(res.skip).to.be(0);
       expect(res.limit).to.be(25);
 
