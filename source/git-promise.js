@@ -120,34 +120,36 @@ const getGitError = (args, stderr, stdout) => {
   err.message = err.error.split('\n')[0];
   err.stderr = stderr;
   err.stdout = stdout;
-  if (stderr.indexOf('Not a git repository') >= 0) {
+  err.stdoutLower = (stdout || "").toLowerCase();
+  err.stderrLower = (stderr || "").toLowerCase();
+  if (err.stderrLower.indexOf('not a git repository') >= 0) {
     err.errorCode = 'not-a-repository';
-  } else if (err.stderr.indexOf('Connection timed out') != -1) {
+  } else if (err.stderrLower.indexOf('connection timed out') != -1) {
     err.errorCode = 'remote-timeout';
-  } else if (err.stderr.indexOf('Permission denied (publickey)') != -1) {
+  } else if (err.stderrLower.indexOf('permission denied (publickey)') != -1) {
     err.errorCode = 'permision-denied-publickey';
-  } else if (err.stderr.indexOf('ssh: connect to host') != -1 && err.stderr.indexOf('Bad file number') != -1) {
+  } else if (err.stderrLower.indexOf('ssh: connect to host') != -1 && err.stderrLower.indexOf('bad file number') != -1) {
     err.errorCode = 'ssh-bad-file-number';
-  } else if (err.stderr.indexOf('No remote configured to list refs from.') != -1) {
+  } else if (err.stderrLower.indexOf('no remote configured to list refs from.') != -1) {
     err.errorCode = 'no-remote-configured';
-  } else if ((err.stderr.indexOf('unable to access') != -1 && err.stderr.indexOf('Could not resolve host:') != -1) ||
-    (err.stderr.indexOf('Could not resolve hostname') != -1)) {
+  } else if ((err.stderrLower.indexOf('unable to access') != -1 && err.stderrLower.indexOf('could not resolve host:') != -1) ||
+    (err.stderrLower.indexOf('could not resolve hostname') != -1)) {
     err.errorCode = 'offline';
-  } else if (err.stderr.indexOf('Proxy Authentication Required') != -1) {
+  } else if (err.stderrLower.indexOf('proxy authentication required') != -1) {
     err.errorCode = 'proxy-authentication-required';
-  } else if (err.stderr.indexOf('Please tell me who you are') != -1) {
+  } else if (err.stderrLower.indexOf('please tell me who you are') != -1) {
     err.errorCode = 'no-git-name-email-configured';
-  } else if (err.stderr.indexOf('FATAL ERROR: Disconnected: No supported authentication methods available (server sent: publickey)') == 0) {
+  } else if (err.stderrLower.indexOf('fatal error: disconnected: no supported authentication methods available (server sent: publickey)') == 0) {
     err.errorCode = 'no-supported-authentication-provided';
-  } else if (stderr.indexOf('fatal: No remote repository specified.') == 0) {
+  } else if (err.stderrLower.indexOf('fatal: no remote repository specified.') == 0) {
     err.errorCode = 'no-remote-specified';
-  } else if (err.stderr.indexOf('non-fast-forward') != -1) {
+  } else if (err.stderrLower.indexOf('non-fast-forward') != -1) {
     err.errorCode = 'non-fast-forward';
-  } else if (err.stderr.indexOf('Failed to merge in the changes.') == 0 || err.stdout.indexOf('CONFLICT (content): Merge conflict in') != -1 || err.stderr.indexOf('after resolving the conflicts') != -1) {
+  } else if (err.stderrLower.indexOf('failed to merge in the changes.') == 0 || err.stdoutLower.indexOf('conflict (content): merge conflict in') != -1 || err.stderrLower.indexOf('after resolving the conflicts') != -1) {
     err.errorCode = 'merge-failed';
-  } else if (err.stderr.indexOf('This operation must be run in a work tree') != -1) {
+  } else if (err.stderrLower.indexOf('this operation must be run in a work tree') != -1) {
     err.errorCode = 'must-be-in-working-tree';
-  } else if (err.stderr.indexOf('Your local changes to the following files would be overwritten by checkout') != -1) {
+  } else if (err.stderrLower.indexOf('your local changes to the following files would be overwritten by checkout') != -1) {
     err.errorCode = 'local-changes-would-be-overwritten';
   }
 

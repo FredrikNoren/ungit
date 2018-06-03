@@ -8,7 +8,7 @@ The easiest way to use git. On any platform. Anywhere.
 
 [![xkcd](xkcd.png)](https://xkcd.com/1597/)
 
-Git is known for being a versatile distributed source control system that is a staple of many individuals, communities, and even for [the City of Chattanooga to crowd source bicycle parking locations](https://github.com/cityofchattanooga/Bicycle-Parking).  However, it is not known for userfriendlyness or easy learning curve.
+Git is known for being a versatile distributed source control system that is a staple of many individuals, communities, and even for [the City of Chattanooga to crowd source bicycle parking locations](https://github.com/cityofchattanooga/Bicycle-Parking).  However, it is not known for userfriendliness or easy learning curve.
 
 Ungit brings user friendliness to git without sacrificing the versatility of git.
 

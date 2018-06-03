@@ -310,7 +310,7 @@ exports.registerApi = (env) => {
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
-  app.get(`${exports.pathPrefix}/log`, ensureAuthenticated, ensurePathExists, (req, res) => {
+  app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
     const skip = getNumber(req.query.skip, 0);
     const task = gitPromise.log(req.query.path, limit, skip, 100)
