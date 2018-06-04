@@ -22,19 +22,24 @@
 	if (ungit.config.bugtracking) {
 		console.log('Initing raven');
 
-    Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
-			logger: 'root',
-			tags: {
-				version: ungit.version,
-				subsystem: 'ui',
-      			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
-			}
-		}).install();
-
-		Raven.setUser({
-			id: ungit.userHash
-		});
-
+    try {
+      Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
+  			logger: 'root',
+  			tags: {
+  				version: ungit.version,
+  				subsystem: 'ui',
+        			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
+  			}
+  		}).install();
+      Raven.setUser({ id: ungit.userHash });
+    } catch(e) {
+      console.warn("Failed to initialize Raven.", e);
+      Raven = {
+        TraceKit: {
+          report: { subscribe: function() {} }
+        }
+      }
+    }
   }
 </script>
 <script type="text/javascript" src="__ROOT_PATH__/socket.io/socket.io.js"></script>

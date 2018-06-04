@@ -103,7 +103,7 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
   var self = this;
   var nodeSize = self.nodes().length;
 
-  return this.server.getPromise('/log', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
+  return this.server.getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
     .then(function(log) {
       // set new limit and skip
       self.limit(parseInt(log.limit));
