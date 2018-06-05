@@ -93,7 +93,7 @@ describe('git-api', () => {
   const testFile = 'somefile';
 
   it('log should be empty before first commit', () => {
-    return common.get(req, '/log', { path: testDir }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(0);
       });
@@ -155,7 +155,7 @@ describe('git-api', () => {
   });
 
   it('log should show latest commit', () => {
-    return common.get(req, '/log', { path: testDir }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(1);
       expect(res.nodes[0].message.indexOf(commitMessage)).to.be(0);
@@ -209,7 +209,7 @@ describe('git-api', () => {
   });
 
   it('amend should not produce additional log-entry', () => {
-    return common.get(req, '/log', { path: testDir })
+    return common.get(req, '/gitlog', { path: testDir })
       .then((res) => expect(res.nodes.length).to.be(1));
   });
 
@@ -286,7 +286,7 @@ describe('git-api', () => {
   });
 
   it('log should show last commit', () => {
-    return common.get(req, '/log', { path: testDir }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
 
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
@@ -362,7 +362,7 @@ describe('git-api', () => {
   });
 
   it('log with limit should only return specified number of items', () => {
-    return common.get(req, '/log', { path: testDir, limit: 1 }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDir, limit: 1 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(1);
     });

@@ -65,7 +65,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local1" should show the init commit', () => {
-    return common.get(req, '/log', { path: testDirLocal1 })
+    return common.get(req, '/gitlog', { path: testDirLocal1 })
       .then((res) => {
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(1);
@@ -85,7 +85,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local2" should show the init commit', () => {
-    common.get(req, '/log', { path: testDirLocal2 })
+    common.get(req, '/gitlog', { path: testDirLocal2 })
       .then((res) => {
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(1);
@@ -111,7 +111,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local2" should show the branch as one behind', () => {
-    common.get(req, '/log', { path: testDirLocal2 })
+    common.get(req, '/gitlog', { path: testDirLocal2 })
       .then((res) =>{
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(2);
@@ -131,7 +131,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local2" should show the branch as in sync', () => {
-    common.get(req, '/log', { path: testDirLocal2 })
+    common.get(req, '/gitlog', { path: testDirLocal2 })
       .then((res) => {
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(2);
@@ -159,7 +159,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local2" should show the branch as in sync', () => {
-    return common.get(req, '/log', { path: testDirLocal2 }, (res) => {
+    return common.get(req, '/gitlog', { path: testDirLocal2 }, (res) => {
       expect(res.nodes.length).to.be(2);
       const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
       const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
@@ -185,7 +185,7 @@ describe('git-api remote', function() {
   });
 
   it('log in "local2" should show the local tag', () => {
-    return common.get(req, '/log', { path: testDirLocal2 })
+    return common.get(req, '/gitlog', { path: testDirLocal2 })
       .then((res) => {
         const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
         expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
