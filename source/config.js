@@ -140,6 +140,10 @@ const defaultConfig = {
 
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
+
+  // Force gpg sign for tags and commits.  (additionally one can set up `git config commit.gpgsign true`
+  // instead of this flag)  more on this: https://help.github.com/articles/signing-commits-using-gpg/
+  isForceGPGSign: false,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -196,6 +200,7 @@ let argv = yargs
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
+.describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
 ;
 
 const argvConfig = argv.argv;

@@ -24,6 +24,13 @@ var GitNodeViewModel = function(graph, sha1) {
   this.ideologicalBranch = ko.observable();
   this.remoteTags = ko.observableArray();
   this.branchesAndLocalTags = ko.observableArray();
+  this.signatureDate = ko.observable();
+  this.signatureMade = ko.observable();
+  this.pgpVerifiedString = ko.computed(function() {
+    if (self.signatureMade()) {
+      return `PGP by: ${self.signatureMade()} at ${self.signatureDate()}`
+    }
+  });
 
   this.refs = ko.computed(function() {
     var rs = self.branchesAndLocalTags().concat(self.remoteTags());
@@ -149,6 +156,8 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
   this.commitTime = logEntry.commitDate;
   this.date = Date.parse(this.commitTime);
   this.commitComponent.setData(logEntry);
+  this.signatureMade(logEntry.signatureMade);
+  this.signatureDate(logEntry.signatureDate);
 
   (logEntry.refs || []).forEach(function(ref) {
     self.graph.getRef(ref).node(self);
