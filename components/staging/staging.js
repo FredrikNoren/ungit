@@ -89,20 +89,22 @@ var StagingViewModel = function(server, repoPath, graph) {
     return self.amend() || self.emptyCommit();
   });
   this.commitValidationError = ko.computed(function() {
-    if (!self.emptyCommit() && !self.amend() && !self.files().some(function(file) { return file.editState() === 'staged' || file.editState() === 'patched'; }))
-      return "No files to commit";
+    if (self.conflictText()) {
+      if (self.files().some((file) => file.conflict())) return "Files in conflict";
+    } else {
+      if (!self.emptyCommit() && !self.amend() && !self.files().some((file) => file.editState() === 'staged' || file.editState() === 'patched')) {
+        return "No files to commit";
+      }
+      if (!self.commitMessageTitle()) {
+        return "Provide a title"
+      }
 
-    if (self.files().some(function(file) { return file.conflict(); }))
-      return "Files in conflict";
-
-    if (!self.commitMessageTitle() && !self.inRebase()) return "Provide a title";
-
-    if (self.textDiffType.value() === 'sidebysidediff') {
-      var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
-      if (patchFiles.length > 0) return "Cannot patch with side by side view."
+      if (self.textDiffType.value() === 'sidebysidediff') {
+        var patchFiles = self.files().filter(function(file) { return file.editState() === 'patched'; });
+        if (patchFiles.length > 0) return "Cannot patch with side by side view."
+      }
     }
-
-    return "";
+    return ""
   });
   this.toggleSelectAllGlyphClass = ko.computed(function() {
     if (self.allStageFlag()) return 'glyphicon-unchecked';
