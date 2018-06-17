@@ -17,7 +17,7 @@ class AppViewModel {
       this.header = components.create('header', { app: this });
     }
     this.dialog = ko.observable(null);
-    this.repoList = ko.observableArray(JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]')); // visitedRepositories is legacy, remove in the next version
+    this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
     this.repoList.subscribe((newValue) => { localStorage.setItem('repositories', JSON.stringify(newValue)); });
     this.content = ko.observable(components.create('home', { app: this }));
     this.currentVersion = ko.observable();
@@ -38,6 +38,14 @@ class AppViewModel {
     const NPSSurveyLastDismissed = parseInt(localStorage.getItem('NPSSurveyLastDismissed') || '0');
     const monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
     this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
+  }
+  getRepoList() {
+    const localStorageRepo = JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]');
+    const newRepos = localStorageRepo.concat(ungit.config.defaultRepositories || [])
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .sort();
+    localStorage.setItem('repositories', JSON.stringify(newRepos));
+    return newRepos;
   }
   sendNPS(value) {
     keen.addEvent('survey-nps', {

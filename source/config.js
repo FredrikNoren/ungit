@@ -144,6 +144,9 @@ const defaultConfig = {
   // Force gpg sign for tags and commits.  (additionally one can set up `git config commit.gpgsign true`
   // instead of this flag)  more on this: https://help.github.com/articles/signing-commits-using-gpg/
   isForceGPGSign: false,
+
+  // Array of local git repo paths to display at the ungit home page
+  defaultRepositories: [],
 };
 
 // Works for now but should be moved to bin/ungit
@@ -201,6 +204,7 @@ let argv = yargs
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
+.describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')
 ;
 
 const argvConfig = argv.argv;
