@@ -17,7 +17,7 @@ class AppViewModel {
       this.header = components.create('header', { app: this });
     }
     this.dialog = ko.observable(null);
-    this.repoList = ko.observableArray(getRepoList()); // visitedRepositories is legacy, remove in the next version
+    this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
     this.repoList.subscribe((newValue) => { localStorage.setItem('repositories', JSON.stringify(newValue)); });
     this.content = ko.observable(components.create('home', { app: this }));
     this.currentVersion = ko.observable();
