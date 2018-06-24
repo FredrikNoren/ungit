@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.4.26",
+  "version": "1.4.27",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -47,7 +47,7 @@
     "npm-registry-client": "~8.5.1",
     "nprogress": "^0.2.0",
     "octicons": "~3.5.0",
-    "open": "~0.0.5",
+    "opn": "~5.3.0",
     "os-homedir": "~1.0.2",
     "passport": "~0.4.0",
     "passport-local": "~1.0.0",
