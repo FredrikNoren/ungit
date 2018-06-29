@@ -1,6 +1,5 @@
 var startLaunchTime = Date.now();
 var config = require('../src/config');
-var open = require('open');
 var path = require('path');
 var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');

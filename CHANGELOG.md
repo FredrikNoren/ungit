@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.27: logic change for the merge conflict resolution
 - 1.4.26: add a way to preconfigure repo lists [#1106](https://github.com/FredrikNoren/ungit/issues/1106)
 - 1.4.25: add git pgp signing docs and code [#740](https://github.com/FredrikNoren/ungit/issues/740)
 - 1.4.24:
