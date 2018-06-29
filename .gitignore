@@ -17,6 +17,7 @@ public/css/
 public/js/ungit.js
 public/js/ungit.js.map
 public/js/devStyling.js
+public/js/raven.min.js
 public/images/
 
 .ungitrc
