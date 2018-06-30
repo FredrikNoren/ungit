@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.4.27",
+  "version": "1.4.28",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -51,7 +51,7 @@
     "os-homedir": "~1.0.2",
     "passport": "~0.4.0",
     "passport-local": "~1.0.0",
-    "raven": "~2.6.2",
+    "raven-js": "~3.26.3",
     "rc": "~1.2.8",
     "rimraf": "~2.6.2",
     "semver": "~5.5.0",
