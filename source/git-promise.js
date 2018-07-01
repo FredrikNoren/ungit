@@ -10,6 +10,7 @@ const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
+const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
 
 // only allows ${config.maxConcurrentGitOperations} count of parallel git operations
 const rateLimiter = () => new Bluebird((resolve) => { gitSem.wait(() => { resolve(); }); });
@@ -158,11 +159,11 @@ const getGitError = (args, stderr, stdout) => {
 
 git.status = (repoPath, file) => {
   return Bluebird.props({
-    numStatsStaged: git(['diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
+    numStatsStaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: git(['diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
+    numStatsUnstaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    status: git(['status', '-s', '-b', '-u', (file || '')], repoPath)
+    status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
         return Bluebird.props({
