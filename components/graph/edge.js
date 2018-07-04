@@ -22,4 +22,20 @@ var EdgeViewModel = function(graph, nodeAsha1, nodeBsha1) {
 EdgeViewModel.prototype.setGraphAttr = function(val) {
   this.element().setAttribute('d', 'M' + val.slice(0,4).join(',') + 'L' + val.slice(4,8).join(','));
 }
+EdgeViewModel.prototype.edgeMouseOver = function() {
+  if (this.nodeA) {
+    this.nodeA.isEdgeHighlighted(true);
+  }
+  if (this.nodeB) {
+    this.nodeB.isEdgeHighlighted(true);
+  }
+}
+EdgeViewModel.prototype.edgeMouseOut = function() {
+  if (this.nodeA) {
+    this.nodeA.isEdgeHighlighted(false);
+  }
+  if (this.nodeB) {
+    this.nodeB.isEdgeHighlighted(false);
+  }
+}
 module.exports = EdgeViewModel;

@@ -34,13 +34,13 @@
     <!-- /ko -->
 
     <!-- ko foreach: edges -->
-      <path data-bind="element: element" stroke="#4A4A4A" stroke-width="8" />
+      <path data-bind="element: element, event: { mouseover: edgeMouseOver, mouseout: edgeMouseOut }" stroke="#4A4A4A" stroke-width="8" />
     <!-- /ko -->
 
     <!-- ko foreach: nodes -->
       <svg data-bind="element: element" >
         <circle data-bind="attr: { r: r, fill: color, 'data-ta-clickable': 'node-clickable-' + $index() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" cx="30" cy="30" />
-        <!-- ko if: selected -->
+        <!-- ko if: isNodeAccented -->
           <circle data-bind=" attr: { r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" cx="30" cy="30" />
         <!-- /ko -->
       </svg>
