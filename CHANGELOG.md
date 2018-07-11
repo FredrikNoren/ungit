@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.29:
+  - Add `--no-optional-locks` if git version is appropriate [#1105](https://github.com/FredrikNoren/ungit/issues/1105)
+  - Ensure ungit server to bind to `127.0.0.1` [#988](https://github.com/FredrikNoren/ungit/issues/988)
+  - Add node highlight on mouse hover on relationsip path [#1093](https://github.com/FredrikNoren/ungit/issues/1093)
 - 1.4.28: adding raven locally for offline access. [#1107](https://github.com/FredrikNoren/ungit/pull/1107)
 - 1.4.27: logic change for the merge conflict resolution
 - 1.4.26: add a way to preconfigure repo lists [#1106](https://github.com/FredrikNoren/ungit/issues/1106)

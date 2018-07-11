@@ -67,6 +67,12 @@ var GitNodeViewModel = function(graph, sha1) {
   this.commitContainerVisible = ko.computed(function() {
     return self.ancestorOfHEAD() || self.nodeIsMousehover() || self.selected();
   });
+  this.isEdgeHighlighted = ko.observable(false);
+  // for small empty black circle to highlight a node
+  this.isNodeAccented = ko.computed(function() {
+    return self.selected() || self.isEdgeHighlighted();
+  });
+  // to show changed files and diff boxes on the left of node
   this.highlighted = ko.computed(function() {
     return self.nodeIsMousehover() || self.selected();
   });

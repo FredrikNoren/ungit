@@ -7,6 +7,7 @@ const yargs = require('yargs');
 const homedir = require('os-homedir')();
 const winston = require('winston');
 const child_process = require('child_process');
+const semver = require('semver');
 
 const defaultConfig = {
 
@@ -281,3 +282,5 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
 }
+
+module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');
