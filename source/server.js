@@ -361,7 +361,8 @@ app.use((err, req, res, next) => {
 
 exports.started = new signals.Signal();
 
-server.listen(config.port, '127.0.0.1', () => {
+const bindIp = config.isBindToLocalhost ? '127.0.0.1' : '';
+server.listen(config.port, bindIp, () => {
   winston.info('Listening on port ' + config.port);
   console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
   exports.started.dispatch();
