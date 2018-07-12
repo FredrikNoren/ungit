@@ -149,8 +149,8 @@ const defaultConfig = {
   // Array of local git repo paths to display at the ungit home page
   defaultRepositories: [],
 
-  // is force ungit server to bind to `127.0.0.1`
-  isBindToLocalhost: true,
+  // a string of ip to bind to, default is `127.0.0.1`
+  ungitBindIp: '127.0.0.1',
 };
 
 // Works for now but should be moved to bin/ungit
@@ -211,8 +211,7 @@ let argv = yargs
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
 .describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')
-.describe('isBindToLocalhost', 'is force ungit server to bind to `127.0.0.1`')
-.boolean('isBindToLocalhost')
+.describe('ungitBindIp', 'a string of ip to bind to, default is `127.0.0.1`')
 ;
 
 const argvConfig = argv.argv;
