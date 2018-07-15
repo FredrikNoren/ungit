@@ -25,29 +25,39 @@ process.on('uncaughtException', (err) => {
   ]).then(cleanExit)
 });
 
-const navigate = (override) => {
-  let pathToNavigateTo = null;
+const openUngitBrowser = (pathToNavigateTo) => {
+  console.log(`Navigate to ${pathToNavigateTo}`);
+  return open(pathToNavigateTo)
+    .catch(err => console.log(`failed to navigate to ${pathToNavigateTo}`, err))
+}
+
+const getPathToNavigateTo= (override) => {
   if (config.forcedLaunchPath !== undefined && config.forcedLaunchPath !== '') {
-    pathToNavigateTo = `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
+    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
   } else if (override || config.launchBrowser || config.launchCommand) {
-    pathToNavigateTo = `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(process.cwd())}`
+    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(process.cwd())}`
+  } else {
+    return null;
   }
+}
+
+const navigate = (override) => {
+  const pathToNavigateTo = getPathToNavigateTo(override);
 
   if (config.launchCommand) {
     const command = config.launchCommand.replace(/%U/g, pathToNavigateTo);
     console.log(`Running custom launch command: ${command}`);
     child_process.exec(command, (err, stdout, stderr) => {
       if (err) {
-        console.log(err)
+        console.log('Failed to exec custom launchCommand', err, stderr)
         return;
       }
       if (config.launchBrowser) {
-        open(pathToNavigateTo);
+        openUngitBrowser(pathToNavigateTo)
       }
     });
   } else if (pathToNavigateTo) {
-    console.log(`Browse to ${pathToNavigateTo}`);
-    open(pathToNavigateTo);
+    openUngitBrowser(pathToNavigateTo);
   }
 }
 

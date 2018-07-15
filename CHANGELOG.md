@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.30: Add `ungitBindIp` config to allow default binding in some cases [#1112](https://github.com/FredrikNoren/ungit/issues/1112)
 - 1.4.29:
   - Add `--no-optional-locks` if git version is appropriate [#1105](https://github.com/FredrikNoren/ungit/issues/1105)
   - Ensure ungit server to bind to `127.0.0.1` [#988](https://github.com/FredrikNoren/ungit/issues/988)
