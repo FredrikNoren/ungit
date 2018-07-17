@@ -371,7 +371,7 @@ module.exports = (grunt) => {
       const hash = stdout.trim();
       updatePackageJsonBuildVersion(hash);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec("npm publish", () => { done(); });
+      childProcess.exec("npm publish", (err) => { done(err); });
     });
   });
 
