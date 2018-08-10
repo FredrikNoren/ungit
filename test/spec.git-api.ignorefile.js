@@ -35,7 +35,7 @@ describe('git-api: test ignorefile call', () => {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });
-        })
+        });
       });
   });
 
@@ -55,7 +55,7 @@ describe('git-api: test ignorefile call', () => {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });
-        })
+        });
     });
   });
 
@@ -79,7 +79,7 @@ describe('git-api: test ignorefile call', () => {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });
-        })
+        });
     });
   });
 });

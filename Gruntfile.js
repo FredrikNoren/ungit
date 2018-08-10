@@ -13,7 +13,7 @@ module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
   const lessFiles = {
     "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/less/d2h.less"]
-  }
+  };
   fs.readdirSync("./components").map((component) => `components/${component}/${component}`)
     .forEach((str) => lessFiles[`${str}.css`] = `${str}.less`);
 
@@ -113,72 +113,8 @@ module.exports = (grunt) => {
         }
       }
     },
-    jshint: {
-      options: {
-        undef: true, // check for usage of undefined constiables
-        indent: 2,
-        esnext: true,
-        '-W033': true, // ignore Missing semicolon
-        '-W041': true, // ignore Use '===' to compare with '0'
-        '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation
-      },
-      web: {
-        options: {
-          node: true,
-          browser: true,
-          globals: {
-            'ungit': true,
-            'io': true,
-            'keen': true,
-            'Raven': true,
-            '$': true,
-            'jQuery': true,
-            'nprogress': true
-          }
-        },
-        files: [
-          {
-            src: ['public/source/**/*.js', 'components/**/*.js'],
-            // Filter out the "compiled" components files; see the browserify task for components
-            filter: (src) => src.indexOf('bundle.js') == -1
-          }
-        ]
-      },
-      node: {
-        options: {
-          node: true
-        },
-        src: ['source/**/*.js']
-      },
-      bin: {
-        options: {
-          node: true
-        },
-        src: [
-          'Gruntfile.js',
-          'bin/*'
-        ]
-      },
-      mocha: {
-        options: {
-          node: true,
-          globals: {
-            'it': true,
-            'describe': true,
-            'before': true,
-            'after': true,
-            'window': true,
-            'document': true,
-            'navigator': true,
-            'ungit': true
-          }
-        },
-        src: [
-          'test/**/*.js',
-          'nmclicktests/**/*.js'
-        ]
-      }
+    eslint: {
+      target: ['.']
     },
     copy: {
       main: {
@@ -339,7 +275,7 @@ module.exports = (grunt) => {
 
   const bumpDependency = (packageJson, packageName) => {
     return new Bluebird((resolve, reject) => {
-      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
+      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
       let currentVersion = packageJson[dependencyType][packageName];
       if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
       npm.commands.show([packageName, 'versions'], true, (err, data) => {
@@ -354,13 +290,13 @@ module.exports = (grunt) => {
         resolve();
       });
     });
-  }
+  };
 
   const updatePackageJsonBuildVersion = (commitHash) => {
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
     packageJson.version += `+${commitHash}`;
     fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-  }
+  };
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
     const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
@@ -391,7 +327,7 @@ module.exports = (grunt) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Bluebird.map(tests, (file) => {
           let output = "";
-          const outStream = (data) => output += data
+          const outStream = (data) => output += data;
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
           return new Bluebird((resolve, reject) => {
@@ -414,9 +350,9 @@ module.exports = (grunt) => {
         let isSuccess = true;
         results.forEach((result) => {
           if (!result.isSuccess) {
-            grunt.log.writeln(`---- start of ${result.name} log ----`)
+            grunt.log.writeln(`---- start of ${result.name} log ----`);
             grunt.log.writeln(result.output);
-            grunt.log.writeln(`----- end of ${result.name} log -----`)
+            grunt.log.writeln(`----- end of ${result.name} log -----`);
             isSuccess = false;
           }
         });
@@ -429,7 +365,7 @@ module.exports = (grunt) => {
     grunt.log.writeln('Bumping dependencies...');
     npm.load(() => {
       const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
+      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
 
       const bumps = Bluebird.map(keys, (dep) => {
         // winston 3.x has different API
@@ -467,14 +403,14 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-plato');
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-babel');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['clean:babel', 'less:production', 'eslint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);

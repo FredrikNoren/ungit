@@ -27,10 +27,10 @@ var LoginViewModel = function(server) {
         self.status('login');
       }
     }).catch(function(err) { });
-}
+};
 LoginViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('login', this, {}, parentElement);
-}
+};
 LoginViewModel.prototype.login = function() {
   var self = this;
   this.server.postPromise('/login', { username: this.username(), password: this.password() }).then(function(res) {
@@ -43,4 +43,4 @@ LoginViewModel.prototype.login = function() {
       self.server.unhandledRejection(err);
     }
   });
-}
+};

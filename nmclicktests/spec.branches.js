@@ -10,13 +10,13 @@ describe('[BRANCHES]', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0])
+    return environment.nm.ug.openUngit(testRepoPaths[0]);
   });
 
   it('add a commit', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .ug.commit('commit-1');
-  })
+  });
 
   // < branch search test >
   it('add branches', () => {
@@ -24,7 +24,7 @@ describe('[BRANCHES]', () => {
       .ug.createBranch("search-2")
       .ug.createBranch("search-3")
       .ug.createBranch("search-4")
-      .wait('[data-ta-name="search-4"]')
+      .wait('[data-ta-name="search-4"]');
   });
 
   it('add tag should make one of the branch disappear', () => {
@@ -38,7 +38,7 @@ describe('[BRANCHES]', () => {
       .nm.click('.showSearchForm')
       .wait(200)
       .type('input.name', '-4\u0028\u000d')
-      .wait('[data-ta-name="search-4"]')
+      .wait('[data-ta-name="search-4"]');
   });
   // < /branch search test>
 
@@ -68,7 +68,7 @@ describe('[BRANCHES]', () => {
   it('Check out a branch via selection', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutrefs/heads/branch-2"]')
-      .ug.waitForElementNotVisible('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Delete a branch via selection', () => {
@@ -87,7 +87,7 @@ describe('[BRANCHES]', () => {
   it('checkout cherypick base', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]')
-      .ug.waitForElementNotVisible('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('cherrypick fail case', () => {
@@ -96,7 +96,7 @@ describe('[BRANCHES]', () => {
       .wait(3000) // on windows clicking on cherry pick which results in conflicts might take some time
       .ug.click('.staging .btn-stg-abort')
       .ug.click('.modal-dialog .btn-primary')
-      .wait(500)
+      .wait(500);
   });
 
   it('cherrypick success case', () => {
@@ -129,12 +129,12 @@ describe('[BRANCHES]', () => {
       .wait('.staging .files .file')
       .ug.click('.files span.discard')
       .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.staging .files .file')
+      .ug.waitForElementNotVisible('.staging .files .file');
   });
 
   it('test forward squash from different lineage', () => {
     return environment.nm.ug.click('.ref.branch.current')
       .ug.click('[data-ta-node-title="commit-3"] .squash .dropmask')
-      .wait('.staging .files .file')
+      .wait('.staging .files .file');
   });
 });

@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var components = require('ungit-components');
 var programEvents = require('ungit-program-events');
@@ -8,7 +7,6 @@ components.register('submodules', function(args) {
 });
 
 function SubmodulesViewModel(server, repoPath) {
-  var self = this;
   this.repoPath = repoPath;
   this.server = server;
   this.submodules = ko.observableArray();
@@ -17,13 +15,13 @@ function SubmodulesViewModel(server, repoPath) {
 
 SubmodulesViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'submodule-fetch') this.fetchSubmodules();
-}
+};
 
 SubmodulesViewModel.prototype.updateNode = function(parentElement) {
   this.fetchSubmodules().then(function(submoduleViewModel) {
     ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
   });
-}
+};
 
 SubmodulesViewModel.prototype.fetchSubmodules = function() {
   var self = this;
@@ -32,7 +30,7 @@ SubmodulesViewModel.prototype.fetchSubmodules = function() {
       self.submodules(submodules && Array.isArray(submodules) ? submodules : []);
       return self;
     }).catch((e) => this.server.unhandledRejection(e));
-}
+};
 
 SubmodulesViewModel.prototype.updateSubmodules = function() {
   if (this.isUpdating) return;
@@ -40,7 +38,7 @@ SubmodulesViewModel.prototype.updateSubmodules = function() {
   return this.server.postPromise('/submodules/update', { path: this.repoPath() })
     .catch((e) => this.server.unhandledRejection(e))
     .finally(() => { this.isUpdating = false; });
-}
+};
 
 SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
   components.create('addsubmoduledialog')
@@ -53,15 +51,15 @@ SubmodulesViewModel.prototype.showAddSubmoduleDialog = function() {
         .catch((e) => this.server.unhandledRejection(e))
         .finally(() => { this.isUpdating = false; });
     });
-}
+};
 
 SubmodulesViewModel.prototype.submoduleLinkClick = function(submodule) {
   window.location.href = submodule.url;
-}
+};
 
 SubmodulesViewModel.prototype.submodulePathClick = function(submodule) {
   window.location.href = document.URL + ungit.config.fileSeparator + submodule.path;
-}
+};
 
 SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
   var self = this;
@@ -73,4 +71,4 @@ SubmodulesViewModel.prototype.submoduleRemove = function(submodule) {
         .then(() => { programEvents.dispatch({ event: 'submodule-fetch' }); })
         .catch((e) => this.server.unhandledRejection(e));
     });
-}
+};

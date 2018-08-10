@@ -9,7 +9,7 @@ var crossroads = navigation.crossroads = require('crossroads');
 
 navigation.browseTo = function(path) {
   hasher.setHash(path);
-}
+};
 
 navigation.init = function() {
 
@@ -24,4 +24,4 @@ navigation.init = function() {
 
   hasher.init();
 
-}
+};

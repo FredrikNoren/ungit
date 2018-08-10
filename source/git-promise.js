@@ -23,7 +23,7 @@ const isRetryableError = (err) => {
   // can report "Permission denied" for the file locking issue.
   if (errMsg.indexOf("index file open failed: Permission denied") > -1) return true;
   return false;
-}
+};
 
 const gitExecutorProm = (args, retryCount) => {
   return rateLimiter().then(() => {
@@ -32,7 +32,7 @@ const gitExecutorProm = (args, retryCount) => {
       let rejected = false;
       let stdout = '';
       let stderr = '';
-      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout }
+      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout };
       const gitProcess = child_process.spawn('git', args.commands, procOpts);
 
       if (args.outPipe) {
@@ -75,7 +75,7 @@ const gitExecutorProm = (args, retryCount) => {
       throw err;
     }
   });
-}
+};
 
 /**
  * Returns a promise that executes git command with given arguments
@@ -109,7 +109,7 @@ const git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
   args.startTime = Date.now();
 
   return gitExecutorProm(args, config.lockConflictRetryCount);
-}
+};
 
 const getGitError = (args, stderr, stdout) => {
   const err = {};
@@ -155,7 +155,7 @@ const getGitError = (args, stderr, stdout) => {
   }
 
   return err;
-}
+};
 
 git.status = (repoPath, file) => {
   return Bluebird.props({
@@ -211,12 +211,12 @@ git.status = (repoPath, file) => {
 
     return status;
   });
-}
+};
 
 git.getRemoteAddress = (repoPath, remoteName) => {
   return git(['config', '--get', `remote.${remoteName}.url`], repoPath)
     .then((text) => addressParser.parseAddress(text.split('\n')[0]));
-}
+};
 
 git.resolveConflicts = (repoPath, files) => {
   const toAdd = [];
@@ -234,7 +234,7 @@ git.resolveConflicts = (repoPath, files) => {
     const removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
     return Bluebird.join(addExec, removeExec);
   });
-}
+};
 
 git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
   let hadLocalChanges = true;
@@ -251,17 +251,17 @@ git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeo
         hadLocalChanges = false;
       }
       return git(commands, repoPath, allowError, outPipe, inPipe, timeout);
-    }).then(() => { return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null });
-}
+    }).then(() => { return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null; });
+};
 
 git.binaryFileContent = (repoPath, filename, version, outPipe) => {
   return git(['show', `${version}:${filename}`], repoPath, null, outPipe);
-}
+};
 
 git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
   const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
   return git.revParse(repoPath)
-    .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
+    .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath); }) // if bare do not call status
     .then((status) => {
       const file = status.files[filename];
 
@@ -289,7 +289,7 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
         });
       }
     });
-}
+};
 
 git.getCurrentBranch = (repoPath) => {
   return git.revParse(repoPath).then(revResult => {
@@ -303,12 +303,12 @@ git.getCurrentBranch = (repoPath) => {
       return rows[0].slice('ref: refs/heads/'.length);
     });
   });
-}
+};
 
 git.discardAllChanges = (repoPath) => {
   return git(['reset', '--hard', 'HEAD'], repoPath)
-    .then(() => { return git(['clean', '-fd'], repoPath) });
-}
+    .then(() => { return git(['clean', '-fd'], repoPath); });
+};
 
 git.discardChangesInFile = (repoPath, filename) => {
   return git.status(repoPath, filename)
@@ -337,13 +337,13 @@ git.discardChangesInFile = (repoPath, filename) => {
           }
         });
     });
-}
+};
 
 git.applyPatchedDiff = (repoPath, patchedDiff) => {
   if (patchedDiff) {
     return git(['apply', '--cached'], repoPath, null, null, patchedDiff + '\n\n');
   }
-}
+};
 
 git.commit = (repoPath, amend, emptyCommit, message, files) => {
   return (new Bluebird((resolve, reject) => {
@@ -398,7 +398,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       throw err;
     }
   });
-}
+};
 
 git.revParse = (repoPath) => {
   return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
@@ -412,7 +412,7 @@ git.revParse = (repoPath) => {
       }
       return { type: 'uninited', gitRootPath: rootPath };
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
-}
+};
 
 git.log = (path, limit, skip, maxSearchIteration) => {
   return git(['log', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
@@ -429,6 +429,6 @@ git.log = (path, limit, skip, maxSearchIteration) => {
         return { "limit": limit, "skip": skip, "nodes": log};
       }
     });
-}
+};
 
 module.exports = git;

@@ -1,7 +1,6 @@
 const config = require('./config');
 const cache = require('./utils/cache');
 const sysinfo = require('./sysinfo');
-const getmac = require('getmac');
 const winston = require('winston');
 const keenio = require('keen.io');
 

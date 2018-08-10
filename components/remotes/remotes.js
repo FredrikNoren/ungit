@@ -21,7 +21,7 @@ function RemotesViewModel(server, repoPath) {
   this.fetchLabel = ko.computed(function() {
     if (self.currentRemote()) return 'Fetch from ' + self.currentRemote();
     else return 'No remotes specified';
-  })
+  });
 
   this.fetchEnabled = ko.computed(function() {
     return self.remotes().length > 0;
@@ -34,14 +34,14 @@ function RemotesViewModel(server, repoPath) {
 }
 RemotesViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('remotes', this, {}, parentElement);
-}
-RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
+};
+RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); };
 RemotesViewModel.prototype.onProgramEvent = function(event) {
   if (event.event === 'working-tree-changed' || event.event === 'request-app-content-refresh' ||
     event.event === 'request-fetch-tags' || event.event === 'git-directory-changed') {
     this.fetchDebounced();
   }
-}
+};
 RemotesViewModel.prototype.fetch = function(options) {
   if (this.isFetching || !this.currentRemote()) return;
   var self = this;
@@ -86,7 +86,7 @@ RemotesViewModel.prototype.fetch = function(options) {
         repoPath: err.res.body.workingDirectory
       } });
     }).finally(() => { this.isFetching = false; });
-}
+};
 
 RemotesViewModel.prototype.updateRemotes = function() {
   var self = this;
@@ -96,8 +96,8 @@ RemotesViewModel.prototype.updateRemotes = function() {
       remotes = remotes.map(function(remote) {
         return {
           name: remote,
-          changeRemote: function() { self.currentRemote(remote) }
-        }
+          changeRemote: function() { self.currentRemote(remote); }
+        };
       });
       self.remotes(remotes);
       if (!self.currentRemote() && remotes.length > 0) {
@@ -115,7 +115,7 @@ RemotesViewModel.prototype.updateRemotes = function() {
     }).catch(function(err) {
       if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
     });
-}
+};
 RemotesViewModel.prototype.showAddRemoteDialog = function() {
   var self = this;
   components.create('addremotedialog')
@@ -127,7 +127,7 @@ RemotesViewModel.prototype.showAddRemoteDialog = function() {
           .catch((e) => this.server.unhandledRejection(e));
       }
     });
-}
+};
 
 RemotesViewModel.prototype.remoteRemove = function(remote) {
   var self = this;
@@ -140,4 +140,4 @@ RemotesViewModel.prototype.remoteRemove = function(remote) {
           .catch((e) => this.server.unhandledRejection(e));
       }
     });
-}
+};

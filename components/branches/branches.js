@@ -5,7 +5,6 @@ const programEvents = require('ungit-program-events');
 const showRemote = 'showRemote';
 const showBranch = 'showBranch';
 const showTag = 'showTag';
-const Bluebird = require('bluebird');
 
 components.register('branches', (args) => {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
@@ -25,7 +24,7 @@ class BranchesViewModel {
       localStorage.setItem(localStorageKey, value);
       this.updateRefs();
       return value;
-    }
+    };
     this.isShowRemote.subscribe(setLocalStorageAndUpdate.bind(null, showRemote));
     this.isShowBranch.subscribe(setLocalStorageAndUpdate.bind(null, showBranch));
     this.isShowTag.subscribe(setLocalStorageAndUpdate.bind(null, showTag));
@@ -49,7 +48,7 @@ class BranchesViewModel {
   updateRefs() {
     const currentBranchProm = this.server.getPromise('/branches', { path: this.repoPath() })
       .then((branches) => branches.forEach((b) => { if (b.current) { this.current(b.name); } }))
-      .catch((err) => { this.current("~error"); })
+      .catch((err) => { this.current("~error"); });
 
     // refreshes tags branches and remote branches
     const refsProm = this.server.getPromise('/refs', { path: this.repoPath() })
@@ -90,7 +89,7 @@ class BranchesViewModel {
         });
       }).catch((e) => this.server.unhandledRejection(e));
 
-    return Promise.all([currentBranchProm, refsProm])
+    return Promise.all([currentBranchProm, refsProm]);
   }
 
   branchRemove(branch) {
@@ -104,7 +103,7 @@ class BranchesViewModel {
         if (!diag.result()) return;
         const url = `${branch.isRemote ? '/remote' : ''}/branches`;
         return this.server.delPromise(url, { path: this.graph.repoPath(), remote: branch.isRemote ? branch.remote : null, name: branch.refName })
-          .then(() => { programEvents.dispatch({ event: 'working-tree-changed' }) })
+          .then(() => { programEvents.dispatch({ event: 'working-tree-changed' }); })
           .catch((e) => this.server.unhandledRejection(e));
       });
   }

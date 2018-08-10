@@ -11,12 +11,12 @@ describe('cache', () => {
     return cache.resolveFunc(key)
       .then((val) => { expect(val).to.be(0); })
       .then(() => cache.resolveFunc(key))
-      .then((val) => expect(val).to.be(0))
+      .then((val) => expect(val).to.be(0));
   });
 
   it('should work when failing', () => {
     const errorMsg = "A nasty error...";
-    const key = cache.registerFunc(() => { throw new Error(errorMsg) });
+    const key = cache.registerFunc(() => { throw new Error(errorMsg); });
 
     return cache.resolveFunc(key)
       .then(() => { throw new Error("should have thrown exception!"); })
@@ -34,14 +34,14 @@ describe('cache', () => {
       .then(() => {
         cache.invalidateFunc(key);
         return cache.resolveFunc(key);
-      }).then((val) => { expect(val).to.be(1); })
+      }).then((val) => { expect(val).to.be(1); });
   });
 
   it('creating a same function with different keys', () => {
     let i = 0;
     const key1 = "func1";
     const key2 = "func2";
-    const func = () => i++
+    const func = () => i++;
     cache.registerFunc(key1, func);
     cache.registerFunc(key2, func);
 
@@ -56,12 +56,12 @@ describe('cache', () => {
         return cache.resolveFunc(key1);
       }).then((val) => { expect(val).to.be(2); })
       .then(() => cache.resolveFunc(key2))
-      .then((val) => { expect(val).to.be(1); })
+      .then((val) => { expect(val).to.be(1); });
   });
 
   it('Testing ttl', function() {
     let i = 0;
-    const func = () => i++
+    const func = () => i++;
     const key = cache.registerFunc(1, null, func);
     this.timeout(3000);
 
@@ -72,20 +72,20 @@ describe('cache', () => {
           setTimeout(resolve, 500);
         });
       }).then(() => {
-        return cache.resolveFunc(key)
+        return cache.resolveFunc(key);
       }).then((val) => { expect(val).to.be(0); })
       .then(() => {
         return new Bluebird((resolve) => {
           setTimeout(resolve, 1000);
         });
       }).then(() => {
-        return cache.resolveFunc(key)
+        return cache.resolveFunc(key);
       }).then((val) => { expect(val).to.be(1); })
       .then(() => {
         return new Bluebird((resolve) => {
           setTimeout(resolve, 500);
         });
       }).then(() => cache.resolveFunc(key))
-      .then((val) => { expect(val).to.be(1); })
+      .then((val) => { expect(val).to.be(1); });
   });
 });

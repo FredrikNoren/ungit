@@ -22,7 +22,7 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
         return env.nm.wait('.files .file .btn-default');
       }
     });
-}
+};
 
 describe('[DISCARD - noWarn]', () => {
   const environment = require('./environment')({ serverStartupOptions: ['--disableDiscardWarning'] });
@@ -30,7 +30,7 @@ describe('[DISCARD - noWarn]', () => {
 
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
 
   it('Open path screen', () => {
@@ -48,7 +48,7 @@ describe('[DISCARD - withWarn]', () => {
 
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
   });
 
   it('Open path screen', () => {

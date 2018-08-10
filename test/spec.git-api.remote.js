@@ -21,11 +21,11 @@ describe('git-api remote', function() {
 
   before('creating test dirs should work', () => {
     return common.post(req, '/testing/createtempdir')
-      .then((dir) => { testDirLocal1 = dir.path })
+      .then((dir) => { testDirLocal1 = dir.path; })
       .then(() => common.post(req, '/testing/createtempdir'))
-      .then((dir) => { testDirLocal2 = dir.path })
+      .then((dir) => { testDirLocal2 = dir.path; })
       .then(() => common.post(req, '/testing/createtempdir'))
-      .then((dir) => { testDirRemote = dir.path });
+      .then((dir) => { testDirRemote = dir.path; });
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -60,7 +60,7 @@ describe('git-api remote', function() {
     const testFile = path.join(testDirLocal1, "testfile1.txt");
     return common.post(req, '/testing/createfile', { file: testFile })
       .then(() => {
-        return common.post(req, '/commit', { path: testDirLocal1, message: "Init", files: [{ name: testFile }] })
+        return common.post(req, '/commit', { path: testDirLocal1, message: "Init", files: [{ name: testFile }] });
       });
   });
 
@@ -103,7 +103,7 @@ describe('git-api remote', function() {
     return common.post(req, '/testing/createfile', { file: testFile })
       .delay(500)
       .then(() => common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [{ name: testFile }] }))
-      .then(() => common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }))
+      .then(() => common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }));
   });
 
   it('fetching in "local2" should work', () => {
@@ -115,7 +115,7 @@ describe('git-api remote', function() {
       .then((res) =>{
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(2);
-        const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0)
+        const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
         const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
         expect(init).to.be.ok();
         expect(commit2).to.be.ok();

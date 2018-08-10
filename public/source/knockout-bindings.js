@@ -1,5 +1,3 @@
-
-var _ = require('lodash');
 var $ = require('jquery');
 var ko = require('knockout');
 
@@ -57,7 +55,7 @@ ko.bindingHandlers.dragStart = {
       valueUnwrapped.call(viewModel, true);
     });
   }
-}
+};
 ko.bindingHandlers.dragEnd = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     var value = valueAccessor();
@@ -67,7 +65,7 @@ ko.bindingHandlers.dragEnd = {
       valueUnwrapped.call(viewModel, false);
     });
   }
-}
+};
 
 
 ko.bindingHandlers.dropOver = {
@@ -83,7 +81,7 @@ ko.bindingHandlers.dropOver = {
       return false;
     });
   }
-}
+};
 
 ko.bindingHandlers.dragEnter = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -93,7 +91,7 @@ ko.bindingHandlers.dragEnter = {
       valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
     });
   }
-}
+};
 
 ko.bindingHandlers.dragLeave = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -103,7 +101,7 @@ ko.bindingHandlers.dragLeave = {
       valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
     });
   }
-}
+};
 
 ko.bindingHandlers.drop = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -115,7 +113,7 @@ ko.bindingHandlers.drop = {
       valueUnwrapped.call(viewModel, currentlyDraggingViewModel);
     });
   }
-}
+};
 
 ko.bindingHandlers.shown = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -149,7 +147,7 @@ ko.bindingHandlers.element = {
       var valueUnwrapped = ko.utils.unwrapObservable(value);
       valueUnwrapped.call(element.viewModel);
     }
-  }
+  };
   function scrollToEndCheck() {
     var elems = document.querySelectorAll('[data-scroll-to-end-listener]');
     for(var i=0; i < elems.length; i++)

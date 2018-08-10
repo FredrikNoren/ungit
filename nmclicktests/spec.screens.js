@@ -17,7 +17,7 @@ describe('[SCREENS]', () => {
 
   it('Open path screen', () => {
     return environment.nm.ug.createTempFolder().then(res => {
-        testRepoPaths.push(res.path ? res.path : res)
+        testRepoPaths.push(res.path ? res.path : res);
         return environment.nm.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[0])}`)
           .wait('.uninited');
       });
@@ -32,7 +32,7 @@ describe('[SCREENS]', () => {
 
   it('Clicking logo should bring you to home screen', () =>  {
     return environment.nm.ug.click('.navbar .backlink')
-      .wait('.home')
+      .wait('.home');
   });
 
   it('Entering an invalid path and create directory in that location', () =>  {
@@ -60,13 +60,13 @@ describe('[SCREENS]', () => {
 
   // getting odd cross-domain-error.
   it('Create test directory with ampersand and open it', () =>  {
-    var specialRepoPath = `${testRepoPaths[0]}-test1/test & repo`;
+    const specialRepoPath = `${testRepoPaths[0]}-test1/test & repo`;
     return rimraf(specialRepoPath)
       .then(() => mkdirp(specialRepoPath))
       .then(() => {
         return environment.nm.wait(2000)
           .goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(specialRepoPath)}`)
-          .wait('.uninited')
+          .wait('.uninited');
       });
   });
 });

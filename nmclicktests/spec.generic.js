@@ -84,7 +84,7 @@ describe('[GENERIC]', () => {
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
       .ug.click('.files span.discard')
       .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.files .file .btn-default')
+      .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
   it('Should be possible to create a branch', () => {

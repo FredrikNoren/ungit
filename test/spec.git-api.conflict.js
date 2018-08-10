@@ -32,7 +32,7 @@ describe('git-api conflict rebase', function () {
         .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
         .then(() => common.post(req, '/checkout', { path: testDir, name: testBranch }))
         .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
-        .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }));
     });
   });
 
@@ -79,7 +79,7 @@ describe('git-api conflict rebase', function () {
     return common.post(req, '/rebase/continue', { path: testDir });
   });
 
-})
+});
 
 describe('git-api conflict checkout', function() {
   this.timeout(8000);
@@ -94,7 +94,7 @@ describe('git-api conflict checkout', function() {
         .then(() => common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }))
         .then(() => common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }))
         .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
-        .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }));
     });
   });
 
@@ -152,7 +152,7 @@ describe('git-api conflict merge', function () {
         .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }))
         .then(() => common.post(req, '/checkout', { path: testDir, name: testBranch }))
         .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
-        .then(() => common.post(req, '/commit', { path: testDir, message: 'c', files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: 'c', files: [{ name: testFile1 }] }));
     });
   });
 
@@ -222,7 +222,7 @@ describe('git-api conflict solve by deleting', function () {
         .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
         .then(() => common.post(req, '/checkout', { path: testDir, name: testBranch }))
         .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
-        .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }));
     });
   });
 

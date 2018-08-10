@@ -78,14 +78,14 @@ function GraphViewModel(server, repoPath) {
 
 GraphViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('graph', this, {}, parentElement);
-}
+};
 
 GraphViewModel.prototype.getNode = function(sha1, logEntry) {
   var nodeViewModel = this.nodesById[sha1];
   if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
   if (logEntry) nodeViewModel.setData(logEntry);
   return nodeViewModel;
-}
+};
 GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
   if (constructIfUnavailable === undefined) constructIfUnavailable = true;
   var refViewModel = this.refsByRefName[ref];
@@ -97,7 +97,7 @@ GraphViewModel.prototype.getRef = function(ref, constructIfUnavailable) {
     }
   }
   return refViewModel;
-}
+};
 
 GraphViewModel.prototype.loadNodesFromApi = function() {
   var self = this;
@@ -136,7 +136,7 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
         self.scrolledToEnd();
       }
     });
-}
+};
 
 GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
   callback(node);
@@ -144,7 +144,7 @@ GraphViewModel.prototype.traverseNodeLeftParents = function(node, callback) {
   if (parent) {
     this.traverseNodeLeftParents(parent, callback);
   }
-}
+};
 
 GraphViewModel.prototype.computeNode = function(nodes) {
   var self = this;
@@ -176,7 +176,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
     // First occurrence of the branch, find an empty slot for the branch
     if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
       ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
-      ideologicalBranch.branchOrder = branchSlotCounter++
+      ideologicalBranch.branchOrder = branchSlotCounter++;
     }
 
     node.branchOrder(ideologicalBranch.branchOrder);
@@ -193,7 +193,7 @@ GraphViewModel.prototype.computeNode = function(nodes) {
   });
 
   return nodes;
-}
+};
 
 GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
   var id = nodeAsha1 + '-' + nodeBsha1;
@@ -202,7 +202,7 @@ GraphViewModel.prototype.getEdge = function(nodeAsha1, nodeBsha1) {
     edge = this.edgesById[id] = new EdgeViewModel(this, nodeAsha1, nodeBsha1);
   }
   return edge;
-}
+};
 
 GraphViewModel._markIdeologicalStamp = 0;
 GraphViewModel.prototype.markNodesIdeologicalBranches = function(refs, nodes, nodesById) {
@@ -230,7 +230,7 @@ GraphViewModel.prototype.markNodesIdeologicalBranches = function(refs, nodes, no
       return true;
     });
   });
-}
+};
 
 GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
   if (!callback(node)) return false;
@@ -241,7 +241,7 @@ GraphViewModel.prototype.traverseNodeParents = function(node, callback) {
       this.traverseNodeParents(parent, callback);
     }
   }
-}
+};
 
 GraphViewModel.prototype.handleBubbledClick = function(elem, event) {
   // If the clicked element is bound to the current action context,
@@ -257,7 +257,7 @@ GraphViewModel.prototype.handleBubbledClick = function(elem, event) {
   // will trigger a click event on the submit input of the form, which will end up here,
   // and if we don't return true, then the submit event is never fired, breaking stuff.
   if (event.target.nodeName === 'INPUT') return true;
-}
+};
 
 GraphViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'git-directory-changed') {
@@ -274,7 +274,7 @@ GraphViewModel.prototype.onProgramEvent = function(event) {
       node.render();
     });
   }
-}
+};
 GraphViewModel.prototype.updateBranches = function() {
   var self = this;
 
@@ -282,8 +282,8 @@ GraphViewModel.prototype.updateBranches = function() {
     .then(function(res) { self.checkedOutBranch(res); })
     .catch(function(err) {
       if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
-    })
-}
+    });
+};
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   const version = Date.now();
   remoteTags.forEach((ref) => {
@@ -300,9 +300,9 @@ GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
       ref.remove(true);
     }
   });
-}
+};
 GraphViewModel.prototype.checkHeadMove = function(toNode) {
   if (this.HEAD() === toNode) {
     this.HEADref.node(toNode);
   }
-}
+};

@@ -5,7 +5,7 @@ const testRepoPaths = [];
 describe('[STASH]', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }]));
   });
   after('Environment stop', () => environment.shutdown());
 
@@ -21,17 +21,17 @@ describe('[STASH]', () => {
       .then((isVisible) => {
         // if stash is currently collapsed show it. (localStorage['showStash'] might already be 'true')
         return (isVisible ? environment.nm.click('.stash-toggle') : environment.nm)
-          .wait('.stash .list-group-item')
+          .wait('.stash .list-group-item');
       });
   });
 
   it('Should be possible to open stash diff', () => {
     return environment.nm.click('.toggle-show-commit-diffs')
-      .wait('.stash .diff-wrapper')
+      .wait('.stash .diff-wrapper');
   });
 
   it('Should be possible to pop a stash', () => {
     return environment.nm.click('.stash .stash-apply')
-      .wait('.files .file .btn-default')
+      .wait('.files .file .btn-default');
   });
 });

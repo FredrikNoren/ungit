@@ -25,11 +25,11 @@ describe('git-api conflict checkout no auto stash', function () {
         .then(() => common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] }))
         .then(() => common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' }))
         .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }))
-        .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }))
+        .then(() => common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] }));
     });
   });
   after(() => {
-    return common.post(req, '/testing/cleanup')
+    return common.post(req, '/testing/cleanup');
   });
 
   it('should be possible to make some changes', () => {

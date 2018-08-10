@@ -385,4 +385,4 @@ describe('git-api', () => {
       .then(() => common.get(req, '/gitignore', { path: testDir }))
       .then((res) => expect(res.content).to.be('abc'));
   });
-})
+});

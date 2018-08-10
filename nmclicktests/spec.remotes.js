@@ -45,7 +45,7 @@ describe('[REMOTES]', () => {
   it('Fetch from newly added remote', () => {
     return environment.nm.click('.fetchButton .btn-main')
       .wait(500)
-      .ug.waitForElementNotVisible('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Remote delete check', () => {
@@ -88,7 +88,7 @@ describe('[REMOTES]', () => {
   it('Should be possible to force push a branch', () => {
     return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
       .ug.refAction('branchinclone', true, 'push')
-      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])')
+      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
   it('Check for fetching remote branches for the branch list', () => {
@@ -99,7 +99,7 @@ describe('[REMOTES]', () => {
       .then((isVisble) => {
         if (!isVisble) {
           return environment.nm.ug.click('div.option input')
-            .wait('li .octicon-broadcast')
+            .wait('li .octicon-broadcast');
         }
       });
   });
@@ -109,13 +109,13 @@ describe('[REMOTES]', () => {
       .ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]')
       .wait(200)
-      .wait('[data-ta-name="branchinclone"][data-ta-local="true"]')
+      .wait('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
 
   it('Should be possible to commitnpush', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`)
       .ug.commitnpush('Commit & Push')
-      .wait('.nux')
+      .wait('.nux');
   });
 
   it('Should be possible to commitnpush with ff', () => {
@@ -123,6 +123,6 @@ describe('[REMOTES]', () => {
       .ug.click('.commit-grp .dropdown-toggle')
       .ug.click('.commitnpush')
       .ug.click('.modal-dialog .btn-primary')
-      .wait('.nux')
+      .wait('.nux');
   });
 });

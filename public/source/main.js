@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var $ = require('jquery');
 jQuery = $; // this is for old backward compatability of bootrap modules
@@ -62,7 +61,7 @@ ko.bindingHandlers.autocomplete = {
           .append($("<a>").text(item.label))
           .appendTo(ul);
       };
-    }
+    };
 
     const handleKeyEvent = (event) => {
       const value = $(element).val();
@@ -72,7 +71,7 @@ ko.bindingHandlers.autocomplete = {
         server.getPromise('/fs/listDirectories', {term: value}).then((directoryList) => {
           const currentDir = directoryList.shift();
           $(element).val(currentDir.endsWith(ungit.config.fileSeparator) ? currentDir : currentDir + ungit.config.fileSeparator);
-          setAutoCompleteOptions(directoryList)
+          setAutoCompleteOptions(directoryList);
           $(element).autocomplete('search', value);
         }).catch((err) => {
           if (!err.errorSummary.startsWith('ENOENT: no such file or directory') && err.errorCode !== 'read-dir-failed') {
@@ -124,15 +123,14 @@ WindowTitle.prototype.update = function() {
   var title = this.path.replace(/\\/g, '/').split('/').filter(function(x) { return x; }).reverse().join(' < ');
   if (this.crash) title = ':( ungit crash ' + title;
   document.title = title;
-}
+};
 
 var windowTitle = new WindowTitle();
 windowTitle.update();
 
 var AppContainerViewModel = function() {
-  var self = this;
   this.content = ko.observable();
-}
+};
 exports.AppContainerViewModel = AppContainerViewModel;
 AppContainerViewModel.prototype.templateChooser = function(data) {
   if (!data) return '';
@@ -182,7 +180,7 @@ exports.start = function() {
     if (app.updateAnimationFrame)
       app.updateAnimationFrame(delta);
     window.requestAnimationFrame(updateAnimationFrame);
-  }
+  };
   window.requestAnimationFrame(updateAnimationFrame);
 
   ko.applyBindings(appContainer);
@@ -202,7 +200,7 @@ exports.start = function() {
   });
 
   navigation.init();
-}
+};
 
 
 $(document).ready(function() {

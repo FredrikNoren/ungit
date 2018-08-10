@@ -5,13 +5,6 @@
 var childProcess = require('child_process');
 var moment = require('moment');
 
-var runClickTest = function(callback) {
-	var child =
-  child.on('exit', function(code) {
-    callback(null, code != 0);
-  });
-}
-
 var count = 0;
 var clickTestErrors = 0;
 var unitTestErrors = 0;
@@ -20,7 +13,7 @@ var run = function() {
   var testTime = Date.now();
   count++;
   console.log('Round ' + count + '...');
-  var clickTestChild = childProcess.exec('grunt clicktest', function(err, stdout, stderr) {
+  childProcess.exec('grunt clicktest', function(err, stdout, stderr) {
     if (err) {
       clickTestErrors++;
       console.log(stdout);
@@ -40,5 +33,5 @@ var run = function() {
       run();
     });
   });
-}
+};
 run();

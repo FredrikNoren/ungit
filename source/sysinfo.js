@@ -7,7 +7,7 @@ const config = require('./config');
 const Bluebird = require('bluebird');
 const winston = require('winston');
 
-const noop = () => {}
+const noop = () => {};
 
 exports.getUngitLatestVersion = () => {
   return new Bluebird((resolve, reject) => {
@@ -30,7 +30,7 @@ exports.getUngitLatestVersion = () => {
       });
     });
   });
-}
+};
 
 exports.getUserHash = () => {
   return new Bluebird((resolve) => {
@@ -42,7 +42,7 @@ exports.getUserHash = () => {
       resolve(md5(addr));
     });
   });
-}
+};
 
 exports.getGitVersionInfo = () => {
   const result = {
@@ -62,4 +62,4 @@ exports.getGitVersionInfo = () => {
   }
 
   return Bluebird.resolve(result);
-}
+};

@@ -1,7 +1,5 @@
-
 var ko = require('knockout');
 var components = require('ungit-components');
-var _ = require('lodash');
 const programEvents = require('ungit-program-events');
 
 components.register('repository', function(args) {
@@ -35,10 +33,10 @@ var RepositoryViewModel = function(server, path) {
   } else {
     this.refreshButton = false;
   }
-}
+};
 RepositoryViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('repository', this, {}, parentElement);
-}
+};
 RepositoryViewModel.prototype.onProgramEvent = function(event) {
   if (this.gitErrors.onProgramEvent) this.gitErrors.onProgramEvent(event);
   if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);
@@ -51,10 +49,10 @@ RepositoryViewModel.prototype.onProgramEvent = function(event) {
 
   // If we get a reconnect event it's usually because the server crashed and then restarted
   // or something like that, so we need to tell it to start watching the path again
-}
+};
 RepositoryViewModel.prototype.updateAnimationFrame = function(deltaT) {
   if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
-}
+};
 RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
   var self = this;
 
@@ -79,7 +77,7 @@ RepositoryViewModel.prototype.refreshSubmoduleStatus = function() {
       self.parentModuleLink(undefined);
       self.parentModulePath(undefined);
     });
-}
+};
 
 RepositoryViewModel.prototype.editGitignore = function() {
   var self = this;
@@ -101,5 +99,5 @@ RepositoryViewModel.prototype.editGitignore = function() {
         stderr: e.stack,
         repoPath: this.repoPath()
       }});
-    })
-}
+    });
+};

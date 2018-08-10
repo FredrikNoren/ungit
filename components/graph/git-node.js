@@ -28,7 +28,7 @@ var GitNodeViewModel = function(graph, sha1) {
   this.signatureMade = ko.observable();
   this.pgpVerifiedString = ko.computed(function() {
     if (self.signatureMade()) {
-      return `PGP by: ${self.signatureMade()} at ${self.signatureDate()}`
+      return `PGP by: ${self.signatureMade()} at ${self.signatureDate()}`;
     }
   });
 
@@ -118,16 +118,16 @@ var GitNodeViewModel = function(graph, sha1) {
     new GraphActions.Revert(this.graph, this),
     new GraphActions.Squash(this.graph, this)
   ];
-}
+};
 module.exports = GitNodeViewModel;
 
 GitNodeViewModel.prototype.getGraphAttr = function() {
   return [this.cx(), this.cy()];
-}
+};
 GitNodeViewModel.prototype.setGraphAttr = function(val) {
   this.element().setAttribute('x', val[0] - 30);
   this.element().setAttribute('y', val[1] - 30);
-}
+};
 GitNodeViewModel.prototype.render = function() {
   this.refSearchFormVisible(false);
   if (!this.isInited) return;
@@ -154,7 +154,7 @@ GitNodeViewModel.prototype.render = function() {
 
   this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
   this.animate();
-}
+};
 GitNodeViewModel.prototype.setData = function(logEntry) {
   var self = this;
   this.title = logEntry.message.split('\n')[0];
@@ -169,11 +169,11 @@ GitNodeViewModel.prototype.setData = function(logEntry) {
     self.graph.getRef(ref).node(self);
   });
   this.isInited = true;
-}
+};
 GitNodeViewModel.prototype.showBranchingForm = function() {
   this.branchingFormVisible(true);
   this.newBranchNameHasFocus(true);
-}
+};
 GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
   const self = this;
   this.refSearchFormVisible(true);
@@ -201,16 +201,16 @@ GitNodeViewModel.prototype.showRefSearchForm = function(obj, event) {
     return $("<li></li>")
       .append(`<a>${item.dom}</a>`)
       .appendTo(ul);
-  }
+  };
   $(textBox).autocomplete('search', '');
-}
+};
 GitNodeViewModel.prototype.createBranch = function() {
   if (!this.canCreateRef()) return;
   this.graph.server.postPromise("/branches", { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
     .then(() => {
-      this.graph.getRef('refs/heads/' + this.newBranchName()).node(this)
+      this.graph.getRef('refs/heads/' + this.newBranchName()).node(this);
       if (ungit.config.autoCheckoutOnBranchCreate) {
-        return this.graph.server.postPromise("/checkout", { path: this.graph.repoPath(), name: this.newBranchName() })
+        return this.graph.server.postPromise("/checkout", { path: this.graph.repoPath(), name: this.newBranchName() });
       }
     }).catch((e) => this.graph.server.unhandledRejection(e))
     .finally(() => {
@@ -218,7 +218,7 @@ GitNodeViewModel.prototype.createBranch = function() {
       this.newBranchName('');
       programEvents.dispatch({ event: 'branch-updated' });
     });
-}
+};
 GitNodeViewModel.prototype.createTag = function() {
   if (!this.canCreateRef()) return;
   this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
@@ -228,9 +228,8 @@ GitNodeViewModel.prototype.createTag = function() {
       this.branchingFormVisible(false);
       this.newBranchName('');
     });
-}
+};
 GitNodeViewModel.prototype.toggleSelected = function() {
-  var self = this;
   var beforeThisCR = this.commitComponent.element().getBoundingClientRect();
   var beforeBelowCR = null;
   if (this.belowNode) {
@@ -264,21 +263,21 @@ GitNodeViewModel.prototype.toggleSelected = function() {
     }
   }
   return false;
-}
+};
 GitNodeViewModel.prototype.removeRef = function(ref) {
   if (ref.isRemoteTag) {
     this.remoteTags.remove(ref);
   } else {
     this.branchesAndLocalTags.remove(ref);
   }
-}
+};
 GitNodeViewModel.prototype.pushRef = function(ref) {
   if (ref.isRemoteTag && this.remoteTags.indexOf(ref) < 0) {
     this.remoteTags.push(ref);
   } else if(this.branchesAndLocalTags.indexOf(ref) < 0) {
     this.branchesAndLocalTags.push(ref);
   }
-}
+};
 GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
   var path = [];
   var thisNode = this;
@@ -288,7 +287,7 @@ GitNodeViewModel.prototype.getPathToCommonAncestor = function(node) {
   }
   if (thisNode) path.push(thisNode);
   return path;
-}
+};
 GitNodeViewModel.prototype.isAncestor = function(node) {
   if (node == this) return true;
   for (var v in this.parents()) {
@@ -296,19 +295,19 @@ GitNodeViewModel.prototype.isAncestor = function(node) {
     if (n && n.isAncestor(node)) return true;
   }
   return false;
-}
+};
 GitNodeViewModel.prototype.getRightToLeftStrike = function() {
   return 'M ' + (this.cx() - 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() + 30) + ' ' + (this.cy() + 30);
-}
+};
 GitNodeViewModel.prototype.getLeftToRightStrike = function() {
   return 'M ' + (this.cx() + 30) + ' ' + (this.cy() - 30) + ' L ' + (this.cx() - 30) + ' ' + (this.cy() + 30);
-}
+};
 GitNodeViewModel.prototype.nodeMouseover = function() {
   this.nodeIsMousehover(true);
-}
+};
 GitNodeViewModel.prototype.nodeMouseout = function() {
   this.nodeIsMousehover(false);
-}
+};
 GitNodeViewModel.prototype.isViewable = function() {
   return this.graph.nodes().indexOf(this) > -1;
-}
+};

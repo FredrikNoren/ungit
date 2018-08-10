@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var components = require('ungit-components');
 
@@ -23,13 +22,13 @@ HomeRepositoryViewModel.prototype.updateState = function() {
     .then(function(exists) { self.pathRemoved(!exists); })
     .catch((e) => this.server.unhandledRejection(e));
   this.server.getPromise('/remotes/origin?path=' + encodeURIComponent(this.path))
-    .then(function(remote) {	self.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
+    .then(function(remote) {	self.remote(remote.address.replace(/\/\/.*?@/, "//***@")); })
     .catch(function(err) { self.remote(''); });
-}
+};
 HomeRepositoryViewModel.prototype.remove = function() {
   this.app.repoList.remove(this.path);
   this.home.update();
-}
+};
 
 function HomeViewModel(app) {
   var self = this;
@@ -41,11 +40,11 @@ function HomeViewModel(app) {
 }
 HomeViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('home', this, {}, parentElement);
-}
+};
 HomeViewModel.prototype.template = 'home';
 HomeViewModel.prototype.shown = function() {
   this.update();
-}
+};
 HomeViewModel.prototype.update = function() {
   var self = this;
   var reposByPath = {};
@@ -55,4 +54,4 @@ HomeViewModel.prototype.update = function() {
       reposByPath[path] = new HomeRepositoryViewModel(self, path);
     return reposByPath[path];
   }));
-}
+};

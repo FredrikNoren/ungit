@@ -33,4 +33,4 @@ CommitDiff.prototype.loadFileLineDiffs = function(args) {
   });
 
   this.commitLineDiffs(this.commitLineDiffs().concat(tempCommitLineDiffs));
-}
+};

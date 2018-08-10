@@ -1,6 +1,5 @@
 var ko = require('knockout');
 var components = require('ungit-components');
-var inherits = require('util').inherits;
 var programEvents = require('ungit-program-events');
 
 var CommitLineDiff = function(args, fileLineDiff) {
@@ -30,7 +29,7 @@ CommitLineDiff.prototype.getSpecificDiff = function() {
     whiteSpace: this.whiteSpace,
     wordWrap: this.wordWrap
   });
-}
+};
 
 CommitLineDiff.prototype.fileNameClick = function() {
   this.isShowingDiffs(!this.isShowingDiffs());

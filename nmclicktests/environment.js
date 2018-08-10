@@ -73,9 +73,9 @@ Nightmare.action('ug', {
     req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
 
     req.end((err, res) => {
-      let data = (res || {}).body
-      try { data = JSON.parse(data); } catch(ex) {}
-      done(err, data)
+      let data = (res || {}).body;
+      try { data = JSON.parse(data); } catch(ex) {/* Ignore Exception */}
+      done(err, data);
     });
   },
   'createTestFile': function(filename, done) {
@@ -105,7 +105,7 @@ Nightmare.action('ug', {
     (options.path ? rimraf(options.path).then(() => mkdirp(options.path)) : this.ug.createTempFolder())
       .then((res) => {
         options.path = res.path ? res.path : res;
-        return this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options)
+        return this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options);
       }).then(done.bind(null, null), done);
   },
   'gitCommand': function(options, done) {
@@ -121,7 +121,7 @@ Nightmare.action('ug', {
       .then((isVisible) => {
         return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
           .ug.waitForElementNotVisible(`[data-ta-action="${action}"]:not([style*="display: none"])`)
-          .wait(200)
+          .wait(200);
       }).then(done.bind(null, null), done);
   },
   'refAction': function(ref, local, action, done) {
@@ -171,7 +171,7 @@ const prependLines = (pre, text) => {
   return text.split('\n').filter((l) => l)
     .map((line) => pre + line)
     .join('\n');
-}
+};
 
 // Environment provides
 class Environment {
@@ -194,7 +194,7 @@ class Environment {
       if (type === 'error' && !this.shuttinDown) {
         winston.info('ERROR DETECTED!');
       }
-    })
+    });
   }
 
   getRootUrl() { return rootUrl; }
@@ -208,7 +208,7 @@ class Environment {
       server.listen(tmpPortrange, (err) => {
         server.once('close', () => {
           this.port = tmpPortrange;
-          rootUrl = `http://localhost:${this.port}${this.config.rootPath}`
+          rootUrl = `http://localhost:${this.port}${this.config.rootPath}`;
           resolve();
         });
         server.close();
@@ -234,7 +234,7 @@ class Environment {
     return this.getPort()
       .then(() => this.startServer())
       .then(() => this.ensureStarted())
-      .catch((err) => { winston.error(err); throw new Error("Cannot confirm ungit start!!", err); })
+      .catch((err) => { winston.error(err); throw new Error("Cannot confirm ungit start!!", err); });
   }
 
   createRepos(testRepoPaths, config) {
@@ -244,7 +244,7 @@ class Environment {
         .then(() => this.createCommits(conf, conf.initCommits))
         .then(() => conf.path);
     }).then((paths) => {
-      if (testRepoPaths) testRepoPaths.push(...paths)
+      if (testRepoPaths) testRepoPaths.push(...paths);
     });
   }
 
@@ -260,7 +260,7 @@ class Environment {
   }
 
   createCommits(config, limit, x) {
-    x = x || 0
+    x = x || 0;
     if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
 
     return this.nm.ug.createTestFile(`${config.path}/testy${x}`)
@@ -270,7 +270,7 @@ class Environment {
           message: `Init Commit ${x}`,
           files: [{ name: `testy${x}` }]
         });
-      }).then(() => this.createCommits(config, limit, x + 1))
+      }).then(() => this.createCommits(config, limit, x + 1));
   }
 
   goto(url) {

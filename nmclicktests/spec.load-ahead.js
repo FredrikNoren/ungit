@@ -46,6 +46,6 @@ describe('[LOAD-AHEAD]', () => {
   it('Load ahead', () => {
     return environment.nm.ug.click('.load-ahead-button')
       .wait('[data-ta-clickable="node-clickable-1"]')
-      .ug.waitForElementNotVisible('.loadAhead')
+      .ug.waitForElementNotVisible('.loadAhead');
   });
 });

@@ -9,9 +9,9 @@ if (semver.satisfies(process.version, '>0.10')) {
     return fs.accessAsync(file, fs.F_OK)
       .then(() => true)
       .catch(() => false);
-  }
+  };
 } else {
-  fs.isExists = (file) => new Bluebird((resolve) => fs.exists(file, resolve))
+  fs.isExists = (file) => new Bluebird((resolve) => fs.exists(file, resolve));
 }
 
 module.exports = fs;

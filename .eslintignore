@@ -1,0 +1,4 @@
+components/**/*.bundle.js
+public/js/
+public/vendor/
+src/

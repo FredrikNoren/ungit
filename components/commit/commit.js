@@ -1,8 +1,5 @@
-
 var ko = require('knockout');
 var components = require('ungit-components');
-var navigation = require('ungit-navigation');
-var programEvents = require('ungit-program-events');
 var md5 = require('blueimp-md5');
 var moment = require('moment');
 
@@ -48,7 +45,7 @@ function CommitViewModel(gitNode) {
 }
 CommitViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('commit', this, {}, parentElement);
-}
+};
 CommitViewModel.prototype.setData = function(args) {
   this.commitTime(moment(new Date(args.commitDate)));
   this.authorTime(moment(new Date(args.authorDate)));
@@ -70,7 +67,7 @@ CommitViewModel.prototype.setData = function(args) {
     repoPath: this.repoPath,
     server: this.server
   }));
-}
+};
 CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
   this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
   this.lastUpdatedAuthorDateFromNow += deltaT;
@@ -78,10 +75,10 @@ CommitViewModel.prototype.updateLastAuthorDateFromNow = function(deltaT) {
     this.lastUpdatedAuthorDateFromNow = 0;
     this.authorDateFromNow(this.authorDate().fromNow());
   }
-}
+};
 CommitViewModel.prototype.updateAnimationFrame = function(deltaT) {
   this.updateLastAuthorDateFromNow(deltaT);
-}
+};
 CommitViewModel.prototype.stopClickPropagation = function(data, event) {
   event.stopImmediatePropagation();
-}
+};

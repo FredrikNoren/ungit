@@ -4,11 +4,11 @@ var getEdgeModelWithD = function(d, stroke, strokeWidth, strokeDasharray, marker
           strokeWidth: strokeWidth ? strokeWidth : '8',
           strokeDasharray: strokeDasharray ? strokeDasharray : '10, 5',
           markerEnd: markerEnd ? markerEnd : '' };
-}
+};
 
 var getEdgeModel = function(scx, scy, tcx, tcy, stroke, strokeWidth, strokeDasharray, markerEnd) {
   return getEdgeModelWithD("M " + scx + " " + scy + " L " + tcx + " " + tcy, stroke, strokeWidth, strokeDasharray, markerEnd);
-}
+};
 
 var getNodeModel = function(cx, cy, r, fill, stroke, strokeWidth, strokeDasharray) {
   return { cx: cx,
@@ -18,7 +18,7 @@ var getNodeModel = function(cx, cy, r, fill, stroke, strokeWidth, strokeDasharra
           stroke: stroke ? stroke : '#41DE3C',
           strokeWidth: strokeWidth ? strokeWidth : '8',
           strokeDasharray: strokeDasharray ? strokeDasharray : '10, 5' };
-}
+};
 
 function HoverViewModel() {
   this.bgEdges = [];
@@ -27,7 +27,6 @@ function HoverViewModel() {
 }
 
 function MergeViewModel(graph, headNode, node) {
-  var self = this;
   HoverViewModel.call(this);
   this.graph = graph;
   this.bgEdges = [ getEdgeModel(headNode.cx(), (headNode.cy() - 110), headNode.cx(), headNode.cy()),
@@ -39,7 +38,7 @@ function MergeViewModel(graph, headNode, node) {
 exports.MergeViewModel = MergeViewModel;
 MergeViewModel.prototype.destroy = function() {
   this.graph.dimCommit(false);
-}
+};
 
 function RebaseViewModel(onto, nodesThatWillMove) {
   var self = this;
@@ -64,7 +63,7 @@ function ResetViewModel(nodes) {
   HoverViewModel.call(this);
 
   nodes.forEach(function(node) {
-    self.fgEdges.push(getEdgeModelWithD(node.getLeftToRightStrike(), 'rgb(255, 129, 31)', '8', '0, 0'))
+    self.fgEdges.push(getEdgeModelWithD(node.getLeftToRightStrike(), 'rgb(255, 129, 31)', '8', '0, 0'));
     self.fgEdges.push(getEdgeModelWithD(node.getRightToLeftStrike(), 'rgb(255, 129, 31)', '8', '0, 0'));
   });
 }
@@ -84,7 +83,7 @@ function SquashViewModel(from, onto) {
   if (path.length == 0) {
     return;
   } else if (path.length == 1) {
-    path = onto.getPathToCommonAncestor(from)
+    path = onto.getPathToCommonAncestor(from);
   } else {
     this.nodes.push(getNodeModel(onto.cx(), onto.cy() - 120, 28, 'transparent'));
   }

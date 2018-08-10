@@ -6,7 +6,7 @@ const winston = require('winston');
 const config = require('./config');
 const Bluebird = require('bluebird');
 
-const assureArray = (obj) => { return Array.isArray(obj) ? obj : [obj]; }
+const assureArray = (obj) => { return Array.isArray(obj) ? obj : [obj]; };
 
 class UngitPlugin {
   constructor(args) {

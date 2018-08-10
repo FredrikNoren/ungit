@@ -1,11 +1,9 @@
-
 const expect = require('expect.js');
 const request = require('supertest');
 const express = require('express');
 const path = require('path');
 const restGit = require('../src/git-api');
 const common = require('./common-es6.js');
-const wrapErrorHandler = common.wrapErrorHandler;
 
 const app = express();
 app.use(require('body-parser').json());
@@ -22,9 +20,9 @@ describe('git-api submodule', function () {
 
   before(() => {
     return common.createSmallRepo(req)
-      .then((dir) => { testDirMain = dir })
+      .then((dir) => { testDirMain = dir; })
       .then(() => common.createSmallRepo(req))
-      .then((dir) => { testDirSecondary = dir });
+      .then((dir) => { testDirSecondary = dir; });
   });
 
   after(() => common.post(req, '/testing/cleanup'));

@@ -1,6 +1,5 @@
 var startLaunchTime = Date.now();
 var config = require('../src/config');
-var path = require('path');
 var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
@@ -72,7 +71,7 @@ app.on('ready', function() {
       server.started.add(function() {
         launch(function(err) {
           if (err) console.log(err);
-        })
+        });
 
         var launchTime = (Date.now() - startLaunchTime);
         console.log('Took ' + launchTime + 'ms to start server.');

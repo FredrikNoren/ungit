@@ -17,10 +17,10 @@ cache.resolveFunc = (key) => {
       return getHardValue(funcMap[key].func()) // func is found, resolve, set with TTL and return result
         .then((r) => {
           return cache.setAsync(key, r, funcMap[key].ttl)
-            .then(() => { return r; })
+            .then(() => { return r; });
         });
     });
-}
+};
 
 /**
  * @function getHardValue
@@ -35,7 +35,7 @@ const getHardValue = (prom) => {
   } else {
     return Bluebird.resolve(prom);
   }
-}
+};
 
 /**
  * @function registerFunc
@@ -65,10 +65,10 @@ cache.registerFunc = (...args) => {
   funcMap[key] = {
     func: func,
     ttl: ttl
-  }
+  };
 
   return key;
-}
+};
 
 /**
  * @function invalidateFunc
@@ -77,7 +77,7 @@ cache.registerFunc = (...args) => {
  */
 cache.invalidateFunc = (key) => {
   cache.del(key);
-}
+};
 
 /**
  * @function deregisterFunc
@@ -87,6 +87,6 @@ cache.invalidateFunc = (key) => {
 cache.deregisterFunc = (key) => {
   cache.invalidateFunc(key);
   delete funcMap[key];
-}
+};
 
 module.exports = cache;

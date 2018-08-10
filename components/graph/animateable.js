@@ -18,5 +18,5 @@ module.exports = function(graph) {
       }, window.mina.elastic);
       this.previousGraph = currentGraph;
     }
-  }
+  };
 };

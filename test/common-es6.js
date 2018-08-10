@@ -20,7 +20,7 @@ exports.makeRequest = (method, req, path, payload) => {
   if (payload) {
     payload.socketId = 'ignore';
     if (method === 'POST' || method === 'PUT') {
-      r.send(payload)
+      r.send(payload);
     } else {
       r.query(payload);
     }
@@ -33,15 +33,15 @@ exports.makeRequest = (method, req, path, payload) => {
           console.log(`failed path: ${path}`);
           console.dir(err);
           console.dir(res ? res.body : "");
-          reject(err)
+          reject(err);
         } else {
           let data = (res || {}).body;
-          try { data = JSON.parse(data); } catch(ex) {}
+          try { data = JSON.parse(data); } catch(ex) {/* Ignore Exception */}
           resolve(data);
         }
       });
   });
-}
+};
 
 exports.get = this.makeRequest.bind(this, 'GET');
 exports.getPng = this.makeRequest.bind(this, 'PNG');
@@ -57,7 +57,7 @@ exports.initRepo = (req, config) => {
       return this.post(req, '/init', { path: res.path, bare: !!config.bare })
         .then(() => res.path);
     });
-}
+};
 
 exports.createSmallRepo = (req) => {
   return this.initRepo(req)
@@ -65,16 +65,16 @@ exports.createSmallRepo = (req) => {
       const testFile = 'smalltestfile.txt';
       return this.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
         .then(() => this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] }))
-        .then(() => dir)
+        .then(() => dir);
     });
-}
+};
 
 // Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.
 exports.initDummyBrowserEnvironment = () => {
   window = {};
   document = {
-    createElement: () => { return { getElementsByTagName: () => [] } },
-    createComment: () => { return {} }
+    createElement: () => { return { getElementsByTagName: () => [] }; },
+    createComment: () => { return {}; }
   };
   navigator = {};
-}
+};

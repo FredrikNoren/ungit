@@ -1,0 +1,22 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "es6": true,
+        "mocha": true,
+        "node": true
+    },
+    "globals": {
+        "io": false,
+        "jQuery": true,
+        "keen": false,
+        "Raven": false,
+        "ungit": false
+    },
+    "rules": {
+        "no-console": "off",
+        "no-global-assign": "off",
+        "no-unused-vars": ["error", { "args": "none" }],
+        "semi": "warn"
+    }
+}

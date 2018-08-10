@@ -5,7 +5,7 @@ const testRepoPaths = [];
 describe('[SUMBODULES]', () => {
   before('Environment init', () => {
     return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }, { bare: false }]))
+      .then(() => environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }, { bare: false }]));
   });
   after('Environment stop', () => environment.shutdown());
 
@@ -37,6 +37,6 @@ describe('[SUMBODULES]', () => {
       .wait('[data-ta-container="yes-no-dialog"]')
       .ug.click('.modal-dialog .btn-primary')
       .wait(500)
-      .ug.waitForElementNotVisible('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 });

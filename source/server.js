@@ -16,7 +16,6 @@ const os = require('os');
 const cache = require('./utils/cache');
 const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
-const bodyParser = require('body-parser');
 const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
@@ -102,7 +101,7 @@ const noCache = (req, res, next) => {
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
   next();
-}
+};
 app.use(noCache);
 
 app.use(require('body-parser').json());
@@ -115,7 +114,7 @@ if (config.autoShutdownTimeout) {
       winston.info('Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' + config.autoShutdownTimeout + 'ms)');
       process.exit(0);
     }, config.autoShutdownTimeout);
-  }
+  };
   app.use((req, res, next) => {
     refreshAutoShutdownTimeout();
     next();
@@ -127,8 +126,8 @@ let ensureAuthenticated = (req, res, next) => { next(); };
 
 if (config.authentication) {
   const cookieParser = require('cookie-parser');
-  const session = require('express-session')
-  const MemoryStore = require('memorystore')(session)
+  const session = require('express-session');
+  const MemoryStore = require('memorystore')(session);
   app.use(cookieParser());
   app.use(session({
     store: new MemoryStore({
@@ -141,7 +140,7 @@ if (config.authentication) {
 
   app.post('/api/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
-      if (err) { return next(err) }
+      if (err) { return next(err); }
       if (!user) {
         res.status(401).json({ errorCode: 'authentication-failed', error: info.message });
         return;
@@ -180,7 +179,7 @@ const indexHtmlCacheKey = cache.registerFunc(() => {
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
 
         return data;
-      })
+      });
     });
   });
 });
@@ -253,7 +252,7 @@ const loadPlugins = (plugins, pluginBasePath) => {
     plugins.push(plugin);
     winston.info('Plugin loaded: ' + pluginDir);
   });
-}
+};
 const pluginsCacheKey = cache.registerFunc(() => {
   const plugins = [];
   loadPlugins(plugins, path.join(__dirname, '..', 'components'));
@@ -318,10 +317,10 @@ const readUserConfig = () => {
         process.exit(0);
       });
   });
-}
+};
 const writeUserConfig = (configContent) => {
   return fs.writeFileAsync(userConfigPath, JSON.stringify(configContent, undefined, 2));
-}
+};
 
 app.get('/api/userconfig', ensureAuthenticated, (req, res) => {
   readUserConfig().then((userConfig) => { res.json(userConfig); })

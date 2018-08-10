@@ -58,7 +58,7 @@ class PathViewModel {
           this.repository(null);
         }
         return null;
-      }).catch((err) => { })
+      }).catch((err) => { });
   }
   initRepository() {
     return this.server.postPromise('/init', { path: this.repoPath() })
@@ -80,7 +80,7 @@ class PathViewModel {
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         programEvents.dispatch({ event: 'working-tree-changed' });
-      })
+      });
   }
   createDir() {
     this.showDirectoryCreatedAlert(true);

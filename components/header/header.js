@@ -21,10 +21,10 @@ function HeaderViewModel(app) {
 }
 HeaderViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('header', this, {}, parentElement);
-}
+};
 HeaderViewModel.prototype.submitPath = function() {
   navigation.browseTo('repository?path=' + encodeURIComponent(this.path()));
-}
+};
 HeaderViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'navigation-changed') {
     this.showBackButton(event.path != '');
@@ -32,8 +32,8 @@ HeaderViewModel.prototype.onProgramEvent = function(event) {
   } else if (event.event == 'navigated-to-path') {
     this.path(event.path);
   }
-}
+};
 HeaderViewModel.prototype.addCurrentPathToRepoList = function() {
   programEvents.dispatch({ event: 'request-remember-repo', repoPath: this.path() });
   return true;
-}
+};

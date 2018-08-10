@@ -1,3 +1,3 @@
-const winston = require('winston')
+const winston = require('winston');
 
-winston.level = "error"
+winston.level = "error";

@@ -9,11 +9,11 @@ const testForBranchMove = (branch, command) => {
       branchTagLoc = oldLoc;
       return environment.nm.ug.gitCommand({ command: command, repo: testRepoPaths[0] })
         .wait((branch, oldLoc) => {
-          let newLoc = document.querySelector(branch).getBoundingClientRect();
+          const newLoc = document.querySelector(branch).getBoundingClientRect();
           return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
         }, branch, branchTagLoc);
     });
-}
+};
 
 describe('[COMMANDS]', () => {
   before('Environment init', () => {
@@ -56,7 +56,7 @@ describe('[COMMANDS]', () => {
 
   it('test tag create from command line', () => {
     return environment.nm.ug.gitCommand({ command: ["tag", "tag1"], repo: testRepoPaths[0] })
-      .wait('[data-ta-name="tag1"]')
+      .wait('[data-ta-name="tag1"]');
   });
 
   it('test tag delete from command line', () => {

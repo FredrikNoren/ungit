@@ -31,7 +31,7 @@ describe('git-api branching', function () {
 
   it('should be possible to commit to master', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
+      .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }));
   });
 
   it('listing branches should work', () => {
@@ -90,7 +90,7 @@ describe('git-api branching', function () {
       expect(res.skip).to.be(0);
       expect(res.limit).to.be(25);
 
-      const nodes = res.nodes
+      const nodes = res.nodes;
       expect(nodes).to.be.a('array');
       expect(nodes.length).to.be(2);
       const objs = {};

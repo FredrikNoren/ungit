@@ -22,24 +22,24 @@ process.on('uncaughtException', (err) => {
   Bluebird.all([
     Bluebird.resolve().then(() => bugtracker.notify(err, 'ungit-launcher')),
     Bluebird.resolve().then(() => usageStatistics.addEvent('launcher-exception'))
-  ]).then(cleanExit)
+  ]).then(cleanExit);
 });
 
 const openUngitBrowser = (pathToNavigateTo) => {
   console.log(`Navigate to ${pathToNavigateTo}`);
   return open(pathToNavigateTo)
-    .catch(err => console.log(`failed to navigate to ${pathToNavigateTo}`, err))
-}
+    .catch(err => console.log(`failed to navigate to ${pathToNavigateTo}`, err));
+};
 
 const getPathToNavigateTo= (override) => {
   if (config.forcedLaunchPath !== undefined && config.forcedLaunchPath !== '') {
-    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`
+    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(config.forcedLaunchPath)}`;
   } else if (override || config.launchBrowser || config.launchCommand) {
-    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(process.cwd())}`
+    return `${config.urlBase}:${config.port}${config.rootPath}/#/repository?path=${encodeURIComponent(process.cwd())}`;
   } else {
     return null;
   }
-}
+};
 
 const navigate = (override) => {
   const pathToNavigateTo = getPathToNavigateTo(override);
@@ -49,17 +49,17 @@ const navigate = (override) => {
     console.log(`Running custom launch command: ${command}`);
     child_process.exec(command, (err, stdout, stderr) => {
       if (err) {
-        console.log('Failed to exec custom launchCommand', err, stderr)
+        console.log('Failed to exec custom launchCommand', err, stderr);
         return;
       }
       if (config.launchBrowser) {
-        openUngitBrowser(pathToNavigateTo)
+        openUngitBrowser(pathToNavigateTo);
       }
     });
   } else if (pathToNavigateTo) {
     openUngitBrowser(pathToNavigateTo);
   }
-}
+};
 
 const launch = () => {
   const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
@@ -74,18 +74,18 @@ const launch = () => {
   const startupListener = (data) => {
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
       child.removeListener('stdout', startupListener);
-      child.stdout.on('data', (data) => console.log(data.toString().trim()))
+      child.stdout.on('data', (data) => console.log(data.toString().trim()));
       const launchTime = (Date.now() - startLaunchTime);
       console.log(data.toString());
       console.log(`Took ${launchTime}ms to start server.`);
       usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
       navigate();
     }
-  }
+  };
 
   child.stdout.on('data', startupListener);
-  child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
-}
+  child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`));
+};
 
 server.listen(config.port, (err) => {
   server.close(launch);

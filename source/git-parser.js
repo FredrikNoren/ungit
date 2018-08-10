@@ -1,8 +1,6 @@
-const moment = require('moment');
-const fs = require('fs');
 const path = require('path');
 const fileType = require('./utils/file-type.js');
-const _ = require('lodash')
+const _ = require('lodash');
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');
@@ -112,11 +110,11 @@ exports.parseGitLog = (data) => {
       const refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
-    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item.trim() === 'HEAD' });
+    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item.trim() === 'HEAD'; });
     commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;
     commits.push(currentCommmit);
     parser = parseHeaderLine;
-  }
+  };
   const parseHeaderLine = (row) => {
     if (row.trim() == '') {
       parser = parseCommitMessage;
@@ -128,7 +126,7 @@ exports.parseGitLog = (data) => {
         }
       }
     }
-  }
+  };
   const parseCommitMessage = (row, index) => {
     if (/[\d-]+\t[\d-]+\t.+/g.test(rows[index + 1])) {
       parser = parseFileChanges;
@@ -141,7 +139,7 @@ exports.parseGitLog = (data) => {
     if (currentCommmit.message) currentCommmit.message += '\n';
     else currentCommmit.message = '';
     currentCommmit.message += row.trim();
-  }
+  };
   const parseFileChanges = (row, index) => {
     if (rows.length === index + 1 || rows[index + 1] && rows[index + 1].indexOf('commit ') === 0) {
       const total = [0, 0, 'Total'];
@@ -161,7 +159,7 @@ exports.parseGitLog = (data) => {
     const splitted = row.split('\t');
     splitted.push(fileType(splitted[2]));
     currentCommmit.fileLineDiffs.push(splitted);
-  }
+  };
   let parser = parseCommitLine;
   const rows = data.split('\n');
   rows.forEach((row, index) => {
@@ -180,7 +178,7 @@ exports.parseGitConfig = (text) => {
     conf[ss[0]] = ss[1];
   });
   return conf;
-}
+};
 
 exports.parseGitBranches = (text) => {
   const branches = [];
@@ -191,17 +189,17 @@ exports.parseGitBranches = (text) => {
     branches.push(branch);
   });
   return branches;
-}
+};
 
 exports.parseGitTags = (text) => {
   return text.split('\n')
-    .filter((tag) => { return tag != '' });
-}
+    .filter((tag) => { return tag != ''; });
+};
 
 exports.parseGitRemotes = (text) => {
   return text.split('\n')
-    .filter((remote) => { return remote != '' });
-}
+    .filter((remote) => { return remote != ''; });
+};
 
 exports.parseGitLsRemote = (text) => {
   return text.split('\n').filter((item) => {
@@ -211,14 +209,14 @@ exports.parseGitLsRemote = (text) => {
     const name = line.slice(41).trim();
     return { sha1: sha1, name: name };
   });
-}
+};
 
 exports.parseGitStashShow = (text) => {
   const lines = text.split('\n').filter((item) =>  item );
   return lines.slice(0, lines.length - 1).map((line) => {
-    return { filename: line.substring(0, line.indexOf('|')).trim() }
+    return { filename: line.substring(0, line.indexOf('|')).trim() };
   });
-}
+};
 
 exports.parseGitSubmodule = (text, args) => {
   if (!text) {
@@ -261,7 +259,7 @@ exports.parseGitSubmodule = (text, args) => {
   });
 
   return submodules;
-}
+};
 
 const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) => {
   const splitedHeader = result[lastHeaderIndex].split(' ');
@@ -286,7 +284,7 @@ const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignor
     result.splice(lastHeaderIndex, result.length - lastHeaderIndex);
   else
     result[lastHeaderIndex] = splitedHeader.join(' ');
-}
+};
 
 exports.parsePatchDiffResult = (patchLineList, text) => {
   if (!text) return {};
@@ -295,7 +293,6 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   const result = [];
   let ignoredDiffCountTotal = 0;
   let ignoredDiffCountCurrent = 0;
-  let headerIndex = null;
   let lastHeaderIndex = -1;
   let n = 0;
   let selectedLines = 0;
@@ -310,7 +307,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   while (n < lines.length) {
     const line = lines[n];
 
-    if (/^[\-\+]/.test(line)) {
+    if (/^[-+]/.test(line)) {
       // Modified line
       if (patchLineList.shift()) {
         selectedLines++;
@@ -349,4 +346,4 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   } else {
     return null;
   }
-}
+};

@@ -13,19 +13,17 @@ restGit.registerApi({ app: app, config: { dev: true } });
 let testDir;
 
 const req = request(app);
-const rootBranch = 'root'
-const branch1 = 'branch1'
-const branch2 = 'branch2'
+const rootBranch = 'root';
 
-const testFile1 = 'testFile1.txt'
-const testFile2 = 'testFile2.txt'
+const testFile1 = 'testFile1.txt';
+const testFile2 = 'testFile2.txt';
 
 describe('git-api conflict rebase', function () {
   this.timeout(8000);
 
   before(() => {
     return common.createSmallRepo(req)
-      .then((dir) => { testDir = dir });
+      .then((dir) => { testDir = dir; });
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -38,7 +36,7 @@ describe('git-api conflict rebase', function () {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
       .then(() => common.post(req, '/commit', { path: testDir, message: `a commit for ${testFile1}`, files: [{ name: testFile1 }] }))
       .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }))
-      .then(() => common.post(req, '/commit', { path: testDir, message: `a commit for ${testFile2}`, files: [{ name: testFile2 }] }))
+      .then(() => common.post(req, '/commit', { path: testDir, message: `a commit for ${testFile2}`, files: [{ name: testFile2 }] }));
   });
 
   it('checkout master', () => {
@@ -59,7 +57,7 @@ describe('git-api conflict rebase', function () {
 
   it('making conflicting commit', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() => common.post(req, '/commit', { path: testDir, message: `a 2nd commit for ${testFile1}`, files: [{ name: testFile1 }] }))
+      .then(() => common.post(req, '/commit', { path: testDir, message: `a 2nd commit for ${testFile1}`, files: [{ name: testFile1 }] }));
   });
 
   it('squash 2 commits to 1 with conflict', () => {

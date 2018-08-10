@@ -88,14 +88,14 @@ describe('git-api discardchanges', () => {
                 "submoduleUrl": subrepoDir,
                 "submodulePath": submodulePath,
                 "path": dir,
-              }).then(() => dir)
+              }).then(() => dir);
           });
       }).then((dir) => {
         return common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] })
           .then(() => common.post(req, '/testing/changefile', { file: path.join(dir, submodulePath, testFile) }))
           .then(() => common.post(req, '/discardchanges', { path: dir, file: submodulePath }))
           .then(() => common.get(req, '/status', { path: dir }))
-          .then((res) => expect(Object.keys(res.files).length).to.be(0))
+          .then((res) => expect(Object.keys(res.files).length).to.be(0));
       });
   });
 

@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var moment = require('moment');
 var components = require('ungit-components');
@@ -24,10 +23,9 @@ function StashItemViewModel(stash, data) {
   }));
 }
 StashItemViewModel.prototype.apply = function() {
-  var self = this;
   this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true })
     .catch((e) => this.server.unhandledRejection(e));
-}
+};
 StashItemViewModel.prototype.drop = function() {
   var self = this;
   components.create('yesnodialog', { title: 'Are you sure you want to drop the stash?', details: 'This operation cannot be undone.'})
@@ -38,10 +36,10 @@ StashItemViewModel.prototype.drop = function() {
             .catch((e) => this.server.unhandledRejection(e));
       }
   });
-}
+};
 StashItemViewModel.prototype.toggleShowCommitDiffs = function() {
   this.showCommitDiff(!this.showCommitDiff());
-}
+};
 
 function StashViewModel(server, repoPath) {
   var self = this;
@@ -55,13 +53,13 @@ function StashViewModel(server, repoPath) {
 
 StashViewModel.prototype.updateNode = function(parentElement) {
   if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
-}
+};
 StashViewModel.prototype.onProgramEvent = function(event) {
   if (event.event == 'request-app-content-refresh' ||
     event.event == 'working-tree-changed' ||
     event.event == 'git-directory-changed')
     this.refresh();
-}
+};
 StashViewModel.prototype.refresh = function() {
   var self = this;
   this.server.getPromise('/stashes', { path: this.repoPath() })
@@ -80,9 +78,9 @@ StashViewModel.prototype.refresh = function() {
       }
     }).catch(function(err) {
       if (err.errorCode != 'no-such-path') self.server.unhandledRejection(err);
-    })
-}
+    });
+};
 StashViewModel.prototype.toggleShowStash = function() {
   this.isShow(!this.isShow());
   localStorage['showStash'] = this.isShow();
-}
+};

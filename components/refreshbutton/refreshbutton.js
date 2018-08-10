@@ -11,7 +11,7 @@ function RefreshButton() {}
 RefreshButton.prototype.refresh = function() {
   programEvents.dispatch({ event: 'request-app-content-refresh' });
   return true;
-}
+};
 RefreshButton.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('refreshbutton', this, {}, parentElement);
-}
+};

@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var components = require('ungit-components');
 var diff2html = require('diff2html').Diff2Html;
@@ -33,14 +32,14 @@ var WordWrap = function () {
   });
   this.toggle = function () {
     self.value(!self.value());
-  }
+  };
   this.isActive = ko.computed(function () { return !!self.value(); });
-}
+};
 
 var Type = function () {
   var self = this;
-  var sideBySideDiff = 'sidebysidediff'
-  var textDiff = 'textdiff'
+  var sideBySideDiff = 'sidebysidediff';
+  var textDiff = 'textdiff';
 
   this.text = ko.observable("Default");
 
@@ -56,11 +55,11 @@ var Type = function () {
   });
   this.toggle = function () {
     self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
-  }
+  };
   this.isActive = ko.computed(function () {
     return self.value() === 'textdiff';
   });
-}
+};
 
 var WhiteSpace = function () {
   var self = this;
@@ -73,9 +72,9 @@ var WhiteSpace = function () {
   });
   this.toggle = function () {
     self.value(!self.value());
-  }
+  };
   this.isActive = ko.computed(function () { return !self.value(); });
-}
+};
 
 var TextDiffViewModel = function (args) {
   var self = this;
@@ -108,10 +107,10 @@ var TextDiffViewModel = function (args) {
   });
 
   if (this.isShowingDiffs()) { this.render(); }
-}
+};
 TextDiffViewModel.prototype.updateNode = function (parentElement) {
   ko.renderTemplate('textdiff', this, {}, parentElement);
-}
+};
 TextDiffViewModel.prototype.getDiffArguments = function () {
   return {
     file: this.filename,
@@ -119,11 +118,11 @@ TextDiffViewModel.prototype.getDiffArguments = function () {
     sha1: this.sha1 ? this.sha1 : '',
     whiteSpace: this.whiteSpace.value()
   };
-}
+};
 
 TextDiffViewModel.prototype.invalidateDiff = function () {
   this.diffJson = null;
-}
+};
 
 TextDiffViewModel.prototype.getDiffJson = function () {
   var self = this;
@@ -142,7 +141,7 @@ TextDiffViewModel.prototype.getDiffJson = function () {
     // so we just ignore the error here
     if (err.errorCode != 'no-such-file') self.server.unhandledRejection(err);
   });
-}
+};
 
 TextDiffViewModel.prototype.render = function (isInvalidate) {
   var self = this;
@@ -184,7 +183,7 @@ TextDiffViewModel.prototype.render = function (isInvalidate) {
     // data bind at getPatchCheckBox that is rendered with "html" binding.
     // which is reason why manually updating the html content and refreshing kobinding to have it render...
     if (self.patchLineList) {
-      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
+      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, function (match, capture) {
         if (self.patchLineList()[index] === undefined) {
           self.patchLineList()[index] = true;
         }
@@ -205,14 +204,14 @@ TextDiffViewModel.prototype.render = function (isInvalidate) {
 TextDiffViewModel.prototype.loadMore = function () {
   this.loadCount += this.loadMoreCount();
   programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-}
+};
 
 TextDiffViewModel.prototype.getPatchCheckBox = function (symbol, index, isActive) {
   if (isActive) {
     this.numberOfSelectedPatchLines++;
   }
   return '<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== \'patched\'">' + symbol + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-bind="visible: editState() === \'patched\', click: togglePatchLine.bind($data, ' + index + ')"></input>';
-}
+};
 
 TextDiffViewModel.prototype.togglePatchLine = function (index) {
   this.patchLineList()[index] = !this.patchLineList()[index];
@@ -228,4 +227,4 @@ TextDiffViewModel.prototype.togglePatchLine = function (index) {
   }
 
   return true;
-}
+};

@@ -1,7 +1,4 @@
-
-var signals = require('signals');
 var programEvents = require('ungit-program-events');
-var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
 var nprogress = require('nprogress');
@@ -45,7 +42,7 @@ Server.prototype.initSocket = function() {
       self.socket.emit('credentials', credentials);
     }, args);
   });
-}
+};
 Server.prototype._queryToString = function(query) {
   var str = [];
   for(var p in query)
@@ -53,7 +50,7 @@ Server.prototype._queryToString = function(query) {
       str.push(encodeURIComponent(p) + "=" + encodeURIComponent(query[p]));
     }
   return str.join("&");
-}
+};
 Server.prototype._httpJsonRequest = function(request, callback) {
   var httpRequest = new XMLHttpRequest();
   httpRequest.onreadystatechange = function() {
@@ -69,7 +66,7 @@ Server.prototype._httpJsonRequest = function(request, callback) {
       else if (httpRequest.status != 200) callback({ status: httpRequest.status, body: body, httpRequest: httpRequest });
       else callback(null, body);
     }
-  }
+  };
   var url = request.url;
   if (request.query) {
     url += '?' + this._queryToString(request.query);
@@ -82,16 +79,16 @@ Server.prototype._httpJsonRequest = function(request, callback) {
   } else {
     httpRequest.send(null);
   }
-}
+};
 // Check if the server is still alive
 Server.prototype._isConnected = function(callback) {
   this._httpJsonRequest({ method: 'GET', url: rootPath + '/api/ping' }, function(err, res) {
     callback(!err && res);
   });
-}
+};
 Server.prototype._onDisconnect = function() {
   programEvents.dispatch({ event: 'disconnected' });
-}
+};
 Server.prototype._getCredentials = function(callback, args) {
   // Push out a program event, hoping someone will respond! (Which the app component will)
   programEvents.dispatch({ event: 'request-credentials', remote: args.remote });
@@ -100,7 +97,7 @@ Server.prototype._getCredentials = function(callback, args) {
     credentialsBinding.detach();
     callback({ username: event.username, password: event.password });
   });
-}
+};
 Server.prototype.watchRepository = function(repositoryPath, callback) {
   this.socket.emit('watch', { path: repositoryPath }, callback);
 };
@@ -110,7 +107,7 @@ Server.prototype.queryPromise = function(method, path, body) {
   var request = {
     method: method,
     url: rootPath + '/api' + path,
-  }
+  };
   if (method == 'GET' || method == 'DELETE') request.query = body;
   else request.body = body;
 
@@ -149,22 +146,22 @@ Server.prototype.queryPromise = function(method, path, body) {
       }
     });
   }).finally(() => nprogress.done(true));
-}
+};
 Server.prototype.getPromise = function(url, arg) {
   return this.queryPromise('GET', url, arg);
-}
+};
 Server.prototype.postPromise = function(url, arg) {
   return this.queryPromise('POST', url, arg);
-}
+};
 Server.prototype.delPromise = function(url, arg) {
   return this.queryPromise('DELETE', url, arg);
-}
+};
 Server.prototype.putPromise = function(url, arg) {
   return this.queryPromise('put', url, arg);
-}
+};
 Server.prototype.emptyPromise = function() {
   return Promise.resolve();
-}
+};
 
 Server.prototype.unhandledRejection = function(err) {
   // Show a error screen for git errors (so that people have a chance to debug them)
@@ -185,4 +182,4 @@ Server.prototype.unhandledRejection = function(err) {
     programEvents.dispatch({ event: 'git-crash-error' });
     Raven.captureException(err);
   }
-}
+};

@@ -1,4 +1,3 @@
-
 var ko = require('knockout');
 var inherits = require('util').inherits;
 var components = require('ungit-components');
@@ -53,14 +52,14 @@ function DialogViewModel(title) {
 DialogViewModel.prototype.closeThen = function(thenFunc) {
   this.closePromise = this.closePromise.then(thenFunc);
   return this;
-}
+};
 DialogViewModel.prototype.setCloser = function(closer) {
   this.close = closer;
-}
+};
 DialogViewModel.prototype.show = function() {
   programEvents.dispatch({ event: 'request-show-dialog', dialog: this });
   return this;
-}
+};
 
 function FormDialogViewModel(title) {
   DialogViewModel.call(this, title);
@@ -73,7 +72,7 @@ FormDialogViewModel.prototype.template = 'formDialog';
 FormDialogViewModel.prototype.submit = function() {
   this.isSubmitted(true);
   this.close();
-}
+};
 
 
 function CredentialsDialogViewModel(args) {

@@ -32,7 +32,7 @@ class BugTracker {
         subsystem: this.subsystem,
         deployment: config.desktopMode ? 'desktop' : 'web'
       }
-    }
+    };
 
     client.captureException(exception, options);
   }

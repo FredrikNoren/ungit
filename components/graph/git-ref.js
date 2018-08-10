@@ -40,7 +40,7 @@ var RefViewModel = function(fullRefName, graph) {
   if (this.isRemoteTag) {
     this.localRefName = this.name.slice('remote-tag: '.length);
   }
-  const splitedName = this.localRefName.split('/')
+  const splitedName = this.localRefName.split('/');
   if (this.isRemote) {
     // get rid of the origin/ part of origin/branchname
     this.remote = splitedName[0];
@@ -62,11 +62,11 @@ var RefViewModel = function(fullRefName, graph) {
   });
 
   // This optimization is for autocomplete display
-  this.value = splitedName[splitedName.length - 1]
-  this.label = this.localRefName
-  this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`
+  this.value = splitedName[splitedName.length - 1];
+  this.label = this.localRefName;
+  this.dom = `${this.localRefName}<span class='octicon ${this.isTag ? 'octicon-tag' : 'octicon-git-branch'}'></span>`;
   this.displayName = ko.computed(function() {
-    var prefix = ''
+    var prefix = '';
     if (self.isRemote) {
       prefix = '<span class="octicon octicon-broadcast"></span> ';
     }
@@ -84,16 +84,16 @@ module.exports = RefViewModel;
 
 RefViewModel.prototype._colorFromHashOfString = function(string) {
   return '#' + md5(string).toString().slice(0, 6);
-}
+};
 RefViewModel.prototype.dragStart = function() {
   this.graph.currentActionContext(this);
   this.isDragging(true);
   if (document.activeElement) document.activeElement.blur();
-}
+};
 RefViewModel.prototype.dragEnd = function() {
   this.graph.currentActionContext(null);
   this.isDragging(false);
-}
+};
 RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
   var self = this;
   var promise;
@@ -147,7 +147,7 @@ RefViewModel.prototype.moveTo = function(target, rewindWarnOverride) {
       }
       self.node(targetNode);
     }).catch((e) => this.server.unhandledRejection(e));
-}
+};
 
 RefViewModel.prototype.remove = function(isClientOnly) {
   var self = this;
@@ -169,26 +169,26 @@ RefViewModel.prototype.remove = function(isClientOnly) {
         }
       }
     });
-}
+};
 
 RefViewModel.prototype.getLocalRef = function() {
   return this.graph.getRef(this.getLocalRefFullName(), false);
-}
+};
 RefViewModel.prototype.getLocalRefFullName = function() {
   if (this.isRemoteBranch) return 'refs/heads/' + this.refName;
   if (this.isRemoteTag) return 'tag: ' + this.refName;
   return null;
-}
+};
 
 RefViewModel.prototype.getRemoteRef = function(remote) {
   return this.graph.getRef(this.getRemoteRefFullName(remote), false);
-}
+};
 
 RefViewModel.prototype.getRemoteRefFullName = function(remote) {
   if (this.isLocalBranch) return 'refs/remotes/' + remote + '/' + this.refName;
   if (this.isLocalTag) return 'remote-tag: ' + remote + '/' + this.refName;
   return null;
-}
+};
 
 RefViewModel.prototype.canBePushed = function(remote) {
   if (!this.isLocal) return false;
@@ -196,13 +196,12 @@ RefViewModel.prototype.canBePushed = function(remote) {
   var remoteRef = this.getRemoteRef(remote);
   if (!remoteRef) return true;
   return this.node() != remoteRef.node();
-}
+};
 
 RefViewModel.prototype.createRemoteRef = function() {
-  var self = this;
   return this.server.postPromise('/push', { path: this.graph.repoPath(), remote: this.graph.currentRemote(), refSpec: this.refName, remoteBranch: this.refName })
     .catch((e) => this.server.unhandledRejection(e));
-}
+};
 RefViewModel.prototype.checkout = function() {
   const isRemote = this.isRemoteBranch;
   const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
@@ -226,4 +225,4 @@ RefViewModel.prototype.checkout = function() {
     }).catch((err) => {
       if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
     });
-}
+};

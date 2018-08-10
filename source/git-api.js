@@ -11,7 +11,6 @@ const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 const ignore = require('ignore');
 const Bluebird = require('bluebird');
-const crypto = require('crypto');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);
@@ -21,7 +20,6 @@ exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
   const app = env.app;
-  const server = env.server;
   const ensureAuthenticated = env.ensureAuthenticated || ((req, res, next) => next());
   const config = env.config;
   const io = env.socketIO;
@@ -34,7 +32,7 @@ exports.registerApi = (env) => {
       socket.on('disconnect', () => { stopDirectoryWatch(socket); });
       socket.on('watch', (data, callback) => {
         stopDirectoryWatch(socket); // clean possibly lingering connections
-        socket.watcherPath = path.normalize(data.path)
+        socket.watcherPath = path.normalize(data.path);
         socket.join(socket.watcherPath); // join room for this path
 
         fs.readFileAsync(path.join(socket.watcherPath, ".gitignore"))
@@ -96,7 +94,7 @@ exports.registerApi = (env) => {
     socket.ignore = undefined;
     (socket.watcher || []).forEach((watcher) => watcher.close());
     winston.info(`Stop watching ${socket.watcherPath}`);
-  }
+  };
 
   // The .git dir changes on for instance 'git status', so we
   // can't trigger a change here (since that would lead to an endless
@@ -115,7 +113,7 @@ exports.registerApi = (env) => {
     } else {
       return true;
     }
-  }
+  };
 
   const ensurePathExists = (req, res, next) => {
     fs.isExists(req.query.path || req.body.path).then((isExists) => {
@@ -125,7 +123,7 @@ exports.registerApi = (env) => {
         res.status(400).json({ error: `'No such path: ${path}`, errorCode: 'no-such-path' });
       }
     });
-  }
+  };
 
   const ensureValidSocketId = (req, res, next) => {
     const socketId = req.query.socketId || req.body.socketId;
@@ -136,20 +134,20 @@ exports.registerApi = (env) => {
     } else {
       next();
     }
-  }
+  };
 
   const emitWorkingTreeChanged = _.debounce((repoPath) => {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
       winston.info('emitting working-tree-changed to sockets, manually triggered');
     }
-  }, 500, { 'maxWait': 2000 })
+  }, 500, { 'maxWait': 2000 });
   const emitGitDirectoryChanged = _.debounce((repoPath) => {
     if (io) {
       io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
       winston.info('emitting git-directory-changed to sockets, manually triggered');
     }
-  }, 500, { 'maxWait': 2000 })
+  }, 500, { 'maxWait': 2000 });
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
     if (config.autoStashAndPop) {
@@ -157,7 +155,7 @@ exports.registerApi = (env) => {
     } else {
       return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }
-  }
+  };
 
   const jsonResultOrFailProm = (res, promise) => {
     return promise.then((result) => {
@@ -166,16 +164,16 @@ exports.registerApi = (env) => {
         winston.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
-  }
+  };
 
   const credentialsOption = (socketId, remote) => {
     let portAndRootPath = `${config.port}`;
     if (config.rootPath) {
-      portAndRootPath = `${config.port}${config.rootPath}`
+      portAndRootPath = `${config.port}${config.rootPath}`;
     }
     const credentialsHelperPath = path.resolve(__dirname, '..', 'bin', 'credentials-helper').replace(/\\/g, '/');
     return ['-c', `credential.helper=${credentialsHelperPath} ${socketId} ${portAndRootPath} ${remote}`];
-  }
+  };
 
   const getNumber = (value, nullValue) => {
     const finalValue = parseInt(value ? value : nullValue);
@@ -184,7 +182,7 @@ exports.registerApi = (env) => {
     } else {
       throw { error: "invalid number"};
     }
-  }
+  };
 
   app.get(`${exports.pathPrefix}/status`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(res, gitPromise.status(req.query.path, null));
@@ -216,7 +214,7 @@ exports.registerApi = (env) => {
     });
 
     jsonResultOrFailProm(res, task)
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path));
   });
 
   app.post(`${exports.pathPrefix}/fetch`, ensureAuthenticated, ensurePathExists, ensureValidSocketId, (req, res) => {
@@ -284,7 +282,7 @@ exports.registerApi = (env) => {
     const gitIgnoreFile = `${currentPath}/.gitignore`;
     const ignoreFile = req.body.file.trim();
     const task = fs.appendFileAsync(gitIgnoreFile, os.EOL + ignoreFile)
-      .catch((err) => { throw { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' }});
+      .catch((err) => { throw { errorCode: 'error-appending-ignore', error: 'Error while appending to .gitignore file.' };});
 
     jsonResultOrFailProm(res, task)
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
@@ -300,7 +298,7 @@ exports.registerApi = (env) => {
     const task = gitPromise(['revert', req.body.commit], req.body.path)
       .catch(e => {
         if (e.message.indexOf("is a merge but no -m option was given.") > 0) {
-          return gitPromise(['revert', '-m', 1, req.body.commit], req.body.path)
+          return gitPromise(['revert', '-m', 1, req.body.commit], req.body.path);
         } else {
           throw e;
         }
@@ -317,7 +315,7 @@ exports.registerApi = (env) => {
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return { "limit": limit, "skip": skip, "nodes": []};
-        } else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)) {
+        } else if (/fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr)) {
           return { "limit": limit, "skip": skip, "nodes": []};
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
           return { "limit": limit, "skip": skip, "nodes": []};
@@ -338,7 +336,7 @@ exports.registerApi = (env) => {
       .catch((err) => {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
           return [];
-        else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr))
+        else if (/fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr))
           return [];
         else if (err.stderr.indexOf('fatal: Not a git repository') == 0)
           return [];
@@ -361,7 +359,7 @@ exports.registerApi = (env) => {
             commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
             repoPath: req.query.path,
             timeout: tenMinTimeoutMs
-          }).catch((e) => winston.warn("err during remote fetch for /refs", e)) // ignore fetch err as it is most likely credential
+          }).catch((e) => winston.warn("err during remote fetch for /refs", e)); // ignore fetch err as it is most likely credential
         });
       }).then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
@@ -371,8 +369,8 @@ exports.registerApi = (env) => {
         if (refs) {
           refs.trim().split('\n').forEach((n) => {
             const splitted = n.split(' ');
-            const sha1 = splitted[0]
-            const name = splitted[1]
+            const sha1 = splitted[0];
+            const name = splitted[1];
             if (name.indexOf('refs/tags') > -1 && name.indexOf('^{}') > -1) {
               results[results.length - 1].sha1 = sha1;
             } else {
@@ -416,7 +414,7 @@ exports.registerApi = (env) => {
       });
 
     jsonResultOrFailProm(res, task)
-      .finally(emitGitDirectoryChanged.bind(null, req.query.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.query.path));
   });
 
   app.get(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -454,14 +452,14 @@ exports.registerApi = (env) => {
     const commands = credentialsOption(req.query.socketId, req.query.remote).concat(['push', req.query.remote, `:refs/tags/${req.query.name.trim()}`]);
     const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
       .catch(() => {})  // might have already deleted, so ignoring error
-      .then(() => gitPromise(commands, req.query.path))
+      .then(() => gitPromise(commands, req.query.path));
 
     jsonResultOrFailProm(res, task)
       .finally(emitGitDirectoryChanged.bind(null, req.query.path));
   });
 
   app.post(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const arg = !!req.body.sha1 ? ['checkout', '-b', req.body.name.trim(), req.body.sha1] : ['checkout', req.body.name.trim()];
+    const arg = req.body.sha1 ? ['checkout', '-b', req.body.name.trim(), req.body.sha1] : ['checkout', req.body.name.trim()];
 
     jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
       .then(emitGitDirectoryChanged.bind(null, req.body.path))
@@ -575,7 +573,7 @@ exports.registerApi = (env) => {
     const task = fs.isExists(filename).then((exists) => {
       if (exists) {
         return fs.readFileAsync(filename, {encoding: 'utf8'})
-          .catch(() => { return {} })
+          .catch(() => { return {}; })
           .then(gitParser.parseGitSubmodule);
       } else {
         return {};
@@ -611,7 +609,7 @@ exports.registerApi = (env) => {
     const task = fs.isExists(req.query.path)
       .then((exists) => {
         return exists ? gitPromise.revParse(req.query.path) : { type: 'no-such-path', gitRootPath: req.query.path };
-      })
+      });
     jsonResultOrFailProm(res, task);
   });
 
@@ -691,7 +689,7 @@ exports.registerApi = (env) => {
     fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
       .then(() => res.status(200).json({}))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path))
-      .catch((e) => res.status(500).json(e))
+      .catch((e) => res.status(500).json(e));
   });
 
   if (config.dev) {
@@ -721,7 +719,7 @@ exports.registerApi = (env) => {
       res.json({});
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo));
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, ensureAuthenticated, (req, res) => {
       //winston.info('Cleaned up: ' + JSON.stringify(cleaned));

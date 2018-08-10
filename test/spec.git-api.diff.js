@@ -19,12 +19,12 @@ describe('git-api diff', () => {
     return common.initRepo(req)
       .then((dir) => testDir = dir)
       .then(() => common.initRepo(req, { bare: true }))
-      .then((dir) => testBareDir = testBareDir)
+      .then((dir) => testBareDir = testBareDir); // eslint-disable-line no-self-assign
   });
   after(() => common.post(req, '/testing/cleanup', undefined));
 
   const testFile = 'afile.txt';
-  const testImage = 'icon.png'
+  const testImage = 'icon.png';
 
   it('diff on non existing file should fail', () => {
     return common.get(req, '/diff', { path: testDir, file: testFile });
@@ -136,7 +136,7 @@ describe('git-api diff', () => {
       .then((res) => {
         // find a commit which contains the testFile
         const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff[2] == testFile))[0];
-        return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile })
+        return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile });
       });
   });
 });

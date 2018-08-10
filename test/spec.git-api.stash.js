@@ -21,8 +21,8 @@ describe('git-api conflict rebase', function () {
 
   before(() => {
     return common.createSmallRepo(req)
-      .then((dir) => { testDir = dir })
-      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }))
+      .then((dir) => { testDir = dir; })
+      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) }));
   });
 
   after(() => common.post(req, '/testing/cleanup'));

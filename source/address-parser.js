@@ -4,11 +4,11 @@
 // DO NOT GO ES6
 const addressWindowsLocalRegexp = /[a-zA-Z]:\\([^\\]+\\?)*/;
 const addressSshWithPortRegexp = /ssh:\/\/(.*):(\d*)\/(.*)/;
-const addressSshWithoutPortRegexp = /ssh:\/\/([^\/]*)\/(.*)/;
+const addressSshWithoutPortRegexp = /ssh:\/\/([^/]*)\/(.*)/;
 const addressGitWithoutPortWithUsernamePortRegexp = /([^@]*)@([^:]*):([^.]*)(\.git)?$/;
 const addressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
-const addressHttpsRegexp = /https:\/\/([^\/]*)\/([^.]*)(\.git)?$/;
-const addressUnixLocalRegexp = /.*\/([^\/]+)/;
+const addressHttpsRegexp = /https:\/\/([^/]*)\/([^.]*)(\.git)?$/;
+const addressUnixLocalRegexp = /.*\/([^/]+)/;
 
 exports.parseAddress = (remote) => {
   let match = addressWindowsLocalRegexp.exec(remote);
@@ -37,4 +37,4 @@ exports.parseAddress = (remote) => {
   if (match) return { address: remote, host: 'localhost', project: match[1], shortProject: match[1] };
 
   return { address: remote };
-}
+};

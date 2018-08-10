@@ -1,8 +1,6 @@
-
 const ko = require('knockout');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
-const navigation = require('ungit-navigation');
 
 components.register('app', (args) => {
   return new AppViewModel(args.appContainer, args.server);

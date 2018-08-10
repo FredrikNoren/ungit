@@ -20,10 +20,10 @@ const testPatch = (req, testDir, testFileName, contentsToPatch, files) => {
     .then(() => common.post(req, '/commit', { path: testDir, message: `a commit for ${testFileName}`, files: [{ name: testFileName }] }))
     .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFileName), content: contentsToPatch[1] }))
     .then(() => common.post(req, '/commit', { path: testDir, message: `patched commit ${testFileName}`, files: files }));
-}
+};
 
 const getPatchLineList = (size, notSelected) => {
-  let patchLineList = [];
+  const patchLineList = [];
   for (let n = 0; n < size; n++) {
     patchLineList.push(false);
   }
@@ -34,7 +34,7 @@ const getPatchLineList = (size, notSelected) => {
     }
   }
   return patchLineList;
-}
+};
 
 const getContentsToPatch = (size, toChange) => {
   let content = '';
@@ -50,7 +50,7 @@ const getContentsToPatch = (size, toChange) => {
   }
 
   return [content, changedContent];
-}
+};
 
 const getContentsToPatchWithAdd = (size, numLinesToAdd) => {
   let content = '';
@@ -68,7 +68,7 @@ const getContentsToPatchWithAdd = (size, numLinesToAdd) => {
   }
 
   return [content, changedContent];
-}
+};
 
 const getContentsToPatchWithDelete = (size, numLinesToDelete) => {
   let content = '';
@@ -84,7 +84,7 @@ const getContentsToPatchWithDelete = (size, numLinesToDelete) => {
   }
 
   return [content, changedContent];
-}
+};
 
 describe('git-api: test patch api', () => {
   it('creating test dir should work', () => {
@@ -92,7 +92,7 @@ describe('git-api: test patch api', () => {
       .then((res) => {
         expect(res.path).to.be.ok();
         testDir = res.path;
-      })
+      });
   });
 
   it('init test dir should work', () => {
@@ -108,7 +108,7 @@ describe('git-api: test patch api', () => {
     const testFileName = md5(Date.now());
     const testFileSize = 10;
     const contentsToPatch = getContentsToPatch(testFileSize);
-    let patchLineList = [];
+    const patchLineList = [];
 
     for (let n = 0; n < testFileSize * 2; n++) {
       patchLineList.push(true);
