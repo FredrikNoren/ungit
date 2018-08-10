@@ -83,7 +83,7 @@ ko.bindingHandlers.autocomplete = {
         // enter key is struck, navigate to the path
         event.preventDefault();
         navigation.browseTo(`repository?path=${encodeURIComponent(value)}`);
-      } else if (value === '' && localStorage.repositories) {
+      } else if (value === '' && localStorage && localStorage.repositories) {
         // if path is emptied out, show save path options
         const folderNames = JSON.parse(localStorage.repositories).map((value) => {
           return {
