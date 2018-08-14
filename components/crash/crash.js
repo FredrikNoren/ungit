@@ -1,14 +1,17 @@
-const ko = require('knockout');
-const components = require('ungit-components');
 
-components.register('crash', (err) => new CrashViewModel(err));
+var ko = require('knockout');
+var components = require('ungit-components');
+var adBlocker = require('just-detect-adblock');
 
-class CrashViewModel {
-  constructor(err) {
-    this.eventcause = err ? err : 'unknown error'
-  }
+components.register('crash', function(err, err2) {
+  return new CrashViewModel(err, err2);
+});
 
-  updateNode(parentElement) {
-    ko.renderTemplate('crash', this, {}, parentElement);
-  }
+var CrashViewModel = function(err, err2) {
+  if (adBlocker.isDetected()) {err='adblock'}
+  this.eventcause = err || err2 || 'unknown error';
+}
+
+CrashViewModel.prototype.updateNode = function(parentElement) {
+  ko.renderTemplate('crash', this, {}, parentElement);
 }
