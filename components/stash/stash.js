@@ -2,6 +2,7 @@
 var ko = require('knockout');
 var moment = require('moment');
 var components = require('ungit-components');
+var storage = require('ungit-storage');
 
 components.register('stash', function(args) {
   return new StashViewModel(args.server, args.repoPath);
@@ -48,7 +49,7 @@ function StashViewModel(server, repoPath) {
   this.server = server;
   this.repoPath = repoPath;
   this.stashedChanges = ko.observable([]);
-  this.isShow = ko.observable(localStorage['showStash'] === 'true');
+  this.isShow = ko.observable(storage.getItem('showStash') === 'true');
   this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow(); });
   this.refresh();
 }
@@ -84,5 +85,5 @@ StashViewModel.prototype.refresh = function() {
 }
 StashViewModel.prototype.toggleShowStash = function() {
   this.isShow(!this.isShow());
-  localStorage['showStash'] = this.isShow();
+  storage.setItem('showStash', this.isShow());
 }

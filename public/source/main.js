@@ -13,6 +13,7 @@ var components = require('ungit-components');
 var Server = require('./server');
 var programEvents = require('ungit-program-events');
 var navigation = require('ungit-navigation');
+var storage = require('ungit-storage');
 
 // Request animation frame polyfill
 (function() {
@@ -83,9 +84,9 @@ ko.bindingHandlers.autocomplete = {
         // enter key is struck, navigate to the path
         event.preventDefault();
         navigation.browseTo(`repository?path=${encodeURIComponent(value)}`);
-      } else if (value === '' && localStorage && localStorage.repositories) {
+      } else if (value === '' && storage.getItem('repositories')) {
         // if path is emptied out, show save path options
-        const folderNames = JSON.parse(localStorage.repositories).map((value) => {
+        const folderNames = JSON.parse(storage.getItem('repositories')).map((value) => {
           return {
             value: value,
             label: value.substring(value.lastIndexOf(ungit.config.fileSeparator) + 1)
