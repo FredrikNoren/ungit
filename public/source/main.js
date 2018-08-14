@@ -13,6 +13,7 @@ var components = require('ungit-components');
 var Server = require('./server');
 var programEvents = require('ungit-program-events');
 var navigation = require('ungit-navigation');
+const adBlocker = require('just-detect-adblock');
 
 // Request animation frame polyfill
 (function() {
@@ -148,10 +149,12 @@ exports.start = function() {
   app = components.create('app', { appContainer: appContainer, server: server });
   programEvents.add(function(event) {
     if (event.event == 'disconnected' || event.event == 'git-crash-error') {
-      appContainer.content(components.create('crash', event.event));
+      console.error(`ungit crash: ${event.event}`, event.error)
+      const err = event.event == 'disconnected' && adBlocker.isDetected() ? 'adblocker' : event.event;
+      appContainer.content(components.create('crash', err));
       windowTitle.crash = true;
       windowTitle.update();
-		} else if (event.event == 'connected') {
+    } else if (event.event == 'connected') {
       appContainer.content(app);
       windowTitle.crash = false;
       windowTitle.update();
@@ -172,7 +175,7 @@ exports.start = function() {
   }
 
   Raven.TraceKit.report.subscribe(function(event, err) {
-		appContainer.content(components.create('crash', event.event, err));
+    programEvents.dispatch({ event: 'raven-crash', error: err || event.event });
   });
 
   var prevTimestamp = 0;
