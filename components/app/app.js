@@ -3,6 +3,7 @@ const ko = require('knockout');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const navigation = require('ungit-navigation');
+const storage = require('ungit-storage');
 
 components.register('app', (args) => {
   return new AppViewModel(args.appContainer, args.server);
@@ -18,33 +19,33 @@ class AppViewModel {
     }
     this.dialog = ko.observable(null);
     this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
-    this.repoList.subscribe((newValue) => { localStorage.setItem('repositories', JSON.stringify(newValue)); });
+    this.repoList.subscribe((newValue) => { storage.setItem('repositories', JSON.stringify(newValue)); });
     this.content = ko.observable(components.create('home', { app: this }));
     this.currentVersion = ko.observable();
     this.latestVersion = ko.observable();
     this.showNewVersionAvailable = ko.observable();
     this.newVersionInstallCommand = (ungit.platform == 'win32' ? '' : 'sudo -H ') + 'npm update -g ungit';
     this.bugtrackingEnabled = ko.observable(ungit.config.bugtracking);
-    this.bugtrackingNagscreenDismissed = ko.observable(localStorage.getItem('bugtrackingNagscreenDismissed'));
+    this.bugtrackingNagscreenDismissed = ko.observable(storage.getItem('bugtrackingNagscreenDismissed'));
     this.showBugtrackingNagscreen = ko.computed(() => {
       return !this.bugtrackingEnabled() && !this.bugtrackingNagscreenDismissed();
     });
-    this.gitVersionErrorDismissed = ko.observable(localStorage.getItem('gitVersionErrorDismissed'));
+    this.gitVersionErrorDismissed = ko.observable(storage.getItem('gitVersionErrorDismissed'));
     this.gitVersionError = ko.observable();
     this.gitVersionErrorVisible = ko.computed(() => {
       return !ungit.config.gitVersionCheckOverride && this.gitVersionError() && !this.gitVersionErrorDismissed();
     });
 
-    const NPSSurveyLastDismissed = parseInt(localStorage.getItem('NPSSurveyLastDismissed') || '0');
+    const NPSSurveyLastDismissed = parseInt(storage.getItem('NPSSurveyLastDismissed') || '0');
     const monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
     this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
   }
   getRepoList() {
-    const localStorageRepo = JSON.parse(localStorage.getItem('repositories') || localStorage.getItem('visitedRepositories') || '[]');
+    const localStorageRepo = JSON.parse(storage.getItem('repositories') || storage.getItem('visitedRepositories') || '[]');
     const newRepos = localStorageRepo.concat(ungit.config.defaultRepositories || [])
       .filter((v, i, a) => a.indexOf(v) === i)
       .sort();
-    localStorage.setItem('repositories', JSON.stringify(newRepos));
+    storage.setItem('repositories', JSON.stringify(newRepos));
     return newRepos;
   }
   sendNPS(value) {
@@ -137,16 +138,16 @@ class AppViewModel {
     this.gitSetUserConfig(true);
   }
   dismissBugtrackingNagscreen() {
-    localStorage.setItem('bugtrackingNagscreenDismissed', true);
+    storage.setItem('bugtrackingNagscreenDismissed', true);
     this.bugtrackingNagscreenDismissed(true);
   }
   dismissGitVersionError() {
-    localStorage.setItem('gitVersionErrorDismissed', true);
+    storage.setItem('gitVersionErrorDismissed', true);
     this.gitVersionErrorDismissed(true);
   }
   dismissNPSSurvey() {
     this.showNPSSurvey(false);
-    localStorage.setItem('NPSSurveyLastDismissed', Date.now());
+    storage.setItem('NPSSurveyLastDismissed', Date.now());
   }
   dismissNewVersion() {
     this.showNewVersionAvailable(false);

@@ -19,7 +19,7 @@ describe('[STASH]', () => {
       .ug.click('.stash-all')
       .visible('.stash-toggle')
       .then((isVisible) => {
-        // if stash is currently collapsed show it. (localStorage['showStash'] might already be 'true')
+        // if stash is currently collapsed show it. (storage['showStash'] might already be 'true')
         return (isVisible ? environment.nm.click('.stash-toggle') : environment.nm)
           .wait('.stash .list-group-item')
       });

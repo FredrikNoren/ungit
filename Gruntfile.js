@@ -279,6 +279,7 @@ module.exports = (grunt) => {
     b.require('./public/source/components.js', { expose: 'ungit-components' });
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
     b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
+    b.require('./public/source/storage.js', { expose: 'ungit-storage' });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
     b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
     b.require('knockout', { expose: 'knockout' });
@@ -320,6 +321,7 @@ module.exports = (grunt) => {
         b.external(['ungit-components',
                 'ungit-program-events',
                 'ungit-navigation',
+                'ungit-storage',
                 'ungit-main',
                 'ungit-address-parser',
                 'knockout',
