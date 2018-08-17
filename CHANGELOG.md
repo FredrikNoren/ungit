@@ -5,6 +5,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 
 - 1.4.32: *UNRELEASED* 
   - Handle crashes with better logs
+  - Wrap localStorage to support environments without access to it
 - 1.4.31: Add error logging for npm publish
 - 1.4.30: Add `ungitBindIp` config to allow default binding in some cases [#1112](https://github.com/FredrikNoren/ungit/issues/1112)
 - 1.4.29:
