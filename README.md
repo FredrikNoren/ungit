@@ -43,7 +43,7 @@ Anywhere you want to start, just type:
 This will launch the server and open up a browser with the ui.
 
 Configuring
----------
+-----------
 Put a configuration file called .ungitrc in your home directory (`/home/USERNAME` on \*nix, `C:/Users/USERNAME/` on windows). Configuration file must be in json format. See [source/config.js](source/config.js) for available options.
 
 You can also override configuration variables at launch by specifying them as command line arguments; `ungit --port=8080`. To disable boolean features use --no: `ungit --no-autoFetch`.
@@ -66,7 +66,7 @@ PGP
 
 Currently, Ungit __DOES NOT__ support GPG authentication!  While git allows robust programmatic authentication via [`credential-helper`](https://help.github.com/articles/telling-git-about-your-gpg-key/), I could not find an easy way to do something equivalent with GPG.  
 
-Therefor, password-less gpg authentication or 3rd party gpg password must be configured when using Ungit to commit with gpg.
+Therefore, password-less gpg authentication or 3rd party gpg password must be configured when using Ungit to commit with gpg.
 Below are several way to enable password-less gpg authentication for various OSs.
 
 - [Cache GnuPG passphrase](https://superuser.com/questions/624343/keep-gnupg-credentials-cached-for-entire-user-session)
@@ -75,7 +75,7 @@ Below are several way to enable password-less gpg authentication for various OSs
   2. `echo "test" | gpg --clearsign` # See gpg authentication prompt when gpg is accessed.
   3. Optionally you can save it to keychain. ![gpg_save_screenshot](gpg_save_screenshot.png)
 
-I understand this is not convenient, but I security is hard.  And I'd much rather have bit of inconvenience than Ungit having security exposure.
+I understand this is not convenient, but security is hard. And I'd much rather have bit of inconvenience than Ungit having security exposure.
 
 
 External Merge Tools
