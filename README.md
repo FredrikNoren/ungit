@@ -61,7 +61,7 @@ PGP
 ---
 [Git](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work) and [github](https://help.github.com/articles/signing-commits-using-gpg/) both supports PGP signing.  Within Ungit these features can be enabled via doing either one of the below two actions.
 
-- `git config -global commit.gpgsign true` (or without `-global` at the repo)
+- `git config --global commit.gpgsign true` (or without `--global` at the repo)
 - Add `isForceGPGSign: true` to `ungit.rc` file
 
 Currently, Ungit __DOES NOT__ support GPG authentication!  While git allows robust programmatic authentication via [`credential-helper`](https://help.github.com/articles/telling-git-about-your-gpg-key/), I could not find an easy way to do something equivalent with GPG.  
