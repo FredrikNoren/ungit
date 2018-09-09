@@ -10,12 +10,16 @@ module.exports = function(graph) {
   });
   this.animate = function(forceRefresh) {
     var currentGraph = this.getGraphAttr();
-    // animate only when dom is valid and (attribute changed or force refresh due to dom change)
     if (this.element() && (forceRefresh || JSON.stringify(currentGraph) !== JSON.stringify(this.previousGraph))) {
-      var now = Date.now();
-      window.mina(this.previousGraph || currentGraph, currentGraph, now, now + 750, window.mina.time, function (val) {
-        self.setGraphAttr(val);
-      }, window.mina.elastic);
+      // dom is valid and force refresh is requested or dom moved, redraw
+      if (ungit.config.isAnimate) {
+        var now = Date.now();
+        window.mina(this.previousGraph || currentGraph, currentGraph, now, now + 750, window.mina.time, function (val) {
+          self.setGraphAttr(val);
+        }, window.mina.elastic);
+      } else {
+        this.setGraphAttr(currentGraph);
+      }
       this.previousGraph = currentGraph;
     }
   }
