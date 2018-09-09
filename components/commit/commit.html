@@ -22,7 +22,12 @@
             +<span data-bind="text: numberOfAddedLines"></span>,
             -<span data-bind="text: numberOfRemovedLines"></span>
              |
-            <span data-bind="text: sha1.substr(0, 8)"></span>
+             <!-- ko if: commitLink() -->
+             <a data-bind="text: sha1.substr(0, 8), attr: { href: commitLink(), target: '_blank' }"></a>
+             <!-- /ko -->
+             <!-- ko ifnot: commitLink() -->
+             <span data-bind="text: sha1.substr(0, 8)"></span>
+             <!-- /ko -->
           </div>
         </div>
       </div>

@@ -29,6 +29,16 @@ function CommitViewModel(gitNode) {
   this.authorDateFromNow = ko.observable();
   this.authorName = ko.observable();
   this.authorEmail = ko.observable();
+  this.commitLink = ko.computed(function() {
+    var short_sha1 = self.sha1.substr(0, 8);
+    var link_to_commit = ungit.config.linkToCommit[self.repoPath()]
+    if (link_to_commit != undefined) {
+      return ungit.config.linkToCommit[self.repoPath()].replace(/%h/g, short_sha1).replace(/%H/g, self.sha1)
+    }
+    else {
+      return null
+    }
+  });
   this.fileLineDiffs = ko.observable();
   this.numberOfAddedLines = ko.observable();
   this.numberOfRemovedLines = ko.observable();

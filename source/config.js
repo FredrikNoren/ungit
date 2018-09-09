@@ -151,6 +151,9 @@ const defaultConfig = {
 
   // a string of ip to bind to, default is `127.0.0.1`
   ungitBindIp: '127.0.0.1',
+
+  // example { "/home/projects/ungit" : "https://github.com/FredrikNoren/ungit/commit/%H" } use %H for full commit hash and %h for short commit hash
+  linkToCommit: {},
 };
 
 // Works for now but should be moved to bin/ungit
