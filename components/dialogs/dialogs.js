@@ -17,12 +17,11 @@ components.register('texteditdialog', args => new TextEditDialog(args.title, arg
 
 class DialogViewModel {
   constructor(title) {
-    const self = this;
     this.onclose = null;
     this.title = ko.observable(title);
     this.taDialogName = ko.observable('');
     this.closePromise = new Bluebird(resolve => {
-      self.onclose = resolve;
+      this.onclose = resolve;
     });
   }
 
@@ -55,50 +54,50 @@ class FormDialogViewModel extends DialogViewModel {
 
   submit() {
     this.isSubmitted(true);
-    close();
+    this.close();
   }
 }
 FormDialogViewModel.prototype.template = 'formDialog';
 
 class CredentialsDialogViewModel extends FormDialogViewModel {
   constructor(args) {
-    super();
-    this.title(`Remote ${args.remote} requires authentication`);
+    super(`Remote ${args.remote} requires authentication`);
     this.taDialogName('credentials-dialog');
     this.showCancel(false);
     this.username = ko.observable();
     this.password = ko.observable();
+    const self = this;
     this.items([
-      { name: 'Username', value: this.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
-      { name: 'Password', value: this.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
+      { name: 'Username', value: self.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
+      { name: 'Password', value: self.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
     ]);
   }
 }
 
 class AddRemoteDialogViewModel extends FormDialogViewModel {
   constructor() {
-    super();
-    this.title('Add new remote');
+    super('Add new remote');
     this.taDialogName('add-remote');
     this.name = ko.observable();
     this.url = ko.observable();
+    const self = this;
     this.items([
-      { name: 'Name', value: this.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
-      { name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Name', value: self.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
+      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
     ]);
   }
 }
 
 class AddSubmoduleDialogViewModel extends FormDialogViewModel {
   constructor() {
-    super();
-    this.title('Add new submodule');
+    super('Add new submodule');
     this.taDialogName('add-submodule');
     this.path = ko.observable();
     this.url = ko.observable();
+    const self = this;
     this.items([
-      { name: 'Path', value: this.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
-      { name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Path', value: self.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
+      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
     ]);
   }
 }
@@ -118,7 +117,6 @@ class YesNoDialogViewModel extends PromptDialogViewModel {
     this.taDialogName('yes-no-dialog');
     this.result = ko.observable(false);
     const self = this;
-    console.log(333, this, close, this.close)
     this.alternatives([
       { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
       { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } },
@@ -134,7 +132,7 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
     const self = this;
     this.alternatives([
       { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
-      { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click() { self.result("mute"); this.self.close() } },
+      { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click() { self.result("mute"); self.close() } },
       { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } }
     ]);
   }

@@ -10,7 +10,6 @@ components.register('commit', args => new CommitViewModel(args));
 
 class CommitViewModel {
   constructor(gitNode) {
-    const self = this;
     this.repoPath = gitNode.graph.repoPath;
     this.sha1 = gitNode.sha1;
     this.server = gitNode.graph.server;
@@ -31,13 +30,13 @@ class CommitViewModel {
     this.fileLineDiffs = ko.observable();
     this.numberOfAddedLines = ko.observable();
     this.numberOfRemovedLines = ko.observable();
-    this.authorGravatar = ko.computed(() => md5((self.authorEmail() || "").trim().toLowerCase()));
+    this.authorGravatar = ko.computed(() => md5((this.authorEmail() || "").trim().toLowerCase()));
 
-    this.showCommitDiff = ko.computed(() => self.fileLineDiffs() && self.fileLineDiffs().length > 0);
+    this.showCommitDiff = ko.computed(() => this.fileLineDiffs() && this.fileLineDiffs().length > 0);
 
     this.diffStyle = ko.computed(() => {
       const marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1;
-      if (self.selected() && self.element()) return { "margin-left": `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
+      if (this.selected() && this.element()) return { "margin-left": `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
       else return {};
     });
   }
