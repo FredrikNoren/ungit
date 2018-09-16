@@ -390,6 +390,12 @@ module.exports = (grunt) => {
     fs.readdirAsync('./nmclicktests')
       .then((files) => files.filter((file) => file.startsWith("spec.")))
       .then((tests) => {
+        const genericIndx = tests.indexOf("spec.generic.js")
+        if (genericIndx > -1) {
+          tests.splice(0, 0, tests.splice(genericIndx, 1)[0]);
+        }
+        return tests;
+      }).then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Bluebird.map(tests, (file) => {
           let output = "";
