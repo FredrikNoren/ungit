@@ -50,8 +50,9 @@ class FormDialogViewModel extends DialogViewModel {
     this.items = ko.observable([]);
     this.isSubmitted = ko.observable(false);
     this.showCancel = ko.observable(true);
-    get template() { return 'formDialog'; }
   }
+
+  get template() { return 'formDialog'; }
 
   submit() {
     this.isSubmitted(true);
@@ -107,8 +108,9 @@ class PromptDialogViewModel extends DialogViewModel {
     super(title);
     this.alternatives = ko.observable();
     this.details = ko.observable(details);
-    get template() { return 'prompt'; }
   }
+  
+  get template() { return 'prompt'; }
 }
 
 class YesNoDialogViewModel extends PromptDialogViewModel {
