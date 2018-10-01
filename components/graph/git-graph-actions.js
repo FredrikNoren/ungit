@@ -19,20 +19,17 @@ class ActionBase {
     this.isHighlighted = ko.computed(() => {
       return !graph.hoverGraphAction() || graph.hoverGraphAction() == this;
     });
+    this.icon = ko.observable();
+    this.text = ko.observable();
+    this.style = ko.observable();
     this.cssClasses = ko.computed(() => {
       if (!this.isHighlighted() || this.isRunning()) {
-        return `${this._style} dimmed`
+        return `${this.style()} dimmed`
       } else {
-        return this._style
+        return this.style()
       }
     });
-    this._icon = null;
-    this._text = null;
-    this._style = null;
   }
-  get icon() { return this._icon; }
-  get text() { return this._text; }
-  get style() { return this._style; }
   doPerform() {
     if (this.isRunning()) return;
     this.graph.hoverGraphAction(null);
@@ -66,9 +63,9 @@ class Move extends ActionBase {
       return this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this._text = 'Move';
-    this._style = 'move';
-    this._icon = 'glyph_icon glyph_icon-move';
+    this.text('Move');
+    this.style('move');
+    this.icon('glyph_icon glyph_icon-move');
   }
   perform() {
     return this.graph.currentActionContext().moveTo(this.node.sha1);
@@ -90,9 +87,9 @@ class Reset extends ActionBase {
         remoteRef.node() != context.node() &&
         remoteRef.node().date < context.node().date;
     });
-    this._text = 'Reset';
-    this._style = 'reset';
-    this._icon = 'glyph_icon glyph_icon-trash';
+    this.text('Reset');
+    this.style('reset');
+    this.icon('glyph_icon glyph_icon-trash');
   }
 
   createHoverGraphic() {
@@ -126,9 +123,9 @@ class Rebase extends ActionBase {
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this._text = 'Rebase';
-    this._style = 'rebase';
-    this._icon = 'oct_icon oct_icon-repo-forked flip';
+    this.text('Rebase');
+    this.style('rebase');
+    this.icon('oct_icon oct_icon-repo-forked flip');
   }
 
   createHoverGraphic() {
@@ -156,9 +153,9 @@ class Merge extends ActionBase {
         !this.graph.currentActionContext().current() &&
         this.graph.checkedOutRef().node() == this.node;
     });
-    this._text = 'Merge';
-    this._style = 'merge';
-    this._icon = 'oct_icon oct_icon-git-merge';
+    this.text('Merge');
+    this.style('merge');
+    this.icon('oct_icon oct_icon-git-merge');
   }
   createHoverGraphic() {
     let node = this.graph.currentActionContext();
@@ -183,9 +180,9 @@ class Push extends ActionBase {
         this.graph.currentActionContext().node() == this.node &&
         this.graph.currentActionContext().canBePushed(this.graph.currentRemote());
     });
-    this._text = 'Push';
-    this._style = 'push';
-    this._icon = 'oct_icon oct_icon-cloud-upload';
+    this.text('Push');
+    this.style('push');
+    this.icon('oct_icon oct_icon-cloud-upload');
   }
 
   createHoverGraphic() {
@@ -223,9 +220,9 @@ class Checkout extends ActionBase {
       return ungit.config.allowCheckoutNodes &&
         this.graph.currentActionContext() == this.node;
     });
-    this._text = 'Checkout';
-    this._style = 'checkout';
-    this._icon = 'oct_icon oct_icon-desktop-download';
+    this.text('Checkout');
+    this.style('checkout');
+    this.icon('oct_icon oct_icon-desktop-download');
   }
   perform() {
     return this.graph.currentActionContext().checkout();
@@ -242,9 +239,9 @@ class Delete extends ActionBase {
         this.graph.currentActionContext().node() == this.node &&
         !this.graph.currentActionContext().current();
     });
-    this._text = 'Delete';
-    this._style = 'delete';
-    this._icon = 'glyph_icon glyph_icon-remove';
+    this.text('Delete');
+    this.style('delete');
+    this.icon('glyph_icon glyph_icon-remove');
   }
   perform() {
     const context = this.graph.currentActionContext();
@@ -271,9 +268,9 @@ class CherryPick extends ActionBase {
       const context = this.graph.currentActionContext();
       return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1
     });
-    this._text = 'Cherry pick';
-    this._style = 'cherry-pick';
-    this._icon = 'oct_icon oct_icon-circuit-board';
+    this.text('Cherry pick');
+    this.style('cherry-pick');
+    this.icon('oct_icon oct_icon-circuit-board');
   }
   perform() {
     return this.server.postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
@@ -290,9 +287,9 @@ class Uncommit extends ActionBase {
       return this.graph.currentActionContext() == this.node &&
         this.graph.HEAD() == this.node;
     });
-    this._text = 'Uncommit';
-    this._style = 'uncommit';
-    this._icon = 'oct_icon oct_icon-zap';
+    this.text('Uncommit');
+    this.style('uncommit');
+    this.icon('oct_icon oct_icon-zap');
   }
   perform() {
     return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: 'HEAD^', mode: 'mixed' })
@@ -315,9 +312,9 @@ class Revert extends ActionBase {
       if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node;
     });
-    this._text = 'Revert';
-    this._style = 'revert';
-    this._icon = 'oct_icon oct_icon-history';
+    this.text('Revert');
+    this.style('revert');
+    this.icon('oct_icon oct_icon-history');
   }
   perform() {
     return this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 });
@@ -334,9 +331,9 @@ class Squash extends ActionBase {
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this._text = 'Squash';
-    this._style = 'squash';
-    this._icon = 'oct_icon oct_icon-fold';
+    this.text('Squash');
+    this.style('squash');
+    this.icon('oct_icon oct_icon-fold');
   }
   createHoverGraphic() {
     let onto = this.graph.currentActionContext();
