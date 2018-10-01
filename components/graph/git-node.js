@@ -15,7 +15,7 @@ class GitNodeViewModel extends Animateable {
     this.graph = graph;
     this.sha1 = sha1;
     this.isInited = false;
-    this.title = undefined;
+    this.title = ko.observable();
     this.parents = ko.observableArray();
     this.commitTime = undefined; // commit time in string
     this.date = undefined;       // commit time in numeric format for sort
@@ -147,7 +147,7 @@ class GitNodeViewModel extends Animateable {
   }
 
   setData(logEntry) {
-    this.title = logEntry.message.split('\n')[0];
+    this.title(logEntry.message.split('\n')[0]);
     this.parents(logEntry.parents || []);
     this.commitTime = logEntry.commitDate;
     this.date = Date.parse(this.commitTime);
