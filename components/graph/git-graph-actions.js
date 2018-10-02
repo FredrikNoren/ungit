@@ -12,21 +12,21 @@ const PushViewModel = HoverActions.PushViewModel;
 const SquashViewModel = HoverActions.SquashViewModel
 
 class ActionBase {
-  constructor(graph) {
+  constructor(graph, text, style, icon) {
     this.graph = graph;
     this.server = graph.server;
     this.isRunning = ko.observable(false);
     this.isHighlighted = ko.computed(() => {
       return !graph.hoverGraphAction() || graph.hoverGraphAction() == this;
     });
-    this.icon = ko.observable();
-    this.text = ko.observable();
-    this.style = ko.observable();
+    this.text = text;
+    this.style = style;
+    this.icon = icon;
     this.cssClasses = ko.computed(() => {
       if (!this.isHighlighted() || this.isRunning()) {
-        return `${this.style()} dimmed`
+        return `${this.style} dimmed`
       } else {
-        return this.style()
+        return this.style
       }
     });
   }
@@ -56,16 +56,13 @@ class ActionBase {
 
 class Move extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Move', 'move', 'glyph_icon glyph_icon-move');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       return this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this.text('Move');
-    this.style('move');
-    this.icon('glyph_icon glyph_icon-move');
   }
   perform() {
     return this.graph.currentActionContext().moveTo(this.node.sha1);
@@ -74,7 +71,7 @@ class Move extends ActionBase {
 
 class Reset extends ActionBase {
   constructor (graph, node) {
-    super(graph);
+    super(graph, 'Reset', 'reset', 'glyph_icon glyph_icon-trash');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -87,9 +84,6 @@ class Reset extends ActionBase {
         remoteRef.node() != context.node() &&
         remoteRef.node().date < context.node().date;
     });
-    this.text('Reset');
-    this.style('reset');
-    this.icon('glyph_icon glyph_icon-trash');
   }
 
   createHoverGraphic() {
@@ -114,7 +108,7 @@ class Reset extends ActionBase {
 
 class Rebase extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Rebase', 'rebase', 'oct_icon oct_icon-repo-forked flip');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -123,9 +117,6 @@ class Rebase extends ActionBase {
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this.text('Rebase');
-    this.style('rebase');
-    this.icon('oct_icon oct_icon-repo-forked flip');
   }
 
   createHoverGraphic() {
@@ -144,7 +135,7 @@ class Rebase extends ActionBase {
 
 class Merge extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Merge', 'merge', 'oct_icon oct_icon-git-merge');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -153,9 +144,6 @@ class Merge extends ActionBase {
         !this.graph.currentActionContext().current() &&
         this.graph.checkedOutRef().node() == this.node;
     });
-    this.text('Merge');
-    this.style('merge');
-    this.icon('oct_icon oct_icon-git-merge');
   }
   createHoverGraphic() {
     let node = this.graph.currentActionContext();
@@ -172,7 +160,7 @@ class Merge extends ActionBase {
 
 class Push extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Push', 'push', 'oct_icon oct_icon-cloud-upload');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -180,9 +168,6 @@ class Push extends ActionBase {
         this.graph.currentActionContext().node() == this.node &&
         this.graph.currentActionContext().canBePushed(this.graph.currentRemote());
     });
-    this.text('Push');
-    this.style('push');
-    this.icon('oct_icon oct_icon-cloud-upload');
   }
 
   createHoverGraphic() {
@@ -210,7 +195,7 @@ class Push extends ActionBase {
 
 class Checkout extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Checkout', 'checkout', 'oct_icon oct_icon-desktop-download');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -220,9 +205,6 @@ class Checkout extends ActionBase {
       return ungit.config.allowCheckoutNodes &&
         this.graph.currentActionContext() == this.node;
     });
-    this.text('Checkout');
-    this.style('checkout');
-    this.icon('oct_icon oct_icon-desktop-download');
   }
   perform() {
     return this.graph.currentActionContext().checkout();
@@ -231,7 +213,7 @@ class Checkout extends ActionBase {
 
 class Delete extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Delete', 'delete', 'glyph_icon glyph_icon-remove');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -239,9 +221,6 @@ class Delete extends ActionBase {
         this.graph.currentActionContext().node() == this.node &&
         !this.graph.currentActionContext().current();
     });
-    this.text('Delete');
-    this.style('delete');
-    this.icon('glyph_icon glyph_icon-remove');
   }
   perform() {
     const context = this.graph.currentActionContext();
@@ -261,16 +240,13 @@ class Delete extends ActionBase {
 
 class CherryPick extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Cherry pick', 'cherry-pick', 'oct_icon oct_icon-circuit-board');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       const context = this.graph.currentActionContext();
       return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1
     });
-    this.text('Cherry pick');
-    this.style('cherry-pick');
-    this.icon('oct_icon oct_icon-circuit-board');
   }
   perform() {
     return this.server.postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
@@ -280,16 +256,13 @@ class CherryPick extends ActionBase {
 
 class Uncommit extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Uncommit', 'uncommit', 'oct_icon oct_icon-zap');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node &&
         this.graph.HEAD() == this.node;
     });
-    this.text('Uncommit');
-    this.style('uncommit');
-    this.icon('oct_icon oct_icon-zap');
   }
   perform() {
     return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: 'HEAD^', mode: 'mixed' })
@@ -306,15 +279,12 @@ class Uncommit extends ActionBase {
 
 class Revert extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Revert', 'revert', 'oct_icon oct_icon-history');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node;
     });
-    this.text('Revert');
-    this.style('revert');
-    this.icon('oct_icon oct_icon-history');
   }
   perform() {
     return this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 });
@@ -323,7 +293,7 @@ class Revert extends ActionBase {
 
 class Squash extends ActionBase {
   constructor(graph, node) {
-    super(graph);
+    super(graph, 'Squash', 'squash', 'oct_icon oct_icon-fold');
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -331,9 +301,6 @@ class Squash extends ActionBase {
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node;
     });
-    this.text('Squash');
-    this.style('squash');
-    this.icon('oct_icon oct_icon-fold');
   }
   createHoverGraphic() {
     let onto = this.graph.currentActionContext();
