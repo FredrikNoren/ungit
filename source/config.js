@@ -151,6 +151,9 @@ const defaultConfig = {
 
   // a string of ip to bind to, default is `127.0.0.1`
   ungitBindIp: '127.0.0.1',
+
+  // is front end animation enabled
+  isAnimate: true,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -212,6 +215,8 @@ let argv = yargs
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
 .describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')
 .describe('ungitBindIp', 'a string of ip to bind to, default is `127.0.0.1`')
+.describe('isAnimate', 'is front end animation enabled')
+.boolean('isAnimate')
 ;
 
 const argvConfig = argv.argv;

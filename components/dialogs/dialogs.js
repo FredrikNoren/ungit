@@ -1,180 +1,173 @@
 
-var ko = require('knockout');
-var inherits = require('util').inherits;
-var components = require('ungit-components');
-var Promise = require('bluebird');
-var programEvents = require('ungit-program-events');
+const ko = require('knockout');
+const inherits = require('util').inherits;
+const components = require('ungit-components');
+const Bluebird = require('bluebird');
+const programEvents = require('ungit-program-events');
 
-components.register('formdialog', function(args) {
-  return new FormDialogViewModel(args.title);
-});
+components.register('formdialog', args => new FormDialogViewModel(args.title));
+components.register('credentialsdialog', args => new CredentialsDialogViewModel({remote: args.remote}));
+components.register('addremotedialog', args => new AddRemoteDialogViewModel());
+components.register('addsubmoduledialog', args => new AddSubmoduleDialogViewModel());
+components.register('promptdialog', args => new PromptDialogViewModel(args.title, args.details));
+components.register('yesnodialog', args => new YesNoDialogViewModel(args.title, args.details));
+components.register('yesnomutedialog', args => new YesNoMuteDialogViewModel(args.title, args.details));
+components.register('toomanyfilesdialogviewmodel', args => new TooManyFilesDialogViewModel(args.title, args.details));
+components.register('texteditdialog', args => new TextEditDialog(args.title, args.content));
 
-components.register('credentialsdialog', function(args) {
-  return new CredentialsDialogViewModel({remote: args.remote});
-});
+class DialogViewModel {
+  constructor(title) {
+    this.onclose = null;
+    this.title = ko.observable(title);
+    this.taDialogName = ko.observable('');
+    this.closePromise = new Bluebird(resolve => {
+      this.onclose = resolve;
+    });
+  }
 
-components.register('addremotedialog', function(args) {
-  return new AddRemoteDialogViewModel();
-});
+  closeThen(thenFunc) {
+    this.closePromise = this.closePromise.then(thenFunc);
+    return this;
+  }
 
-components.register('addsubmoduledialog', function(args) {
-  return new AddSubmoduleDialogViewModel();
-});
+  setCloser(closer) {
+    this.closer = closer;
+  }
 
-components.register('promptdialog', function(args) {
-  return new PromptDialogViewModel(args.title, args.details);
-});
+  close() {
+    this.closer();
+  }
 
-components.register('yesnodialog', function(args) {
-  return new YesNoDialogViewModel(args.title, args.details);
-});
-
-components.register('yesnomutedialog', function(args) {
-  return new YesNoMuteDialogViewModel(args.title, args.details);
-});
-
-components.register('toomanyfilesdialogviewmodel', function(args) {
-  return new TooManyFilesDialogViewModel(args.title, args.details);
-});
-
-components.register('texteditdialog', function(args) {
-  return new TextEditDialog(args.title, args.content);
-});
-
-function DialogViewModel(title) {
-  var self = this;
-  this.onclose = null;
-  this.title = ko.observable(title);
-  this.taDialogName = ko.observable('');
-  this.closePromise = new Promise(function(resolve) {
-    self.onclose = resolve;
-  });
-}
-DialogViewModel.prototype.closeThen = function(thenFunc) {
-  this.closePromise = this.closePromise.then(thenFunc);
-  return this;
-}
-DialogViewModel.prototype.setCloser = function(closer) {
-  this.close = closer;
-}
-DialogViewModel.prototype.show = function() {
-  programEvents.dispatch({ event: 'request-show-dialog', dialog: this });
-  return this;
+  show() {
+    programEvents.dispatch({ event: 'request-show-dialog', dialog: this });
+    return this;
+  }
 }
 
-function FormDialogViewModel(title) {
-  DialogViewModel.call(this, title);
-  this.items = ko.observable([]);
-  this.isSubmitted = ko.observable(false);
-  this.showCancel = ko.observable(true);
-}
-inherits(FormDialogViewModel, DialogViewModel);
-FormDialogViewModel.prototype.template = 'formDialog';
-FormDialogViewModel.prototype.submit = function() {
-  this.isSubmitted(true);
-  this.close();
+class FormDialogViewModel extends DialogViewModel {
+  constructor(title) {
+    super(title);
+    this.items = ko.observable([]);
+    this.isSubmitted = ko.observable(false);
+    this.showCancel = ko.observable(true);
+  }
+
+  get template() { return 'formDialog'; }
+
+  submit() {
+    this.isSubmitted(true);
+    this.close();
+  }
 }
 
-
-function CredentialsDialogViewModel(args) {
-  FormDialogViewModel.call(this);
-  this.title(`Remote ${args.remote} requires authentication`);
-  this.taDialogName('credentials-dialog');
-  this.showCancel(false);
-  this.username = ko.observable();
-  this.password = ko.observable();
-  this.items([
-    { name: 'Username', value: this.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
-    { name: 'Password', value: this.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
-  ]);
+class CredentialsDialogViewModel extends FormDialogViewModel {
+  constructor(args) {
+    super(`Remote ${args.remote} requires authentication`);
+    this.taDialogName('credentials-dialog');
+    this.showCancel(false);
+    this.username = ko.observable();
+    this.password = ko.observable();
+    const self = this;
+    this.items([
+      { name: 'Username', value: self.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
+      { name: 'Password', value: self.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
+    ]);
+  }
 }
-inherits(CredentialsDialogViewModel, FormDialogViewModel);
 
-
-function AddRemoteDialogViewModel() {
-  FormDialogViewModel.call(this);
-  this.title('Add new remote');
-  this.taDialogName('add-remote');
-  this.name = ko.observable();
-  this.url = ko.observable();
-  this.items([
-    { name: 'Name', value: this.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
-    { name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
-  ]);
+class AddRemoteDialogViewModel extends FormDialogViewModel {
+  constructor() {
+    super('Add new remote');
+    this.taDialogName('add-remote');
+    this.name = ko.observable();
+    this.url = ko.observable();
+    const self = this;
+    this.items([
+      { name: 'Name', value: self.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
+      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+    ]);
+  }
 }
-inherits(AddRemoteDialogViewModel, FormDialogViewModel);
 
-function AddSubmoduleDialogViewModel() {
-  FormDialogViewModel.call(this);
-  this.title('Add new submodule');
-  this.taDialogName('add-submodule');
-  this.path = ko.observable();
-  this.url = ko.observable();
-  this.items([
-    { name: 'Path', value: this.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
-    { name: 'Url', value: this.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
-  ]);
+class AddSubmoduleDialogViewModel extends FormDialogViewModel {
+  constructor() {
+    super('Add new submodule');
+    this.taDialogName('add-submodule');
+    this.path = ko.observable();
+    this.url = ko.observable();
+    const self = this;
+    this.items([
+      { name: 'Path', value: self.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
+      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+    ]);
+  }
 }
-inherits(AddSubmoduleDialogViewModel, FormDialogViewModel);
 
-function PromptDialogViewModel(title, details) {
-  DialogViewModel.call(this, title);
-  this.alternatives = ko.observable();
-  this.details = ko.observable(details);
+class PromptDialogViewModel extends DialogViewModel {
+  constructor(title, details) {
+    super(title);
+    this.alternatives = ko.observable();
+    this.details = ko.observable(details);
+  }
+  
+  get template() { return 'prompt'; }
 }
-inherits(PromptDialogViewModel, DialogViewModel);
-PromptDialogViewModel.prototype.template = 'prompt';
 
-function YesNoDialogViewModel(title, details) {
-  PromptDialogViewModel.call(this, title, details);
-  var self = this;
-  this.taDialogName('yes-no-dialog');
-  this.result = ko.observable(false);
-  this.alternatives([
-    { label: 'Yes', primary: true, taId: 'yes', click: function() { self.result(true); self.close(); } },
-    { label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } },
-  ]);
+class YesNoDialogViewModel extends PromptDialogViewModel {
+  constructor(title, details) {
+    super(title, details);
+    this.taDialogName('yes-no-dialog');
+    this.result = ko.observable(false);
+    const self = this;
+    this.alternatives([
+      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } },
+    ]);
+  }
 }
-inherits(YesNoDialogViewModel, PromptDialogViewModel);
 
-function YesNoMuteDialogViewModel(title, details) {
-  PromptDialogViewModel.call(this, title, details);
-  var self = this;
-  this.taDialogName('yes-no-mute-dialog');
-  this.result = ko.observable(false);
-  this.alternatives([
-    { label: 'Yes', primary: true, taId: 'yes', click: function() { self.result(true); self.close(); } },
-    { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click: function() { self.result("mute"); self.close(); } },
-    { label: 'No', primary: false, taId: 'no', click: function() { self.result(false); self.close(); } }
-  ]);
+class YesNoMuteDialogViewModel extends PromptDialogViewModel {
+  constructor(title, details) {
+    super(title, details);
+    this.taDialogName('yes-no-mute-dialog');
+    this.result = ko.observable(false);
+    const self = this;
+    this.alternatives([
+      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click() { self.result("mute"); self.close() } },
+      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } }
+    ]);
+  }
 }
-inherits(YesNoMuteDialogViewModel, PromptDialogViewModel);
 
-function TooManyFilesDialogViewModel(title, details) {
-  PromptDialogViewModel.call(this, title, details);
-  var self = this;
-  this.taDialogName('yes-no-dialog');
-  this.result = ko.observable(false);
-  this.alternatives([
-    { label: "Don't load", primary: true, taId: 'noLoad', click: function() { self.result(false); self.close(); } },
-    { label: 'Load anyway', primary: false, taId: 'loadAnyway', click: function() { self.result(true); self.close(); } },
-  ]);
+class TooManyFilesDialogViewModel extends PromptDialogViewModel {
+  constructor(title, details) {
+    super(title, details);
+    this.taDialogName('yes-no-dialog');
+    this.result = ko.observable(false);
+    const self = this;
+    this.alternatives([
+      { label: "Don't load", primary: true, taId: 'noLoad', click() { self.result(false); self.close(); } },
+      { label: 'Load anyway', primary: false, taId: 'loadAnyway', click() { self.result(true); self.close(); } },
+    ]);
+  }
 }
-inherits(TooManyFilesDialogViewModel, PromptDialogViewModel);
 
-function TextEditDialog(title, content) {
-  PromptDialogViewModel.call(this, title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px;width: 100%">${content}</textarea>`);
-  var self = this;
-  this.taDialogName('text-edit-dialog');
-  this.result = ko.observable(false);
-  this.alternatives([
-    { label: "Save", primary: true, taId: 'save', click: function() {
-        self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
-        self.result(true);
-        self.close();
-      }
-    },
-    { label: 'Cancel', primary: false, taId: 'cancel', click: function() { self.result(false); self.close(); } },
-  ]);
+class TextEditDialog extends PromptDialogViewModel {
+  constructor(title, content) {
+    super(title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px;width: 100%">${content}</textarea>`);
+    this.taDialogName('text-edit-dialog');
+    this.result = ko.observable(false);
+    const self = this;
+    this.alternatives([
+      {
+        label: "Save", primary: true, taId: 'save', click() {
+          this.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
+          self.result(true);
+          self.close();
+        }
+      },
+      { label: 'Cancel', primary: false, taId: 'cancel', click() { self.result(false); self.close(); } },
+    ]);
+  }
 }
-inherits(TextEditDialog, PromptDialogViewModel);

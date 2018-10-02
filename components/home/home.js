@@ -1,58 +1,60 @@
 
-var ko = require('knockout');
-var components = require('ungit-components');
+const ko = require('knockout');
+const components = require('ungit-components');
 
-components.register('home', function(args) {
-  return new HomeViewModel(args.app);
-});
+components.register('home', args => new HomeViewModel(args.app));
 
-function HomeRepositoryViewModel(home, path) {
-  this.home = home;
-  this.app = home.app;
-  this.server = this.app.server;
-  this.path = path;
-  this.title = path;
-  this.link = ungit.config.rootPath + '/#/repository?path=' + encodeURIComponent(path);
-  this.pathRemoved = ko.observable(false);
-  this.remote = ko.observable('...');
-  this.updateState();
-}
-HomeRepositoryViewModel.prototype.updateState = function() {
-  var self = this;
-  this.server.getPromise('/fs/exists?path=' + encodeURIComponent(this.path))
-    .then(function(exists) { self.pathRemoved(!exists); })
-    .catch((e) => this.server.unhandledRejection(e));
-  this.server.getPromise('/remotes/origin?path=' + encodeURIComponent(this.path))
-    .then(function(remote) {	self.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
-    .catch(function(err) { self.remote(''); });
-}
-HomeRepositoryViewModel.prototype.remove = function() {
-  this.app.repoList.remove(this.path);
-  this.home.update();
+class HomeRepositoryViewModel {
+  constructor(home, path) {
+    this.home = home;
+    this.app = home.app;
+    this.server = this.app.server;
+    this.path = path;
+    this.title = path;
+    this.link = `${ungit.config.rootPath}/#/repository?path=${encodeURIComponent(path)}`;
+    this.pathRemoved = ko.observable(false);
+    this.remote = ko.observable('...');
+    this.updateState();
+  }
+
+  updateState() {
+    this.server.getPromise(`/fs/exists?path=${encodeURIComponent(this.path)}`)
+      .then(exists => { this.pathRemoved(!exists); })
+      .catch((e) => this.server.unhandledRejection(e));
+    this.server.getPromise(`/remotes/origin?path=${encodeURIComponent(this.path)}`)
+      .then(remote => {	this.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
+      .catch(err => { this.remote(''); });
+  }
+
+  remove() {
+    this.app.repoList.remove(this.path);
+    this.home.update();
+  }
 }
 
-function HomeViewModel(app) {
-  var self = this;
-  this.app = app;
-  this.repos = ko.observableArray();
-  this.showNux = ko.computed(function() {
-    return self.repos().length == 0;
-  });
-}
-HomeViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('home', this, {}, parentElement);
-}
-HomeViewModel.prototype.template = 'home';
-HomeViewModel.prototype.shown = function() {
-  this.update();
-}
-HomeViewModel.prototype.update = function() {
-  var self = this;
-  var reposByPath = {};
-  this.repos().forEach(function(repo) { reposByPath[repo.path] = repo; });
-  this.repos(this.app.repoList().sort().map(function(path) {
-    if (!reposByPath[path])
-      reposByPath[path] = new HomeRepositoryViewModel(self, path);
-    return reposByPath[path];
-  }));
+class HomeViewModel {
+  constructor(app) {
+    this.app = app;
+    this.repos = ko.observableArray();
+    this.showNux = ko.computed(() => this.repos().length == 0);
+  }
+
+  updateNode(parentElement) {
+    ko.renderTemplate('home', this, {}, parentElement);
+  }
+
+  shown() {
+    this.update();
+  }
+
+  update() {
+    const reposByPath = {};
+    this.repos().forEach(repo => { reposByPath[repo.path] = repo; });
+    this.repos(this.app.repoList().sort().map(path => {
+      if (!reposByPath[path])
+        reposByPath[path] = new HomeRepositoryViewModel(this, path);
+      return reposByPath[path];
+    }));
+  }
+  get template() { return 'home'; }
 }

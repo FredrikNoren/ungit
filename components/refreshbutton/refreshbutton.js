@@ -1,17 +1,17 @@
 
-var ko = require('knockout');
-var components = require('ungit-components');
-var programEvents = require('ungit-program-events');
+const ko = require('knockout');
+const components = require('ungit-components');
+const programEvents = require('ungit-program-events');
 
-components.register('refreshbutton', function() {
-  return new RefreshButton();
-});
+components.register('refreshbutton', () => new RefreshButton());
 
-function RefreshButton() {}
-RefreshButton.prototype.refresh = function() {
-  programEvents.dispatch({ event: 'request-app-content-refresh' });
-  return true;
-}
-RefreshButton.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('refreshbutton', this, {}, parentElement);
+class RefreshButton {
+  refresh() {
+    programEvents.dispatch({ event: 'request-app-content-refresh' });
+    return true;
+  }
+
+  updateNode(parentElement) {
+    ko.renderTemplate('refreshbutton', this, {}, parentElement);
+  }
 }
