@@ -286,11 +286,23 @@ GraphViewModel.prototype.updateBranches = function() {
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   const version = Date.now();
+  
+  const sha1Map = {}; // map holding true sha1 per tags
+  remoteTags.forEach(tag => {
+    if (tag.name.indexOf('^{}') !== -1) {
+      // This tag is a dereference tag, use this sha1.
+      const tagRef = tag.name.slice(0, tag.name.length - '^{}'.length);
+      sha1Map[tagRef] = tag.sha1
+    } else if (!sha1Map[tag.name]) {
+      // If sha1 wasn't previously set, use this sha1
+      sha1Map[tag.name] = tag.sha1
+    }
+  });
+
   remoteTags.forEach((ref) => {
-    if (ref.name.indexOf('^{}') !== -1) {
-      const tagRef = ref.name.slice(0, ref.name.length - '^{}'.length);
-      const name = `remote-tag: ${ref.remote}/${tagRef.split('/')[2]}`;
-      this.getRef(name).node(this.getNode(ref.sha1));
+    if (ref.name.indexOf('^{}') === -1) {
+      const name = `remote-tag: ${ref.remote}/${ref.name.split('/')[2]}`;
+      this.getRef(name).node(this.getNode(sha1Map[ref.name]));
       this.getRef(name).version = version;
     }
   });
