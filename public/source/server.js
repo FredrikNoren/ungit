@@ -4,12 +4,20 @@ var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
-var nprogress = require('nprogress');
-nprogress.configure({
-  trickleRate: 0.06,
-  trickleSpeed: 200,
-  showSpinner: false
-});
+var nprogress;
+if (ungit.config.isDisableProgressBar) {
+  nprogress = {
+    start: () => {},
+    done: () => {}
+  }
+} else {
+  nprogress = require('nprogress');
+  nprogress.configure({
+    trickleRate: 0.06,
+    trickleSpeed: 200,
+    showSpinner: false
+  });
+}
 
 function Server() {
   this.isInternetConnected = true;

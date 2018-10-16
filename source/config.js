@@ -154,6 +154,9 @@ const defaultConfig = {
 
   // is front end animation enabled
   isAnimate: true,
+
+  // disable progress bar (front end api)
+  isDisableProgressBar: false
 };
 
 // Works for now but should be moved to bin/ungit
@@ -217,6 +220,8 @@ let argv = yargs
 .describe('ungitBindIp', 'a string of ip to bind to, default is `127.0.0.1`')
 .describe('isAnimate', 'is front end animation enabled')
 .boolean('isAnimate')
+.describe('isDisableProgressBar', 'disable progress bar (front end api)')
+.boolean('isDisableProgressBar')
 ;
 
 const argvConfig = argv.argv;
