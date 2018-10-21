@@ -173,6 +173,7 @@ let argv = yargs
 .describe('o', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
 .boolean('o')
 .describe('ungitVersionCheckOverride', 'Ignore check for older version of ungit')
+.boolean('ungitVersionCheckOverride')
 .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this')
 .boolean('b')
 .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
