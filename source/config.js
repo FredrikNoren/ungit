@@ -154,6 +154,9 @@ const defaultConfig = {
 
   // is front end animation enabled
   isAnimate: true,
+
+  // disable progress bar (front end api)
+  isDisableProgressBar: false
 };
 
 // Works for now but should be moved to bin/ungit
@@ -170,6 +173,7 @@ let argv = yargs
 .describe('o', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
 .boolean('o')
 .describe('ungitVersionCheckOverride', 'Ignore check for older version of ungit')
+.boolean('ungitVersionCheckOverride')
 .describe('b', 'Launch a browser window with ungit when the ungit server is started. --no-b or --no-launchBrowser disables this')
 .boolean('b')
 .describe('cliconfigonly', 'Ignore the default configuration points and only use parameters sent on the command line')
@@ -217,6 +221,8 @@ let argv = yargs
 .describe('ungitBindIp', 'a string of ip to bind to, default is `127.0.0.1`')
 .describe('isAnimate', 'is front end animation enabled')
 .boolean('isAnimate')
+.describe('isDisableProgressBar', 'disable progress bar (front end api)')
+.boolean('isDisableProgressBar')
 ;
 
 const argvConfig = argv.argv;
