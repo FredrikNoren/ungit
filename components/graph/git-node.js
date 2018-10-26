@@ -173,7 +173,7 @@ class GitNodeViewModel extends Animateable {
     $(textBox).autocomplete({
       source: this.refs().filter(ref => !ref.isHEAD),
       minLength: 0,
-      select(event, ui) {
+      select: (event, ui) => {
         const ref = ui.item;
         const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
 
