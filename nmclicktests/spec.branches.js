@@ -72,7 +72,8 @@ describe('[BRANCHES]', () => {
   });
 
   it('Delete a branch via selection', () => {
-    return environment.nm.click('.branch .dropdown-toggle')
+    return environment.nm.wait(1000)
+      .ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="refs/heads/branch-3-remove"]')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('#nprogress')
