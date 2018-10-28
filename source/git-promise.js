@@ -292,17 +292,16 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
 }
 
 git.getCurrentBranch = (repoPath) => {
-  return git.revParse(repoPath).then(revResult => {
-    const HEADFile = path.join(revResult.gitRootPath, '.git', 'HEAD');
-    return fs.isExists(HEADFile).then(isExist => {
-      if (!isExist) throw { errorCode: 'not-a-repository', error: `No such file: ${HEADFile}` };
-    }).then(() => {
-      return fs.readFileAsync(HEADFile, { encoding: 'utf8' });
-    }).then(text => {
-      const rows = text.toString().split('\n');
-      return rows[0].slice('ref: refs/heads/'.length);
+  return git(['branch'], repoPath).then(gitParser.parseGitBranches)
+    .then((branches) => {
+      let branch = branches.find((branch) => branch.current);
+      if (branch) {
+        return branch.name;
+      }
+      else {
+        return "";
+      }
     });
-  });
 }
 
 git.discardAllChanges = (repoPath) => {
