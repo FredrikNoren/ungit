@@ -92,9 +92,10 @@ class RemotesViewModel {
   updateRemotes() {
     return this.server.getPromise('/remotes', { path: this.repoPath() })
       .then(remotes => {
+        const outerThis = this;
         remotes = remotes.map(remote => ({
           name: remote,
-          changeRemote() { this.currentRemote(remote) }
+          changeRemote() { outerThis.currentRemote(remote) }
         }));
         this.remotes(remotes);
         if (!this.currentRemote() && remotes.length > 0) {
