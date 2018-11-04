@@ -3,6 +3,35 @@ const expect = require('expect.js');
 const path = require('path');
 const gitParser = require('../src/git-parser');
 
+describe('git-parser status', () => {
+  describe('with submodules', () => {
+    it('should mark submodules with untracked files as dirty', () => {
+      const text = `## dirty-submodules
+ m amodule`;
+      const res = gitParser.parseGitStatus(text);
+      expect(res.files['amodule'].dirty).to.be(true);
+    });
+    it('should mark submodules with modified contents as dirty', () => {
+      const text = `## dirty-submodules
+ ? amodule`;
+      const res = gitParser.parseGitStatus(text);
+      expect(res.files['amodule'].dirty).to.be(true);
+    });
+    it('should not mark submodules with a diferent HEAD as dirty', () => {
+      const text = `## dirty-submodules
+ M amodule`;
+      const res = gitParser.parseGitStatus(text);
+      expect(res.files['amodule'].dirty).to.be(false);
+    });
+    it('should not mark normal changes as dirty', () => {
+      const text = `## dirty-submodules
+xA afile`;
+      const res = gitParser.parseGitStatus(text);
+      expect(res.files['amodule'].dirty).to.be(false);
+    });
+  });
+});
+
 describe('git-parser stash show', () => {
   it('should be possible to parse stashed show', () => {
     const text = ' New Text Document (2).txt | 5 +++++\n 1 file changed, 5 insertions(+)\n';
