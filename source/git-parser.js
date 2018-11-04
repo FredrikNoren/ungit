@@ -15,6 +15,7 @@ exports.parseGitStatus = (text, args) => {
     const finalFilename = status[0] == 'R' ? filename.slice(filename.indexOf('>') + 2) : filename;
     files[finalFilename] = {
       displayName: filename,
+      dirty: (status[0] == ' ' && (status[1] == '?' || status[1] == 'm')),
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
       isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),

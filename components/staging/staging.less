@@ -149,7 +149,7 @@
       }
       padding: 0.3em;
 
-      .new, .deleted, .conflict, .markresolved, .launchmergetool {
+      .new, .deleted, .conflict, .markresolved, .launchmergetool, .dirty {
         padding: 3px;
         padding-left: 5px;
         padding-right: 5px;
@@ -173,6 +173,21 @@
           }
           .temporary {
             display: none;
+          }
+        }
+      }
+      .dirty {
+        color: #DB12C0;
+        cursor: pointer;
+        .explanation {
+          display: none;
+        }
+        &:hover {
+          background: #A445ED;
+          color: #000;
+          border-radius: 3px;
+          .explanation {
+            display: inline;
           }
         }
       }

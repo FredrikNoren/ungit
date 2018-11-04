@@ -348,6 +348,7 @@ var FileViewModel = function(staging, name) {
   this.displayName = ko.observable(name);
   this.isNew = ko.observable(false);
   this.removed = ko.observable(false);
+  this.dirty = ko.observable(false);
   this.conflict = ko.observable(false);
   this.renamed = ko.observable(false);
   this.isShowingDiffs = ko.observable(false);
@@ -393,6 +394,7 @@ FileViewModel.prototype.setState = function(state) {
   this.displayName(state.displayName);
   this.isNew(state.isNew);
   this.removed(state.removed);
+  this.dirty(state.dirty);
   this.conflict(state.conflict);
   this.renamed(state.renamed);
   this.fileType(state.type);
