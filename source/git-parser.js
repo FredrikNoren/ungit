@@ -260,7 +260,9 @@ exports.parseGitSubmodule = (text, args) => {
     }
   });
 
-  return submodules;
+  let sorted_submodules = submodules.sort((a,b) => a.name.localeCompare(b.name));
+
+  return sorted_submodules;
 }
 
 const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) => {
