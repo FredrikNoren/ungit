@@ -14,10 +14,12 @@
         <input class="form-control" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onEnter}"></input>
         <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
         <div>
-          <span class="amend" data-bind="visible: canAmend">
-            <span class="checkmark" data-bind="css: { checked: amend }">&#10003;</span>
-            <a class="amend-link" href="#" data-bind="click: toggleAmend">Amend last commit</a>
-          </span>
+          <button class="amend-button btn btn-link" data-bind="visible: canAmend, click: toggleAmend">
+            <div class="checkmark" data-bind="css: { checked: amend }">
+              <span class="glyphicon" data-bind="css: { 'glyphicon-check': amend, 'glyphicon-unchecked': !amend() }"></span>
+            </div>
+            <span>Amend last commit</span>
+          </button>
           <span class="commit-message-title-counter" data-bind="text: commitMessageTitleCount"/>
         </div>
         <div class="btn-group commit-grp" data-bind="visible: isStageValid">
