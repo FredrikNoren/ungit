@@ -59,6 +59,7 @@ describe('[BRANCHES]', () => {
 
   it('add second branch', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
+      .wait(500)
       .ug.commit('commit-2')
       .wait('.commit')
       .ug.createBranch('branch-2')
