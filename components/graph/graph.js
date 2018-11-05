@@ -1,5 +1,6 @@
 var ko = require('knockout');
 var components = require('ungit-components');
+var programEvents = require('ungit-program-events');
 var GitNodeViewModel = require('./git-node');
 var GitRefViewModel = require('./git-ref');
 var _ = require('lodash');
@@ -130,6 +131,7 @@ GraphViewModel.prototype.loadNodesFromApi = function() {
         self.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
       self.graphWidth(1000 + (self.heighstBranchOrder * 90));
+      programEvents.dispatch({ event: 'init-tooltip' });
     }).catch((e) => this.server.unhandledRejection(e))
     .finally(function() {
       if (window.innerHeight - self.graphHeight() > 0 && nodeSize != self.nodes().length) {
@@ -286,7 +288,7 @@ GraphViewModel.prototype.updateBranches = function() {
 }
 GraphViewModel.prototype.setRemoteTags = function(remoteTags) {
   const version = Date.now();
-  
+
   const sha1Map = {}; // map holding true sha1 per tags
   remoteTags.forEach(tag => {
     if (tag.name.indexOf('^{}') !== -1) {

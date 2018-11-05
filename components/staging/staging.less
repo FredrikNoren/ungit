@@ -138,6 +138,11 @@
           border-bottom-right-radius: 0px;
         }
       }
+      .checkmark {
+        span {
+          top: 5px;
+        }
+      }
       .name {
         background: transparent;
         font-size: 1.3em;
@@ -229,6 +234,14 @@
   position: absolute;
 }
 
+.amend-button {
+  padding: 0;
+  &:active,
+  &:focus,
+  &:hover {
+    text-decoration: none;
+  }
+}
 
 .checkmark {
   color: #fff;
@@ -237,8 +250,5 @@
   cursor: pointer;
   &.checked {
     opacity: 0.8;
-  }
-  span {
-    top: 5px;
   }
 }
