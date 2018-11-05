@@ -1,7 +1,7 @@
 
 <div class="navbar navbar-default navbar-fixed-top">
 
-  <a class="backlink bootstrap-tooltip" href="#/" data-toggle="tooltip" data-placement="bottom" data-original-title="Navigate to Ungit home page" data-delay='{"show":"2000", "hide":"0"}'>
+  <a class="backlink bootstrap-tooltip" href="#/" data-toggle="tooltip" data-placement="bottom" title="Navigate to Ungit home page" data-delay='{"show":"2000", "hide":"0"}'>
     <span class="glyphicon glyphicon-arrow-left glyphicon-circled" data-bind="css: { 'glyph-shown': showBackButton }"></span>
     <img src="images/logoLarge.png" class="headerLogo">
   </a>
@@ -9,7 +9,7 @@
   <div class="form-container">
     <form class="path-input-form" data-bind="submit: submitPath">
       <input class="form-control input-lg" data-bind="value: path, autocomplete: path" placeholder="Enter path to repository">
-      <button type="button" class="add-to-repolist btn btn-default bootstrap-tooltip" data-bind="visible: showAddToRepoListButton, click: addCurrentPathToRepoList" data-toggle="tooltip" data-placement="bottom" data-original-title="Add current git directory to Ungit home page" data-delay='{"show":"2000", "hide":"0"}'>
+      <button type="button" class="add-to-repolist btn btn-default bootstrap-tooltip" data-bind="visible: showAddToRepoListButton, click: addCurrentPathToRepoList" data-toggle="tooltip" data-placement="bottom" title="Add current git directory to Ungit home page" data-delay='{"show":"2000", "hide":"0"}'>
         <span class="glyphicon glyphicon-plus"></span>
       </button>
     </form>

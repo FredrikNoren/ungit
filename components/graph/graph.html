@@ -43,7 +43,7 @@
 
         <!-- ko if: showNewRefAction -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showBranchingForm" data-bind="click: showBranchingForm, visible: !branchingFormVisible()">&#x271A;</button>
+          <button class="showBranchingForm bootstrap-tooltip" data-bind="click: showBranchingForm, visible: !branchingFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Create a branch or tag"><span class="glyphicon glyphicon-plus"></span></button>
           <!-- ko if: branchingFormVisible -->
           <div class="form-inline">
             <input class="name form-control" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
@@ -56,7 +56,7 @@
 
         <!-- ko if: refs().length > 0 -->
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showSearchForm octicon octicon-search" data-bind="click: showRefSearchForm, visible: !refSearchFormVisible()"></button>
+          <button class="showSearchForm octicon octicon-search bootstrap-tooltip" data-bind="click: showRefSearchForm, visible: !refSearchFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Search for a branch or tag"></button>
           <!-- ko if: refSearchFormVisible -->
           <div class="form-inline">
             <input class="name form-control" type="text" data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeydown'"/>
