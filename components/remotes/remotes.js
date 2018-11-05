@@ -94,7 +94,7 @@ class RemotesViewModel {
       .then(remotes => {
         remotes = remotes.map(remote => ({
           name: remote,
-          changeRemote() { this.currentRemote(remote) }
+          changeRemote: () => { this.currentRemote(remote) }
         }));
         this.remotes(remotes);
         if (!this.currentRemote() && remotes.length > 0) {
