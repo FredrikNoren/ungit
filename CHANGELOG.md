@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
 
+- 1.4.38: Fix: Highlight current branch in submodules
 - 1.4.37: Sort modules by names
 - 1.4.36: fix changing remotes in remotes dropdown [#1158](https://github.com/FredrikNoren/ungit/pull/1158)
 - 1.4.35:
