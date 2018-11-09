@@ -11,6 +11,12 @@ const fs = require('./utils/fs-async');
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
+const gitBin = (() => {
+  if (config.gitBinPath) {
+    return (config.gitBinPath.endsWith('/') ? config.gitBinPath : config.gitBinPath + '/') + 'git';
+  }
+  return 'git';
+})();
 
 // only allows ${config.maxConcurrentGitOperations} count of parallel git operations
 const rateLimiter = () => new Bluebird((resolve) => { gitSem.wait(() => { resolve(); }); });
@@ -33,7 +39,7 @@ const gitExecutorProm = (args, retryCount) => {
       let stdout = '';
       let stderr = '';
       const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout }
-      const gitProcess = child_process.spawn('git', args.commands, procOpts);
+      const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
 
       if (args.outPipe) {
         gitProcess.stdout.pipe(args.outPipe);

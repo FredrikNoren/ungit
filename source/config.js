@@ -156,7 +156,10 @@ const defaultConfig = {
   isAnimate: true,
 
   // disable progress bar (front end api)
-  isDisableProgressBar: false
+  isDisableProgressBar: false,
+
+  // git binary path, not including git binary path. (i.e. /bin or /usr/bin/)
+  gitBinPath: null
 };
 
 // Works for now but should be moved to bin/ungit
@@ -223,6 +226,7 @@ let argv = yargs
 .boolean('isAnimate')
 .describe('isDisableProgressBar', 'disable progress bar (front end api)')
 .boolean('isDisableProgressBar')
+.describe('gitBinPath', 'git binary path, not including git binary path. (i.e. /bin or /usr/bin/)')
 ;
 
 const argvConfig = argv.argv;

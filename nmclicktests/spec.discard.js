@@ -4,6 +4,7 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
     .wait('.files .file .btn-default')
     .ug.click('.files span.discard')
+    .wait(500)
     .then(() => {
       if (dialogButtonToClick === "yes") {
         return env.nm.ug.click('.modal-dialog .btn-primary');
