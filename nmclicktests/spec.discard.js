@@ -3,6 +3,7 @@ const muteGraceTimeDuration = 2000;
 const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
     .wait('.files .file .btn-default')
+    .wait(500)
     .ug.click('.files span.discard')
     .wait(500)
     .then(() => {
@@ -16,7 +17,8 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
         return env.nm.visible('.modal-dialog .btn-primary')
           .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
       }
-    }).then(() => {
+    }).wait(500)
+    .then(() => {
       if (dialogButtonToClick !== 'no') {
         return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
       } else {
