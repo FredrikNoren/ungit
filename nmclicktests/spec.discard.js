@@ -17,8 +17,7 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
         return env.nm.visible('.modal-dialog .btn-primary')
           .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
       }
-    }).wait(500)
-    .then(() => {
+    }).then(() => {
       if (dialogButtonToClick !== 'no') {
         return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
       } else {
