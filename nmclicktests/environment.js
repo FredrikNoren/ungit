@@ -156,7 +156,9 @@ Nightmare.action('ug', {
     this.wait(selector)
       .wait(300)
       .click(selector)
-      .wait(500)
+      .wait(300)
+      .mouseover('img.headerLogo')
+      .wait(300)
       .then(done.bind(null, null), done);
   },
   'openUngit': function(tempDirPath, done) {

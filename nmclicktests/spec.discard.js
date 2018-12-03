@@ -1,10 +1,11 @@
 'use strict';
-const muteGraceTimeDuration = 2000;
+const muteGraceTimeDuration = 3000;
 const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
   return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
     .wait('.files .file .btn-default')
+    .wait(250)
     .ug.click('.files span.discard')
-    .wait(500)
+    .wait(250)
     .then(() => {
       if (dialogButtonToClick === "yes") {
         return env.nm.ug.click('.modal-dialog .btn-primary');
@@ -67,7 +68,7 @@ describe('[DISCARD - withWarn]', () => {
   it('Should be possible to discard a created file and disable warn for awhile', () => {
     return createAndDiscard(environment, testRepoPaths[0], 'mute')
       .then(() => createAndDiscard(environment, testRepoPaths[0]))
-      .delay(muteGraceTimeDuration + 500)
+      .delay(2000)
       .then(() => createAndDiscard(environment, testRepoPaths[0], 'yes'));
   });
 });
