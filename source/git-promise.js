@@ -35,11 +35,21 @@ const gitExecutorProm = (args, retryCount) => {
   return rateLimiter().then(() => {
     return new Bluebird((resolve, reject) => {
       if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
-      let rejected = false;
+      let rejectedError = null;
+      let isCompleted = false;
       let stdout = '';
       let stderr = '';
-      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout }
+      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, detached: false }
       const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
+      if (args.timeout) {
+        setTimeout(() => {
+          if (isCompleted) return;
+          isCompleted = true;
+          winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
+          gitSem.signal();
+          gitProcess.kill('SIGINT')
+        }, args.timeout);
+      }
 
       if (args.outPipe) {
         gitProcess.stdout.pipe(args.outPipe);
@@ -50,20 +60,19 @@ const gitExecutorProm = (args, retryCount) => {
         gitProcess.stdin.end(args.inPipe);
       }
       gitProcess.stderr.on('data', (data) => stderr += data.toString());
-      gitProcess.on('error', (error) => {
-        if (args.outPipe) args.outPipe.end();
-        rejected = true;
-        gitSem.signal();
-        reject(error);
-      });
+      gitProcess.on('error', (error) => { rejectedError = error; });
 
       gitProcess.on('close', (code) => {
+        if (isCompleted) return;
+        isCompleted = true;
+
         if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
-        if (rejected) return;
         if (args.outPipe) args.outPipe.end();
         gitSem.signal();
 
-        if (code === 0 || (code === 1 && args.allowError)) {
+        if (rejectedError) {
+          reject(rejectedError);
+        } else if (code === 0 || (code === 1 && args.allowError)) {
           resolve(stdout);
         } else {
           reject(getGitError(args, stderr, stdout));
