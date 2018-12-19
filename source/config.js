@@ -126,8 +126,11 @@ const defaultConfig = {
   // Auto checkout the created branch on creation
   autoCheckoutOnBranchCreate: false,
 
-  // Always load with active checkout branch
+  // Always load with active checkout branch (deprecated: use `maxActiveBranchSearchIteration`)
   alwaysLoadActiveBranch: false,
+
+  // Max search iterations for active branch.  ( value means not searching for active branch)
+  maxActiveBranchSearchIteration: -1,
 
   // number of nodes to load for each git.log call
   numberOfNodesPerLoad: 25,
@@ -214,7 +217,10 @@ let argv = yargs
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted')
 .describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict')
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
-.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
+.boolean('autoCheckoutOnBranchCreate')
+.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch (DEPRECATED, use `maxActiveBranchSearchIteration`)')
+.boolean('alwaysLoadActiveBranch')
+.describe('maxActiveBranchSearchIteration', 'Max search iterations for active branch.  (-1 means not searching for active branch)')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
@@ -300,6 +306,10 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
   module.exports.ungitDevVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
+}
+
+if (module.exports.alwaysLoadActiveBranch) {
+  module.exports.maxActiveBranchSearchIteration = 25;
 }
 
 module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');

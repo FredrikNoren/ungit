@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.40:
+  - fix issue with detached git processes on some OS and timeout not being enforced.
+  - simplify `maxSearchIteration` enforcemen for git.log()
+  - change `alwaysLoadActiveBranch` boolean config to `maxActiveBranchSearchIteration` numeric config
+  - bumped node engine requirement to [10.14 Dubnium](https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V10.md#10.14.2)
 - 1.4.39: Add git bin path config. [#1151](https://github.com/FredrikNoren/ungit/issues/1151)
 - 1.4.38: Fix: Highlight current branch in submodules
 - 1.4.37: Sort modules by names

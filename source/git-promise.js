@@ -428,17 +428,13 @@ git.revParse = (repoPath) => {
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
-git.log = (path, limit, skip, maxSearchIteration) => {
+git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
   return git(['log', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (config.alwaysLoadActiveBranch && !log.isHeadExist && maxSearchIteration) {
-        if (maxSearchIteration - 1) {
-          return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxSearchIteration - 1);
-        } else {
-          return git.log(path, config.numberOfNodesPerLoad, 0, maxSearchIteration - 1);
-        }
+      if (maxActiveBranchSearchIteration && !log.isHeadExist) {
+        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1);
       } else {
         return { "limit": limit, "skip": skip, "nodes": log};
       }

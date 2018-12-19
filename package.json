@@ -93,7 +93,7 @@
     "supertest": "~3.3.0"
   },
   "engines": {
-    "node": ">=0.10"
+    "node": ">=10.14"
   },
   "license": "MIT",
   "main": "public/main.js",
