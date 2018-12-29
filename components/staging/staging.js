@@ -121,23 +121,14 @@ var StagingViewModel = function(server, repoPath, graph) {
   this.mutedTime = null;
   this.commitMessageTags = []
 
-  var toggler = function(variable) {
-    return function() {
-      console.log('toogling');
-      console.log(variable());
-      variable(!variable());
-      console.log(variable());
-    }
-  }
-  
-  for(let i = 0; i < ungit.config.commitMessageTags.length; i++) {
-    let o = ko.observable(false)
+  ungit.config.commitMessageTags.forEach((elt) => {
+    let selected = ko.observable(false)
     this.commitMessageTags.push({
-      text: ungit.config.commitMessageTags[i],
-      selected: o,
-      toggle: toggler(o)
+      text: elt,
+      selected,
+      toggle() { selected(!selected()) }
     })
-  }
+  })
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
