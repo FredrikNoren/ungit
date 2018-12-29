@@ -264,7 +264,7 @@ StagingViewModel.prototype.resetMessages = function() {
   this.emptyCommit(false);
   this.commitMessageTags.forEach(function(elt) {
     elt.selected(false);
-  })
+  });
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;
@@ -278,7 +278,7 @@ StagingViewModel.prototype.commit = function() {
 
   this.commitMessageTags.forEach(function(elt) {
     if (elt.selected()) {
-      commitMessage += elt.text;
+      commitMessage = elt.text + " " + commitMessage;
     }
   })
 
