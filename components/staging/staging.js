@@ -119,6 +119,25 @@ var StagingViewModel = function(server, repoPath, graph) {
   this.loadAnyway = false;
   this.isDiagOpen = false;
   this.mutedTime = null;
+  this.commitMessageTags = []
+
+  var toggler = function(variable) {
+    return function() {
+      console.log('toogling');
+      console.log(variable());
+      variable(!variable());
+      console.log(variable());
+    }
+  }
+  
+  for(let i = 0; i < ungit.config.commitMessageTags.length; i++) {
+    let o = ko.observable(false)
+    this.commitMessageTags.push({
+      text: ungit.config.commitMessageTags[i],
+      selected: o,
+      toggle: toggler(o)
+    })
+  }
 }
 StagingViewModel.prototype.updateNode = function(parentElement) {
   ko.renderTemplate('staging', this, {}, parentElement);
@@ -243,6 +262,9 @@ StagingViewModel.prototype.resetMessages = function() {
   }
   this.amend(false);
   this.emptyCommit(false);
+  this.commitMessageTags.forEach(function(elt) {
+    elt.selected(false);
+  })
 }
 StagingViewModel.prototype.commit = function() {
   var self = this;
@@ -253,6 +275,12 @@ StagingViewModel.prototype.commit = function() {
   });
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
+
+  this.commitMessageTags.forEach(function(elt) {
+    if (elt.selected()) {
+      commitMessage += elt.text;
+    }
+  })
 
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
     .then(() => { self.resetMessages(); })
