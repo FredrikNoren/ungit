@@ -162,7 +162,7 @@ const defaultConfig = {
   gitBinPath: null,
 
   // tags prepended to the commit message when selected (e.g. [SKIP CI])
-  commitMessageTags: ['[SKIP CI]'],
+  commitMessageTags: [],
 };
 
 // Works for now but should be moved to bin/ungit
