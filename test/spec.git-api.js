@@ -7,6 +7,7 @@ const restGit = require('../src/git-api');
 const common = require('./common-es6.js');
 const mkdirp = require('mkdirp');
 const cmdGit = require('./git-utils.js');
+const os = require('os');
 
 const app = express();
 app.use(require('body-parser').json());
@@ -387,32 +388,35 @@ describe('git-api', () => {
   });
 })
 
-describe('git-api merge commit diff', () => {
 
-  before(() => {
-    cmdGit.initTestRepo(`
-      echo "test" > test.txt
-      git add -A
-      git commit -m first
-      git checkout -b branch
-      echo "new file" > new_file.txt
-      git add -A
-      git commit -m second
-      git checkout master
-      echo "third" > third.txt
-      git add -A
-      git commit -m third
-      git merge branch
-      `)
-  })
+if (os.type() != "Windows_NT") {
+  describe('git-api merge commit diff', function() {
 
-  after(cmdGit.removeTestRepo)
-  
-  it('test git api response', () => {
-    return common.get(req, '/gitlog', { path: cmdGit.testRepoWorkingDirectory(), limit: 1 }).then((res) => {
-      expect(res.nodes[0].message).to.be("Merge branch 'branch'");
-      expect(res.nodes[0].fileLineDiffs[0]).to.eql([1, 0, "Total"]);
-      expect(res.nodes[0].fileLineDiffs[1]).to.eql([1, 0, "new_file.txt", "text"]);
-    });
+    before(() => {
+      cmdGit.initTestRepo(`
+        echo "test" > test.txt
+        git add -A
+        git commit -m first
+        git checkout -b branch
+        echo "new file" > new_file.txt
+        git add -A
+        git commit -m second
+        git checkout master
+        echo "third" > third.txt
+        git add -A
+        git commit -m third
+        git merge branch
+        `)
+    })
+
+    after(cmdGit.removeTestRepo)
+
+    it('test git api response', () => {
+      return common.get(req, '/gitlog', { path: cmdGit.testRepoWorkingDirectory(), limit: 1 }).then((res) => {
+        expect(res.nodes[0].message).to.be("Merge branch 'branch'");
+        expect(res.nodes[0].fileLineDiffs[0]).to.eql([1, 0, "Total"]);
+        expect(res.nodes[0].fileLineDiffs[1]).to.eql([1, 0, "new_file.txt", "text"]);
+      });
+    })
   })
-})
+}
