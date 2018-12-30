@@ -387,7 +387,8 @@ describe('git-api', () => {
   });
 })
 
-describe('git-api merge commit diff', () => {
+describe('git-api merge commit diff', function() {
+  this.timeout(8000);
 
   before(() => {
     cmdGit.initTestRepo(`
