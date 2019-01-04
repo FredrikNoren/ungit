@@ -135,4 +135,16 @@ describe('parseGitTags', () => {
     ]);
   });
 })
+
+describe('parseGitRemotes', () => {
+  it('parses the remotes', () => {
+    
+    var gitRemotes = 'origin\n'
+    gitRemotes += 'upstream'
+    
+    expect(gitParser.parseGitRemotes(gitRemotes)).to.eql([
+      'origin',
+      'upstream'
+    ]);
+  });
 });
