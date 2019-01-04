@@ -165,3 +165,33 @@ describe('parseGitLsRemote', () => {
     ]);
   });
 });
+
+describe('parseGitStatusNumstat', () => {
+  it('parses the git status numstat', () => {
+    var gitStatusNumstat = '1459\t202\tpackage-lock.json\n'
+    gitStatusNumstat += '2\t1\tpackage.json\n'
+    gitStatusNumstat += '13\t0\ttest/spec.git-parser.js'
+    
+
+    expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
+      "package-lock.json": { additions: "1459", deletions: "202" },
+      "package.json": { additions: "2", deletions: "1" },
+      "test/spec.git-parser.js": { additions: "13", deletions: "0" }
+    });
+  })
+
+  it('skips empty lines', () => {
+    var gitStatusNumstat = '1459\t202\tpackage-lock.json\n'
+    gitStatusNumstat += '\n'
+    gitStatusNumstat += '\n'
+    gitStatusNumstat += '2\t1\tpackage.json\n'
+    gitStatusNumstat += '13\t0\ttest/spec.git-parser.js'
+    
+
+    expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
+      "package-lock.json": { additions: "1459", deletions: "202" },
+      "package.json": { additions: "2", deletions: "1" },
+      "test/spec.git-parser.js": { additions: "13", deletions: "0" }
+    });
+  })
+});
