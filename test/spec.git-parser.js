@@ -8,7 +8,7 @@ describe('git-parser stash show', () => {
     const res = gitParser.parseGitStashShow(text);
     expect(res).to.be.an('array');
     expect(res.length).to.be(1);
-    expect(res[0].filename).to.be('New Text Document (2).txt');
+    expect(res[0]).to.eql({ filename: 'New Text Document (2).txt' });
   });
 });
 
@@ -111,17 +111,11 @@ describe('git-parser parseDiffResult', () => {
 describe('git-parser parseGitLog', () => {
   it('should work with branch name with ()', () => {
     const refs = gitParser.parseGitLog('commit AAA BBB (HEAD, (test), fw(4rw), 5), ((, ()')[0].refs;
-
-    if(refs.length != 6) {
-      throw new Error('Failed to parse git log with branch name with ().');
-    }
+    expect(refs.length).to.be(6)
   });
   it('should work with no branch name', () => {
     const refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
-
-    if(refs.length != 0) {
-      throw new Error('Failed to parse git log without branches.');
-    }
+    expect(refs.length).to.be(0)
   });
   it('should work with empty lines', () => {
     expect(gitParser.parseGitLog('')).to.eql([]);
@@ -379,15 +373,18 @@ describe('git-parser submodule', () => {
   it('should work with empty string', () => {
     const gitmodules = "";
     const submodules = gitParser.parseGitSubmodule(gitmodules);
-    expect(submodules).to.be.an('object').and.to.be.empty();
+    expect(submodules).to.eql({})
   });
   it('should work with name, path and url', () => {
     const gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com';
     const submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(1);
-    expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
-    expect(submodules[0].url).to.be('http://example1.com');
+    expect(submodules[0]).to.eql({
+      name: "test1",
+      path: "/path/to/sub1",
+      rawUrl: "http://example1.com",
+      url: "http://example1.com"
+    });
   });
   it('should work with multiple name, path and url', () => {
     const gitmodules = [
@@ -396,12 +393,18 @@ describe('git-parser submodule', () => {
     ].join('\n');
     const submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(2);
-    expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
-    expect(submodules[0].url).to.be('http://example1.com');
-    expect(submodules[1].name).to.be('test2');
-    expect(submodules[1].path).to.be(path.join(path.sep, 'path', 'to', 'sub2'));
-    expect(submodules[1].url).to.be('http://example2.com');
+    expect(submodules[0]).to.eql({
+      name: "test1",
+      path: "/path/to/sub1",
+      rawUrl: "http://example1.com",
+      url: "http://example1.com"
+    })
+    expect(submodules[1]).to.eql({
+      name: "test2",
+      path: "/path/to/sub2",
+      rawUrl: "http://example2.com",
+      url: "http://example2.com"
+    })
   });
   it('should work with multiple name, path, url, update, branch, fetchRecurseSubmodules and ignore', () => {
     const gitmodules = [
@@ -410,17 +413,22 @@ describe('git-parser submodule', () => {
     ].join('\n');
     const submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(2);
-    expect(submodules[0].name).to.be('test1');
-    expect(submodules[0].path).to.be(path.join(path.sep, 'path', 'to', 'sub1'));
-    expect(submodules[0].url).to.be('http://example1.com');
-    expect(submodules[0].update).to.be('checkout');
-    expect(submodules[0].branch).to.be('master');
-    expect(submodules[0].fetchRecurseSubmodules).to.be('true');
-    expect(submodules[0].ignore).to.be('all');
-    expect(submodules[1].name).to.be('test2');
-    expect(submodules[1].path).to.be(path.join('=', 'path', 'to', 'sub2'));
-    expect(submodules[1].url).to.be('http://example2.com');
-    expect(submodules[1].rawUrl).to.be('git://example2.com');
+    expect(submodules[0]).to.eql({
+      branch: "master",
+      fetchRecurseSubmodules: "true",
+      ignore: "all",
+      name: "test1",
+      path: "/path/to/sub1",
+      rawUrl: "http://example1.com",
+      update: "checkout",
+      url: "http://example1.com"
+    })
+    expect(submodules[1]).to.eql({
+      name: "test2",
+      path: "=/path/to/sub2",
+      rawUrl: "git://example2.com",
+      url: "http://example2.com"
+    })
   });
   it('should work with git submodules', () => {
     var gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = git://example1.com\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all\n'
@@ -484,7 +492,6 @@ describe('parseGitConfig', () => {
 
 describe('parseGitBranches', () => {
   it('parses the branches', () => {
-    
     var gitBranches = '* dev\n'
     gitBranches += '  master\n'
     gitBranches += '  testbuild\n'
@@ -499,7 +506,6 @@ describe('parseGitBranches', () => {
 
 describe('parseGitTags', () => {
   it('parses the tags', () => {
-    
     var gitTags = '0.1.0\n'
     gitTags += '0.1.1\n'
     gitTags += '0.1.2\n'
@@ -514,7 +520,6 @@ describe('parseGitTags', () => {
 
 describe('parseGitRemotes', () => {
   it('parses the remotes', () => {
-    
     var gitRemotes = 'origin\n'
     gitRemotes += 'upstream'
     
@@ -527,7 +532,6 @@ describe('parseGitRemotes', () => {
 
 describe('parseGitLsRemote', () => {
   it('parses the ls remote', () => {
-    
     var gitLsRemote = '86bec6415fa7ec0d7550a62389de86adb493d546	refs/tags/0.1.0\n'
     gitLsRemote += '668ab7beae996c5a7b36da0be64b98e45ba2aa0b	refs/tags/0.1.0^{}\n'
     gitLsRemote += 'd3ec9678acf285637ef11c7cba897d697820de07	refs/tags/0.1.1\n'
@@ -548,14 +552,12 @@ describe('parseGitStatusNumstat', () => {
     gitStatusNumstat += '2\t1\tpackage.json\n'
     gitStatusNumstat += '13\t0\ttest/spec.git-parser.js'
     
-
     expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
       "package-lock.json": { additions: "1459", deletions: "202" },
       "package.json": { additions: "2", deletions: "1" },
       "test/spec.git-parser.js": { additions: "13", deletions: "0" }
     });
   })
-
   it('skips empty lines', () => {
     var gitStatusNumstat = '1459\t202\tpackage-lock.json\n'
     gitStatusNumstat += '\n'
@@ -563,7 +565,6 @@ describe('parseGitStatusNumstat', () => {
     gitStatusNumstat += '2\t1\tpackage.json\n'
     gitStatusNumstat += '13\t0\ttest/spec.git-parser.js'
     
-
     expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
       "package-lock.json": { additions: "1459", deletions: "202" },
       "package.json": { additions: "2", deletions: "1" },
@@ -595,130 +596,46 @@ describe('parseGitStatus', () => {
         branch: "git-parser-specs",
         files: {
           "../source/sys.js": {
-            conflict: false,
-            displayName: "../source/sysinfo.js -> ../source/sys.js",
-            isNew: false,
-            removed: false,
-            renamed: true,
-           staged: false,
-            type: "text",
+            conflict: false, displayName: "../source/sysinfo.js -> ../source/sys.js", isNew: false, removed: false, renamed: true, staged: false, type: "text"
           },
           "file1.js": {
-            conflict: false,
-            displayName: "file1.js",
-            isNew: true,
-            removed: false,
-            renamed: false,
-            staged: true,
-            type: "text",
+            conflict: false, displayName: "file1.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file2.js": {
-            conflict: false,
-            displayName: "file2.js",
-            isNew: false,
-            removed: false,
-            renamed: false,
-            staged: true,
-            type: "text",
+            conflict: false, displayName: "file2.js", isNew: false, removed: false, renamed: false, staged: true, type: "text"
           },
           "file3.js": {
-            conflict: false,
-            displayName: "file3.js",
-            isNew: false,
-            removed: true,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file3.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file4.js": {
-            conflict: false,
-            displayName: "file4.js",
-            isNew: false,
-            removed: true,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file4.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file5.js": {
-            conflict: true,
-            displayName: "file5.js",
-            isNew: false,
-            removed: false,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: true, displayName: "file5.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file6.js": {
-            conflict: true,
-            displayName: "file6.js",
-            isNew: false,
-            removed: false,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: true, displayName: "file6.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file7.js": {
-            conflict: true,
-            displayName: "file7.js",
-            isNew: true,
-            removed: false,
-            renamed: false,
-            staged: true,
-            type: "text",
+            conflict: true, displayName: "file7.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file8.js": {
-            conflict: false,
-            displayName: "file8.js",
-            isNew: true,
-            removed: false,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file8.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
           },
           "file9.js": {
-            conflict: false,
-            displayName: "file9.js",
-            isNew: true,
-            removed: false,
-            renamed: false,
-            staged: true,
-            type: "text",
+            conflict: false, displayName: "file9.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file10.js": {
-            conflict: false,
-            displayName: "file10.js",
-            isNew: false,
-            removed: true,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file10.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file11.js": {
-            conflict: false,
-            displayName: "file11.js",
-            isNew: false,
-            removed: true,
-            renamed: false,
-            staged: true,
-            type: "text",
+            conflict: false, displayName: "file11.js", isNew: false, removed: true, renamed: false, staged: true, type: "text"
           },
           "file12.js": {
-            conflict: false,
-            displayName: "file12.js",
-            isNew: false,
-            removed: false,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file12.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file13.js": {
-            conflict: false,
-            displayName: "file13.js",
-            isNew: true,
-            removed: false,
-            renamed: false,
-            staged: false,
-            type: "text",
+            conflict: false, displayName: "file13.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
           }
         },
       inited: true,
