@@ -148,3 +148,20 @@ describe('parseGitRemotes', () => {
     ]);
   });
 });
+
+describe('parseGitLsRemote', () => {
+  it('parses the ls remote', () => {
+    
+    var gitLsRemote = '86bec6415fa7ec0d7550a62389de86adb493d546	refs/tags/0.1.0\n'
+    gitLsRemote += '668ab7beae996c5a7b36da0be64b98e45ba2aa0b	refs/tags/0.1.0^{}\n'
+    gitLsRemote += 'd3ec9678acf285637ef11c7cba897d697820de07	refs/tags/0.1.1\n'
+    gitLsRemote += 'ad00b6c8b7b0cbdd0bd92d44dece559b874a4ae6	refs/tags/0.1.1^{}\n'
+    
+    expect(gitParser.parseGitLsRemote(gitLsRemote)).to.eql([
+      { sha1: "86bec6415fa7ec0d7550a62389de86adb493d546", name: "refs/tags/0.1.0" },
+      { sha1: "668ab7beae996c5a7b36da0be64b98e45ba2aa0b", name: "refs/tags/0.1.0^{}"},
+      { sha1: "d3ec9678acf285637ef11c7cba897d697820de07", name: "refs/tags/0.1.1"},
+      { sha1: "ad00b6c8b7b0cbdd0bd92d44dece559b874a4ae6", name: "refs/tags/0.1.1^{}"}
+    ]);
+  });
+});
