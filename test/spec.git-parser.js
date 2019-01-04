@@ -105,3 +105,18 @@ describe('parseGitConfig', () => {
     });
   })
 });
+
+describe('parseGitBranches', () => {
+  it('parses the branches', () => {
+    
+    var gitBranches = '* dev\n'
+    gitBranches += '  master\n'
+    gitBranches += '  testbuild\n'
+
+    expect(gitParser.parseGitBranches(gitBranches)).to.eql([
+      { "name":"dev", "current": true},
+      {"name":"master"},
+      {"name":"testbuild"}
+    ]);
+  });
+});
