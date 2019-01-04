@@ -1,4 +1,3 @@
-
 const expect = require('expect.js');
 const path = require('path');
 const gitParser = require('../src/git-parser');
@@ -79,4 +78,30 @@ describe('git-parser submodule', () => {
     expect(submodules[1].url).to.be('http://example2.com');
     expect(submodules[1].rawUrl).to.be('git://example2.com');
   });
+});
+
+describe('parseGitConfig', () => {
+  it('parses the git config', () => {
+    var gitConfig = 'user.email=test@example.com\n'
+    gitConfig += 'user.name=Ungit Test\n'
+    gitConfig += 'core.repositoryformatversion=0\n'
+    gitConfig += 'core.filemode=true\n'
+    gitConfig += 'core.bare=false\n'
+    gitConfig += 'core.logallrefupdates=true\n'
+    gitConfig += 'remote.origin.url=git@github.com:ungit/ungit.git\n'
+    gitConfig += 'branch.master.remote=origin\n'
+    gitConfig += 'branch.master.merge=refs/heads/master'
+
+    expect(gitParser.parseGitConfig(gitConfig)).to.eql({
+      'user.email': 'test@example.com',
+      'user.name': 'Ungit Test',
+      'core.repositoryformatversion': '0',
+      'core.filemode': 'true',
+      'core.bare': 'false',
+      'core.logallrefupdates': 'true',
+      'remote.origin.url': 'git@github.com:ungit/ungit.git',
+      'branch.master.remote': 'origin',
+      'branch.master.merge': 'refs/heads/master'
+    });
+  })
 });
