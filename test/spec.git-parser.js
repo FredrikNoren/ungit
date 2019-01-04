@@ -12,272 +12,366 @@ describe('git-parser stash show', () => {
   });
 });
 
-describe('git-parse diff on big change', () => {
-  describe('git-parser parseGitLog', () => {
-    it('should work with branch name with ()', () => {
-      const refs = gitParser.parseGitLog('commit AAA BBB (HEAD, (test), fw(4rw), 5), ((, ()')[0].refs;
+describe('git-parser parseDiffResult', () => {
+  it('all diff selected', () => {
+    var gitDiff = 'diff --git a/package.json b/package.json\n'
+    gitDiff += 'index f71e0064..08964575 100644\n'
+    gitDiff += '--- a/package.json\n'
+    gitDiff += '+++ b/package.json\n'
+    gitDiff += '@@ -87,9 +87,10 @@\n'
+    gitDiff += '\t"grunt-mocha-test": "~0.13.3",\n'
+    gitDiff += '\t"grunt-plato": "~1.4.0",\n'
+    gitDiff += '\t"grunt-release": "~0.14.0",\n'
+    gitDiff += '-\t"istanbul": "~0.4.5",\n'
+    gitDiff += '+\t"istanbul": "^0.4.5",\n'
+    gitDiff += '\t"mocha": "~5.2.0",\n'
+    gitDiff += '\t"nightmare": "~3.0.1",\n'
+    gitDiff += '+\t"nyc": "^13.1.0",\n'
+    gitDiff += '\t"supertest": "~3.3.0"\n'
+    
+    expect(gitParser.parsePatchDiffResult([true, true, true], gitDiff)).to.eql('diff --git a/package.json b/package.json\nindex f71e0064..08964575 100644\n--- a/package.json\n+++ b/package.json\n@@ -87,9 +87,10 @@\n\t"grunt-mocha-test": "~0.13.3",\n\t"grunt-plato": "~1.4.0",\n\t"grunt-release": "~0.14.0",\n-\t"istanbul": "~0.4.5",\n+\t"istanbul": "^0.4.5",\n\t"mocha": "~5.2.0",\n\t"nightmare": "~3.0.1",\n+\t"nyc": "^13.1.0",\n\t"supertest": "~3.3.0"')
+  });
+  it('no diff selected', () => {
+    var gitDiff = 'diff --git a/package.json b/package.json\n'
+    gitDiff += 'index f71e0064..08964575 100644\n'
+    gitDiff += '--- a/package.json\n'
+    gitDiff += '+++ b/package.json\n'
+    gitDiff += '@@ -87,9 +87,10 @@\n'
+    gitDiff += '\t"grunt-mocha-test": "~0.13.3",\n'
+    gitDiff += '\t"grunt-plato": "~1.4.0",\n'
+    gitDiff += '\t"grunt-release": "~0.14.0",\n'
+    gitDiff += '-\t"istanbul": "~0.4.5",\n'
+    gitDiff += '+\t"istanbul": "^0.4.5",\n'
+    gitDiff += '\t"mocha": "~5.2.0",\n'
+    gitDiff += '\t"nightmare": "~3.0.1",\n'
+    gitDiff += '+\t"nyc": "^13.1.0",\n'
+    gitDiff += '\t"supertest": "~3.3.0"\n'
+    
+    expect(gitParser.parsePatchDiffResult([false, false, false], gitDiff)).to.eql(null)
+  });
+  it('one +- diff selected', () => {
+    var gitDiff = 'diff --git a/package.json b/package.json\n'
+    gitDiff += 'index f71e0064..08964575 100644\n'
+    gitDiff += '--- a/package.json\n'
+    gitDiff += '+++ b/package.json\n'
+    gitDiff += '@@ -87,9 +87,10 @@\n'
+    gitDiff += '\t"grunt-mocha-test": "~0.13.3",\n'
+    gitDiff += '\t"grunt-plato": "~1.4.0",\n'
+    gitDiff += '\t"grunt-release": "~0.14.0",\n'
+    gitDiff += '-\t"istanbul": "~0.4.5",\n'
+    gitDiff += '+\t"istanbul": "^0.4.5",\n'
+    gitDiff += '\t"mocha": "~5.2.0",\n'
+    gitDiff += '\t"nightmare": "~3.0.1",\n'
+    gitDiff += '+\t"nyc": "^13.1.0",\n'
+    gitDiff += '\t"supertest": "~3.3.0"\n'
+    
+    expect(gitParser.parsePatchDiffResult([true, true, false], gitDiff)).to.eql('diff --git a/package.json b/package.json\nindex f71e0064..08964575 100644\n--- a/package.json\n+++ b/package.json\n@@ -87,9 +87,9 @@\n\t"grunt-mocha-test": "~0.13.3",\n\t"grunt-plato": "~1.4.0",\n\t"grunt-release": "~0.14.0",\n-\t"istanbul": "~0.4.5",\n+\t"istanbul": "^0.4.5",\n\t"mocha": "~5.2.0",\n\t"nightmare": "~3.0.1",\n\t"supertest": "~3.3.0"')
+  });
+  it('only one + diff selected', () => {
+    var gitDiff = 'diff --git a/package.json b/package.json\n'
+    gitDiff += 'index f71e0064..08964575 100644\n'
+    gitDiff += '--- a/package.json\n'
+    gitDiff += '+++ b/package.json\n'
+    gitDiff += '@@ -87,9 +87,10 @@\n'
+    gitDiff += '\t"grunt-mocha-test": "~0.13.3",\n'
+    gitDiff += '\t"grunt-plato": "~1.4.0",\n'
+    gitDiff += '\t"grunt-release": "~0.14.0",\n'
+    gitDiff += '-\t"istanbul": "~0.4.5",\n'
+    gitDiff += '+\t"istanbul": "^0.4.5",\n'
+    gitDiff += '\t"mocha": "~5.2.0",\n'
+    gitDiff += '\t"nightmare": "~3.0.1",\n'
+    gitDiff += '+\t"nyc": "^13.1.0",\n'
+    gitDiff += '\t"supertest": "~3.3.0"\n'
 
-      if(refs.length != 6) {
-        throw new Error('Failed to parse git log with branch name with ().');
-      }
-    });
-    it('should work with no branch name', () => {
-      const refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
+    expect(gitParser.parsePatchDiffResult([false, false, true], gitDiff)).to.eql('diff --git a/package.json b/package.json\nindex f71e0064..08964575 100644\n--- a/package.json\n+++ b/package.json\n@@ -87,9 +87,10 @@\n\t"grunt-mocha-test": "~0.13.3",\n\t"grunt-plato": "~1.4.0",\n\t"grunt-release": "~0.14.0",\n \t"istanbul": "~0.4.5",\n\t"mocha": "~5.2.0",\n\t"nightmare": "~3.0.1",\n+\t"nyc": "^13.1.0",\n\t"supertest": "~3.3.0"')
+  });
+  it('works with multiple diffs', () => {
+    var gitDiff = 'diff --git a/README.md b/README.md\n'
+    gitDiff += 'index 96700c3a..dc141a51 100644\n'
+    gitDiff += '--- a/README.md\n'
+    gitDiff += '+++ b/README.md\n'
+    gitDiff += '@@ -1,4 +1,3 @@\n'
+    gitDiff += '-ungit\n'
+    gitDiff += '======\n'
+    gitDiff += '[![NPM version](https://badge.fury.io/js/ungit.svg)](http://badge.fury.io/js/ungit)\n'
+    gitDiff += '[![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)\n'
+    gitDiff += '@@ -133,7 +132,6 @@ Changelog\n'
+    gitDiff += 'See [CHANGELOG.md](CHANGELOG.md).\n'
+    gitDiff += '\n'
+    gitDiff += '-License (MIT)\n'
+    gitDiff += 'See [LICENSE.md](LICENSE.md). To read about the Faircode experiment go to [#974](https://github.com/FredrikNoren/ungit/issues/974). Ungit is now once again MIT.\n'
 
-      if(refs.length != 0) {
-        throw new Error('Failed to parse git log without branches.');
-      }
-    });
-    it('should work with empty lines', () => {
-      expect(gitParser.parseGitLog('')).to.eql([]);
-    });
-    it('parses authors without emails', () => {
-      var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'Author:     Test ungit\n'
-      gitLog += 'Commit:     Test ungit\n'
+    expect(gitParser.parsePatchDiffResult([true, false], gitDiff)).to.eql('diff --git a/README.md b/README.md\nindex 96700c3a..dc141a51 100644\n--- a/README.md\n+++ b/README.md\n@@ -1,4 +1,3 @@\n-ungit\n======\n[![NPM version](https://badge.fury.io/js/ungit.svg)](http://badge.fury.io/js/ungit)\n[![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)\n@@ -133,7 +132,7 @@ Changelog\nSee [CHANGELOG.md](CHANGELOG.md).\n\n License (MIT)\nSee [LICENSE.md](LICENSE.md). To read about the Faircode experiment go to [#974](https://github.com/FredrikNoren/ungit/issues/974). Ungit is now once again MIT.')
+  });
+  it('works with empty diff', () => {
+    expect(gitParser.parsePatchDiffResult([], null)).to.eql('')
+  });
+});
 
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
-        authorName: "Test ungit",
-        committerName: "Test ungit",
-        fileLineDiffs: [],
-        isHead: true,
-        message: "",
-        parents: [
-          "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
-        ],
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
-      })
-    });
-    it('parses multiple commits in a row', () => {
-      var gitLog = 'commit 5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4 37d1154434b70854ed243967e0d7e37aa3564551 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'Author:     Test ungit <test@example.com>\n'
-      gitLog += 'AuthorDate: Fri Jan 4 14:54:06 2019 +0100\n'
-      gitLog += 'Commit:     Test ungit <test@example.com>\n'
-      gitLog += 'CommitDate: Fri Jan 4 14:54:06 2019 +0100\n'
-      gitLog += '\n'
-      gitLog += '\tparseGitLog + gix reflox parsing\n'
-      gitLog += '\n'
-      gitLog += '1\t1\tsource/git-parser.js\n'
-      gitLog += '175\t0\ttest/spec.git-parser.js\n'
-      gitLog += '\n'
-      gitLog += 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861\n'
-      gitLog += 'Author:     Test ungit <test@example.com>\n'
-      gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += 'Commit:     Test ungit <test@example.com>\n'
-      gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += '\n'
-      gitLog += '\tsubmodules parser\n'
-      gitLog += '\n'
-      gitLog += '32\t0\ttest/spec.git-parser.js\n'
+describe('git-parser parseGitLog', () => {
+  it('should work with branch name with ()', () => {
+    const refs = gitParser.parseGitLog('commit AAA BBB (HEAD, (test), fw(4rw), 5), ((, ()')[0].refs;
 
-      var res = gitParser.parseGitLog(gitLog)
-      expect(res[0]).to.eql({
-        authorDate: "Fri Jan 4 14:54:06 2019 +0100",
-        authorEmail: "test@example.com",
-        authorName: "Test ungit",
-        commitDate: "Fri Jan 4 14:54:06 2019 +0100",
-        committerEmail: "test@example.com",
-        committerName: "Test ungit",
-        fileLineDiffs: [
-          [176, 1, "Total"],
-          [1, 1, "source/git-parser.js", "text"],
-          [175, 0, "test/spec.git-parser.js", "text"],
-        ],
-        isHead: true,
-        message: "parseGitLog + gix reflox parsing",
-        parents: [
-          "37d1154434b70854ed243967e0d7e37aa3564551"
-        ],
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4"
-      })
-      expect(res[1]).to.eql({
-        authorDate: "Fri Jan 4 14:03:56 2019 +0100",
-        authorEmail: "test@example.com",
-        authorName: "Test ungit",
-        commitDate: "Fri Jan 4 14:03:56 2019 +0100",
-        committerEmail: "test@example.com",
-        committerName: "Test ungit",
-        fileLineDiffs: [
-          [32, 0, "Total"],
-          [32, 0, "test/spec.git-parser.js", "text"],
-        ],
-        isHead: false,
-        message: "submodules parser",
-        parents: [
-          "d58c8e117fc257520d90b099fd2c6acd7c1e8861",
-        ],
-        refs: [],
-        sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
-      })
+    if(refs.length != 6) {
+      throw new Error('Failed to parse git log with branch name with ().');
+    }
+  });
+  it('should work with no branch name', () => {
+    const refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
+
+    if(refs.length != 0) {
+      throw new Error('Failed to parse git log without branches.');
+    }
+  });
+  it('should work with empty lines', () => {
+    expect(gitParser.parseGitLog('')).to.eql([]);
+  });
+  it('parses authors without emails', () => {
+    var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'Author:     Test ungit\n'
+    gitLog += 'Commit:     Test ungit\n'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
+      authorName: "Test ungit",
+      committerName: "Test ungit",
+      fileLineDiffs: [],
+      isHead: true,
+      message: "",
+      parents: [
+        "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
+      ],
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
+    })
+  });
+  it('parses multiple commits in a row', () => {
+    var gitLog = 'commit 5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4 37d1154434b70854ed243967e0d7e37aa3564551 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'Author:     Test ungit <test@example.com>\n'
+    gitLog += 'AuthorDate: Fri Jan 4 14:54:06 2019 +0100\n'
+    gitLog += 'Commit:     Test ungit <test@example.com>\n'
+    gitLog += 'CommitDate: Fri Jan 4 14:54:06 2019 +0100\n'
+    gitLog += '\n'
+    gitLog += '\tparseGitLog + gix reflox parsing\n'
+    gitLog += '\n'
+    gitLog += '1\t1\tsource/git-parser.js\n'
+    gitLog += '175\t0\ttest/spec.git-parser.js\n'
+    gitLog += '\n'
+    gitLog += 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861\n'
+    gitLog += 'Author:     Test ungit <test@example.com>\n'
+    gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += 'Commit:     Test ungit <test@example.com>\n'
+    gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += '\n'
+    gitLog += '\tsubmodules parser\n'
+    gitLog += '\n'
+    gitLog += '32\t0\ttest/spec.git-parser.js\n'
+
+    var res = gitParser.parseGitLog(gitLog)
+    expect(res[0]).to.eql({
+      authorDate: "Fri Jan 4 14:54:06 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:54:06 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      fileLineDiffs: [
+        [176, 1, "Total"],
+        [1, 1, "source/git-parser.js", "text"],
+        [175, 0, "test/spec.git-parser.js", "text"],
+      ],
+      isHead: true,
+      message: "parseGitLog + gix reflox parsing",
+      parents: [
+        "37d1154434b70854ed243967e0d7e37aa3564551"
+      ],
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4"
+    })
+    expect(res[1]).to.eql({
+      authorDate: "Fri Jan 4 14:03:56 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:03:56 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      fileLineDiffs: [
+        [32, 0, "Total"],
+        [32, 0, "test/spec.git-parser.js", "text"],
+      ],
+      isHead: false,
+      message: "submodules parser",
+      parents: [
+        "d58c8e117fc257520d90b099fd2c6acd7c1e8861",
+      ],
+      refs: [],
+      sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
+    })
+  });
+  it('parses reflog commits without email', () => {
+    var gitLog = 'commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit)\n'
+    gitLog += 'Reflog message: commit: submodules parser\n'
+    gitLog += 'Author:     Test ungit <test@example.com>\n'
+    gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += 'Commit:     Test ungit <test@example.com>\n'
+    gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += '\n'
+    gitLog += '    submodules parser\n'
+    gitLog += '\n'
+    gitLog += '32\t0\ttest/spec.git-parser.js\n'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
+      authorDate: "Fri Jan 4 14:03:56 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:03:56 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      fileLineDiffs: [
+        [32, 0, "Total"],
+        [32, 0, "test/spec.git-parser.js", "text"]
+      ],
+      isHead: true,
+      message: "submodules parser",
+      parents: [
+        "d58c8e11"
+      ],
+      reflogAuthorName: "Test ungit",
+      reflogId: "Fri Jan 4 14:03:56 2019 +0100",
+      reflogName: "git-parser-specs@{Fri",
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "37d11544"
+    })
+  });
+  it('parses reflog commits', () => {
+    var gitLog = 'commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit <test@example.com>)\n'
+    gitLog += 'Reflog message: commit: submodules parser\n'
+    gitLog += 'Author:     Test ungit <test@example.com>\n'
+    gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += 'Commit:     Test ungit <test@example.com>\n'
+    gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += '\n'
+    gitLog += '    submodules parser\n'
+    gitLog += '\n'
+    gitLog += '32\t0\ttest/spec.git-parser.js\n'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
+      authorDate: "Fri Jan 4 14:03:56 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:03:56 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      fileLineDiffs: [
+        [32, 0, "Total"],
+        [32, 0, "test/spec.git-parser.js", "text"]
+      ],
+      isHead: true,
+      message: "submodules parser",
+      parents: [
+        "d58c8e11"
+      ],
+      reflogAuthorEmail: "test@example.com",
+      reflogAuthorName: "Test ungit",
+      reflogId: "Fri Jan 4 14:03:56 2019 +0100",
+      reflogName: "git-parser-specs@{Fri",
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "37d11544"
+    })
+  });
+  it('parses wrongly signed commits', () => {
+    var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'gpg: Signature made Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA\n'
+    gitLog += "gpg: Can't check signature: public key not found\n"
+    gitLog += 'Author: Test Ungit <test@example.com>\n'
+    gitLog += 'Date:   Wed Jun 4 19:49:17 2014 -0700\n'
+    gitLog += 'signed commit'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
+      authorEmail: "test@example.com",
+      authorName: "Test Ungit",
+      fileLineDiffs: [],
+      isHead: true,
+      message: "",
+      parents: [
+        "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
+      ],
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "37d1154434b70854ed243967e0d7e37aa3564551",
     });
-    it('parses reflog commits without email', () => {
-      var gitLog = 'commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit)\n'
-      gitLog += 'Reflog message: commit: submodules parser\n'
-      gitLog += 'Author:     Test ungit <test@example.com>\n'
-      gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += 'Commit:     Test ungit <test@example.com>\n'
-      gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += '\n'
-      gitLog += '    submodules parser\n'
-      gitLog += '\n'
-      gitLog += '32\t0\ttest/spec.git-parser.js\n'
-       
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
-        authorDate: "Fri Jan 4 14:03:56 2019 +0100",
-        authorEmail: "test@example.com",
-        authorName: "Test ungit",
-        commitDate: "Fri Jan 4 14:03:56 2019 +0100",
-        committerEmail: "test@example.com",
-        committerName: "Test ungit",
+  });
+  it('parses signed commits', () => {
+    var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'gpg: Signature made Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA\n'
+    gitLog += 'gpg: Good signature from "Test ungit (Git signing key) <test@example.com>"\n'
+    gitLog += 'Author: Test Ungit <test@example.com>\n'
+    gitLog += 'Date:   Wed Jun 4 19:49:17 2014 -0700\n'
+    gitLog += 'signed commit'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
+      authorEmail: "test@example.com",
+      authorName: "Test Ungit",
+      fileLineDiffs: [],
+      isHead: true,
+      message: "",
+      parents: [
+        "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
+      ],
+      refs: [
+        "HEAD",
+        "refs/heads/git-parser-specs"
+      ],
+      sha1: "37d1154434b70854ed243967e0d7e37aa3564551",
+      signatureDate: "Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA",
+      signatureMade: '"Test ungit (Git signing key) <test@example.com>"'
+    });
+  });
+  it('parses the git log', () => {
+    var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
+    gitLog += 'Author:     Test ungit <test@example.com>\n'
+    gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += 'Commit:     Test ungit <test@example.com>\n'
+    gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
+    gitLog += '\n'
+    gitLog += '    submodules parser\n'
+    gitLog += '\n'
+    gitLog += '32\t0\ttest/spec.git-parser.js\n'
+
+    expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
+      { 
+        refs: [ 'HEAD', 'refs/heads/git-parser-specs' ],
         fileLineDiffs: [
           [32, 0, "Total"],
           [32, 0, "test/spec.git-parser.js", "text"]
         ],
+        sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
+        parents: [ 'd58c8e117fc257520d90b099fd2c6acd7c1e8861' ],
         isHead: true,
-        message: "submodules parser",
-        parents: [
-          "d58c8e11"
-        ],
-        reflogAuthorName: "Test ungit",
-        reflogId: "Fri Jan 4 14:03:56 2019 +0100",
-        reflogName: "git-parser-specs@{Fri",
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "37d11544"
-      })
-    });
-    it('parses reflog commits', () => {
-      var gitLog = 'commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit <test@example.com>)\n'
-      gitLog += 'Reflog message: commit: submodules parser\n'
-      gitLog += 'Author:     Test ungit <test@example.com>\n'
-      gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += 'Commit:     Test ungit <test@example.com>\n'
-      gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += '\n'
-      gitLog += '    submodules parser\n'
-      gitLog += '\n'
-      gitLog += '32\t0\ttest/spec.git-parser.js\n'
-       
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
-        authorDate: "Fri Jan 4 14:03:56 2019 +0100",
-        authorEmail: "test@example.com",
-        authorName: "Test ungit",
-        commitDate: "Fri Jan 4 14:03:56 2019 +0100",
-        committerEmail: "test@example.com",
-        committerName: "Test ungit",
-        fileLineDiffs: [
-          [32, 0, "Total"],
-          [32, 0, "test/spec.git-parser.js", "text"]
-        ],
-        isHead: true,
-        message: "submodules parser",
-        parents: [
-          "d58c8e11"
-        ],
-        reflogAuthorEmail: "test@example.com",
-        reflogAuthorName: "Test ungit",
-        reflogId: "Fri Jan 4 14:03:56 2019 +0100",
-        reflogName: "git-parser-specs@{Fri",
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "37d11544"
-      })
-    });
-    it('parses wrongly signed commits', () => {
-      var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'gpg: Signature made Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA\n'
-      gitLog += "gpg: Can't check signature: public key not found\n"
-      gitLog += 'Author: Test Ungit <test@example.com>\n'
-      gitLog += 'Date:   Wed Jun 4 19:49:17 2014 -0700\n'
-      gitLog += 'signed commit'
-      
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
-        authorEmail: "test@example.com",
-        authorName: "Test Ungit",
-        fileLineDiffs: [],
-        isHead: true,
-        message: "",
-        parents: [
-          "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
-        ],
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "37d1154434b70854ed243967e0d7e37aa3564551",
-      });
-    });
-    it('parses signed commits', () => {
-      var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'gpg: Signature made Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA\n'
-      gitLog += 'gpg: Good signature from "Test ungit (Git signing key) <test@example.com>"\n'
-      gitLog += 'Author: Test Ungit <test@example.com>\n'
-      gitLog += 'Date:   Wed Jun 4 19:49:17 2014 -0700\n'
-      gitLog += 'signed commit'
-      
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
-        authorEmail: "test@example.com",
-        authorName: "Test Ungit",
-        fileLineDiffs: [],
-        isHead: true,
-        message: "",
-        parents: [
-          "d58c8e117fc257520d90b099fd2c6acd7c1e8861"
-        ],
-        refs: [
-          "HEAD",
-          "refs/heads/git-parser-specs"
-        ],
-        sha1: "37d1154434b70854ed243967e0d7e37aa3564551",
-        signatureDate: "Wed Jun  4 19:49:17 2014 PDT using RSA key ID 0AAAAAAA",
-        signatureMade: '"Test ungit (Git signing key) <test@example.com>"'
-      });
-    });
-    it('parses the git log', () => {
-      var gitLog = 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)\n'
-      gitLog += 'Author:     Test ungit <test@example.com>\n'
-      gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += 'Commit:     Test ungit <test@example.com>\n'
-      gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
-      gitLog += '\n'
-      gitLog += '    submodules parser\n'
-      gitLog += '\n'
-      gitLog += '32\t0\ttest/spec.git-parser.js\n'
-
-      expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
-        { 
-          refs: [ 'HEAD', 'refs/heads/git-parser-specs' ],
-          fileLineDiffs: [
-            [32, 0, "Total"],
-            [32, 0, "test/spec.git-parser.js", "text"]
-          ],
-          sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
-          parents: [ 'd58c8e117fc257520d90b099fd2c6acd7c1e8861' ],
-          isHead: true,
-          authorName: 'Test ungit',
-          authorEmail: 'test@example.com',
-          authorDate: 'Fri Jan 4 14:03:56 2019 +0100',
-          committerName: 'Test ungit',
-          committerEmail: 'test@example.com',
-          commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
-          message: 'submodules parser',
-        }
-      );
-    });
+        authorName: 'Test ungit',
+        authorEmail: 'test@example.com',
+        authorDate: 'Fri Jan 4 14:03:56 2019 +0100',
+        committerName: 'Test ungit',
+        committerEmail: 'test@example.com',
+        commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
+        message: 'submodules parser',
+      }
+    );
   });
 });
 
