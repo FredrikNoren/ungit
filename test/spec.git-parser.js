@@ -195,3 +195,158 @@ describe('parseGitStatusNumstat', () => {
     });
   })
 });
+
+describe('parseGitStatus', () => {
+  it('parses git status', () => {
+    var gitStatus = '## git-parser-specs\n'
+    gitStatus += 'A  file1.js\n'
+    gitStatus += 'M  file2.js\n'
+    gitStatus += 'D  file3.js\n'
+    gitStatus += ' D file4.js\n'
+    gitStatus += ' U file5.js\n'
+    gitStatus += 'U  file6.js\n'
+    gitStatus += 'AA file7.js\n'
+    gitStatus += '?  file8.js\n'
+    gitStatus += 'A  file9.js\n'
+    gitStatus += '?D file10.js\n'
+    gitStatus += 'AD file11.js\n'
+    gitStatus += ' M file12.js\n'
+    gitStatus += '?? file13.js\n'
+    gitStatus += '\n'
+    gitStatus += 'R  ../source/sysinfo.js -> ../source/sys.js'
+
+    expect(gitParser.parseGitStatus(gitStatus)).to.eql({
+        branch: "git-parser-specs",
+        files: {
+          "../source/sys.js": {
+            conflict: false,
+            displayName: "../source/sysinfo.js -> ../source/sys.js",
+            isNew: false,
+            removed: false,
+            renamed: true,
+           staged: false,
+            type: "text",
+          },
+          "file1.js": {
+            conflict: false,
+            displayName: "file1.js",
+            isNew: true,
+            removed: false,
+            renamed: false,
+            staged: true,
+            type: "text",
+          },
+          "file2.js": {
+            conflict: false,
+            displayName: "file2.js",
+            isNew: false,
+            removed: false,
+            renamed: false,
+            staged: true,
+            type: "text",
+          },
+          "file3.js": {
+            conflict: false,
+            displayName: "file3.js",
+            isNew: false,
+            removed: true,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file4.js": {
+            conflict: false,
+            displayName: "file4.js",
+            isNew: false,
+            removed: true,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file5.js": {
+            conflict: true,
+            displayName: "file5.js",
+            isNew: false,
+            removed: false,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file6.js": {
+            conflict: true,
+            displayName: "file6.js",
+            isNew: false,
+            removed: false,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file7.js": {
+            conflict: true,
+            displayName: "file7.js",
+            isNew: true,
+            removed: false,
+            renamed: false,
+            staged: true,
+            type: "text",
+          },
+          "file8.js": {
+            conflict: false,
+            displayName: "file8.js",
+            isNew: true,
+            removed: false,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file9.js": {
+            conflict: false,
+            displayName: "file9.js",
+            isNew: true,
+            removed: false,
+            renamed: false,
+            staged: true,
+            type: "text",
+          },
+          "file10.js": {
+            conflict: false,
+            displayName: "file10.js",
+            isNew: false,
+            removed: true,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file11.js": {
+            conflict: false,
+            displayName: "file11.js",
+            isNew: false,
+            removed: true,
+            renamed: false,
+            staged: true,
+            type: "text",
+          },
+          "file12.js": {
+            conflict: false,
+            displayName: "file12.js",
+            isNew: false,
+            removed: false,
+            renamed: false,
+            staged: false,
+            type: "text",
+          },
+          "file13.js": {
+            conflict: false,
+            displayName: "file13.js",
+            isNew: true,
+            removed: false,
+            renamed: false,
+            staged: false,
+            type: "text",
+          }
+        },
+      inited: true,
+      isMoreToLoad: false
+    })
+  });
+});
