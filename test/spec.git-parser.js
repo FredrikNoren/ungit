@@ -120,3 +120,19 @@ describe('parseGitBranches', () => {
     ]);
   });
 });
+
+describe('parseGitTags', () => {
+  it('parses the tags', () => {
+    
+    var gitTags = '0.1.0\n'
+    gitTags += '0.1.1\n'
+    gitTags += '0.1.2\n'
+    
+    expect(gitParser.parseGitTags(gitTags)).to.eql([
+      '0.1.0',
+      '0.1.1',
+      '0.1.2'
+    ]);
+  });
+})
+});
