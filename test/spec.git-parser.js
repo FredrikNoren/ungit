@@ -78,6 +78,38 @@ describe('git-parser submodule', () => {
     expect(submodules[1].url).to.be('http://example2.com');
     expect(submodules[1].rawUrl).to.be('git://example2.com');
   });
+  it('should work with git submodules', () => {
+    var gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = git://example1.com\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all\n'
+
+    expect(gitParser.parseGitSubmodule(gitmodules)).to.eql([
+      { 
+        name: 'test1',
+        path: '/path/to/sub1',
+        rawUrl: 'git://example1.com',
+        url: 'http://example1.com',
+        update: 'checkout',
+        branch: 'master',
+        fetchRecurseSubmodules: 'true',
+        ignore: 'all'
+      }
+    ]);
+  });
+  it('should work with ssh submodules', () => {
+    var gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = ssh://login@server.com:12345\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all\n'
+
+    expect(gitParser.parseGitSubmodule(gitmodules)).to.eql([
+      { 
+        name: 'test1',
+        path: '/path/to/sub1',
+        rawUrl: 'ssh://login@server.com:12345',
+        url: 'http://server.com/12345',
+        update: 'checkout',
+        branch: 'master',
+        fetchRecurseSubmodules: 'true',
+        ignore: 'all'
+      }
+    ]);
+  });
 });
 
 describe('parseGitConfig', () => {
