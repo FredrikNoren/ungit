@@ -52,6 +52,72 @@ describe('git-parse diff on big change', () => {
         sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
       })
     });
+    it('parses multiple commits in a row', () => {
+      var gitLog = 'commit 5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4 37d1154434b70854ed243967e0d7e37aa3564551 (HEAD -> refs/heads/git-parser-specs)\n'
+      gitLog += 'Author:     Test ungit <test@example.com>\n'
+      gitLog += 'AuthorDate: Fri Jan 4 14:54:06 2019 +0100\n'
+      gitLog += 'Commit:     Test ungit <test@example.com>\n'
+      gitLog += 'CommitDate: Fri Jan 4 14:54:06 2019 +0100\n'
+      gitLog += '\n'
+      gitLog += '\tparseGitLog + gix reflox parsing\n'
+      gitLog += '\n'
+      gitLog += '1\t1\tsource/git-parser.js\n'
+      gitLog += '175\t0\ttest/spec.git-parser.js\n'
+      gitLog += '\n'
+      gitLog += 'commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861\n'
+      gitLog += 'Author:     Test ungit <test@example.com>\n'
+      gitLog += 'AuthorDate: Fri Jan 4 14:03:56 2019 +0100\n'
+      gitLog += 'Commit:     Test ungit <test@example.com>\n'
+      gitLog += 'CommitDate: Fri Jan 4 14:03:56 2019 +0100\n'
+      gitLog += '\n'
+      gitLog += '\tsubmodules parser\n'
+      gitLog += '\n'
+      gitLog += '32\t0\ttest/spec.git-parser.js\n'
+
+      var res = gitParser.parseGitLog(gitLog)
+      expect(res[0]).to.eql({
+        authorDate: "Fri Jan 4 14:54:06 2019 +0100",
+        authorEmail: "test@example.com",
+        authorName: "Test ungit",
+        commitDate: "Fri Jan 4 14:54:06 2019 +0100",
+        committerEmail: "test@example.com",
+        committerName: "Test ungit",
+        fileLineDiffs: [
+          [176, 1, "Total"],
+          [1, 1, "source/git-parser.js", "text"],
+          [175, 0, "test/spec.git-parser.js", "text"],
+        ],
+        isHead: true,
+        message: "parseGitLog + gix reflox parsing",
+        parents: [
+          "37d1154434b70854ed243967e0d7e37aa3564551"
+        ],
+        refs: [
+          "HEAD",
+          "refs/heads/git-parser-specs"
+        ],
+        sha1: "5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4"
+      })
+      expect(res[1]).to.eql({
+        authorDate: "Fri Jan 4 14:03:56 2019 +0100",
+        authorEmail: "test@example.com",
+        authorName: "Test ungit",
+        commitDate: "Fri Jan 4 14:03:56 2019 +0100",
+        committerEmail: "test@example.com",
+        committerName: "Test ungit",
+        fileLineDiffs: [
+          [32, 0, "Total"],
+          [32, 0, "test/spec.git-parser.js", "text"],
+        ],
+        isHead: false,
+        message: "submodules parser",
+        parents: [
+          "d58c8e117fc257520d90b099fd2c6acd7c1e8861",
+        ],
+        refs: [],
+        sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
+      })
+    });
     it('parses reflog commits without email', () => {
       var gitLog = 'commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)\n'
       gitLog += 'Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit)\n'
@@ -63,7 +129,7 @@ describe('git-parse diff on big change', () => {
       gitLog += '\n'
       gitLog += '    submodules parser\n'
       gitLog += '\n'
-      gitLog += '32      0       test/spec.git-parser.js\n'
+      gitLog += '32\t0\ttest/spec.git-parser.js\n'
        
       expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
         authorDate: "Fri Jan 4 14:03:56 2019 +0100",
@@ -72,9 +138,12 @@ describe('git-parse diff on big change', () => {
         commitDate: "Fri Jan 4 14:03:56 2019 +0100",
         committerEmail: "test@example.com",
         committerName: "Test ungit",
-        fileLineDiffs: [],
+        fileLineDiffs: [
+          [32, 0, "Total"],
+          [32, 0, "test/spec.git-parser.js", "text"]
+        ],
         isHead: true,
-        message: "submodules parser\n\n32      0       test/spec.git-parser.js",
+        message: "submodules parser",
         parents: [
           "d58c8e11"
         ],
@@ -99,7 +168,7 @@ describe('git-parse diff on big change', () => {
       gitLog += '\n'
       gitLog += '    submodules parser\n'
       gitLog += '\n'
-      gitLog += '32      0       test/spec.git-parser.js\n'
+      gitLog += '32\t0\ttest/spec.git-parser.js\n'
        
       expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
         authorDate: "Fri Jan 4 14:03:56 2019 +0100",
@@ -108,9 +177,12 @@ describe('git-parse diff on big change', () => {
         commitDate: "Fri Jan 4 14:03:56 2019 +0100",
         committerEmail: "test@example.com",
         committerName: "Test ungit",
-        fileLineDiffs: [],
+        fileLineDiffs: [
+          [32, 0, "Total"],
+          [32, 0, "test/spec.git-parser.js", "text"]
+        ],
         isHead: true,
-        message: "submodules parser\n\n32      0       test/spec.git-parser.js",
+        message: "submodules parser",
         parents: [
           "d58c8e11"
         ],
@@ -184,12 +256,15 @@ describe('git-parse diff on big change', () => {
       gitLog += '\n'
       gitLog += '    submodules parser\n'
       gitLog += '\n'
-      gitLog += '32      0       test/spec.git-parser.js\n'
+      gitLog += '32\t0\ttest/spec.git-parser.js\n'
 
       expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
         { 
           refs: [ 'HEAD', 'refs/heads/git-parser-specs' ],
-          fileLineDiffs: [],
+          fileLineDiffs: [
+            [32, 0, "Total"],
+            [32, 0, "test/spec.git-parser.js", "text"]
+          ],
           sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
           parents: [ 'd58c8e117fc257520d90b099fd2c6acd7c1e8861' ],
           isHead: true,
@@ -199,7 +274,7 @@ describe('git-parse diff on big change', () => {
           committerName: 'Test ungit',
           committerEmail: 'test@example.com',
           commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
-          message: 'submodules parser\n\n32      0       test/spec.git-parser.js',
+          message: 'submodules parser',
         }
       );
     });
