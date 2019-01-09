@@ -19,7 +19,7 @@ describe('git-api diff', () => {
     return common.initRepo(req)
       .then((dir) => testDir = dir)
       .then(() => common.initRepo(req, { bare: true }))
-      .then((dir) => testBareDir = testBareDir)
+      .then((dir) => testBareDir = dir)
   });
   after(() => common.post(req, '/testing/cleanup', undefined));
 
