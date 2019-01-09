@@ -291,7 +291,7 @@ const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignor
 }
 
 exports.parsePatchDiffResult = (patchLineList, text) => {
-  if (!text) return '';
+  if (!text) return null;
 
   const lines = text.trim().split('\n');
   const result = [];
