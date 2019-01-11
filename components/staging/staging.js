@@ -257,13 +257,7 @@ StagingViewModel.prototype.resetMessages = function() {
     elt.selected(false);
   });
 }
-StagingViewModel.prototype.commit = function() {
-  var self = this;
-  var files = this.files().filter(function(file) {
-    return file.editState() !== 'none';
-  }).map(function(file) {
-    return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
-  });
+StagingViewModel.prototype.buildCommitMessage = function() {
   var commitMessage = this.commitMessageTitle();
   if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 
@@ -272,7 +266,16 @@ StagingViewModel.prototype.commit = function() {
       commitMessage = elt.text + " " + commitMessage;
     }
   })
-
+  return commitMessage;
+}
+StagingViewModel.prototype.commit = function() {
+  var self = this;
+  var files = this.files().filter(function(file) {
+    return file.editState() !== 'none';
+  }).map(function(file) {
+    return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
+  });
+  var commitMessage = this.buildCommitMessage();
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
     .then(() => { self.resetMessages(); })
     .catch((e) => this.server.unhandledRejection(e));
@@ -284,9 +287,7 @@ StagingViewModel.prototype.commitnpush = function() {
   }).map(function(file) {
     return { name: file.name(), patchLineList: file.editState() === 'patched' ? file.patchLineList() : null };
   });
-  var commitMessage = this.commitMessageTitle();
-  if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
-
+  var commitMessage = this.buildCommitMessage();
   this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files: files, amend: this.amend(), emptyCommit: this.emptyCommit() })
     .then(() => {
       self.resetMessages();
