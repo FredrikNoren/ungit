@@ -31,7 +31,7 @@ describe('git-parser parseDiffResult', () => {
       + "nyc": "^13.1.0",
         "supertest": "~3.3.0"
     `
-    
+
     expect(gitParser.parsePatchDiffResult([true, true, true], gitDiff)).to.eql(dedent`
       diff --git a/package.json b/package.json
       index f71e0064..08964575 100644
@@ -66,7 +66,7 @@ describe('git-parser parseDiffResult', () => {
       + "nyc": "^13.1.0",
         "supertest": "~3.3.0"
     `
-    
+
     expect(gitParser.parsePatchDiffResult([false, false, false], gitDiff)).to.eql(null)
   });
   it('one +- diff selected', () => {
@@ -86,7 +86,7 @@ describe('git-parser parseDiffResult', () => {
       +	"nyc": "^13.1.0",
       	"supertest": "~3.3.0"
     `
-    
+
     expect(gitParser.parsePatchDiffResult([true, true, false], gitDiff)).to.eql(dedent`
       diff --git a/package.json b/package.json
       index f71e0064..08964575 100644
@@ -136,7 +136,7 @@ describe('git-parser parseDiffResult', () => {
       [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
       @@ -133,7 +132,6 @@ Changelog
       See [CHANGELOG.md](CHANGELOG.md).
-      
+
       -License (MIT)
       See [LICENSE.md](LICENSE.md). To read about the Faircode experiment go to [#974](https://github.com/FredrikNoren/ungit/issues/974). Ungit is now once again MIT.
     `
@@ -190,20 +190,20 @@ describe('git-parser parseGitLog', () => {
       AuthorDate: Fri Jan 4 14:54:06 2019 +0100
       Commit:     Test ungit <test@example.com>
       CommitDate: Fri Jan 4 14:54:06 2019 +0100
-      
+
         parseGitLog + gix reflox parsing
-      
+
       1	1	source/git-parser.js
       175	0	test/spec.git-parser.js
-      
+
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861
       Author:     Test ungit <test@example.com>
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
       Commit:     Test ungit <test@example.com>
       CommitDate: Fri Jan 4 14:03:56 2019 +0100
-      
+
         submodules parser
-      
+
       32	0	test/spec.git-parser.js\n
     `
 
@@ -260,9 +260,9 @@ describe('git-parser parseGitLog', () => {
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
       Commit:     Test ungit <test@example.com>
       CommitDate: Fri Jan 4 14:03:56 2019 +0100
-      
+
           submodules parser
-      
+
       32	0	test/spec.git-parser.js\n
     `
 
@@ -301,9 +301,9 @@ describe('git-parser parseGitLog', () => {
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
       Commit:     Test ungit <test@example.com>
       CommitDate: Fri Jan 4 14:03:56 2019 +0100
-      
+
           submodules parser
-      
+
       32	0	test/spec.git-parser.js\n
     `
 
@@ -395,14 +395,14 @@ describe('git-parser parseGitLog', () => {
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
       Commit:     Test ungit <test@example.com>
       CommitDate: Fri Jan 4 14:03:56 2019 +0100
-      
+
           submodules parser
-      
+
       32	0	test/spec.git-parser.js\n
     `
 
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
-      { 
+      {
         refs: [ 'HEAD', 'refs/heads/git-parser-specs' ],
         fileLineDiffs: [
           [32, 0, "Total"],
@@ -435,7 +435,7 @@ describe('git-parser submodule', () => {
     expect(submodules.length).to.be(1);
     expect(submodules[0]).to.eql({
       name: "test1",
-      path: "/path/to/sub1",
+      path: path.join('/path', 'to', 'sub1'),
       rawUrl: "http://example1.com",
       url: "http://example1.com"
     });
@@ -449,13 +449,13 @@ describe('git-parser submodule', () => {
     expect(submodules.length).to.be(2);
     expect(submodules[0]).to.eql({
       name: "test1",
-      path: "/path/to/sub1",
+      path: path.join('/path', 'to', 'sub1'),
       rawUrl: "http://example1.com",
       url: "http://example1.com"
     })
     expect(submodules[1]).to.eql({
       name: "test2",
-      path: "/path/to/sub2",
+      path: path.join('/path', 'to', 'sub2'),
       rawUrl: "http://example2.com",
       url: "http://example2.com"
     })
@@ -463,7 +463,7 @@ describe('git-parser submodule', () => {
   it('should work with multiple name, path, url, update, branch, fetchRecurseSubmodules and ignore', () => {
     const gitmodules = [
       '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all',
-      '[submodule  "test2"]\n\npath   ==/path/to/sub2\nurl= git://example2.com',
+      '[submodule  "test2"]\n\npath   = /path/to/sub2\nurl= git://example2.com',
     ].join('\n');
     const submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules.length).to.be(2);
@@ -472,14 +472,14 @@ describe('git-parser submodule', () => {
       fetchRecurseSubmodules: "true",
       ignore: "all",
       name: "test1",
-      path: "/path/to/sub1",
+      path: path.join('/path', 'to', 'sub1'),
       rawUrl: "http://example1.com",
       update: "checkout",
       url: "http://example1.com"
     })
     expect(submodules[1]).to.eql({
       name: "test2",
-      path: "=/path/to/sub2",
+      path: path.join('/path', 'to', 'sub2'),
       rawUrl: "git://example2.com",
       url: "http://example2.com"
     })
@@ -496,9 +496,9 @@ describe('git-parser submodule', () => {
     `
 
     expect(gitParser.parseGitSubmodule(gitmodules)).to.eql([
-      { 
+      {
         name: 'test1',
-        path: '/path/to/sub1',
+        path: path.join('/path', 'to', 'sub1'),
         rawUrl: 'git://example1.com',
         url: 'http://example1.com',
         update: 'checkout',
@@ -520,9 +520,9 @@ describe('git-parser submodule', () => {
     `
 
     expect(gitParser.parseGitSubmodule(gitmodules)).to.eql([
-      { 
+      {
         name: 'test1',
-        path: '/path/to/sub1',
+        path: path.join('/path', 'to', 'sub1'),
         rawUrl: 'ssh://login@server.com:12345',
         url: 'http://server.com/12345',
         update: 'checkout',
@@ -585,7 +585,7 @@ describe('parseGitTags', () => {
       0.1.1
       0.1.2
     `
-    
+
     expect(gitParser.parseGitTags(gitTags)).to.eql([
       '0.1.0',
       '0.1.1',
@@ -600,7 +600,7 @@ describe('parseGitRemotes', () => {
       origin
       upstream
     `
-    
+
     expect(gitParser.parseGitRemotes(gitRemotes)).to.eql([
       'origin',
       'upstream'
@@ -616,7 +616,7 @@ describe('parseGitLsRemote', () => {
       d3ec9678acf285637ef11c7cba897d697820de07	refs/tags/0.1.1
       ad00b6c8b7b0cbdd0bd92d44dece559b874a4ae6	refs/tags/0.1.1^{}
     `
-    
+
     expect(gitParser.parseGitLsRemote(gitLsRemote)).to.eql([
       { sha1: "86bec6415fa7ec0d7550a62389de86adb493d546", name: "refs/tags/0.1.0" },
       { sha1: "668ab7beae996c5a7b36da0be64b98e45ba2aa0b", name: "refs/tags/0.1.0^{}"},
@@ -643,8 +643,8 @@ describe('parseGitStatusNumstat', () => {
   it('skips empty lines', () => {
     const gitStatusNumstat = dedent`
       1459	202	package-lock.json
-      
-      
+
+
       2	1	package.json
       13	0	test/spec.git-parser.js
     `
@@ -674,7 +674,7 @@ describe('parseGitStatus', () => {
       AD file11.js
        M file12.js
       ?? file13.js
-      
+
       R  ../source/sysinfo.js -> ../source/sys.js
     `
 
