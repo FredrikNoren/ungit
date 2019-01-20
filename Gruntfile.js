@@ -25,7 +25,7 @@ module.exports = (grunt) => {
     watch: {
       scripts: {
         files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
-        tasks: ['browserify-common', 'browserify-components', 'babel:prod'],
+        tasks: ['browserify-common', 'browserify-components'],
         options: {
           spawn: false,
         },
@@ -194,7 +194,7 @@ module.exports = (grunt) => {
       electron: {
         files: [
           { expand: true, src: ['public/**'], dest: 'build/resource/' },
-          { expand: true, src: ['src/**'], dest: 'build/resource/' },
+          { expand: true, src: ['source/**'], dest: 'build/resource/' },
           { expand: true, src: ['components/**'], dest: 'build/resource/' },
           { expand: true, src: ['assets/**'], dest: 'build/resource/' },
           { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
@@ -205,8 +205,7 @@ module.exports = (grunt) => {
     clean: {
       electron: ['./build'],
       coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit'],
-      babel: ['./src']
+      'coverage-unit': ['./coverage/coverage-unit']
     },
     electron: {
       package: {
@@ -238,32 +237,6 @@ module.exports = (grunt) => {
           coverageFolder: './coverage/coverage-unit',
           mask: 'spec.*.js'
         }
-      }
-    },
-    babel: {
-      prod: {
-        options: {
-          presets: ['es2015', 'stage-0']
-        },
-        files: [{
-            expand: true,
-            cwd: 'source',
-            src: ['**/*.js'],
-            dest: 'src',
-            ext: '.js'
-        }]
-      },
-      electron: {
-        options: {
-          presets: ['es2015', 'stage-0']
-        },
-        files: [{
-            expand: true,
-            cwd: 'source',
-            src: ['**/*.js'],
-            dest: 'src',
-            ext: '.js'
-        }]
       }
     }
   });
@@ -442,8 +415,6 @@ module.exports = (grunt) => {
       const bumps = Bluebird.map(keys, (dep) => {
         // winston 3.x has different API
         if (dep == 'winston') return;
-        // babel 7.x.x has alot of changes.... :(
-        if (dep.indexOf('babel') > -1) return;
         // Octicon moved to SCSS instead of less
         if (dep == 'octicons') return;
 
@@ -479,10 +450,9 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
-  grunt.loadNpmTasks('grunt-babel');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
@@ -496,7 +466,7 @@ module.exports = (grunt) => {
   grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
 
   // Create electron package
-  grunt.registerTask('package', ['clean:electron', 'clean:babel', 'babel:electron', 'copy:electron', 'electron']);
+  grunt.registerTask('package', ['clean:electron', 'copy:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);

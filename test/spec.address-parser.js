@@ -1,5 +1,5 @@
 const expect = require('expect.js');
-const addressParser = require('../src/address-parser');
+const addressParser = require('../source/address-parser');
 
 describe('git-parser addresses', () => {
   it('parseAddress ssh://some.address.com/my/awesome/project', () => {

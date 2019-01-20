@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 const startLaunchTime = Date.now();
-const config = require('../src/config');
+const config = require('../source/config');
 const open = require('opn');
 const path = require('path');
 const child_process = require('child_process');
 
-const BugTracker = require('../src/bugtracker');
+const BugTracker = require('../source/bugtracker');
 const bugtracker = new BugTracker('launcher');
-const usageStatistics = require('../src/usage-statistics');
+const usageStatistics = require('../source/usage-statistics');
 const Bluebird = require('bluebird');
 // Fastest way to find out if a port is used or not/i.e. if ungit is running
 const net = require('net');
@@ -63,7 +63,7 @@ const navigate = (override) => {
 
 const launch = () => {
   const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
-    [path.join(__dirname, '..', 'src', 'server.js')].concat(process.argv.slice(2)),
+    [path.join(__dirname, '..', 'source', 'server.js')].concat(process.argv.slice(2)),
     { cwd: path.join(process.cwd(), '..') }
   );
 
