@@ -7,8 +7,7 @@ var bugtracker = new BugTracker('launcher');
 var usageStatistics = require('../src/usage-statistics');
 
 const Bluebird = require('bluebird');
-var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');  // Module to create native browser window.
+const { app, BrowserWindow } = require('electron')
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
@@ -24,7 +23,7 @@ function launch(callback) {
   else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
   console.log('Browse to ' + currentUrl);
   if (config.launchBrowser && !config.launchCommand) {
-    mainWindow.loadUrl(currentUrl);
+    mainWindow.loadURL(currentUrl);
   } else if (config.launchCommand) {
     var command = config.launchCommand.replace(/%U/g, currentUrl);
     console.log('Running custom launch command: ' + command);
@@ -34,7 +33,7 @@ function launch(callback) {
         return;
       }
       if (config.launchBrowser)
-        mainWindow.loadUrl(currentUrl);
+        mainWindow.loadURL(currentUrl);
     });
   }
 }
