@@ -1,10 +1,10 @@
 var startLaunchTime = Date.now();
-var config = require('../src/config');
+var config = require('../source/config');
 var path = require('path');
 var child_process = require('child_process');
-var BugTracker = require('../src/bugtracker');
+var BugTracker = require('../source/bugtracker');
 var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../src/usage-statistics');
+var usageStatistics = require('../source/usage-statistics');
 
 const Bluebird = require('bluebird');
 const { app, BrowserWindow } = require('electron')
@@ -67,7 +67,7 @@ app.on('ready', function() {
       app.quit();
     }
     else {
-      var server = require('../src/server');
+      var server = require('../source/server');
       server.started.add(function() {
         launch(function(err) {
           if (err) console.log(err);
