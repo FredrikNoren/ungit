@@ -201,7 +201,6 @@ module.exports = (grunt) => {
     electron: {
       package: {
         options: {
-          electronVersion: '3.1.1',
           dir: '.',
           out: './build',
         }
