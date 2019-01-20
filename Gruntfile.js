@@ -190,16 +190,6 @@ module.exports = (grunt) => {
           { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js.map'], dest: 'public/js/' }
         ]
       },
-      electron: {
-        files: [
-          { expand: true, src: ['public/**'], dest: 'build/resource/' },
-          { expand: true, src: ['src/**'], dest: 'build/resource/' },
-          { expand: true, src: ['components/**'], dest: 'build/resource/' },
-          { expand: true, src: ['assets/**'], dest: 'build/resource/' },
-          { expand: true, src: ['node_modules/**'], dest: 'build/resource/' },
-          { expand: true, src: ['package.json'], dest: 'build/resource/'}
-        ]
-      }
     },
     clean: {
       electron: ['./build'],
@@ -210,23 +200,9 @@ module.exports = (grunt) => {
     electron: {
       package: {
         options: {
-          name: 'ungit',
-          dir: './build/resource',
+          electronVersion: '3.1.1',
+          dir: '.',
           out: './build',
-          icon: './icon.ico',
-          version: '0.31.1',
-          platform: 'all',
-          arch: 'all',
-          asar: true,
-          prune: true,
-          'version-string': {
-            FileDescription : 'ungit',
-            OriginalFilename : 'ungit.exe',
-            FileVersion : '<%= version %>',
-            ProductVersion : '<%= version %>',
-            ProductName : 'ungit',
-            InternalName : 'ungit.exe'
-          }
         }
       }
     },
@@ -494,7 +470,7 @@ module.exports = (grunt) => {
   grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
 
   // Create electron package
-  grunt.registerTask('package', ['clean:electron', 'clean:babel', 'babel:electron', 'copy:electron', 'electron']);
+  grunt.registerTask('package', ['clean:electron', 'clean:babel', 'babel:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
