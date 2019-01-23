@@ -26,32 +26,6 @@
     <button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button>
     <button class="btn btn-default" data-bind="click: dismissBugtrackingNagscreen">Naah, I&#39;ll skip that</button>
   </div>
-
-  <div class="alert alert-info clearfix" data-bind="visible: showNPSSurvey">
-    <button type="button" class="close" data-bind="click: dismissNPSSurvey">&times;</button>
-    <span class="text-dimmed">Hi! This is a one-question survey to learn more about how people use Ungit. You can dismiss it by clicking the x in the upper right corner.</span>
-    <p><h4>Question: How likely are you to recommend Ungit to your friends and colleagues?</h4></p>
-    <p>
-      <div class="btn-group btn-group-justified">
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 0)">0</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 1)">1</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 2)">2</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 3)">3</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 4)">4</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 5)">5</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 6)">6</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 7)">7</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 8)">8</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 9)">9</a>
-        <a class="btn btn-default" role="button" data-bind="click: sendNPS.bind(null, 10)">10</a>
-      </div>
-      <div class="clearfix">
-        Not at all likely
-        <div class="pull-right">Extremely likely</div>
-      </div>
-    </p>
-  </div>
-
 </div>
 
 <!-- ko if: content -->

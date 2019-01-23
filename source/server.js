@@ -1,7 +1,6 @@
 const config = require('./config');
 const BugTracker = require('./bugtracker');
 const bugtracker = new BugTracker('server');
-const usageStatistics = require('./usage-statistics');
 const express = require('express');
 const gitApi = require('./git-api');
 const winston = require('winston');
@@ -22,8 +21,7 @@ const Bluebird = require('bluebird');
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
   Bluebird.all([
-    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); }),
-    new Bluebird((resolve) => { usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception'); resolve(); })
+    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); })
   ]).then(() => { app.quit(); });
 });
 
@@ -354,7 +352,6 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   bugtracker.notify(err, 'ungit-node');
-  usageStatistics.addEvent('server-exception');
   winston.error(err.stack);
   res.status(500).send({ error: err.message, errorType: err.name, stack: err.stack });
 });
