@@ -25,6 +25,7 @@
     "color": "~3.0.0",
     "cookie-parser": "~1.4.3",
     "crossroads": "~0.12.2",
+    "dedent": "^0.7.0",
     "diff2html": "~2.4.0",
     "dnd-page-scroll": "0.0.4",
     "express": "~4.16.3",

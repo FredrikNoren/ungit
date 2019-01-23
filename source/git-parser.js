@@ -74,7 +74,7 @@ const gitLogHeaders = {
   'Reflog': (currentCommmit, data) => {
     currentCommmit.reflogId = /\{(.*?)\}/.exec(data)[1];
     currentCommmit.reflogName = data.substring(0, data.indexOf(' ')).replace("refs/", "");
-    const author = data.substring(data.indexOf(' ') + 2, data.length - 1);
+    const author = data.substring(data.indexOf('(') + 1, data.length - 1);
     const capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.reflogAuthorName = capture[1].trim();
@@ -291,7 +291,7 @@ const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignor
 }
 
 exports.parsePatchDiffResult = (patchLineList, text) => {
-  if (!text) return {};
+  if (!text) return null;
 
   const lines = text.trim().split('\n');
   const result = [];
