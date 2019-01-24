@@ -7,7 +7,6 @@ const child_process = require('child_process');
 
 const BugTracker = require('../source/bugtracker');
 const bugtracker = new BugTracker('launcher');
-const usageStatistics = require('../source/usage-statistics');
 const Bluebird = require('bluebird');
 // Fastest way to find out if a port is used or not/i.e. if ungit is running
 const net = require('net');
@@ -20,8 +19,7 @@ process.on('uncaughtException', (err) => {
   console.error(err.stack.toString());
 
   Bluebird.all([
-    Bluebird.resolve().then(() => bugtracker.notify(err, 'ungit-launcher')),
-    Bluebird.resolve().then(() => usageStatistics.addEvent('launcher-exception'))
+    Bluebird.resolve().then(() => bugtracker.notify(err, 'ungit-launcher'))
   ]).then(cleanExit)
 });
 
@@ -78,7 +76,6 @@ const launch = () => {
       const launchTime = (Date.now() - startLaunchTime);
       console.log(data.toString());
       console.log(`Took ${launchTime}ms to start server.`);
-      usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
       navigate();
     }
   }

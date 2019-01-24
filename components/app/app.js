@@ -35,10 +35,6 @@ class AppViewModel {
     this.gitVersionErrorVisible = ko.computed(() => {
       return !ungit.config.gitVersionCheckOverride && this.gitVersionError() && !this.gitVersionErrorDismissed();
     });
-
-    const NPSSurveyLastDismissed = parseInt(storage.getItem('NPSSurveyLastDismissed') || '0');
-    const monthsSinceNPSLastDismissed = (Date.now() - NPSSurveyLastDismissed) / (1000 * 60 * 60 * 24 * 30);
-    this.showNPSSurvey = ko.observable(monthsSinceNPSLastDismissed >= 6 && Math.random() < 0.01);
   }
   getRepoList() {
     const localStorageRepo = JSON.parse(storage.getItem('repositories') || storage.getItem('visitedRepositories') || '[]');
@@ -47,16 +43,6 @@ class AppViewModel {
       .sort();
     storage.setItem('repositories', JSON.stringify(newRepos));
     return newRepos;
-  }
-  sendNPS(value) {
-    keen.addEvent('survey-nps', {
-      version: ungit.version,
-      userHash: ungit.userHash,
-      rating: value,
-      bugtrackingEnabled: ungit.config.bugtracking,
-      sendUsageStatistics: ungit.config.sendUsageStatistics
-    });
-    this.dismissNPSSurvey();
   }
   updateNode(parentElement) {
     ko.renderTemplate('app', this, {}, parentElement);
@@ -144,10 +130,6 @@ class AppViewModel {
   dismissGitVersionError() {
     storage.setItem('gitVersionErrorDismissed', true);
     this.gitVersionErrorDismissed(true);
-  }
-  dismissNPSSurvey() {
-    this.showNPSSurvey(false);
-    storage.setItem('NPSSurveyLastDismissed', Date.now());
   }
   dismissNewVersion() {
     this.showNewVersionAvailable(false);
