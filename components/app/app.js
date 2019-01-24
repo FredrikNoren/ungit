@@ -108,17 +108,13 @@ class AppViewModel {
       return dialog;
     }));
   }
-  gitSetUserConfig(bugTracking, sendUsageStatistics) {
+  gitSetUserConfig(bugTracking) {
     this.server.getPromise('/userconfig')
       .then((userConfig) => {
         userConfig.bugtracking = bugTracking;
-        if (sendUsageStatistics != undefined) userConfig.sendUsageStatistics = sendUsageStatistics;
         return this.server.postPromise('/userconfig', userConfig)
           .then(() => { this.bugtrackingEnabled(bugTracking); });
       });
-  }
-  enableBugtrackingAndStatistics() {
-    this.gitSetUserConfig(true, true);
   }
   enableBugtracking() {
     this.gitSetUserConfig(true);
