@@ -4,7 +4,6 @@ var path = require('path');
 var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../src/usage-statistics');
 
 const Bluebird = require('bluebird');
 var app = require('app');  // Module to control application life.
@@ -12,10 +11,8 @@ var BrowserWindow = require('browser-window');  // Module to create native brows
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  Bluebird.all([
-    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); }),
-    new Bluebird((resolve) => { usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception'); resolve(); })
-  ]).then(() => { app.quit(); });
+  bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
+  app.quit();
 });
 
 function launch(callback) {
@@ -76,7 +73,6 @@ app.on('ready', function() {
 
         var launchTime = (Date.now() - startLaunchTime);
         console.log('Took ' + launchTime + 'ms to start server.');
-        usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
       });
 
       mainWindow = new BrowserWindow({width: 1366, height: 768});
