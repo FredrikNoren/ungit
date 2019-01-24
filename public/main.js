@@ -11,9 +11,8 @@ var BrowserWindow = require('browser-window');  // Module to create native brows
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  Bluebird.all([
-    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); })
-  ]).then(() => { app.quit(); });
+  bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
+  app.quit();
 });
 
 function launch(callback) {
