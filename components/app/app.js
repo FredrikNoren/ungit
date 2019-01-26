@@ -67,10 +67,12 @@ class AppViewModel {
         this.latestVersion(version.latestVersion);
         this.showNewVersionAvailable(!ungit.config.ungitVersionCheckOverride && version.outdated);
       }).catch((e) => this.server.unhandledRejection(e));
-    this.server.getPromise('/gitversion')
-      .then((gitversion) => {
-        if (gitversion && !gitversion.satisfied) {
-          this.gitVersionError(gitversion.error);
+
+    const minGitVersion = '>=1.8.0'
+    this.server.getPromise('/gitversion', {requiredGitVersion: minGitVersion})
+      .then((result) => {
+        if (result && !result.satisfied) {
+          this.gitVersionError(`Ungit requires git ${minGitVersion}, found ${result.type} ${result.version}`);
         }
       }).catch((e) => this.server.unhandledRejection(e));
   }
