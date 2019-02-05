@@ -221,6 +221,7 @@ let argv = yargs
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
+.describe('ignoreWhiteSpaceDiff', 'Specify whether  to Ignore or Show white space diff')
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
 .describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')

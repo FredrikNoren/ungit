@@ -47,7 +47,7 @@ class Type {
 
 class WhiteSpace {
   constructor() {
-    this.text = ko.observable(ungit.config.ignoreWhiteSpaceDiff ? "Ignoring White Space diff" : "Showing White Space diff");
+    this.text = ko.observable("Show/Ignore white space diff");
     this.value = ko.observable(ungit.config.ignoreWhiteSpaceDiff);
     this.value.subscribe(value => {
       this.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
