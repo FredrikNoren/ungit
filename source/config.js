@@ -139,6 +139,9 @@ const defaultConfig = {
   // Preferred default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
 	diffType: undefined,
 
+  // Specify whether  to Ignore or Show white space diff
+  ignoreWhiteSpaceDiff: false,
+  
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
 
