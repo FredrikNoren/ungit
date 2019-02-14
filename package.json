@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.4.41",
+  "version": "1.4.42",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
