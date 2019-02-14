@@ -35,9 +35,6 @@ const defaultConfig = {
   // This will automatically send anonymous bug reports.
   bugtracking: false,
 
-  // Google analytics for usage statistics.
-  sendUsageStatistics: false,
-
   // True to enable authentication. Users are defined in the users configuration property.
   authentication: false,
 
@@ -192,7 +189,6 @@ let argv = yargs
 .describe('logGitCommands', 'Write git commands issued to the log')
 .describe('logGitOutput', 'Write the result of git commands issued to the log')
 .describe('bugtracking', 'This will automatically send anonymous bug reports')
-.describe('sendUsageStatistics', 'Google analytics for usage statistics')
 .describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
 .describe('users', 'Map of username/passwords which are granted access')
 .describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')

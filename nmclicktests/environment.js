@@ -291,7 +291,6 @@ class Environment {
       '--no-launchBrowser',
       '--dev',
       '--no-bugtracking',
-      '--no-sendUsageStatistics',
       `--autoShutdownTimeout=${this.config.serverTimeout}`,
       '--logLevel=debug',
       '--maxNAutoRestartOnCrash=0',

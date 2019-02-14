@@ -50,13 +50,4 @@ class GitErrorViewModel {
   dismiss() {
     this.gitErrors.gitErrors.remove(this);
   }
-
-  enableBugtrackingAndStatistics() {
-    this.server.getPromise('/userconfig')
-      .then(userConfig => {
-        userConfig.bugtracking = true;
-        userConfig.sendUsageStatistics = true;
-        return this.server.postPromise('/userconfig', userConfig)
-      }).then(() => { this.showEnableBugtracking(false); })
-  }
 }
