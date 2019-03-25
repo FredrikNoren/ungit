@@ -35,9 +35,6 @@ const defaultConfig = {
   // This will automatically send anonymous bug reports.
   bugtracking: false,
 
-  // Google analytics for usage statistics.
-  sendUsageStatistics: false,
-
   // True to enable authentication. Users are defined in the users configuration property.
   authentication: false,
 
@@ -142,6 +139,9 @@ const defaultConfig = {
   // Preferred default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.
 	diffType: undefined,
 
+  // Specify whether to Ignore or Show white space diff
+  ignoreWhiteSpaceDiff: false,
+  
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
 
@@ -192,7 +192,6 @@ let argv = yargs
 .describe('logGitCommands', 'Write git commands issued to the log')
 .describe('logGitOutput', 'Write the result of git commands issued to the log')
 .describe('bugtracking', 'This will automatically send anonymous bug reports')
-.describe('sendUsageStatistics', 'Google analytics for usage statistics')
 .describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
 .describe('users', 'Map of username/passwords which are granted access')
 .describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')
@@ -224,6 +223,8 @@ let argv = yargs
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
+.describe('ignoreWhiteSpaceDiff', 'Specify whether to Ignore or Show white space diff')
+.boolean('ignoreWhiteSpaceDiff')
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
 .describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')
