@@ -109,7 +109,7 @@ class PromptDialogViewModel extends DialogViewModel {
     this.alternatives = ko.observable();
     this.details = ko.observable(details);
   }
-  
+
   get template() { return 'prompt'; }
 }
 
@@ -162,7 +162,7 @@ class TextEditDialog extends PromptDialogViewModel {
     this.alternatives([
       {
         label: "Save", primary: true, taId: 'save', click() {
-          this.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
+          self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
           self.result(true);
           self.close();
         }
