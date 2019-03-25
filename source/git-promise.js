@@ -433,7 +433,7 @@ git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (maxActiveBranchSearchIteration && !log.isHeadExist) {
+      if (skip === 0 && maxActiveBranchSearchIteration > 0 && !log.isHeadExist) {
         return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1);
       } else {
         return { "limit": limit, "skip": skip, "nodes": log};
