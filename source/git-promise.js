@@ -433,10 +433,18 @@ git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (skip === 0 && maxActiveBranchSearchIteration > 0 && !log.isHeadExist) {
-        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1);
+      if (maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
+        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1)
+          .then(innerLog => {
+            return {
+              "limit": limit + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
+              "skip": skip + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
+              "nodes": log.concat(innerLog.nodes),
+              "isHeadExist": innerLog.isHeadExist
+            }
+          });
       } else {
-        return { "limit": limit, "skip": skip, "nodes": log};
+        return { "limit": limit, "skip": skip, "nodes": log, "isHeadExist": log.isHeadExist };
       }
     });
 }
