@@ -307,7 +307,7 @@ exports.registerApi = (env) => {
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
     const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise.log(req.query.path, limit, skip, 100)
+    const task = gitPromise.log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return { "limit": limit, "skip": skip, "nodes": []};

@@ -123,8 +123,11 @@ const defaultConfig = {
   // Auto checkout the created branch on creation
   autoCheckoutOnBranchCreate: false,
 
-  // Always load with active checkout branch
+  // Always load with active checkout branch (deprecated: use `maxActiveBranchSearchIteration`)
   alwaysLoadActiveBranch: false,
+
+  // Max search iterations for active branch.  ( value means not searching for active branch)
+  maxActiveBranchSearchIteration: -1,
 
   // number of nodes to load for each git.log call
   numberOfNodesPerLoad: 25,
@@ -138,7 +141,7 @@ const defaultConfig = {
 
   // Specify whether to Ignore or Show white space diff
   ignoreWhiteSpaceDiff: false,
-  
+
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
 
@@ -170,8 +173,10 @@ let argv = yargs
 .help('help')
 .version()
 .alias('b', 'launchBrowser')
+.boolean('launchBrowser')
 .alias('h', 'help')
 .alias('o', 'gitVersionCheckOverride')
+.boolean('gitVersionCheckOverride')
 .alias('v', 'version')
 .describe('o', 'Ignore git version check and allow ungit to run with possibly lower versions of git')
 .boolean('o')
@@ -186,34 +191,49 @@ let argv = yargs
 .describe('rootPath', 'The root path ungit will be accessible from')
 .describe('logDirectory', 'Directory to output log files')
 .describe('logRESTRequests', 'Write REST requests to the log')
+.boolean('logRESTRequests')
 .describe('logGitCommands', 'Write git commands issued to the log')
+.boolean('logGitCommands')
 .describe('logGitOutput', 'Write the result of git commands issued to the log')
+.boolean('logGitOutput')
 .describe('bugtracking', 'This will automatically send anonymous bug reports')
+.boolean('bugtracking')
 .describe('authentication', 'True to enable authentication. Users are defined in the users configuration property')
+.boolean('authentication')
 .describe('users', 'Map of username/passwords which are granted access')
 .describe('showRebaseAndMergeOnlyOnRefs', 'Set to false to show rebase and merge on drag and drop on all nodes')
+.boolean('showRebaseAndMergeOnlyOnRefs')
 .describe('maxConcurrentGitOperations', 'Maximum number of concurrent git operations')
 .describe('forcedLaunchPath', 'Define path to be used on open. Can be set to null to force the home screen')
 .describe('autoShutdownTimeout', 'Closes the server after x ms of inactivity. Mainly used by the clicktesting')
 .describe('noFFMerge', 'Don\'t fast forward git mergers. See git merge --no-ff documentation')
+.boolean('noFFMerge')
 .describe('autoFetch', 'Automatically fetch from remote when entering a repository using ungit')
+.boolean('autoFetch')
 .describe('dev', 'Used for development purposes')
+.boolean('dev')
 .describe('logLevel', 'The logging level, possible values are none, error, warn, info, verbose, debug, and silly.')
 .describe('launchCommand', 'Specify a custom command to launch. `%U` will be replaced with the URL that corresponds with the working git directory.')
 .describe('allowCheckoutNodes', 'Allow checking out nodes (which results in a detached head)')
+.boolean('allowCheckoutNodes')
 .describe('allowedIPs', 'An array of ip addresses that can connect to ungit. All others are denied')
 .describe('autoPruneOnFetch', 'Automatically remove remote tracking branches that have been removed on the server when fetching. (git fetch -p)')
+.boolean('autoPruneOnFetch')
 .describe('pluginDirectory', 'Directory to look for plugins')
 // --pluginConfigs doesn't work...  Probably only works in .ungitrc as a json file
 .describe('pluginConfigs', 'No supported as a command line argument, use ungitrc config file.  See README.md')
 .describe('autoStashAndPop', 'Used for development purposes')
-.describe('dev', 'Automatically does stash -> operation -> stash pop when you checkout, reset or cherry pick')
+.boolean('autoStashAndPop')
 .describe('fileSeparator', 'OS dependent file separator')
 .describe('disableDiscardWarning', 'disable warning popup at discard')
+.boolean('disableDiscardWarning')
 .describe('disableDiscardMuteTime', 'duration of discard warning dialog mute time should it be muted')
 .describe('lockConflictRetryCount', 'Allowed number of retry for git "index.lock" conflict')
 .describe('autoCheckoutOnBranchCreate', 'Auto checkout the created branch on creation')
-.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch')
+.boolean('autoCheckoutOnBranchCreate')
+.describe('alwaysLoadActiveBranch', 'Always load with active checkout branch (DEPRECATED, use `maxActiveBranchSearchIteration`)')
+.boolean('alwaysLoadActiveBranch')
+.describe('maxActiveBranchSearchIteration', 'Max search iterations for active branch.  (-1 means not searching for active branch)')
 .describe('numberOfNodesPerLoad', 'number of nodes to load for each git.log call')
 .describe('mergeTool', 'the git merge tool to use when resolving conflicts')
 .describe('diffType', 'Prefered default diff type used. Can be `"textdiff"` or `"sidebysidediff"`.')
@@ -221,6 +241,7 @@ let argv = yargs
 .boolean('ignoreWhiteSpaceDiff')
 .describe('numRefsToShow', 'Number of refs to show on git commit bubbles to limit too many refs to appear.')
 .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
+.boolean('isForceGPGSign')
 .describe('defaultRepositories', 'Array of local git repo paths to display at the ungit home page')
 .describe('ungitBindIp', 'a string of ip to bind to, default is `127.0.0.1`')
 .describe('isAnimate', 'is front end animation enabled')
@@ -301,6 +322,10 @@ if (fs.existsSync(path.join(__dirname, '..', '.git'))){
   module.exports.ungitDevVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
 } else {
   module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
+}
+
+if (module.exports.alwaysLoadActiveBranch) {
+  module.exports.maxActiveBranchSearchIteration = 25;
 }
 
 module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');
