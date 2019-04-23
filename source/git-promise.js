@@ -176,6 +176,8 @@ git.status = (repoPath, file) => {
   return Bluebird.props({
     numStatsStaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
+    numStatsUnstaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
+      .then(gitParser.parseGitStatusNumstat),
     status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
@@ -205,7 +207,7 @@ git.status = (repoPath, file) => {
         });
       })
   }).then((result) => {
-    const numstats = result.numStatsStaged;
+    const numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
     const status = result.status;
     status.inConflict = false;
 
