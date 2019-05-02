@@ -176,16 +176,14 @@ git.status = (repoPath, file) => {
   return Bluebird.props({
     numStatsStaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: git([gitOptionalLocks, 'diff-index', 'HEAD'], repoPath)
-      .then((lines) => {
-        if (lines && lines.trim() != '') {
-          // only run diff on unstaged files only when there are unstaged changes
-          return git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
-            .then(gitParser.parseGitStatusNumstat);
-        } else {
-          return {}
-        }
-      }).catch(() => { return {}; }),
+    numStatsUnstaged: Bluebird.resolve().then(() => {
+      if (config.isEnableNumStat) {
+        return git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
+          .then(gitParser.parseGitStatusNumstat);
+      } else {
+        return {}
+      }
+    }),
     status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
