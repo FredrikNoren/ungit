@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const startLaunchTime = Date.now();
 const config = require('../src/config');
-const open = require('opn');
+const open = require('open');
 const path = require('path');
 const child_process = require('child_process');
 
