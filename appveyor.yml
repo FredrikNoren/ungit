@@ -12,7 +12,6 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
-  - npm cach clean
   - npm install
   - npm install -g grunt-cli
 
