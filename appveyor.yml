@@ -2,7 +2,7 @@ skip_branch_with_pr: true
 
 environment:
   matrix:
-  - nodejs_version: "7.10"
+  - nodejs_version: "8.0"
 
 branches:
   only:
