@@ -162,7 +162,10 @@ const defaultConfig = {
   isDisableProgressBar: false,
 
   // git binary path, not including git binary path. (i.e. /bin or /usr/bin/)
-  gitBinPath: null
+  gitBinPath: null,
+
+  // when false, disable numstats durin status for performance.  see #1193
+  isEnableNumStat: true,
 };
 
 // Works for now but should be moved to bin/ungit
@@ -249,6 +252,8 @@ let argv = yargs
 .describe('isDisableProgressBar', 'disable progress bar (front end api)')
 .boolean('isDisableProgressBar')
 .describe('gitBinPath', 'git binary path, not including git binary path. (i.e. /bin or /usr/bin/)')
+.describe('isEnableNumStat', 'when false, disables numstats during git status for performance.  see #1193')
+.boolean('isEnableNumStat')
 ;
 
 const argvConfig = argv.argv;

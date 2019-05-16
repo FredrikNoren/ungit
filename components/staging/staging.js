@@ -337,6 +337,12 @@ class FileViewModel {
     this.isShowingDiffs = ko.observable(false);
     this.additions = ko.observable('');
     this.deletions = ko.observable('');
+    this.modified = ko.computed(() => {
+      // only show modfied whe not removed, not conflicted, not new, not renamed
+      // and length of additions and deletions is 0.
+      return !this.removed() && !this.conflict() && !this.isNew() &&
+        !this.renamed() && this.additions().length === 0 && this.deletions().length === 0;
+    });
     this.fileType = ko.observable('text');
     this.patchLineList = ko.observableArray();
     this.diff = ko.observable();

@@ -88,6 +88,7 @@
             <span class="deleted" data-bind="visible: removed">Removed</span>
             <span class="additions" data-bind="text: additions"></span>
             <span class="deletions" data-bind="text: deletions"></span>
+            <span class="modified" data-bind="visible: modified">Modified</span>
             <span class="conflict" data-bind="visible: conflict"><span class="temporary">Conflicts</span><span class="launchmergetool explanation" data-bind="visible: mergeTool, click: launchMergeTool">Launch Merge Tool</span><span class="markresolved explanation" data-bind="click: resolveConflict">Mark as Resolved</span></span>
             <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
                 data-toggle="tooltip" data-placement="top" title="Patch changes">Patch</span>
