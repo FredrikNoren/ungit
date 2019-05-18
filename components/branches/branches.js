@@ -51,7 +51,6 @@ class BranchesViewModel {
         this.branchesAndLocalTags().forEach((branch) => this.filteredBranchesAndLocalTags.push(branch));
       }
     });
-    // this.refSearchFormVisible = ko.observable(false);
   }
 
   checkoutBranch(branch) { branch.checkout(); }
