@@ -17,6 +17,11 @@ class BranchesViewModel {
     this.repoPath = repoPath;
     this.server = server;
     this.branchesAndLocalTags = ko.observableArray();
+    this.filteredBranchesAndLocalTags = ko.observableArray();
+    this.branchesAndLocalTags.subscribe((branches) => {
+      this.filteredBranchesAndLocalTags.removeAll();
+      branches.forEach((branch) => this.filteredBranchesAndLocalTags.push(branch))
+    });
     this.current = ko.observable();
     this.isShowRemote = ko.observable(storage.getItem(showRemote) != 'false');
     this.isShowBranch = ko.observable(storage.getItem(showBranch) != 'false');
@@ -36,6 +41,17 @@ class BranchesViewModel {
       }
     });
     this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
+    this.branchSearchString = ko.observable();
+    this.branchSearchString.subscribe((value) => {
+      const filteredBranches = this.updateBranchSearchString(this.branchesAndLocalTags, value);
+      this.filteredBranchesAndLocalTags.removeAll();
+      if (filteredBranches){
+        filteredBranches.forEach((branch) => this.filteredBranchesAndLocalTags.push(branch));
+      } else {
+        this.branchesAndLocalTags().forEach((branch) => this.filteredBranchesAndLocalTags.push(branch));
+      }
+    });
+    // this.refSearchFormVisible = ko.observable(false);
   }
 
   checkoutBranch(branch) { branch.checkout(); }
@@ -66,7 +82,7 @@ class BranchesViewModel {
             return a.current() ? -1 : 1;
           } else if (a.isRemoteBranch === b.isRemoteBranch) {
             if (a.name < b.name) {
-               return -1;
+              return -1;
             } if (a.name > b.name) {
               return 1;
             }
@@ -92,6 +108,20 @@ class BranchesViewModel {
       }).catch((e) => this.server.unhandledRejection(e));
 
     return Promise.all([currentBranchProm, refsProm])
+  }
+
+  updateBranchSearchString(availableBranches, searchString) {
+    if (!searchString.length) {
+      return null;
+    }
+    const filteredBranches = [];
+    availableBranches().forEach((item) => {
+      if (item.label.includes(searchString)) {
+        filteredBranches.push(item);
+      }
+    });
+
+    return filteredBranches;
   }
 
   branchRemove(branch) {
