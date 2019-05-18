@@ -19,8 +19,7 @@ class BranchesViewModel {
     this.branchesAndLocalTags = ko.observableArray();
     this.filteredBranchesAndLocalTags = ko.observableArray();
     this.branchesAndLocalTags.subscribe((branches) => {
-      this.filteredBranchesAndLocalTags.removeAll();
-      branches.forEach((branch) => this.filteredBranchesAndLocalTags.push(branch))
+      this.branchSearchString.notifySubscribers(this.branchSearchString());
     });
     this.current = ko.observable();
     this.isShowRemote = ko.observable(storage.getItem(showRemote) != 'false');
@@ -110,7 +109,7 @@ class BranchesViewModel {
   }
 
   updateBranchSearchString(availableBranches, searchString) {
-    if (!searchString.length) {
+    if (!(searchString && searchString.length)) {
       return null;
     }
     const filteredBranches = [];
