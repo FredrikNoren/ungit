@@ -18,7 +18,7 @@ class BranchesViewModel {
     this.server = server;
     this.branchesAndLocalTags = ko.observableArray();
     this.filteredBranchesAndLocalTags = ko.observableArray();
-    this.branchesAndLocalTags.subscribe((branches) => {
+    this.branchesAndLocalTags.subscribe(() => {
       this.branchSearchString.notifySubscribers(this.branchSearchString());
     });
     this.current = ko.observable();
@@ -41,14 +41,13 @@ class BranchesViewModel {
     });
     this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
     this.branchSearchString = ko.observable();
-    this.branchSearchString.subscribe((value) => {
-      const filteredBranches = this.updateBranchSearchString(this.branchesAndLocalTags, value);
+    this.branchSearchString.subscribe((searchString) => {
       this.filteredBranchesAndLocalTags.removeAll();
-      if (filteredBranches){
-        filteredBranches.forEach((branch) => this.filteredBranchesAndLocalTags.push(branch));
-      } else {
-        this.branchesAndLocalTags().forEach((branch) => this.filteredBranchesAndLocalTags.push(branch));
-      }
+      this.branchesAndLocalTags().forEach((branch) => {
+        if (!searchString || branch.label.includes(searchString)) {
+          this.filteredBranchesAndLocalTags.push(branch);
+        }
+      });
     });
   }
 
@@ -106,20 +105,6 @@ class BranchesViewModel {
       }).catch((e) => this.server.unhandledRejection(e));
 
     return Promise.all([currentBranchProm, refsProm])
-  }
-
-  updateBranchSearchString(availableBranches, searchString) {
-    if (!(searchString && searchString.length)) {
-      return null;
-    }
-    const filteredBranches = [];
-    availableBranches().forEach((item) => {
-      if (item.label.includes(searchString)) {
-        filteredBranches.push(item);
-      }
-    });
-
-    return filteredBranches;
   }
 
   branchRemove(branch) {
