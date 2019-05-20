@@ -41,14 +41,14 @@ class BranchesViewModel {
     });
     this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
     this.branchSearchString = ko.observable();
-    this.branchSearchString.subscribe((searchString) => {
+    this.branchSearchString.subscribe(_.debounce((searchString) => {
       this.filteredBranchesAndLocalTags.removeAll();
       this.branchesAndLocalTags().forEach((branch) => {
         if (!searchString || branch.label.includes(searchString)) {
           this.filteredBranchesAndLocalTags.push(branch);
         }
       });
-    });
+    }, 200));
   }
 
   checkoutBranch(branch) { branch.checkout(); }
