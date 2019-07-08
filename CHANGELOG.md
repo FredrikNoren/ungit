@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- 1.4.45: Improve styling of .gitignore edit dialog
 - 1.4.44: add config to disable numstat in staged diff to better performance [#1193](https://github.com/FredrikNoren/ungit/issues/1193)
 - 1.4.43:
   - fix gitignore manual edit not being saved [644](https://github.com/FredrikNoren/ungit/issues/644)
