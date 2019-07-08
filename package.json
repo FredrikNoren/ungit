@@ -48,7 +48,6 @@
     "nprogress": "^0.2.0",
     "octicons": "3.5.0",
     "open": "~6.1.0",
-    "os-homedir": "~2.0.0",
     "passport": "~0.4.0",
     "passport-local": "~1.0.0",
     "raven-js": "~3.27.0",
