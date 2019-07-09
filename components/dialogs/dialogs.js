@@ -155,7 +155,7 @@ class TooManyFilesDialogViewModel extends PromptDialogViewModel {
 
 class TextEditDialog extends PromptDialogViewModel {
   constructor(title, content) {
-    super(title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px;width: 100%">${content}</textarea>`);
+    super(title, `<textarea class="text-area-content form-control" spellcheck="false" style="height: 250px; width: 100%; font-family: monospace; resize: vertical;">${content}</textarea>`);
     this.taDialogName('text-edit-dialog');
     this.result = ko.observable(false);
     const self = this;
