@@ -39,7 +39,9 @@ const gitExecutorProm = (args, retryCount) => {
       let isCompleted = false;
       let stdout = '';
       let stderr = '';
-      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, detached: false }
+      let env = JSON.parse(JSON.stringify(process.env));
+      env['LC_ALL'] = 'C'
+      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, detached: false, env: env }
       const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
       if (args.timeout) {
         setTimeout(() => {
