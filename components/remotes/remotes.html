@@ -10,7 +10,7 @@
     <!-- ko foreach: remotes -->
     <li>
       <a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a>
-      <a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a href="#" class="list-link list-remove octicon octicon-x" data-bind="click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
     <li class="divider"></li>
