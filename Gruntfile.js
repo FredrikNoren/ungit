@@ -12,9 +12,9 @@ const maxConcurrency = 5;
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
   const lessFiles = {
-    "public/css/styles.css": ["public/less/styles.less", "public/vendor/css/animate.css", "public/less/d2h.less"]
-  }
-  fs.readdirSync("./components").map((component) => `components/${component}/${component}`)
+    'public/css/styles.css': ['public/less/styles.less', 'public/vendor/css/animate.css', 'public/less/d2h.less']
+  };
+  fs.readdirSync('./components').map((component) => `components/${component}/${component}`)
     .forEach((str) => lessFiles[`${str}.css`] = `${str}.less`);
 
   grunt.initConfig({
@@ -104,10 +104,10 @@ module.exports = (grunt) => {
     imageEmbed: {
       default: {
         files: {
-          "public/css/styles.css": [ "public/css/styles.css" ],
-          "components/graph/graph.css": ["components/graph/graph.css"],
-          "components/header/header.css": ["components/header/header.css"],
-          "components/staging/staging.css": ["components/staging/staging.css"],
+          'public/css/styles.css': [ 'public/css/styles.css' ],
+          'components/graph/graph.css': ['components/graph/graph.css'],
+          'components/header/header.css': ['components/header/header.css'],
+          'components/staging/staging.css': ['components/staging/staging.css'],
         },
         options: {
           deleteAfterEncoding: false
@@ -184,8 +184,6 @@ module.exports = (grunt) => {
       main: {
         files: [
           // includes files within path
-          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.ttf'], dest: 'public/css/' },
-          { expand: true, flatten: true, src: ['node_modules/octicons/octicons/octicons.woff'], dest: 'public/css/' },
           { expand: true, flatten: true, src: ['node_modules/nprogress/nprogress.css'], dest: 'public/css/' },
           { expand: true, flatten: true, src: ['node_modules/jquery-ui-bundle/jquery-ui.min.css'], dest: 'public/css/'},
           { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' }
@@ -300,6 +298,7 @@ module.exports = (grunt) => {
     b.require('nprogress', { expose: 'nprogress' });
     b.require('jquery', { expose: 'jquery' });
     b.require('dnd-page-scroll', { expose: 'dnd-page-scroll' });
+    b.require('@primer/octicons', { expose: 'octicons' });
     const outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', () => done());
     b.bundle().pipe(outFile);
@@ -341,7 +340,7 @@ module.exports = (grunt) => {
 
   const bumpDependency = (packageJson, packageName) => {
     return new Bluebird((resolve, reject) => {
-      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies'
+      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
       let currentVersion = packageJson[dependencyType][packageName];
       if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
       npm.commands.show([packageName, 'versions'], true, (err, data) => {
@@ -356,24 +355,24 @@ module.exports = (grunt) => {
         resolve();
       });
     });
-  }
+  };
 
   const updatePackageJsonBuildVersion = (commitHash) => {
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
     packageJson.version += `+${commitHash}`;
     fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-  }
+  };
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
     const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
       console.log('Skipping travis npm publish');
       return done();
     }
-    childProcess.exec("git rev-parse --short HEAD", (err, stdout, stderr) => {
+    childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
       const hash = stdout.trim();
       updatePackageJsonBuildVersion(hash);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec("npm publish", (err) => { done(err); });
+      childProcess.exec('npm publish', (err) => { done(err); });
     });
   });
 
@@ -388,9 +387,9 @@ module.exports = (grunt) => {
     const done = this.async();
 
     fs.readdirAsync('./nmclicktests')
-      .then((files) => files.filter((file) => file.startsWith("spec.")))
+      .then((files) => files.filter((file) => file.startsWith('spec.')))
       .then((tests) => {
-        const genericIndx = tests.indexOf("spec.generic.js")
+        const genericIndx = tests.indexOf('spec.generic.js');
         if (genericIndx > -1) {
           tests.splice(0, 0, tests.splice(genericIndx, 1)[0]);
         }
@@ -398,8 +397,8 @@ module.exports = (grunt) => {
       }).then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Bluebird.map(tests, (file) => {
-          let output = "";
-          const outStream = (data) => output += data
+          let output = '';
+          const outStream = (data) => output += data;
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
           return new Bluebird((resolve, reject) => {
@@ -422,9 +421,9 @@ module.exports = (grunt) => {
         let isSuccess = true;
         results.forEach((result) => {
           if (!result.isSuccess) {
-            grunt.log.writeln(`---- start of ${result.name} log ----`)
+            grunt.log.writeln(`---- start of ${result.name} log ----`);
             grunt.log.writeln(result.output);
-            grunt.log.writeln(`----- end of ${result.name} log -----`)
+            grunt.log.writeln(`----- end of ${result.name} log -----`);
             isSuccess = false;
           }
         });
@@ -437,15 +436,13 @@ module.exports = (grunt) => {
     grunt.log.writeln('Bumping dependencies...');
     npm.load(() => {
       const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies))
+      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
 
       const bumps = Bluebird.map(keys, (dep) => {
         // winston 3.x has different API
         if (dep == 'winston') return;
         // babel 7.x.x has alot of changes.... :(
         if (dep.indexOf('babel') > -1) return;
-        // Octicon moved to SCSS instead of less
-        if (dep == 'octicons') return;
 
         return bumpDependency(tempPackageJson, dep);
       });

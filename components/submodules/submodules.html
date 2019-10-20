@@ -10,8 +10,8 @@
     <!-- ko foreach: submodules -->
     <li>
       <a href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
-      <a href="#" class="list-link list-url octicon octicon-link-external" data-bind="click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
-      <a href="#" class="list-link list-remove octicon octicon-x" data-bind="click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a href="#" class="list-link list-url" data-bind="html: $parent.linkIcon, click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
+      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
     <!-- ko if: submodules().length-->

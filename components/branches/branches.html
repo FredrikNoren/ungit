@@ -1,6 +1,6 @@
 <div class="btn-group branch">
   <button type="button" class="btn btn-default btn-main" data-bind="click: updateRefs">
-    <span class="octicon octicon-git-branch"></span>
+    <span data-bind="html: branchIcon"></span>
     <span data-bind="text: fetchLabel"></span>
   </button>
   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -24,8 +24,8 @@
     <div class="dropdown-divider"></div>
     <!-- ko foreach: branchesAndLocalTags -->
     <li>
-      <a href="#" data-bind="html: displayName, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
-      <a href="#" class="list-link list-remove octicon octicon-x" data-bind="click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a href="#" data-bind="html: displayHtml(), click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
+      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
   </ul>
