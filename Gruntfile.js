@@ -186,7 +186,8 @@ module.exports = (grunt) => {
           // includes files within path
           { expand: true, flatten: true, src: ['node_modules/nprogress/nprogress.css'], dest: 'public/css/' },
           { expand: true, flatten: true, src: ['node_modules/jquery-ui-bundle/jquery-ui.min.css'], dest: 'public/css/'},
-          { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' }
+          { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' },
+          { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js.map'], dest: 'public/js/' }
         ]
       },
       electron: {
