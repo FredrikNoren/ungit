@@ -1,5 +1,5 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
@@ -14,6 +14,7 @@ class HeaderViewModel {
     this.currentVersion = ungit.version;
     this.refreshButton = components.create('refreshbutton');
     this.showAddToRepoListButton = ko.computed(() => this.path() && !this.app.repoList().includes(this.path()));
+    this.addIcon = octicons.plus.toSVG({ 'height': 18 });
   }
 
   updateNode(parentElement) {
