@@ -90,8 +90,6 @@ class StagingViewModel {
     this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
     this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
     this.refreshContentThrottled();
-    if (window.location.search.includes('noheader=true'))
-      this.refreshButton = components.create('refreshbutton');
     this.loadAnyway = false;
     this.isDiagOpen = false;
     this.mutedTime = null;
