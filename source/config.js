@@ -39,7 +39,7 @@ const defaultConfig = {
   authentication: false,
 
   // Map of username/passwords which are granted access.
-  users: undefined,
+  users: {},
 
   // Set to false to show rebase and merge on drag and drop on all nodes.
   showRebaseAndMergeOnlyOnRefs: true,
