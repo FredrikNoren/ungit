@@ -1,4 +1,3 @@
-
 const ko = require('knockout');
 const moment = require('moment');
 const components = require('ungit-components');
@@ -20,7 +19,8 @@ class StashItemViewModel {
       fileLineDiffs: data.fileLineDiffs.slice(),
       sha1: this.sha1,
       repoPath: stash.repoPath,
-      server: stash.server
+      server: stash.server,
+      showDiffButtons: ko.observable(true)
     }));
   }
 
@@ -79,7 +79,7 @@ class StashViewModel {
         }
       }).catch(err => {
         if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
-      })
+      });
   }
 
   toggleShowStash() {
