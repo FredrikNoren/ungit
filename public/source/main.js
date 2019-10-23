@@ -43,7 +43,7 @@ var adBlocker = require('just-detect-adblock');
 
   programEvents.add(function(event) {
     if (event.event === 'init-tooltip') {
-      $('.bootstrap-tooltip').tooltip();
+      $('.bootstrap-tooltip').tooltip().removeClass('bootstrap-tooltip');
     }
   });
 
