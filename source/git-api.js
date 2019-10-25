@@ -679,13 +679,13 @@ exports.registerApi = (env) => {
       });
   });
   app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    if (!req.body.data || req.body.data == '') {
-      return res.status(500).json({ message: "Invalid .gitignore content"});
+    if (!req.body.data && req.body.data !== '') {
+      return res.status(400).json({ message: 'Invalid .gitignore content'});
     }
-    fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
+    fs.writeFileAsync(path.join(req.body.path, '.gitignore'), req.body.data)
       .then(() => res.status(200).json({}))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path))
-      .catch((e) => res.status(500).json(e))
+      .catch((e) => res.status(500).json(e));
   });
 
   if (config.dev) {
