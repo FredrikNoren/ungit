@@ -30,11 +30,8 @@ class BranchesViewModel {
     this.isShowRemote.subscribe(setLocalStorageAndUpdate.bind(null, showRemote));
     this.isShowBranch.subscribe(setLocalStorageAndUpdate.bind(null, showBranch));
     this.isShowTag.subscribe(setLocalStorageAndUpdate.bind(null, showTag));
-    this.fetchLabel = ko.computed(() => {
-      if (this.current()) {
-        return this.current();
-      }
-    });
+    this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
+    this.listRefsEnabled = ko.computed(() => this.branchesAndLocalTags().length > 0);
     this.branchIcon = octicons['git-branch'].toSVG({ 'height': 18 });
     this.closeIcon = octicons.x.toSVG({ 'height': 18 });
     this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
