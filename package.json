@@ -7,8 +7,10 @@
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "grunt test",
+    "unittest": "grunt unittest",
     "build": "grunt",
-    "watch": "grunt watch"
+    "watch": "grunt watch",
+    "travisnpmpublish": "grunt travisnpmpublish"
   },
   "repository": {
     "type": "git",
