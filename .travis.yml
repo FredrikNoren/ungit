@@ -8,8 +8,6 @@ branches:
   only:
     - master
 env:
-  global:
-    - CXX=g++-4.8
   matrix:
     - GIT_VERSION=default
     - GIT_VERSION=edge
@@ -21,11 +19,9 @@ matrix:
       env: GIT_VERSION=edge
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - g++-4.8
       - xvfb
+      - libgconf-2-4
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
