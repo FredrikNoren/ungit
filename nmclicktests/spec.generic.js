@@ -46,8 +46,8 @@ describe('[GENERIC]', () => {
   it('Should be able to add a new file to .gitignore', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`)
       .wait('.files .file .btn-default')
-      .ug.click('.files span.ignore')
-      .ug.click('.files span.ignore')
+      .ug.click('.files button.ignore')
+      .ug.click('.files button.ignore')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });
 
@@ -82,7 +82,7 @@ describe('[GENERIC]', () => {
       .wait('.files .file .btn-default')
       .ug.click('.files button')
       .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
-      .ug.click('.files span.discard')
+      .ug.click('.files button.discard')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default')
   });
@@ -121,7 +121,7 @@ describe('[GENERIC]', () => {
     return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
       .wait('.files .file .additions')
       .wait('.files .file .deletions')
-      .ug.click('.files span.discard')
+      .ug.click('.files button.discard')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.files .file .btn-default');
   });

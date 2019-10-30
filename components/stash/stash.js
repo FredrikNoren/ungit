@@ -1,4 +1,5 @@
 const ko = require('knockout');
+const octicons = require('octicons');
 const moment = require('moment');
 const components = require('ungit-components');
 const storage = require('ungit-storage');
@@ -22,6 +23,7 @@ class StashItemViewModel {
       server: stash.server,
       showDiffButtons: ko.observable(true)
     }));
+    this.dropIcon = octicons.x.toSVG({ 'height': 18 });
   }
 
   apply() {

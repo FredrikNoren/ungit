@@ -1,5 +1,5 @@
 <div class="stash-toggle stash-toggle-text" data-bind="click: toggleShowStash, visible: !isShow()" >
-  <span class="glyphicon glyphicon-chevron-up"></span>
+  <span class="glyphicon glyphicon-chevron-right"></span>
   Stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
 <div class="panel panel-default stash" data-bind="visible: visible">
@@ -20,7 +20,7 @@
           <div class="diff-inner" data-bind="component: commitDiff"></div>
         </div>
         <!-- /ko -->
-        <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop" data-toggle="tooltip" data-placement="top" title="Drop this stash">&#x2716;</button>
+        <button type="button" class="btn btn-default list-item-remove" data-bind="html: dropIcon, click: drop" data-toggle="tooltip" data-placement="top" title="Drop this stash"></button>
       </div>
     </div>
   </div>

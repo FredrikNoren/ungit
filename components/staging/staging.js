@@ -1,14 +1,14 @@
 const ko = require('knockout');
-const inherits = require('util').inherits;
+const _ = require('lodash');
+const promise = require('bluebird');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
-const _ = require('lodash');
-const promise = require("bluebird");
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 // when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
 const muteGraceTimeDuration = 60 * 1000 * 5;
-const mergeTool = ungit.config.mergeTool
+const mergeTool = ungit.config.mergeTool;
 
 components.register('staging', args => new StagingViewModel(args.server, args.repoPath, args.graph));
 
@@ -25,7 +25,7 @@ class StagingViewModel {
       this.commitMessageTitleCount(value.length);
     });
     this.commitMessageBody = ko.observable();
-    this.wordWrap = components.create("textdiff.wordwrap");
+    this.wordWrap = components.create('textdiff.wordwrap');
     this.textDiffType = components.create('textdiff.type');
     this.whiteSpace = components.create('textdiff.whitespace');
     this.inRebase = ko.observable(false);
@@ -35,15 +35,15 @@ class StagingViewModel {
       if (this.inMerge()) {
         this.conflictContinue = this.conflictResolution.bind(this, '/merge/continue');
         this.conflictAbort = this.conflictResolution.bind(this, '/merge/abort');
-        return "Merge";
+        return 'Merge';
       } else if (this.inRebase()) {
         this.conflictContinue = this.conflictResolution.bind(this, '/rebase/continue');
         this.conflictAbort = this.conflictResolution.bind(this, '/rebase/abort');
-        return "Rebase";
+        return 'Rebase';
       } else if (this.inCherry()) {
         this.conflictContinue = this.commit;
         this.conflictAbort = this.discardAllChanges;
-        return "Cherry-pick";
+        return 'Cherry-pick';
       } else {
         this.conflictContinue = undefined;
         this.conflictAbort = undefined;
@@ -66,21 +66,21 @@ class StagingViewModel {
     this.showCancelButton = ko.computed(() => this.amend() || this.emptyCommit());
     this.commitValidationError = ko.computed(() => {
       if (this.conflictText()) {
-        if (this.files().some((file) => file.conflict())) return "Files in conflict";
+        if (this.files().some((file) => file.conflict())) return 'Files in conflict';
       } else {
         if (!this.emptyCommit() && !this.amend() && !this.files().some((file) => file.editState() === 'staged' || file.editState() === 'patched')) {
-          return "No files to commit";
+          return 'No files to commit';
         }
         if (!this.commitMessageTitle()) {
-          return "Provide a title"
+          return 'Provide a title';
         }
 
         if (this.textDiffType.value() === 'sidebysidediff') {
           const patchFiles = this.files().filter(file => file.editState() === 'patched');
-          if (patchFiles.length > 0) return "Cannot patch with side by side view."
+          if (patchFiles.length > 0) return 'Cannot patch with side by side view.';
         }
       }
-      return ""
+      return '';
     });
     this.toggleSelectAllGlyphClass = ko.computed(() => {
       if (this.allStageFlag()) return 'glyphicon-unchecked';
@@ -90,11 +90,11 @@ class StagingViewModel {
     this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
     this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
     this.refreshContentThrottled();
-    if (window.location.search.includes('noheader=true'))
-      this.refreshButton = components.create('refreshbutton');
     this.loadAnyway = false;
     this.isDiagOpen = false;
     this.mutedTime = null;
+    this.discardIcon = octicons.x.toSVG({ 'height': 18 });
+    this.ignoreIcon = octicons.skip.toSVG({ 'height': 18 });
   }
 
   updateNode(parentElement) {
@@ -208,7 +208,7 @@ class StagingViewModel {
   }
 
   toggleEmptyCommit() {
-    this.commitMessageTitle("Empty commit");
+    this.commitMessageTitle('Empty commit');
     this.commitMessageBody();
     this.emptyCommit(true);
   }
@@ -221,7 +221,7 @@ class StagingViewModel {
       element.diff().invalidateDiff();
       element.patchLineList.removeAll();
       element.isShowingDiffs(false);
-      element.editState(element.editState() === 'patched' ? 'none' : element.editState())
+      element.editState(element.editState() === 'patched' ? 'none' : element.editState());
     }
     this.amend(false);
     this.emptyCommit(false);
@@ -251,7 +251,7 @@ class StagingViewModel {
     this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files, amend: this.amend(), emptyCommit: this.emptyCommit() })
       .then(() => {
         this.resetMessages();
-        return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote() })
+        return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote() });
       })
       .catch(err => {
         if (err.errorCode == 'non-fast-forward') {
@@ -291,7 +291,7 @@ class StagingViewModel {
       .closeThen((diag) => {
         if (diag.result()) {
           this.server.postPromise('/discardchanges', { path: this.repoPath(), all: true })
-            .catch((e) => this.server.unhandledRejection(e))
+            .catch((e) => this.server.unhandledRejection(e));
         }
       });
   }
@@ -416,7 +416,7 @@ class FileViewModel {
             this.server.postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
               .catch((e) => this.server.unhandledRejection(e));
           }
-          if (diag.result() === "mute") this.staging.mutedTime = new Date().getTime();
+          if (diag.result() === 'mute') this.staging.mutedTime = new Date().getTime();
         });
     }
   }
