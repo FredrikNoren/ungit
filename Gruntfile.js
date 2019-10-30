@@ -208,6 +208,17 @@ module.exports = (grunt) => {
         }
       }
     },
+    zip_directories: {
+      electron: {
+        files: [{
+          filter: 'isDirectory',
+          expand: true,
+          cwd: './build',
+          dest: './dist',
+          src: '*'
+        }]
+      }
+    },
     mocha_istanbul: {
       unit: {
         src: './test',
@@ -343,6 +354,8 @@ module.exports = (grunt) => {
     });
   });
 
+  grunt.registerTask('electronpublish', ['zip_directories:electron']);
+
   /**
    * Run clicktest in parallel at test suite level.
    * This test does intermittently fails depends on the maxConcurrency level set
@@ -445,6 +458,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
   grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);

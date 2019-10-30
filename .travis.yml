@@ -39,3 +39,15 @@ before_script:
   - DISPLAY= npm run package
 after_success:
   - npm run travisnpmpublish
+before_deploy:
+  - npm run electronpublish
+deploy:
+  provider: releases
+  api_key: ${GITHUB_TOKEN}
+  file_glob: true
+  file: dist/*.zip
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $GIT_VERSION = edge
