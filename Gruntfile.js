@@ -365,7 +365,7 @@ module.exports = (grunt) => {
   grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
     const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
-      console.log('Skipping travis npm publish');
+      grunt.log.writeln('Skipping travis npm publish');
       return done();
     }
     childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
