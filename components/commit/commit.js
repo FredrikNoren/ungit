@@ -63,7 +63,8 @@ class CommitViewModel {
       fileLineDiffs: this.fileLineDiffs(),
       sha1: this.sha1,
       repoPath: this.repoPath,
-      server: this.server
+      server: this.server,
+      showDiffButtons: this.selected
     }));
   }
 

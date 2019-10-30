@@ -20,7 +20,8 @@ class StashItemViewModel {
       fileLineDiffs: data.fileLineDiffs.slice(),
       sha1: this.sha1,
       repoPath: stash.repoPath,
-      server: stash.server
+      server: stash.server,
+      showDiffButtons: ko.observable(true)
     }));
     this.dropIcon = octicons.x.toSVG({ 'height': 18 });
   }
