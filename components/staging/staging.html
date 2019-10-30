@@ -1,4 +1,3 @@
-
 <div class="staging panel panel-default" data-bind="css: { commitValidationError: commitValidationError }">
   <div class="panel-body">
     <div class="arrowContainer arrowDown">
@@ -92,10 +91,8 @@
             <span class="conflict" data-bind="visible: conflict"><span class="temporary">Conflicts</span><span class="launchmergetool explanation" data-bind="visible: mergeTool, click: launchMergeTool">Launch Merge Tool</span><span class="markresolved explanation" data-bind="click: resolveConflict">Mark as Resolved</span></span>
             <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
                 data-toggle="tooltip" data-placement="top" title="Patch changes">Patch</span>
-            <span class="ignore bootstrap-tooltip" data-bind="click: ignoreFile"
-                data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
-            <span class="discard bootstrap-tooltip" data-bind="click: discardChanges"
-                data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
+            <button class="ignore btn bootstrap-tooltip" data-bind="html: $parent.ignoreIcon, click: ignoreFile" data-toggle="tooltip" data-placement="top" title="Add to .gitignore"></button>
+            <button class="discard btn bootstrap-tooltip" data-bind="html: $parent.discardIcon, click: discardChanges" data-toggle="tooltip" data-placement="top" title="Discard changes"></button>
             <!-- ko if: isShowingDiffs -->
             <div class="diffContainer" data-bind="component: diff"></div>
             <!-- /ko -->

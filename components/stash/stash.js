@@ -1,5 +1,5 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const moment = require('moment');
 const components = require('ungit-components');
 const storage = require('ungit-storage');
@@ -22,6 +22,7 @@ class StashItemViewModel {
       repoPath: stash.repoPath,
       server: stash.server
     }));
+    this.dropIcon = octicons.x.toSVG({ 'height': 18 });
   }
 
   apply() {
@@ -79,7 +80,7 @@ class StashViewModel {
         }
       }).catch(err => {
         if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
-      })
+      });
   }
 
   toggleShowStash() {

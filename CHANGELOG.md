@@ -3,13 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 Use the following format for additions: ` - VERSION: [feature/patch (if applicable)] Short description of change. Links to relevant issues/PRs.`
 
+- Unreleased:
+  - Updated Octicons
 - 1.4.48: fix the width value of the header logo [#1221](https://github.com/FredrikNoren/ungit/pull/1221)
-- 1.4.47: make diff2html line numbers and +/- prefixes unnselectable [#1214](https://github.com/FredrikNoren/ungit/issues/1214), [#1215](https://github.com/FredrikNoren/ungit/pull/1215)
+- 1.4.47: make diff2html line numbers and +/- prefixes unselectable [#1214](https://github.com/FredrikNoren/ungit/issues/1214), [#1215](https://github.com/FredrikNoren/ungit/pull/1215)
 - 1.4.46: force git out put to be in English within ungit [#1208](https://github.com/FredrikNoren/ungit/pull/1208)
-- 1.4.45: Improve styling of .gitignore edit dialog
+- 1.4.45: Improve styling of .gitignore edit dialog [#1205](https://github.com/FredrikNoren/ungit/pull/1205)
 - 1.4.44: add config to disable numstat in staged diff to better performance [#1193](https://github.com/FredrikNoren/ungit/issues/1193)
 - 1.4.43:
-  - fix gitignore manual edit not being saved [644](https://github.com/FredrikNoren/ungit/issues/644)
+  - fix gitignore manual edit not being saved [#644](https://github.com/FredrikNoren/ungit/issues/644)
   - fix issue with detached git processes on some OS and timeout not being enforced.
   - simplify `maxSearchIteration` enforcement for git.log()
   - change `alwaysLoadActiveBranch` boolean config to `maxActiveBranchSearchIteration` numeric config
@@ -38,13 +40,13 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
 - 1.4.29:
   - Add `--no-optional-locks` if git version is appropriate [#1105](https://github.com/FredrikNoren/ungit/issues/1105)
   - Ensure ungit server to bind to `127.0.0.1` [#988](https://github.com/FredrikNoren/ungit/issues/988)
-  - Add node highlight on mouse hover on relationsip path [#1093](https://github.com/FredrikNoren/ungit/issues/1093)
+  - Add node highlight on mouse hover on relationship path [#1093](https://github.com/FredrikNoren/ungit/issues/1093)
 - 1.4.28: adding raven locally for offline access. [#1107](https://github.com/FredrikNoren/ungit/pull/1107)
 - 1.4.27: logic change for the merge conflict resolution
 - 1.4.26: add a way to preconfigure repo lists [#1106](https://github.com/FredrikNoren/ungit/issues/1106)
 - 1.4.25: add git pgp signing docs and code [#740](https://github.com/FredrikNoren/ungit/issues/740)
 - 1.4.24:
-  - change `/api/log` -> `/api/gitlog` as soem ad blockers really hates This
+  - change `/api/log` -> `/api/gitlog` as some ad blockers really hates This
   - Fix excessive error messaging when disconnected from internet
   - Fix Raven initialization error when disconnected from internet
 - 1.4.23:

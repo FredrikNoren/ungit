@@ -19,6 +19,7 @@
     "0ungit-credentials-helper": "./bin/credentials-helper"
   },
   "dependencies": {
+    "@primer/octicons": "^9.2.0",
     "bluebird": "~3.5.4",
     "blueimp-md5": "~2.10.0",
     "body-parser": "~1.19.0",
@@ -46,7 +47,6 @@
     "npm": "~6.9.1-next.0",
     "npm-registry-client": "~8.6.0",
     "nprogress": "^0.2.0",
-    "octicons": "3.5.0",
     "open": "~6.1.0",
     "passport": "~0.4.0",
     "passport-local": "~1.0.0",
