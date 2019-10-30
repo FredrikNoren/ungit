@@ -1,10 +1,11 @@
 const ko = require('knockout');
+const _ = require('lodash');
+const moment = require('moment');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
-const _ = require('lodash');
-const moment = require('moment');
 const EdgeViewModel = require('./edge');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
@@ -67,6 +68,8 @@ class GraphViewModel {
     this.updateBranches();
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
+    this.searchIcon = octicons.search.toSVG({ 'height': 18 });
+    this.plusIcon = octicons.plus.toSVG({ 'height': 18 });
   }
 
   updateNode(parentElement) {
@@ -164,7 +167,7 @@ class GraphViewModel {
       // First occurrence of the branch, find an empty slot for the branch
       if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
         ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
-        ideologicalBranch.branchOrder = branchSlotCounter++
+        ideologicalBranch.branchOrder = branchSlotCounter++;
       }
 
       node.branchOrder(ideologicalBranch.branchOrder);
@@ -267,7 +270,7 @@ class GraphViewModel {
       .then(res => { this.checkedOutBranch(res); })
       .catch(err => {
         if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
-      })
+      });
   }
 
   setRemoteTags(remoteTags) {
@@ -278,10 +281,10 @@ class GraphViewModel {
       if (tag.name.includes('^{}')) {
         // This tag is a dereference tag, use this sha1.
         const tagRef = tag.name.slice(0, tag.name.length - '^{}'.length);
-        sha1Map[tagRef] = tag.sha1
+        sha1Map[tagRef] = tag.sha1;
       } else if (!sha1Map[tag.name]) {
         // If sha1 wasn't previously set, use this sha1
-        sha1Map[tag.name] = tag.sha1
+        sha1Map[tag.name] = tag.sha1;
       }
     });
 
