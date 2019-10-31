@@ -2,6 +2,9 @@ skip_branch_with_pr: true
 
 environment:
   matrix:
+  - nodejs_version: "" # latest
+  - nodejs_version: "12"
+  - nodejs_version: "10"
   - nodejs_version: "8"
 
 branches:
@@ -10,15 +13,17 @@ branches:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - git config --global user.email "test@testy.com"
-  - git config --global user.name "Test testy"
-  - npm install
-  - npm install -g grunt-cli
-
-test_script:
   - node --version
   - npm --version
-  - grunt
-  - npm test
+  - npm ci
 
-build: off
+build_script:
+  - npm run build
+
+before_test:
+  - git config --global user.email "test@testy.com"
+  - git config --global user.name "Test testy"
+  - git --version
+
+test_script:
+  - npm test
