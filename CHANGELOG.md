@@ -7,6 +7,8 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - Updated Octicons [#1224](https://github.com/FredrikNoren/ungit/pull/1224)
   - Hide diff buttons on hover [#1225](https://github.com/FredrikNoren/ungit/pull/1225)
   - Fix stash tooltips [#1227](https://github.com/FredrikNoren/ungit/pull/1227)
+  - Fix clearing .gitignore [#1236](https://github.com/FredrikNoren/ungit/pull/1236)
+  - Minor fixes to remove warnings [#1235](https://github.com/FredrikNoren/ungit/pull/1235), [#1237](https://github.com/FredrikNoren/ungit/pull/1237), [#1238](https://github.com/FredrikNoren/ungit/pull/1238), [#1239](https://github.com/FredrikNoren/ungit/pull/1239)
 - 1.4.48: fix the width value of the header logo [#1221](https://github.com/FredrikNoren/ungit/pull/1221)
 - 1.4.47: make diff2html line numbers and +/- prefixes unselectable [#1214](https://github.com/FredrikNoren/ungit/issues/1214), [#1215](https://github.com/FredrikNoren/ungit/pull/1215)
 - 1.4.46: force git out put to be in English within ungit [#1208](https://github.com/FredrikNoren/ungit/pull/1208)
