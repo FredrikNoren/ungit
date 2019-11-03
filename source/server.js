@@ -267,7 +267,7 @@ app.get('/serverdata.js', (req, res) => {
         `ungit.version = "${config.ungitDevVersion}";\n` +
         `ungit.platform = "${os.platform()}";\n` +
         `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
-      res.set('Content-Type', 'text/javascript');
+      res.set('Content-Type', 'application/javascript');
       res.send(text);
     });
 });
