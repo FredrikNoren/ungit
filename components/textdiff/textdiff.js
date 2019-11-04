@@ -16,45 +16,43 @@ const loadLimit = 100;
 
 class WordWrap {
   constructor() {
-    this.text = ko.observable("No Wrap");
     this.value = ko.observable(false);
-    this.value.subscribe(value => { this.text(value ? "Word Wrap" : "No Wrap"); });
-    this.toggle = () => { this.value(!this.value()); }
-    this.isActive = ko.computed(() => !!this.value());
+    this.toggle = () => {
+      this.value(!this.value());
+    };
+    this.isActive = ko.computed(() => this.value());
   }
 }
 
 class Type {
   constructor() {
-    this.text = ko.observable("Default");
-
-    if (!!ungit.config.diffType && ungit.config.diffType !== 'textdiff' && ungit.config.diffType !== 'sidebysidediff') {
-      ungit.config.diffType = 'textdiff';
+    if (!!ungit.config.diffType && ungit.config.diffType !== textDiff && ungit.config.diffType !== sideBySideDiff) {
+      ungit.config.diffType = textDiff;
       console.log('Config "diffType" must be either "textdiff" or "sidebysidediff".');
     }
 
     this.value = ko.observable(ungit.config.diffType || textDiff);
-    this.value.subscribe(value => {
-      this.text(value === textDiff ? "Default" : "Side By Side");
+    this.value.subscribe(() => {
       programEvents.dispatch({ event: 'invalidate-diff-and-render' });
     });
+
     this.toggle = () => {
       this.value(this.value() === textDiff ? sideBySideDiff : textDiff);
-    }
-    this.isActive = ko.computed(() => this.value() === 'textdiff');
+    };
+    this.isActive = ko.computed(() => this.value() === sideBySideDiff);
   }
 }
 
 class WhiteSpace {
   constructor() {
-    this.text = ko.observable("Show/Ignore white space diff");
     this.value = ko.observable(ungit.config.ignoreWhiteSpaceDiff);
-    this.value.subscribe(value => {
-      this.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
+    this.value.subscribe(() => {
       programEvents.dispatch({ event: 'invalidate-diff-and-render' });
     });
-    this.toggle = () => { this.value(!this.value()); }
-    this.isActive = ko.computed(() => !this.value());
+    this.toggle = () => {
+      this.value(!this.value());
+    };
+    this.isActive = ko.computed(() => this.value());
   }
 }
 
