@@ -67,7 +67,7 @@ describe('[REMOTES]', () => {
   it('Clone repository should bring you to repo page', () => {
     return environment.nm.insert('#cloneFromInput', testRepoPaths[1])
       .insert('#cloneToInput', testRepoPaths[2])
-      .ug.click('.uninited input[type="submit"]')
+      .ug.click('.uninited button[type="submit"]')
       .wait('.repository-view')
       .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
