@@ -5,8 +5,7 @@ var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 
-const Bluebird = require('bluebird');
-const { app, BrowserWindow } = require('electron')
+var { app, BrowserWindow } = require('electron');
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());

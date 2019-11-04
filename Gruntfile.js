@@ -189,7 +189,7 @@ module.exports = (grunt) => {
           { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' },
           { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js.map'], dest: 'public/js/' }
         ]
-      },
+      }
     },
     clean: {
       electron: ['./build'],
@@ -200,9 +200,11 @@ module.exports = (grunt) => {
     electron: {
       package: {
         options: {
-          electronVersion: '3.1.1',
           dir: '.',
           out: './build',
+          icon: './icon',
+          all: true,
+          asar: true
         }
       }
     },
@@ -217,18 +219,6 @@ module.exports = (grunt) => {
     },
     babel: {
       prod: {
-        options: {
-          presets: ['es2015', 'stage-0']
-        },
-        files: [{
-            expand: true,
-            cwd: 'source',
-            src: ['**/*.js'],
-            dest: 'src',
-            ext: '.js'
-        }]
-      },
-      electron: {
         options: {
           presets: ['es2015', 'stage-0']
         },
@@ -432,7 +422,8 @@ module.exports = (grunt) => {
   });
 
   grunt.registerMultiTask('electron', 'Package Electron apps', function() {
-    electronPackager(this.options(), this.async());
+    const done = this.async();
+    electronPackager(this.options()).then(() => { done(); }, done);
   });
 
   grunt.event.on('coverage', (lcovFileContents) => {
@@ -470,7 +461,7 @@ module.exports = (grunt) => {
   grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
 
   // Create electron package
-  grunt.registerTask('package', ['clean:electron', 'clean:babel', 'babel:electron', 'electron']);
+  grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
