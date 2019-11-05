@@ -335,12 +335,7 @@ module.exports = (grunt) => {
     });
   };
 
-  const updatePackageJsonBuildVersion = (commitHash) => {
-    const packageJson = JSON.parse(fs.readFileSync('package.json'));
-    packageJson.version += `+${commitHash}`;
-    fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-  };
-  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis.', function() {
+  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis and create git tag.', function() {
     const done = this.async();
     if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
       grunt.log.writeln('Skipping travis npm publish');
@@ -348,9 +343,15 @@ module.exports = (grunt) => {
     }
     childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
       const hash = stdout.trim();
-      updatePackageJsonBuildVersion(hash);
+      const packageJson = JSON.parse(fs.readFileSync('package.json'));
+      const version = packageJson.version;
+      packageJson.version += `+${hash}`;
+      fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
       fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec('npm publish', (err) => { done(err); });
+      childProcess.exec('npm publish', (err) => {
+        if (err) done(err);
+        else childProcess.exec(`git tag v${version} && git push -q https://${process.env.GITHUB_TOKEN}@github.com/FredrikNoren/ungit.git v${version}`, (err) => { done(err); });
+      });
     });
   });
 

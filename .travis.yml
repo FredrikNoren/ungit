@@ -8,6 +8,7 @@ node_js:
 branches:
   only:
     - master
+    - /^v\d+\.\d+\.\d+$/
 env:
   matrix:
     - GIT_VERSION=edge
@@ -48,6 +49,7 @@ deploy:
   file: dist/*.zip
   overwrite: true
   skip_cleanup: true
+  body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
   on:
     tags: true
     condition: $GIT_VERSION = edge
