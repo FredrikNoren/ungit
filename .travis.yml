@@ -25,15 +25,17 @@ addons:
     packages:
       - xvfb
       - libgconf-2-4
+      - wine
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   - npm ci
 before_script:
+  - wine --version
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git version
-  - npm run build
+  - DISPLAY= npm run package
 after_success:
   - npm run travisnpmpublish

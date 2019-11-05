@@ -18,7 +18,7 @@ install:
   - npm ci
 
 build_script:
-  - npm run build
+  - npm run package
 
 before_test:
   - git config --global user.email "test@testy.com"
