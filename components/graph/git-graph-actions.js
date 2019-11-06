@@ -1,35 +1,34 @@
-
 const ko = require('knockout');
-const inherits = require('util').inherits;
+const octicons = require('octicons');
 const components = require('ungit-components');
+const programEvents = require('ungit-program-events');
 const RefViewModel = require('./git-ref.js');
 const HoverActions = require('./hover-actions');
-const programEvents = require('ungit-program-events');
+
 const RebaseViewModel = HoverActions.RebaseViewModel;
 const MergeViewModel = HoverActions.MergeViewModel;
 const ResetViewModel = HoverActions.ResetViewModel;
 const PushViewModel = HoverActions.PushViewModel;
-const SquashViewModel = HoverActions.SquashViewModel
+const SquashViewModel = HoverActions.SquashViewModel;
 
 class ActionBase {
   constructor(graph, text, style, icon) {
     this.graph = graph;
     this.server = graph.server;
     this.isRunning = ko.observable(false);
-    this.isHighlighted = ko.computed(() => {
-      return !graph.hoverGraphAction() || graph.hoverGraphAction() == this;
-    });
+    this.isHighlighted = ko.computed(() => !graph.hoverGraphAction() || graph.hoverGraphAction() == this);
     this.text = text;
     this.style = style;
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
       if (!this.isHighlighted() || this.isRunning()) {
-        return `${this.style} dimmed`
+        return `${this.style} dimmed`;
       } else {
-        return this.style
+        return this.style;
       }
     });
   }
+
   doPerform() {
     if (this.isRunning()) return;
     this.graph.hoverGraphAction(null);
@@ -38,25 +37,30 @@ class ActionBase {
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => { this.isRunning(false); });
   }
+
   dragEnter() {
     if (!this.visible()) return;
     this.graph.hoverGraphAction(this);
   }
+
   dragLeave() {
     if (!this.visible()) return;
     this.graph.hoverGraphAction(null);
   }
+
   mouseover() {
     this.graph.hoverGraphAction(this);
   }
+
   mouseout() {
     this.graph.hoverGraphAction(null);
   }
 }
 
+
 class Move extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Move', 'move', 'glyph_icon glyph_icon-move');
+    super(graph, 'Move', 'move', octicons['arrow-left'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -64,14 +68,16 @@ class Move extends ActionBase {
         this.graph.currentActionContext().node() != this.node;
     });
   }
+
   perform() {
     return this.graph.currentActionContext().moveTo(this.node.sha1);
   }
 }
 
+
 class Reset extends ActionBase {
   constructor (graph, node) {
-    super(graph, 'Reset', 'reset', 'glyph_icon glyph_icon-trash');
+    super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -93,6 +99,7 @@ class Reset extends ActionBase {
     const nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
     return new ResetViewModel(nodes);
   }
+
   perform() {
     const context = this.graph.currentActionContext();
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
@@ -106,9 +113,10 @@ class Reset extends ActionBase {
   }
 }
 
+
 class Rebase extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Rebase', 'rebase', 'oct_icon oct_icon-repo-forked flip');
+    super(graph, 'Rebase', 'rebase', octicons['repo-forked'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -126,16 +134,17 @@ class Rebase extends ActionBase {
     const path = onto.getPathToCommonAncestor(this.node);
     return new RebaseViewModel(this.node, path);
   }
+
   perform() {
     return this.server.postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
-      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); })
+      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
   }
 }
 
 
 class Merge extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Merge', 'merge', 'oct_icon oct_icon-git-merge');
+    super(graph, 'Merge', 'merge', octicons['git-merge'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -145,22 +154,24 @@ class Merge extends ActionBase {
         this.graph.checkedOutRef().node() == this.node;
     });
   }
+
   createHoverGraphic() {
     let node = this.graph.currentActionContext();
     if (!node) return null;
     if (node instanceof RefViewModel) node = node.node();
     return new MergeViewModel(this.graph, this.node, node);
   }
+
   perform() {
     return this.server.postPromise('/merge', { path: this.graph.repoPath(), with: this.graph.currentActionContext().localRefName })
-      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); })
+      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
   }
 }
 
 
 class Push extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Push', 'push', 'oct_icon oct_icon-cloud-upload');
+    super(graph, 'Push', 'push', octicons['repo-push'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -177,6 +188,7 @@ class Push extends ActionBase {
     if (!remoteRef) return null;
     return new PushViewModel(remoteRef.node(), context.node());
   }
+
   perform() {
     const ref = this.graph.currentActionContext();
     const remoteRef = ref.getRemoteRef(this.graph.currentRemote());
@@ -193,9 +205,10 @@ class Push extends ActionBase {
   }
 }
 
+
 class Checkout extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Checkout', 'checkout', 'oct_icon oct_icon-desktop-download');
+    super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -206,14 +219,16 @@ class Checkout extends ActionBase {
         this.graph.currentActionContext() == this.node;
     });
   }
+
   perform() {
     return this.graph.currentActionContext().checkout();
   }
 }
 
+
 class Delete extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Delete', 'delete', 'glyph_icon glyph_icon-remove');
+    super(graph, 'Delete', 'delete', octicons.x.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -222,11 +237,12 @@ class Delete extends ActionBase {
         !this.graph.currentActionContext().current();
     });
   }
+
   perform() {
     const context = this.graph.currentActionContext();
     let details = `"${context.refName}"`;
     if (context.isRemoteBranch) {
-      details = `<code _style='font-size: 100%'>REMOTE</code> ${details}`;
+      details = `<code _style="font-size: 100%">REMOTE</code> ${details}`;
     }
     details = `Deleting ${details} branch or tag cannot be undone with ungit.`;
 
@@ -238,25 +254,28 @@ class Delete extends ActionBase {
   }
 }
 
+
 class CherryPick extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Cherry pick', 'cherry-pick', 'oct_icon oct_icon-circuit-board');
+    super(graph, 'Cherry pick', 'cherry-pick', octicons['circuit-board'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       const context = this.graph.currentActionContext();
-      return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1
+      return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1;
     });
   }
+
   perform() {
     return this.server.postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
-      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); })
+      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
   }
 }
 
+
 class Uncommit extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Uncommit', 'uncommit', 'oct_icon oct_icon-zap');
+    super(graph, 'Uncommit', 'uncommit', octicons.zap.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -264,6 +283,7 @@ class Uncommit extends ActionBase {
         this.graph.HEAD() == this.node;
     });
   }
+
   perform() {
     return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: 'HEAD^', mode: 'mixed' })
       .then(() => {
@@ -277,23 +297,26 @@ class Uncommit extends ActionBase {
   }
 }
 
+
 class Revert extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Revert', 'revert', 'oct_icon oct_icon-history');
+    super(graph, 'Revert', 'revert', octicons.history.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node;
     });
   }
+
   perform() {
     return this.server.postPromise('/revert', { path: this.graph.repoPath(), commit: this.node.sha1 });
   }
 }
 
+
 class Squash extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Squash', 'squash', 'oct_icon oct_icon-fold');
+    super(graph, 'Squash', 'squash', octicons.fold.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -302,6 +325,7 @@ class Squash extends ActionBase {
         this.graph.currentActionContext().node() != this.node;
     });
   }
+
   createHoverGraphic() {
     let onto = this.graph.currentActionContext();
     if (!onto) return;
@@ -309,6 +333,7 @@ class Squash extends ActionBase {
 
     return new SquashViewModel(this.node, onto);
   }
+
   perform() {
     let onto = this.graph.currentActionContext();
     if (!onto) return;
@@ -334,10 +359,11 @@ class Squash extends ActionBase {
       //                ->     \
       //                        [bc]
       return this.graph.currentActionContext().moveTo(this.node.sha1, true)
-        .then(() => this.server.postPromise('/squash', { path: this.graph.repoPath(), target: onto.sha1 }))
+        .then(() => this.server.postPromise('/squash', { path: this.graph.repoPath(), target: onto.sha1 }));
     }
   }
 }
+
 
 const GraphActions = {
   Move: Move,
