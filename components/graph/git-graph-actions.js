@@ -1,4 +1,5 @@
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const RefViewModel = require('./git-ref.js');
@@ -59,7 +60,7 @@ class ActionBase {
 
 class Move extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Move', 'move', 'glyph_icon glyph_icon-move');
+    super(graph, 'Move', 'move', octicons['arrow-left'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -76,7 +77,7 @@ class Move extends ActionBase {
 
 class Reset extends ActionBase {
   constructor (graph, node) {
-    super(graph, 'Reset', 'reset', 'glyph_icon glyph_icon-trash');
+    super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -115,7 +116,7 @@ class Reset extends ActionBase {
 
 class Rebase extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Rebase', 'rebase', 'oct_icon oct_icon-repo-forked flip');
+    super(graph, 'Rebase', 'rebase', octicons['repo-forked'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -143,7 +144,7 @@ class Rebase extends ActionBase {
 
 class Merge extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Merge', 'merge', 'oct_icon oct_icon-git-merge');
+    super(graph, 'Merge', 'merge', octicons['git-merge'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -170,7 +171,7 @@ class Merge extends ActionBase {
 
 class Push extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Push', 'push', 'oct_icon oct_icon-cloud-upload');
+    super(graph, 'Push', 'push', octicons['repo-push'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -207,7 +208,7 @@ class Push extends ActionBase {
 
 class Checkout extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Checkout', 'checkout', 'oct_icon oct_icon-desktop-download');
+    super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -227,7 +228,7 @@ class Checkout extends ActionBase {
 
 class Delete extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Delete', 'delete', 'glyph_icon glyph_icon-remove');
+    super(graph, 'Delete', 'delete', octicons.x.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -256,7 +257,7 @@ class Delete extends ActionBase {
 
 class CherryPick extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Cherry pick', 'cherry-pick', 'oct_icon oct_icon-circuit-board');
+    super(graph, 'Cherry pick', 'cherry-pick', octicons['circuit-board'].toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -274,7 +275,7 @@ class CherryPick extends ActionBase {
 
 class Uncommit extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Uncommit', 'uncommit', 'oct_icon oct_icon-zap');
+    super(graph, 'Uncommit', 'uncommit', octicons.zap.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -299,7 +300,7 @@ class Uncommit extends ActionBase {
 
 class Revert extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Revert', 'revert', 'oct_icon oct_icon-history');
+    super(graph, 'Revert', 'revert', octicons.history.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -315,7 +316,7 @@ class Revert extends ActionBase {
 
 class Squash extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Squash', 'squash', 'oct_icon oct_icon-fold');
+    super(graph, 'Squash', 'squash', octicons.fold.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
