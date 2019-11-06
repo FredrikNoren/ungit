@@ -10,6 +10,7 @@ Use the following format for additions: ` - VERSION: [feature/patch (if applicab
   - Fix clearing .gitignore [#1236](https://github.com/FredrikNoren/ungit/pull/1236)
   - Improve git-init experience [#1228](https://github.com/FredrikNoren/ungit/pull/1228)
   - Include file diff in merge commits [#1242](https://github.com/FredrikNoren/ungit/pull/1242)
+  - Restore icons on graph actions using Octicons [#1245](https://github.com/FredrikNoren/ungit/pull/1245)
   - Minor fixes to remove warnings [#1235](https://github.com/FredrikNoren/ungit/pull/1235), [#1237](https://github.com/FredrikNoren/ungit/pull/1237), [#1238](https://github.com/FredrikNoren/ungit/pull/1238), [#1239](https://github.com/FredrikNoren/ungit/pull/1239)
 - 1.4.48: fix the width value of the header logo [#1221](https://github.com/FredrikNoren/ungit/pull/1221)
 - 1.4.47: make diff2html line numbers and +/- prefixes unselectable [#1214](https://github.com/FredrikNoren/ungit/issues/1214), [#1215](https://github.com/FredrikNoren/ungit/pull/1215)
