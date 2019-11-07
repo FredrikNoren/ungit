@@ -20,6 +20,7 @@ class WordWrap {
     this.toggle = () => {
       this.value(!this.value());
     };
+    this.text = ko.computed(() => this.value() ? 'Wrap Lines' : 'No Wrap');
     this.isActive = ko.computed(() => this.value());
   }
 }
@@ -39,6 +40,7 @@ class Type {
     this.toggle = () => {
       this.value(this.value() === textDiff ? sideBySideDiff : textDiff);
     };
+    this.text = ko.computed(() => this.value() === textDiff ? 'Inline' : 'Side By Side');
     this.isActive = ko.computed(() => this.value() === sideBySideDiff);
   }
 }
@@ -52,6 +54,7 @@ class WhiteSpace {
     this.toggle = () => {
       this.value(!this.value());
     };
+    this.text = ko.computed(() => this.value() ? 'Show Whitespace' : 'Hide Whitespace');
     this.isActive = ko.computed(() => this.value());
   }
 }
