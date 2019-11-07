@@ -20,6 +20,7 @@ class RemotesViewModel {
       if (this.currentRemote()) return `Fetch from ${this.currentRemote()}`;
       else return 'No remotes specified';
     });
+    this.remotesIcon = octicons['cloud-download'].toSVG({ 'height': 18 });
     this.closeIcon = octicons.x.toSVG({ 'height': 18 });
 
     this.fetchEnabled = ko.computed(() => this.remotes().length > 0);

@@ -51,11 +51,11 @@
             Toggle all
           </button>
           <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" title="Discard all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
-            <span class="glyphicon glyphicon-trash"></span>
+            <span data-bind="html: discardAllIcon"></span>
             Discard all
           </button>
           <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" title="Stash all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
-            <span class="glyphicon glyphicon-paperclip"></span>
+            <span data-bind="html: stashIcon"></span>
             Stash all
           </button>
           <div class="btn-group pull-right btn-group-sm">

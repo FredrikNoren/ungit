@@ -24,6 +24,7 @@ class StashItemViewModel {
       showDiffButtons: ko.observable(true)
     }));
     this.dropIcon = octicons.x.toSVG({ 'height': 18 });
+    this.applyIcon = octicons.pencil.toSVG({ 'height': 20 });
   }
 
   apply() {
@@ -54,6 +55,8 @@ class StashViewModel {
     this.stashedChanges = ko.observable([]);
     this.isShow = ko.observable(storage.getItem('showStash') === 'true');
     this.visible = ko.computed(() => this.stashedChanges().length > 0 && this.isShow());
+    this.expandIcon = octicons['chevron-right'].toSVG({ 'height': 18 });
+    this.expandedIcon = octicons['chevron-down'].toSVG({ 'height': 22 });
     this.refresh();
   }
 

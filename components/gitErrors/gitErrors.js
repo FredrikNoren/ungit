@@ -1,8 +1,6 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
-const navigation = require('ungit-navigation');
 
 components.register('gitErrors', args => new GitErrorsViewModel(args.server, args.repoPath));
 
@@ -11,6 +9,8 @@ class GitErrorsViewModel {
     this.server = server;
     this.repoPath = repoPath;
     this.gitErrors = ko.observableArray();
+    this.closeIcon = octicons.x.toSVG({ 'height': 18 });
+    this.alertIcon = octicons.alert.toSVG({ 'height': 24 });
   }
 
   updateNode(parentElement) {
