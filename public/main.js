@@ -60,6 +60,7 @@ app.on('ready', function() {
     if (ungitRunning) {
       dialog.showMessageBoxSync({
         type: 'error',
+        title: 'Ungit',
         message: 'Ungit instance is already running'
       });
       app.quit();
