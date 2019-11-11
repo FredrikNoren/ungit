@@ -1,11 +1,10 @@
 var startLaunchTime = Date.now();
 var config = require('../src/config');
-var path = require('path');
 var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 
-var { app, BrowserWindow } = require('electron');
+var { app, dialog, BrowserWindow } = require('electron');
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
@@ -37,29 +36,32 @@ function launch(callback) {
 function checkIfUngitIsRunning(callback) {
   // Fastest way to find out if a port is used or not/i.e. if ungit is running
   var net = require('net');
-  var server = net.createServer(function(c) { });
-  server.listen(config.port, function(err) {
-    server.close(function() {
-      callback(null, false);
-    });
-  });
+  var server = net.createServer();
   server.on('error', function (e) {
     if (e.code == 'EADDRINUSE') {
-      callback(null, true);
+      callback(true);
     }
+  });
+  server.listen(config.port, config.ungitBindIp, function() {
+    server.close(function() {
+      callback(false);
+    });
   });
 }
 
 var mainWindow = null;
 
 app.on('window-all-closed', function() {
-    app.quit();
+  app.quit();
 });
 
 app.on('ready', function() {
-  checkIfUngitIsRunning(function(err1, ungitRunning) {
+  checkIfUngitIsRunning(function(ungitRunning) {
     if (ungitRunning) {
-      console.log('Ungit instance is already running');
+      dialog.showMessageBoxSync({
+        type: 'error',
+        message: 'Ungit instance is already running'
+      });
       app.quit();
     }
     else {
