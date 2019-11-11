@@ -4,15 +4,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## Unreleased
-- Updated Octicons [#1224](https://github.com/FredrikNoren/ungit/pull/1224)
+
+## [1.5.0](https://github.com/FredrikNoren/ungit/compare/v1.4.48...v1.5.0)
+
+### Added
+- Include file diff in merge commits [#1242](https://github.com/FredrikNoren/ungit/pull/1242)
 - Hide diff buttons on hover [#1225](https://github.com/FredrikNoren/ungit/pull/1225)
+- Publish electron build [#1241](https://github.com/FredrikNoren/ungit/pull/1241)
+
+### Fixed
+- Updated Octicons [#1224](https://github.com/FredrikNoren/ungit/pull/1224), [#1245](https://github.com/FredrikNoren/ungit/pull/1245), [#1246](https://github.com/FredrikNoren/ungit/pull/1246)
 - Fix stash tooltips [#1227](https://github.com/FredrikNoren/ungit/pull/1227)
 - Improve git-init experience [#1228](https://github.com/FredrikNoren/ungit/pull/1228)
 - Fix inconsistent diff options [#1229](https://github.com/FredrikNoren/ungit/issues/1229)
 - Fix clearing .gitignore [#1236](https://github.com/FredrikNoren/ungit/pull/1236)
 - Fix electron package [#1240](https://github.com/FredrikNoren/ungit/pull/1240)
-- Include file diff in merge commits [#1242](https://github.com/FredrikNoren/ungit/pull/1242)
-- Restore icons on graph actions using Octicons [#1245](https://github.com/FredrikNoren/ungit/pull/1245)
 - Minor fixes to remove warnings [#1235](https://github.com/FredrikNoren/ungit/pull/1235), [#1237](https://github.com/FredrikNoren/ungit/pull/1237), [#1238](https://github.com/FredrikNoren/ungit/pull/1238), [#1239](https://github.com/FredrikNoren/ungit/pull/1239)
 
 ## [1.4.48](https://github.com/FredrikNoren/ungit/compare/v1.4.47...v1.4.48)
