@@ -11,6 +11,7 @@ class SubmodulesViewModel {
     this.server = server;
     this.submodules = ko.observableArray();
     this.isUpdating = false;
+    this.submodulesIcon = octicons['file-submodule'].toSVG({ 'height': 18 });
     this.closeIcon = octicons.x.toSVG({ 'height': 18 });
     this.linkIcon = octicons['link-external'].toSVG({ 'height': 18 });
   }
