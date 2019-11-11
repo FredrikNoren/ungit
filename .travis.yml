@@ -8,6 +8,7 @@ node_js:
 branches:
   only:
     - master
+    - /^v\d+\.\d+\.\d+$/
 env:
   matrix:
     - GIT_VERSION=edge
@@ -39,3 +40,16 @@ before_script:
   - DISPLAY= npm run package
 after_success:
   - npm run travisnpmpublish
+before_deploy:
+  - npm run electronpublish
+deploy:
+  provider: releases
+  api_key: ${GITHUB_TOKEN}
+  file_glob: true
+  file: dist/*.zip
+  overwrite: true
+  skip_cleanup: true
+  body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
+  on:
+    tags: true
+    condition: $GIT_VERSION = edge

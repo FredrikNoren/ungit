@@ -11,7 +11,8 @@
     "build": "grunt",
     "watch": "grunt watch",
     "package": "grunt package",
-    "travisnpmpublish": "grunt travisnpmpublish"
+    "travisnpmpublish": "grunt travisnpmpublish",
+    "electronpublish": "grunt electronpublish"
   },
   "repository": {
     "type": "git",
@@ -90,6 +91,7 @@
     "grunt-mocha-test": "~0.13.3",
     "grunt-plato": "~1.4.0",
     "grunt-release": "~0.14.0",
+    "grunt-zip-directories": "^1.0.1",
     "istanbul": "~0.4.5",
     "mocha": "~6.1.4",
     "nightmare": "~3.0.2",
