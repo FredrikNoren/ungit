@@ -5,7 +5,7 @@ var child_process = require('child_process');
 var BugTracker = require('../src/bugtracker');
 var bugtracker = new BugTracker('launcher');
 
-var { app, BrowserWindow } = require('electron');
+var { app, shell, BrowserWindow, Menu } = require('electron');
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
@@ -51,6 +51,41 @@ function checkIfUngitIsRunning(callback) {
 }
 
 var mainWindow = null;
+
+var menuTemplate = [
+  {
+    label: 'File',
+    submenu: [
+      { role: 'quit' }
+    ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' }
+    ]
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: async () => {
+          await shell.openExternal('https://github.com/FredrikNoren/ungit');
+        }
+      }
+    ]
+  }
+];
+Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 app.on('window-all-closed', function() {
     app.quit();
