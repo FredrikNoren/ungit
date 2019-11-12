@@ -18,7 +18,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 - Improve git-init experience [#1228](https://github.com/FredrikNoren/ungit/pull/1228)
 - Fix inconsistent diff options [#1229](https://github.com/FredrikNoren/ungit/issues/1229)
 - Fix clearing .gitignore [#1236](https://github.com/FredrikNoren/ungit/pull/1236)
-- Fix electron package [#1240](https://github.com/FredrikNoren/ungit/pull/1240)
+- Fix electron package [#1240](https://github.com/FredrikNoren/ungit/pull/1240), [#1248](https://github.com/FredrikNoren/ungit/pull/1248)
 - Minor fixes to remove warnings [#1235](https://github.com/FredrikNoren/ungit/pull/1235), [#1237](https://github.com/FredrikNoren/ungit/pull/1237), [#1238](https://github.com/FredrikNoren/ungit/pull/1238), [#1239](https://github.com/FredrikNoren/ungit/pull/1239)
 
 ## [1.4.48](https://github.com/FredrikNoren/ungit/compare/v1.4.47...v1.4.48)
