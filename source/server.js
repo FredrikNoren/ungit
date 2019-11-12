@@ -20,7 +20,7 @@ const Bluebird = require('bluebird');
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
   bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
-  app.quit();
+  process.exit();
 });
 
 console.log('Setting log level to ' + config.logLevel);
