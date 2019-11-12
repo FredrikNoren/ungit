@@ -45,6 +45,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: ${GITHUB_TOKEN}
+  name: ${TRAVIS_TAG}
   file_glob: true
   file: dist/*.zip
   overwrite: true
