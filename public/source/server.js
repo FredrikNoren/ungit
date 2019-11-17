@@ -168,7 +168,7 @@ Server.prototype.delPromise = function(url, arg) {
   return this.queryPromise('DELETE', url, arg);
 }
 Server.prototype.putPromise = function(url, arg) {
-  return this.queryPromise('put', url, arg);
+  return this.queryPromise('PUT', url, arg);
 }
 Server.prototype.emptyPromise = function() {
   return Promise.resolve();

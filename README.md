@@ -1,6 +1,6 @@
 ungit
 ======
-[![NPM version](https://badge.fury.io/js/ungit.svg)](http://badge.fury.io/js/ungit)
+[![NPM version](https://badge.fury.io/js/ungit.svg)](https://badge.fury.io/js/ungit)
 [![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -20,19 +20,21 @@ Ungit brings user friendliness to git without sacrificing the versatility of git
 
 [Follow @ungitui on twitter](https://twitter.com/ungitui)
 
-Quick intro to ungit: [http://youtu.be/hkBVAi3oKvo](http://youtu.be/hkBVAi3oKvo)
+Quick intro to ungit: [https://youtu.be/hkBVAi3oKvo](https://youtu.be/hkBVAi3oKvo)
 
-[![Screenshot](screenshot.png)](http://youtu.be/hkBVAi3oKvo)
+[![Screenshot](screenshot.png)](https://youtu.be/hkBVAi3oKvo)
 
 Installing
 ----------
-Requires [node.js](http://nodejs.org) (≥ 6.11), [npm](https://www.npmjs.com/) (≥ 3.10.10, comes with node.js) and [git](http://git-scm.com/) (≥ 1.8.x). To install ungit just type:
+Requires [node.js](https://nodejs.org) (≥ 8.16.0), [npm](https://www.npmjs.com/) (≥ 3.10.10, comes with node.js) and [git](https://git-scm.com/) (≥ 1.8.x). To install ungit just type:
 
 	npm install -g ungit
 
 NOTE: If your system requires root access to install global npm packages, make sure you use the -H flag:
 
 	sudo -H npm install -g ungit
+
+Prebuilt [electron](https://electronjs.org/) packages are avaiable [here](https://github.com/FredrikNoren/ungit/releases) (git is still required).
 
 Using
 -----

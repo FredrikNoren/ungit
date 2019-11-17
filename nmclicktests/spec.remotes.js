@@ -1,8 +1,8 @@
 'use strict';
 const environment = require('./environment')();
 const Bluebird = require('bluebird');
-const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
-const rimraf = Bluebird.promisify(require("rimraf"));
+const mkdirp = Bluebird.promisifyAll(require('mkdirp')).mkdirPAsync;
+const rimraf = Bluebird.promisify(require('rimraf'));
 const testRepoPaths = [];
 
 describe('[REMOTES]', () => {
@@ -20,7 +20,7 @@ describe('[REMOTES]', () => {
   });
 
   it('Should not be possible to push without remote', () => {
-    return environment.nm.ug.click(`.branch[data-ta-name="master"][data-ta-local="true"]`)
+    return environment.nm.ug.click('.branch[data-ta-name="master"][data-ta-local="true"]')
       .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
@@ -45,7 +45,7 @@ describe('[REMOTES]', () => {
   it('Fetch from newly added remote', () => {
     return environment.nm.click('.fetchButton .btn-main')
       .wait(500)
-      .ug.waitForElementNotVisible('#nprogress')
+      .ug.waitForElementNotVisible('#nprogress');
   });
 
   it('Remote delete check', () => {
@@ -67,7 +67,7 @@ describe('[REMOTES]', () => {
   it('Clone repository should bring you to repo page', () => {
     return environment.nm.insert('#cloneFromInput', testRepoPaths[1])
       .insert('#cloneToInput', testRepoPaths[2])
-      .ug.click('.uninited input[type="submit"]')
+      .ug.click('.uninited button[type="submit"]')
       .wait('.repository-view')
       .exists('[data-ta-container="remote-error-popup"]')
       .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
@@ -88,18 +88,18 @@ describe('[REMOTES]', () => {
   it('Should be possible to force push a branch', () => {
     return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
       .ug.refAction('branchinclone', true, 'push')
-      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])')
+      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
   it('Check for fetching remote branches for the branch list', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
       .ug.click('div.option input')
       .wait(200)
-      .visible('li .octicon-broadcast')
+      .visible('li .octicon-globe')
       .then((isVisble) => {
         if (!isVisble) {
           return environment.nm.ug.click('div.option input')
-            .wait('li .octicon-broadcast')
+            .wait('li .octicon-globe');
         }
       });
   });
@@ -109,13 +109,13 @@ describe('[REMOTES]', () => {
       .ug.click('.branch .dropdown-toggle')
       .ug.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]')
       .wait(200)
-      .wait('[data-ta-name="branchinclone"][data-ta-local="true"]')
+      .wait('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
 
   it('Should be possible to commitnpush', () => {
     return environment.nm.ug.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`)
       .ug.commitnpush('Commit & Push')
-      .wait('.nux')
+      .wait('.nux');
   });
 
   it('Should be possible to commitnpush with ff', () => {
@@ -123,6 +123,6 @@ describe('[REMOTES]', () => {
       .ug.click('.commit-grp .dropdown-toggle')
       .ug.click('.commitnpush')
       .ug.click('.modal-dialog .btn-primary')
-      .wait('.nux')
+      .wait('.nux');
   });
 });

@@ -35,10 +35,6 @@
 
   .file-area {
     position: relative;
-
-    .commands {
-      width: 100%;
-    }
   }
 
   .validationError {
@@ -64,6 +60,8 @@
     padding-left: 5px;
     padding-right: 5px;
     cursor: pointer;
+
+    &:focus,
     &:hover {
       background: #000;
       color: rgba(255, 255, 255, 0.9);
@@ -79,6 +77,8 @@
     padding-right: 5px;
     cursor: pointer;
     font-weight: bold;
+
+    &:focus,
     &:hover {
       background: #55f;
       color: rgba(255, 255, 255, 0.9);
@@ -212,9 +212,6 @@
         }
       }
     }
-  }
-  .btn-group {
-    margin-right: 10px
   }
 }
 

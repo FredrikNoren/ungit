@@ -1,5 +1,5 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 
@@ -11,6 +11,9 @@ class SubmodulesViewModel {
     this.server = server;
     this.submodules = ko.observableArray();
     this.isUpdating = false;
+    this.submodulesIcon = octicons['file-submodule'].toSVG({ 'height': 18 });
+    this.closeIcon = octicons.x.toSVG({ 'height': 18 });
+    this.linkIcon = octicons['link-external'].toSVG({ 'height': 18 });
   }
 
   onProgramEvent(event) {

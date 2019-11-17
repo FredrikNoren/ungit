@@ -1,9 +1,9 @@
-
 const ko = require('knockout');
 const _ = require('lodash');
+const promise = require('bluebird');
+const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
-const promise = require('bluebird');
 
 components.register('remotes', args => new RemotesViewModel(args.server, args.repoPath));
 
@@ -19,7 +19,9 @@ class RemotesViewModel {
     this.fetchLabel = ko.computed(() => {
       if (this.currentRemote()) return `Fetch from ${this.currentRemote()}`;
       else return 'No remotes specified';
-    })
+    });
+    this.remotesIcon = octicons['cloud-download'].toSVG({ 'height': 18 });
+    this.closeIcon = octicons.x.toSVG({ 'height': 18 });
 
     this.fetchEnabled = ko.computed(() => this.remotes().length > 0);
 
@@ -69,7 +71,7 @@ class RemotesViewModel {
       if (errorMessage.includes('Could not resolve host')) {
         if (this.server.isInternetConnected) {
           this.server.isInternetConnected = false;
-          errorMessage = `Could not resolve host.  This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.`;
+          errorMessage = 'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
           stdout = '';
           stderr = '';
         } else {
@@ -94,7 +96,7 @@ class RemotesViewModel {
       .then(remotes => {
         remotes = remotes.map(remote => ({
           name: remote,
-          changeRemote: () => { this.currentRemote(remote) }
+          changeRemote: () => { this.currentRemote(remote); }
         }));
         this.remotes(remotes);
         if (!this.currentRemote() && remotes.length > 0) {

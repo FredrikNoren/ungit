@@ -1,10 +1,8 @@
-
 const ko = require('knockout');
-const components = require('ungit-components');
-const navigation = require('ungit-navigation');
-const programEvents = require('ungit-program-events');
 const md5 = require('blueimp-md5');
 const moment = require('moment');
+const octicons = require('octicons');
+const components = require('ungit-components');
 
 components.register('commit', args => new CommitViewModel(args));
 
@@ -17,6 +15,7 @@ class CommitViewModel {
     this.nodeIsMousehover = gitNode.nodeIsMousehover;
     this.selected = gitNode.selected;
     this.pgpVerifiedString = gitNode.pgpVerifiedString;
+    this.pgpIcon = octicons.verified.toSVG({ 'height': 18 });
     this.element = ko.observable();
     this.commitTime = ko.observable();
     this.authorTime = ko.observable();
@@ -30,13 +29,13 @@ class CommitViewModel {
     this.fileLineDiffs = ko.observable();
     this.numberOfAddedLines = ko.observable();
     this.numberOfRemovedLines = ko.observable();
-    this.authorGravatar = ko.computed(() => md5((this.authorEmail() || "").trim().toLowerCase()));
+    this.authorGravatar = ko.computed(() => md5((this.authorEmail() || '').trim().toLowerCase()));
 
     this.showCommitDiff = ko.computed(() => this.fileLineDiffs() && this.fileLineDiffs().length > 0);
 
     this.diffStyle = ko.computed(() => {
       const marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1;
-      if (this.selected() && this.element()) return { "margin-left": `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
+      if (this.selected() && this.element()) return { 'margin-left': `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
       else return {};
     });
   }
@@ -64,7 +63,8 @@ class CommitViewModel {
       fileLineDiffs: this.fileLineDiffs(),
       sha1: this.sha1,
       repoPath: this.repoPath,
-      server: this.server
+      server: this.server,
+      showDiffButtons: this.selected
     }));
   }
 

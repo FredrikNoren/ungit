@@ -1,31 +1,31 @@
 <div class="btn-group branch">
   <button type="button" class="btn btn-default btn-main" data-bind="click: updateRefs">
-    <span class="octicon octicon-git-branch"></span>
-    <span data-bind="text: fetchLabel"></span>
+    <span data-bind="html: branchIcon"></span>
+    <span data-bind="text: refsLabel"></span>
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-bind="enable: listRefsEnabled">
     <span class="caret"></span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <div class="option" onclick="event.stopPropagation()">
       <label>
+        <input class="glyphicon" type="checkbox" data-bind="checked: isShowRemote, css: { 'glyphicon-check': isShowRemote, 'glyphicon-unchecked': !isShowRemote() }" />
         Remote
-        <input type="checkbox" data-bind="checked: isShowRemote"/>
       </label>
       <label>
+        <input class="glyphicon" type="checkbox" data-bind="checked: isShowBranch, css: { 'glyphicon-check': isShowBranch, 'glyphicon-unchecked': !isShowBranch() }" />
         Branch
-        <input type="checkbox" data-bind="checked: isShowBranch"/>
       </label>
       <label>
+        <input class="glyphicon" type="checkbox" data-bind="checked: isShowTag, css: { 'glyphicon-check': isShowTag, 'glyphicon-unchecked': !isShowTag() }" />
         Tag
-        <input type="checkbox" data-bind="checked: isShowTag"/>
       </label>
     </div>
     <div class="dropdown-divider"></div>
     <!-- ko foreach: branchesAndLocalTags -->
     <li>
-      <a href="#" data-bind="html: displayName, click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
-      <a href="#" class="list-link list-remove" data-bind="click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }">X</a>
+      <a href="#" data-bind="html: displayHtml(), click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
+      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
   </ul>

@@ -1,10 +1,9 @@
-
 // Generic.less
 // This file can be used to style any page to look like "ungit", i.e. anything that's not
 // application specific goes here.
 
 @import "../vendor/less/bootstrap/bootstrap.less";
-@import "../../node_modules/octicons/octicons/octicons.less";
+@import (inline) "../../node_modules/@primer/octicons/build/build.css";
 @import "variables.less";
 
 @font-face {
@@ -22,16 +21,6 @@
 }
 
 // -- Bootstrap styling ---
-
-.btn {
-	.glyphicon {
-		font-size: 0.8em;
-		margin-right: 0.1em;
-	}
-	&:focus {
-		outline: none;
-	}
-}
 
 .btn, .list-group-item {
 	position: relative;
@@ -186,8 +175,4 @@ a.disabled {
 }
 ::-webkit-scrollbar-corner {
       background-color: black;
-}
-
-.create-dir {
-	margin-top: 50px;
 }

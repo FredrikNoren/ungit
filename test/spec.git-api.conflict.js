@@ -200,6 +200,16 @@ describe('git-api conflict merge', function () {
     return common.post(req, '/merge/continue', { path: testDir, message: 'something' });
   });
 
+  it('log should show changes on the merge commit', () => {
+    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
+      expect(res.nodes).to.be.a('array');
+      expect(res.nodes.length).to.be(4);
+      expect(res.nodes[0].fileLineDiffs.length).to.be(2);
+      expect(res.nodes[0].fileLineDiffs[0]).to.eql([1, 1, 'Total']);
+      expect(res.nodes[0].fileLineDiffs[1]).to.eql([1, 1, testFile1, 'text']);
+    });
+  });
+
 });
 
 

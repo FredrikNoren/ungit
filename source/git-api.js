@@ -307,7 +307,7 @@ exports.registerApi = (env) => {
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
     const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise.log(req.query.path, limit, skip, 100)
+    const task = gitPromise.log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
           return { "limit": limit, "skip": skip, "nodes": []};
@@ -679,13 +679,13 @@ exports.registerApi = (env) => {
       });
   });
   app.put(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    if (!req.body.data || req.body.data == '') {
-      return res.status(500).json({ message: "Invalid .gitignore content"});
+    if (!req.body.data && req.body.data !== '') {
+      return res.status(400).json({ message: 'Invalid .gitignore content'});
     }
-    fs.writeFileAsync(path.join(req.body.path, ".gitignore"), req.body.data)
+    fs.writeFileAsync(path.join(req.body.path, '.gitignore'), req.body.data)
       .then(() => res.status(200).json({}))
       .finally(emitGitDirectoryChanged.bind(null, req.body.path))
-      .catch((e) => res.status(500).json(e))
+      .catch((e) => res.status(500).json(e));
   });
 
   if (config.dev) {

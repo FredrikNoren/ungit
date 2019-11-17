@@ -1,59 +1,57 @@
-
 <div class="path" data-bind="shown: shown">
 
   <!-- ko if: status() == 'uninited' -->
-  <div class="uninited">
-    <div class="container">
-      <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
-        Directory '<span data-bind="text: dirName"></span>' created
-      </div>
-      <h1>'<span data-bind="text: dirName"></span>' is not a repository</h1>
-      <p>There is no repository at the selected path.</p>
-      <div class="row">
-        <div class="col-lg-6">
-          <div class="panel panel-default">
-            <div class="panel-heading">Create a new repository</div>
-            <div class="panel-body">
-              <button class="btn btn-primary btn-lg" data-bind='click: initRepository'>
-                Make '<span data-bind="text: dirName"></span>' a repository
-              </button>
-            </div>
+  <div class="uninited container">
+    <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
+      Directory "<span data-bind="text: dirName"></span>" created.
+    </div>
+    <h1>"<span data-bind="text: dirName"></span>" is not a git repository</h1>
+    <p>There is no git repository at the selected path.</p>
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">Create a new git repository in "<span data-bind="text: dirName"></span>"</div>
+          <div class="panel-body">
+            <button class="btn btn-primary btn-lg" data-bind="click: initRepository">
+              Create Repository
+            </button>
           </div>
         </div>
-        <div class="col-lg-6">
-          <div class="panel panel-default">
-            <div class="panel-heading">Clone a repository into a subfolder of '<span data-bind="text: dirName"></span>'</div>
-            <div class="panel-body">
-              <form data-bind="submit: cloneRepository">
-                <div class="form-group">
-                  <label for="cloneFromInput">Clone from</label>
-                  <input class="form-control" type="text" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
-                </div>
-                <div class="form-group">
-                  <label for="cloneToInput">to</label>
-                  <input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
-                </div>
-                <div class="form-group" style="display: flex;">
-                  <label style="width: 230px; padding-top: 11px;">is recurse submodule?</label>
-                  <input class="form-control" type="checkbox" data-bind="checked: isRecursiveSubmodule, attr: { placeholder: cloneDestinationImplicit }">
-                </div>
-                <input type="submit" class="btn btn-primary btn-lg" value="Clone repository">
-              </form>
-            </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">Clone a git repository into a subfolder of "<span data-bind="text: dirName"></span>"</div>
+          <div class="panel-body">
+            <form data-bind="submit: cloneRepository">
+              <div class="form-group">
+                <label for="cloneFromInput">Clone from</label>
+                <input class="form-control" type="text" id="cloneFromInput" placeholder="URL" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'" required />
+              </div>
+              <div class="form-group">
+                <label for="cloneToInput">into</label>
+                <input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }" />
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" data-bind="checked: isRecursiveSubmodule, attr: { placeholder: cloneDestinationImplicit }" />
+                  Recurse submodules
+                </label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg">Clone Repository</button>
+            </form>
           </div>
         </div>
       </div>
     </div>
-
   </div>
   <!-- /ko -->
 
   <!-- ko if: status() == 'no-such-path' -->
-  <div class="invalid-path" data-bind="visible: status() == 'no-such-path'">
-    <h2>Invalid path</h2>
-    <p>"<span data-bind="text: repoPath"></span>" doesn&#39;t seem to be a valid path.</p>
+  <div class="invalid-path container">
+    <h1>Invalid path</h1>
+    <p>"<span data-bind="text: repoPath"></span>" doesn't seem to be a valid path.</p>
     <div class="create-dir">
-      <button class="btn btn-primary btn-lg" data-bind="click: createDir">Create directory</button>
+      <button class="btn btn-primary btn-lg" data-bind="click: createDir">Create Directory</button>
     </div>
   </div>
   <!-- /ko -->

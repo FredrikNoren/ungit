@@ -1,6 +1,6 @@
 <div class="btn-group fetchButton submodule">
   <button type="button" class="btn btn-default btn-main" data-bind="click: function() {}">
-    <span class="glyphicon glyphicon-th-large"></span>
+    <span data-bind="html: submodulesIcon"></span>
     <span data-bind="text: 'Submodules'"></span>
   </button>
   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -10,13 +10,15 @@
     <!-- ko foreach: submodules -->
     <li>
       <a href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
-      <a href="#" class="list-link list-url" data-bind="text: '@', click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
-      <a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a href="#" class="list-link list-url" data-bind="html: $parent.linkIcon, click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
+      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
+    <!-- ko if: submodules().length-->
     <li class="divider"></li>
     <li><a href="#" class="update-submodule" data-bind="click: updateSubmodules">Update Submodules</a></li>
     <li class="divider"></li>
+    <!-- /ko -->
     <li><a href="#" class="add-submodule" data-bind="click: showAddSubmoduleDialog">Add Submodules</a></li>
   </ul>
 </div>

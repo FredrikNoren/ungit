@@ -129,7 +129,7 @@ describe('[BRANCHES]', () => {
     return environment.nm.ug.click('.ref.branch.current')
       .ug.click('[data-ta-node-title="commit-1"] .squash .dropmask')
       .wait('.staging .files .file')
-      .ug.click('.files span.discard')
+      .ug.click('.files button.discard')
       .ug.click('.modal-dialog .btn-primary')
       .ug.waitForElementNotVisible('.staging .files .file')
   });

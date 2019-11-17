@@ -1,5 +1,5 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const moment = require('moment');
 const components = require('ungit-components');
 const storage = require('ungit-storage');
@@ -20,8 +20,11 @@ class StashItemViewModel {
       fileLineDiffs: data.fileLineDiffs.slice(),
       sha1: this.sha1,
       repoPath: stash.repoPath,
-      server: stash.server
+      server: stash.server,
+      showDiffButtons: ko.observable(true)
     }));
+    this.dropIcon = octicons.x.toSVG({ 'height': 18 });
+    this.applyIcon = octicons.pencil.toSVG({ 'height': 20 });
   }
 
   apply() {
@@ -52,6 +55,8 @@ class StashViewModel {
     this.stashedChanges = ko.observable([]);
     this.isShow = ko.observable(storage.getItem('showStash') === 'true');
     this.visible = ko.computed(() => this.stashedChanges().length > 0 && this.isShow());
+    this.expandIcon = octicons['chevron-right'].toSVG({ 'height': 18 });
+    this.expandedIcon = octicons['chevron-down'].toSVG({ 'height': 22 });
     this.refresh();
   }
 
@@ -79,7 +84,7 @@ class StashViewModel {
         }
       }).catch(err => {
         if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
-      })
+      });
   }
 
   toggleShowStash() {

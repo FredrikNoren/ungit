@@ -383,6 +383,9 @@ describe('git-api', () => {
   it('test gitignore api endpoint', () => {
     return common.put(req, '/gitignore', { path: testDir, data: 'abc' })
       .then(() => common.get(req, '/gitignore', { path: testDir }))
-      .then((res) => expect(res.content).to.be('abc'));
+      .then((res) => expect(res.content).to.be('abc'))
+      .then(() => common.put(req, '/gitignore', { path: testDir, data: '' }))
+      .then(() => common.get(req, '/gitignore', { path: testDir }))
+      .then((res) => expect(res.content).to.be(''));
   });
 })
