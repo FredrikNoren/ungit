@@ -1,6 +1,6 @@
 <div class="btn-group fetchButton">
   <button type="button" class="btn btn-default btn-main" data-bind="click: clickFetch, enable: fetchEnabled">
-    <span class="glyphicon glyphicon-download-alt"></span>
+    <span data-bind="html: remotesIcon"></span>
     <span data-bind="text: fetchLabel"></span>
   </button>
   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -10,10 +10,12 @@
     <!-- ko foreach: remotes -->
     <li>
       <a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a>
-      <a href="#" class="list-link list-remove" data-bind="text: 'X', click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
+    <!-- ko if: remotes().length -->
     <li class="divider"></li>
+    <!-- /ko -->
     <li><a href="#" class="add-new-remote" data-bind="click: showAddRemoteDialog">Add a new remote</a></li>
   </ul>
 </div>

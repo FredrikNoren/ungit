@@ -32,13 +32,6 @@ describe('[LOAD-AHEAD]', () => {
       .ug.waitForElementNotVisible('#nprogress');
   });
 
-  it('Open path screen again and should see only 1 commit', () => {
-    return environment.nm.wait(500)
-      .refresh()
-      .wait('.loadAhead')
-      .ug.waitForElementNotVisible('[data-ta-clickable="node-clickable-1"]');
-  });
-
   it('Create a branch during collapsed mode', () => {
     return environment.nm.ug.createBranch('new-branch');
   });

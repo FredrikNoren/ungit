@@ -1,4 +1,3 @@
-
 const ko = require('knockout');
 const components = require('ungit-components');
 const addressParser = require('ungit-address-parser');
@@ -13,7 +12,7 @@ class PathViewModel {
   constructor(server, path) {
     this.server = server;
     this.repoPath = ko.observable(path);
-    this.dirName = this.repoPath().replace('\\', '/')
+    this.dirName = this.repoPath().replace(/\\/g, '/')
                      .split('/')
                      .filter((s) => s)
                      .slice(-1)[0] || '/';
@@ -58,7 +57,7 @@ class PathViewModel {
           this.repository(null);
         }
         return null;
-      }).catch((err) => { })
+      }).catch((err) => { });
   }
   initRepository() {
     return this.server.postPromise('/init', { path: this.repoPath() })
@@ -76,15 +75,15 @@ class PathViewModel {
     const dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
     return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest, isRecursiveSubmodule: this.isRecursiveSubmodule() })
-      .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)) )
+      .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)))
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         programEvents.dispatch({ event: 'working-tree-changed' });
-      })
+      });
   }
   createDir() {
     this.showDirectoryCreatedAlert(true);
-    return this.server.postPromise('/createDir',  { dir: this.repoPath() })
+    return this.server.postPromise('/createDir', { dir: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
       .then(() => this.updateStatus());
   }

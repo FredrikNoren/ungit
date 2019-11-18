@@ -9,7 +9,7 @@
   height: 81px;
 
   .backlink {
-    margin-left: 9px;
+    margin-left: 10px;
     margin-top: 7px;
     position: absolute;
     color: #686868;
@@ -17,19 +17,21 @@
       text-decoration: none;
       color: #a5a5a5;
     }
-    .glyphicon-arrow-left {
+
+    .back-icon {
       -webkit-transition: opacity 0.5s ease-in-out;
       -moz-transition: opacity 0.5s ease-in-out;
       transition: opacity 0.5s ease-in-out;
       opacity: 0;
-      &.glyph-shown {
+
+      &.back-icon-shown {
         opacity: 1;
       }
     }
   }
   .form-container {
     margin-left: 180px;
-    margin-right: 62px;
+    margin-right: 72px;
     .path-input-form {
       width: 100%;
       position: relative;
@@ -74,7 +76,8 @@
 }
 
 .headerLogo {
-  width: 15%;
+  width: 100px;
+  height: auto;
 }
 .version {
   padding-left: 140px;

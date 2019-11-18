@@ -1,9 +1,8 @@
 const $ = require('jquery');
 const ko = require('knockout');
 const components = require('ungit-components');
-const Selectable = require('./selectable');
-const Animateable = require('./animateable');
 const programEvents = require('ungit-program-events');
+const Animateable = require('./animateable');
 const GraphActions = require('./git-graph-actions');
 
 const maxBranchesToDisplay = parseInt(ungit.config.numRefsToShow / 5 * 3);  // 3/5 of refs to show to branches
@@ -27,7 +26,7 @@ class GitNodeViewModel extends Animateable {
     this.signatureMade = ko.observable();
     this.pgpVerifiedString = ko.computed(() => {
       if (this.signatureMade()) {
-        return `PGP by: ${this.signatureMade()} at ${this.signatureDate()}`
+        return `PGP by: ${this.signatureMade()} at ${this.signatureDate()}`;
       }
     });
 
@@ -169,7 +168,7 @@ class GitNodeViewModel extends Animateable {
   showRefSearchForm(obj, event) {
     this.refSearchFormVisible(true);
 
-    const textBox = event.target.nextElementSibling.firstElementChild; // this may not be the best idea...
+    const textBox = event.currentTarget.nextElementSibling.firstElementChild; // this may not be the best idea...
     $(textBox).autocomplete({
       source: this.refs().filter(ref => !ref.isHEAD),
       minLength: 0,
@@ -188,19 +187,19 @@ class GitNodeViewModel extends Animateable {
       }
     }).focus(() => {
       $(this).autocomplete('search', $(this).val());
-    }).data("ui-autocomplete")._renderItem = (ul, item) => $("<li></li>")
+    }).data('ui-autocomplete')._renderItem = (ul, item) => $('<li></li>')
       .append(`<a>${item.dom}</a>`)
-      .appendTo(ul)
+      .appendTo(ul);
     $(textBox).autocomplete('search', '');
   }
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.graph.server.postPromise("/branches", { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
+    this.graph.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
       .then(() => {
-        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this)
+        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.graph.server.postPromise("/checkout", { path: this.graph.repoPath(), name: this.newBranchName() })
+          return this.graph.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.newBranchName() });
         }
       }).catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {

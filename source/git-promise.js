@@ -35,11 +35,23 @@ const gitExecutorProm = (args, retryCount) => {
   return rateLimiter().then(() => {
     return new Bluebird((resolve, reject) => {
       if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
-      let rejected = false;
+      let rejectedError = null;
+      let isCompleted = false;
       let stdout = '';
       let stderr = '';
-      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, timeout: args.timeout }
+      let env = JSON.parse(JSON.stringify(process.env));
+      env['LC_ALL'] = 'C'
+      const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, detached: false, env: env }
       const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
+      if (args.timeout) {
+        setTimeout(() => {
+          if (isCompleted) return;
+          isCompleted = true;
+          winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
+          gitSem.signal();
+          gitProcess.kill('SIGINT')
+        }, args.timeout);
+      }
 
       if (args.outPipe) {
         gitProcess.stdout.pipe(args.outPipe);
@@ -50,20 +62,19 @@ const gitExecutorProm = (args, retryCount) => {
         gitProcess.stdin.end(args.inPipe);
       }
       gitProcess.stderr.on('data', (data) => stderr += data.toString());
-      gitProcess.on('error', (error) => {
-        if (args.outPipe) args.outPipe.end();
-        rejected = true;
-        gitSem.signal();
-        reject(error);
-      });
+      gitProcess.on('error', (error) => { rejectedError = error; });
 
       gitProcess.on('close', (code) => {
+        if (isCompleted) return;
+        isCompleted = true;
+
         if (config.logGitCommands) winston.info(`git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(0, 400)}\n${stdout.slice(0, 400)}`);
-        if (rejected) return;
         if (args.outPipe) args.outPipe.end();
         gitSem.signal();
 
-        if (code === 0 || (code === 1 && args.allowError)) {
+        if (rejectedError) {
+          reject(rejectedError);
+        } else if (code === 0 || (code === 1 && args.allowError)) {
           resolve(stdout);
         } else {
           reject(getGitError(args, stderr, stdout));
@@ -167,8 +178,14 @@ git.status = (repoPath, file) => {
   return Bluebird.props({
     numStatsStaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
-      .then(gitParser.parseGitStatusNumstat),
+    numStatsUnstaged: Bluebird.resolve().then(() => {
+      if (config.isEnableNumStat) {
+        return git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
+          .then(gitParser.parseGitStatusNumstat);
+      } else {
+        return {}
+      }
+    }),
     status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
@@ -419,19 +436,23 @@ git.revParse = (repoPath) => {
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
-git.log = (path, limit, skip, maxSearchIteration) => {
-  return git(['log', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
+git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
+  return git(['log', '--cc', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (config.alwaysLoadActiveBranch && !log.isHeadExist && maxSearchIteration) {
-        if (maxSearchIteration - 1) {
-          return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxSearchIteration - 1);
-        } else {
-          return git.log(path, config.numberOfNodesPerLoad, 0, maxSearchIteration - 1);
-        }
+      if (maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
+        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1)
+          .then(innerLog => {
+            return {
+              "limit": limit + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
+              "skip": skip + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
+              "nodes": log.concat(innerLog.nodes),
+              "isHeadExist": innerLog.isHeadExist
+            }
+          });
       } else {
-        return { "limit": limit, "skip": skip, "nodes": log};
+        return { "limit": limit, "skip": skip, "nodes": log, "isHeadExist": log.isHeadExist };
       }
     });
 }

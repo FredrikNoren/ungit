@@ -2,7 +2,10 @@ skip_branch_with_pr: true
 
 environment:
   matrix:
-  - nodejs_version: "6.0"
+  - nodejs_version: "" # latest
+  - nodejs_version: "12"
+  - nodejs_version: "10"
+  - nodejs_version: "8"
 
 branches:
   only:
@@ -10,16 +13,23 @@ branches:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - git config --global user.email "test@testy.com"
-  - git config --global user.name "Test testy"
-  - npm cach clean
-  - npm install
-  - npm install -g grunt-cli
-
-test_script:
   - node --version
   - npm --version
-  - grunt
+  - npm ci
+
+build_script:
+  - npm run package
+
+before_test:
+  - git config --global user.email "test@testy.com"
+  - git config --global user.name "Test testy"
+  - git --version
+
+test_script:
   - npm test
 
-build: off
+after_test:
+  - npm run electronpublish
+
+artifacts:
+  - path: dist\*.zip

@@ -34,11 +34,11 @@ class MergeViewModel extends HoverViewModel {
                   getEdgeModel(headNode.cx(), (headNode.cy() - 110), node.cx(), node.cy()) ];
     this.nodes = [ getNodeModel(headNode.cx(), headNode.cy() - 110, Math.max(headNode.r(), node.r()), '#252833', '#41DE3C', '8', '10, 5') ];
 
-    graph.dimCommit(true);
+    graph.commitOpacity(0.1);
   }
 
   destroy() {
-    this.graph.dimCommit(false);
+    this.graph.commitOpacity(1.0);
   }
 }
 

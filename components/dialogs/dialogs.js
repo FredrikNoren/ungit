@@ -109,7 +109,7 @@ class PromptDialogViewModel extends DialogViewModel {
     this.alternatives = ko.observable();
     this.details = ko.observable(details);
   }
-  
+
   get template() { return 'prompt'; }
 }
 
@@ -155,14 +155,14 @@ class TooManyFilesDialogViewModel extends PromptDialogViewModel {
 
 class TextEditDialog extends PromptDialogViewModel {
   constructor(title, content) {
-    super(title, `<textarea class="text-area-content" rows="30" cols="75" style="height:250px;width: 100%">${content}</textarea>`);
+    super(title, `<textarea class="text-area-content form-control" spellcheck="false" style="height: 250px; width: 100%; font-family: monospace; resize: vertical;">${content}</textarea>`);
     this.taDialogName('text-edit-dialog');
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
       {
         label: "Save", primary: true, taId: 'save', click() {
-          this.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
+          self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
           self.result(true);
           self.close();
         }

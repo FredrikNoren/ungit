@@ -1,4 +1,3 @@
-
 <div class="staging panel panel-default" data-bind="css: { commitValidationError: commitValidationError }">
   <div class="panel-body">
     <div class="arrowContainer arrowDown">
@@ -53,33 +52,35 @@
         <span class="validationError" data-bind="text: commitValidationError, visible: commitValidationError"></span>
       </div>
       <div class="col-lg-9 file-area">
-        <div class="commands btn-group btn-group-sm">
-          <button class="btn btn-default" disabled data-bind="text: stats"></button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" title="Toggle all uncommitted files for commit" data-delay='{"show":"1000", "hide":"0"}'>
-            <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
-            Toggle all
-          </button>
-          <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" title="Discard all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
-            <span class="glyphicon glyphicon-trash"></span>
-            Discard all
-          </button>
-          <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" title="Stash all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
-            <span class="glyphicon glyphicon-paperclip"></span>
-            Stash all
-          </button>
-          <div class="btn-group pull-right btn-group-sm">
-            <button class="btn btn-default bootstrap-tooltip" data-bind="click: whiteSpace.toggle, css: {active: whiteSpace.isActive}" data-toggle="tooltip" data-placement="bottom" title="Ignore whitespaces" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: whiteSpace.text"></span>
+        <div class="btn-toolbar">
+          <div class="commands btn-group btn-group-sm">
+            <button class="btn btn-default" disabled data-bind="text: stats"></button>
+            <button class="btn btn-default bootstrap-tooltip" data-bind="click: toggleAllStages" data-toggle="tooltip" data-placement="bottom" title="Toggle all uncommitted files for commit" data-delay='{"show":"1000", "hide":"0"}'>
+              <span class="glyphicon" data-bind="css: toggleSelectAllGlyphClass"></span>
+              Toggle all
+            </button>
+            <button class="btn btn-default bootstrap-tooltip" data-bind="click: discardAllChanges" data-toggle="tooltip" data-placement="bottom" title="Discard all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+              <span data-bind="html: discardAllIcon"></span>
+              Discard all
+            </button>
+            <button class="btn btn-default bootstrap-tooltip stash-all" data-bind="click: stashAll, css: { disabled: !canStashAll() }" data-toggle="tooltip" data-placement="bottom" title="Stash all uncommitted file changes, including not showing files" data-delay='{"show":"1000", "hide":"0"}'>
+              <span data-bind="html: stashIcon"></span>
+              Stash all
             </button>
           </div>
-          <div class="btn-group pull-right btn-group-sm">
-            <button class="btn btn-default bootstrap-tooltip" data-bind="click: textDiffType.toggle, css: {active: textDiffType.isActive}" data-toggle="tooltip" data-placement="bottom" title="Show inline diff view" data-delay='{"show":"2000", "hide":"0"}'>
+          <div class="btn-group btn-group-sm pull-right">
+            <button class="btn btn-default bootstrap-tooltip" data-bind="click: wordWrap.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: wordWrap.text"></span>
+            </button>
+          </div>
+          <div class="btn-group btn-group-sm pull-right">
+            <button class="btn btn-default bootstrap-tooltip" data-bind="click: textDiffType.toggle, css: {active: textDiffType.isActive}" data-toggle="tooltip" data-placement="bottom" title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
               <span data-bind="text: textDiffType.text"></span>
             </button>
           </div>
-          <div class="btn-group pull-right btn-group-sm">
-            <button class="btn btn-default bootstrap-tooltip" data-bind="click: wordWrap.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" title="Not wrapping words per line" data-delay='{"show":"2000", "hide":"0"}'>
-              <span data-bind="text: wordWrap.text"></span>
+          <div class="btn-group btn-group-sm pull-right">
+            <button class="btn btn-default bootstrap-tooltip" data-bind="click: whiteSpace.toggle, css: {active: whiteSpace.isActive}" data-toggle="tooltip" data-placement="bottom" title="Hide whitespace changes in diff" data-delay='{"show":"2000", "hide":"0"}'>
+              <span data-bind="text: whiteSpace.text"></span>
             </button>
           </div>
         </div>
@@ -96,13 +97,12 @@
             <span class="deleted" data-bind="visible: removed">Removed</span>
             <span class="additions" data-bind="text: additions"></span>
             <span class="deletions" data-bind="text: deletions"></span>
+            <span class="modified" data-bind="visible: modified">Modified</span>
             <span class="conflict" data-bind="visible: conflict"><span class="temporary">Conflicts</span><span class="launchmergetool explanation" data-bind="visible: mergeTool, click: launchMergeTool">Launch Merge Tool</span><span class="markresolved explanation" data-bind="click: resolveConflict">Mark as Resolved</span></span>
             <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
                 data-toggle="tooltip" data-placement="top" title="Patch changes">Patch</span>
-            <span class="ignore bootstrap-tooltip" data-bind="click: ignoreFile"
-                data-toggle="tooltip" data-placement="top" title="Add to .gitignore">i</span>
-            <span class="discard bootstrap-tooltip" data-bind="click: discardChanges"
-                data-toggle="tooltip" data-placement="top" title="Discard changes">&#x2716;</span>
+            <button class="ignore btn bootstrap-tooltip" data-bind="html: $parent.ignoreIcon, click: ignoreFile" data-toggle="tooltip" data-placement="top" title="Add to .gitignore"></button>
+            <button class="discard btn bootstrap-tooltip" data-bind="html: $parent.discardIcon, click: discardChanges" data-toggle="tooltip" data-placement="top" title="Discard changes"></button>
             <!-- ko if: isShowingDiffs -->
             <div class="diffContainer" data-bind="component: diff"></div>
             <!-- /ko -->

@@ -1,7 +1,6 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
-const _ = require('lodash');
 const programEvents = require('ungit-program-events');
 
 components.register('repository', args => new RepositoryViewModel(args.server, args.path));
@@ -26,10 +25,11 @@ class RepositoryViewModel {
     this.isSubmodule = ko.computed(() => this.parentModulePath() && this.parentModuleLink());
     this.refreshSubmoduleStatus();
     if (window.location.search.includes('noheader=true')) {
-      this.refreshButton = components.create('refreshbutton');
+      this.refreshButton = components.create('refreshbutton', { isLarge: false });
     } else {
       this.refreshButton = false;
     }
+    this.ignoreIcon = octicons.file.toSVG({ 'height': 18 });
   }
 
   updateNode(parentElement) {
@@ -97,6 +97,6 @@ class RepositoryViewModel {
           stderr: e.stack,
           repoPath: this.repoPath()
         }});
-      })
+      });
   }
 }

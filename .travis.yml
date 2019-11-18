@@ -1,41 +1,56 @@
 sudo: required
 language: node_js
 node_js:
-  - "8"
+  - node
+  - "12"
   - "10"
-  - "11"
+  - "8"
 branches:
   only:
     - master
+    - /^v\d+\.\d+\.\d+$/
 env:
-  global:
-    - CXX=g++-4.8
   matrix:
-    - GIT_VERSION=default
     - GIT_VERSION=edge
+    - GIT_VERSION=default
 matrix:
   exclude:
-    - node_js: "8"
+    - node_js: "12"
       env: GIT_VERSION=edge
     - node_js: "10"
       env: GIT_VERSION=edge
+    - node_js: "8"
+      env: GIT_VERSION=edge
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - g++-4.8
       - xvfb
+      - libgconf-2-4
+      - wine
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - npm install --unsafe-perm=true --allow-root
-before_script:
-  - npm install -g grunt-cli
   - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
+  - npm ci
+before_script:
+  - wine --version
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git version
-  - grunt -d
-after_script:
-  - grunt travisnpmpublish
+  - DISPLAY= npm run package
+after_success:
+  - npm run travisnpmpublish
+before_deploy:
+  - npm run electronpublish
+deploy:
+  provider: releases
+  api_key: ${GITHUB_TOKEN}
+  name: ${TRAVIS_TAG}
+  file_glob: true
+  file: dist/*.zip
+  overwrite: true
+  skip_cleanup: true
+  body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
+  on:
+    tags: true
+    condition: $GIT_VERSION = edge

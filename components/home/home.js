@@ -1,5 +1,5 @@
-
 const ko = require('knockout');
+const octicons = require('octicons');
 const components = require('ungit-components');
 
 components.register('home', args => new HomeViewModel(args.app));
@@ -15,6 +15,8 @@ class HomeRepositoryViewModel {
     this.pathRemoved = ko.observable(false);
     this.remote = ko.observable('...');
     this.updateState();
+    this.removeIcon = octicons.x.toSVG({ 'height': 18 });
+    this.arrowIcon = octicons['arrow-right'].toSVG({ 'height': 24 });
   }
 
   updateState() {
@@ -22,7 +24,7 @@ class HomeRepositoryViewModel {
       .then(exists => { this.pathRemoved(!exists); })
       .catch((e) => this.server.unhandledRejection(e));
     this.server.getPromise(`/remotes/origin?path=${encodeURIComponent(this.path)}`)
-      .then(remote => {	this.remote(remote.address.replace(/\/\/.*?\@/, "//***@")); })
+      .then(remote => {	this.remote(remote.address.replace(/\/\/.*?\@/, '//***@')); })
       .catch(err => { this.remote(''); });
   }
 
@@ -37,6 +39,7 @@ class HomeViewModel {
     this.app = app;
     this.repos = ko.observableArray();
     this.showNux = ko.computed(() => this.repos().length == 0);
+    this.addIcon = octicons.plus.toSVG({ 'height': 18 });
   }
 
   updateNode(parentElement) {
