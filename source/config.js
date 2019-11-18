@@ -164,11 +164,11 @@ const defaultConfig = {
   // git binary path, not including git binary path. (i.e. /bin or /usr/bin/)
   gitBinPath: null,
 
-  // tags prepended to the commit message when selected (e.g. [SKIP CI])
-  commitMessageTags: [],
-  
   // when false, disable numstats durin status for performance.  see #1193
   isEnableNumStat: true,
+
+  // tags prepended to the commit message when selected (e.g. [SKIP CI])
+  commitMessageTags: [],
 };
 
 // Works for now but should be moved to bin/ungit
@@ -255,10 +255,10 @@ let argv = yargs
 .describe('isDisableProgressBar', 'disable progress bar (front end api)')
 .boolean('isDisableProgressBar')
 .describe('gitBinPath', 'git binary path, not including git binary path. (i.e. /bin or /usr/bin/)')
-.describe('commitMessageTags', 'tags prepended to the commit message when selected (e.g. [SKIP CI])')
-.array('commitMessageTags')
 .describe('isEnableNumStat', 'when false, disables numstats during git status for performance.  see #1193')
 .boolean('isEnableNumStat')
+.describe('commitMessageTags', 'tags prepended to the commit message when selected (e.g. [SKIP CI])')
+.array('commitMessageTags')
 ;
 
 const argvConfig = argv.argv;
