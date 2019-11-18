@@ -4,7 +4,7 @@ const request = require('supertest');
 const _ = require('lodash');
 const express = require('express');
 const path = require('path');
-const restGit = require('../src/git-api');
+const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
 
 const app = express();

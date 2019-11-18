@@ -1,6 +1,6 @@
 const expect = require('expect.js');
 const path = require('path');
-const gitParser = require('../src/git-parser');
+const gitParser = require('../source/git-parser');
 const dedent = require('dedent');
 
 describe('git-parser stash show', () => {
