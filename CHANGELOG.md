@@ -5,6 +5,8 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.1...master)
 
+### Removed
+- Remove Node 8 from build matrix [#1256](https://github.com/FredrikNoren/ungit/pull/1256)
 
 ## [1.5.1](https://github.com/FredrikNoren/ungit/compare/v1.5.0...v1.5.1)
 
@@ -583,7 +585,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [0.10.2](https://github.com/FredrikNoren/ungit/compare/v0.10.1...v0.10.2)
 
-# Fixed
+### Fixed
 - Handle SIGTERM and SIGINT [#763](https://github.com/FredrikNoren/ungit/issues/763)
 
 ### Added
