@@ -48,7 +48,7 @@
     "mkdirp": "~0.5.1",
     "moment": "~2.24.0",
     "node-cache": "~4.2.0",
-    "npm": "~6.12.1",
+    "npm": "~6.13.4",
     "npm-registry-client": "~8.6.0",
     "nprogress": "^0.2.0",
     "open": "~6.1.0",
