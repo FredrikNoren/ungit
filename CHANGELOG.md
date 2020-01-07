@@ -3,7 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## Unreleased
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.1...master)
+
+### Removed
+- Remove Node 8 from build matrix [#1256](https://github.com/FredrikNoren/ungit/pull/1256)
+
+## [1.5.1](https://github.com/FredrikNoren/ungit/compare/v1.5.0...v1.5.1)
+
+### Fixed
+- Fix copy and paste in electron on macOS [#1251](https://github.com/FredrikNoren/ungit/issues/1251)
 
 ## [1.5.0](https://github.com/FredrikNoren/ungit/compare/v1.4.48...v1.5.0)
 
@@ -577,7 +585,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [0.10.2](https://github.com/FredrikNoren/ungit/compare/v0.10.1...v0.10.2)
 
-# Fixed
+### Fixed
 - Handle SIGTERM and SIGINT [#763](https://github.com/FredrikNoren/ungit/issues/763)
 
 ### Added

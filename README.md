@@ -26,7 +26,7 @@ Quick intro to ungit: [https://youtu.be/hkBVAi3oKvo](https://youtu.be/hkBVAi3oKv
 
 Installing
 ----------
-Requires [node.js](https://nodejs.org) (≥ 8.16.0), [npm](https://www.npmjs.com/) (≥ 3.10.10, comes with node.js) and [git](https://git-scm.com/) (≥ 1.8.x). To install ungit just type:
+Requires [node.js](https://nodejs.org) (≥ 10.18.0), [npm](https://www.npmjs.com/) (≥ 6.13.4, comes with node.js) and [git](https://git-scm.com/) (≥ 1.8.x). To install ungit just type:
 
 	npm install -g ungit
 

@@ -25,7 +25,7 @@ module.exports = (grunt) => {
     watch: {
       scripts: {
         files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
-        tasks: ['browserify-common', 'browserify-components', 'babel:prod'],
+        tasks: ['browserify-common', 'browserify-components'],
         options: {
           spawn: false,
         },
@@ -194,8 +194,7 @@ module.exports = (grunt) => {
     clean: {
       electron: ['./build'],
       coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit'],
-      babel: ['./src']
+      'coverage-unit': ['./coverage/coverage-unit']
     },
     electron: {
       package: {
@@ -226,20 +225,6 @@ module.exports = (grunt) => {
           coverageFolder: './coverage/coverage-unit',
           mask: 'spec.*.js'
         }
-      }
-    },
-    babel: {
-      prod: {
-        options: {
-          presets: ['es2015', 'stage-0']
-        },
-        files: [{
-            expand: true,
-            cwd: 'source',
-            src: ['**/*.js'],
-            dest: 'src',
-            ext: '.js'
-        }]
       }
     }
   });
@@ -422,8 +407,6 @@ module.exports = (grunt) => {
       const bumps = Bluebird.map(keys, (dep) => {
         // winston 3.x has different API
         if (dep == 'winston') return;
-        // babel 7.x.x has alot of changes.... :(
-        if (dep.indexOf('babel') > -1) return;
 
         return bumpDependency(tempPackageJson, dep);
       });
@@ -458,11 +441,10 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
-  grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['clean:babel', 'less:production', 'jshint', 'babel:prod', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);

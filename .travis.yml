@@ -4,7 +4,6 @@ node_js:
   - node
   - "12"
   - "10"
-  - "8"
 branches:
   only:
     - master
@@ -18,8 +17,6 @@ matrix:
     - node_js: "12"
       env: GIT_VERSION=edge
     - node_js: "10"
-      env: GIT_VERSION=edge
-    - node_js: "8"
       env: GIT_VERSION=edge
 addons:
   apt:

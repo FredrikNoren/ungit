@@ -1,7 +1,7 @@
 var startLaunchTime = Date.now();
-var config = require('../src/config');
+var config = require('../source/config');
 var child_process = require('child_process');
-var BugTracker = require('../src/bugtracker');
+var BugTracker = require('../source/bugtracker');
 var bugtracker = new BugTracker('launcher');
 
 var { app, dialog, shell, BrowserWindow, Menu } = require('electron');
@@ -58,6 +58,20 @@ var menuTemplate = [
       { role: 'quit' }
     ]
   },
+  {  
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'delete' },
+      { type: 'separator' },
+      { role: 'selectAll' }
+    ]
+  },
   {
     label: 'View',
     submenu: [
@@ -100,7 +114,7 @@ app.on('ready', function() {
       app.quit();
     }
     else {
-      var server = require('../src/server');
+      var server = require('../source/server');
       server.started.add(function() {
         launch(function(err) {
           if (err) console.log(err);
