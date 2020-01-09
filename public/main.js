@@ -12,24 +12,33 @@ process.on('uncaughtException', function(err) {
   app.quit();
 });
 
+function openUngitBrowser(pathToNavigateTo) {
+  console.log(`Navigate to ${pathToNavigateTo}`);
+  mainWindow.loadURL(pathToNavigateTo);
+}
+
 function launch(callback) {
-  var currentUrl = config.urlBase + ':' + config.port;
-  if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
-  else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
-  console.log('Browse to ' + currentUrl);
-  if (config.launchBrowser && !config.launchCommand) {
-    mainWindow.loadURL(currentUrl);
-  } else if (config.launchCommand) {
-    var command = config.launchCommand.replace(/%U/g, currentUrl);
+  var url = config.urlBase + ':' + config.port;
+  if (config.forcedLaunchPath === undefined) {
+    url += '/#/repository?path=' + encodeURIComponent(process.cwd());
+  } else if (config.forcedLaunchPath !== undefined && config.forcedLaunchPath !== '') {
+    url += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+  }
+
+  if (config.launchCommand) {
+    var command = config.launchCommand.replace(/%U/g, url);
     console.log('Running custom launch command: ' + command);
     child_process.exec(command, function(err, stdout, stderr) {
       if (err) {
         callback(err);
         return;
       }
-      if (config.launchBrowser)
-        mainWindow.loadURL(currentUrl);
+      if (config.launchBrowser) {
+        openUngitBrowser(url);
+      }
     });
+  } else if (config.launchBrowser) {
+    openUngitBrowser(url);
   }
 }
 
