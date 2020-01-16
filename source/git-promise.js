@@ -8,6 +8,7 @@ const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
+const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
@@ -284,7 +285,7 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
   if (sha1) {
     return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
-      let prevSha1 = sha1 == initialCommitSha1.trim() ? '4b825dc642cb6eb9a060e54bf8d69288fbee4904' : `${sha1}^`;
+      let prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
       return git(['diff', ignoreWhiteSpace ? '-w' : '', prevSha1, sha1, "--", filename.trim()], repoPath);
     });
   }
