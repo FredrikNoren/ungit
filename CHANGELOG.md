@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.1...master)
 
+### Fixed
+- `--no-launchBrowser` is ignored when ungit already running [#1259](https://github.com/FredrikNoren/ungit/issues/1259)
+
 ### Removed
 - Remove Node 8 from build matrix [#1256](https://github.com/FredrikNoren/ungit/pull/1256)
 
