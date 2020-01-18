@@ -6,6 +6,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.1...master)
 
 ### Fixed
+- Diff does not work for first commit [#1124](https://github.com/FredrikNoren/ungit/issues/1124)
 - `--no-launchBrowser` is ignored when ungit already running [#1259](https://github.com/FredrikNoren/ungit/issues/1259)
 
 ### Removed

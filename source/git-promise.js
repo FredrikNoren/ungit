@@ -8,6 +8,7 @@ const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
+const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
@@ -282,13 +283,18 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 }
 
 git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
-  const newFileDiffArgs = ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()];
+  if (sha1) {
+    return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
+      let prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
+      return git(['diff', ignoreWhiteSpace ? '-w' : '', prevSha1, sha1, "--", filename.trim()], repoPath);
+    });
+  }
+
   return git.revParse(repoPath)
     .then((revParse) => { return revParse.type === 'bare' ? { files: {} } : git.status(repoPath) }) // if bare do not call status
     .then((status) => {
       const file = status.files[filename];
-
-      if (!file && !sha1) {
+      if (!file) {
         return fs.isExists(path.join(repoPath, filename))
           .then((isExist) => {
             if (isExist) return [];
@@ -296,20 +302,11 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
           });
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
-        let exec;
         if (file && file.isNew) {
-          exec = git(newFileDiffArgs, repoPath, true);
-        } else if (sha1) {
-          exec = git(['diff', ignoreWhiteSpace ? '-w' : '', `${sha1}^`, sha1, "--", filename.trim()], repoPath);
+          return git(['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()], repoPath, true);
         } else {
-          exec = git(['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()], repoPath);
+          return git(['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()], repoPath);
         }
-        return exec.catch((err) => {
-          // when <rev> is very first commit and 'diff <rev>~1:[file] <rev>:[file]' is performed,
-          // it will error out with invalid object name error
-          if (sha1 && err && err.error.indexOf('bad revision') > -1)
-            return git(newFileDiffArgs, repoPath, true);
-        });
       }
     });
 }

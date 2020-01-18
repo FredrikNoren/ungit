@@ -44,7 +44,7 @@ describe('git-api diff', () => {
 
   it('diff on created file should work', () => {
     return common.get(req, '/diff', { path: testDir, file: testFile }).then((res) => {
-      for(let i = 0; i < content.length; i++) {
+      for (let i = 0; i < content.length; i++) {
         expect(res.indexOf(content[i])).to.be.above(-1);
       }
     });
@@ -60,6 +60,18 @@ describe('git-api diff', () => {
   });
   it('should be possible to commit an image file', () => {
     return common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testImage }] });
+  });
+
+  it('diff on first commit should work', () => {
+    return common.get(req, '/gitlog', { path: testDir })
+      .then((res) => {
+        expect(res.nodes.length).to.be(2);
+        return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
+      }).then((res) => {
+        for (let i = 0; i < content.length; i++) {
+          expect(res.indexOf(content[i])).to.be.above(-1);
+        }
+      });
   });
 
   it('diff on commited file should work', () => {
@@ -88,6 +100,17 @@ describe('git-api diff', () => {
       expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
       expect(res.indexOf('+more')).to.be.above(-1);
     });
+  });
+
+  it('diff on file commit should work if file is changing', () => {
+    return common.get(req, '/gitlog', { path: testDir })
+      .then((res) => {
+        expect(res.nodes.length).to.be(2);
+        return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
+      }).then((res) => {
+        expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
+        expect(res.indexOf('+more')).to.be(-1);
+      });
   });
 
   it('getting current image file should work', () => {
