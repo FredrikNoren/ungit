@@ -31,7 +31,7 @@
     "cookie-parser": "~1.4.4",
     "crossroads": "~0.12.2",
     "dedent": "^0.7.0",
-    "diff2html": "~2.8.0",
+    "diff2html": "~3.0.2",
     "dnd-page-scroll": "0.0.4",
     "express": "~4.16.4",
     "express-session": "~1.16.1",

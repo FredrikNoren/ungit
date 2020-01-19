@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.3...master)
 
+### Changed
+- Update diff2html to version 3 [#1273](https://github.com/FredrikNoren/ungit/pull/1273)
+
 ## [1.5.3](https://github.com/FredrikNoren/ungit/compare/v1.5.2...v1.5.3)
 
 ### Fixed
