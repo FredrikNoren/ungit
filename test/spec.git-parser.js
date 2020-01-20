@@ -184,7 +184,7 @@ describe('git-parser parseGitLog', () => {
     })
   });
   it('parses multiple commits in a row', () => {
-    const gitLog = dedent`
+    const gitLog = dedent(`
       commit 5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4 37d1154434b70854ed243967e0d7e37aa3564551 (HEAD -> refs/heads/git-parser-specs)
       Author:     Test ungit <test@example.com>
       AuthorDate: Fri Jan 4 14:54:06 2019 +0100
@@ -193,10 +193,7 @@ describe('git-parser parseGitLog', () => {
 
         parseGitLog + gix reflox parsing
 
-      1	1	source/git-parser.js
-      175	0	test/spec.git-parser.js
-
-      commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861
+      1	1	source/git-parser.js\x00175	0	test/spec.git-parser.js\x00\x00commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861
       Author:     Test ungit <test@example.com>
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
       Commit:     Test ungit <test@example.com>
@@ -204,8 +201,7 @@ describe('git-parser parseGitLog', () => {
 
         submodules parser
 
-      32	0	test/spec.git-parser.js\n
-    `
+      32	0	test/spec.git-parser.js\x00\x00`)
 
     const res = gitParser.parseGitLog(gitLog)
     expect(res[0]).to.eql({
@@ -252,7 +248,7 @@ describe('git-parser parseGitLog', () => {
     })
   });
   it('parses reflog commits without email', () => {
-    const gitLog = dedent`
+    const gitLog = dedent(`
       commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)
       Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit)
       Reflog message: commit: submodules parser
@@ -263,8 +259,7 @@ describe('git-parser parseGitLog', () => {
 
           submodules parser
 
-      32	0	test/spec.git-parser.js\n
-    `
+      32	0	test/spec.git-parser.js\x00\x00`)
 
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       authorDate: "Fri Jan 4 14:03:56 2019 +0100",
@@ -293,7 +288,7 @@ describe('git-parser parseGitLog', () => {
     })
   });
   it('parses reflog commits', () => {
-    const gitLog = dedent`
+    const gitLog = dedent(`
       commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)
       Reflog: git-parser-specs@{Fri Jan 4 14:03:56 2019 +0100} (Test ungit <test@example.com>)
       Reflog message: commit: submodules parser
@@ -304,8 +299,7 @@ describe('git-parser parseGitLog', () => {
 
           submodules parser
 
-      32	0	test/spec.git-parser.js\n
-    `
+      32	0	test/spec.git-parser.js\x00\x00`)
 
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       authorDate: "Fri Jan 4 14:03:56 2019 +0100",
@@ -389,7 +383,7 @@ describe('git-parser parseGitLog', () => {
     });
   });
   it('parses the git log', () => {
-    const gitLog = dedent`
+    const gitLog = dedent(`
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)
       Author:     Test ungit <test@example.com>
       AuthorDate: Fri Jan 4 14:03:56 2019 +0100
@@ -398,8 +392,7 @@ describe('git-parser parseGitLog', () => {
 
           submodules parser
 
-      32	0	test/spec.git-parser.js\n
-    `
+      32	0	test/spec.git-parser.js\x00\x00`)
 
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
       {

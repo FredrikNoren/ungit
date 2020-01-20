@@ -434,7 +434,7 @@ git.revParse = (repoPath) => {
 }
 
 git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
-  return git(['log', '--cc', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
+  return git(['log', '--cc', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '-z', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];

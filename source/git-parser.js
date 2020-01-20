@@ -143,24 +143,39 @@ exports.parseGitLog = (data) => {
     currentCommmit.message += row.trim();
   }
   const parseFileChanges = (row, index) => {
-    if (rows.length === index + 1 || rows[index + 1] && rows[index + 1].indexOf('commit ') === 0) {
-      const total = [0, 0, 'Total'];
-      for (let n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
-        const fileLineDiff = currentCommmit.fileLineDiffs[n];
-        if (!isNaN(parseInt(fileLineDiff[0], 10))) {
-          total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
-        }
-        if (!isNaN(parseInt(fileLineDiff[1], 10))) {
-          total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
-        }
-      }
-      currentCommmit.fileLineDiffs.splice(0, 0, total);
-      parser = parseCommitLine;
-      return;
+    // git log is using -z so all the file changes are on one line
+    const fileChangeRegex = /(?<added>[\d-]+)\t(?<removed>[\d-]+)\t((?<filename>[^\x00]+?)\x00|\x00(?<oldFilename>[^\x00]+?)\x00(?<newFilename>[^\x00]+?)\x00)/y;
+    // merge commits start the file changes with a null
+    if (row[0] === '\x00'){
+      row = row.slice(1);
     }
-    const splitted = row.split('\t');
-    splitted.push(fileType(splitted[2]));
-    currentCommmit.fileLineDiffs.push(splitted);
+    while (row[fileChangeRegex.lastIndex] && row[fileChangeRegex.lastIndex] !== '\x00') {
+      let match = fileChangeRegex.exec(row);
+      let filename = match.groups.filename || match.groups.newFilename;
+      currentCommmit.fileLineDiffs.push([
+        match.groups.added,
+        match.groups.removed,
+        filename,
+        fileType(filename)
+      ]);
+    }
+    const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
+    const total = [0, 0, 'Total'];
+    for (let n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
+      const fileLineDiff = currentCommmit.fileLineDiffs[n];
+      if (!isNaN(parseInt(fileLineDiff[0], 10))) {
+        total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
+      }
+      if (!isNaN(parseInt(fileLineDiff[1], 10))) {
+        total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
+      }
+    }
+    currentCommmit.fileLineDiffs.splice(0, 0, total);
+    parser = parseCommitLine;
+    if (nextRow) {
+      parser(nextRow, index);
+    }
+    return;
   }
   let parser = parseCommitLine;
   const rows = data.split('\n');
