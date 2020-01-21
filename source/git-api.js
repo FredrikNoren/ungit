@@ -71,7 +71,8 @@ exports.registerApi = (env) => {
           });
         }
       }).then(() => {
-        socket.watcher.push(fs.watch(pathToWatch, options || {}, (event, filename) => {
+        const watcher = fs.watch(pathToWatch, options || {});
+        watcher.on('change', (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
@@ -80,7 +81,11 @@ exports.registerApi = (env) => {
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
-        }));
+        });
+        watcher.on('error', (err) => {
+          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
+        });
+        socket.watcher.push(watcher);
       });
   };
 
