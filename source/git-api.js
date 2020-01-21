@@ -560,7 +560,7 @@ exports.registerApi = (env) => {
       .then((baseRepoPath) => {
         return { path: path.resolve(baseRepoPath.trim()) };
       }).catch((e) => {
-        if (e.errorCode === 'not-a-repository') {
+        if (e.errorCode === 'not-a-repository' || e.errorCode === 'must-be-in-working-tree') {
           return {};
         }
         throw e;
