@@ -34,6 +34,7 @@ describe('[DISCARD - noWarn]', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
   });
+  after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0]);
@@ -52,6 +53,7 @@ describe('[DISCARD - withWarn]', () => {
     return environment.init()
       .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
   });
+  after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
     return environment.nm.ug.openUngit(testRepoPaths[0]);
