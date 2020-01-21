@@ -18,7 +18,7 @@ exports.parseGitStatus = (text, args) => {
     let displayName;
     if (status[0] == 'R') {
       oldFileName = lineIterator.next().value
-      displayName = `${oldFileName} => ${newFileName}`;
+      displayName = `${oldFileName} → ${newFileName}`;
     } else {
       oldFileName = newFileName;
       displayName = newFileName;
@@ -170,7 +170,7 @@ exports.parseGitLog = (data) => {
       let oldFileName = match.groups.oldFileName || match.groups.fileName;
       let displayName;
       if(match.groups.oldFileName) {
-        displayName = `${match.groups.oldFileName} => ${match.groups.newFileName}`;
+        displayName = `${match.groups.oldFileName} → ${match.groups.newFileName}`;
       } else {
         displayName = fileName;
       }
