@@ -286,7 +286,7 @@ git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
   if (sha1) {
     return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
       let prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
-      if (oldFilename !== filename) {
+      if (oldFilename && oldFilename !== filename) {
         return git(['diff', ignoreWhiteSpace ? '-w' : '', `${prevSha1}:${oldFilename.trim()}`, `${sha1}:${filename.trim()}`], repoPath);
       } else {
         return git(['diff', ignoreWhiteSpace ? '-w' : '', prevSha1, sha1, "--", filename.trim()], repoPath);
