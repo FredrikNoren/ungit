@@ -428,7 +428,7 @@ git.revParse = (repoPath) => {
       }
       return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
         const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
-        if (resultLines[0].indexOf('true') > -1) {          
+        if (resultLines[0].indexOf('true') > -1) {
             return { type: 'inited', gitRootPath: rootPath };
         }
         return { type: 'uninited', gitRootPath: rootPath };
