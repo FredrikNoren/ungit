@@ -177,17 +177,17 @@ const getGitError = (args, stderr, stdout) => {
 
 git.status = (repoPath, file) => {
   return Bluebird.props({
-    numStatsStaged: git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--cached', '--', (file || '')], repoPath)
+    numStatsStaged: git([gitOptionalLocks, 'diff', '--numstat', '--cached', '-z', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
     numStatsUnstaged: Bluebird.resolve().then(() => {
       if (config.isEnableNumStat) {
-        return git([gitOptionalLocks, 'diff', '--no-renames', '--numstat', '--', (file || '')], repoPath)
+        return git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', (file || '')], repoPath)
           .then(gitParser.parseGitStatusNumstat);
       } else {
         return {}
       }
     }),
-    status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', (file || '')], repoPath)
+    status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
         return Bluebird.props({
@@ -282,11 +282,11 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
   return git(['show', `${version}:${filename}`], repoPath, null, outPipe);
 }
 
-git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
+git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
   if (sha1) {
     return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
       let prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
-      return git(['diff', ignoreWhiteSpace ? '-w' : '', prevSha1, sha1, "--", filename.trim()], repoPath);
+      return git(['diff', ignoreWhiteSpace ? '-w' : '', `${prevSha1}:${oldFilename.trim()}`, `${sha1}:${filename.trim()}`], repoPath);
     });
   }
 
@@ -304,6 +304,8 @@ git.diffFile = (repoPath, filename, sha1, ignoreWhiteSpace) => {
       } else {
         if (file && file.isNew) {
           return git(['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()], repoPath, true);
+        } else if (file && file.renamed) {
+          return git(['diff', ignoreWhiteSpace ? '-w' : '', `HEAD:${oldFilename}`, filename.trim()], repoPath);
         } else {
           return git(['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()], repoPath);
         }

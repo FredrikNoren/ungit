@@ -256,7 +256,7 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const isIgnoreWhiteSpace = req.query.whiteSpace === "true" ? true : false;
-    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.sha1, isIgnoreWhiteSpace));
+    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.oldFile, req.query.sha1, isIgnoreWhiteSpace));
   });
 
   app.get(`${exports.pathPrefix}/diff/image`, ensureAuthenticated, ensurePathExists, (req, res) => {

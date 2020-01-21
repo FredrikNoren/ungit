@@ -19,7 +19,7 @@
 <div data-bind="foreach: commitLineDiffs" class="commitdiff">
   <div class="file">
     <div class="head commit-diff-filename" data-bind="click: fileNameClick">
-      <span data-bind="text: fileName"></span>
+      <span data-bind="text: displayName"></span>
       <span class="file-stats" data-bind="visible: added() != '-'">
         (
         <span data-bind="text: added"></span>

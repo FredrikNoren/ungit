@@ -5,24 +5,36 @@ const fileType = require('./utils/file-type.js');
 const _ = require('lodash')
 
 exports.parseGitStatus = (text, args) => {
-  const lines = text.split('\n');
+  const lines = text.split('\x00');
   const files = {};
   // skipping first line...
-  lines.slice(1).forEach((line) => {
-    if (line == '') return;
+  let lineIterator = lines.slice(1).values();
+
+  for(let line of lineIterator){
+    if (line == '') continue;
     const status = line.slice(0, 2);
-    const filename = line.slice(3).trim().replace(/^"(.*)"$/, '$1'); // may contain old and renamed file name.
-    const finalFilename = status[0] == 'R' ? filename.slice(filename.indexOf('>') + 2) : filename;
-    files[finalFilename] = {
-      displayName: filename,
+    const newFileName = line.slice(3).trim();
+    let oldFileName;
+    let displayName;
+    if (status[0] == 'R') {
+      oldFileName = lineIterator.next().value
+      displayName = `${oldFileName} => ${newFileName}`;
+    } else {
+      oldFileName = newFileName;
+      displayName = newFileName;
+    }
+    files[newFileName] = {
+      fileName: newFileName,
+      oldFileName: oldFileName,
+      displayName: displayName,
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
       isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
       conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
       renamed: status[0] == 'R',
-      type: fileType(finalFilename)
+      type: fileType(newFileName)
     };
-  });
+  }
 
   return {
     isMoreToLoad: false,
@@ -32,16 +44,19 @@ exports.parseGitStatus = (text, args) => {
   };
 };
 
+const fileChangeRegex = /(?<additions>[\d-]+)\t(?<deletions>[\d-]+)\t((?<fileName>[^\x00]+?)\x00|\x00(?<oldFileName>[^\x00]+?)\x00(?<newFileName>[^\x00]+?)\x00)/y;
+
 exports.parseGitStatusNumstat = (text) => {
   const result = {};
-  text.split('\n').forEach((line) => {
-    if (line == '') return;
-    const parts = line.split('\t');
-    result[parts[2]] = {
-      additions: parts[0],
-      deletions: parts[1]
+  fileChangeRegex.lastIndex = 0;
+  let match = fileChangeRegex.exec(text);
+  while (match !== null) {
+    result[match.groups.fileName || match.groups.newFileName] = {
+      additions: match.groups.additions,
+      deletions: match.groups.deletions
     };
-  });
+    match = fileChangeRegex.exec(text);
+  }
   return result;
 };
 
@@ -144,33 +159,44 @@ exports.parseGitLog = (data) => {
   }
   const parseFileChanges = (row, index) => {
     // git log is using -z so all the file changes are on one line
-    const fileChangeRegex = /(?<added>[\d-]+)\t(?<removed>[\d-]+)\t((?<filename>[^\x00]+?)\x00|\x00(?<oldFilename>[^\x00]+?)\x00(?<newFilename>[^\x00]+?)\x00)/y;
     // merge commits start the file changes with a null
     if (row[0] === '\x00'){
       row = row.slice(1);
     }
+    fileChangeRegex.lastIndex = 0;
     while (row[fileChangeRegex.lastIndex] && row[fileChangeRegex.lastIndex] !== '\x00') {
       let match = fileChangeRegex.exec(row);
-      let filename = match.groups.filename || match.groups.newFilename;
-      currentCommmit.fileLineDiffs.push([
-        match.groups.added,
-        match.groups.removed,
-        filename,
-        fileType(filename)
-      ]);
+      let fileName = match.groups.fileName || match.groups.newFileName;
+      let oldFileName = match.groups.oldFileName || match.groups.fileName;
+      let displayName;
+      if(match.groups.oldFileName) {
+        displayName = `${match.groups.oldFileName} => ${match.groups.newFileName}`;
+      } else {
+        displayName = fileName;
+      }
+      currentCommmit.fileLineDiffs.push({
+        additions: match.groups.additions,
+        deletions: match.groups.deletions,
+        fileName: fileName,
+        oldFileName: oldFileName,
+        displayName: displayName,
+        type: fileType(fileName)
+      });
     }
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
-    const total = [0, 0, 'Total'];
-    for (let n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
-      const fileLineDiff = currentCommmit.fileLineDiffs[n];
-      if (!isNaN(parseInt(fileLineDiff[0], 10))) {
-        total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
+    const total = {
+      additions: 0,
+      deletions: 0
+    };
+    for (let fileLineDiff of currentCommmit.fileLineDiffs) {
+      if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
+        total.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
       }
-      if (!isNaN(parseInt(fileLineDiff[1], 10))) {
-        total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
+      if (!isNaN(parseInt(fileLineDiff.deletions, 10))) {
+        total.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
       }
     }
-    currentCommmit.fileLineDiffs.splice(0, 0, total);
+    currentCommmit.total = total;
     parser = parseCommitLine;
     if (nextRow) {
       parser(nextRow, index);

@@ -5,10 +5,12 @@ const programEvents = require('ungit-program-events');
 
 class CommitLineDiff {
   constructor(args, fileLineDiff) {
-    this.added = ko.observable(fileLineDiff[0]);
-    this.removed = ko.observable(fileLineDiff[1]);
-    this.fileName = ko.observable(fileLineDiff[2]);
-    this.fileType = fileLineDiff[3];
+    this.added = ko.observable(fileLineDiff.additions);
+    this.removed = ko.observable(fileLineDiff.deletions);
+    this.fileName = ko.observable(fileLineDiff.fileName);
+    this.oldFileName = ko.observable(fileLineDiff.oldFileName);
+    this.displayName = ko.observable(fileLineDiff.displayName);
+    this.fileType = fileLineDiff.type;
     this.isShowingDiffs = ko.observable(false);
     this.repoPath = args.repoPath;
     this.server = args.server;
@@ -22,6 +24,7 @@ class CommitLineDiff {
   getSpecificDiff() {
     return components.create(`${this.fileType}diff`, {
       filename: this.fileName(),
+      oldFilename: this.oldFileName(),
       repoPath: this.repoPath,
       server: this.server,
       sha1: this.sha1,
