@@ -82,10 +82,6 @@ Nightmare.action('ug', {
     this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename })
       .then(done.bind(null, null), done);
   },
-  'shutdownServer': function(done) {
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/shutdown`, undefined)
-      .then(done.bind(null, null), done);
-  },
 
   'changeTestFile': function(filename, done) {
     this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename })
@@ -250,14 +246,15 @@ class Environment {
     });
   }
 
-  shutdown(doNotClose) {
+  shutdown() {
     this.shuttinDown = true;
     return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
-      .ug.shutdownServer()
       .then(() => {
-        if (!doNotClose) {
-          return this.nm.end();
+        if (this.ungitServer) {
+          this.ungitServer.kill('SIGINT');
+          this.ungitServer = null;
         }
+        return this.nm.end();
       });
   }
 
@@ -326,6 +323,9 @@ class Environment {
       }
     });
     ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
+
+    this.ungitServer = ungitServer;
+
     return Bluebird.resolve();
   }
 }

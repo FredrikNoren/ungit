@@ -716,13 +716,11 @@ exports.registerApi = (env) => {
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
       jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
     });
-    app.post(`${exports.pathPrefix}/testing/cleanup`, ensureAuthenticated, (req, res) => {
-      //winston.info('Cleaned up: ' + JSON.stringify(cleaned));
-      res.json({ result: temp.cleanup() });
-    });
-    app.post(`${exports.pathPrefix}/testing/shutdown`, ensureAuthenticated, (req, res) => {
-      res.json({});
-      process.exit();
+    app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
+      temp.cleanup((err, cleaned) => {
+        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+        res.json({ result: cleaned });
+      });
     });
   }
 };
