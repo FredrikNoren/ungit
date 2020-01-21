@@ -6,8 +6,6 @@ const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
-// when discard button is clicked and disable discard warning is selected, for next 5 minutes disable discard warnings
-const muteGraceTimeDuration = 60 * 1000 * 5;
 const mergeTool = ungit.config.mergeTool;
 
 components.register('staging', args => new StagingViewModel(args.server, args.repoPath, args.graph));

@@ -10,7 +10,6 @@ const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 const ignore = require('ignore');
 const Bluebird = require('bluebird');
-const crypto = require('crypto');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);

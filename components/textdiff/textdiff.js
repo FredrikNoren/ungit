@@ -153,7 +153,7 @@ class TextDiffViewModel {
 
       let html;
 
-      if (this.textDiffType.value() === 'sidebysidediff') {
+      if (this.textDiffType.value() === sideBySideDiff) {
         html = diff2html.getPrettySideBySideHtmlFromJson(this.diffJson);
       } else {
         html = diff2html.getPrettyHtmlFromJson(this.diffJson);
