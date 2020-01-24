@@ -2,7 +2,6 @@
 const ko = require('knockout');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
-const navigation = require('ungit-navigation');
 const storage = require('ungit-storage');
 
 components.register('app', (args) => {

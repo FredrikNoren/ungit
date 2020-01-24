@@ -82,10 +82,6 @@ Nightmare.action('ug', {
     this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename })
       .then(done.bind(null, null), done);
   },
-  'shutdownServer': function(done) {
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/shutdown`, undefined)
-      .then(done.bind(null, null), done);
-  },
 
   'changeTestFile': function(filename, done) {
     this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename })
@@ -250,14 +246,15 @@ class Environment {
     });
   }
 
-  shutdown(doNotClose) {
+  shutdown() {
     this.shuttinDown = true;
     return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
-      .ug.shutdownServer()
       .then(() => {
-        if (!doNotClose) {
-          return this.nm.end();
+        if (this.ungitServerProcess) {
+          this.ungitServerProcess.kill('SIGINT');
+          this.ungitServerProcess = null;
         }
+        return this.nm.end();
       });
   }
 
@@ -322,10 +319,14 @@ class Environment {
       if (stderrStr.indexOf("EADDRINUSE") > -1) {
         winston.info("retrying with different port");
         ungitServer.kill('SIGINT');
+        this.ungitServerProcess = null;
         this.getPort().then(() => this.startServer());
       }
     });
     ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
+
+    this.ungitServerProcess = ungitServer;
+
     return Bluebird.resolve();
   }
 }

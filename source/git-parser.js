@@ -1,8 +1,6 @@
-const moment = require('moment');
-const fs = require('fs');
 const path = require('path');
 const fileType = require('./utils/file-type.js');
-const _ = require('lodash')
+const _ = require('lodash');
 
 exports.parseGitStatus = (text, args) => {
   const lines = text.split('\n');

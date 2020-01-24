@@ -420,16 +420,19 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
 }
 
 git.revParse = (repoPath) => {
-  return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository', '--show-toplevel'], repoPath)
+  return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository'], repoPath)
     .then((result) => {
-      const resultLines = result.toString().split('\n');
-      const rootPath = path.normalize(resultLines[2] ? resultLines[2] : repoPath);
-      if (resultLines[0].indexOf('true') > -1) {
-        return { type: 'inited', gitRootPath: rootPath };
-      } else if (resultLines[1].indexOf('true') > -1) {
-        return { type: 'bare', gitRootPath: rootPath };
+      const resultLines = result.split('\n');
+      if (resultLines[1].indexOf('true') > -1) { // bare repositories don't support `--show-toplevel` since git 2.25
+        return { type: 'bare', gitRootPath: repoPath };
       }
-      return { type: 'uninited', gitRootPath: rootPath };
+      return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
+        const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
+        if (resultLines[0].indexOf('true') > -1) {
+            return { type: 'inited', gitRootPath: rootPath };
+        }
+        return { type: 'uninited', gitRootPath: rootPath };
+      });
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 

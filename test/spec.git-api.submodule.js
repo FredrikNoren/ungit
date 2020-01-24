@@ -5,7 +5,6 @@ const express = require('express');
 const path = require('path');
 const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
-const wrapErrorHandler = common.wrapErrorHandler;
 
 const app = express();
 app.use(require('body-parser').json());
