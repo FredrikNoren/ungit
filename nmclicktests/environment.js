@@ -250,9 +250,9 @@ class Environment {
     this.shuttinDown = true;
     return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
       .then(() => {
-        if (this.ungitServer) {
-          this.ungitServer.kill('SIGINT');
-          this.ungitServer = null;
+        if (this.ungitServerProcess) {
+          this.ungitServerProcess.kill('SIGINT');
+          this.ungitServerProcess = null;
         }
         return this.nm.end();
       });
@@ -319,12 +319,13 @@ class Environment {
       if (stderrStr.indexOf("EADDRINUSE") > -1) {
         winston.info("retrying with different port");
         ungitServer.kill('SIGINT');
+        this.ungitServerProcess = null;
         this.getPort().then(() => this.startServer());
       }
     });
     ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
 
-    this.ungitServer = ungitServer;
+    this.ungitServerProcess = ungitServer;
 
     return Bluebird.resolve();
   }
