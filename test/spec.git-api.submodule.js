@@ -84,6 +84,8 @@ describe('git-api submodule', function () {
         expect(Object.keys(res.files).length).to.be(1);
         expect(res.files[submodulePath]).to.eql({
           displayName: submodulePath,
+          fileName: submodulePath,
+          oldFileName: submodulePath,
           isNew: false,
           staged: false,
           removed: false,

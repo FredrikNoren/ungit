@@ -211,10 +211,27 @@ describe('git-parser parseGitLog', () => {
       commitDate: "Fri Jan 4 14:54:06 2019 +0100",
       committerEmail: "test@example.com",
       committerName: "Test ungit",
+      total: {
+        "additions": 176,
+        "deletions": 1
+      },
       fileLineDiffs: [
-        [176, 1, "Total"],
-        [1, 1, "source/git-parser.js", "text"],
-        [175, 0, "test/spec.git-parser.js", "text"],
+        {
+          "additions": 1,
+          "deletions": 1,
+          "displayName": "source/git-parser.js",
+          "fileName": "source/git-parser.js",
+          "oldFileName": "source/git-parser.js",
+          "type": "text"
+        },
+        {
+          "additions": 175,
+          "deletions": 0,
+          "displayName": "test/spec.git-parser.js",
+          "fileName": "test/spec.git-parser.js",
+          "oldFileName": "test/spec.git-parser.js",
+          "type": "text"
+        }
       ],
       isHead: true,
       message: "parseGitLog + gix reflox parsing",
@@ -234,9 +251,19 @@ describe('git-parser parseGitLog', () => {
       commitDate: "Fri Jan 4 14:03:56 2019 +0100",
       committerEmail: "test@example.com",
       committerName: "Test ungit",
+      total: {
+        "additions": 32,
+        "deletions": 0
+      },
       fileLineDiffs: [
-        [32, 0, "Total"],
-        [32, 0, "test/spec.git-parser.js", "text"],
+        {
+          "additions": 32,
+          "deletions": 0,
+          "displayName": "test/spec.git-parser.js",
+          "fileName": "test/spec.git-parser.js",
+          "oldFileName": "test/spec.git-parser.js",
+          "type": "text"
+        }
       ],
       isHead: false,
       message: "submodules parser",
@@ -268,9 +295,19 @@ describe('git-parser parseGitLog', () => {
       commitDate: "Fri Jan 4 14:03:56 2019 +0100",
       committerEmail: "test@example.com",
       committerName: "Test ungit",
+      total: {
+        "additions": 32,
+        "deletions": 0
+      },
       fileLineDiffs: [
-        [32, 0, "Total"],
-        [32, 0, "test/spec.git-parser.js", "text"]
+        {
+          "additions": 32,
+          "deletions": 0,
+          "displayName": "test/spec.git-parser.js",
+          "fileName": "test/spec.git-parser.js",
+          "oldFileName": "test/spec.git-parser.js",
+          "type": "text"
+        }
       ],
       isHead: true,
       message: "submodules parser",
@@ -308,9 +345,19 @@ describe('git-parser parseGitLog', () => {
       commitDate: "Fri Jan 4 14:03:56 2019 +0100",
       committerEmail: "test@example.com",
       committerName: "Test ungit",
+      total: {
+        "additions": 32,
+        "deletions": 0
+      },
       fileLineDiffs: [
-        [32, 0, "Total"],
-        [32, 0, "test/spec.git-parser.js", "text"]
+        {
+          "additions": 32,
+          "deletions": 0,
+          "displayName": "test/spec.git-parser.js",
+          "fileName": "test/spec.git-parser.js",
+          "oldFileName": "test/spec.git-parser.js",
+          "type": "text"
+        }
       ],
       isHead: true,
       message: "submodules parser",
@@ -397,9 +444,19 @@ describe('git-parser parseGitLog', () => {
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql(
       {
         refs: [ 'HEAD', 'refs/heads/git-parser-specs' ],
+        total: {
+          "additions": 32,
+          "deletions": 0
+        },
         fileLineDiffs: [
-          [32, 0, "Total"],
-          [32, 0, "test/spec.git-parser.js", "text"]
+          {
+            "additions": 32,
+            "deletions": 0,
+            "displayName": "test/spec.git-parser.js",
+            "fileName": "test/spec.git-parser.js",
+            "oldFileName": "test/spec.git-parser.js",
+            "type": "text"
+          }
         ],
         sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
         parents: [ 'd58c8e117fc257520d90b099fd2c6acd7c1e8861' ],
@@ -621,11 +678,7 @@ describe('parseGitLsRemote', () => {
 
 describe('parseGitStatusNumstat', () => {
   it('parses the git status numstat', () => {
-    const gitStatusNumstat = dedent`
-      1459	202	package-lock.json
-      2	1	package.json
-      13	0	test/spec.git-parser.js
-    `
+    const gitStatusNumstat = `1459	202	package-lock.json\x002	1	package.json\x0013	0	test/spec.git-parser.js\x00`
 
     expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
       "package-lock.json": { additions: "1459", deletions: "202" },
@@ -634,13 +687,12 @@ describe('parseGitStatusNumstat', () => {
     });
   })
   it('skips empty lines', () => {
-    const gitStatusNumstat = dedent`
-      1459	202	package-lock.json
+    const gitStatusNumstat = dedent(`
+      1459	202	package-lock.json\x00
 
 
-      2	1	package.json
-      13	0	test/spec.git-parser.js
-    `
+      2	1	package.json\x0013	0	test/spec.git-parser.js\x00
+    `)
 
     expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
       "package-lock.json": { additions: "1459", deletions: "202" },
@@ -652,69 +704,66 @@ describe('parseGitStatusNumstat', () => {
 
 describe('parseGitStatus', () => {
   it('parses git status', () => {
-    const gitStatus = dedent`
-      ## git-parser-specs
-      A  file1.js
-      M  file2.js
-      D  file3.js
-       D file4.js
-       U file5.js
-      U  file6.js
-      AA file7.js
-      ?  file8.js
-      A  file9.js
-      ?D file10.js
-      AD file11.js
-       M file12.js
-      ?? file13.js
-
-      R  ../source/sysinfo.js -> ../source/sys.js
-    `
+    const gitStatus = `## git-parser-specs\x00` +
+    `A  file1.js\x00` +
+    `M  file2.js\x00` +
+    `D  file3.js\x00` +
+    ` D file4.js\x00` +
+    ` U file5.js\x00` +
+    `U  file6.js\x00` +
+    `AA file7.js\x00` +
+    `?  file8.js\x00` +
+    `A  file9.js\x00` +
+    `?D file10.js\x00` +
+    `AD file11.js\x00` +
+    ` M file12.js\x00` +
+    `?? file13.js\x00` +
+    `R  ../source/sys.js\x00../source/sysinfo.js\x00`
 
     expect(gitParser.parseGitStatus(gitStatus)).to.eql({
         branch: "git-parser-specs",
         files: {
           "../source/sys.js": {
-            conflict: false, displayName: "../source/sysinfo.js -> ../source/sys.js", isNew: false, removed: false, renamed: true, staged: false, type: "text"
+            conflict: false, displayName: "../source/sysinfo.js → ../source/sys.js", fileName: "../source/sys.js", oldFileName: "../source/sysinfo.js", isNew: false, removed: false, renamed: true, staged: false, type: "text"
           },
           "file1.js": {
-            conflict: false, displayName: "file1.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
+            conflict: false, displayName: "file1.js", fileName: "file1.js", oldFileName: "file1.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file2.js": {
-            conflict: false, displayName: "file2.js", isNew: false, removed: false, renamed: false, staged: true, type: "text"
+            conflict: false, displayName: "file2.js", fileName: "file2.js", oldFileName: "file2.js", isNew: false, removed: false, renamed: false, staged: true, type: "text"
           },
           "file3.js": {
-            conflict: false, displayName: "file3.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file3.js", fileName: "file3.js", oldFileName: "file3.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file4.js": {
-            conflict: false, displayName: "file4.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file4.js", fileName: "file4.js", oldFileName: "file4.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file5.js": {
-            conflict: true, displayName: "file5.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
+            conflict: true, displayName: "file5.js", fileName: "file5.js", oldFileName: "file5.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file6.js": {
-            conflict: true, displayName: "file6.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
+            conflict: true, displayName: "file6.js", fileName: "file6.js", oldFileName: "file6.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file7.js": {
-            conflict: true, displayName: "file7.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
+            conflict: true, displayName: "file7.js", fileName: "file7.js", oldFileName: "file7.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file8.js": {
-            conflict: false, displayName: "file8.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file8.js", fileName: "file8.js", oldFileName: "file8.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
           },
           "file9.js": {
-            conflict: false, displayName: "file9.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
+            conflict: false, displayName: "file9.js", fileName: "file9.js", oldFileName: "file9.js", isNew: true, removed: false, renamed: false, staged: true, type: "text"
           },
           "file10.js": {
-            conflict: false, displayName: "file10.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file10.js", fileName: "file10.js", oldFileName: "file10.js", isNew: false, removed: true, renamed: false, staged: false, type: "text"
           },
           "file11.js": {
-            conflict: false, displayName: "file11.js", isNew: false, removed: true, renamed: false, staged: true, type: "text"
+            conflict: false, displayName: "file11.js", fileName: "file11.js", oldFileName: "file11.js", isNew: false, removed: true, renamed: false, staged: true, type: "text"
           },
           "file12.js": {
-            conflict: false, displayName: "file12.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file12.js", fileName: "file12.js", oldFileName: "file12.js", isNew: false, removed: false, renamed: false, staged: false, type: "text"
           },
           "file13.js": {
-            conflict: false, displayName: "file13.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
+            conflict: false, displayName: "file13.js", fileName: "file13.js", oldFileName: "file13.js", isNew: true, removed: false, renamed: false, staged: false, type: "text"
           }
         },
       inited: true,

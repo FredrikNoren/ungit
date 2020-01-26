@@ -158,7 +158,7 @@ describe('git-api diff', () => {
       .then(() => common.get(req, '/gitlog', { path: testDir }))
       .then((res) => {
         // find a commit which contains the testFile
-        const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff[2] == testFile))[0];
+        const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff.fileName == testFile))[0];
         return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile })
       });
   });
