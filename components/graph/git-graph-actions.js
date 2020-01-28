@@ -174,6 +174,11 @@ class MergeSquash extends Merge {
     this.text = "Merge Squash";
     this.style("merge-squash");
   }
+
+  perform() {
+    return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.graph.currentActionContext().localRefName, squash: true })
+      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
+  }
 }
 
 class Push extends ActionBase {
