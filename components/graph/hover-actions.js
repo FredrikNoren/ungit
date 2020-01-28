@@ -65,7 +65,7 @@ exports.RebaseViewModel = RebaseViewModel;
 
 class MergeSquashViewModel extends RebaseViewModel {
   constructor(onto, nodesThatWillMove) {
-    super(onto, nodesThatWillMove.slice(0, 1));
+    super(onto, nodesThatWillMove.slice(0, 2));
   }
 }
 exports.MergeSquashViewModel = MergeSquashViewModel;
