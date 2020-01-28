@@ -18,13 +18,13 @@ class ActionBase {
     this.isRunning = ko.observable(false);
     this.isHighlighted = ko.computed(() => !graph.hoverGraphAction() || graph.hoverGraphAction() == this);
     this.text = text;
-    this.style = style;
+    this.style = ko.observable(style);
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
       if (!this.isHighlighted() || this.isRunning()) {
-        return `${this.style} dimmed`;
+        return `${this.style()} dimmed`;
       } else {
-        return this.style;
+        return this.style();
       }
     });
   }
@@ -168,6 +168,13 @@ class Merge extends ActionBase {
   }
 }
 
+class MergeSquash extends Merge {
+  constructor(graph, node) {
+    super(graph, node)
+    this.text = "Merge Squash";
+    this.style("merge-squash");
+  }
+}
 
 class Push extends ActionBase {
   constructor(graph, node) {
@@ -369,6 +376,7 @@ const GraphActions = {
   Move: Move,
   Rebase: Rebase,
   Merge: Merge,
+  MergeSquash: MergeSquash,
   Push: Push,
   Reset: Reset,
   Checkout: Checkout,
