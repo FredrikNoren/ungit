@@ -156,10 +156,11 @@ class Merge extends ActionBase {
   }
 
   createHoverGraphic() {
-    let node = this.graph.currentActionContext();
-    if (!node) return null;
-    if (node instanceof RefViewModel) node = node.node();
-    return new MergeViewModel(this.graph, this.node, node);
+    let onto = this.graph.currentActionContext();
+    if (!onto) return;
+    if (onto instanceof RefViewModel) onto = onto.node();
+    const path = onto.getPathToCommonAncestor(this.node);
+    return new RebaseViewModel(this.node, path);
   }
 
   perform() {
