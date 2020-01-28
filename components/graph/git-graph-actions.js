@@ -180,8 +180,8 @@ class MergeSquash extends Merge {
     let onto = this.graph.currentActionContext();
     if (!onto) return;
     if (onto instanceof RefViewModel) onto = onto.node();
-    const path = this.node.getPathToCommonAncestor(onto);
-    return new MergeSquashViewModel(this.node, path);
+    const path = onto.getPathToCommonAncestor(this.node);
+    return new RebaseViewModel(this.node, path);
   }
 
   perform() {
