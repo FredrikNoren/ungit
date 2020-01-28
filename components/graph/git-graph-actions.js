@@ -10,6 +10,7 @@ const MergeViewModel = HoverActions.MergeViewModel;
 const ResetViewModel = HoverActions.ResetViewModel;
 const PushViewModel = HoverActions.PushViewModel;
 const SquashViewModel = HoverActions.SquashViewModel;
+const MergeSquashViewModel = HoverActions.MergeSquashViewModel;
 
 class ActionBase {
   constructor(graph, text, style, icon) {
