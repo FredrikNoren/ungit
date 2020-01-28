@@ -160,7 +160,7 @@ class Merge extends ActionBase {
     if (!onto) return;
     if (onto instanceof RefViewModel) onto = onto.node();
     const path = onto.getPathToCommonAncestor(this.node);
-    return new RebaseViewModel(this.node, path);
+    return new MergeSquashViewModel(this.node, path);
   }
 
   perform() {
