@@ -1,5 +1,4 @@
 
-var signals = require('signals');
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
 var Promise = require("bluebird");

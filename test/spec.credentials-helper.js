@@ -1,7 +1,6 @@
 
 const expect = require('expect.js');
 const child_process = require('child_process');
-const path = require('path');
 const http = require('http');
 const config = require('../source/config');
 const url = require('url');

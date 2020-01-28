@@ -10,7 +10,6 @@ const gitPromise = require('./git-promise');
 const fs = require('./utils/fs-async');
 const ignore = require('ignore');
 const Bluebird = require('bluebird');
-const crypto = require('crypto');
 
 const isMac = /^darwin/.test(process.platform);
 const isWindows = /^win/.test(process.platform);
@@ -72,7 +71,8 @@ exports.registerApi = (env) => {
           });
         }
       }).then(() => {
-        socket.watcher.push(fs.watch(pathToWatch, options || {}, (event, filename) => {
+        const watcher = fs.watch(pathToWatch, options || {});
+        watcher.on('change', (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
@@ -81,7 +81,11 @@ exports.registerApi = (env) => {
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
-        }));
+        });
+        watcher.on('error', (err) => {
+          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
+        });
+        socket.watcher.push(watcher);
       });
   };
 
@@ -556,7 +560,7 @@ exports.registerApi = (env) => {
       .then((baseRepoPath) => {
         return { path: path.resolve(baseRepoPath.trim()) };
       }).catch((e) => {
-        if (e.errorCode === 'not-a-repository') {
+        if (e.errorCode === 'not-a-repository' || e.errorCode === 'must-be-in-working-tree') { // not a repository or a bare repository
           return {};
         }
         throw e;
@@ -717,13 +721,11 @@ exports.registerApi = (env) => {
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
       jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
     });
-    app.post(`${exports.pathPrefix}/testing/cleanup`, ensureAuthenticated, (req, res) => {
-      //winston.info('Cleaned up: ' + JSON.stringify(cleaned));
-      res.json({ result: temp.cleanup() });
-    });
-    app.post(`${exports.pathPrefix}/testing/shutdown`, ensureAuthenticated, (req, res) => {
-      res.json({});
-      process.exit();
+    app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
+      temp.cleanup((err, cleaned) => {
+        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+        res.json({ result: cleaned });
+      });
     });
   }
 };

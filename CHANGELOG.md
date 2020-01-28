@@ -5,6 +5,13 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.1...master)
 
+### Fixed
+- Diff does not work for first commit [#1124](https://github.com/FredrikNoren/ungit/issues/1124)
+- `--no-launchBrowser` is ignored when ungit already running [#1259](https://github.com/FredrikNoren/ungit/issues/1259)
+- Bare repositories don't work with git 2.25 [#1265](https://github.com/FredrikNoren/ungit/issues/1265)
+- ungit crashes if current directory is deleted [#1266](https://github.com/FredrikNoren/ungit/issues/1266)
+- Make clicktests more reliable [#1263](https://github.com/FredrikNoren/ungit/pull/1263)
+
 ### Removed
 - Remove Node 8 from build matrix [#1256](https://github.com/FredrikNoren/ungit/pull/1256)
 

@@ -1,6 +1,5 @@
 
 const ko = require('knockout');
-const inherits = require('util').inherits;
 const components = require('ungit-components');
 const Bluebird = require('bluebird');
 const programEvents = require('ungit-program-events');
