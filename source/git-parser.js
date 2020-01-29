@@ -3,19 +3,21 @@ const fileType = require('./utils/file-type.js');
 const _ = require('lodash');
 
 exports.parseGitStatus = (text, args) => {
-  const lines = text.split('\x00');
-  const files = {};
+  let lines = text.split('\x00');
+  const branch = lines[0].split(' ').pop();
   // skipping first line...
-  let lineIterator = lines.slice(1).values();
+  lines = lines.slice(1);
+  const files = {};
 
-  for(let line of lineIterator){
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
     if (line == '') continue;
     const status = line.slice(0, 2);
     const newFileName = line.slice(3).trim();
     let oldFileName;
     let displayName;
     if (status[0] == 'R') {
-      oldFileName = lineIterator.next().value
+      oldFileName = lines[++i]
       displayName = `${oldFileName} → ${newFileName}`;
     } else {
       oldFileName = newFileName;
@@ -36,7 +38,7 @@ exports.parseGitStatus = (text, args) => {
 
   return {
     isMoreToLoad: false,
-    branch: lines[0].split(' ').pop(),
+    branch: branch,
     inited: true,
     files: files
   };
