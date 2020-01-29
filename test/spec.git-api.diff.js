@@ -24,6 +24,7 @@ describe('git-api diff', () => {
   after(() => common.post(req, '/testing/cleanup', undefined));
 
   const testFile = 'afile.txt';
+  const testFile2 = 'anotherfile.txt';
   const testImage = 'icon.png'
 
   it('diff on non existing file should fail', () => {
@@ -56,10 +57,10 @@ describe('git-api diff', () => {
   });
 
   it('should be possible to commit a file', () => {
-    return common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testFile }] });
+    return common.post(req, '/commit', { path: testDir, message: "Init File", files: [{ name: testFile }] });
   });
   it('should be possible to commit an image file', () => {
-    return common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testImage }] });
+    return common.post(req, '/commit', { path: testDir, message: "Init Image", files: [{ name: testImage }] });
   });
 
   it('diff on first commit should work', () => {
@@ -123,12 +124,35 @@ describe('git-api diff', () => {
       .then((res) => expect(res.toString()).to.be('png'));
   });
 
-  it('should be possible to commit a file', () => {
-    return common.post(req, '/commit', { path: testDir, message: "Init", files: [{ name: testFile }] });
+  it('should be possible to rename a modified file', () => {
+    return common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile, testFile2] });
+  });
+
+  it('diff on renamed and modified file should work', () => {
+    return common.get(req, '/diff', { path: testDir, file: testFile2, oldFile: testFile}).then((res) => {
+      expect(res.indexOf('diff --git a/afile.txt b/anotherfile.txt')).to.be.above(-1);
+      expect(res.indexOf('+more')).to.be.above(-1);
+    });
+  });
+
+  it('should be possible to commit the renamed and modified file', () => {
+    return common.post(req, '/commit', { path: testDir, message: "Move and Change", files: [{ name: testFile2 }] });
+  });
+
+  it('diff on commit with renamed and modified file should work', () => {
+    return common.get(req, '/gitlog', { path: testDir })
+      .then((res) => {
+        expect(res.nodes.length).to.be(3);
+        return common.get(req, '/diff', { path: testDir, file: testFile2, oldFile:testFile, sha1: res.nodes[0].sha1 });
+      }).then((res) => {
+        for (let i = 0; i < content.length; i++) {
+          expect(res.indexOf(content[i])).to.be.above(-1);
+        }
+      });
   });
 
   it('removing a test file should work', () => {
-    return common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) });
+    return common.post(req, '/testing/removefile', { file: path.join(testDir, testFile2) });
   });
 
   it('should be possible to commit an image file', () => {
@@ -139,7 +163,7 @@ describe('git-api diff', () => {
   });
 
   it('diff on removed file should work', () => {
-    return common.get(req, '/diff', { path: testDir, file: testFile })
+    return common.get(req, '/diff', { path: testDir, file: testFile2 })
       .then((res) => {
         expect(res.indexOf('deleted file')).to.be.above(-1);
         expect(res.indexOf("@@ -1,6 +0,0 @@")).to.be.above(-1);
@@ -158,7 +182,7 @@ describe('git-api diff', () => {
       .then(() => common.get(req, '/gitlog', { path: testDir }))
       .then((res) => {
         // find a commit which contains the testFile
-        const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff[2] == testFile))[0];
+        const commit = res.nodes.filter((commit) => commit.fileLineDiffs.some((lineDiff) => lineDiff.fileName == testFile))[0];
         return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile })
       });
   });

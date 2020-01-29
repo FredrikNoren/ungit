@@ -260,7 +260,7 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const isIgnoreWhiteSpace = req.query.whiteSpace === "true" ? true : false;
-    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.sha1, isIgnoreWhiteSpace));
+    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.oldFile, req.query.sha1, isIgnoreWhiteSpace));
   });
 
   app.get(`${exports.pathPrefix}/diff/image`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -327,11 +327,11 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/show`, ensureAuthenticated, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['show', '--numstat', req.query.sha1], req.query.path).then(gitParser.parseGitLog));
+    jsonResultOrFailProm(res, gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(gitParser.parseGitLog));
   });
 
   app.get(`${exports.pathPrefix}/head`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
+    const task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'], req.query.path)
       .then(gitParser.parseGitLog)
       .catch((err) => {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
@@ -614,7 +614,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller', '--parents', '--numstat'], req.query.path)
+    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--numstat'], req.query.path)
       .then(gitParser.parseGitLog);
     jsonResultOrFailProm(res, task);
   });

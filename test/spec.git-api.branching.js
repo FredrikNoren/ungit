@@ -134,9 +134,12 @@ describe('git-api branching', function () {
 
   it('status should list the changed file', () => {
     return common.get(req, '/status', { path: testDir }).then(res => {
+
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,

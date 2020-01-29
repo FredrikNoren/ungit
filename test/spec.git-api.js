@@ -125,6 +125,8 @@ describe('git-api', () => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile]).to.eql({
         displayName: testFile,
+        fileName: testFile,
+        oldFileName: testFile,
         isNew: true,
         staged: false,
         removed: false,
@@ -184,6 +186,8 @@ describe('git-api', () => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile]).to.eql({
         displayName: testFile,
+        fileName: testFile,
+        oldFileName: testFile,
         isNew: false,
         staged: false,
         removed: false,
@@ -224,6 +228,8 @@ describe('git-api', () => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile2]).to.eql({
         displayName: testFile2,
+        fileName: testFile2,
+        oldFileName: testFile2,
         isNew: true,
         staged: false,
         removed: false,
@@ -267,6 +273,8 @@ describe('git-api', () => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile3]).to.eql({
         displayName: testFile3,
+        fileName: testFile3,
+        oldFileName: testFile3,
         isNew: true,
         staged: false,
         removed: false,
@@ -314,6 +322,8 @@ describe('git-api', () => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile]).to.eql({
         displayName: testFile,
+        fileName: testFile,
+        oldFileName: testFile,
         isNew: false,
         staged: false,
         removed: true,
@@ -348,14 +358,16 @@ describe('git-api', () => {
     return common.get(req, '/status', { path: testDir }).then((res) => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile4]).to.eql({
-        displayName: `${testFile3} -> ${testFile4}`,
+        displayName: `${testFile3} → ${testFile4}`,
+        fileName: testFile4,
+        oldFileName: testFile3,
         isNew: false,
         staged: false,
         removed: false,
         conflict: false,
         renamed: true,
         type: 'text',
-        additions: '2',
+        additions: '0',
         deletions: '0'
       });
     });
