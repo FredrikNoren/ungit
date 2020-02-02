@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.2...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.3...master)
+
+## [1.5.3](https://github.com/FredrikNoren/ungit/compare/v1.5.2...v1.5.3)
+
+### Fixed
+- Git log for merge / empty commits does not work correctly [#1270](https://github.com/FredrikNoren/ungit/issues/1270)
 
 ## [1.5.2](https://github.com/FredrikNoren/ungit/compare/v1.5.1...v1.5.2)
 

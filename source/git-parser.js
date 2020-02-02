@@ -118,7 +118,7 @@ exports.parseGitLog = (data) => {
   let currentCommmit;
   const parseCommitLine = (row) => {
     if (!row.trim()) return;
-    currentCommmit = { refs: [], fileLineDiffs: [] };
+    currentCommmit = { refs: [], fileLineDiffs: [], total: { additions: 0, deletions: 0 } };
     const refStartIndex = row.indexOf('(');
     const sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter((sha1) => { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
@@ -145,17 +145,17 @@ exports.parseGitLog = (data) => {
     }
   }
   const parseCommitMessage = (row, index) => {
+    if (currentCommmit.message) currentCommmit.message += '\n';
+    else currentCommmit.message = '';
+    currentCommmit.message += row.trim();
     if (/[\d-]+\t[\d-]+\t.+/g.test(rows[index + 1])) {
       parser = parseFileChanges;
       return;
     }
-    if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
+    if (rows[index + 1] && rows[index + 1].indexOf('\x00commit ') == 0) {
       parser = parseCommitLine;
       return;
     }
-    if (currentCommmit.message) currentCommmit.message += '\n';
-    else currentCommmit.message = '';
-    currentCommmit.message += row.trim();
   }
   const parseFileChanges = (row, index) => {
     // git log is using -z so all the file changes are on one line
@@ -184,19 +184,14 @@ exports.parseGitLog = (data) => {
       });
     }
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
-    const total = {
-      additions: 0,
-      deletions: 0
-    };
     for (let fileLineDiff of currentCommmit.fileLineDiffs) {
       if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
-        total.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
+        currentCommmit.total.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
       }
       if (!isNaN(parseInt(fileLineDiff.deletions, 10))) {
-        total.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
+        currentCommmit.total.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
       }
     }
-    currentCommmit.total = total;
     parser = parseCommitLine;
     if (nextRow) {
       parser(nextRow, index);
