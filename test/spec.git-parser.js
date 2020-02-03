@@ -170,6 +170,10 @@ describe('git-parser parseGitLog', () => {
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       authorName: "Test ungit",
       committerName: "Test ungit",
+      total: {
+        "additions": 0,
+        "deletions": 0
+      },
       fileLineDiffs: [],
       isHead: true,
       message: "",
@@ -201,7 +205,24 @@ describe('git-parser parseGitLog', () => {
 
         submodules parser
 
-      32	0	test/spec.git-parser.js\x00\x00`)
+      32	0	test/spec.git-parser.js\x00\x00commit 02efa0da7b1eccb1e0f1c2ff0433ce7387738f60 985617e19e30e9abe0a5711bf455f0dc10f97dff
+      Author:     Test ungit <test@example.com>
+      AuthorDate: Fri Jan 4 14:02:56 2019 +0100
+      Commit:     Test ungit <test@example.com>
+      CommitDate: Fri Jan 4 14:02:56 2019 +0100
+      
+          empty commit
+      \x00commit 621a04f931ea9007ac826c04a1a02832e20aa470 4e5d611fdad85bcad44abf65936c95f748abef4e e2dc3ef6e2cbf6ab0acb456c0837257dc01baafd
+      Merge: 4e5d611f e2dc3ef6
+      Author:     Test ungit <test@example.com>
+      AuthorDate: Fri Jan 4 14:01:56 2019 +0100
+      Commit:     Test ungit <test@example.com>
+      CommitDate: Fri Jan 4 14:01:56 2019 +0100
+      
+          Merge pull request #1268 from campersau/prepare_152
+          
+          Prepare version 1.5.2
+      \x004	1	CHANGELOG.md\x001	1	package-lock.json\x001	1	package.json\x008	6	source/git-parser.js\x00\x00`)
 
     const res = gitParser.parseGitLog(gitLog)
     expect(res[0]).to.eql({
@@ -272,6 +293,82 @@ describe('git-parser parseGitLog', () => {
       ],
       refs: [],
       sha1: "37d1154434b70854ed243967e0d7e37aa3564551"
+    })
+    // empty commit
+    expect(res[2]).to.eql({
+      authorDate: "Fri Jan 4 14:02:56 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:02:56 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      total: {
+        "additions": 0,
+        "deletions": 0
+      },
+      fileLineDiffs: [],
+      isHead: false,
+      message: "empty commit",
+      parents: [
+        "985617e19e30e9abe0a5711bf455f0dc10f97dff",
+      ],
+      refs: [],
+      sha1: "02efa0da7b1eccb1e0f1c2ff0433ce7387738f60"
+    })
+    // merge commit
+    expect(res[3]).to.eql({
+      authorDate: "Fri Jan 4 14:01:56 2019 +0100",
+      authorEmail: "test@example.com",
+      authorName: "Test ungit",
+      commitDate: "Fri Jan 4 14:01:56 2019 +0100",
+      committerEmail: "test@example.com",
+      committerName: "Test ungit",
+      total: {
+        "additions": 14,
+        "deletions": 9
+      },
+      fileLineDiffs: [
+        {
+          "additions": 4,
+          "deletions": 1,
+          "displayName": "CHANGELOG.md",
+          "fileName": "CHANGELOG.md",
+          "oldFileName": "CHANGELOG.md",
+          "type": "text"
+        },
+        {
+          "additions": 1,
+          "deletions": 1,
+          "displayName": "package-lock.json",
+          "fileName": "package-lock.json",
+          "oldFileName": "package-lock.json",
+          "type": "text"
+        },
+        {
+          "additions": 1,
+          "deletions": 1,
+          "displayName": "package.json",
+          "fileName": "package.json",
+          "oldFileName": "package.json",
+          "type": "text"
+        },
+        {
+          "additions": 8,
+          "deletions": 6,
+          "displayName": "source/git-parser.js",
+          "fileName": "source/git-parser.js",
+          "oldFileName": "source/git-parser.js",
+          "type": "text"
+        }
+      ],
+      isHead: false,
+      message: "Merge pull request #1268 from campersau/prepare_152\n\nPrepare version 1.5.2",
+      parents: [
+        "4e5d611fdad85bcad44abf65936c95f748abef4e",
+        "e2dc3ef6e2cbf6ab0acb456c0837257dc01baafd",
+      ],
+      refs: [],
+      sha1: "621a04f931ea9007ac826c04a1a02832e20aa470"
     })
   });
   it('parses reflog commits without email', () => {
@@ -388,6 +485,10 @@ describe('git-parser parseGitLog', () => {
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       authorEmail: "test@example.com",
       authorName: "Test Ungit",
+      total: {
+        "additions": 0,
+        "deletions": 0
+      },
       fileLineDiffs: [],
       isHead: true,
       message: "",
@@ -414,6 +515,10 @@ describe('git-parser parseGitLog', () => {
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       authorEmail: "test@example.com",
       authorName: "Test Ungit",
+      total: {
+        "additions": 0,
+        "deletions": 0
+      },
       fileLineDiffs: [],
       isHead: true,
       message: "",
