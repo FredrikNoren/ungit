@@ -14,7 +14,6 @@ class GraphViewModel {
   constructor(server, repoPath) {
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
-    this.limit = ko.observable(numberOfNodesPerLoad);
     this.skip = ko.observable(0);
     this.server = server;
     this.currentRemote = ko.observable();
@@ -39,16 +38,6 @@ class GraphViewModel {
     this.edgesById = {};
     this.scrolledToEnd = _.debounce(
       () => {
-        this.limit(numberOfNodesPerLoad + this.limit());
-        this.loadNodesFromApi();
-      },
-      500,
-      true
-    );
-    this.loadAhead = _.debounce(
-      () => {
-        if (this.skip() <= 0) return;
-        this.skip(Math.max(this.skip() - numberOfNodesPerLoad, 0));
         this.loadNodesFromApi();
       },
       500,
@@ -114,34 +103,32 @@ class GraphViewModel {
 
     const nodeSize = this.nodes().length;
     return this.server
-      .getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
+      .getPromise('/gitlog', {
+        path: this.repoPath(),
+        skip: this.skip(),
+        lookForHead: this.HEAD() ? 'false' : 'true',
+      })
       .then((log) => {
         // set new limit and skip
-        this.limit(parseInt(log.limit));
         this.skip(parseInt(log.skip));
         return log.nodes || [];
       })
-      .then((
-        nodes // create and/or calculate nodes
-      ) =>
-        this.computeNode(
+      .then((nodes) => {
+        // create and/or calculate nodes
+        return this.computeNode(
           nodes.map((logEntry) => {
-            return this.getNode(logEntry.sha1, logEntry); // convert to node object
+            return this.getNode(logEntry.sha1, logEntry);
           })
-        )
-      )
+        );
+      })
       .then((nodes) => {
         // create edges
-        const edges = [];
         nodes.forEach((node) => {
           node.parents().forEach((parentSha1) => {
-            edges.push(this.getEdge(node.sha1, parentSha1));
+            this.edges.push(this.getEdge(node.sha1, parentSha1));
           });
-          node.render();
         });
 
-        this.edges(edges);
-        this.nodes(nodes);
         if (nodes.length > 0) {
           this.graphHeight(nodes[nodes.length - 1].cy() + 80);
         }
@@ -201,16 +188,18 @@ class GraphViewModel {
     }
 
     this.heighstBranchOrder = branchSlotCounter - 1;
-    let prevNode;
+    let prevNode = this.nodes() ? this.nodes()[this.nodes().length - 1] : null;
     nodes.forEach((node) => {
       node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
       if (node.ancestorOfHEAD()) node.branchOrder(0);
       node.aboveNode = prevNode;
       if (prevNode) prevNode.belowNode = node;
       prevNode = node;
+      node.render();
+      this.nodes.push(node);
     });
 
-    return nodes;
+    return this.nodes();
   }
 
   getEdge(nodeAsha1, nodeBsha1) {

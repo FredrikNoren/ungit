@@ -125,8 +125,8 @@ const defaultConfig = {
   // Always load with active checkout branch (deprecated: use `maxActiveBranchSearchIteration`)
   alwaysLoadActiveBranch: false,
 
-  // Max search iterations for active branch.  ( value means not searching for active branch)
-  maxActiveBranchSearchIteration: -1,
+  // Max search iterations for active branch.
+  maxActiveBranchSearchIteration: 25,
 
   // number of nodes to load for each git.log call
   numberOfNodesPerLoad: 25,

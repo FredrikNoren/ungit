@@ -34,7 +34,7 @@
     <!-- ko if: commitNodeEdge -->
     <g
       class="load-ahead-button"
-      data-bind="attr: { opacity: commitOpacity, visible: commitNodeEdge}, click: loadAhead"
+      data-bind="attr: { opacity: commitOpacity, visible: commitNodeEdge}"
     >
       <path
         data-bind="attr: { d: commitNodeEdge }"
@@ -53,15 +53,6 @@
         stroke-width="10"
         fill="transparent"
       />
-      <!-- ko if: skip() > 0 -->
-      <circle
-        class="loadAhead"
-        data-bind="attr: { fill: commitNodeColor }"
-        cx="610"
-        cy="35"
-        r="15"
-      />
-      <!-- /ko -->
     </g>
     <!-- /ko -->
 

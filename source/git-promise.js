@@ -591,7 +591,7 @@ git.revParse = (repoPath) => {
     .catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 };
 
-git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
+git.log = (path, skip, lookForHead, maxActiveBranchSearchIteration) => {
   return git(
     [
       'log',
@@ -608,7 +608,7 @@ git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
       '--no-notes',
       '--numstat',
       '--date-order',
-      `--max-count=${limit}`,
+      `--max-count=${config.numberOfNodesPerLoad}`,
       `--skip=${skip}`,
     ],
     path
@@ -616,24 +616,17 @@ git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
-        return git
-          .log(
-            path,
-            config.numberOfNodesPerLoad + limit,
-            config.numberOfNodesPerLoad + skip,
-            maxActiveBranchSearchIteration - 1
-          )
-          .then((innerLog) => {
-            return {
-              limit: limit + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
-              skip: skip + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
-              nodes: log.concat(innerLog.nodes),
-              isHeadExist: innerLog.isHeadExist,
-            };
-          });
+      skip = skip + log.length;
+      if (lookForHead && maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
+        return git.log(path, skip, maxActiveBranchSearchIteration - 1).then((innerLog) => {
+          return {
+            skip: skip,
+            nodes: log.concat(innerLog.nodes),
+            isHeadExist: innerLog.isHeadExist,
+          };
+        });
       } else {
-        return { limit: limit, skip: skip, nodes: log, isHeadExist: log.isHeadExist };
+        return { skip: skip, nodes: log, isHeadExist: log.isHeadExist };
       }
     });
 };
