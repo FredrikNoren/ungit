@@ -141,7 +141,7 @@ class GitNodeViewModel extends Animateable {
     } else {
       this.r(15);
       this.cx(610 + 90 * this.branchOrder());
-      this.cy(this.aboveNode ? this.aboveNode.cy() + 60 : 120);
+      this.cy(this.aboveNode && !isNaN(this.aboveNode.cy()) ? this.aboveNode.cy() + 60 : 120);
     }
 
     if (this.aboveNode && this.aboveNode.selected()) {
