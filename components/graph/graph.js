@@ -76,12 +76,12 @@ class GraphViewModel {
 
     this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
     this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
-    this.loadNodesFromApi();
-    this.updateBranches();
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ height: 18 });
     this.plusIcon = octicons.plus.toSVG({ height: 18 });
+    this.isLoadNodesRunning = false;
+    this.loadNodesFromApi();
   }
 
   updateNode(parentElement) {
@@ -109,8 +109,10 @@ class GraphViewModel {
   }
 
   loadNodesFromApi() {
-    const nodeSize = this.nodes().length;
+    if (this.isLoadNodesRunning) return;
+    this.isLoadNodesRunning = true;
 
+    const nodeSize = this.nodes().length;
     return this.server
       .getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
       .then((log) => {
@@ -150,6 +152,7 @@ class GraphViewModel {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
           this.scrolledToEnd();
         }
+        this.isLoadNodesRunning = false;
       });
   }
 
