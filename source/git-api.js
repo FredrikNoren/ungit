@@ -310,14 +310,17 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise.log(req.query.path, skip, req.query.lookForHead === "true", config.maxActiveBranchSearchIteration)
+    const limit = getNumber(req.query.limit, parseInt(config.numberOfNodesPerLoad));
+    const isLookForHead = skip === 0 && limit === config.numberOfNodesPerLoad;
+
+    const task = gitPromise.log(req.query.path, skip, limit, isLookForHead, config.maxActiveBranchSearchIteration)
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
-          return { "skip": skip, "nodes": []};
+          return [];
         } else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)) {
-          return { "skip": skip, "nodes": []};
+          return [];
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
-          return { "skip": skip, "nodes": []};
+          return [];
         } else {
           throw err;
         }

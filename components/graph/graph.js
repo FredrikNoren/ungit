@@ -15,7 +15,7 @@ class GraphViewModel {
   constructor(server, repoPath) {
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
-    this.skip = ko.observable(0);
+    this.graphSkip = 0;
     this.server = server;
     this.currentRemote = ko.observable();
     this.nodes = ko.observableArray();
@@ -89,25 +89,32 @@ class GraphViewModel {
     return refViewModel;
   }
 
-  loadNodesFromApi() {
+  loadNodesFromApi(skip, limit) {
     if (this.isLoadNodesRunning) return;
-    this.isLoadNodesRunning = true
+    this.isLoadNodesRunning = true;
+
+    skip = skip ? skip : this.graphSkip;
+    limit = limit ? limit : parseInt(ungit.config.numberOfNodesPerLoad);
 
     const nodeSize = this.nodes().length;
-    return this.server.getPromise('/gitlog', { path: this.repoPath(), skip: this.skip(), lookForHead: this.HEAD() ? "false" : "true" })
-      .then(log => {
-        // set new limit and skip
-        this.skip(parseInt(log.skip));
-        return log.nodes || [];
-      }).then(nodes => {
+    return this.server.getPromise('/gitlog', { path: this.repoPath(), skip: skip, limit: limit })
+      .then(log => log || [])
+      .then(nodes => {
         // create and/or calculate nodes
-        const nodeVMs = nodes.map((logEntry) => this.getNode(logEntry.sha1, logEntry));
+        let prevNode = this.nodes() ? this.nodes()[this.nodes().length - 1] : null;
+        const nodeVMs = nodes.map((logEntry) => {
+          const nodeVM = this.getNode(logEntry.sha1, logEntry);
+          nodeVM.aboveNode = prevNode;
+          if (prevNode) prevNode.belowNode = nodeVM;
+          prevNode = nodeVM;
+          return nodeVM;
+        });
         return this.computeNode(nodeVMs);
       }).then(nodes => {
         // create edges
         nodes.forEach(node => {
           node.parents().forEach(parentSha1 => {
-            this.edges.push(this.getEdge(node.sha1, parentSha1));
+            this.getEdge(node.sha1, parentSha1);
           });
         });
 
@@ -116,6 +123,8 @@ class GraphViewModel {
         }
         this.graphWidth(1000 + (this.highestBranchOrder * 90));
         programEvents.dispatch({ event: 'init-tooltip' });
+
+        this.graphSkip += parseInt(ungit.config.numberOfNodesPerLoad)
       }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
@@ -166,13 +175,9 @@ class GraphViewModel {
       node.branchOrder(ideologicalBranch.branchOrder);
     }
 
-    let prevNode = this.nodes() ? this.nodes()[this.nodes().length - 1] : null;
     nodes.forEach(node => {
       node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
       if (node.ancestorOfHEAD()) node.branchOrder(0);
-      node.aboveNode = prevNode;
-      if (prevNode) prevNode.belowNode = node;
-      prevNode = node;
       node.render();
       this.nodes.push(node);
     });
@@ -185,6 +190,7 @@ class GraphViewModel {
     let edge = this.edgesById[id];
     if (!edge) {
       edge = this.edgesById[id] = new EdgeViewModel(this, nodeAsha1, nodeBsha1);
+      this.edges.push(edge);
     }
     return edge;
   }
