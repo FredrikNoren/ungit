@@ -4,6 +4,7 @@ const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const Animateable = require('./animateable');
 const GraphActions = require('./git-graph-actions');
+const _ = require('lodash');
 
 const maxBranchesToDisplay = parseInt(ungit.config.numRefsToShow / 5 * 3);  // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
@@ -106,6 +107,34 @@ class GitNodeViewModel extends Animateable {
       new GraphActions.Revert(this.graph, this),
       new GraphActions.Squash(this.graph, this)
     ];
+
+    this.render = _.debounce(() => {
+      this.refSearchFormVisible(false);
+      if (!this.isInited) return;
+      if (this.ancestorOfHEAD()) {
+        this.r(30);
+        this.cx(610);
+
+        if (!this.aboveNode) {
+          this.cy(120);
+        } else if (this.aboveNode.ancestorOfHEAD()) {
+          this.cy(this.aboveNode.cy() + 120);
+        } else {
+          this.cy(this.aboveNode.cy() + 60);
+        }
+      } else {
+        this.r(15);
+        this.cx(610 + (90 * this.branchOrder()));
+        this.cy(this.aboveNode && !isNaN(this.aboveNode.cy()) ? this.aboveNode.cy() + 60 : 120);
+      }
+
+      if (this.aboveNode && this.aboveNode.selected()) {
+        this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
+      }
+
+      this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+      this.animate();
+    }, 500, {leading: true})
   }
 
   getGraphAttr() {
@@ -115,34 +144,6 @@ class GitNodeViewModel extends Animateable {
   setGraphAttr(val) {
     this.element().setAttribute('x', val[0] - 30);
     this.element().setAttribute('y', val[1] - 30);
-  }
-
-  render() {
-    this.refSearchFormVisible(false);
-    if (!this.isInited) return;
-    if (this.ancestorOfHEAD()) {
-      this.r(30);
-      this.cx(610);
-
-      if (!this.aboveNode) {
-        this.cy(120);
-      } else if (this.aboveNode.ancestorOfHEAD()) {
-        this.cy(this.aboveNode.cy() + 120);
-      } else {
-        this.cy(this.aboveNode.cy() + 60);
-      }
-    } else {
-      this.r(15);
-      this.cx(610 + (90 * this.branchOrder()));
-      this.cy(this.aboveNode && !isNaN(this.aboveNode.cy()) ? this.aboveNode.cy() + 60 : 120);
-    }
-
-    if (this.aboveNode && this.aboveNode.selected()) {
-      this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
-    }
-
-    this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
-    this.animate();
   }
 
   setData(logEntry) {
