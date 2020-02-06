@@ -1,103 +1,110 @@
 /*
-*
-* Diff to HTML (diff2html.css)
-* Author: rtfpessoa
-* Modified by: codingtwinky
-* Date: Friday 29 August 2014
-* Last Update: Saturday 27 September 2014
-*
-*/
+ *
+ * Diff to HTML (diff2html.css)
+ * Author: rtfpessoa
+ *
+ */
 
-.d2h-wrapper {
-  display: block;
-  margin: 0 auto;
+ .d2h-wrapper {
   text-align: left;
-  width: 100%;
-}
-
-.d2h-file-wrapper {
-  border-radius: 3px;
 }
 
 .d2h-file-header {
-  display: none;
+  height: 35px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #d8d8d8;
+  background-color: #f7f7f7;
 }
 
 .d2h-file-stats {
-  display: inline;
-  font-size: 12px;
-  text-align: center;
-  max-width: 15%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-left: auto;
+  font-size: 14px;
 }
 
 .d2h-lines-added {
-  background-color: #ceffce;
+  text-align: right;
   border: 1px solid #b4e2b4;
-  color: #FFFFFF;
   border-radius: 5px 0 0 5px;
+  color: #399839;
   padding: 2px;
-  width: 25px;
+  vertical-align: middle;
 }
 
 .d2h-lines-deleted {
-  background-color: #f7c8c8;
+  text-align: left;
   border: 1px solid #e9aeae;
-  color: #000000;
   border-radius: 0 5px 5px 0;
+  color: #c33;
   padding: 2px;
-  width: 25px;
+  vertical-align: middle;
+  margin-left: 1px;
+}
+
+.d2h-file-name-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 100%;
+  font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 15px;
 }
 
 .d2h-file-name {
-  display: inline;
-  height: 33px;
-  max-width: 80%;
   white-space: nowrap;
   text-overflow: ellipsis;
-  overflow: hidden;
+  overflow-x: hidden;
+}
+
+.d2h-file-wrapper {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin-bottom: 1em;
 }
 
 .d2h-diff-table {
-  border-collapse: collapse;
-  font-family: 'Source Code Pro';
-  font-size: 12px;
-  height: 19px;
   width: 100%;
-  tbody > tr > td {
-    padding: 0px;
-    border-spacing: 0px;
-    height: 105%;
-  }
+  border-collapse: collapse;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
 }
 
 .d2h-files-diff {
+  display: block;
   width: 100%;
-  display: flex;
+  height: 100%;
 }
 
 .d2h-file-diff {
-  overflow-x: auto;
   overflow-y: hidden;
 }
 
 .d2h-file-side-diff {
   display: inline-block;
-  overflow-x: auto;
+  overflow-x: scroll;
+  overflow-y: hidden;
   width: 50%;
+  margin-right: -4px;
+  margin-bottom: -8px;
 }
 
 .d2h-code-line {
-  white-space: pre;
-  padding-left: 10px;
-  padding-right: 10px;
-  display: inline-flex;
+  display: inline-block;
+  white-space: nowrap;
+  /* Compensate for the absolute positioning of the line numbers */
+  padding: 0 8em;
 }
 
 .d2h-code-side-line {
-  white-space: pre;
-  padding-left: 5px;
-  padding-right: 5px;
-  display: inline-flex;
+  display: inline-block;
+  white-space: nowrap;
+  /* Compensate for the absolute positioning of the line numbers */
+  padding: 0 4.5em;
 }
 
 .d2h-code-line del,
@@ -105,7 +112,8 @@
   display: inline-block;
   margin-top: -1px;
   text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #ffb6ba;
+  border-radius: 0.2em;
 }
 
 .d2h-code-line ins,
@@ -113,106 +121,314 @@
   display: inline-block;
   margin-top: -1px;
   text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: #97f295;
+  border-radius: 0.2em;
+  text-align: left;
 }
 
 .d2h-code-line-prefix {
-  display: inline-flex;
-  margin-right: 10px;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
+  display: inline;
+  background: none;
+  padding: 0;
+  word-wrap: normal;
+  white-space: pre;
+}
+
+.d2h-code-line-ctn {
+  display: inline;
+  background: none;
+  padding: 0;
+  word-wrap: normal;
+  white-space: pre;
 }
 
 .line-num1 {
-  display: inline-block;
+  box-sizing: border-box;
   float: left;
-  width: 30px;
+  width: 3.5em;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 0.5em 0 0.5em;
 }
 
 .line-num2 {
-  display: inline-block;
+  box-sizing: border-box;
   float: right;
-  width: 30px;
+  width: 3.5em;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 0.5em 0 0.5em;
 }
 
 .d2h-code-linenumber {
-  position: static;
-  width: 52px;
-  min-width: 65px;
-  text-align: center;
-  background-color: #727a83;
-  color: rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  width: 7.5em;
+  /* Keep the numbers fixed on line contents scroll */
+  position: absolute;
+  display: inline-block;
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.3);
+  text-align: right;
+  border: solid #eeeeee;
+  border-width: 0 1px 0 1px;
+  cursor: pointer;
+}
+
+.d2h-code-linenumber:after {
+  content: '\200b';
+}
+
+.d2h-code-side-linenumber {
+  /* Keep the numbers fixed on line contents scroll */
+  position: absolute;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 4em;
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.3);
+  text-align: right;
+  border: solid #eeeeee;
   border-width: 0 1px 0 1px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-left: 1px solid rgba(0, 0, 0, 0.34);
-  border-right: 1px solid rgba(0, 0, 0, 0.34);
+}
+
+.d2h-code-side-linenumber:after {
+  content: '\200b';
+}
+
+.d2h-code-side-emptyplaceholder,
+.d2h-emptyplaceholder {
+  background-color: #f1f1f1;
+  border-color: #e1e1e1;
+}
+
+/*
+ * Changes Highlight
+ */
+
+.d2h-del {
+  background-color: #fee8e9;
+  border-color: #e9aeae;
+}
+
+.d2h-ins {
+  background-color: #dfd;
+  border-color: #b4e2b4;
+}
+
+.d2h-info {
+  background-color: #f8fafd;
+  color: rgba(0, 0, 0, 0.3);
+  border-color: #d5e4f2;
+}
+
+.d2h-file-diff .d2h-del.d2h-change {
+  background-color: #fdf2d0;
+}
+
+.d2h-file-diff .d2h-ins.d2h-change {
+  background-color: #ded;
+}
+
+/*
+ * File Summary List
+ */
+
+.d2h-file-list-wrapper {
+  margin-bottom: 10px;
+}
+
+.d2h-file-list-wrapper a {
+  text-decoration: none;
+  color: #3572b0;
+}
+
+.d2h-file-list-wrapper a:visited {
+  color: #3572b0;
+}
+
+.d2h-file-list-header {
+  text-align: left;
+}
+
+.d2h-file-list-title {
+  font-weight: bold;
+}
+
+.d2h-file-list-line {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  text-align: left;
+}
+
+.d2h-file-list {
+  display: block;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.d2h-file-list > li {
+  border-bottom: #ddd solid 1px;
+  padding: 5px 10px;
+  margin: 0;
+}
+
+.d2h-file-list > li:last-child {
+  border-bottom: none;
+}
+
+.d2h-file-switch {
+  display: none;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.d2h-icon {
+  vertical-align: middle;
+  margin-right: 10px;
+  fill: currentColor;
+}
+
+.d2h-deleted {
+  color: #c33;
+}
+
+.d2h-added {
+  color: #399839;
+}
+
+.d2h-changed {
+  color: #d0b44c;
+}
+
+.d2h-moved {
+  color: #3572b0;
+}
+
+.d2h-tag {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 10px;
+  margin-left: 5px;
+  padding: 0 2px;
+  background-color: #fff;
+}
+
+.d2h-deleted-tag {
+  border: #c33 1px solid;
+}
+
+.d2h-added-tag {
+  border: #399839 1px solid;
+}
+
+.d2h-changed-tag {
+  border: #d0b44c 1px solid;
+}
+
+.d2h-moved-tag {
+  border: #3572b0 1px solid;
+}
+
+/*
+ * Selection util.
+ */
+
+.selecting-left .d2h-code-line,
+.selecting-left .d2h-code-line *,
+.selecting-right td.d2h-code-linenumber,
+.selecting-right td.d2h-code-linenumber *,
+.selecting-left .d2h-code-side-line,
+.selecting-left .d2h-code-side-line *,
+.selecting-right td.d2h-code-side-linenumber,
+.selecting-right td.d2h-code-side-linenumber * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  -webkit-user-select: none;
   user-select: none;
+}
+
+.selecting-left .d2h-code-line::-moz-selection,
+.selecting-left .d2h-code-line *::-moz-selection,
+.selecting-right td.d2h-code-linenumber::-moz-selection,
+.selecting-left .d2h-code-side-line::-moz-selection,
+.selecting-left .d2h-code-side-line *::-moz-selection,
+.selecting-right td.d2h-code-side-linenumber::-moz-selection,
+.selecting-right td.d2h-code-side-linenumber *::-moz-selection {
+  background: transparent;
+}
+
+.selecting-left .d2h-code-line::selection,
+.selecting-left .d2h-code-line *::selection,
+.selecting-right td.d2h-code-linenumber::selection,
+.selecting-left .d2h-code-side-line::selection,
+.selecting-left .d2h-code-side-line *::selection,
+.selecting-right td.d2h-code-side-linenumber::selection,
+.selecting-right td.d2h-code-side-linenumber *::selection {
+  background: transparent;
+}
+
+/*** adjustments for ungit ***/
+
+.d2h-file-wrapper {
+  border: none;
+  margin-bottom: 0;
+}
+
+.d2h-file-header {
+  display: none;
 }
 
 .d2h-cntx {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.d2h-code-side-linenumber {
-  position: static;
-  display: table-cell;
-  width: 52px;
-  min-width: 65px;
-  text-align: center;
-  height: 100%;
-  background-color: rgba(114, 122, 131, 1);
-  color: rgba(0, 0, 0, 0.5);
-  border-width: 0 1px 0 1px;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.d2h-info {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.d2h-code-side-emptyplaceholder,
+.d2h-emptyplaceholder {
+  background-color: transparent;
+}
+
+.d2h-code-linenumber, .d2h-code-side-linenumber {
+  background-color: #727a83;
   border-left: 1px solid rgba(0, 0, 0, 0.34);
   border-right: 1px solid rgba(0, 0, 0, 0.34);
+}
+.d2h-code-side-linenumber {
+  text-align: center;
+}
+
+.d2h-file-diff .d2h-del.d2h-change, .d2h-del {
+  background-color: #E86756;
+  color: #FFFFFF;
+}
+
+.d2h-file-diff .d2h-ins.d2h-change, .d2h-ins {
+  background-color: #66F27B;
+  color: #000000;
+}
+
+.d2h-code-line del, .d2h-code-side-line del {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.d2h-code-line ins, .d2h-code-side-line ins {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.d2h-code-linenumber, .d2h-code-side-linenumber, .d2h-code-line-prefix {
   -moz-user-select: none;
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.d2h-del {
-  background-color: #E86756;
-  color: #FFFFFF;
-
-  &.d2h-code-side-linenumber {
-    color: rgba(0, 0, 0, 0.5);
-  }
-}
-
-.d2h-ins {
-  background-color: #66F27B;
-  color: #000000;
-
-  &.d2h-code-side-linenumber {
-    color: rgba(0, 0, 0, 0.5);
-  }
-}
-
-.d2h-info {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.d2h-code-line-ctn {
-  .word-wrap & {
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -webkit-pre-wrap; /*Chrome & Safari */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    white-space: pre-wrap;       /* css-3 */
-  }
 }
