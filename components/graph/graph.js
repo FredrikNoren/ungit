@@ -39,7 +39,7 @@ class GraphViewModel {
       this.loadNodesFromApi();
     }, 500, true);
     this.commitOpacity = ko.observable(1.0);
-    this.heighstBranchOrder = 0;
+    this.highestBranchOrder = 0;
     this.hoverGraphActionGraphic = ko.observable();
     this.hoverGraphActionGraphic.subscribe(value => {
       if (value && value.destroy)
@@ -99,10 +99,10 @@ class GraphViewModel {
         // set new limit and skip
         this.skip(parseInt(log.skip));
         return log.nodes || [];
-      }).then(nodes => {// create and/or calculate nodes
-        return this.computeNode(nodes.map((logEntry) => {
-          return this.getNode(logEntry.sha1, logEntry)
-        }))
+      }).then(nodes => {
+        // create and/or calculate nodes
+        const nodeVMs = nodes.map((logEntry) => this.getNode(logEntry.sha1, logEntry));
+        return this.computeNode(nodeVMs);
       }).then(nodes => {
         // create edges
         nodes.forEach(node => {
@@ -114,7 +114,7 @@ class GraphViewModel {
         if (nodes.length > 0) {
           this.graphHeight(nodes[nodes.length - 1].cy() + 80);
         }
-        this.graphWidth(1000 + (this.heighstBranchOrder * 90));
+        this.graphWidth(1000 + (this.highestBranchOrder * 90));
         programEvents.dispatch({ event: 'init-tooltip' });
       }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
@@ -140,32 +140,32 @@ class GraphViewModel {
 
     const updateTimeStamp = moment().valueOf();
     if (this.HEAD()) {
+      if (this.highestBranchOrder == 0) {
+        this.highestBranchOrder = 1;
+      }
       this.traverseNodeLeftParents(this.HEAD(), node => {
         node.ancestorOfHEADTimeStamp = updateTimeStamp;
       });
     }
 
     // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-    nodes = nodes.filter(node => (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp);
-
-    let branchSlotCounter = this.HEAD() ? 1 : 0;
+    const nodesWithRefs = nodes.filter(node => (node.ideologicalBranch() && !node.ideologicalBranch().isStash) || node.ancestorOfHEADTimeStamp == updateTimeStamp);
 
     // Then iterate from the bottom to fix the orders of the branches
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      const node = nodes[i];
+    for (let i = nodesWithRefs.length - 1; i >= 0; i--) {
+      const node = nodesWithRefs[i];
       if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
       const ideologicalBranch = node.ideologicalBranch();
 
       // First occurrence of the branch, find an empty slot for the branch
       if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
         ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
-        ideologicalBranch.branchOrder = branchSlotCounter++;
+        ideologicalBranch.branchOrder = this.highestBranchOrder++;
       }
 
       node.branchOrder(ideologicalBranch.branchOrder);
     }
 
-    this.heighstBranchOrder = branchSlotCounter - 1;
     let prevNode = this.nodes() ? this.nodes()[this.nodes().length - 1] : null;
     nodes.forEach(node => {
       node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
