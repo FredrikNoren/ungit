@@ -35,9 +35,6 @@ class GraphViewModel {
     this.showCommitNode = ko.observable(false);
     this.currentActionContext = ko.observable();
     this.edgesById = {};
-    this.scrolledToEnd = _.debounce(() => {
-      this.loadNodesFromApi();
-    }, 500, true);
     this.commitOpacity = ko.observable(1.0);
     this.highestBranchOrder = 0;
     this.hoverGraphActionGraphic = ko.observable();
@@ -62,7 +59,6 @@ class GraphViewModel {
     this.searchIcon = octicons.search.toSVG({ 'height': 18 });
     this.plusIcon = octicons.plus.toSVG({ 'height': 18 });
     this.isLoadNodesRunning = false;
-    this.loadNodesFromApi();
   }
 
   updateNode(parentElement) {
@@ -89,12 +85,9 @@ class GraphViewModel {
     return refViewModel;
   }
 
-  loadNodesFromApi(skip, limit) {
-    if (this.isLoadNodesRunning) return;
-    this.isLoadNodesRunning = true;
-
-    skip = skip ? skip : this.graphSkip;
-    limit = limit ? limit : parseInt(ungit.config.numberOfNodesPerLoad);
+  loadNodesFromApi(isRefresh) {
+    const skip = isRefresh ? 0 : this.graphSkip;
+    const limit = isRefresh && this.graphSkip > 0 ? this.graphSkip : parseInt(ungit.config.numberOfNodesPerLoad);
 
     const nodeSize = this.nodes().length;
     return this.server.getPromise('/gitlog', { path: this.repoPath(), skip: skip, limit: limit })
@@ -128,9 +121,8 @@ class GraphViewModel {
       }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
-          this.scrolledToEnd();
+          this.loadNodesFromApiThrottled();
         }
-        this.isLoadNodesRunning = false
       });
   }
 
@@ -250,10 +242,10 @@ class GraphViewModel {
 
   onProgramEvent(event) {
     if (event.event == 'git-directory-changed') {
-      this.loadNodesFromApiThrottled();
+      this.loadNodesFromApiThrottled(true);
       this.updateBranchesThrottled();
     } else if (event.event == 'request-app-content-refresh') {
-      this.loadNodesFromApiThrottled();
+      this.loadNodesFromApiThrottled(true);
     } else if (event.event == 'remote-tags-update') {
       this.setRemoteTags(event.tags);
     } else if (event.event == 'current-remote-changed') {
