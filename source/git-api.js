@@ -70,9 +70,8 @@ exports.registerApi = (env) => {
         return mkdirp(pathToWatch);
       })
       .then(() => {
-        const watcher = watch(pathToWatch, options || {});
-        watcher.on('change', (event, filename) => {
-          if (!filename) return;
+        const watcher = fs.watch(pathToWatch, options || {}, (event, filename) => {
+          if (event === 'rename' || !filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
@@ -80,9 +79,6 @@ exports.registerApi = (env) => {
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
-        });
-        watcher.on('error', (err) => {
-          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
         });
         socket.watcher.push(watcher);
       });
