@@ -63,7 +63,7 @@ class RefViewModel extends Selectable {
     // This optimization is for autocomplete display
     this.value = splitedName[splitedName.length - 1];
     this.label = this.localRefName;
-    this.dom = `${this.localRefName}<span>${octicons[(this.isTag ? 'tag': 'git-branch')].toSVG({ 'height': 18 })}</span>`;
+    this.dom = `${this.localRefName}<span>${octicons[(this.isTag ? 'tag' : 'git-branch')].toSVG({ 'height': 18 })}</span>`;
 
     this.displayHtml = (largeCurrent) => {
       const size = (largeCurrent && this.current()) ? 26 : 18;
@@ -109,8 +109,8 @@ class RefViewModel extends Selectable {
         operation = '/branches';
       }
 
-      if (!rewindWarnOverride && this.node().date > toNode.date) {
-        promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.'})
+      if (!rewindWarnOverride && this.node().timestamp > toNode.timestamp) {
+        promise = components.create('yesnodialog', { title: 'Are you sure?', details: 'This operation potentially going back in history.' })
           .show()
           .closeThen(diag => {
             if (diag.result()) {
@@ -208,15 +208,15 @@ class RefViewModel extends Selectable {
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 
     return promise.resolve().then(() => {
-        if (isRemote && !isLocalCurrent) {
-          return this.server.postPromise('/branches', {
-            path: this.graph.repoPath(),
-            name: this.refName,
-            sha1: this.name,
-            force: true
-          });
-        }
-      }).then(() => this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName }))
+      if (isRemote && !isLocalCurrent) {
+        return this.server.postPromise('/branches', {
+          path: this.graph.repoPath(),
+          name: this.refName,
+          sha1: this.name,
+          force: true
+        });
+      }
+    }).then(() => this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName }))
       .then(() => {
         if (isRemote && isLocalCurrent) {
           return this.server.postPromise('/reset', { path: this.graph.repoPath(), to: this.name, mode: 'hard' });

@@ -12,13 +12,14 @@ const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2
 class GitNodeViewModel extends Animateable {
   constructor(graph, sha1) {
     super(graph);
+    this.hasBeenRenderedBefore = false;
     this.graph = graph;
     this.sha1 = sha1;
     this.isInited = false;
     this.title = ko.observable();
     this.parents = ko.observableArray();
     this.commitTime = undefined; // commit time in string
-    this.date = undefined;       // commit time in numeric format for sort
+    this.timestamp = undefined;  // commit time in numeric format for sort
     this.color = ko.observable();
     this.ideologicalBranch = ko.observable();
     this.remoteTags = ko.observableArray();
@@ -133,8 +134,14 @@ class GitNodeViewModel extends Animateable {
       }
 
       this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+      if (!this.hasBeenRenderedBefore) {
+        // push this nodes into the graph's node list to be rendered if first time.
+        // if been pushed before, no need to add to nodes.
+        this.hasBeenRenderedBefore = true;
+        graph.nodes.push(this);
+      }
       this.animate();
-    }, 500, {leading: true})
+    }, 500, { leading: true })
   }
 
   getGraphAttr() {
@@ -146,11 +153,16 @@ class GitNodeViewModel extends Animateable {
     this.element().setAttribute('y', val[1] - 30);
   }
 
+  setParent(parent) {
+    this.aboveNode = parent;
+    if (parent) parent.belowNode = this;
+  }
+
   setData(logEntry) {
     this.title(logEntry.message.split('\n')[0]);
     this.parents(logEntry.parents || []);
     this.commitTime = logEntry.commitDate;
-    this.date = Date.parse(this.commitTime);
+    this.timestamp = logEntry.timestamp || Date.parse(this.commitTime);
     this.commitComponent.setData(logEntry);
     this.signatureMade(logEntry.signatureMade);
     this.signatureDate(logEntry.signatureDate);
@@ -184,7 +196,7 @@ class GitNodeViewModel extends Animateable {
       },
       messages: {
         noResults: '',
-        results: () => {}
+        results: () => { }
       }
     }).focus(() => {
       $(this).autocomplete('search', $(this).val());
@@ -213,7 +225,7 @@ class GitNodeViewModel extends Animateable {
   createTag() {
     if (!this.canCreateRef()) return;
     this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
-      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this) )
+      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
       .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
@@ -228,7 +240,7 @@ class GitNodeViewModel extends Animateable {
       beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
     }
 
-    let prevSelected  = this.graph.currentActionContext();
+    let prevSelected = this.graph.currentActionContext();
     if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected ? prevSelected.commitComponent.element().getBoundingClientRect() : null;
     this.selected(!this.selected());
@@ -240,12 +252,12 @@ class GitNodeViewModel extends Animateable {
         // If the next node is showing, try to keep it in the screen (no jumping)
         if (beforeBelowCR.top < window.innerHeight) {
           window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
-        // Otherwise just try to bring them to the middle of the screen
+          // Otherwise just try to bring them to the middle of the screen
         } else {
           window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
         }
       }
-    // If we are selecting
+      // If we are selecting
     } else {
       const afterThisCR = this.commitComponent.element().getBoundingClientRect();
       if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
@@ -268,7 +280,7 @@ class GitNodeViewModel extends Animateable {
   pushRef(ref) {
     if (ref.isRemoteTag && !this.remoteTags().includes(ref)) {
       this.remoteTags.push(ref);
-    } else if(!this.branchesAndLocalTags().includes(ref)) {
+    } else if (!this.branchesAndLocalTags().includes(ref)) {
       this.branchesAndLocalTags.push(ref);
     }
   }

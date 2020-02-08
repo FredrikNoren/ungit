@@ -51,14 +51,14 @@ class GraphViewModel {
         this.hoverGraphActionGraphic(null);
       }
     });
-
-    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
-    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
+    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000, { leading: false });
+    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000, { leading: false });
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ 'height': 18 });
     this.plusIcon = octicons.plus.toSVG({ 'height': 18 });
     this.isLoadNodesRunning = false;
+    this.loadNodesFromApiThrottled();
   }
 
   updateNode(parentElement) {
@@ -91,18 +91,31 @@ class GraphViewModel {
 
     const nodeSize = this.nodes().length;
     return this.server.getPromise('/gitlog', { path: this.repoPath(), skip: skip, limit: limit })
-      .then(log => log || [])
-      .then(nodes => {
-        // create and/or calculate nodes
-        let prevNode = this.nodes() ? this.nodes()[this.nodes().length - 1] : null;
-        const nodeVMs = nodes.map((logEntry) => {
-          const nodeVM = this.getNode(logEntry.sha1, logEntry);
-          nodeVM.aboveNode = prevNode;
-          if (prevNode) prevNode.belowNode = nodeVM;
-          prevNode = nodeVM;
-          return nodeVM;
+      .then(logs => {
+        logs = logs || [];
+        // get or update each commit nodes.
+        logs.forEach(log => this.getNode(log.sha1, log));
+
+        // sort in commit order
+        const allNodes = Object.values(this.nodesById)
+          .filter(node => node.timestamp) // some nodes are created by ref without info
+          .sort((a, b) => {
+            if (a.timestamp < b.timestamp) {
+              return 1;
+            } else if (a.timestamp > b.timestamp) {
+              return -1;
+            }
+            return 0;
+          });
+
+        // reset parent child relationship for each
+        let prevNode = null;
+        allNodes.forEach(node => {
+          node.setParent(prevNode);
+          prevNode = node;
         });
-        return this.computeNode(nodeVMs);
+
+        return this.computeNode(allNodes);
       }).then(nodes => {
         // create edges
         nodes.forEach(node => {
@@ -117,7 +130,9 @@ class GraphViewModel {
         this.graphWidth(1000 + (this.highestBranchOrder * 90));
         programEvents.dispatch({ event: 'init-tooltip' });
 
-        this.graphSkip += parseInt(ungit.config.numberOfNodesPerLoad)
+        if (!isRefresh) {
+          this.graphSkip += parseInt(ungit.config.numberOfNodesPerLoad)
+        }
       }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
@@ -159,8 +174,7 @@ class GraphViewModel {
       const ideologicalBranch = node.ideologicalBranch();
 
       // First occurrence of the branch, find an empty slot for the branch
-      if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
-        ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
+      if (!ideologicalBranch.branchOrder) {
         ideologicalBranch.branchOrder = this.highestBranchOrder++;
       }
 
@@ -171,7 +185,6 @@ class GraphViewModel {
       node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
       if (node.ancestorOfHEAD()) node.branchOrder(0);
       node.render();
-      this.nodes.push(node);
     });
 
     return this.nodes();
@@ -187,8 +200,8 @@ class GraphViewModel {
     return edge;
   }
 
-  markNodesIdeologicalBranches(refs, nodes, nodesById) {
-    refs = refs.filter(r => !!r.node());
+  markNodesIdeologicalBranches(refs) {
+    refs = refs.filter(r => !!r.node().timestamp);
     refs = refs.sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;
       if (b.isLocal && !a.isLocal) return 1;
@@ -198,8 +211,8 @@ class GraphViewModel {
       if (!a.isHEAD && b.isHEAD) return -1;
       if (a.isStash && !b.isStash) return 1;
       if (b.isStash && !a.isStash) return -1;
-      if (a.node() && a.node().date && b.node() && b.node().date)
-        return a.node().date - b.node().date;
+      if (a.node() && a.node().timestamp && b.node() && b.node().timestamp)
+        return a.node().timestamp - b.node().timestamp;
       return a.refName < b.refName ? -1 : 1;
     });
     const stamp = this._markIdeologicalStamp++;
