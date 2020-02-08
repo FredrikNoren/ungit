@@ -260,7 +260,7 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const isIgnoreWhiteSpace = req.query.whiteSpace === "true" ? true : false;
-    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.sha1, isIgnoreWhiteSpace));
+    jsonResultOrFailProm(res, gitPromise.diffFile(req.query.path, req.query.file, req.query.oldFile, req.query.sha1, isIgnoreWhiteSpace));
   });
 
   app.get(`${exports.pathPrefix}/diff/image`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -327,11 +327,11 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/show`, ensureAuthenticated, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['show', '--numstat', req.query.sha1], req.query.path).then(gitParser.parseGitLog));
+    jsonResultOrFailProm(res, gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(gitParser.parseGitLog));
   });
 
   app.get(`${exports.pathPrefix}/head`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '--parents', '--max-count=1'], req.query.path)
+    const task = gitPromise(['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'], req.query.path)
       .then(gitParser.parseGitLog)
       .catch((err) => {
         if (err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0)
@@ -614,7 +614,7 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller', '--parents', '--numstat'], req.query.path)
+    const task = gitPromise(['stash', 'list', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--numstat'], req.query.path)
       .then(gitParser.parseGitLog);
     jsonResultOrFailProm(res, task);
   });
@@ -698,28 +698,23 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFileSync(req.body.file, content);
-      res.json({});
+      fs.writeFile(req.body.file, content, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFileSync(req.body.file, content);
-      res.json({});
+      fs.writeFile(req.body.file, content, () => res.json({}));
     });
      app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png', { encoding: 'binary' });
-      res.json({});
+      fs.writeFile(req.body.file, 'png', { encoding: 'binary' }, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' });
-      res.json({});
+      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' }, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
-      fs.unlinkSync(req.body.file);
-      res.json({});
+      fs.unlink(req.body.file, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo));
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {

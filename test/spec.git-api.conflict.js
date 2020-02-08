@@ -55,6 +55,8 @@ describe('git-api conflict rebase', function () {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,
@@ -121,6 +123,8 @@ describe('git-api conflict checkout', function() {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,
@@ -176,6 +180,8 @@ describe('git-api conflict merge', function () {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,
@@ -204,9 +210,16 @@ describe('git-api conflict merge', function () {
     return common.get(req, '/gitlog', { path: testDir }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(4);
-      expect(res.nodes[0].fileLineDiffs.length).to.be(2);
-      expect(res.nodes[0].fileLineDiffs[0]).to.eql([1, 1, 'Total']);
-      expect(res.nodes[0].fileLineDiffs[1]).to.eql([1, 1, testFile1, 'text']);
+      expect(res.nodes[0].total).to.eql({additions: 1, deletions: 1});
+      expect(res.nodes[0].fileLineDiffs.length).to.be(1);
+      expect(res.nodes[0].fileLineDiffs[0]).to.eql({
+        additions: 1,
+        deletions: 1,
+        fileName: testFile1,
+        oldFileName: testFile1,
+        displayName: testFile1,
+        type: 'text'
+      });
     });
   });
 
@@ -255,6 +268,8 @@ describe('git-api conflict solve by deleting', function () {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,

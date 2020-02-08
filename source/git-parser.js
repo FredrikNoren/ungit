@@ -3,43 +3,60 @@ const fileType = require('./utils/file-type.js');
 const _ = require('lodash');
 
 exports.parseGitStatus = (text, args) => {
-  const lines = text.split('\n');
-  const files = {};
+  let lines = text.split('\x00');
+  const branch = lines[0].split(' ').pop();
   // skipping first line...
-  lines.slice(1).forEach((line) => {
-    if (line == '') return;
+  lines = lines.slice(1);
+  const files = {};
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    if (line == '') continue;
     const status = line.slice(0, 2);
-    const filename = line.slice(3).trim().replace(/^"(.*)"$/, '$1'); // may contain old and renamed file name.
-    const finalFilename = status[0] == 'R' ? filename.slice(filename.indexOf('>') + 2) : filename;
-    files[finalFilename] = {
-      displayName: filename,
+    const newFileName = line.slice(3).trim();
+    let oldFileName;
+    let displayName;
+    if (status[0] == 'R') {
+      oldFileName = lines[++i]
+      displayName = `${oldFileName} → ${newFileName}`;
+    } else {
+      oldFileName = newFileName;
+      displayName = newFileName;
+    }
+    files[newFileName] = {
+      fileName: newFileName,
+      oldFileName: oldFileName,
+      displayName: displayName,
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
       isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
       conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
       renamed: status[0] == 'R',
-      type: fileType(finalFilename)
+      type: fileType(newFileName)
     };
-  });
+  }
 
   return {
     isMoreToLoad: false,
-    branch: lines[0].split(' ').pop(),
+    branch: branch,
     inited: true,
     files: files
   };
 };
 
+const fileChangeRegex = /(?<additions>[\d-]+)\t(?<deletions>[\d-]+)\t((?<fileName>[^\x00]+?)\x00|\x00(?<oldFileName>[^\x00]+?)\x00(?<newFileName>[^\x00]+?)\x00)/g;
+
 exports.parseGitStatusNumstat = (text) => {
   const result = {};
-  text.split('\n').forEach((line) => {
-    if (line == '') return;
-    const parts = line.split('\t');
-    result[parts[2]] = {
-      additions: parts[0],
-      deletions: parts[1]
+  fileChangeRegex.lastIndex = 0;
+  let match = fileChangeRegex.exec(text);
+  while (match !== null) {
+    result[match.groups.fileName || match.groups.newFileName] = {
+      additions: match.groups.additions,
+      deletions: match.groups.deletions
     };
-  });
+    match = fileChangeRegex.exec(text);
+  }
   return result;
 };
 
@@ -101,7 +118,7 @@ exports.parseGitLog = (data) => {
   let currentCommmit;
   const parseCommitLine = (row) => {
     if (!row.trim()) return;
-    currentCommmit = { refs: [], fileLineDiffs: [] };
+    currentCommmit = { refs: [], fileLineDiffs: [], total: { additions: 0, deletions: 0 } };
     const refStartIndex = row.indexOf('(');
     const sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter((sha1) => { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
@@ -128,37 +145,58 @@ exports.parseGitLog = (data) => {
     }
   }
   const parseCommitMessage = (row, index) => {
+    if (currentCommmit.message) currentCommmit.message += '\n';
+    else currentCommmit.message = '';
+    currentCommmit.message += row.trim();
     if (/[\d-]+\t[\d-]+\t.+/g.test(rows[index + 1])) {
       parser = parseFileChanges;
       return;
     }
-    if (rows[index + 1] && rows[index + 1].indexOf('commit ') == 0) {
+    if (rows[index + 1] && rows[index + 1].indexOf('\x00commit ') == 0) {
       parser = parseCommitLine;
       return;
     }
-    if (currentCommmit.message) currentCommmit.message += '\n';
-    else currentCommmit.message = '';
-    currentCommmit.message += row.trim();
   }
   const parseFileChanges = (row, index) => {
-    if (rows.length === index + 1 || rows[index + 1] && rows[index + 1].indexOf('commit ') === 0) {
-      const total = [0, 0, 'Total'];
-      for (let n = 0; n < currentCommmit.fileLineDiffs.length; n++) {
-        const fileLineDiff = currentCommmit.fileLineDiffs[n];
-        if (!isNaN(parseInt(fileLineDiff[0], 10))) {
-          total[0] += fileLineDiff[0] = parseInt(fileLineDiff[0], 10);
-        }
-        if (!isNaN(parseInt(fileLineDiff[1], 10))) {
-          total[1] += fileLineDiff[1] = parseInt(fileLineDiff[1], 10);
-        }
-      }
-      currentCommmit.fileLineDiffs.splice(0, 0, total);
-      parser = parseCommitLine;
-      return;
+    // git log is using -z so all the file changes are on one line
+    // merge commits start the file changes with a null
+    if (row[0] === '\x00'){
+      row = row.slice(1);
     }
-    const splitted = row.split('\t');
-    splitted.push(fileType(splitted[2]));
-    currentCommmit.fileLineDiffs.push(splitted);
+    fileChangeRegex.lastIndex = 0;
+    while (row[fileChangeRegex.lastIndex] && row[fileChangeRegex.lastIndex] !== '\x00') {
+      let match = fileChangeRegex.exec(row);
+      let fileName = match.groups.fileName || match.groups.newFileName;
+      let oldFileName = match.groups.oldFileName || match.groups.fileName;
+      let displayName;
+      if(match.groups.oldFileName) {
+        displayName = `${match.groups.oldFileName} → ${match.groups.newFileName}`;
+      } else {
+        displayName = fileName;
+      }
+      currentCommmit.fileLineDiffs.push({
+        additions: match.groups.additions,
+        deletions: match.groups.deletions,
+        fileName: fileName,
+        oldFileName: oldFileName,
+        displayName: displayName,
+        type: fileType(fileName)
+      });
+    }
+    const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
+    for (let fileLineDiff of currentCommmit.fileLineDiffs) {
+      if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
+        currentCommmit.total.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
+      }
+      if (!isNaN(parseInt(fileLineDiff.deletions, 10))) {
+        currentCommmit.total.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
+      }
+    }
+    parser = parseCommitLine;
+    if (nextRow) {
+      parser(nextRow, index);
+    }
+    return;
   }
   let parser = parseCommitLine;
   const rows = data.split('\n');
