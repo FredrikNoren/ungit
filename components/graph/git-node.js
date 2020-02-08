@@ -12,13 +12,14 @@ const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2
 class GitNodeViewModel extends Animateable {
   constructor(graph, sha1) {
     super(graph);
+    this.hasBeenRenderedBefore = false;
     this.graph = graph;
     this.sha1 = sha1;
     this.isInited = false;
     this.title = ko.observable();
     this.parents = ko.observableArray();
     this.commitTime = undefined; // commit time in string
-    this.date = undefined; // commit time in numeric format for sort
+    this.timestamp = undefined; // commit time in numeric format for sort
     this.color = ko.observable();
     this.ideologicalBranch = ko.observable();
     this.remoteTags = ko.observableArray();
@@ -141,6 +142,12 @@ class GitNodeViewModel extends Animateable {
         }
 
         this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+        if (!this.hasBeenRenderedBefore) {
+          // push this nodes into the graph's node list to be rendered if first time.
+          // if been pushed before, no need to add to nodes.
+          this.hasBeenRenderedBefore = true;
+          graph.nodes.push(this);
+        }
         this.animate();
       },
       500,
@@ -157,11 +164,16 @@ class GitNodeViewModel extends Animateable {
     this.element().setAttribute('y', val[1] - 30);
   }
 
+  setParent(parent) {
+    this.aboveNode = parent;
+    if (parent) parent.belowNode = this;
+  }
+
   setData(logEntry) {
     this.title(logEntry.message.split('\n')[0]);
     this.parents(logEntry.parents || []);
     this.commitTime = logEntry.commitDate;
-    this.date = Date.parse(this.commitTime);
+    this.timestamp = logEntry.timestamp || Date.parse(this.commitTime);
     this.commitComponent.setData(logEntry);
     this.signatureMade(logEntry.signatureMade);
     this.signatureDate(logEntry.signatureDate);
@@ -180,21 +192,12 @@ class GitNodeViewModel extends Animateable {
   showRefSearchForm(obj, event) {
     this.refSearchFormVisible(true);
 
-    const textBox = event.currentTarget.parentElement.querySelector('input[type="search"]');
-    const $textBox = $(textBox);
-
-    if (!$textBox.autocomplete('instance')) {
-      const renderItem = (ul, item) => $(`<li><a>${item.displayHtml()}</a></li>`).appendTo(ul);
-      $textBox.autocomplete({
-        classes: {
-          'ui-autocomplete': 'dropdown-menu',
-        },
+    const textBox = event.currentTarget.nextElementSibling.firstElementChild; // this may not be the best idea...
+    $(textBox)
+      .autocomplete({
         source: this.refs().filter((ref) => !ref.isHEAD),
         minLength: 0,
-        create: (event) => {
-          $(event.target).data('ui-autocomplete')._renderItem = renderItem;
-        },
-        select: (_event, ui) => {
+        select: (event, ui) => {
           const ref = ui.item;
           const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
 
@@ -202,16 +205,18 @@ class GitNodeViewModel extends Animateable {
           ray.splice(ray.indexOf(ref), 1);
           ray.unshift(ref);
           this.refSearchFormVisible(false);
-
-          // Clear search input on selection
-          return false;
         },
-      });
-      $textBox.focus((event) => {
-        $(event.target).autocomplete('search', event.target.value);
-      });
-      $textBox.autocomplete('search', '');
-    }
+        messages: {
+          noResults: '',
+          results: () => {},
+        },
+      })
+      .focus(() => {
+        $(this).autocomplete('search', $(this).val());
+      })
+      .data('ui-autocomplete')._renderItem = (ul, item) =>
+      $('<li></li>').append(`<a>${item.dom}</a>`).appendTo(ul);
+    $(textBox).autocomplete('search', '');
   }
 
   createBranch() {

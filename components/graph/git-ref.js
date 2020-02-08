@@ -68,6 +68,9 @@ class RefViewModel extends Selectable {
     // This optimization is for autocomplete display
     this.value = splitedName[splitedName.length - 1];
     this.label = this.localRefName;
+    this.dom = `${this.localRefName}<span>${octicons[this.isTag ? 'tag' : 'git-branch'].toSVG({
+      height: 18,
+    })}</span>`;
 
     this.displayHtml = (largeCurrent) => {
       const size = largeCurrent && this.current() ? 26 : 18;
@@ -120,7 +123,7 @@ class RefViewModel extends Selectable {
         operation = '/branches';
       }
 
-      if (!rewindWarnOverride && this.node().date > toNode.date) {
+      if (!rewindWarnOverride && this.node().timestamp > toNode.timestamp) {
         promise = components
           .create('yesnodialog', {
             title: 'Are you sure?',

@@ -85,6 +85,7 @@ const gitLogHeaders = {
   },
   CommitDate: (currentCommmit, date) => {
     currentCommmit.commitDate = date;
+    currentCommmit.timestamp = Date.parse(date);
   },
   Reflog: (currentCommmit, data) => {
     currentCommmit.reflogId = /\{(.*?)\}/.exec(data)[1];

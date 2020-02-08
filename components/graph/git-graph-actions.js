@@ -81,7 +81,7 @@ class Move extends ActionBase {
 
 class Reset extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ height: 18 }));
+    super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
@@ -95,8 +95,7 @@ class Reset extends ActionBase {
         context &&
         context.node() &&
         remoteRef.node() != context.node() &&
-        remoteRef.node().date < context.node().date
-      );
+        remoteRef.node().timestamp < context.node().timestamp;
     });
   }
 
@@ -223,14 +222,11 @@ class Push extends ActionBase {
     if (remoteRef) {
       return remoteRef.moveTo(ref.node().sha1);
     } else {
-      return ref
-        .createRemoteRef()
-        .then(() => {
-          if (this.graph.HEAD().name == ref.name) {
-            this.grah.HEADref().node(ref.node());
-          }
-        })
-        .finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
+      return ref.createRemoteRef().then(() => {
+        if (this.graph.HEAD().name == ref.name) {
+          this.grah.HEADref().node(ref.node());
+        }
+      }).finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
     }
   }
 }
