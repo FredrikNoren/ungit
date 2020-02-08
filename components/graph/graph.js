@@ -51,8 +51,8 @@ class GraphViewModel {
         this.hoverGraphActionGraphic(null);
       }
     });
-    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000, { leading: false });
-    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000, { leading: false });
+    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000, { leading: true, trailing: false });
+    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000, { leading: true, trailing: false });
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ 'height': 18 });
@@ -115,18 +115,20 @@ class GraphViewModel {
           prevNode = node;
         });
 
-        return this.computeNode(allNodes);
-      }).then(nodes => {
-        // create edges
+        const nodes = this.computeNode(allNodes);
+        let maxHeight = 0;
+
+        // create edges and calculate max height
         nodes.forEach(node => {
+          if (node.cy() > maxHeight) {
+            maxHeight = node.cy()
+          }
           node.parents().forEach(parentSha1 => {
             this.getEdge(node.sha1, parentSha1);
           });
         });
 
-        if (nodes.length > 0) {
-          this.graphHeight(nodes[nodes.length - 1].cy() + 80);
-        }
+        this.graphHeight(maxHeight + 80);
         this.graphWidth(1000 + (this.highestBranchOrder * 90));
         programEvents.dispatch({ event: 'init-tooltip' });
 
