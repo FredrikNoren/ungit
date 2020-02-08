@@ -219,8 +219,14 @@ class GraphViewModel {
   }
 
   markNodesIdeologicalBranches(refs) {
-    refs = refs.filter((r) => !!r.node().timestamp);
-    refs = refs.sort((a, b) => {
+    const refNodeMap = {};
+    refs.forEach((r) => {
+      if (!r.node()) return;
+      if (!r.node().timestamp) return;
+      if (refNodeMap[r.node().sha1]) return;
+      refNodeMap[r.node().sha1] = r;
+    });
+    refs = Object.values(refNodeMap).sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;
       if (b.isLocal && !a.isLocal) return 1;
       if (a.isBranch && !b.isBranch) return -1;
