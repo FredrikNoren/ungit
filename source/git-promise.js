@@ -620,7 +620,7 @@ git.log = (path, skip, limit, lookForHead, maxActiveBranchSearchIteration) => {
       if (lookForHead && maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
         return git
           .log(path, skip, maxActiveBranchSearchIteration - 1)
-          .then((innerLog) => log.concat(innerLog.nodes));
+          .then((innerLog) => log.concat(innerLog));
       } else {
         return log;
       }
