@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.2...master)
 
+### Removed
+- Remove dependency on npm [#1269](https://github.com/FredrikNoren/ungit/pull/1269)
+
 ## [1.5.2](https://github.com/FredrikNoren/ungit/compare/v1.5.1...v1.5.2)
 
 ### Fixed
