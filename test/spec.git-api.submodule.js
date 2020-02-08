@@ -1,4 +1,3 @@
-
 const expect = require('expect.js');
 const request = require('supertest');
 const express = require('express');
@@ -21,9 +20,9 @@ describe('git-api submodule', function () {
 
   before(() => {
     return common.createSmallRepo(req)
-      .then((dir) => { testDirMain = dir })
+      .then((dir) => { testDirMain = dir; })
       .then(() => common.createSmallRepo(req))
-      .then((dir) => { testDirSecondary = dir });
+      .then((dir) => { testDirSecondary = dir; });
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -35,31 +34,36 @@ describe('git-api submodule', function () {
   });
 
   it('submodule should show up in status', () => {
-    return common.get(req, '/status', { path: testDirMain }, (res) => {
-      expect(Object.keys(res.body.files).length).to.be(2);
-      expect(res.files[submodulePath]).to.eql({
-        displayName: submodulePath,
-        isNew: true,
-        staged: true,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '1',
-        deletions: '0'
+    return common.get(req, '/status', { path: testDirMain })
+      .then((res) => {
+        expect(Object.keys(res.files).length).to.be(2);
+        expect(res.files[submodulePath]).to.eql({
+          displayName: submodulePath,
+          fileName: submodulePath,
+          oldFileName: submodulePath,
+          isNew: true,
+          staged: true,
+          removed: false,
+          conflict: false,
+          renamed: false,
+          type: 'text',
+          additions: '1',
+          deletions: '0'
+        });
+        expect(res.files['.gitmodules']).to.eql({
+          displayName: '.gitmodules',
+          fileName: '.gitmodules',
+          oldFileName: '.gitmodules',
+          isNew: true,
+          staged: true,
+          removed: false,
+          conflict: false,
+          renamed: false,
+          type: 'text',
+          additions: '3',
+          deletions: '0'
+        });
       });
-      expect(res.files['.gitmodules']).to.eql({
-        displayName: '.gitmodules',
-        isNew: true,
-        staged: true,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '3',
-        deletions: '0'
-      });
-    });
   });
 
   it('commit should succeed', () => {
@@ -71,9 +75,8 @@ describe('git-api submodule', function () {
       .then((res) => expect(Object.keys(res.files).length).to.be(0));
   });
 
-  const testFile = path.join(submodulePath, 'testy.txt');
-
   it('creating a test file in sub dir should work', () => {
+    const testFile = path.join(submodulePath, 'testy.txt');
     return common.post(req, '/testing/createfile', { file: path.join(testDirMain, testFile) });
   });
 

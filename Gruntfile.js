@@ -1,12 +1,12 @@
-const childProcess = require('child_process');
-const path = require('path');
-const fs = require('./source/utils/fs-async');
-const npm = require('npm');
-const semver = require('semver');
-const browserify = require('browserify');
-const electronPackager = require('electron-packager');
 const Bluebird = require('bluebird');
+const browserify = require('browserify');
+const childProcess = require('child_process');
 const cliColor = require('ansi-color');
+const electronPackager = require('electron-packager');
+const path = require('path');
+const pkgVersions = require('pkg-versions');
+const semver = require('semver');
+const fs = require('./source/utils/fs-async');
 const maxConcurrency = 5;
 
 module.exports = (grunt) => {
@@ -302,21 +302,17 @@ module.exports = (grunt) => {
   });
 
   const bumpDependency = (packageJson, packageName) => {
-    return new Bluebird((resolve, reject) => {
-      const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
-      let currentVersion = packageJson[dependencyType][packageName];
-      if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
-      npm.commands.show([packageName, 'versions'], true, (err, data) => {
-        if(err) reject(err);
-        const versions = data[Object.keys(data)[0]].versions.filter((v) => {
-          return v.indexOf('alpha') == -1;
-        });
-        const latestVersion = versions[versions.length - 1];
-        if (semver.gt(latestVersion, currentVersion)) {
-          packageJson[dependencyType][packageName] = '~' + latestVersion;
-        }
-        resolve();
+    const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
+    let currentVersion = packageJson[dependencyType][packageName];
+    if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
+    return pkgVersions(packageName).then((versionSet) => {
+      const versions = Array.from(versionSet).reverse();
+      const latestVersion = versions.find((version) => {
+        return semver.prerelease(version) === null;
       });
+      if (semver.gt(latestVersion, currentVersion)) {
+        packageJson[dependencyType][packageName] = '~' + latestVersion;
+      }
     });
   };
 
@@ -400,22 +396,20 @@ module.exports = (grunt) => {
   grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
     const done = this.async();
     grunt.log.writeln('Bumping dependencies...');
-    npm.load(() => {
-      const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
+    const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
+    const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
 
-      const bumps = Bluebird.map(keys, (dep) => {
-        // winston 3.x has different API
-        if (dep == 'winston') return;
+    const bumps = Bluebird.map(keys, (dep) => {
+      // winston 3.x has different API
+      if (dep == 'winston') return;
 
-        return bumpDependency(tempPackageJson, dep);
-      });
-
-      Bluebird.all(bumps).then(() => {
-        fs.writeFileSync('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`);
-        grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
-      }).then(() => { done(); }).catch(done);
+      return bumpDependency(tempPackageJson, dep);
     });
+
+    Bluebird.all(bumps).then(() => {
+      fs.writeFileSync('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`);
+      grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
+    }).then(() => { done(); }).catch(done);
   });
 
   grunt.registerMultiTask('electron', 'Package Electron apps', function() {
