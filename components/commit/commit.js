@@ -55,8 +55,8 @@ class CommitViewModel {
     this.authorDateFromNow(this.authorDate().fromNow());
     this.authorName(args.authorName);
     this.authorEmail(args.authorEmail);
-    this.numberOfAddedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][0] : 0);
-    this.numberOfRemovedLines(args.fileLineDiffs.length > 0 ? args.fileLineDiffs[0][1] : 0);
+    this.numberOfAddedLines(args.total.additions);
+    this.numberOfRemovedLines(args.total.deletions);
     this.fileLineDiffs(args.fileLineDiffs);
     this.isInited = true;
     this.commitDiff = ko.observable(components.create('commitDiff', {

@@ -2,7 +2,7 @@
   "name": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.5.1",
+  "version": "1.5.3",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
@@ -42,14 +42,13 @@
     "jquery-ui-bundle": "~1.12.1",
     "just-detect-adblock": "~1.0.0",
     "knockout": "~3.5.0",
+    "latest-version": "~5.1.0",
     "locks": "~0.2.2",
     "lodash": "~4.17.11",
     "memorystore": "~1.6.1",
     "mkdirp": "~0.5.1",
     "moment": "~2.24.0",
     "node-cache": "~4.2.0",
-    "npm": "~6.12.1",
-    "npm-registry-client": "~8.6.0",
     "nprogress": "^0.2.0",
     "open": "~6.1.0",
     "passport": "~0.4.0",
@@ -91,6 +90,7 @@
     "istanbul": "~0.4.5",
     "mocha": "~6.1.4",
     "nightmare": "~3.0.2",
+    "pkg-versions": "~2.1.0",
     "supertest": "~4.0.2"
   },
   "engines": {

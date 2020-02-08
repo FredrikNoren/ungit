@@ -185,16 +185,16 @@ class StagingViewModel {
 
   setFiles(files) {
     const newFiles = [];
-    for(const file in files) {
-      let fileViewModel = this.filesByPath[file];
+    for(let fileStatus of Object.values(files)) {
+      let fileViewModel = this.filesByPath[fileStatus.fileName];
       if (!fileViewModel) {
-        this.filesByPath[file] = fileViewModel = new FileViewModel(this, file);
+        this.filesByPath[fileStatus.fileName] = fileViewModel = new FileViewModel(this, fileStatus.fileName, fileStatus.oldFileName, fileStatus.displayName);
       } else {
         // this is mainly for patching and it may not fire due to the fact that
         // '/commit' triggers working-tree-changed which triggers throttled refresh
         fileViewModel.diff().invalidateDiff();
       }
-      fileViewModel.setState(files[file]);
+      fileViewModel.setState(fileStatus);
       newFiles.push(fileViewModel);
     }
     this.files(newFiles);
@@ -349,12 +349,13 @@ class StagingViewModel {
 }
 
 class FileViewModel {
-  constructor(staging, name) {
+  constructor(staging, name, oldName, displayName) {
     this.staging = staging;
     this.server = staging.server;
     this.editState = ko.observable('staged'); // staged, patched and none
     this.name = ko.observable(name);
-    this.displayName = ko.observable(name);
+    this.oldName = ko.observable(oldName);
+    this.displayName = ko.observable(displayName);
     this.isNew = ko.observable(false);
     this.removed = ko.observable(false);
     this.conflict = ko.observable(false);
@@ -366,7 +367,7 @@ class FileViewModel {
       // only show modfied whe not removed, not conflicted, not new, not renamed
       // and length of additions and deletions is 0.
       return !this.removed() && !this.conflict() && !this.isNew() &&
-        !this.renamed() && this.additions().length === 0 && this.deletions().length === 0;
+        this.additions().length === 0 && this.deletions().length === 0;
     });
     this.fileType = ko.observable('text');
     this.patchLineList = ko.observableArray();
@@ -391,6 +392,8 @@ class FileViewModel {
   getSpecificDiff() {
     return components.create(!this.name() || `${this.fileType()}diff`, {
       filename: this.name(),
+      oldFilename: this.oldName(),
+      displayFilename: this.displayName(),
       repoPath: this.staging.repoPath,
       server: this.server,
       textDiffType: this.staging.textDiffType,
@@ -469,7 +472,6 @@ class FileViewModel {
   }
 
   toggleDiffs() {
-    if (this.renamed()) return; // do not show diffs for renames
     this.isShowingDiffs(!this.isShowingDiffs());
   }
 
