@@ -185,7 +185,7 @@ class MergeSquash extends Merge {
   }
 
   perform() {
-    return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.graph.currentActionContext().localRefName, squash: true })
+    return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.graph.currentActionContext().localRefName })
       .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
   }
 }
