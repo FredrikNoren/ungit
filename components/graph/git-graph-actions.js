@@ -76,7 +76,7 @@ class Move extends ActionBase {
 
 
 class Reset extends ActionBase {
-  constructor (graph, node) {
+  constructor(graph, node) {
     super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ 'height': 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
@@ -88,7 +88,7 @@ class Reset extends ActionBase {
       return remoteRef && remoteRef.node() &&
         context && context.node() &&
         remoteRef.node() != context.node() &&
-        remoteRef.node().date < context.node().date;
+        remoteRef.node().timestamp < context.node().timestamp;
     });
   }
 
@@ -103,7 +103,7 @@ class Reset extends ActionBase {
   perform() {
     const context = this.graph.currentActionContext();
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
-    return components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.'})
+    return components.create('yesnodialog', { title: 'Are you sure?', details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.' })
       .show()
       .closeThen((diag) => {
         if (!diag.result()) return;
@@ -197,10 +197,10 @@ class Push extends ActionBase {
       return remoteRef.moveTo(ref.node().sha1);
     } else {
       return ref.createRemoteRef().then(() => {
-          if (this.graph.HEAD().name == ref.name) {
-            this.grah.HEADref().node(ref.node());
-          }
-        }).finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
+        if (this.graph.HEAD().name == ref.name) {
+          this.grah.HEADref().node(ref.node());
+        }
+      }).finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
     }
   }
 }

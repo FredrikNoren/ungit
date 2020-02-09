@@ -71,9 +71,8 @@ exports.registerApi = (env) => {
           });
         }
       }).then(() => {
-        const watcher = fs.watch(pathToWatch, options || {});
-        watcher.on('change', (event, filename) => {
-          if (!filename) return;
+        const watcher = fs.watch(pathToWatch, options || {}, (event, filename) => {
+          if (event === 'rename' || !filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
@@ -81,9 +80,6 @@ exports.registerApi = (env) => {
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
-        });
-        watcher.on('error', (err) => {
-          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
         });
         socket.watcher.push(watcher);
       });
@@ -309,16 +305,18 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
     const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise.log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
+    const limit = getNumber(req.query.limit, parseInt(config.numberOfNodesPerLoad));
+    const isLookForHead = skip === 0 && limit === config.numberOfNodesPerLoad;
+
+    const task = gitPromise.log(req.query.path, skip, limit, isLookForHead, config.maxActiveBranchSearchIteration)
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf('fatal: bad default revision \'HEAD\'') == 0) {
-          return { "limit": limit, "skip": skip, "nodes": []};
+          return [];
         } else if (/fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)) {
-          return { "limit": limit, "skip": skip, "nodes": []};
+          return [];
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
-          return { "limit": limit, "skip": skip, "nodes": []};
+          return [];
         } else {
           throw err;
         }

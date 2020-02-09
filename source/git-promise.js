@@ -254,8 +254,8 @@ git.resolveConflicts = (repoPath, files) => {
       }
     });
   })).then(() => {
-    const addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
-    const removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
+    const addExec = toAdd.length > 0 ? git(['add', toAdd], repoPath) : null;
+    const removeExec = toRemove.length > 0 ? git(['rm', toRemove], repoPath) : null;
     return Bluebird.join(addExec, removeExec);
   });
 }
@@ -414,7 +414,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
     const ammendFlag = (amend ? '--amend' : '');
-    const allowedEmptyFlag = ((emptyCommit ||amend) ? '--allow-empty' : '');
+    const allowedEmptyFlag = ((emptyCommit || amend) ? '--allow-empty' : '');
     const isGPGSign = (config.isForceGPGSign ? '-S' : '');
     return git(['commit', ammendFlag, allowedEmptyFlag, isGPGSign, '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
@@ -435,30 +435,24 @@ git.revParse = (repoPath) => {
       return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
         const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
         if (resultLines[0].indexOf('true') > -1) {
-            return { type: 'inited', gitRootPath: rootPath };
+          return { type: 'inited', gitRootPath: rootPath };
         }
         return { type: 'uninited', gitRootPath: rootPath };
       });
     }).catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
 }
 
-git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
+git.log = (path, skip, limit, lookForHead, maxActiveBranchSearchIteration) => {
   return git(['log', '--cc', '--decorate=full', '--show-signature', '--date=default', '--pretty=fuller', '-z', '--branches', '--tags', '--remotes', '--parents', '--no-notes', '--numstat', '--date-order', `--max-count=${limit}`, `--skip=${skip}`], path)
     .then(gitParser.parseGitLog)
     .then((log) => {
       log = log ? log : [];
-      if (maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
-        return git.log(path, config.numberOfNodesPerLoad + limit, config.numberOfNodesPerLoad + skip, maxActiveBranchSearchIteration - 1)
-          .then(innerLog => {
-            return {
-              "limit": limit + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
-              "skip": skip + (innerLog.isHeadExist ? 0 : config.numberOfNodesPerLoad),
-              "nodes": log.concat(innerLog.nodes),
-              "isHeadExist": innerLog.isHeadExist
-            }
-          });
+      skip = skip + log.length;
+      if (lookForHead && maxActiveBranchSearchIteration > 0 && !log.isHeadExist && log.length > 0) {
+        return git.log(path, skip, maxActiveBranchSearchIteration - 1)
+          .then(innerLog => log.concat(innerLog));
       } else {
-        return { "limit": limit, "skip": skip, "nodes": log, "isHeadExist": log.isHeadExist };
+        return log;
       }
     });
 }
