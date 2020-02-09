@@ -1,35 +1,14 @@
+const Bluebird = require('bluebird');
 const getmac = require('getmac');
+const latestVersion = require('latest-version');
 const md5 = require('blueimp-md5');
 const semver = require('semver');
-const npm = require('npm');
-const RegClient = require('npm-registry-client');
-const config = require('./config');
-const Bluebird = require('bluebird');
 const winston = require('winston');
+const config = require('./config');
 
-const noop = () => {}
 
 exports.getUngitLatestVersion = () => {
-  return new Bluebird((resolve, reject) => {
-    npm.load({}, (err, config) => {
-      if (err) return reject(err);
-      config.log = { error: noop, warn: noop, info: noop,
-               verbose: noop, silly: noop, http: noop,
-               pause: noop, resume: noop };
-      resolve(new RegClient(config));
-    });
-  }).then((client) => {
-    return new Bluebird((resolve, reject) => {
-      client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, (err, data, raw, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          const versions = Object.keys(data.versions);
-          resolve(versions[versions.length - 1]);
-        }
-      });
-    });
-  });
+  return latestVersion('ungit');
 }
 
 exports.getUserHash = () => {

@@ -696,28 +696,23 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFileSync(req.body.file, content);
-      res.json({});
+      fs.writeFile(req.body.file, content, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFileSync(req.body.file, content);
-      res.json({});
+      fs.writeFile(req.body.file, content, () => res.json({}));
     });
      app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png', { encoding: 'binary' });
-      res.json({});
+      fs.writeFile(req.body.file, 'png', { encoding: 'binary' }, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' });
-      res.json({});
+      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' }, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
-      fs.unlinkSync(req.body.file);
-      res.json({});
+      fs.unlink(req.body.file, () => res.json({}));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo))
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo));
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
