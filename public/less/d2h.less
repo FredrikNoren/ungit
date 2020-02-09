@@ -12,6 +12,13 @@
 .d2h-diff-table {
   font-family: 'Source Code Pro';
   font-size: 12px;
+
+  tbody > tr > td {
+    padding: 0;
+    &.d2h-code-side-linenumber {
+      padding: 0 0.5em;
+    }
+  }
 }
 
 .d2h-cntx {
@@ -34,10 +41,6 @@
   border-right: 1px solid rgba(0, 0, 0, 0.34);
 }
 
-.d2h-code-side-linenumber {
-  padding-right: 0.5em;
-}
-
 .d2h-file-diff .d2h-del.d2h-change, .d2h-del {
   background-color: #E86756;
   color: #FFFFFF;
@@ -54,10 +57,6 @@
 
 .d2h-code-line ins, .d2h-code-side-line ins {
   background-color: rgba(255, 255, 255, 0.6);
-}
-
-.d2h-code-linenumber, .d2h-code-side-linenumber, .d2h-code-line-prefix {
-  user-select: none;
 }
 
 .word-wrap .d2h-code-line-ctn {
