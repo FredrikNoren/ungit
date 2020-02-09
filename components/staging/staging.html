@@ -91,8 +91,7 @@
             <span class="deletions" data-bind="text: deletions"></span>
             <span class="modified" data-bind="visible: modified">Modified</span>
             <span class="conflict" data-bind="visible: conflict"><span class="temporary">Conflicts</span><span class="launchmergetool explanation" data-bind="visible: mergeTool, click: launchMergeTool">Launch Merge Tool</span><span class="markresolved explanation" data-bind="click: resolveConflict">Mark as Resolved</span></span>
-            <span class="patch bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick"
-                data-toggle="tooltip" data-placement="top" title="Patch changes">Patch</span>
+            <button class="patch btn bootstrap-tooltip" data-bind="visible: isShowPatch(), click: patchClick" data-toggle="tooltip" data-placement="top" title="Patch changes">Patch</button>
             <button class="ignore btn bootstrap-tooltip" data-bind="html: $parent.ignoreIcon, click: ignoreFile" data-toggle="tooltip" data-placement="top" title="Add to .gitignore"></button>
             <button class="discard btn bootstrap-tooltip" data-bind="html: $parent.discardIcon, click: discardChanges" data-toggle="tooltip" data-placement="top" title="Discard changes"></button>
             <!-- ko if: isShowingDiffs -->
