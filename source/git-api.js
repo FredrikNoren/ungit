@@ -80,6 +80,9 @@ exports.registerApi = (env) => {
             emitWorkingTreeChanged(socket.watcherPath);
           }
         });
+        watcher.on('error', (err) => {
+          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
+        });
         socket.watcher.push(watcher);
       });
   };
@@ -384,21 +387,19 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
     const skip = getNumber(req.query.skip, 0);
-    const limit = getNumber(req.query.limit, parseInt(config.numberOfNodesPerLoad));
-    const isLookForHead = skip === 0 && limit === config.numberOfNodesPerLoad;
-
     const task = gitPromise
-      .log(req.query.path, skip, limit, isLookForHead, config.maxActiveBranchSearchIteration)
+      .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
       .catch((err) => {
         if (err.stderr && err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) {
-          return [];
+          return { limit: limit, skip: skip, nodes: [] };
         } else if (
           /fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)
         ) {
-          return [];
+          return { limit: limit, skip: skip, nodes: [] };
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
-          return [];
+          return { limit: limit, skip: skip, nodes: [] };
         } else {
           throw err;
         }

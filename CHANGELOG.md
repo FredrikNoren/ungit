@@ -8,7 +8,6 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ### Fixed
 - Performance optimizations for the big org [#1091](https://github.com/FredrikNoren/ungit/issues/1091)
     - ignore 'rename' filewatch event as it can cause constant update and refresh loop
-    - Prevent full gitlog history from server to client and load only what is needed
     - Prevent redundant ref and node calculations per each `/gitlog` api call
 
 ## [1.5.15](https://github.com/FredrikNoren/ungit/compare/v1.5.14...v1.5.15)
