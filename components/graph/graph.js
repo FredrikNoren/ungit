@@ -234,8 +234,8 @@ class GraphViewModel {
       if (!a.isHEAD && b.isHEAD) return -1;
       if (a.isStash && !b.isStash) return 1;
       if (b.isStash && !a.isStash) return -1;
-      if (a.node() && a.node().date && b.node() && b.node().date)
-        return a.node().date - b.node().date;
+      if (a.node() && a.node().timestamp && b.node() && b.node().timestamp)
+        return a.node().timestamp - b.node().timestamp;
       return a.refName < b.refName ? -1 : 1;
     });
     const stamp = this._markIdeologicalStamp++;
