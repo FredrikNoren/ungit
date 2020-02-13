@@ -227,10 +227,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:54:06 2019 +0100',
+      timestamp: 1546610046000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 176,
-      deletions: 1,
+      total: {
+        additions: 176,
+        deletions: 1,
+      },
       fileLineDiffs: [
         {
           additions: 1,
@@ -260,10 +263,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
+      timestamp: 1546607036000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 32,
-      deletions: 0,
+      total: {
+        additions: 32,
+        deletions: 0,
+      },
       fileLineDiffs: [
         {
           additions: 32,
@@ -286,10 +292,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:02:56 2019 +0100',
+      timestamp: 1546606976000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 0,
-      deletions: 0,
+      total: {
+        additions: 0,
+        deletions: 0,
+      },
       fileLineDiffs: [],
       isHead: false,
       message: 'empty commit',
@@ -303,10 +312,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:01:56 2019 +0100',
+      timestamp: 1546606916000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 14,
-      deletions: 9,
+      total: {
+        additions: 14,
+        deletions: 9,
+      },
       fileLineDiffs: [
         {
           additions: 4,
@@ -370,10 +382,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
+      timestamp: 1546607036000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 32,
-      deletions: 0,
+      total: {
+        additions: 32,
+        deletions: 0,
+      },
       fileLineDiffs: [
         {
           additions: 32,
@@ -413,10 +428,13 @@ describe('git-parser parseGitLog', () => {
       authorEmail: 'test@example.com',
       authorName: 'Test ungit',
       commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
+      timestamp: 1546607036000,
       committerEmail: 'test@example.com',
       committerName: 'Test ungit',
-      additions: 32,
-      deletions: 0,
+      total: {
+        additions: 32,
+        deletions: 0,
+      },
       fileLineDiffs: [
         {
           additions: 32,
@@ -500,8 +518,10 @@ describe('git-parser parseGitLog', () => {
 
     expect(gitParser.parseGitLog(gitLog)[0]).to.eql({
       refs: ['HEAD', 'refs/heads/git-parser-specs'],
-      additions: 32,
-      deletions: 0,
+      total: {
+        additions: 32,
+        deletions: 0,
+      },
       fileLineDiffs: [
         {
           additions: 32,
@@ -521,6 +541,7 @@ describe('git-parser parseGitLog', () => {
       committerName: 'Test ungit',
       committerEmail: 'test@example.com',
       commitDate: 'Fri Jan 4 14:03:56 2019 +0100',
+      timestamp: 1546607036000,
       message: 'submodules parser',
     });
   });
@@ -752,21 +773,21 @@ describe('parseGitStatusNumstat', () => {
 describe('parseGitStatus', () => {
   it('parses git status', () => {
     const gitStatus =
-      '## git-parser-specs\x00' +
-      'A  file1.js\x00' +
-      'M  file2.js\x00' +
-      'D  file3.js\x00' +
-      ' D file4.js\x00' +
-      ' U file5.js\x00' +
-      'U  file6.js\x00' +
-      'AA file7.js\x00' +
-      '?  file8.js\x00' +
-      'A  file9.js\x00' +
-      '?D file10.js\x00' +
-      'AD file11.js\x00' +
-      ' M file12.js\x00' +
-      '?? file13.js\x00' +
-      'R  ../source/sys.js\x00../source/sysinfo.js\x00';
+      `## git-parser-specs\x00` +
+      `A  file1.js\x00` +
+      `M  file2.js\x00` +
+      `D  file3.js\x00` +
+      ` D file4.js\x00` +
+      ` U file5.js\x00` +
+      `U  file6.js\x00` +
+      `AA file7.js\x00` +
+      `?  file8.js\x00` +
+      `A  file9.js\x00` +
+      `?D file10.js\x00` +
+      `AD file11.js\x00` +
+      ` M file12.js\x00` +
+      `?? file13.js\x00` +
+      `R  ../source/sys.js\x00../source/sysinfo.js\x00`;
 
     expect(gitParser.parseGitStatus(gitStatus)).to.eql({
       branch: 'git-parser-specs',
