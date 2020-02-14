@@ -251,7 +251,7 @@ module.exports = (grunt) => {
     b.require('moment', { expose: 'moment' });
     b.require('blueimp-md5', { expose: 'blueimp-md5' });
     b.require('color', { expose: 'color' });
-    b.require('signals', { expose: 'signals' });
+    b.require('unprioritized-signals', { expose: 'unprioritized-signals' });
     b.require('util', { expose: 'util' });
     b.require('path', { expose: 'path' });
     b.require('diff2html', { expose: 'diff2html' });
