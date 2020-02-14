@@ -37,6 +37,14 @@ class GraphViewModel {
     this.showCommitNode = ko.observable(false);
     this.currentActionContext = ko.observable();
     this.edgesById = {};
+    this.scrolledToEnd = _.debounce(
+      () => {
+        this.limit(numberOfNodesPerLoad + this.limit());
+        this.loadNodesFromApiThrottled();
+      },
+      500,
+      true
+    );
     this.loadAhead = _.debounce(
       () => {
         if (this.skip() <= 0) return;
