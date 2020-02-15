@@ -17,6 +17,7 @@ const loadLimit = 100;
 class WordWrap {
   constructor() {
     this.value = ko.observable(false);
+
     this.toggle = () => {
       this.value(!this.value());
     };
@@ -33,9 +34,6 @@ class Type {
     }
 
     this.value = ko.observable(ungit.config.diffType || textDiff);
-    this.value.subscribe(() => {
-      programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-    });
 
     this.toggle = () => {
       this.value(this.value() === textDiff ? sideBySideDiff : textDiff);
@@ -48,9 +46,7 @@ class Type {
 class WhiteSpace {
   constructor() {
     this.value = ko.observable(ungit.config.ignoreWhiteSpaceDiff);
-    this.value.subscribe(() => {
-      programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-    });
+
     this.toggle = () => {
       this.value(!this.value());
     };
@@ -79,15 +75,14 @@ class TextDiffViewModel {
     this.htmlSrc = undefined;
     this.isParsed = ko.observable(false);
 
-    programEvents.add(event => {
-      if (event.event === "invalidate-diff-and-render" || event.event === "working-tree-changed") {
-        this.invalidateDiff();
-        if (this.isShowingDiffs()) this.render();
-      }
-    });
-
     this.isShowingDiffs.subscribe(newValue => {
       if (newValue) this.render();
+    });
+    this.textDiffType.value.subscribe(() => {
+      if (this.isShowingDiffs()) this.render();
+    });
+    this.whiteSpace.value.subscribe(() => {
+      if (this.isShowingDiffs()) this.invalidateDiff();
     });
 
     if (this.isShowingDiffs()) { this.render(); }
@@ -109,6 +104,7 @@ class TextDiffViewModel {
 
   invalidateDiff() {
     this.diffJson = null;
+    if (this.isShowingDiffs()) this.render();
   }
 
   getDiffJson() {
@@ -129,9 +125,9 @@ class TextDiffViewModel {
     });
   }
 
-  render(isInvalidate) {
+  render() {
     return promise.resolve().then(() => {
-      if (!this.diffJson || isInvalidate) {
+      if (!this.diffJson) {
         return this.getDiffJson();
       }
     }).then(() => {
