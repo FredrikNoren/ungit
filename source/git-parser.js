@@ -85,6 +85,7 @@ const gitLogHeaders = {
   },
   'CommitDate': (currentCommmit, date) => {
     currentCommmit.commitDate = date;
+    currentCommmit.timestamp = Date.parse(date);
   },
   'Reflog': (currentCommmit, data) => {
     currentCommmit.reflogId = /\{(.*?)\}/.exec(data)[1];
@@ -160,7 +161,7 @@ exports.parseGitLog = (data) => {
   const parseFileChanges = (row, index) => {
     // git log is using -z so all the file changes are on one line
     // merge commits start the file changes with a null
-    if (row[0] === '\x00'){
+    if (row[0] === '\x00') {
       row = row.slice(1);
     }
     fileChangeRegex.lastIndex = 0;
@@ -169,7 +170,7 @@ exports.parseGitLog = (data) => {
       let fileName = match.groups.fileName || match.groups.newFileName;
       let oldFileName = match.groups.oldFileName || match.groups.fileName;
       let displayName;
-      if(match.groups.oldFileName) {
+      if (match.groups.oldFileName) {
         displayName = `${match.groups.oldFileName} → ${match.groups.newFileName}`;
       } else {
         displayName = fileName;
@@ -223,7 +224,7 @@ exports.parseGitBranches = (text) => {
   text.split('\n').forEach((row) => {
     if (row.trim() == '') return;
     const branch = { name: row.slice(2) };
-    if(row[0] == '*') branch.current = true;
+    if (row[0] == '*') branch.current = true;
     branches.push(branch);
   });
   return branches;
@@ -250,7 +251,7 @@ exports.parseGitLsRemote = (text) => {
 }
 
 exports.parseGitStashShow = (text) => {
-  const lines = text.split('\n').filter((item) =>  item );
+  const lines = text.split('\n').filter((item) => item);
   return lines.slice(0, lines.length - 1).map((line) => {
     return { filename: line.substring(0, line.indexOf('|')).trim() }
   });
@@ -265,38 +266,38 @@ exports.parseGitSubmodule = (text, args) => {
   const submodules = [];
 
   text.trim().split('\n').filter((line) => line)
-  .forEach((line) => {
-    if (line.indexOf("[submodule") === 0) {
-      submodule = { name: line.match(/"(.*?)"/)[1] };
-      submodules.push(submodule);
-    } else {
-      const parts = line.split("=");
-      const key = parts[0].trim();
-      let value = parts.slice(1).join("=").trim();
+    .forEach((line) => {
+      if (line.indexOf("[submodule") === 0) {
+        submodule = { name: line.match(/"(.*?)"/)[1] };
+        submodules.push(submodule);
+      } else {
+        const parts = line.split("=");
+        const key = parts[0].trim();
+        let value = parts.slice(1).join("=").trim();
 
-      if (key == "path") {
-        value = path.normalize(value);
-      } else if (key == "url") {
-        // keep a reference to the raw url
-        let url = submodule.rawUrl = value;
+        if (key == "path") {
+          value = path.normalize(value);
+        } else if (key == "url") {
+          // keep a reference to the raw url
+          let url = submodule.rawUrl = value;
 
-        // When a repo is checkout with ssh or git instead of an url
-        if (url.indexOf('http') != 0) {
-          if (url.indexOf('git:') == 0) { // git
-            url = `http${url.substr(url.indexOf(':'))}`;
-          } else { // ssh
-            url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+          // When a repo is checkout with ssh or git instead of an url
+          if (url.indexOf('http') != 0) {
+            if (url.indexOf('git:') == 0) { // git
+              url = `http${url.substr(url.indexOf(':'))}`;
+            } else { // ssh
+              url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+            }
           }
+
+          value = url;
         }
 
-        value = url;
+        submodule[key] = value;
       }
+    });
 
-      submodule[key] = value;
-    }
-  });
-
-  let sorted_submodules = submodules.sort((a,b) => a.name.localeCompare(b.name));
+  let sorted_submodules = submodules.sort((a, b) => a.name.localeCompare(b.name));
 
   return sorted_submodules;
 }

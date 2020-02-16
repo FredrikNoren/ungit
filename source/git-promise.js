@@ -254,8 +254,8 @@ git.resolveConflicts = (repoPath, files) => {
       }
     });
   })).then(() => {
-    const addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
-    const removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
+    const addExec = toAdd.length > 0 ? git(['add', toAdd], repoPath) : null;
+    const removeExec = toRemove.length > 0 ? git(['rm', toRemove], repoPath) : null;
     return Bluebird.join(addExec, removeExec);
   });
 }
@@ -414,7 +414,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
     return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
   }).then(() => {
     const ammendFlag = (amend ? '--amend' : '');
-    const allowedEmptyFlag = ((emptyCommit ||amend) ? '--allow-empty' : '');
+    const allowedEmptyFlag = ((emptyCommit || amend) ? '--allow-empty' : '');
     const isGPGSign = (config.isForceGPGSign ? '-S' : '');
     return git(['commit', ammendFlag, allowedEmptyFlag, isGPGSign, '--file=-'], repoPath, null, null, message);
   }).catch((err) => {
@@ -435,7 +435,7 @@ git.revParse = (repoPath) => {
       return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
         const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
         if (resultLines[0].indexOf('true') > -1) {
-            return { type: 'inited', gitRootPath: rootPath };
+          return { type: 'inited', gitRootPath: rootPath };
         }
         return { type: 'uninited', gitRootPath: rootPath };
       });

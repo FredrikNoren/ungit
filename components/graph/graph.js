@@ -38,7 +38,7 @@ class GraphViewModel {
     this.edgesById = {};
     this.scrolledToEnd = _.debounce(() => {
       this.limit(numberOfNodesPerLoad + this.limit());
-      this.loadNodesFromApi();
+      this.loadNodesFromApiThrottled();
     }, 500, true);
     this.loadAhead = _.debounce(() => {
       if (this.skip() <= 0) return;
@@ -46,7 +46,7 @@ class GraphViewModel {
       this.loadNodesFromApi();
     }, 500, true);
     this.commitOpacity = ko.observable(1.0);
-    this.heighstBranchOrder = 0;
+    this.highestBranchOrder = 0;
     this.hoverGraphActionGraphic = ko.observable();
     this.hoverGraphActionGraphic.subscribe(value => {
       if (value && value.destroy)
@@ -61,15 +61,14 @@ class GraphViewModel {
         this.hoverGraphActionGraphic(null);
       }
     });
-
-    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
-    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
-    this.loadNodesFromApi();
-    this.updateBranches();
+    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000, { leading: true, trailing: false });
+    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000, { leading: true, trailing: false });
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ 'height': 18 });
     this.plusIcon = octicons.plus.toSVG({ 'height': 18 });
+    this.loadNodesFromApiThrottled();
+    this.updateBranchesThrottled();
   }
 
   updateNode(parentElement) {
@@ -106,26 +105,26 @@ class GraphViewModel {
         this.skip(parseInt(log.skip));
         return log.nodes || [];
       }).then(nodes => // create and/or calculate nodes
-    this.computeNode(nodes.map((logEntry) => {
-      return this.getNode(logEntry.sha1, logEntry);     // convert to node object
-    }))).then(nodes => {
-        // create edges
-        const edges = [];
-        nodes.forEach(node => {
-          node.parents().forEach(parentSha1 => {
-            edges.push(this.getEdge(node.sha1, parentSha1));
+        this.computeNode(nodes.map((logEntry) => {
+          return this.getNode(logEntry.sha1, logEntry);     // convert to node object
+        }))).then(nodes => {
+          // create edges
+          const edges = [];
+          nodes.forEach(node => {
+            node.parents().forEach(parentSha1 => {
+              edges.push(this.getEdge(node.sha1, parentSha1));
+            });
+            node.render();
           });
-          node.render();
-        });
 
-        this.edges(edges);
-        this.nodes(nodes);
-        if (nodes.length > 0) {
-          this.graphHeight(nodes[nodes.length - 1].cy() + 80);
-        }
-        this.graphWidth(1000 + (this.heighstBranchOrder * 90));
-        programEvents.dispatch({ event: 'init-tooltip' });
-      }).catch((e) => this.server.unhandledRejection(e))
+          this.edges(edges);
+          this.nodes(nodes);
+          if (nodes.length > 0) {
+            this.graphHeight(nodes[nodes.length - 1].cy() + 80);
+          }
+          this.graphWidth(1000 + (this.highestBranchOrder * 90));
+          programEvents.dispatch({ event: 'init-tooltip' });
+        }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
           this.scrolledToEnd();
@@ -144,7 +143,7 @@ class GraphViewModel {
   computeNode(nodes) {
     nodes = nodes || this.nodes();
 
-    this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
+    this.markNodesIdeologicalBranches(this.refs());
 
     const updateTimeStamp = moment().valueOf();
     if (this.HEAD()) {
@@ -173,7 +172,7 @@ class GraphViewModel {
       node.branchOrder(ideologicalBranch.branchOrder);
     }
 
-    this.heighstBranchOrder = branchSlotCounter - 1;
+    this.highestBranchOrder = branchSlotCounter - 1;
     let prevNode;
     nodes.forEach(node => {
       node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
@@ -195,9 +194,15 @@ class GraphViewModel {
     return edge;
   }
 
-  markNodesIdeologicalBranches(refs, nodes, nodesById) {
-    refs = refs.filter(r => !!r.node());
-    refs = refs.sort((a, b) => {
+  markNodesIdeologicalBranches(refs) {
+    const refNodeMap = {};
+    refs.forEach(r => {
+      if (!r.node()) return;
+      if (!r.node().timestamp) return;
+      if (refNodeMap[r.node().sha1]) return;
+      refNodeMap[r.node().sha1] = r;
+    });
+    refs = Object.values(refNodeMap).sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;
       if (b.isLocal && !a.isLocal) return 1;
       if (a.isBranch && !b.isBranch) return -1;
@@ -206,8 +211,8 @@ class GraphViewModel {
       if (!a.isHEAD && b.isHEAD) return -1;
       if (a.isStash && !b.isStash) return 1;
       if (b.isStash && !a.isStash) return -1;
-      if (a.node() && a.node().date && b.node() && b.node().date)
-        return a.node().date - b.node().date;
+      if (a.node() && a.node().timestamp && b.node() && b.node().timestamp)
+        return a.node().timestamp - b.node().timestamp;
       return a.refName < b.refName ? -1 : 1;
     });
     const stamp = this._markIdeologicalStamp++;
