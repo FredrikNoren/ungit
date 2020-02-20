@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.3...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.4...master)
+
+## [1.5.4](https://github.com/FredrikNoren/ungit/compare/v1.5.3...v1.5.4)
 
 ### Fixed
 - forcedLaunchPath of null fails to work [#1281](https://github.com/FredrikNoren/ungit/issues/1281)
