@@ -33,7 +33,7 @@ const navigate = () => {
   let url = config.urlBase + ':' + config.port;
   if (config.forcedLaunchPath === undefined) {
     url += '/#/repository?path=' + encodeURIComponent(process.cwd());
-  } else if (config.forcedLaunchPath !== undefined && config.forcedLaunchPath !== '') {
+  } else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') {
     url += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
   }
 

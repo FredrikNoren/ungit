@@ -1,7 +1,7 @@
 
 const ko = require('knockout');
 const components = require('ungit-components');
-const diff2html = require('diff2html').Diff2Html;
+const diff2html = require('diff2html');
 const programEvents = require('ungit-program-events');
 const promise = require("bluebird");
 const sideBySideDiff = 'sidebysidediff';
@@ -120,7 +120,7 @@ class TextDiffViewModel {
                   --- a/${this.filename}
                   +++ b/${this.filename}`;
       }
-      this.diffJson = diff2html.getJsonFromDiff(diffs);
+      this.diffJson = diff2html.parse(diffs);
     }).catch(err => {
       // The file existed before but has been removed, but we're trying to get a diff for it
       // Most likely it will just disappear with the next refresh of the staging area
@@ -153,13 +153,10 @@ class TextDiffViewModel {
 
       this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
 
-      let html;
-
-      if (this.textDiffType.value() === sideBySideDiff) {
-        html = diff2html.getPrettySideBySideHtmlFromJson(this.diffJson);
-      } else {
-        html = diff2html.getPrettyHtmlFromJson(this.diffJson);
-      }
+      let html = diff2html.html(this.diffJson, {
+        outputFormat: this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
+        drawFileList: false
+      });
 
       this.numberOfSelectedPatchLines = 0;
       let index = 0;

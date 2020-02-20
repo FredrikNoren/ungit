@@ -1,218 +1,64 @@
-/*
-*
-* Diff to HTML (diff2html.css)
-* Author: rtfpessoa
-* Modified by: codingtwinky
-* Date: Friday 29 August 2014
-* Last Update: Saturday 27 September 2014
-*
-*/
-
-.d2h-wrapper {
-  display: block;
-  margin: 0 auto;
-  text-align: left;
-  width: 100%;
-}
+// diff2html style overrides
 
 .d2h-file-wrapper {
-  border-radius: 3px;
+  border: none;
+  margin-bottom: 0;
 }
 
 .d2h-file-header {
   display: none;
 }
 
-.d2h-file-stats {
-  display: inline;
-  font-size: 12px;
-  text-align: center;
-  max-width: 15%;
-}
-
-.d2h-lines-added {
-  background-color: #ceffce;
-  border: 1px solid #b4e2b4;
-  color: #FFFFFF;
-  border-radius: 5px 0 0 5px;
-  padding: 2px;
-  width: 25px;
-}
-
-.d2h-lines-deleted {
-  background-color: #f7c8c8;
-  border: 1px solid #e9aeae;
-  color: #000000;
-  border-radius: 0 5px 5px 0;
-  padding: 2px;
-  width: 25px;
-}
-
-.d2h-file-name {
-  display: inline;
-  height: 33px;
-  max-width: 80%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
 .d2h-diff-table {
-  border-collapse: collapse;
   font-family: 'Source Code Pro';
   font-size: 12px;
-  height: 19px;
-  width: 100%;
+
   tbody > tr > td {
-    padding: 0px;
-    border-spacing: 0px;
-    height: 105%;
+    padding: 0;
+    &.d2h-code-side-linenumber {
+      padding: 0 0.5em;
+    }
   }
-}
-
-.d2h-files-diff {
-  width: 100%;
-  display: flex;
-}
-
-.d2h-file-diff {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.d2h-file-side-diff {
-  display: inline-block;
-  overflow-x: auto;
-  width: 50%;
-}
-
-.d2h-code-line {
-  white-space: pre;
-  padding-left: 10px;
-  padding-right: 10px;
-  display: inline-flex;
-}
-
-.d2h-code-side-line {
-  white-space: pre;
-  padding-left: 5px;
-  padding-right: 5px;
-  display: inline-flex;
-}
-
-.d2h-code-line del,
-.d2h-code-side-line del {
-  display: inline-block;
-  margin-top: -1px;
-  text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.d2h-code-line ins,
-.d2h-code-side-line ins {
-  display: inline-block;
-  margin-top: -1px;
-  text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.6);
-}
-
-.d2h-code-line-prefix {
-  display: inline-flex;
-  margin-right: 10px;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.line-num1 {
-  display: inline-block;
-  float: left;
-  width: 30px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.line-num2 {
-  display: inline-block;
-  float: right;
-  width: 30px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.d2h-code-linenumber {
-  position: static;
-  width: 52px;
-  min-width: 65px;
-  text-align: center;
-  background-color: #727a83;
-  color: rgba(0, 0, 0, 0.5);
-  border-width: 0 1px 0 1px;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-left: 1px solid rgba(0, 0, 0, 0.34);
-  border-right: 1px solid rgba(0, 0, 0, 0.34);
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .d2h-cntx {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.d2h-code-side-linenumber {
-  position: static;
-  display: table-cell;
-  width: 52px;
-  min-width: 65px;
-  text-align: center;
-  height: 100%;
-  background-color: rgba(114, 122, 131, 1);
-  color: rgba(0, 0, 0, 0.5);
-  border-width: 0 1px 0 1px;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-left: 1px solid rgba(0, 0, 0, 0.34);
-  border-right: 1px solid rgba(0, 0, 0, 0.34);
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.d2h-del {
-  background-color: #E86756;
-  color: #FFFFFF;
-
-  &.d2h-code-side-linenumber {
-    color: rgba(0, 0, 0, 0.5);
-  }
-}
-
-.d2h-ins {
-  background-color: #66F27B;
-  color: #000000;
-
-  &.d2h-code-side-linenumber {
-    color: rgba(0, 0, 0, 0.5);
-  }
-}
-
 .d2h-info {
+  background-color: transparent;
   color: rgba(255, 255, 255, 0.3);
 }
 
-.d2h-code-line-ctn {
-  .word-wrap & {
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -webkit-pre-wrap; /*Chrome & Safari */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    white-space: pre-wrap;       /* css-3 */
-  }
+.d2h-code-side-emptyplaceholder,
+.d2h-emptyplaceholder {
+  background-color: transparent;
+}
+
+.d2h-code-linenumber, .d2h-code-side-linenumber {
+  background-color: #727a83;
+  border-left: 1px solid rgba(0, 0, 0, 0.34);
+  border-right: 1px solid rgba(0, 0, 0, 0.34);
+}
+
+.d2h-file-diff .d2h-del.d2h-change, .d2h-del {
+  background-color: #E86756;
+  color: #FFFFFF;
+}
+
+.d2h-file-diff .d2h-ins.d2h-change, .d2h-ins {
+  background-color: #66F27B;
+  color: #000000;
+}
+
+.d2h-code-line del, .d2h-code-side-line del {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.d2h-code-line ins, .d2h-code-side-line ins {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.word-wrap .d2h-code-line-ctn {
+  white-space: pre-wrap;
 }
