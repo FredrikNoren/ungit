@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.3...master)
 
+### Fixed
+- forcedLaunchPath of null fails to work [#1281](https://github.com/FredrikNoren/ungit/issues/1281)
+
 ### Changed
 - Update diff2html to version 3 [#1273](https://github.com/FredrikNoren/ungit/pull/1273)
 
