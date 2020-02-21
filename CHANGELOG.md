@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.3...master)
 
+### Fixed
+- forcedLaunchPath of null fails to work [#1281](https://github.com/FredrikNoren/ungit/issues/1281)
+
 ## [1.5.3](https://github.com/FredrikNoren/ungit/compare/v1.5.2...v1.5.3)
 
 ### Fixed
