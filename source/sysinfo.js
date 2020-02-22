@@ -24,21 +24,5 @@ exports.getUserHash = () => {
 }
 
 exports.getGitVersionInfo = () => {
-  const result = {
-    requiredVersion: '>=1.8.x',
-    version: 'unkown',
-    satisfied: false
-  };
-
-  if (!config.gitVersion) {
-    result.error = `Failed to parse git version number. Note that Ungit requires git version ${result.requiredVersion}`;
-  } else {
-    result.version = config.gitVersion;
-    result.satisfied = semver.satisfies(result.version, result.requiredVersion);
-    if (!result.satisfied) {
-      result.error = `Ungit requires git version ${result.requiredVersion}, you are currently running ${result.version}`;
-    }
-  }
-
-  return Bluebird.resolve(result);
+  return Bluebird.resolve(config.gitVersion);
 }
