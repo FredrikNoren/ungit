@@ -85,20 +85,6 @@
     }
   }
 
-  .ignore + .tooltip {
-    .tooltip-inner {
-      background: #55f;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    .tooltip-arrow {
-      bottom: 0;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px 5px 0;
-      border-top-color: #55f;
-    }
-  }
-
   .patch {
     background: #279124;
     color: rgba(255, 255, 255, 0.9);
@@ -108,23 +94,18 @@
     padding-right: 5px;
     cursor: pointer;
     font-weight: bold;
+
+    &:focus,
     &:hover {
       background: #279124;
       color: rgba(255, 255, 255, 0.9);
     }
   }
-  .patch + .tooltip {
-    .tooltip-inner {
-      background: #279124;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    .tooltip-arrow {
-      bottom: 0;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px 5px 0;
-      border-top-color: #279124;
-    }
+
+  .d2h-code-line-prefix input[type="checkbox"] {
+    margin: 0;
+    margin-right: -6px;
+    vertical-align: sub;
   }
 
   .files {
