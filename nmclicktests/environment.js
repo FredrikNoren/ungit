@@ -5,7 +5,7 @@ const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
 const net = require('net');
 const request = require('superagent');
-const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
+const mkdirp = require("mkdirp");
 const rimraf = Bluebird.promisify(require("rimraf"));
 const portrange = 45032;
 let rootUrl;

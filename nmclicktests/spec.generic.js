@@ -1,7 +1,7 @@
 'use strict';
 const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
 const Bluebird = require('bluebird');
-const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
+const mkdirp = require("mkdirp");
 const rimraf = Bluebird.promisify(require("rimraf"));
 const testRepoPaths = [];
 

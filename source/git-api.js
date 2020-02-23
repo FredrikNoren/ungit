@@ -63,12 +63,7 @@ exports.registerApi = (env) => {
         // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
         if (!isExists) {
           winston.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
-          return new Bluebird((resolve, reject) => {
-            mkdirp(pathToWatch, (err) => {
-              if (err) reject(err);
-              else resolve();
-            });
-          });
+          return mkdirp(pathToWatch);
         }
       }).then(() => {
         const watcher = fs.watch(pathToWatch, options || {});
@@ -665,10 +660,9 @@ exports.registerApi = (env) => {
       return res.status(400).json({ errorCode: 'missing-request-parameter', error: 'You need to supply the path request parameter' });
     }
 
-    mkdirp(dir, (err) => {
-      if (err) return res.status(400).json(err);
-      else return res.json({});
-    });
+    mkdirp(dir)
+      .then(() => res.json({}))
+      .catch((err) => res.status(400).json(err));
   });
 
   app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
