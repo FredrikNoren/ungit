@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.4...master)
 
+### Fixed
+- Bump dependencies [#1283](https://github.com/FredrikNoren/ungit/pull/1283)
+
 ## [1.5.4](https://github.com/FredrikNoren/ungit/compare/v1.5.3...v1.5.4)
 
 ### Fixed
