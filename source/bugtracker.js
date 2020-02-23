@@ -1,6 +1,6 @@
 'use strict';
 
-const winston = require('winston');
+const winston = require('./utils/winston');
 const sysinfo = require('./sysinfo');
 const config = require('./config');
 const raven = require('raven-js');

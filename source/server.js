@@ -3,7 +3,7 @@ const BugTracker = require('./bugtracker');
 const bugtracker = new BugTracker('server');
 const express = require('express');
 const gitApi = require('./git-api');
-const winston = require('winston');
+const winston = require('./utils/winston');
 const sysinfo = require('./sysinfo');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -24,14 +24,23 @@ process.on('uncaughtException', (err) => {
 });
 
 console.log('Setting log level to ' + config.logLevel);
-winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, {
-  level: config.logLevel,
-  timestamp: true,
-  colorize: true
+const consoleTransport = winston.default.transports.find((transport) => {
+   return transport instanceof winston.transports.Console;
 });
-if (config.logDirectory)
-  winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
+if (consoleTransport) {
+  consoleTransport.level = config.logLevel;
+}
+if (config.logDirectory) {
+  winston.add(new winston.transports.File({
+    filename: path.join(config.logDirectory, 'server.log'),
+    maxsize: 100*1024,
+    maxFiles: 2,
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    )
+  }));
+}
 
 const users = config.users;
 config.users = null; // So that we don't send the users to the client

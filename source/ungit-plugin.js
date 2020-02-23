@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const winston = require('winston');
+const winston = require('./utils/winston');
 const config = require('./config');
 const Bluebird = require('bluebird');
 

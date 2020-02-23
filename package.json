@@ -63,7 +63,7 @@
     "socket.io": "~2.3.0",
     "superagent": "~5.2.2",
     "temp": "~0.9.1",
-    "winston": "2.4.0",
+    "winston": "3.2.1",
     "yargs": "~15.1.0"
   },
   "devDependencies": {
