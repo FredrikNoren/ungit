@@ -2,7 +2,6 @@
 const ko = require('knockout');
 const components = require('ungit-components');
 const diff2html = require('diff2html');
-const programEvents = require('ungit-program-events');
 const promise = require("bluebird");
 const sideBySideDiff = 'sidebysidediff';
 const textDiff = 'textdiff';
@@ -110,7 +109,7 @@ class TextDiffViewModel {
   getDiffJson() {
     return this.server.getPromise('/diff', this.getDiffArguments()).then((diffs) => {
       if (typeof diffs !== 'string') {
-        // Invalid value means there is no changes, show dummy diff withotu any changes
+        // Invalid value means there is no changes, show dummy diff without any changes
         diffs = `diff --git a/${this.filename} b/${this.filename}
                   index aaaaaaaa..bbbbbbbb 111111
                   --- a/${this.filename}
@@ -126,62 +125,69 @@ class TextDiffViewModel {
   }
 
   render() {
-    return promise.resolve().then(() => {
-      if (!this.diffJson) {
-        return this.getDiffJson();
-      }
-    }).then(() => {
-      if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
-      let lineCount = 0;
+    return (!this.diffJson ? this.getDiffJson() : promise.resolve())
+      .then(() => {
+        if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
-      if (!this.diffJson[0].isTrimmed) {
-        this.diffJson[0].blocks = this.diffJson[0].blocks.reduce((blocks, block) => {
-          const length = block.lines.length;
-          if (lineCount < this.loadCount) {
-            block.lines = block.lines.slice(0, this.loadCount - lineCount);
+        if (!this.diffJson[0].allBlocks) {
+          this.diffJson[0].allBlocks = this.diffJson[0].blocks;
+        }
+
+        let lineCount = 0;
+        this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
+          const length = (block.allLines || block.lines).length;
+          const remaining = this.loadCount - lineCount;
+          if (remaining > 0) {
+            if (remaining < length) {
+              if (!block.allLines) {
+                block.allLines = block.lines;
+              }
+              block.lines = block.allLines.slice(0, remaining);
+            } else if (block.allLines) {
+              block.lines = block.allLines;
+              block.allLines = undefined;
+            }
             blocks.push(block);
           }
           lineCount += length;
           return blocks;
         }, []);
-      }
-      this.diffJson[0].isTrimmed = true;
 
-      this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
+        this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
 
-      let html = diff2html.html(this.diffJson, {
-        outputFormat: this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
-        drawFileList: false
-      });
-
-      this.numberOfSelectedPatchLines = 0;
-      let index = 0;
-
-      // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
-      // data bind at getPatchCheckBox that is rendered with "html" binding.
-      // which is reason why manually updating the html content and refreshing kobinding to have it render...
-      if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, (match, capture) => {
-          if (this.patchLineList()[index] === undefined) {
-            this.patchLineList()[index] = true;
-          }
-
-          return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+        let html = diff2html.html(this.diffJson, {
+          outputFormat: this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
+          drawFileList: false
         });
-      }
 
-      if (html !== this.htmlSrc) {
-        // diff has changed since last we displayed and need refresh
-        this.htmlSrc = html;
-        this.isParsed(false);
-        this.isParsed(true);
-      }
-    });
+        this.numberOfSelectedPatchLines = 0;
+        let index = 0;
+
+        // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
+        // data bind at getPatchCheckBox that is rendered with "html" binding.
+        // which is reason why manually updating the html content and refreshing kobinding to have it render...
+        if (this.patchLineList) {
+          html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, (match, capture) => {
+            if (this.patchLineList()[index] === undefined) {
+              this.patchLineList()[index] = true;
+            }
+
+            return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+          });
+        }
+
+        if (html !== this.htmlSrc) {
+          // diff has changed since last we displayed and need refresh
+          this.htmlSrc = html;
+          this.isParsed(false);
+          this.isParsed(true);
+        }
+      });
   }
 
   loadMore() {
     this.loadCount += this.loadMoreCount();
-    programEvents.dispatch({ event: 'invalidate-diff-and-render' });
+    this.render();
   }
 
   getPatchCheckBox(symbol, index, isActive) {
