@@ -271,16 +271,13 @@ const pluginsCacheKey = cache.registerFunc(() => {
 });
 
 app.get('/serverdata.js', (req, res) => {
-  sysinfo.getUserHash()
-    .then((hash) => {
-      const text = `ungit.config = ${JSON.stringify(config)};\n` +
-        `ungit.userHash = "${hash}";\n` +
-        `ungit.version = "${config.ungitDevVersion}";\n` +
-        `ungit.platform = "${os.platform()}";\n` +
-        `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
-      res.set('Content-Type', 'application/javascript');
-      res.send(text);
-    });
+  const text = `ungit.config = ${JSON.stringify(config)};\n` +
+    `ungit.userHash = "${sysinfo.getUserHash()}";\n` +
+    `ungit.version = "${config.ungitDevVersion}";\n` +
+    `ungit.platform = "${os.platform()}";\n` +
+    `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
+  res.set('Content-Type', 'application/javascript');
+  res.send(text);
 });
 
 app.get('/api/latestversion', (req, res) => {

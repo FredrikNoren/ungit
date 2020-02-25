@@ -19,7 +19,7 @@ exports.getUserHash = () => {
     winston.error("attempt to get mac addr failed, using fake mac.", err);
     addr = "abcde";
   }
-  return Bluebird.resolve(md5(addr));
+  return md5(addr);
 }
 
 exports.getGitVersionInfo = () => {
