@@ -49,7 +49,7 @@ class GraphViewModel {
       () => {
         if (this.skip() <= 0) return;
         this.skip(Math.max(this.skip() - numberOfNodesPerLoad, 0));
-        this.loadNodesFromApi();
+        this.loadNodesFromApiThrottled();
       },
       500,
       true
