@@ -2,7 +2,7 @@ const getMac = require('getmac').default;
 const latestVersion = require('latest-version');
 const md5 = require('blueimp-md5');
 const semver = require('semver');
-const winston = require('./utils/winston');
+const winston = require('winston');
 const config = require('./config');
 
 

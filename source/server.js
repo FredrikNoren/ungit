@@ -1,9 +1,9 @@
+const winston = require('./utils/winston');
 const config = require('./config');
 const BugTracker = require('./bugtracker');
 const bugtracker = new BugTracker('server');
 const express = require('express');
 const gitApi = require('./git-api');
-const winston = require('./utils/winston');
 const sysinfo = require('./sysinfo');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;

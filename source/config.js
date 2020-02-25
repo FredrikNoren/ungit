@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const homedir = require('os').homedir();
-const winston = require('./utils/winston');
+const winston = require('winston');
 const child_process = require('child_process');
 const semver = require('semver');
 
