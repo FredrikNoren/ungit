@@ -43,7 +43,7 @@ class GraphViewModel {
     this.loadAhead = _.debounce(() => {
       if (this.skip() <= 0) return;
       this.skip(Math.max(this.skip() - numberOfNodesPerLoad, 0));
-      this.loadNodesFromApi();
+      this.loadNodesFromApiThrottled();
     }, 500, true);
     this.commitOpacity = ko.observable(1.0);
     this.highestBranchOrder = 0;
