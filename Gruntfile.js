@@ -60,6 +60,7 @@ module.exports = (grunt) => {
       unit: {
         options: {
           reporter: 'spec',
+          require: './source/utils/winston.js',
           timeout: 5000
         },
         src: 'test/*.js'
@@ -67,6 +68,7 @@ module.exports = (grunt) => {
       click: {
         options: {
           reporter: 'spec',
+          require: './source/utils/winston.js',
           timeout: 15000,
           bail: true
         },

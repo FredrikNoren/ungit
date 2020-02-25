@@ -1,5 +1,5 @@
 'use strict';
-const winston = require('../source/utils/winston');
+const winston = require('winston');
 const child_process = require('child_process');
 const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
