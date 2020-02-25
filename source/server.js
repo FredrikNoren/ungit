@@ -309,7 +309,7 @@ app.get('/api/latestversion', (req, res) => {
 app.get('/api/ping', (req, res) => res.json({}));
 
 app.get('/api/gitversion', (req, res) => {
-  sysinfo.getGitVersionInfo().then((result) => res.json(result));
+  res.json(sysinfo.getGitVersionInfo());
 });
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');

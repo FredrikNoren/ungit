@@ -1,4 +1,3 @@
-const Bluebird = require('bluebird');
 const getMac = require('getmac').default;
 const latestVersion = require('latest-version');
 const md5 = require('blueimp-md5');
@@ -39,5 +38,5 @@ exports.getGitVersionInfo = () => {
     }
   }
 
-  return Bluebird.resolve(result);
+  return result;
 }
