@@ -11,25 +11,24 @@ const funcMap = {}; // Will there ever be a use case where this is a cache with 
  * @return {Promise} - Promise either resolved with cached result of the function or rejected with function not found.
  */
 cache.resolveFunc = (key) => {
-  return new Bluebird((resolve, reject) => {
-    let result = cache.get(key);
-    if (result !== undefined) {
-      resolve(result);
-      return;
-    }
-    result = funcMap[key];
-    if (result === undefined) {
-      reject(new Error(`Cache entry ${key} not found`));
-      return;
-    }
-    getHardValue(result.func()) // func is found, resolve, set with TTL and return result
-      .then((r) => {
-        cache.set(key, r, funcMap[key].ttl)
-        resolve(r);
-      }).catch((err) => {
-        reject(err);
-      });
-  });
+  let result = cache.get(key);
+  if (result !== undefined) {
+    return Bluebird.resolve(result);
+  }
+  result = funcMap[key];
+  if (result === undefined) {
+    return Bluebird.reject(new Error(`Cache entry ${key} not found`));
+  }
+  try {
+    result = result.func();
+  } catch (err) {
+    return Bluebird.reject(err);
+  }
+  return getHardValue(result) // func is found, resolve, set with TTL and return result
+    .then((r) => {
+      cache.set(key, r, funcMap[key].ttl)
+      return r;
+    });
 }
 
 /**
