@@ -19,7 +19,7 @@ const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
-  bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
+  bugtracker.notify(err, 'ungit-launcher');
   process.exit();
 });
 
