@@ -14,9 +14,20 @@ describe('cache', () => {
       .then((val) => expect(val).to.be(0))
   });
 
-  it('should work when failing', () => {
+  it('should work when failing sync', () => {
     const errorMsg = "A nasty error...";
     const key = cache.registerFunc(() => { throw new Error(errorMsg) });
+
+    return cache.resolveFunc(key)
+      .then(() => { throw new Error("should have thrown exception!"); })
+      .catch((e) => {
+        if (e.message !== errorMsg) throw new Error("error message does not match!");
+      });
+  });
+
+  it('should work when failing async', () => {
+    const errorMsg = "A nasty error...";
+    const key = cache.registerFunc(() => Bluebird.reject(new Error(errorMsg)));
 
     return cache.resolveFunc(key)
       .then(() => { throw new Error("should have thrown exception!"); })

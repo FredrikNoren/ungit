@@ -1,9 +1,9 @@
+const winston = require('./utils/winston');
 const config = require('./config');
 const BugTracker = require('./bugtracker');
 const bugtracker = new BugTracker('server');
 const express = require('express');
 const gitApi = require('./git-api');
-const winston = require('winston');
 const sysinfo = require('./sysinfo');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -19,19 +19,28 @@ const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
-  bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
+  bugtracker.notify(err, 'ungit-launcher');
   process.exit();
 });
 
 console.log('Setting log level to ' + config.logLevel);
-winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, {
-  level: config.logLevel,
-  timestamp: true,
-  colorize: true
+const consoleTransport = winston.default.transports.find((transport) => {
+   return transport instanceof winston.transports.Console;
 });
-if (config.logDirectory)
-  winston.add(winston.transports.File, { filename: path.join(config.logDirectory, 'server.log'), maxsize: 100*1024, maxFiles: 2 });
+if (consoleTransport) {
+  consoleTransport.level = config.logLevel;
+}
+if (config.logDirectory) {
+  winston.add(new winston.transports.File({
+    filename: path.join(config.logDirectory, 'server.log'),
+    maxsize: 100*1024,
+    maxFiles: 2,
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    )
+  }));
+}
 
 const users = config.users;
 config.users = null; // So that we don't send the users to the client
@@ -262,16 +271,13 @@ const pluginsCacheKey = cache.registerFunc(() => {
 });
 
 app.get('/serverdata.js', (req, res) => {
-  sysinfo.getUserHash()
-    .then((hash) => {
-      const text = `ungit.config = ${JSON.stringify(config)};\n` +
-        `ungit.userHash = "${hash}";\n` +
-        `ungit.version = "${config.ungitDevVersion}";\n` +
-        `ungit.platform = "${os.platform()}";\n` +
-        `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
-      res.set('Content-Type', 'application/javascript');
-      res.send(text);
-    });
+  const text = `ungit.config = ${JSON.stringify(config)};\n` +
+    `ungit.userHash = "${sysinfo.getUserHash()}";\n` +
+    `ungit.version = "${config.ungitDevVersion}";\n` +
+    `ungit.platform = "${os.platform()}";\n` +
+    `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
+  res.set('Content-Type', 'application/javascript');
+  res.send(text);
 });
 
 app.get('/api/latestversion', (req, res) => {
@@ -303,7 +309,7 @@ app.get('/api/latestversion', (req, res) => {
 app.get('/api/ping', (req, res) => res.json({}));
 
 app.get('/api/gitversion', (req, res) => {
-  sysinfo.getGitVersionInfo().then((result) => res.json(result));
+  res.json(sysinfo.getGitVersionInfo());
 });
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');

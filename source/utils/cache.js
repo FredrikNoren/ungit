@@ -1,6 +1,6 @@
 const Bluebird = require('bluebird');
 const NodeCache = require('node-cache');
-const cache = Bluebird.promisifyAll(new NodeCache({ stdTTL: 0, errorOnMissing: true }));
+const cache = new NodeCache({ stdTTL: 0 });
 const md5 = require('blueimp-md5');
 const funcMap = {}; // Will there ever be a use case where this is a cache with TTL? func registration with TTL?
 
@@ -11,14 +11,23 @@ const funcMap = {}; // Will there ever be a use case where this is a cache with 
  * @return {Promise} - Promise either resolved with cached result of the function or rejected with function not found.
  */
 cache.resolveFunc = (key) => {
-  return cache.getAsync(key) // Can't do `cache.getAsync(key, true)` due to `get` argument ordering...
-    .catch({ errorcode: "ENOTFOUND" }, (e) => {
-      if (!funcMap[key]) throw e;     // func associated with key is not found, throw not found error
-      return getHardValue(funcMap[key].func()) // func is found, resolve, set with TTL and return result
-        .then((r) => {
-          return cache.setAsync(key, r, funcMap[key].ttl)
-            .then(() => { return r; })
-        });
+  let result = cache.get(key);
+  if (result !== undefined) {
+    return Bluebird.resolve(result);
+  }
+  result = funcMap[key];
+  if (result === undefined) {
+    return Bluebird.reject(new Error(`Cache entry ${key} not found`));
+  }
+  try {
+    result = result.func();
+  } catch (err) {
+    return Bluebird.reject(err);
+  }
+  return getHardValue(result) // func is found, resolve, set with TTL and return result
+    .then((r) => {
+      cache.set(key, r, funcMap[key].ttl)
+      return r;
     });
 }
 

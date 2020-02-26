@@ -383,7 +383,7 @@ describe('git-api', () => {
   it('get the baserepopath without base repo should work', (done) => {
     const baseRepoPathTestDir = path.join(testDir, 'depth1', 'depth2');
 
-    mkdirp(baseRepoPathTestDir, (res) => {
+    mkdirp(baseRepoPathTestDir).then(() => {
       return common.get(req, '/baserepopath', { path: baseRepoPathTestDir }).then((res) => {
         // Some oses uses symlink and path will be different as git will return resolved symlink
         expect(res.path).to.contain(testDir);

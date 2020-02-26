@@ -60,7 +60,7 @@ module.exports = (grunt) => {
       unit: {
         options: {
           reporter: 'spec',
-          require: './test/spec.helper.js',
+          require: './source/utils/winston.js',
           timeout: 5000
         },
         src: 'test/*.js'
@@ -68,9 +68,9 @@ module.exports = (grunt) => {
       click: {
         options: {
           reporter: 'spec',
+          require: './source/utils/winston.js',
           timeout: 15000,
-          bail: true,
-          require: './test/spec.helper.js'
+          bail: true
         },
         src: 'nmclicktests/spec.*.js'
       }
@@ -398,9 +398,6 @@ module.exports = (grunt) => {
     const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
 
     const bumps = Bluebird.map(keys, (dep) => {
-      // winston 3.x has different API
-      if (dep == 'winston') return;
-
       return bumpDependency(tempPackageJson, dep);
     });
 
