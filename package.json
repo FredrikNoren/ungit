@@ -84,7 +84,6 @@
     "grunt-lineending": "~1.0.0",
     "grunt-mocha-istanbul": "~5.0.2",
     "grunt-mocha-test": "~0.13.3",
-    "grunt-plato": "~1.4.0",
     "grunt-release": "~0.14.0",
     "grunt-zip-directories": "~1.0.1",
     "istanbul": "~0.4.5",

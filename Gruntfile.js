@@ -76,15 +76,6 @@ module.exports = (grunt) => {
       }
     },
 
-    // Plato code analysis
-    plato: {
-      all: {
-        files: {
-          'report': ['source/**/*.js', 'public/source/**/*.js'],
-        }
-      },
-    },
-
     // Minify images (basically just lossless compression)
     imagemin: {
       default: {
@@ -423,7 +414,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-plato');
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-image-embed');
   grunt.loadNpmTasks('grunt-contrib-jshint');
