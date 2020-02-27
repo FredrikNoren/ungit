@@ -265,6 +265,12 @@ class GraphViewModel {
     }
   }
 
+  updateAnimationFrame(deltaT) {
+    this.nodes().forEach(node => {
+      node.updateAnimationFrame(deltaT);
+    });
+  }
+
   updateBranches() {
     this.server.getPromise('/checkout', { path: this.repoPath() })
       .then(res => { this.checkedOutBranch(res); })
