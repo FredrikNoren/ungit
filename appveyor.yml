@@ -26,9 +26,3 @@ before_test:
 
 test_script:
   - npm test
-
-after_test:
-  - npm run electronpublish
-
-artifacts:
-  - path: dist\*.zip
