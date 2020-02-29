@@ -61,7 +61,7 @@ class TextDiffViewModel {
     this.repoPath = args.repoPath;
     this.server = args.server;
     this.sha1 = args.sha1;
-    this.loadMoreCount = ko.observable(0);
+    this.hasMore = ko.observable(false);
     this.diffJson = null;
     this.loadCount = loadLimit;
     this.textDiffType = args.textDiffType;
@@ -134,26 +134,20 @@ class TextDiffViewModel {
         }
 
         let lineCount = 0;
+        let loadCount = 0;
         this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
-          const length = (block.allLines || block.lines).length;
+          const length = block.lines.length;
           const remaining = this.loadCount - lineCount;
           if (remaining > 0) {
-            if (remaining < length) {
-              if (!block.allLines) {
-                block.allLines = block.lines;
-              }
-              block.lines = block.allLines.slice(0, remaining);
-            } else if (block.allLines) {
-              block.lines = block.allLines;
-              block.allLines = undefined;
-            }
+            loadCount += length;
             blocks.push(block);
           }
           lineCount += length;
           return blocks;
         }, []);
 
-        this.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - this.loadCount)));
+        this.loadCount = loadCount;
+        this.hasMore(lineCount > loadCount);
 
         let html = diff2html.html(this.diffJson, {
           outputFormat: this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
@@ -186,7 +180,7 @@ class TextDiffViewModel {
   }
 
   loadMore() {
-    this.loadCount += this.loadMoreCount();
+    this.loadCount += loadLimit;
     this.render();
   }
 
