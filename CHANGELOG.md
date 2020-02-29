@@ -7,7 +7,8 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Fixed
 - Bump dependencies [#1283](https://github.com/FredrikNoren/ungit/pull/1283)
-- Better focus handling when creating branches and tags
+- Running npm scripts on macOS [#1287](https://github.com/FredrikNoren/ungit/pull/1287)
+- Better focus handling when creating branches and tags [#1288](https://github.com/FredrikNoren/ungit/pull/1288)
 
 ## [1.5.4](https://github.com/FredrikNoren/ungit/compare/v1.5.3...v1.5.4)
 
