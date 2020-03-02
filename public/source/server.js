@@ -20,6 +20,8 @@ if (ungit.config.isDisableProgressBar) {
 
 function Server() {
   this.isInternetConnected = true;
+  this.isUnloading = false;
+  window.addEventListener('beforeunload', () => this.isUnloading = true);
 }
 module.exports = Server;
 
@@ -97,7 +99,9 @@ Server.prototype._isConnected = function(callback) {
   });
 }
 Server.prototype._onDisconnect = function() {
-  programEvents.dispatch({ event: 'disconnected' });
+  if (!this.isUnloading) {
+    programEvents.dispatch({ event: 'disconnected' });
+  }
 }
 Server.prototype._getCredentials = function(callback, args) {
   // Push out a program event, hoping someone will respond! (Which the app component will)
