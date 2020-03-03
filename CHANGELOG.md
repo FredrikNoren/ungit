@@ -11,6 +11,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 - Reduce CPU and Memory consumption in textdiff. Addresses part of [#1091](https://github.com/FredrikNoren/ungit/issues/1091)
 - Better focus handling when creating branches and tags [#1288](https://github.com/FredrikNoren/ungit/pull/1288)
 - Don't show error page when reloading the page [#1289](https://github.com/FredrikNoren/ungit/issues/1289)
+- Periodically update author date of commits again [#1286](https://github.com/FredrikNoren/ungit/pull/1286)
 
 ## [1.5.4](https://github.com/FredrikNoren/ungit/compare/v1.5.3...v1.5.4)
 
