@@ -8,6 +8,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ### Fixed
 - Bump dependencies [#1283](https://github.com/FredrikNoren/ungit/pull/1283)
 - Running npm scripts on macOS [#1287](https://github.com/FredrikNoren/ungit/pull/1287)
+- Reduce CPU and Memory consumption in textdiff. addresses part of [#1091](https://github.com/FredrikNoren/ungit/issues/1091)
 
 ## [1.5.4](https://github.com/FredrikNoren/ungit/compare/v1.5.3...v1.5.4)
 
