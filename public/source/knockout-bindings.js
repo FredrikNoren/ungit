@@ -183,14 +183,28 @@ ko.bindingHandlers.modal = {
 };
 
 
-// For some reason the standard hasFocus binder doesn't fire events on div objects with tabIndex's
-ko.bindingHandlers.hasFocus2 = {
+// handle focus for this element and all children. only when this element or all of its chlidren have lost focus set the value to false.
+ko.bindingHandlers.hasfocus2 = {
   init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    element.addEventListener('focus', function() {
+    var hasFocus = false;
+    var timeout;
+
+    ko.utils.registerEventHandler(element, "focusin", handleElementFocusIn);
+    ko.utils.registerEventHandler(element, "focusout",  handleElementFocusOut);
+
+    function handleElementFocusIn() {
+      hasFocus = true;
       valueAccessor()(true);
-    });
-    element.addEventListener('blur', function() {
-      valueAccessor()(false);
-    });
+    }
+    function handleElementFocusOut() {
+      hasFocus = false;
+
+      clearTimeout(timeout);
+      timeout = setTimeout(function() {
+        if (!hasFocus) {
+          valueAccessor()(false);
+        }
+      }, 50);
+    }
   }
 };
