@@ -264,6 +264,10 @@ class GitNodeViewModel extends Animateable {
     }
   }
 
+  updateAnimationFrame(deltaT) {
+    this.commitComponent.updateAnimationFrame(deltaT);
+  }
+
   getPathToCommonAncestor(node) {
     const path = [];
     let thisNode = this;
