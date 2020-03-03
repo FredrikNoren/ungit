@@ -133,11 +133,12 @@ class TextDiffViewModel {
           this.diffJson[0].allBlocks = this.diffJson[0].blocks;
         }
 
+        let currentLoadCount = Math.max(this.loadCount, loadLimit);
         let lineCount = 0;
         let loadCount = 0;
         this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
           const length = block.lines.length;
-          const remaining = this.loadCount - lineCount;
+          const remaining = currentLoadCount - lineCount;
           if (remaining > 0) {
             loadCount += length;
             blocks.push(block);
