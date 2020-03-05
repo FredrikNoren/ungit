@@ -1,4 +1,7 @@
-sudo: required
+os:
+  - linux
+  - osx
+#  - windows
 language: node_js
 node_js:
   - node
@@ -9,14 +12,16 @@ branches:
     - master
     - /^v\d+\.\d+\.\d+$/
 env:
-  matrix:
+  jobs:
     - GIT_VERSION=edge
     - GIT_VERSION=default
-matrix:
+jobs:
   exclude:
     - node_js: "12"
       env: GIT_VERSION=edge
     - node_js: "10"
+      env: GIT_VERSION=edge
+    - os: windows
       env: GIT_VERSION=edge
 addons:
   apt:
@@ -24,16 +29,32 @@ addons:
       - xvfb
       - libgconf-2-4
       - wine
+  homebrew:
+    update: true
+    casks:
+      - xquartz
+      - wine-stable
+before_install:
+  # linux
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then export DISPLAY=':99.0'; fi
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & fi
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then wine --version; fi
+  - if [[ $TRAVIS_OS_NAME = "linux" && $GIT_VERSION = "edge" ]]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
+  # osx
+  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then export WINEDLLOVERRIDES='mscoree,mshtml='; fi
+  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then wine64 --version; fi
+  - if [[ $TRAVIS_OS_NAME = "osx" && $GIT_VERSION = "edge" ]]; then brew reinstall git; fi
+  # windows
+  # required for git clone ("git-receive-pack") and submodule ("git-submodule") tests
+  - if [[ $TRAVIS_OS_NAME = "windows" ]]; then export "PATH=$PATH:/c/Program Files/Git/mingw64/libexec/git-core/"; fi
+  # currently fails with Exit code was '1'
+  - if [[ $TRAVIS_OS_NAME = "windows" && $GIT_VERSION = "edge" ]]; then choco install git; fi
 install:
-  - export DISPLAY=':99.0'
-  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - if [ "$GIT_VERSION" = "edge" ]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   - npm ci
 before_script:
-  - wine --version
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
-  - git version
+  - git --version
   - DISPLAY= npm run package
 after_success:
   - npm run travisnpmpublish
@@ -50,4 +71,4 @@ deploy:
   body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
   on:
     tags: true
-    condition: $GIT_VERSION = edge
+    condition: $TRAVIS_OS_NAME = "linux" && $GIT_VERSION = "edge"
