@@ -1,0 +1,125 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['10', '12', '*']
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      # Xvfb (nightmare on linux)
+      DISPLAY: ':99.0'
+      # electron packager (win32 ia32 on macos) https://github.com/electron/electron-packager/pull/449#issuecomment-240508298
+      WINEDLLOVERRIDES: 'mscoree,mshtml='
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: node --version
+
+      # linux dependencies
+      - run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        if: matrix.os == 'ubuntu-latest'
+      - run: sudo apt install -y wine64
+        if: matrix.os == 'ubuntu-latest'
+      - run: wine --version
+        if: matrix.os == 'ubuntu-latest'
+      - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+      # macos dependencies
+      - run: brew cask install xquartz wine-stable
+        if: matrix.os == 'macos-latest'
+      - run: wine64 --version
+        if: matrix.os == 'macos-latest'
+      - run: brew reinstall git
+        if: matrix.os == 'macos-latest' && matrix.node-version == '*'
+      # windows dependencies
+      # https://github.community/t5/GitHub-Actions/TEMP-is-broken-on-Windows/td-p/30432
+      - run: echo "::set-env name=TEMP::C:\Users\runneradmin\AppData\Local\Temp"
+        if: matrix.os == 'windows-latest'
+      - run: choco install git
+        if: matrix.os == 'windows-latest' && matrix.node-version == '*'
+
+      - run: git --version
+      - run: git config --global user.email "test@testy.com"
+      - run: git config --global user.name "Test testy"
+
+      - run: npm ci
+      - run: npm run package
+      - run: npm test
+
+      # publish artifacts
+      - run: npm run electronpublish
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+
+      - name: Upload ungit-darwin-x64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-darwin-x64
+          path: dist/ungit-darwin-x64.zip
+
+      - name: Upload ungit-linux-arm64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-linux-arm64
+          path: dist/ungit-linux-arm64.zip
+
+      - name: Upload ungit-linux-armv7l
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-linux-armv7l
+          path: dist/ungit-linux-armv7l.zip
+
+      - name: Upload ungit-linux-ia32
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-linux-ia32
+          path: dist/ungit-linux-ia32.zip
+
+      - name: Upload ungit-linux-x64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-linux-x64
+          path: dist/ungit-linux-x64.zip
+
+      - name: Upload ungit-mas-x64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-mas-x64
+          path: dist/ungit-mas-x64.zip
+
+      - name: Upload ungit-win32-arm64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-win32-arm64
+          path: dist/ungit-win32-arm64.zip
+
+      - name: Upload ungit-win32-ia32
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-win32-ia32
+          path: dist/ungit-win32-ia32.zip
+
+      - name: Upload ungit-win32-x64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: ungit-win32-x64
+          path: dist/ungit-win32-x64.zip
