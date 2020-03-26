@@ -72,7 +72,6 @@
     "electron": "~8.2.0",
     "electron-packager": "~14.2.1",
     "expect.js": "~0.3.1",
-    "extract-zip": "~1.6.8",
     "grunt": "~1.1.0",
     "grunt-contrib-clean": "~2.0.0",
     "grunt-contrib-copy": "~1.0.0",
