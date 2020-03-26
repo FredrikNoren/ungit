@@ -317,7 +317,7 @@ module.exports = (grunt) => {
       const version = packageJson.version;
       packageJson.version += `+${hash}`;
       fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-      fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
+      fs.appendFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
       childProcess.exec('npm publish', (err) => {
         if (err) done(err);
         else childProcess.exec(`git tag v${version} && git push -q https://${process.env.GITHUB_TOKEN}@github.com/FredrikNoren/ungit.git v${version}`, (err) => { done(err); });
