@@ -46,7 +46,7 @@ jobs:
       # https://github.community/t5/GitHub-Actions/TEMP-is-broken-on-Windows/td-p/30432
       - run: echo "::set-env name=TEMP::C:\Users\runneradmin\AppData\Local\Temp"
         if: matrix.os == 'windows-latest'
-      - run: choco install git
+      - run: choco upgrade git
         if: matrix.os == 'windows-latest' && matrix.node-version == '*'
 
       - run: git --version

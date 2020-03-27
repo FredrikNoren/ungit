@@ -48,7 +48,7 @@ before_install:
   # required for git clone ("git-receive-pack") and submodule ("git-submodule") tests
   - if [[ $TRAVIS_OS_NAME = "windows" ]]; then export "PATH=$PATH:/c/Program Files/Git/mingw64/libexec/git-core/"; fi
   # currently fails with Exit code was '1'
-  - if [[ $TRAVIS_OS_NAME = "windows" && $GIT_VERSION = "edge" ]]; then choco install git; fi
+  - if [[ $TRAVIS_OS_NAME = "windows" && $GIT_VERSION = "edge" ]]; then choco upgrade git; fi
 install:
   - npm ci
 before_script:
