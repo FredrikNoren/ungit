@@ -36,6 +36,8 @@ jobs:
       - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
       # macos dependencies
+      - run: brew update
+        if: matrix.os == 'macos-latest'
       - run: brew cask install xquartz wine-stable
         if: matrix.os == 'macos-latest'
       - run: wine64 --version
