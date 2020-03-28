@@ -1,9 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.5...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.6...master)
+
+## [1.5.6](https://github.com/FredrikNoren/ungit/compare/v1.5.5...v1.5.6)
+
+### Fixed
+- Continue rebase fails with git 2.26 [#1301](https://github.com/FredrikNoren/ungit/issues/1301)
+- Dependency updates [#1304](https://github.com/FredrikNoren/ungit/pull/1304), [#1300](https://github.com/FredrikNoren/ungit/pull/1300), [#1297](https://github.com/FredrikNoren/ungit/pull/1297), [#1295](https://github.com/FredrikNoren/ungit/pull/1295)
+- ignore nmclicktests and ci files in npm package [#1306](https://github.com/FredrikNoren/ungit/pull/1306)
+
+### Added
+- GitHub Action CI [#1298](https://github.com/FredrikNoren/ungit/pull/1298)
+- GitHub Action dependency bump [#1296](https://github.com/FredrikNoren/ungit/pull/1296)
 
 ## [1.5.5](https://github.com/FredrikNoren/ungit/compare/v1.5.4...v1.5.5)
 
