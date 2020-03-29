@@ -16,7 +16,9 @@ npm-debug.log
 node_modules/
 
 .ungitrc
+.github/
 .travis.yml
+appveyor.yml
 Gruntfile.js
 
 assets/
@@ -30,7 +32,7 @@ public/devStyling.html
 public/js/devStyling.js
 
 clicktests/
-clicktestout/
+nmclicktests/
 
 teststabilitytester.js
 
