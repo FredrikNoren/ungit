@@ -145,7 +145,7 @@ Nightmare.action('ug', {
         element.dispatchEvent(new KeyboardEvent('keydown'));
         /* jshint ignore:end */
       }, '.ref-icons.new-ref.editing input', name)
-      .wait(200)
+      .wait(500)
       // nightmare click calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L107)
       .evaluate(function(selector) {
         var element = document.querySelector(selector);
