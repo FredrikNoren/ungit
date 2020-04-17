@@ -42,7 +42,7 @@
         <!-- /ko -->
 
         <!-- ko if: refs().length > ungit.config.numRefsToShow -->
-        <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+        <span class="ref-icons" data-bind="css: { editing: branchingFormVisible }">
           <button class="showSearchForm bootstrap-tooltip"
             data-bind="html: $parent.searchIcon, click: showRefSearchForm, visible: !refSearchFormVisible()"
             data-toggle="tooltip" data-placement="bottom" title="Search for a branch or tag"></button>
@@ -54,7 +54,7 @@
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->
-        <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
+        <span class="ref-icons new-ref" data-bind="css: { editing: branchingFormVisible }">
           <button class="showBranchingForm bootstrap-tooltip"
             data-bind="html: $parent.plusIcon, click: showBranchingForm, visible: !branchingFormVisible()"
             data-toggle="tooltip" data-placement="bottom" title="Create a branch or tag"></button>
