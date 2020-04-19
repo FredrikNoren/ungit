@@ -1,0 +1,35 @@
+name: Bump Dependencies
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  bump:
+    if: github.repository == 'FredrikNoren/ungit'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '*'
+
+      - run: npm ci
+      - run: ./node_modules/.bin/grunt bumpdependencies
+      - run: npm install
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Bump Dependencies
+          title: Bump Dependencies
+          body: Bump Dependencies
+          labels: dependencies
+          branch: bumpdependencies

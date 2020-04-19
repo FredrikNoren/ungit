@@ -5,7 +5,7 @@ const Bluebird = require('bluebird');
 const Nightmare = require('nightmare');
 const net = require('net');
 const request = require('superagent');
-const mkdirp = Bluebird.promisifyAll(require("mkdirp")).mkdirPAsync;
+const mkdirp = require("mkdirp");
 const rimraf = Bluebird.promisify(require("rimraf"));
 const portrange = 45032;
 let rootUrl;
@@ -134,10 +134,29 @@ Nightmare.action('ug', {
   },
   '_createRef': function(type, name, done) {
     this.ug.click('.current ~ .newRef button.showBranchingForm')
-      .insert('.newRef.editing input', name)
+      // nightmare insert calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L347)
+      .evaluate(function(selector, value) {
+        var element = document.querySelector(selector);
+        if (!element) {
+          throw new Error(`Element not found ${selector}`);
+        }
+        element.value = value;
+        /* jshint ignore:start */
+        element.dispatchEvent(new KeyboardEvent('keydown'));
+        /* jshint ignore:end */
+      }, '.newRef.editing input', name)
       .wait(100)
+      // nightmare click calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L107)
+      .evaluate(function(selector) {
+        var element = document.querySelector(selector);
+        if (!element) {
+          throw new Error(`Element not found ${selector}`);
+        }
+        /* jshint ignore:start */
+        element.dispatchEvent(new MouseEvent('click'));
+        /* jshint ignore:end */
+      }, `.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
       // cannot use .ug.click as wait op will defocus and doms will disappear
-      .click(`.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
       .wait(`.ref.${type}[data-ta-name="${name}"]`)
       .wait(300)
       .then(done.bind(null, null), done);

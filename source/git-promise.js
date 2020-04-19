@@ -9,7 +9,7 @@ const isWindows = /^win/.test(process.platform);
 const Bluebird = require('bluebird');
 const fs = require('./utils/fs-async');
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
-const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat'];
+const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat', '-c', 'core.editor=:'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
 const gitBin = (() => {
@@ -41,7 +41,7 @@ const gitExecutorProm = (args, retryCount) => {
       let stdout = '';
       let stderr = '';
       let env = JSON.parse(JSON.stringify(process.env));
-      env['LC_ALL'] = 'C'
+      env['LC_ALL'] = 'C';
       const procOpts = { cwd: args.repoPath, maxBuffer: 1024 * 1024 * 100, detached: false, env: env }
       const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
       if (args.timeout) {

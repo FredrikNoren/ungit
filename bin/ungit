@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const startLaunchTime = Date.now();
+const winston = require('../source/utils/winston');
 const config = require('../source/config');
 const open = require('open');
 const path = require('path');
@@ -7,7 +8,6 @@ const child_process = require('child_process');
 
 const BugTracker = require('../source/bugtracker');
 const bugtracker = new BugTracker('launcher');
-const Bluebird = require('bluebird');
 // Fastest way to find out if a port is used or not/i.e. if ungit is running
 const net = require('net');
 const server = net.createServer();
@@ -18,9 +18,8 @@ process.on('SIGTERM', cleanExit); // catch kill
 process.on('uncaughtException', (err) => {
   console.error(err.stack.toString());
 
-  Bluebird.all([
-    Bluebird.resolve().then(() => bugtracker.notify(err, 'ungit-launcher'))
-  ]).then(cleanExit)
+  bugtracker.notify(err, 'ungit-launcher');
+  cleanExit();
 });
 
 const openUngitBrowser = (pathToNavigateTo) => {

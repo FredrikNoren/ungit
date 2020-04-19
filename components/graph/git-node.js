@@ -75,14 +75,6 @@ class GitNodeViewModel extends Animateable {
     this.newBranchName = ko.observable();
     this.newBranchNameHasFocus = ko.observable(true);
     this.branchingFormVisible = ko.observable(false);
-    this.newBranchNameHasFocus.subscribe(newValue => {
-      if (!newValue) {
-        // Small timeout because in ff the form is hidden before the submit click event is registered otherwise
-        setTimeout(() => {
-          this.branchingFormVisible(false);
-        }, 200);
-      }
-    });
     this.canCreateRef = ko.computed(() => this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' '));
     this.branchOrder = ko.observable();
     this.aboveNode = undefined;
@@ -270,6 +262,10 @@ class GitNodeViewModel extends Animateable {
     } else if(!this.branchesAndLocalTags().includes(ref)) {
       this.branchesAndLocalTags.push(ref);
     }
+  }
+
+  updateAnimationFrame(deltaT) {
+    this.commitComponent.updateAnimationFrame(deltaT);
   }
 
   getPathToCommonAncestor(node) {

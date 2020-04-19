@@ -1,14 +1,15 @@
 var startLaunchTime = Date.now();
+var winston = require('../source/utils/winston');
 var config = require('../source/config');
 var child_process = require('child_process');
 var BugTracker = require('../source/bugtracker');
-var bugtracker = new BugTracker('launcher');
+var bugtracker = new BugTracker('electron');
 
 var { app, dialog, shell, BrowserWindow, Menu } = require('electron');
 
 process.on('uncaughtException', function(err) {
   console.error(err.stack.toString());
-  bugtracker.notify.bind(bugtracker, err, 'ungit-launcher');
+  bugtracker.notify(err, 'ungit-launcher');
   app.quit();
 });
 

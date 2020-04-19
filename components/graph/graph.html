@@ -41,11 +41,11 @@
         <span class="newRef" data-bind="css: { editing: branchingFormVisible }">
           <button class="showBranchingForm bootstrap-tooltip" data-bind="html: $parent.plusIcon, click: showBranchingForm, visible: !branchingFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Create a branch or tag"></button>
           <!-- ko if: branchingFormVisible -->
-          <div class="form-inline">
+          <form class="form-inline" data-bind="hasfocus2: branchingFormVisible, submit: createBranch">
             <input class="name form-control" type="text" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"/>
             <button class="btn btn-primary" type="submit" value="Branch" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
             <button class="btn btn-default" data-bind="click: createTag, enable: canCreateRef">Tag</button>
-          </div>
+          </form>
           <!-- /ko -->
         </span>
         <!-- /ko -->

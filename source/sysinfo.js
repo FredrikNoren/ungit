@@ -1,5 +1,4 @@
-const Bluebird = require('bluebird');
-const getmac = require('getmac');
+const getMac = require('getmac').default;
 const latestVersion = require('latest-version');
 const md5 = require('blueimp-md5');
 const semver = require('semver');
@@ -12,15 +11,14 @@ exports.getUngitLatestVersion = () => {
 }
 
 exports.getUserHash = () => {
-  return new Bluebird((resolve) => {
-    getmac.getMac((err, addr) => {
-      if (err) {
-        winston.error("attempt to get mac addr failed, using fake mac.", err);
-        addr = "abcde";
-      }
-      resolve(md5(addr));
-    });
-  });
+  let addr;
+  try {
+    addr = getMac();
+  } catch (err) {
+    winston.error("attempt to get mac addr failed, using fake mac.", err);
+    addr = "abcde";
+  }
+  return md5(addr);
 }
 
 exports.getGitVersionInfo = () => {
@@ -40,5 +38,5 @@ exports.getGitVersionInfo = () => {
     }
   }
 
-  return Bluebird.resolve(result);
+  return result;
 }
