@@ -106,6 +106,7 @@ ko.bindingHandlers.autocomplete = {
 
 // Used to catch when a user was tabbed away and re-visits the page.
 // If fs.watch worked better on Windows (i.e. on subdirectories) we wouldn't need this
+// TODO is this still needed?
 (function detectReActivity() {
   var lastMoved = Date.now();
   document.addEventListener('mousemove', function() {

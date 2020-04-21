@@ -49,6 +49,7 @@
     "mkdirp": "~1.0.3",
     "moment": "~2.24.0",
     "node-cache": "~5.1.0",
+    "node-watch": "^0.6.3",
     "nprogress": "~0.2.0",
     "open": "~7.0.3",
     "passport": "~0.4.1",
