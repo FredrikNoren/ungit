@@ -56,9 +56,9 @@ exports.registerApi = (env) => {
         }
       }).then(() => {
         const watcher = watch(pathToWatch, options || {});
-        watcher.on('change', (event, filename) => {
-          if (!filename) return;
-          const filePath = path.join(subfolderPath, filename);
+        watcher.on('change', (event, changedPath) => {
+          if (!changedPath) return;
+          const filePath = path.relative(socket.watcherPath, changedPath);
           winston.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
             winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
