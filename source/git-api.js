@@ -8,11 +8,9 @@ const rimraf = require('rimraf');
 const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('fs').promises;
-const watch = require('fs').watch;
+const watch = require('node-watch');
 const ignore = require('ignore');
 
-const isMac = /^darwin/.test(process.platform);
-const isWindows = /^win/.test(process.platform);
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
 exports.pathPrefix = '';
@@ -41,18 +39,7 @@ exports.registerApi = (env) => {
           .catch(() => {})
           .then(() => {
             socket.watcher = [];
-            return watchPath(socket, '.', { recursive: isMac || isWindows });
-          })
-          .then(() => {
-            if (!isMac && !isWindows) {
-              // recursive fs.watch only works on mac and windows
-              const promises = [];
-              promises.push(watchPath(socket, path.join('.git', 'HEAD')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'heads')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'remotes')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'tags')));
-              return Promise.all(promises);
-            }
+            return watchPath(socket, '.', { recursive: true });
           })
           .finally(callback);
       });
