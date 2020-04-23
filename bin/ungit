@@ -91,5 +91,8 @@ server.on('error', (e) => {
   if (e.code == 'EADDRINUSE') {
     console.log('Ungit server already running');
     navigate();
+  } else {
+    console.error('Failed to run server: ', e)
+    process.exit(1)
   }
 });
