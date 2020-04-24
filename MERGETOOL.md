@@ -8,8 +8,8 @@ The first step is to configure git so that it knows how to invoke your merge too
 
 ```ini
 [mergetool "extMerge"]
-  cmd = extMergeTool "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
-  trustExitCode = false
+	cmd = extMergeTool "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+	trustExitCode = false
 ```
 
 * `"extMergeTool"` is the merge tool you are invoking. This assumes your merge tool was installed and the command is recognized by your system. You may also replace this with the path to your merge tool directly.
@@ -20,7 +20,7 @@ The first step is to configure git so that it knows how to invoke your merge too
 
 ```ini
 [merge]
-  tool = extMerge
+	tool = extMerge
 ```
 
 If you wish to test your configuration, open a console in a git repo that is currently waiting for conflict resolution and type the following command:
