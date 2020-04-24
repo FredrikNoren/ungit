@@ -88,6 +88,8 @@ Auto Refresh
 ------------
 Ungit will watch git directory recursively upon page view and automatically refresh contents on git operations or changes on files that are not configured to be ignored in `.gitignore`.
 
+One caveat is that node's [`fs.watch()`](https://nodejs.org/docs/latest/api/fs.html#fs_fs_watch_filename_options_listener) with `recursive: true` option is only available in Mac and Windows.  For non Mac and Windows machines, git operations will be automatically refreshed but file changes may require manual refreshes as `fs.watch()` is unable to detect changes within nested directory hierarchy.
+
 Text Editor Integrations
 -------------------
 
