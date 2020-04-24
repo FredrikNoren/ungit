@@ -3,8 +3,9 @@
     <span data-bind="html: submodulesIcon"></span>
     <span data-bind="text: 'Submodules'"></span>
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="caret"></span>
+    <span class="sr-only">Toggle Submodule List</span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: submodules -->

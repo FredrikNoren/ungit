@@ -25,8 +25,9 @@
           <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, enable: !commitValidationError()">
             Commit
           </button>
-          <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" data-bind="enable: !commitValidationError()">
+          <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" data-bind="enable: !commitValidationError()" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
+            <span class="sr-only">Toggle Commit Options</span>
           </button>
           <ul class="dropdown-menu" role="menu">
             <li><a href="#" data-bind="click: commitnpush, css: { disabled: !canPush() }" class="commitnpush">Commit & Push</a></li>
