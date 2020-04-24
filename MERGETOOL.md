@@ -35,7 +35,7 @@ Add the `"mergeTool"` option to your ungit configuration file (.ungitrc). Set th
 
 ```json
 {
-	"mergeTool": "extMerge"
+  "mergeTool": "extMerge"
 }
 ```
 
@@ -59,11 +59,11 @@ Once you have used your merge tool to resolve the conflicts, if ungit does not i
 5. Merge Tool Suggestions
 -------------------------
 * Mac OS X:
-	* Meld: [meldmerge.org](http://meldmerge.org)
-  * Kaleidoscope: [www.kaleidoscopeapp.com](http://www.kaleidoscopeapp.com)
-  * Araxis Merge: [www.araxis.com](http://www.araxis.com)
-  * DeltaWalker: [www.deltopia.com](http://www.deltopia.com)
+  * Meld: [meldmerge.org](https://meldmerge.org)
+  * Kaleidoscope: [kaleidoscopeapp.com](https://www.kaleidoscopeapp.com)
+  * Araxis Merge: [araxis.com](https://araxis.com/merge)
+  * DeltaWalker: [deltopia.com](https://deltopia.com)
 * Windows:
-  * Beyond Compare: [www.scootersoftware.com](http://www.scootersoftware.com)
-  * Araxis Merge: [www.araxis.com](http://www.araxis.com)
-  * P4Merge: [www.perforce.com](http://www.perforce.com)
+  * Beyond Compare: [scootersoftware.com](https://scootersoftware.com/)
+  * Araxis Merge: [araxis.com](https://araxis.com/merge)
+  * P4Merge: [perforce.com](https://perforce.com/products/helix-core-apps/merge-diff-tool-p4merge)
