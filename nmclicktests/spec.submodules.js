@@ -19,7 +19,7 @@ describe('[SUMBODULES]', () => {
       .wait('.modal')
       .insert('.modal #Path', 'subrepo')
       .insert('.modal #Url', testRepoPaths[0])
-      .click('.modal .modal-footer input')
+      .click('.modal .modal-footer .btn-primary')
       .wait(500)
       .click('.submodule .dropdown-toggle')
       .wait('.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]');
