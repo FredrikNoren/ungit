@@ -8,8 +8,8 @@ The first step is to configure git so that it knows how to invoke your merge too
 
 ```ini
 [mergetool "extMerge"]
-	cmd = extMergeTool "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
-	trustExitCode = false
+  cmd = extMergeTool "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+  trustExitCode = false
 ```
 
 * `"extMergeTool"` is the merge tool you are invoking. This assumes your merge tool was installed and the command is recognized by your system. You may also replace this with the path to your merge tool directly.
@@ -20,7 +20,7 @@ The first step is to configure git so that it knows how to invoke your merge too
 
 ```ini
 [merge]
-	tool = extMerge
+  tool = extMerge
 ```
 
 If you wish to test your configuration, open a console in a git repo that is currently waiting for conflict resolution and type the following command:
@@ -35,7 +35,7 @@ Add the `"mergeTool"` option to your ungit configuration file (.ungitrc). Set th
 
 ```json
 {
-	"mergeTool": "extMerge"
+  "mergeTool": "extMerge"
 }
 ```
 
@@ -59,11 +59,11 @@ Once you have used your merge tool to resolve the conflicts, if ungit does not i
 5. Merge Tool Suggestions
 -------------------------
 * Mac OS X:
-	* Meld: [meldmerge.org](http://meldmerge.org)
-  * Kaleidoscope: [www.kaleidoscopeapp.com](http://www.kaleidoscopeapp.com)
-  * Araxis Merge: [www.araxis.com](http://www.araxis.com)
-  * DeltaWalker: [www.deltopia.com](http://www.deltopia.com)
+  * Meld: [meldmerge.org](https://meldmerge.org)
+  * Kaleidoscope: [kaleidoscopeapp.com](https://www.kaleidoscopeapp.com)
+  * Araxis Merge: [araxis.com](https://araxis.com/merge)
+  * DeltaWalker: [deltopia.com](https://deltopia.com)
 * Windows:
-  * Beyond Compare: [www.scootersoftware.com](http://www.scootersoftware.com)
-  * Araxis Merge: [www.araxis.com](http://www.araxis.com)
-  * P4Merge: [www.perforce.com](http://www.perforce.com)
+  * Beyond Compare: [scootersoftware.com](https://scootersoftware.com/)
+  * Araxis Merge: [araxis.com](https://araxis.com/merge)
+  * P4Merge: [perforce.com](https://perforce.com/products/helix-core-apps/merge-diff-tool-p4merge)
