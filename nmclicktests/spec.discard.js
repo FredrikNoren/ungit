@@ -8,20 +8,20 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
     .wait(250)
     .then(() => {
       if (dialogButtonToClick === "yes") {
-        return env.nm.ug.click('.modal-dialog .btn-primary');
+        return env.nm.ug.click('.modal-dialog [data-ta-action="yes"]');
       } else if (dialogButtonToClick === "mute") {
-        return env.nm.ug.click('.modal-dialog .btn-mute');
+        return env.nm.ug.click('.modal-dialog [data-ta-action="mute"]');
       } else if (dialogButtonToClick === "no") {
-        return env.nm.ug.click('.modal-dialog .btn-default:last-child');
+        return env.nm.ug.click('.modal-dialog [data-ta-action="no"]');
       } else {
-        return env.nm.visible('.modal-dialog .btn-primary')
+        return env.nm.visible('.modal-dialog [data-ta-action="yes"]')
           .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
       }
     }).then(() => {
       if (dialogButtonToClick !== 'no') {
-        return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
+        return env.nm.ug.waitForElementNotVisible('.files .file [data-ta-action="no"]');
       } else {
-        return env.nm.wait('.files .file .btn-default');
+        return env.nm.wait('.files .file [data-ta-action="no"]');
       }
     });
 }

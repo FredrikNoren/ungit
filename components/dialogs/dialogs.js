@@ -119,8 +119,8 @@ class YesNoDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: 'Yes', style: 'primary', taId: 'yes', click() { self.result(true); self.close(); } },
-      { label: 'No', style: 'default', taId: 'no', click() { self.result(false); self.close(); } },
+      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } },
     ]);
   }
 }
@@ -132,9 +132,9 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: 'Yes', style: 'primary', taId: 'yes', click() { self.result(true); self.close(); } },
-      { label: 'Yes and mute for awhile', style: 'mute', click() { self.result("mute"); self.close() } },
-      { label: 'No', style: 'default', taId: 'no', click() { self.result(false); self.close(); } }
+      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click() { self.result("mute"); self.close() } },
+      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } }
     ]);
   }
 }
@@ -146,8 +146,8 @@ class TooManyFilesDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: "Don't load", style: 'primary', taId: 'noLoad', click() { self.result(false); self.close(); } },
-      { label: 'Load anyway', style: 'default', taId: 'loadAnyway', click() { self.result(true); self.close(); } },
+      { label: "Don't load", primary: true, taId: 'noLoad', click() { self.result(false); self.close(); } },
+      { label: 'Load anyway', primary: false, taId: 'loadAnyway', click() { self.result(true); self.close(); } },
     ]);
   }
 }
@@ -160,13 +160,13 @@ class TextEditDialog extends PromptDialogViewModel {
     const self = this;
     this.alternatives([
       {
-        label: "Save", style: 'primary', taId: 'save', click() {
+        label: "Save", primary: true, taId: 'save', click() {
           self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
           self.result(true);
           self.close();
         }
       },
-      { label: 'Cancel', style: 'default', taId: 'cancel', click() { self.result(false); self.close(); } },
+      { label: 'Cancel', primary: false, taId: 'cancel', click() { self.result(false); self.close(); } },
     ]);
   }
 }
