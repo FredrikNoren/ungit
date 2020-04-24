@@ -68,8 +68,8 @@ class CredentialsDialogViewModel extends FormDialogViewModel {
     this.password = ko.observable();
     const self = this;
     this.items([
-      { name: 'Username', value: self.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
-      { name: 'Password', value: self.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
+      { name: 'Username', value: self.username, type: 'text', autofocus: true },
+      { name: 'Password', value: self.password, type: 'password', autofocus: false }
     ]);
   }
 }
@@ -82,8 +82,8 @@ class AddRemoteDialogViewModel extends FormDialogViewModel {
     this.url = ko.observable();
     const self = this;
     this.items([
-      { name: 'Name', value: self.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
-      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Name', value: self.name, type: 'text', autofocus: true },
+      { name: 'Url', value: self.url, type: 'text', autofocus: false }
     ]);
   }
 }
@@ -96,8 +96,8 @@ class AddSubmoduleDialogViewModel extends FormDialogViewModel {
     this.url = ko.observable();
     const self = this;
     this.items([
-      { name: 'Path', value: self.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
-      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Path', value: self.path, type: 'text', autofocus: true },
+      { name: 'Url', value: self.url, type: 'text', autofocus: false }
     ]);
   }
 }
@@ -119,8 +119,8 @@ class YesNoDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
-      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } },
+      { label: 'Yes', style: 'primary', taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'No', style: 'default', taId: 'no', click() { self.result(false); self.close(); } },
     ]);
   }
 }
@@ -132,9 +132,9 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: 'Yes', primary: true, taId: 'yes', click() { self.result(true); self.close(); } },
-      { label: 'Yes and mute for awhile', primary: false, taId: 'mute', click() { self.result("mute"); self.close() } },
-      { label: 'No', primary: false, taId: 'no', click() { self.result(false); self.close(); } }
+      { label: 'Yes', style: 'primary', taId: 'yes', click() { self.result(true); self.close(); } },
+      { label: 'Yes and mute for awhile', style: 'mute', click() { self.result("mute"); self.close() } },
+      { label: 'No', style: 'default', taId: 'no', click() { self.result(false); self.close(); } }
     ]);
   }
 }
@@ -146,8 +146,8 @@ class TooManyFilesDialogViewModel extends PromptDialogViewModel {
     this.result = ko.observable(false);
     const self = this;
     this.alternatives([
-      { label: "Don't load", primary: true, taId: 'noLoad', click() { self.result(false); self.close(); } },
-      { label: 'Load anyway', primary: false, taId: 'loadAnyway', click() { self.result(true); self.close(); } },
+      { label: "Don't load", style: 'primary', taId: 'noLoad', click() { self.result(false); self.close(); } },
+      { label: 'Load anyway', style: 'default', taId: 'loadAnyway', click() { self.result(true); self.close(); } },
     ]);
   }
 }
@@ -160,13 +160,13 @@ class TextEditDialog extends PromptDialogViewModel {
     const self = this;
     this.alternatives([
       {
-        label: "Save", primary: true, taId: 'save', click() {
+        label: "Save", style: 'primary', taId: 'save', click() {
           self.textAreaContent = document.querySelector('.modal-body .text-area-content').value;
           self.result(true);
           self.close();
         }
       },
-      { label: 'Cancel', primary: false, taId: 'cancel', click() { self.result(false); self.close(); } },
+      { label: 'Cancel', style: 'default', taId: 'cancel', click() { self.result(false); self.close(); } },
     ]);
   }
 }
