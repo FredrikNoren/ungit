@@ -295,10 +295,8 @@ module.exports = (grunt) => {
     let currentVersion = packageJson[dependencyType][packageName];
     if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
     return pkgVersions(packageName).then((versionSet) => {
-      const versions = Array.from(versionSet).reverse();
-      const latestVersion = versions.find((version) => {
-        return semver.prerelease(version) === null;
-      });
+      const versions = Array.from(versionSet);
+      const latestVersion = semver.maxSatisfying(versions, '*');
       if (semver.gt(latestVersion, currentVersion)) {
         packageJson[dependencyType][packageName] = '~' + latestVersion;
       }

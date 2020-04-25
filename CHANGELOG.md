@@ -7,6 +7,8 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Changed
 - Only display ref search button when there are hidden refs
+### Fixed
+- Recursive watch now works on Linux as well [#1164](https://github.com/FredrikNoren/ungit/issues/1164)
 
 ## [1.5.6](https://github.com/FredrikNoren/ungit/compare/v1.5.5...v1.5.6)
 
