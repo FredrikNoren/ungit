@@ -19,9 +19,9 @@ const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
       }
     }).then(() => {
       if (dialogButtonToClick !== 'no') {
-        return env.nm.ug.waitForElementNotVisible('.files .file [data-ta-action="no"]');
+        return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
       } else {
-        return env.nm.wait('.files .file [data-ta-action="no"]');
+        return env.nm.wait('.files .file .btn-default');
       }
     });
 }
