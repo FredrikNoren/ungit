@@ -5,8 +5,8 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.6...master)
 
-### Fixed
-- Recursive watch now works on Linux as well [#1164](https://github.com/FredrikNoren/ungit/issues/1164)
+### Changed
+- Only display ref search button when there are hidden refs [#1311](https://github.com/FredrikNoren/ungit/pull/1311)
 
 ## [1.5.6](https://github.com/FredrikNoren/ungit/compare/v1.5.5...v1.5.6)
 
