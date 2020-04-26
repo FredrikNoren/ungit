@@ -51,8 +51,8 @@ class GitNodeViewModel extends Animateable {
       if (newValue) {
         this.branches(newValue.filter((r) => r.isBranch));
         this.tags(newValue.filter((r) => r.isTag));
-        this.tagsToDisplay(this.tags.slice(0, maxTagsToDisplay));
-        this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - this.tagsToDisplay().length));
+        this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)));
+        this.tagsToDisplay(this.tags.slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length));
       } else {
         this.branches.removeAll();
         this.tags.removeAll();
@@ -72,6 +72,7 @@ class GitNodeViewModel extends Animateable {
       programEvents.dispatch({ event: 'graph-render' });
     });
     this.showNewRefAction = ko.computed(() => !graph.currentActionContext());
+    this.showRefSearch = ko.computed(() => (this.branches().length + this.tags().length) > ungit.config.numRefsToShow);
     this.newBranchName = ko.observable();
     this.newBranchNameHasFocus = ko.observable(true);
     this.branchingFormVisible = ko.observable(false);

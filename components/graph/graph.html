@@ -50,7 +50,7 @@
         </span>
         <!-- /ko -->
 
-        <!-- ko if: refs().length > 0 -->
+        <!-- ko if: showRefSearch -->
         <span class="ref-icons" data-bind="css: { editing: branchingFormVisible }">
           <button class="showSearchForm bootstrap-tooltip" type="button" data-bind="html: $parent.searchIcon, click: showRefSearchForm, visible: !refSearchFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Search for a branch or tag"></button>
           <div class="form-inline" data-bind="visible: refSearchFormVisible()">
