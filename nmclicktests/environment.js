@@ -133,7 +133,7 @@ Nightmare.action('ug', {
       .then(done.bind(null, null), done);
   },
   '_createRef': function(type, name, done) {
-    this.ug.click('.current ~ .newRef button.showBranchingForm')
+    this.ug.click('.current ~ .new-ref button.showBranchingForm')
       // nightmare insert calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L347)
       .evaluate(function(selector, value) {
         var element = document.querySelector(selector);
@@ -144,8 +144,8 @@ Nightmare.action('ug', {
         /* jshint ignore:start */
         element.dispatchEvent(new KeyboardEvent('keydown'));
         /* jshint ignore:end */
-      }, '.newRef.editing input', name)
-      .wait(100)
+      }, '.ref-icons.new-ref.editing input', name)
+      .wait(500)
       // nightmare click calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L107)
       .evaluate(function(selector) {
         var element = document.querySelector(selector);
@@ -155,7 +155,7 @@ Nightmare.action('ug', {
         /* jshint ignore:start */
         element.dispatchEvent(new MouseEvent('click'));
         /* jshint ignore:end */
-      }, `.newRef ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
+      }, `.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
       // cannot use .ug.click as wait op will defocus and doms will disappear
       .wait(`.ref.${type}[data-ta-name="${name}"]`)
       .wait(300)
