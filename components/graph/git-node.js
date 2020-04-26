@@ -161,28 +161,34 @@ class GitNodeViewModel extends Animateable {
     this.refSearchFormVisible(true);
 
     const textBox = event.currentTarget.nextElementSibling.firstElementChild; // this may not be the best idea...
-    $(textBox).autocomplete({
-      source: this.refs().filter(ref => !ref.isHEAD),
-      minLength: 0,
-      select: (event, ui) => {
-        const ref = ui.item;
-        const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
+    const $textBox = $(textBox);
 
-        // if ref is in display, remove it, else remove last in array.
-        ray.splice(ray.indexOf(ref), 1);
-        ray.unshift(ref);
-        this.refSearchFormVisible(false);
-      },
-      messages: {
-        noResults: '',
-        results: () => {}
-      }
-    }).focus(() => {
-      $(this).autocomplete('search', $(this).val());
-    }).data('ui-autocomplete')._renderItem = (ul, item) => $('<li></li>')
-      .append(`<a>${item.dom}</a>`)
-      .appendTo(ul);
-    $(textBox).autocomplete('search', '');
+    if (!$textBox.autocomplete('instance')) {
+      const renderItem = (ul, item) => $(`<li><a>${item.dom}</a></li>`).appendTo(ul);
+      $textBox.autocomplete({
+        source: this.refs().filter(ref => !ref.isHEAD),
+        minLength: 0,
+        create: (event) => {
+          $(event.target).data('ui-autocomplete')._renderItem = renderItem;
+        },
+        select: (_event, ui) => {
+          const ref = ui.item;
+          const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
+
+          // if ref is in display, remove it, else remove last in array.
+          ray.splice(ray.indexOf(ref), 1);
+          ray.unshift(ref);
+          this.refSearchFormVisible(false);
+
+          // Clear search input on selection
+          return false;
+        },
+      });
+      $textBox.focus((event) => {
+        $(event.target).autocomplete('search', event.target.value);
+      });
+      $textBox.autocomplete('search', '');
+    }
   }
 
   createBranch() {
