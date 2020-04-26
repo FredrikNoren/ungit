@@ -7,8 +7,8 @@
       </div>
       <div class="clearfix">
         <img class="pull-left img-circle gravatar"
-          data-bind="attr: { src: 'http://www.gravatar.com/avatar/' + authorGravatar() + '?default=404' }"
-          onerror="this.style.display='none';">
+          data-bind="attr: { src: `https://www.gravatar.com/avatar/${authorGravatar()}?default=404`, alt: `Profile Picture of ${authorName()}` }"
+          onerror="this.style.display='none';" />
         <div>
           <div>
             <span class="title" data-bind="text: (title().length > 72 ? title().substring(0, 72) + '...' : title)"></span>

@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.6...master)
 
+### Fixed
+- Fixing some accessibility issues [#1318](https://github.com/FredrikNoren/ungit/pull/1318)
+
 ### Changed
 - Only display ref search button when there are hidden refs [#1311](https://github.com/FredrikNoren/ungit/pull/1311)
 

@@ -15,18 +15,18 @@ describe('[AUTHENTICATION]', () => {
   });
 
   it('Filling out the authentication with wrong details should result in an error', () => {
-    return environment.nm.insert('.login input[type="text"]', testuser.username)
-      .insert('.login input[type="password"]', 'notthepassword')
-      .click('.login input[type="submit"]')
+    return environment.nm.insert('.login #inputUsername', testuser.username)
+      .insert('.login #inputPassword', 'notthepassword')
+      .click('.login button')
       .wait('.login .loginError');
   });
 
   it('Filling out the authentication should bring you to the home screen', () => {
-    return environment.nm.insert('.login input[type="text"]')
-      .insert('.login input[type="text"]', testuser.username)
-      .insert('.login input[type="password"]')
-      .insert('.login input[type="password"]', testuser.password)
-      .click('.login input[type="submit"]')
+    return environment.nm.insert('.login #inputUsername')
+      .insert('.login #inputUsername', testuser.username)
+      .insert('.login #inputPassword')
+      .insert('.login #inputPassword', testuser.password)
+      .click('.login button')
       .wait('.container.home');
   });
 });

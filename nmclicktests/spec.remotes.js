@@ -36,7 +36,7 @@ describe('[REMOTES]', () => {
       .wait('.modal')
       .insert('.modal #Name', 'myremote')
       .insert('.modal #Url', testRepoPaths[0])
-      .click('.modal .modal-footer input')
+      .click('.modal .modal-footer .btn-primary')
       .wait(500)
       .click('.fetchButton .dropdown-toggle')
       .wait('.fetchButton .dropdown-menu [data-ta-clickable="myremote"]');

@@ -68,8 +68,8 @@ class CredentialsDialogViewModel extends FormDialogViewModel {
     this.password = ko.observable();
     const self = this;
     this.items([
-      { name: 'Username', value: self.username, placeholder: 'Username', type: 'text', autofocus: true, taName: 'username' },
-      { name: 'Password', value: self.password, placeholder: 'Password', type: 'password', autofocus: false, taName: 'password' }
+      { name: 'Username', value: self.username, type: 'text', autofocus: true },
+      { name: 'Password', value: self.password, type: 'password', autofocus: false }
     ]);
   }
 }
@@ -82,8 +82,8 @@ class AddRemoteDialogViewModel extends FormDialogViewModel {
     this.url = ko.observable();
     const self = this;
     this.items([
-      { name: 'Name', value: self.name, placeholder: 'Name', type: 'text', autofocus: true, taName: 'name' },
-      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Name', value: self.name, type: 'text', autofocus: true },
+      { name: 'Url', value: self.url, type: 'text', autofocus: false }
     ]);
   }
 }
@@ -96,8 +96,8 @@ class AddSubmoduleDialogViewModel extends FormDialogViewModel {
     this.url = ko.observable();
     const self = this;
     this.items([
-      { name: 'Path', value: self.path, placeholder: 'Path', type: 'text', autofocus: true, taName: 'path' },
-      { name: 'Url', value: self.url, placeholder: 'Url', type: 'text', autofocus: false, taName: 'url' }
+      { name: 'Path', value: self.path, type: 'text', autofocus: true },
+      { name: 'Url', value: self.url, type: 'text', autofocus: false }
     ]);
   }
 }
