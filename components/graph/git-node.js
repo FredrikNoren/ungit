@@ -165,7 +165,7 @@ class GitNodeViewModel extends Animateable {
     const $textBox = $(textBox);
 
     if (!$textBox.autocomplete('instance')) {
-      const renderItem = (ul, item) => $(`<li><a>${item.dom}</a></li>`).appendTo(ul);
+      const renderItem = (ul, item) => $(`<li><a>${item.displayHtml()}</a></li>`).appendTo(ul);
       $textBox.autocomplete({
         classes: {
           'ui-autocomplete': 'dropdown-menu'
