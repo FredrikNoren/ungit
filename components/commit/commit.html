@@ -1,10 +1,8 @@
 <div class="commit" data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }">
   <div class="commit-box panel panel-default" data-bind="element: element, click: stopClickPropagation">
     <div class="panel-body">
-      <div class="arrowContainer arrowRight">
-        <div class="shadow"></div>
-        <div class="arrow"></div>
-      </div>
+      <div class="arrow shadow"></div>
+      <div class="arrow"></div>
       <div class="clearfix">
         <img class="pull-left img-circle gravatar"
           data-bind="attr: { src: `https://www.gravatar.com/avatar/${authorGravatar()}?default=404`, alt: `Profile Picture of ${authorName()}` }"

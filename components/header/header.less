@@ -1,3 +1,5 @@
+@import "public/less/variables.less";
+
 .navbarPadder {
   height: 81px;
 }
@@ -52,16 +54,13 @@
       }
     }
   }
-  .arrowUp {
-    position: absolute;
+
+  .arrow {
     bottom: 0px;
     left: 300px;
-    height: 0px;
-    width: 0px;
-    border-bottom: 15px solid #242832;
-    border-right: 15px solid transparent;
-    border-left: 15px solid transparent;
+    border-bottom-color: @body-bg;
   }
+
   .version-and-license {
     position: absolute;
     right: 10px;

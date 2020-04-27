@@ -9,12 +9,12 @@
       box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
       background: #4B5766;
       left: -5px;
-      .arrowRight {
-        .shadow {
+
+      .arrow {
+        border-left-color: #4b5766;
+
+        &.shadow {
           display: block;
-        }
-        .arrow {
-          border-left: 15px solid #4A5665;
         }
       }
     }
@@ -41,25 +41,16 @@
   }
 
   .commit-box {
-    .arrowRight {
-      position: absolute;
-      right: 0px;
-      top: 5px;
-      .shadow {
+    .arrow {
+      right: -30px;
+      top: 27px;
+      border-left-color: @panel-bg;
+
+      &.shadow {
         display: none;
-        height: 0px;
-        width: 0px;
-        margin-left: -1px;
-        border-top: 15px solid transparent;
-        border-bottom: 15px solid transparent;
-        border-left: 15px solid #1E2029;
-      }
-      .arrow {
-        height: 0px;
-        width: 0px;
-        border-top: 15px solid transparent;
-        border-bottom: 15px solid transparent;
-        border-left: 15px solid #3b4552;
+        right: -34px;
+        top: 32px;
+        border-left-color: rgba(0, 0, 0, 0.2);
       }
     }
   }
