@@ -1,24 +1,30 @@
 @import "public/less/variables.less";
 
-.branch .options {
-  font-size: inherit;
-  color: @gray-dark;
-  white-space: nowrap; // Remove with bootstrap 3.4
+.branch {
+  .options {
+    font-size: inherit;
+    color: @gray-dark;
+    white-space: nowrap; // Remove with bootstrap 3.4
 
-  label {
-    cursor: pointer;
-    font-weight: normal;
-    margin: 0 15px 0 0;
+    label {
+      cursor: pointer;
+      font-weight: normal;
+      margin: 0 15px 0 0;
 
-    &:last-child {
-      margin: 0;
+      &:last-child {
+        margin: 0;
+      }
+    }
+
+    input {
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
     }
   }
 
-  input {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    appearance: none;
-    cursor: pointer;
+  .dropdown-menu.octicon {
+    width: 18px;
   }
 }
