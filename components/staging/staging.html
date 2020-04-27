@@ -10,8 +10,8 @@
     </div>
     <div class="row" data-bind="visible: !showNux()">
       <div class="col-lg-3">
-        <input class="form-control" type="text" placeholder="Title (required)" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onEnter}"></input>
-        <textarea class="form-control" rows="2" placeholder="Body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
+        <input class="form-control" type="text" placeholder="Title (required)" aria-label="Commit message title" data-bind="value: commitMessageTitle, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onEnter}" />
+        <textarea class="form-control" rows="2" placeholder="Body" aria-label="Commit message body" data-bind="value: commitMessageBody, valueUpdate: 'afterkeydown', enable: !inRebase(), event: {keypress: onAltEnter}"></textarea>
         <div>
           <button class="amend-button btn btn-link" data-bind="visible: canAmend, click: toggleAmend">
             <div class="checkmark" data-bind="css: { checked: amend }">
@@ -33,8 +33,9 @@
           <button class="btn btn-primary btn-lg commit-btn" data-bind="click: commit, enable: !commitValidationError()">
             Commit
           </button>
-          <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" data-bind="enable: !commitValidationError()">
+          <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" data-bind="enable: !commitValidationError()" aria-haspopup="true" aria-expanded="false">
             <span class="caret"></span>
+            <span class="sr-only">Toggle Commit Options</span>
           </button>
           <ul class="dropdown-menu" role="menu">
             <li><a href="#" data-bind="click: commitnpush, css: { disabled: !canPush() }" class="commitnpush">Commit & Push</a></li>

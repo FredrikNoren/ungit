@@ -71,4 +71,4 @@ deploy:
   body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
   on:
     tags: true
-    condition: $TRAVIS_OS_NAME = "linux" && $GIT_VERSION = "edge"
+    condition: $TRAVIS_OS_NAME = "linux" && $TRAVIS_NODE_VERSION = "10"

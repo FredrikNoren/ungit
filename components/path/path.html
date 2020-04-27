@@ -25,19 +25,19 @@
             <form data-bind="submit: cloneRepository">
               <div class="form-group">
                 <label for="cloneFromInput">Clone from</label>
-                <input class="form-control" type="text" id="cloneFromInput" placeholder="URL" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'" required />
+                <input class="form-control" id="cloneFromInput" type="text" placeholder="URL" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'" required />
               </div>
               <div class="form-group">
                 <label for="cloneToInput">into</label>
-                <input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }" />
+                <input class="form-control" id="cloneToInput" type="text" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }" />
               </div>
               <div class="form-group">
                 <label>
-                  <input type="checkbox" data-bind="checked: isRecursiveSubmodule, attr: { placeholder: cloneDestinationImplicit }" />
+                  <input type="checkbox" data-bind="checked: isRecursiveSubmodule" />
                   Recurse submodules
                 </label>
               </div>
-              <button type="submit" class="btn btn-primary btn-lg">Clone Repository</button>
+              <button class="btn btn-primary btn-lg" type="submit">Clone Repository</button>
             </form>
           </div>
         </div>

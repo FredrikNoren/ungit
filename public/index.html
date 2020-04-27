@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0 ">
-	<link rel="stylesheet" type="text/css" href="__ROOT_PATH__/css/styles.css" />
-	<link rel="shortcut icon" href="__ROOT_PATH__/favicon.ico" >
-	<link rel="shortcut icon" href="/images/icon.png" >
-	<title>ungit</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" type="text/css" href="__ROOT_PATH__/css/styles.css" />
+  <link rel="shortcut icon" href="__ROOT_PATH__/favicon.ico" />
+  <link rel="shortcut icon" href="/images/icon.png" />
+  <title>ungit</title>
 </head>
 <body>
 
@@ -16,19 +16,19 @@
 <script type="text/javascript" src="__ROOT_PATH__/serverdata.js"></script>
 <script type="text/javascript" src="__ROOT_PATH__/js/raven.min.js"></script>
 <script type="text/javascript">
-	console.log('App version: ' + ungit.version);
-	if (ungit.config.bugtracking) {
-		console.log('Initing raven');
+  console.log('App version: ' + ungit.version);
+  if (ungit.config.bugtracking) {
+    console.log('Initing raven');
 
     try {
       Raven.config('https://58f16d6f010d4c77900bb1de9c02185f@app.getsentry.com/12434', {
-  			logger: 'root',
-  			tags: {
-  				version: ungit.version,
-  				subsystem: 'ui',
-        			deployment: ungit.config.desktopMode ? 'desktop' : 'web'
-  			}
-  		}).install();
+        logger: 'root',
+        tags: {
+          version: ungit.version,
+          subsystem: 'ui',
+              deployment: ungit.config.desktopMode ? 'desktop' : 'web'
+        }
+      }).install();
       Raven.setUser({ id: ungit.userHash });
     } catch(e) {
       console.warn("Failed to initialize Raven.", e);
@@ -46,7 +46,7 @@
 <!-- ungit-plugins-placeholder -->
 
 <script type="text/javascript">
-	require('ungit-main').start();
+  require('ungit-main').start();
 </script>
 
 </body>

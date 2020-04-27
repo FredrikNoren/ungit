@@ -36,7 +36,7 @@ describe('[REMOTES]', () => {
       .wait('.modal')
       .insert('.modal #Name', 'myremote')
       .insert('.modal #Url', testRepoPaths[0])
-      .click('.modal .modal-footer input')
+      .click('.modal .modal-footer .btn-primary')
       .wait(500)
       .click('.fetchButton .dropdown-toggle')
       .wait('.fetchButton .dropdown-menu [data-ta-clickable="myremote"]');
@@ -93,12 +93,12 @@ describe('[REMOTES]', () => {
 
   it('Check for fetching remote branches for the branch list', () => {
     return environment.nm.ug.click('.branch .dropdown-toggle')
-      .ug.click('div.option input')
+      .ug.click('.options input')
       .wait(200)
       .visible('li .octicon-globe')
       .then((isVisble) => {
         if (!isVisble) {
-          return environment.nm.ug.click('div.option input')
+          return environment.nm.ug.click('.options input')
             .wait('li .octicon-globe');
         }
       });

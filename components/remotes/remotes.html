@@ -3,18 +3,19 @@
     <span data-bind="html: remotesIcon"></span>
     <span data-bind="text: fetchLabel"></span>
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="caret"></span>
+    <span class="sr-only">Toggle Remote List</span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: remotes -->
     <li>
-      <a href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a>
-      <a href="#" class="list-link list-remove" data-bind="html: $parent.closeIcon, click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a class="linked-remove" href="#" data-bind="text: name, click: changeRemote, attr: { 'data-ta-clickable': name }"></a>
+      <a class="list-link list-remove" href="#" data-bind="html: $parent.closeIcon, click: $parent.remoteRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
     </li>
     <!-- /ko -->
     <!-- ko if: remotes().length -->
-    <li class="divider"></li>
+    <li class="divider" role="separator"></li>
     <!-- /ko -->
     <li><a href="#" class="add-new-remote" data-bind="click: showAddRemoteDialog">Add a new remote</a></li>
   </ul>

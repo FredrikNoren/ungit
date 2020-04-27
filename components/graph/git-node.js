@@ -51,8 +51,8 @@ class GitNodeViewModel extends Animateable {
       if (newValue) {
         this.branches(newValue.filter((r) => r.isBranch));
         this.tags(newValue.filter((r) => r.isTag));
-        this.tagsToDisplay(this.tags.slice(0, maxTagsToDisplay));
-        this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - this.tagsToDisplay().length));
+        this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)));
+        this.tagsToDisplay(this.tags.slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length));
       } else {
         this.branches.removeAll();
         this.tags.removeAll();
@@ -72,6 +72,7 @@ class GitNodeViewModel extends Animateable {
       programEvents.dispatch({ event: 'graph-render' });
     });
     this.showNewRefAction = ko.computed(() => !graph.currentActionContext());
+    this.showRefSearch = ko.computed(() => (this.branches().length + this.tags().length) > ungit.config.numRefsToShow);
     this.newBranchName = ko.observable();
     this.newBranchNameHasFocus = ko.observable(true);
     this.branchingFormVisible = ko.observable(false);
@@ -161,28 +162,34 @@ class GitNodeViewModel extends Animateable {
     this.refSearchFormVisible(true);
 
     const textBox = event.currentTarget.nextElementSibling.firstElementChild; // this may not be the best idea...
-    $(textBox).autocomplete({
-      source: this.refs().filter(ref => !ref.isHEAD),
-      minLength: 0,
-      select: (event, ui) => {
-        const ref = ui.item;
-        const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
+    const $textBox = $(textBox);
 
-        // if ref is in display, remove it, else remove last in array.
-        ray.splice(ray.indexOf(ref), 1);
-        ray.unshift(ref);
-        this.refSearchFormVisible(false);
-      },
-      messages: {
-        noResults: '',
-        results: () => {}
-      }
-    }).focus(() => {
-      $(this).autocomplete('search', $(this).val());
-    }).data('ui-autocomplete')._renderItem = (ul, item) => $('<li></li>')
-      .append(`<a>${item.dom}</a>`)
-      .appendTo(ul);
-    $(textBox).autocomplete('search', '');
+    if (!$textBox.autocomplete('instance')) {
+      const renderItem = (ul, item) => $(`<li><a>${item.dom}</a></li>`).appendTo(ul);
+      $textBox.autocomplete({
+        source: this.refs().filter(ref => !ref.isHEAD),
+        minLength: 0,
+        create: (event) => {
+          $(event.target).data('ui-autocomplete')._renderItem = renderItem;
+        },
+        select: (_event, ui) => {
+          const ref = ui.item;
+          const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
+
+          // if ref is in display, remove it, else remove last in array.
+          ray.splice(ray.indexOf(ref), 1);
+          ray.unshift(ref);
+          this.refSearchFormVisible(false);
+
+          // Clear search input on selection
+          return false;
+        },
+      });
+      $textBox.focus((event) => {
+        $(event.target).autocomplete('search', event.target.value);
+      });
+      $textBox.autocomplete('search', '');
+    }
   }
 
   createBranch() {

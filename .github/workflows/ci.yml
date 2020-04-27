@@ -29,6 +29,8 @@ jobs:
       # linux dependencies
       - run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         if: matrix.os == 'ubuntu-latest'
+      - run: sudo apt update
+        if: matrix.os == 'ubuntu-latest'
       - run: sudo apt install -y wine64
         if: matrix.os == 'ubuntu-latest'
       - run: wine --version
@@ -61,66 +63,66 @@ jobs:
 
       # publish artifacts
       - run: npm run electronpublish
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
 
       - name: Upload ungit-darwin-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-darwin-x64
           path: dist/ungit-darwin-x64.zip
 
       - name: Upload ungit-linux-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-linux-arm64
           path: dist/ungit-linux-arm64.zip
 
       - name: Upload ungit-linux-armv7l
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-linux-armv7l
           path: dist/ungit-linux-armv7l.zip
 
       - name: Upload ungit-linux-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-linux-ia32
           path: dist/ungit-linux-ia32.zip
 
       - name: Upload ungit-linux-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-linux-x64
           path: dist/ungit-linux-x64.zip
 
       - name: Upload ungit-mas-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-mas-x64
           path: dist/ungit-mas-x64.zip
 
       - name: Upload ungit-win32-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-win32-arm64
           path: dist/ungit-win32-arm64.zip
 
       - name: Upload ungit-win32-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-win32-ia32
           path: dist/ungit-win32-ia32.zip
 
       - name: Upload ungit-win32-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: ungit-win32-x64
