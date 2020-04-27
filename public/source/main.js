@@ -53,6 +53,9 @@ ko.bindingHandlers.autocomplete = {
   init: (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) => {
     const setAutoCompleteOptions = (sources) => {
       $(element).autocomplete({
+        classes: {
+          'ui-autocomplete': 'dropdown-menu'
+        },
         source: sources,
         minLength: 0,
         messages: {
