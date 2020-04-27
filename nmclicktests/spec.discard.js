@@ -1,43 +1,39 @@
 'use strict';
 const muteGraceTimeDuration = 3000;
-const createAndDiscard = (env, testRepoPath, dialogButtonToClick) => {
-  return env.nm.ug.createTestFile(testRepoPath + '/testfile2.txt')
-    .wait('.files .file .btn-default')
-    .wait(250)
-    .ug.click('.files button.discard')
-    .wait(250)
-    .then(() => {
-      if (dialogButtonToClick === "yes") {
-        return env.nm.ug.click('.modal-dialog [data-ta-action="yes"]');
-      } else if (dialogButtonToClick === "mute") {
-        return env.nm.ug.click('.modal-dialog [data-ta-action="mute"]');
-      } else if (dialogButtonToClick === "no") {
-        return env.nm.ug.click('.modal-dialog [data-ta-action="no"]');
-      } else {
-        return env.nm.visible('.modal-dialog [data-ta-action="yes"]')
-          .then((isVisible) => { if (isVisible) throw new Error('Should not see yes button'); });
-      }
-    }).then(() => {
-      if (dialogButtonToClick !== 'no') {
-        return env.nm.ug.waitForElementNotVisible('.files .file .btn-default');
-      } else {
-        return env.nm.wait('.files .file .btn-default');
-      }
-    });
+const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
+  await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
+  await env.waitForElementVisible('.files .file .btn-default');
+  await env.click('.files button.discard');
+
+  if (dialogButtonToClick === "yes") {
+    await env.click('.modal-dialog [data-ta-action="yes"]');
+  } else if (dialogButtonToClick === "mute") {
+    await env.click('.modal-dialog [data-ta-action="mute"]');
+  } else if (dialogButtonToClick === "no") {
+    await env.click('.modal-dialog [data-ta-action="no"]');
+  } else {
+    await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
+  }
+
+  if (dialogButtonToClick !== 'no') {
+    await env.waitForElementHidden('.files .file .btn-default');
+  } else {
+    await env.waitForElementVisible('.files .file .btn-default');
+  }
 }
 
 describe('[DISCARD - noWarn]', () => {
   const environment = require('./environment')({ serverStartupOptions: ['--disableDiscardWarning'] });
   const testRepoPaths = [];
 
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0]);
+    return environment.openUngit(testRepoPaths[0]);
   });
 
   it('Should be possible to discard a created file without warning message', () => {
@@ -49,14 +45,14 @@ describe('[DISCARD - withWarn]', () => {
   const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning', '--disableDiscardMuteTime=' + muteGraceTimeDuration] });
   const testRepoPaths = [];
 
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0]);
+    return environment.openUngit(testRepoPaths[0]);
   });
 
   it('Should be possible to select no from discard', () => {
@@ -67,10 +63,10 @@ describe('[DISCARD - withWarn]', () => {
     return createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 
-  it('Should be possible to discard a created file and disable warn for awhile', () => {
-    return createAndDiscard(environment, testRepoPaths[0], 'mute')
-      .then(() => createAndDiscard(environment, testRepoPaths[0]))
-      .delay(2000)
-      .then(() => createAndDiscard(environment, testRepoPaths[0], 'yes'));
+  it('Should be possible to discard a created file and disable warn for awhile', async () => {
+    await createAndDiscard(environment, testRepoPaths[0], 'mute');
+    await createAndDiscard(environment, testRepoPaths[0]);
+    await environment.wait(2000);
+    await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });

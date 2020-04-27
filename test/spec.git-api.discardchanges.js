@@ -57,7 +57,7 @@ describe('git-api discardchanges', () => {
       const testFile1 = 'test.txt';
 
       return common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() => common.post(req, '/testing/git', { repo: dir, command: ['add', testFile1] }))
+        .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
         .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
         .then(() => common.get(req, '/status', { path: dir }))
         .then((res) => expect(Object.keys(res.files).length).to.be(0));
@@ -69,7 +69,7 @@ describe('git-api discardchanges', () => {
       const testFile1 = 'test.txt';
 
       return common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() => common.post(req, '/testing/git', { repo: dir, command: ['add', testFile1] }))
+        .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
         .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
         .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
         .then(() => common.get(req, '/status', { path: dir }))
@@ -108,7 +108,7 @@ describe('git-api discardchanges', () => {
         () => {common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
         () => {common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] });
         () => {common.post(req, '/testing/changefile', { file: path.join(dir, testFile1) });
-        () => {common.post(req, '/testing/git', { repo: dir, command: ['add', testFile1] });
+        () => {common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] });
         () => {common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) });
         () => {common.post(req, '/discardchanges', { path: dir, file: testFile1 });
         () => {common.get(req, '/status', { path: dir }).then((res) => {

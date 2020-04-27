@@ -2,66 +2,65 @@
 const environment = require('./environment')();
 const testRepoPaths = [];
 
-const testForBranchMove = (branch, command) => {
-  let branchTagLoc;
-  return environment.nm.evaluate((branch) => document.querySelector(branch).getBoundingClientRect(), branch)
-    .then((oldLoc) => {
-      branchTagLoc = oldLoc;
-      return environment.nm.ug.gitCommand({ command: command, repo: testRepoPaths[0] })
-        .wait((branch, oldLoc) => {
-          let newLoc = document.querySelector(branch).getBoundingClientRect();
-          return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
-        }, branch, branchTagLoc);
-    });
+const gitCommand = (options) => {
+  return environment.backgroundAction('POST', '/api/testing/git', options);
+}
+const testForBranchMove = async (branch, command) => {
+  const branchTagLoc = await environment.page.$eval(branch, (element) => JSON.stringify(element.getBoundingClientRect()));
+
+  await gitCommand({ command: command, path: testRepoPaths[0] });
+
+  await environment.page.waitForFunction((branch, oldLoc) => {
+    const newLoc = document.querySelector(branch).getBoundingClientRect();
+    return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
+  }, {}, branch, JSON.parse(branchTagLoc));
 }
 
 describe('[COMMANDS]', () => {
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0]);
+    return environment.openUngit(testRepoPaths[0]);
   });
 
-  it('add a branch-1', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('commit-1')
-      .wait('.commit')
-      .ug.createBranch('branch-1');
+  it('add a branch-1', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.commit('commit-1');
+    await environment.createBranch('branch-1');
   });
 
-  it('add a branch-2', () =>{
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('commit-1')
-      .wait('.commit')
-      .ug.createBranch('branch-2');
+  it('add a branch-2', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.commit('commit-1');
+    await environment.createBranch('branch-2');
   });
 
-  it('test branch create from command line', () => {
-    return environment.nm.ug.gitCommand({ command: ["branch", "gitCommandBranch"], repo: testRepoPaths[0] })
-      .then(() => environment.nm.wait('[data-ta-name="gitCommandBranch"]'));
+  it('test branch create from command line', async () => {
+    await gitCommand({ command: ["branch", "gitCommandBranch"], path: testRepoPaths[0] });
+    await environment.waitForElementVisible('[data-ta-name="gitCommandBranch"]');
   });
 
   it('test branch move from command line', () => {
     return testForBranchMove('[data-ta-name="gitCommandBranch"]', ["branch", "-f", "gitCommandBranch", "branch-1"]);
   });
 
-  it('test branch delete from command line', () => {
-    return environment.nm.ug.gitCommand({ command: ["branch", "-D", "gitCommandBranch"], repo: testRepoPaths[0] })
-      .ug.waitForElementNotVisible('[data-ta-name="gitCommandBranch');
+  it('test branch delete from command line', async () => {
+    await gitCommand({ command: ["branch", "-D", "gitCommandBranch"], path: testRepoPaths[0] });
+    await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]');
   });
 
-  it('test tag create from command line', () => {
-    return environment.nm.ug.gitCommand({ command: ["tag", "tag1"], repo: testRepoPaths[0] })
-      .wait('[data-ta-name="tag1"]')
+  it('test tag create from command line', async () => {
+    await gitCommand({ command: ["tag", "tag1"], path: testRepoPaths[0] });
+    await environment.waitForElementVisible('[data-ta-name="tag1"]');
   });
 
-  it('test tag delete from command line', () => {
-    return environment.nm.ug.gitCommand({ command: ["tag", "-d", "tag1"], repo: testRepoPaths[0] })
-      .ug.waitForElementNotVisible('[data-ta-name="tag1"]');
+  it('test tag delete from command line', async () => {
+    await gitCommand({ command: ["tag", "-d", "tag1"], path: testRepoPaths[0] });
+    await environment.waitForElementHidden('[data-ta-name="tag1"]');
   });
 
   it('test reset from command line', () => {

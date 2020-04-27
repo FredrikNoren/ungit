@@ -1,188 +1,15 @@
 'use strict';
-const winston = require('winston');
+const winston = require('../source/utils/winston');
 const child_process = require('child_process');
-const Bluebird = require('bluebird');
-const Nightmare = require('nightmare');
+const puppeteer = require('puppeteer');
 const net = require('net');
 const request = require('superagent');
-const mkdirp = require("mkdirp");
-const rimraf = Bluebird.promisify(require("rimraf"));
+const mkdirp = require('mkdirp');
+const util = require('util');
+const rimraf = util.promisify(require('rimraf'));
 const portrange = 45032;
-let rootUrl;
 
 module.exports = (config) => new Environment(config);
-
-Nightmare.action('ug', {
-  'log': function(message, done) {
-    winston.info(`>>> ${message}`);
-    done();
-  },
-  'commit': function(commitMessage, done) {
-    this.wait('.files .file .btn-default')
-      .insert('.staging input.form-control', commitMessage)
-      .wait(100)
-      .ug.click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default')
-      .wait(1000)
-      .then(done.bind(null, null), done);
-  },
-  'commitnpush': function(commitMessage, done) {
-    this.wait('.files .file .btn-default')
-      .insert('.staging input.form-control', commitMessage)
-      .ug.click('.commit-grp .dropdown-toggle')
-      .ug.click('.commitnpush')
-      .then(done.bind(null, null), done);
-  },
-  'amendCommit': function(done) {
-    this.ug.click('.amend-link')
-      .ug.click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default')
-      .wait(1000)
-      .then(done.bind(null, null), done);
-  },
-  'emptyCommit': function(done) {
-    this.ug.click('.empty-commit-link')
-      .ug.click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default')
-      .wait(1000)
-      .then(done.bind(null, null), done);
-  },
-  'checkout': function(branch, done) {
-    this.ug.click(`.branch[data-ta-name="${branch}"]`)
-      .ug.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask')
-      .wait(`.ref.branch[data-ta-name="${branch}"].current`)
-      .then(done.bind(null, null), done);
-  },
-  'patch': function(commitMessage, done) {
-    this.ug.click('.files .file .btn-default')
-      .ug.click('.patch')
-      .wait('.d2h-diff-tbody input')
-      .ug.commit(commitMessage)
-      .then(done.bind(null, null), done);
-  },
-  'backgroundAction': function(method, url, body, done) {
-    let req;
-    if (method === 'GET') {
-      req = request.get(url).withCredentials().query(body);
-    } else if (method === 'POST') {
-      req = request.post(url).send(body);
-    } else if (method === 'DELETE') {
-      req = request.delete(url).send(body);
-    }
-
-    req.set({'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json'});
-
-    req.end((err, res) => {
-      let data = (res || {}).body
-      try { data = JSON.parse(data); } catch(ex) {}
-      done(err, data)
-    });
-  },
-  'createTestFile': function(filename, done) {
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createfile`, { file: filename })
-      .then(done.bind(null, null), done);
-  },
-
-  'changeTestFile': function(filename, done) {
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/changefile`, { file: filename })
-      .then(done.bind(null, null), done);
-  },
-  'createTempFolder': function(done) {
-    winston.info('Creating temp folder');
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/createtempdir`, undefined)
-      .then(done.bind(null, null), done);
-  },
-  'createFolder': function(dir, done) {
-    winston.info(`Create folder: ${dir}`);
-    this.ug.backgroundAction('POST', `${rootUrl}/api/createdir`, { dir: dir })
-      .then(done.bind(null, null), done);
-  },
-  'initRepo': function(options, done) {
-    (options.path ? rimraf(options.path).then(() => mkdirp(options.path)) : this.ug.createTempFolder())
-      .then((res) => {
-        options.path = res.path ? res.path : res;
-        return this.ug.backgroundAction('POST', `${rootUrl}/api/init`, options)
-      }).then(done.bind(null, null), done);
-  },
-  'gitCommand': function(options, done) {
-    this.ug.backgroundAction('POST', `${rootUrl}/api/testing/git`, options)
-      .then(done.bind(null, null), done);
-  },
-  'waitForElementNotVisible': function(selector, done) {
-    this.wait((selector) => !document.querySelector(selector), selector)
-      .then(done.bind(null, null), done);
-  },
-  '_verifyRefAction': function(action, done) {
-    this.visible('.modal-dialog .btn-primary')
-      .then((isVisible) => {
-        return (isVisible ? this.ug.click('.modal-dialog .btn-primary') : this)
-          .ug.waitForElementNotVisible(`[data-ta-action="${action}"]:not([style*="display: none"])`)
-          .wait(200)
-      }).then(done.bind(null, null), done);
-  },
-  'refAction': function(ref, local, action, done) {
-    this.ug.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`)
-      .ug.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`)
-      .then(() => this.ug._verifyRefAction(action))
-      .then(done.bind(null, null), done);
-  },
-  'moveRef': function(ref, targetNodeCommitTitle, done) {
-    this.ug.click(`.branch[data-ta-name="${ref}"]`)
-      .ug.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`)
-      .then(() => this.ug._verifyRefAction('move'))
-      .then(done.bind(null, null), done);
-  },
-  '_createRef': function(type, name, done) {
-    this.ug.click('.current ~ .new-ref button.showBranchingForm')
-      // nightmare insert calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L347)
-      .evaluate(function(selector, value) {
-        var element = document.querySelector(selector);
-        if (!element) {
-          throw new Error(`Element not found ${selector}`);
-        }
-        element.value = value;
-        /* jshint ignore:start */
-        element.dispatchEvent(new KeyboardEvent('keydown'));
-        /* jshint ignore:end */
-      }, '.ref-icons.new-ref.editing input', name)
-      .wait(500)
-      // nightmare click calls blur... (https://github.com/segmentio/nightmare/blob/b230e85375bb084007a54c6a1bf698d81b5f2feb/lib/actions.js#L107)
-      .evaluate(function(selector) {
-        var element = document.querySelector(selector);
-        if (!element) {
-          throw new Error(`Element not found ${selector}`);
-        }
-        /* jshint ignore:start */
-        element.dispatchEvent(new MouseEvent('click'));
-        /* jshint ignore:end */
-      }, `.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`)
-      // cannot use .ug.click as wait op will defocus and doms will disappear
-      .wait(`.ref.${type}[data-ta-name="${name}"]`)
-      .wait(300)
-      .then(done.bind(null, null), done);
-  },
-  'createTag': function(name, done) {
-    this.ug._createRef('tag', name).then(done.bind(null, null), done);
-  },
-  'createBranch': function(name, done) {
-    this.ug._createRef('branch', name).then(done.bind(null, null), done);
-  },
-  'click': function(selector, done) {
-    this.wait(selector)
-      .wait(300)
-      .click(selector)
-      .wait(300)
-      .mouseover('img.headerLogo')
-      .wait(300)
-      .then(done.bind(null, null), done);
-  },
-  'openUngit': function(tempDirPath, done) {
-    this.goto(`${rootUrl}/#/repository?path=${encodeURIComponent(tempDirPath)}`)
-      .wait('.repository-actions')
-      .wait(1000)
-      .then(done.bind(null, null), done);
-  }
-});
 
 const prependLines = (pre, text) => {
   return text.split('\n').filter((l) => l)
@@ -193,107 +20,54 @@ const prependLines = (pre, text) => {
 // Environment provides
 class Environment {
   constructor(config) {
-    this.nm = Nightmare({ Promise: Bluebird, typeInterval: 500, show: false });
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
-    this.config.serverTimeout = this.config.serverTimeout || 15000;
+    this.config.serverTimeout = this.config.serverTimeout || 35000;
     this.config.viewWidth = 2000;
     this.config.viewHeight = 2000;
     this.config.showServerOutput = this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
     this.shuttinDown = false;
-
-    // init
-    this.nm.viewport(this.config.viewWidth, this.config.viewHeight);
-    this.nm.on('console', (type, msg1, msg2) => {
-      winston.info(`[ui ${type}] ${(new Date()).toISOString()}  - ${msg1} ${JSON.stringify(msg2)}`);
-
-      if (type === 'error' && !this.shuttinDown) {
-        winston.info('ERROR DETECTED!');
-      }
-    })
   }
 
-  getRootUrl() { return rootUrl; }
+  getRootUrl() { return this.rootUrl; }
 
   getPort() {
     const tmpPortrange = portrange + Math.floor((Math.random() * 5000));
 
-    return new Bluebird((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const server = net.createServer();
 
-      server.listen(tmpPortrange, (err) => {
+      server.listen(tmpPortrange, () => {
         server.once('close', () => {
           this.port = tmpPortrange;
-          rootUrl = `http://localhost:${this.port}${this.config.rootPath}`
+          this.rootUrl = `http://localhost:${this.port}${this.config.rootPath}`;
           resolve();
         });
         server.close();
       });
-      server.on('error', (err) => {
+      server.on('error', () => {
         this.getPort().then(resolve);
       });
     });
   }
 
-  ensureStarted() {
-    return Bluebird.resolve()
-      .then(() => {
-        if (!this.hasStarted) {
-          return Bluebird.resolve()
-            .delay(50)
-            .then(() => this.ensureStarted());
-        }
+  async init() {
+    try {
+      this.browser = await puppeteer.launch({
+        defaultViewport: {
+          width: this.config.viewWidth,
+          height: this.config.viewHeight
+        },
+        headless: true
       });
-  }
 
-  init() {
-    return this.getPort()
-      .then(() => this.startServer())
-      .then(() => this.ensureStarted())
-      .catch((err) => { winston.error(err); throw new Error("Cannot confirm ungit start!!", err); })
-  }
-
-  createRepos(testRepoPaths, config) {
-    return Bluebird.map(config, (conf) => {
-      conf.bare = !!conf.bare;
-      return this.nm.ug.initRepo(conf)
-        .then(() => this.createCommits(conf, conf.initCommits))
-        .then(() => conf.path);
-    }).then((paths) => {
-      if (testRepoPaths) testRepoPaths.push(...paths)
-    });
-  }
-
-  shutdown() {
-    this.shuttinDown = true;
-    return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/testing/cleanup`, undefined)
-      .then(() => {
-        if (this.ungitServerProcess) {
-          this.ungitServerProcess.kill('SIGINT');
-          this.ungitServerProcess = null;
-        }
-        return this.nm.end();
-      });
-  }
-
-  createCommits(config, limit, x) {
-    x = x || 0
-    if (!limit || limit < 0 || x === limit) return Bluebird.resolve();
-
-    return this.nm.ug.createTestFile(`${config.path}/testy${x}`)
-      .then(() => {
-        return this.nm.ug.backgroundAction('POST', `${rootUrl}/api/commit`, {
-          path: config.path,
-          message: `Init Commit ${x}`,
-          files: [{ name: `testy${x}` }]
-        });
-      }).then(() => this.createCommits(config, limit, x + 1))
-  }
-
-  goto(url) {
-    this.nm = this.nm.goto(url);
-    return this.nm;
+      await this.getPort();
+      await this.startServer();
+    } catch (err) {
+      winston.error(err);
+      throw new Error('Cannot confirm ungit start!!\n' + err);
+    }
   }
 
   startServer() {
@@ -314,38 +88,225 @@ class Environment {
       '--alwaysLoadActiveBranch',
       `--numRefsToShow=${this.config.numRefsToShow || 5}`]
       .concat(this.config.serverStartupOptions);
-    const ungitServer = child_process.spawn('node', options);
-    ungitServer.stdout.on('data', (stdout) => {
-      const stdoutStr = stdout.toString();
-      if (this.config.showServerOutput) winston.verbose(prependLines('[server] ', stdoutStr));
 
-      if (stdoutStr.indexOf('Ungit server already running') >= 0) {
-        winston.info('server-already-running');
-      }
+    const ungitServer = this.ungitServerProcess = child_process.spawn('node', options);
 
-      if (stdoutStr.indexOf('## Ungit started ##') >= 0) {
-        if (this.hasStarted) {
-          winston.info('Ungit started twice, probably crashed.');
-        } else {
-          this.hasStarted = true;
-          winston.info('Ungit server started.');
+    return new Promise((resolve, reject) => {
+      ungitServer.stdout.on('data', (stdout) => {
+        const stdoutStr = stdout.toString();
+        if (this.config.showServerOutput) winston.verbose(prependLines('[server] ', stdoutStr));
+
+        if (stdoutStr.indexOf('Ungit server already running') >= 0) {
+          winston.info('server-already-running');
         }
-      }
-    });
-    ungitServer.stderr.on("data", (stderr) => {
-      const stderrStr = stderr.toString();
-      winston.error(prependLines('[server ERROR] ', stderrStr));
-      if (stderrStr.indexOf("EADDRINUSE") > -1) {
-        winston.info("retrying with different port");
-        ungitServer.kill('SIGINT');
-        this.ungitServerProcess = null;
-        this.getPort().then(() => this.startServer());
-      }
-    });
-    ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
 
-    this.ungitServerProcess = ungitServer;
-
-    return Bluebird.resolve();
+        if (stdoutStr.indexOf('## Ungit started ##') >= 0) {
+          if (this.hasStarted) {
+            reject(new Error('Ungit started twice, probably crashed.'));
+          } else {
+            this.hasStarted = true;
+            winston.info('Ungit server started.');
+            resolve();
+          }
+        }
+      });
+      ungitServer.stderr.on('data', (stderr) => {
+        const stderrStr = stderr.toString();
+        winston.error(prependLines('[server ERROR] ', stderrStr));
+        if (stderrStr.indexOf('EADDRINUSE') > -1) {
+          winston.info('retrying with different port');
+          ungitServer.kill('SIGINT');
+          reject(new Error('EADDRINUSE'));
+        }
+      });
+      ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
+    });
   }
+
+  async shutdown() {
+    this.shuttinDown = true;
+
+    await this.backgroundAction('POST', '/api/testing/cleanup')
+
+    if (this.ungitServerProcess) {
+      this.ungitServerProcess.kill('SIGINT');
+      this.ungitServerProcess = null;
+    }
+
+    if (this.browser) {
+      await this.browser.close();
+      this.browser = null;
+      this.page = null;
+    }
+  }
+
+  // server helpers
+
+  async backgroundAction(method, url, body) {
+    url = this.getRootUrl() + url;
+
+    let req;
+    if (method === 'GET') {
+      req = request.get(url).withCredentials().query(body);
+    } else if (method === 'POST') {
+      req = request.post(url).send(body);
+    } else if (method === 'DELETE') {
+      req = request.delete(url).send(body);
+    }
+
+    req.set({ 'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json' });
+
+    const response = await req;
+    return response.body;
+  }
+
+  async createRepos(testRepoPaths, config) {
+    for (let i = 0; i < config.length; i++) {
+      const conf = config[i];
+      conf.bare = !!conf.bare;
+      await this.initRepo(conf);
+      await this.createCommits(conf, conf.initCommits);
+      testRepoPaths.push(conf.path);
+    }
+  }
+
+  async initRepo(options) {
+    if (options.path) {
+      await rimraf(options.path);
+      await mkdirp(options.path);
+    } else {
+      winston.info('Creating temp folder');
+      options.path = await this.createTempFolder();
+    }
+    await this.backgroundAction('POST', '/api/init', options);
+  }
+
+  async createTempFolder() {
+    const res = await this.backgroundAction('POST', '/api/testing/createtempdir');
+    return res.path;
+  }
+
+  async createCommits(config, limit, x) {
+    x = x || 0
+    if (!limit || limit < 0 || x === limit) return;
+
+    await this.createTestFile(`${config.path}/testy${x}`);
+    await this.backgroundAction('POST', '/api/commit', {
+      path: config.path,
+      message: `Init Commit ${x}`,
+      files: [{ name: `testy${x}` }]
+    });
+    await this.createCommits(config, limit, x + 1);
+  }
+
+  createTestFile(filename, repoPath) {
+    return this.backgroundAction('POST', '/api/testing/createfile', { file: filename, path: repoPath });
+  }
+
+  // browser helpers
+
+  async goto(url, options) {
+    if (!this.page) {
+      const pages = await this.browser.pages();
+      const page = this.page = pages[0];
+
+      page.on('console', (message) => {
+        const text = `[ui ${message.type()}] ${(new Date()).toISOString()}  - ${message.text()} ${message.args().join(', ')}`;
+
+        if (message.type() === 'error' && !this.shuttinDown) {
+          winston.error(text);
+        } else {
+          winston.info(text);
+        }
+      });
+    }
+
+    await this.page.goto(url);
+
+    if (!options || options.waitForSocketIO) {
+      await this.page.evaluate(() => {
+        const programEvents = require('ungit-program-events');
+        programEvents.add(function (event) {
+          if (event.event == 'connected') {
+            window.socketIOInitialized = true;
+          }
+        });
+      });
+      await this.page.waitForFunction(() => window.socketIOInitialized);
+    }
+  }
+
+  async openUngit(tempDirPath) {
+    await this.goto(`${this.getRootUrl()}/#/repository?path=${encodeURIComponent(tempDirPath)}`);
+    await this.waitForElementVisible('.repository-actions');
+  }
+
+  waitForElementVisible(selector) {
+    return this.page.waitForSelector(selector, { visible: true });
+  }
+  waitForElementHidden(selector) {
+    return this.page.waitForSelector(selector, { hidden: true });
+  }
+  wait(duration) {
+    return this.page.waitFor(duration);
+  }
+
+  type(text) {
+    return this.page.keyboard.type(text);
+  }
+  async insert(selector, text) {
+    await this.page.focus(selector);
+    await this.page.$eval(selector, (ele) => ele.value = '');
+    await this.type(text);
+  }
+  press(key) {
+    return this.page.keyboard.press(key);
+  }
+
+  async click(selector) {
+    await this.waitForElementVisible(selector);
+    await this.page.click(selector);
+  }
+
+  async commit(commitMessage) {
+    await this.waitForElementVisible('.files .file .btn-default');
+    await this.insert('.staging input.form-control', commitMessage);
+    await this.click('.commit-btn');
+    await this.waitForElementHidden('.files .file .btn-default');
+    await this.wait(1000);
+  }
+
+  async _createRef(type, name) {
+    await this.click('.current ~ .new-ref button.showBranchingForm');
+    await this.insert('.ref-icons.new-ref.editing input', name);
+    await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
+    await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
+  }
+  createTag(name) {
+    return this._createRef('tag', name);
+  }
+  createBranch(name) {
+    return this._createRef('branch', name);
+  }
+
+  async _verifyRefAction(action) {
+    try {
+      await this.page.waitForSelector('.modal-dialog .btn-primary', { visible: true, timeout: 2000 });
+      await this.click('.modal-dialog .btn-primary');
+    } catch (err) { /* ignore */ }
+    await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
+  }
+
+  async refAction(ref, local, action) {
+    await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
+    await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
+    await this._verifyRefAction(action);
+  }
+
+  async moveRef(ref, targetNodeCommitTitle) {
+    await this.click(`.branch[data-ta-name="${ref}"]`);
+    await this.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`);
+    await this._verifyRefAction('move');
+  }
+
 }

@@ -1,128 +1,125 @@
 'use strict';
 const environment = require('./environment')();
-const Bluebird = require('bluebird');
 const mkdirp = require('mkdirp');
-const rimraf = Bluebird.promisify(require('rimraf'));
+const util = require('util');
+const rimraf = util.promisify(require('rimraf'));
 const testRepoPaths = [];
 
 describe('[REMOTES]', () => {
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: true }, { bare: false, initCommits: 2 }]))
-      .then(() => testRepoPaths.push(`${testRepoPaths[1]}-cloned`)) // A directory to test cloning
-      .then(() => rimraf(testRepoPaths[2]))   // clean clone test dir
-      .then(() => mkdirp(testRepoPaths[2]));  // create clone test dir
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: true }, { bare: false, initCommits: 2 }]);
+
+    testRepoPaths.push(`${testRepoPaths[1]}-cloned`); // A directory to test cloning
+    await rimraf(testRepoPaths[2]);   // clean clone test dir
+    await mkdirp(testRepoPaths[2]);  // create clone test dir
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[1]);
+    return environment.openUngit(testRepoPaths[1]);
   });
 
-  it('Should not be possible to push without remote', () => {
-    return environment.nm.ug.click('.branch[data-ta-name="master"][data-ta-local="true"]')
-      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
+  it('Should not be possible to push without remote', async () => {
+    await environment.click('.branch[data-ta-name="master"][data-ta-local="true"]');
+    await environment.waitForElementHidden('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
-  it('Should not be possible to commit & push without remote', () => {
-    return environment.nm.ug.click('.amend-link')
-      .ug.click('.commit-grp .dropdown-toggle')
-      .wait('.commitnpush.disabled');
+  it('Should not be possible to commit & push without remote', async () => {
+    await environment.click('.amend-link');
+    await environment.click('.commit-grp .dropdown-toggle');
+    await environment.waitForElementVisible('.commitnpush.disabled');
   });
 
-  it('Adding a remote', () => {
-    return environment.nm.ug.click('.fetchButton .dropdown-toggle')
-      .ug.click('.add-new-remote')
-      .wait('.modal')
-      .insert('.modal #Name', 'myremote')
-      .insert('.modal #Url', testRepoPaths[0])
-      .click('.modal .modal-footer .btn-primary')
-      .wait(500)
-      .click('.fetchButton .dropdown-toggle')
-      .wait('.fetchButton .dropdown-menu [data-ta-clickable="myremote"]');
+  it('Adding a remote', async () => {
+    await environment.click('.fetchButton .dropdown-toggle');
+    await environment.click('.add-new-remote');
+
+    await environment.insert('.modal #Name', 'myremote');
+    await environment.insert('.modal #Url', testRepoPaths[0]);
+    await environment.click('.modal .modal-footer .btn-primary');
+
+    await environment.click('.fetchButton .dropdown-toggle');
+    await environment.waitForElementVisible('.fetchButton .dropdown-menu [data-ta-clickable="myremote"]');
   });
 
-  it('Fetch from newly added remote', () => {
-    return environment.nm.click('.fetchButton .btn-main')
-      .wait(500)
-      .ug.waitForElementNotVisible('#nprogress');
+  it('Fetch from newly added remote', async () => {
+    await environment.click('.fetchButton .btn-main');
+    await environment.waitForElementHidden('#nprogress');
   });
 
-  it('Remote delete check', () => {
-    return environment.nm.click('.fetchButton .dropdown-toggle')
-      .ug.click('[data-ta-clickable="myremote-remove"]')
-      .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('#nprogress')
-      .ug.click('.fetchButton .dropdown-toggle')
-      .exists('[data-ta-clickable="myremote"]')
-      .then((isVisible) => { if (isVisible) throw new Error('Remote exists after delete'); });
+  it('Remote delete check', async () => {
+    await environment.click('.fetchButton .dropdown-toggle');
+    await environment.click('[data-ta-clickable="myremote-remove"]');
+    await environment.click('.modal-dialog .btn-primary');
+
+    await environment.click('.fetchButton .dropdown-toggle');
+    await environment.waitForElementHidden('[data-ta-clickable="myremote"]');
   });
 
   // ----------- CLONING -------------
-  it('navigate to empty folder path', () => {
-    return environment.nm.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[2])}`)
-      .wait('.uninited');
+  it('navigate to empty folder path', async () => {
+    await environment.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[2])}`);
+    await environment.waitForElementVisible('.uninited');
   });
 
-  it('Clone repository should bring you to repo page', () => {
-    return environment.nm.insert('#cloneFromInput', testRepoPaths[1])
-      .insert('#cloneToInput', testRepoPaths[2])
-      .ug.click('.uninited button[type="submit"]')
-      .wait('.repository-view')
-      .exists('[data-ta-container="remote-error-popup"]')
-      .then((isVisible) => { if (isVisible) throw new Error('Should not find remote error popup'); });
+  it('Clone repository should bring you to repo page', async () => {
+    await environment.insert('#cloneFromInput', testRepoPaths[1]);
+    await environment.insert('#cloneToInput', testRepoPaths[2]);
+    await environment.click('.uninited button[type="submit"]');
+    await environment.waitForElementVisible('.repository-view');
   });
 
-  it('Should be possible to fetch', () => {
-    return environment.nm.click('.fetchButton .btn-main')
-      .wait('#nprogress')
-      .ug.waitForElementNotVisible('#nprogress');
+  it('Should be possible to fetch', async () => {
+    await environment.click('.fetchButton .btn-main');
+    await environment.waitForElementHidden('#nprogress');
   });
 
-  it('Should be possible to create and push a branch', () => {
-    return environment.nm.ug.createBranch('branchinclone')
-      .ug.refAction('branchinclone', true, 'push')
-      .wait('[data-ta-name="origin/branchinclone"]');
+  it('Should be possible to create and push a branch', async () => {
+    await environment.createBranch('branchinclone');
+    await environment.refAction('branchinclone', true, 'push');
+    await environment.waitForElementVisible('[data-ta-name="origin/branchinclone"]');
   });
 
-  it('Should be possible to force push a branch', () => {
-    return environment.nm.ug.moveRef('branchinclone', 'Init Commit 0')
-      .ug.refAction('branchinclone', true, 'push')
-      .ug.waitForElementNotVisible('[data-ta-action="push"]:not([style*="display: none"])');
+  it('Should be possible to force push a branch', async () => {
+    await environment.moveRef('branchinclone', 'Init Commit 0');
+    await environment.refAction('branchinclone', true, 'push');
+    await environment.waitForElementHidden('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
-  it('Check for fetching remote branches for the branch list', () => {
-    return environment.nm.ug.click('.branch .dropdown-toggle')
-      .ug.click('.options input')
-      .wait(200)
-      .visible('li .octicon-globe')
-      .then((isVisble) => {
-        if (!isVisble) {
-          return environment.nm.ug.click('.options input')
-            .wait('li .octicon-globe');
-        }
-      });
+  it('Check for fetching remote branches for the branch list', async () => {
+    await environment.click('.branch .dropdown-toggle');
+    await environment.click('.options input');
+    await environment.wait(1000);
+    try {
+      await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 2000 });
+    } catch (err) {
+      await environment.click('.options input');
+      await environment.waitForElementVisible('li .octicon-globe');
+    }
   });
 
-  it('checkout remote branches with matching local branch at wrong place', () => {
-    return environment.nm.ug.moveRef('branchinclone', 'Init Commit 1')
-      .ug.click('.branch .dropdown-toggle')
-      .ug.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]')
-      .wait(200)
-      .wait('[data-ta-name="branchinclone"][data-ta-local="true"]');
+  it('checkout remote branches with matching local branch at wrong place', async () => {
+    await environment.moveRef('branchinclone', 'Init Commit 1');
+    await environment.click('.branch .dropdown-toggle');
+    await environment.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]');
+    await environment.waitForElementVisible('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
 
-  it('Should be possible to commitnpush', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`)
-      .ug.commitnpush('Commit & Push')
-      .wait('.nux');
+  it('Should be possible to commitnpush', async () => {
+    await environment.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`, testRepoPaths[2]);
+    await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.insert('.staging input.form-control', 'Commit & Push');
+    await environment.click('.commit-grp .dropdown-toggle');
+    await environment.click('.commitnpush');
+    await environment.waitForElementVisible('.nux');
   });
 
-  it('Should be possible to commitnpush with ff', () => {
-    return environment.nm.ug.click('.amend-link')
-      .ug.click('.commit-grp .dropdown-toggle')
-      .ug.click('.commitnpush')
-      .ug.click('.modal-dialog .btn-primary')
-      .wait('.nux');
+  it('Should be possible to commitnpush with ff', async () => {
+    await environment.click('.amend-link');
+    await environment.click('.commit-grp .dropdown-toggle');
+    await environment.click('.commitnpush');
+    await environment.click('.modal-dialog .btn-primary');
+    await environment.waitForElementVisible('.nux');
   });
 });

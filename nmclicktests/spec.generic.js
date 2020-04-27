@@ -1,205 +1,224 @@
 'use strict';
 const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
-const Bluebird = require('bluebird');
-const mkdirp = require("mkdirp");
-const rimraf = Bluebird.promisify(require("rimraf"));
+const mkdirp = require('mkdirp');
+const util = require('util');
+const rimraf = util.promisify(require('rimraf'));
 const testRepoPaths = [];
 
+const changeTestFile = async (filename, repoPath) => {
+  await environment.backgroundAction('POST', `/api/testing/changefile`, { file: filename, path: repoPath });
+};
+const checkout = async (branch) => {
+  await environment.click(`.branch[data-ta-name="${branch}"]`);
+  await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
+  await environment.waitForElementVisible(`.ref.branch[data-ta-name="${branch}"].current`);
+};
+const amendCommit = async () => {
+  try {
+    await environment.page.waitForSelector('.amend-button', { visible: true, timeout: 2000 });
+    await environment.click('.amend-button');
+  } catch (err) {
+    await environment.click('.amend-link');
+  }
+  await environment.click('.commit-btn');
+  await environment.waitForElementHidden('.files .file .btn-default');
+};
+
 describe('[GENERIC]', () => {
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]))
-      // create a sub dir and change working dir to sub dir to prove functionality within subdir
-      .then(() => testRepoPaths.push(`${testRepoPaths[0]}/asubdir`))
-      .then(() => rimraf(testRepoPaths[1]))
-      .then(() => mkdirp(testRepoPaths[1]));
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: false }]);
+
+    // create a sub dir and change working dir to sub dir to prove functionality within subdir
+    testRepoPaths.push(`${testRepoPaths[0]}/asubdir`);
+    await rimraf(testRepoPaths[1]);
+    await mkdirp(testRepoPaths[1]);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open repo screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[1]);
+    return environment.openUngit(testRepoPaths[1]);
   });
 
   it('Check for refresh button', () => {
-    return environment.nm.wait('.refresh-button')
-      .ug.click('.refresh-button');
+    return environment.click('.refresh-button');
   });
 
-  it('Should be possible to create and commit a file', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('Init')
-      .wait('.commit');
+  it('Should be possible to create and commit a file', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.commit('Init');
+    await environment.waitForElementVisible('.commit');
   });
 
-  it('Should be possible to amend a file', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.amendCommit()
-      .wait('.commit');
+  it('Should be possible to amend a file', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.waitForElementVisible('.files .file .btn-default');
+    await amendCommit();
+    await environment.waitForElementVisible('.commit');
   });
 
-  it('Should be possible to cancel amend a file', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .ug.amendCommit()
-      .wait('.btn-stg-cancel');
+  it('Should be possible to cancel amend a file', async () => {
+    await environment.click('.amend-link');
+    await environment.click('.btn-stg-cancel');
+    await environment.waitForElementVisible('.empty-commit-link');
   });
 
-  it('Should be able to add a new file to .gitignore', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`)
-      .wait('.files .file .btn-default')
-      .ug.click('.files button.ignore')
-      .ug.click('.files button.ignore')
-      .ug.waitForElementNotVisible('.files .file .btn-default');
+  it('Should be able to add a new file to .gitignore', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
+    await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.click('.files button.ignore');
+    await environment.wait(2000);
+    await environment.click('.files button.ignore');
+    await environment.waitForElementHidden('.files .file .btn-default');
   });
 
-  it('Test showing commit diff between two commits', () => {
-    return environment.nm.wait('[data-ta-clickable="node-clickable-0"]')
-      .ug.click('[data-ta-clickable="node-clickable-0"]')
-      .wait('.diff-wrapper')
-      .ug.click('.commit-diff-filename')
-      .wait('.commit-line-diffs');
+  it('Test showing commit diff between two commits', async () => {
+    await environment.click('[data-ta-clickable="node-clickable-0"]')
+    await environment.waitForElementVisible('.diff-wrapper');
+    await environment.click('.commit-diff-filename');
+    await environment.waitForElementVisible('.commit-line-diffs');
   });
 
-  it('Test showing commit side by side diff between two commits', () => {
-    return environment.nm.ug.click('.commit-sideBySideDiff')
-      .wait('.commit-line-diffs');
+  it('Test showing commit side by side diff between two commits', async () => {
+    await environment.click('.commit-sideBySideDiff');
+    await environment.waitForElementVisible('.commit-line-diffs');
   });
 
-  it('Test wordwrap', () => {
-    return environment.nm.ug.click('.commit-wordwrap')
-      .wait('.word-wrap');
+  it('Test wordwrap', async () => {
+    await environment.click('.commit-wordwrap');
+    await environment.waitForElementVisible('.word-wrap');
   });
 
-  it('Test wordwrap', () => {
-    return environment.nm.ug.click('.commit-whitespace')
-      .wait('.commit-line-diffs')
-      .ug.click('[data-ta-clickable="node-clickable-0"]');
+  it('Test whitespace', async () => {
+    await environment.click('.commit-whitespace');
+    await environment.waitForElementVisible('.commit-line-diffs');
+    await environment.click('[data-ta-clickable="node-clickable-0"]');
   });
 
-  it('Should be possible to discard a created file and ensure patching is not available for new file', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile2.txt`)
-      .wait('.files .file .btn-default')
-      .ug.click('.files button')
-      .wait('.files .file .btn-default')
-      .ug.click('.files button')
-      .ug.waitForElementNotVisible('[data-ta-container="patch-file"]')
-      .ug.click('.files button.discard')
-      .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.files .file .btn-default')
+  it('Should be possible to discard a created file and ensure patching is not available for new file', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
+    await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.click('.files button');
+    await environment.waitForElementHidden('[data-ta-container="patch-file"]');
+    await environment.click('.files button.discard');
+    await environment.click('.modal-dialog .btn-primary');
+    await environment.waitForElementHidden('.files .file .btn-default');
   });
 
   it('Should be possible to create a branch', () => {
-    return environment.nm.ug.createBranch('testbranch');
+    return environment.createBranch('testbranch');
   });
 
-  it('Should be possible to create and destroy a branch', () => {
-    return environment.nm.ug.createBranch('willbedeleted')
-      .ug.click('.branch[data-ta-name="willbedeleted"]')
-      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
-      .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.branch[data-ta-name="willbedeleted"]');
+  it('Should be possible to create and destroy a branch', async () => {
+    await environment.createBranch('willbedeleted');
+    await environment.click('.branch[data-ta-name="willbedeleted"]');
+    await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.click('.modal-dialog .btn-primary');
+    await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
 
-  it('Should be possible to create and destroy a tag', () => {
-    return environment.nm.ug.createTag('tagwillbedeleted')
-      .ug.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]')
-      .ug.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask')
-      .wait('[data-ta-container="yes-no-dialog"]')
-      .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
+  it('Should be possible to create and destroy a tag', async () => {
+    await environment.createTag('tagwillbedeleted');
+    await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
+    await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.click('.modal-dialog .btn-primary')
+    await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
-  it('Commit changes to a file', () => {
-    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('.files .file .btn-default')
-      .insert('.staging input.form-control', 'My commit message')
-      .click('.commit-btn')
-      .ug.waitForElementNotVisible('.files .file .btn-default');
+  it('Commit changes to a file', async () => {
+    await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.insert('.staging input.form-control', 'My commit message');
+    await environment.click('.commit-btn');
+    await environment.waitForElementHidden('.files .file .btn-default');
   });
 
-  it('Show stats for changed file and discard it', () => {
-    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .wait('.files .file .additions')
-      .wait('.files .file .deletions')
-      .ug.click('.files button.discard')
-      .ug.click('.modal-dialog .btn-primary')
-      .ug.waitForElementNotVisible('.files .file .btn-default');
+  it('Show stats for changed file and discard it', async () => {
+    await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.waitForElementVisible('.files .file .additions');
+    await environment.waitForElementVisible('.files .file .deletions');
+
+    await environment.click('.files button.discard');
+    await environment.click('.modal-dialog .btn-primary');
+    await environment.waitForElementHidden('.files .file .btn-default');
   });
 
-  it.skip('Should be possible to patch a file', () => {
-    return environment.nm.ug.changeTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .patch('patch')
-      .waitForElementVisible('.commit');
+  it.skip('Should be possible to patch a file', async () => {
+    await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    //   .patch('patch')
+    environment.waitForElementVisible('.commit');
   });
 
   it('Checkout a branch', () => {
-    return environment.nm.ug.checkout('testbranch');
+    return checkout('testbranch');
   });
 
-  it('Create another commit', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testy2.txt`)
-      .ug.commit('Branch commit');
+  it('Create another commit', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testy2.txt`, testRepoPaths[0]);
+    await environment.commit('Branch commit');
   });
 
   it('Rebase', () => {
-    return environment.nm.ug.refAction('testbranch', true, 'rebase');
+    return environment.refAction('testbranch', true, 'rebase');
   });
 
   it('Checkout master again', () => {
-    return environment.nm.ug.checkout('master');
+    return checkout('master');
   });
 
-  it('Create yet another commit', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testy3.txt`)
-      .ug.commit('Branch commit');
+  it('Create yet another commit', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testy3.txt`, testRepoPaths[0]);
+    await environment.commit('Branch commit');
   });
 
   it('Merge', () => {
-    return environment.nm.ug.refAction('testbranch', true, 'merge');
+    return environment.refAction('testbranch', true, 'merge');
   });
 
-  it('Revert merge', () => {
-    return environment.nm.ug.click('[data-ta-clickable="node-clickable-0"]')
-      .wait('[data-ta-action="revert"]')
-      .ug.click('[data-ta-action="revert"]')
-      .ug.waitForElementNotVisible('.crash');
+  it('Revert merge', async () => {
+    await environment.click('[data-ta-clickable="node-clickable-0"]');
+    await environment.waitForElementVisible('[data-ta-action="revert"]');
+    await environment.click('[data-ta-action="revert"]');
+    await environment.waitForElementHidden('.crash');
   });
 
-  it('Should be possible to move a branch', () => {
-    return environment.nm.ug.createBranch('movebranch')
-      .ug.moveRef('movebranch', 'Init');
+  it('Should be possible to move a branch', async () => {
+    await environment.createBranch('movebranch');
+    await environment.moveRef('movebranch', 'Init');
   });
 
-  it('Should be possible to cancel creation of an empty commit', () => {
-    return environment.nm.ug.emptyCommit()
-      .ug.click('.btn-stg-cancel')
-      .wait('.empty-commit-link');
+  it('Should be possible to cancel creation of an empty commit', async () => {
+    await environment.click('.empty-commit-link');
+    await environment.click('.btn-stg-cancel');
+    await environment.waitForElementVisible('.empty-commit-link');
   });
 
-  it('Should be possible to create an empty commit', () => {
-    return environment.nm.ug.emptyCommit()
-      .wait('.commit');
+  it('Should be possible to create an empty commit', async () => {
+    await environment.click('.empty-commit-link');
+    await environment.click('.commit-btn');
+    await environment.waitForElementVisible('.commit');
   });
 
-  it('Should be possible to amend an empty commit', () => {
-    return environment.nm.ug.emptyCommit()
-      .wait('.commit')
-      .ug.amendCommit()
-      .wait('.commit');
+  it('Should be possible to amend an empty commit', async () => {
+    await environment.click('.empty-commit-link');
+    await environment.click('.commit-btn');
+    await environment.waitForElementVisible('.commit');
+    await amendCommit();
+    await environment.waitForElementVisible('.commit');
   });
 
-  it('Should be possible to cancel amend of an empty commit', () => {
-    return environment.nm.ug.amendCommit()
-      .ug.click('.btn-stg-cancel')
-      .wait('.empty-commit-link');
+  it('Should be possible to cancel amend of an empty commit', async () => {
+    await environment.click('.amend-link');
+    await environment.click('.btn-stg-cancel');
+    await environment.waitForElementVisible('.empty-commit-link');
   });
 
   it('Should be possible to click refresh button', () => {
-    return environment.nm.ug.click('button.refresh-button');
+    return environment.click('button.refresh-button');
   });
 
-  it('Go to home screen', () => {
-    return environment.nm.ug.click('.navbar .backlink')
-      .wait('.home');
+  it('Go to home screen', async () => {
+    await environment.click('.navbar .backlink');
+    await environment.waitForElementVisible('.home');
   });
 });

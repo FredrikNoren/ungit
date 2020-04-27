@@ -3,42 +3,40 @@ const environment = require('./environment')({ serverStartupOptions: ['--numberO
 const testRepoPaths = [];
 
 describe('[LOAD-AHEAD]', () => {
-  before('Environment init', () => {
-    return environment.init()
-      .then(() => environment.createRepos(testRepoPaths, [{ bare: false }]));
+  before('Environment init', async () => {
+    await environment.init();
+    await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
-    return environment.nm.ug.openUngit(testRepoPaths[0]);
+    return environment.openUngit(testRepoPaths[0]);
   });
 
-  it('Should be possible to create and commit 1', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('commit-1')
-      .wait('.commit')
-      .ug.createBranch('branch-1');
+  it('Should be possible to create and commit 1', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.commit('commit-1');
+    await environment.createBranch('branch-1');
   });
 
-  it('Should be possible to create and commit 2', () => {
-    return environment.nm.ug.createTestFile(`${testRepoPaths[0]}/testfile.txt`)
-      .ug.commit('commit-2')
-      .wait('.commit');
+  it('Should be possible to create and commit 2', async () => {
+    await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.commit('commit-2');
   });
 
-  it('Should be possible to create and commit 3', () => {
-    return environment.nm.ug.click('.branch .dropdown-toggle')
-      .ug.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]')
-      .ug.waitForElementNotVisible('#nprogress');
+  it('Should be possible to create and commit 3', async () => {
+    await environment.click('.branch .dropdown-toggle');
+    await environment.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]');
+    await environment.waitForElementVisible('[data-ta-name="branch-1"].current');
   });
 
   it('Create a branch during collapsed mode', () => {
-    return environment.nm.ug.createBranch('new-branch');
+    return environment.createBranch('new-branch');
   });
 
-  it('Load ahead', () => {
-    return environment.nm.ug.click('.load-ahead-button')
-      .wait('[data-ta-clickable="node-clickable-1"]')
-      .ug.waitForElementNotVisible('.loadAhead')
+  it('Load ahead', async () => {
+    await environment.click('.load-ahead-button');
+    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-1"]');
+    await environment.waitForElementHidden('.loadAhead');
   });
 });

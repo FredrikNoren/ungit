@@ -27,6 +27,7 @@ addons:
   apt:
     packages:
       - xvfb
+      - libgbm1
       - libgconf-2-4
       - wine
   homebrew:
