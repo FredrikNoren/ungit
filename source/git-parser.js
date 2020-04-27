@@ -118,7 +118,7 @@ exports.parseGitLog = (data) => {
   let currentCommmit;
   const parseCommitLine = (row) => {
     if (!row.trim()) return;
-    currentCommmit = { refs: [], fileLineDiffs: [], total: { additions: 0, deletions: 0 } };
+    currentCommmit = { refs: [], fileLineDiffs: [], additions: 0, deletions: 0 };
     const refStartIndex = row.indexOf('(');
     const sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter((sha1) => { return sha1 && sha1.length; });
     currentCommmit.sha1 = sha1s[0];
@@ -186,10 +186,10 @@ exports.parseGitLog = (data) => {
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
     for (let fileLineDiff of currentCommmit.fileLineDiffs) {
       if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
-        currentCommmit.total.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
+        currentCommmit.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
       }
       if (!isNaN(parseInt(fileLineDiff.deletions, 10))) {
-        currentCommmit.total.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
+        currentCommmit.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
       }
     }
     parser = parseCommitLine;
