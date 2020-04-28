@@ -1,10 +1,10 @@
 <!-- ko if: isShowingDiffs -->
-<div>
+<div class="textdiff">
   <!-- ko if: isParsed -->
   <div data-bind="template: {nodes: ko.utils.parseHtmlFragment(htmlSrc)}, css: {'word-wrap': wordWrap.value}"></div>
   <!-- /ko -->
-  <div class="btn-load-more" data-bind="visible: hasMore">
-    <span class="btn btn-warning" data-bind="click: loadMore, text: 'Load more'"></span>
+  <div class="load-more" data-bind="visible: hasMore">
+    <button class="btn btn-default" data-bind="click: loadMore">Load more</button>
   </div>
 </div>
 <!-- /ko -->
