@@ -10,7 +10,7 @@ describe('[AUTHENTICATION]', () => {
   after('Environment stop', () => environment.shutdown());
 
   it('Open home screen should show authentication dialog', async () => {
-    await environment.goto(environment.getRootUrl(), { waitForSocketIO: false });
+    await environment.goto(environment.getRootUrl());
     await environment.waitForElementVisible('.login');
   });
 

@@ -205,13 +205,15 @@ class Environment {
 
   // browser helpers
 
-  async goto(url, options) {
+  async goto(url) {
+    winston.info('Go to page: ' + url);
+
     if (!this.page) {
       const pages = await this.browser.pages();
       const page = this.page = pages[0];
 
       page.on('console', (message) => {
-        const text = `[ui ${message.type()}] ${(new Date()).toISOString()}  - ${message.text()} ${message.args().join(', ')}`;
+        const text = `[ui ${message.type()}] ${(new Date()).toISOString()}  - ${message.text()}}`;
 
         if (message.type() === 'error' && !this.shuttinDown) {
           winston.error(text);
@@ -222,23 +224,12 @@ class Environment {
     }
 
     await this.page.goto(url);
-
-    if (!options || options.waitForSocketIO) {
-      await this.page.evaluate(() => {
-        const programEvents = require('ungit-program-events');
-        programEvents.add(function (event) {
-          if (event.event == 'connected') {
-            window.socketIOInitialized = true;
-          }
-        });
-      });
-      await this.page.waitForFunction(() => window.socketIOInitialized);
-    }
   }
 
   async openUngit(tempDirPath) {
     await this.goto(`${this.getRootUrl()}/#/repository?path=${encodeURIComponent(tempDirPath)}`);
     await this.waitForElementVisible('.repository-actions');
+    await this.wait(1000);
   }
 
   waitForElementVisible(selector) {
@@ -255,8 +246,9 @@ class Environment {
     return this.page.keyboard.type(text);
   }
   async insert(selector, text) {
-    await this.page.focus(selector);
+    await this.waitForElementVisible(selector);
     await this.page.$eval(selector, (ele) => ele.value = '');
+    await this.page.focus(selector);
     await this.type(text);
   }
   press(key) {

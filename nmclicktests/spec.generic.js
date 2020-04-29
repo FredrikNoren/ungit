@@ -179,7 +179,7 @@ describe('[GENERIC]', () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
     await environment.waitForElementVisible('[data-ta-action="revert"]');
     await environment.click('[data-ta-action="revert"]');
-    await environment.waitForElementHidden('.crash');
+    await environment.waitForElementVisible('[data-ta-node-title="Revert \\"Merge branch \'testbranch\'\\""]');
   });
 
   it('Should be possible to move a branch', async () => {

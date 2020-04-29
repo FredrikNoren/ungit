@@ -113,6 +113,7 @@ describe('[REMOTES]', () => {
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
     await environment.waitForElementVisible('.nux');
+    await environment.waitForElementHidden('#nprogress');
   });
 
   it('Should be possible to commitnpush with ff', async () => {
@@ -121,5 +122,6 @@ describe('[REMOTES]', () => {
     await environment.click('.commitnpush');
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementVisible('.nux');
+    await environment.waitForElementHidden('#nprogress');
   });
 });
