@@ -11,8 +11,6 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
-      # Xvfb (nightmare on linux)
-      DISPLAY: ':99.0'
       # electron packager (win32 ia32 on macos) https://github.com/electron/electron-packager/pull/449#issuecomment-240508298
       WINEDLLOVERRIDES: 'mscoree,mshtml='
 
@@ -25,8 +23,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       # linux dependencies
-      - run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        if: matrix.os == 'ubuntu-latest'
       - run: sudo apt update
         if: matrix.os == 'ubuntu-latest'
       - run: sudo apt install -y libgbm1
