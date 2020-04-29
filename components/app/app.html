@@ -1,7 +1,6 @@
-
 <!-- ko component: header --><!-- /ko -->
-<div class="app-top-margin"></div>
-<div class="app-wrapper">
+
+<div class="app">
 
 <div class="container" data-bind="shown: shown">
   <div class="alert alert-danger" data-bind="visible: gitVersionErrorVisible">
@@ -28,7 +27,7 @@
 </div>
 
 <!-- ko if: content -->
-<div class="container container-wide" data-bind="component: content"></div>
+<div class="container-wide" data-bind="component: content"></div>
 <!-- /ko -->
 
 </div>
