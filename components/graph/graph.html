@@ -30,7 +30,7 @@
         <!-- /ko -->
 
         <!-- ko foreach: dropareaGraphActions -->
-        <span class="graphAction droparea" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
+        <span class="graphAction" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
           <span data-bind="html: icon"></span>
           <span data-bind="text: text"></span>
           <div class="dropmask" tabIndex="0" role="button" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
