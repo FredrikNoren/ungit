@@ -30,7 +30,6 @@
     "color": "~3.1.2",
     "cookie-parser": "~1.4.5",
     "crossroads": "~0.12.2",
-    "dedent": "~0.7.0",
     "diff2html": "~3.1.6",
     "dnd-page-scroll": "0.0.4",
     "express": "~4.17.1",
@@ -61,7 +60,6 @@
     "signals": "~1.0.0",
     "snapsvg": "~0.5.1",
     "socket.io": "~2.3.0",
-    "superagent": "~5.2.2",
     "temp": "~0.9.1",
     "winston": "~3.2.1",
     "yargs": "~15.3.1"
@@ -69,6 +67,7 @@
   "devDependencies": {
     "ansi-color": "~0.2.1",
     "browserify": "~16.5.0",
+    "dedent": "~0.7.0",
     "electron": "~8.2.0",
     "electron-packager": "~14.2.1",
     "expect.js": "~0.3.1",
@@ -89,6 +88,7 @@
     "mocha": "~7.1.1",
     "nightmare": "~3.0.2",
     "pkg-versions": "~2.1.0",
+    "superagent": "~5.2.2",
     "supertest": "~4.0.2"
   },
   "engines": {
