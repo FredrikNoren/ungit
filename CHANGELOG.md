@@ -3,14 +3,29 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.6...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.7...master)
+
+## [1.5.7](https://github.com/FredrikNoren/ungit/compare/v1.5.6...v1.5.7)
 
 ### Fixed
 - Init tooltips from the app start [#1343](https://github.com/FredrikNoren/ungit/pull/1343)
 - Fixing some accessibility issues [#1318](https://github.com/FredrikNoren/ungit/pull/1318)
+- Flatten total-lines-changed object [#1330](https://github.com/FredrikNoren/ungit/pull/1330)
+- Set electron window icon explicitly so it works during debug and on linux [#1347](https://github.com/FredrikNoren/ungit/pull/1347)
 
 ### Changed
-- Only display ref search button when there are hidden refs [#1311](https://github.com/FredrikNoren/ungit/pull/1311)
+- Only display ref search button when there are hidden refs [#1311](https://github.com/FredrikNoren/ungit/pull/1311), [#1325](https://github.com/FredrikNoren/ungit/pull/1325)
+- Cleanup CSS styles [#1339](https://github.com/FredrikNoren/ungit/pull/1339), [#1328](https://github.com/FredrikNoren/ungit/pull/1328), [#1331](https://github.com/FredrikNoren/ungit/pull/1331), [#1332](https://github.com/FredrikNoren/ungit/pull/1332), [#1322](https://github.com/FredrikNoren/ungit/pull/1322)
+- Style autocompletes like dropdowns [#1327](https://github.com/FredrikNoren/ungit/pull/1327)
+- Optimizes ref-search autocomplete initialization [#1326](https://github.com/FredrikNoren/ungit/pull/1326)
+- Reduce jQuery UI imports and use Bootstrap tooltips [#1340](https://github.com/FredrikNoren/ungit/pull/1340)
+- Image cleanup [#1345](https://github.com/FredrikNoren/ungit/pull/1345)
+- Bump Dependencies [#1309](https://github.com/FredrikNoren/ungit/pull/1309)
+
+### Removed
+- Remove unused color dependency [#1341](https://github.com/FredrikNoren/ungit/pull/1341)
+- Remove image embed [#1346](https://github.com/FredrikNoren/ungit/pull/1346)
+- Remove unused tracker.js [#1344](https://github.com/FredrikNoren/ungit/pull/1344)
 
 ## [1.5.6](https://github.com/FredrikNoren/ungit/compare/v1.5.5...v1.5.6)
 
