@@ -61,33 +61,11 @@ div.list-group-item {
   }
 }
 
-.arrowContainer {
-	position: relative;
-	&.arrowRight .arrow,
-	&.arrowRight .shadow,
-	&.arrowLeft .arrow,
-	&.arrowLeft .shadow {
-		width: 15px;
-		height: 30px;
-		margin-top: 22px;
-	}
-	&.arrowUp .arrow,
-	&.arrowUp .shadow,
-	&.arrowDown .arrow,
-	&.arrowDown .shadow {
-		width: 30px;
-		height: 15px;
-	}
-	.shadow {
-		position: absolute;
-		left: 5px;
-		top: 5px;
-	}
-	.arrow {
-		position: absolute;
-		left: 0px;
-		top: 0px;
-	}
+.arrow {
+  position: absolute;
+  height: 0;
+  width: 0;
+  border: 15px solid transparent;
 }
 
 // -- Custom Scrollbar ----

@@ -13,17 +13,10 @@
     }
   }
 
-  .arrowDown {
-    position: absolute;
+  .arrow {
+    border-top-color: #643a44;
     left: (@log-width-small + 45px);
-    bottom: 0px;
-    .arrow {
-      height: 0px;
-      width: 0px;
-      border-top: 15px solid rgb(99, 57, 67);
-      border-right: 15px solid transparent;
-      border-left: 15px solid transparent;
-    }
+    bottom: -30px;
   }
 
   .commitnpush.disabled {
@@ -196,7 +189,7 @@
 
 @media (min-width: @screen-md-min) {
   .staging {
-    .arrowDown {
+    .arrow {
       left: (@log-width-large + 45px);
     }
   }
