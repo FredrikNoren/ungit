@@ -112,8 +112,7 @@ describe('[REMOTES]', () => {
     await environment.insert('.staging input.form-control', 'Commit & Push');
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
-    await environment.waitForElementVisible('.nux');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push"]')
   });
 
   it('Should be possible to commitnpush with ff', async () => {
