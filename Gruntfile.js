@@ -239,7 +239,6 @@ module.exports = (grunt) => {
     b.require('async', { expose: 'async' });
     b.require('moment', { expose: 'moment' });
     b.require('blueimp-md5', { expose: 'blueimp-md5' });
-    b.require('color', { expose: 'color' });
     b.require('signals', { expose: 'signals' });
     b.require('util', { expose: 'util' });
     b.require('path', { expose: 'path' });
