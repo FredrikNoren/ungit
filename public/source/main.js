@@ -16,7 +16,7 @@ var navigation = require('ungit-navigation');
 var storage = require('ungit-storage');
 var adBlocker = require('just-detect-adblock');
 
-// Request animation frame polyfill
+// Request animation frame polyfill and init tooltips
 (function() {
   var lastTime = 0;
   var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -41,12 +41,9 @@ var adBlocker = require('just-detect-adblock');
       clearTimeout(id);
     };
 
-  programEvents.add(function(event) {
-    if (event.event === 'init-tooltip') {
-      $('.bootstrap-tooltip').tooltip().removeClass('bootstrap-tooltip');
-    }
+  $(document).tooltip({
+    selector: '.bootstrap-tooltip'
   });
-
 }());
 
 ko.bindingHandlers.autocomplete = {
