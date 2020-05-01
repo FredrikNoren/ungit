@@ -124,7 +124,6 @@ class GraphViewModel {
           this.graphHeight(nodes[nodes.length - 1].cy() + 80);
         }
         this.graphWidth(1000 + (this.heighstBranchOrder * 90));
-        programEvents.dispatch({ event: 'init-tooltip' });
       }).catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
