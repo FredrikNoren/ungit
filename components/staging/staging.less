@@ -1,4 +1,3 @@
-
 @import "public/less/variables.less";
 
 .staging {
@@ -14,23 +13,15 @@
     }
   }
 
-  .arrowDown {
-    position: absolute;
+  .arrow {
+    border-top-color: #643a44;
     left: (@log-width-small + 45px);
-    bottom: 0px;
-    .arrow {
-      height: 0px;
-      width: 0px;
-      border-top: 15px solid rgb(99, 57, 67);
-      border-right: 15px solid transparent;
-      border-left: 15px solid transparent;
-    }
+    bottom: -30px;
   }
 
-  .btn-load-more {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  .commitnpush.disabled {
+    pointer-events: none;
+    opacity: 0.5;
   }
 
   .file-area {
@@ -198,7 +189,7 @@
 
 @media (min-width: @screen-md-min) {
   .staging {
-    .arrowDown {
+    .arrow {
       left: (@log-width-large + 45px);
     }
   }

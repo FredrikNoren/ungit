@@ -210,7 +210,8 @@ describe('git-api conflict merge', function () {
     return common.get(req, '/gitlog', { path: testDir }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(4);
-      expect(res.nodes[0].total).to.eql({additions: 1, deletions: 1});
+      expect(res.nodes[0].additions).to.eql(1);
+      expect(res.nodes[0].deletions).to.eql(1);
       expect(res.nodes[0].fileLineDiffs.length).to.be(1);
       expect(res.nodes[0].fileLineDiffs[0]).to.eql({
         additions: 1,
