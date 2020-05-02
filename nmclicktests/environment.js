@@ -256,8 +256,11 @@ class Environment {
   }
 
   async click(selector) {
-    await this.waitForElementVisible(selector);
-    await this.page.click(selector);
+    const elementHandle =  await this.waitForElementVisible(selector);
+    if (elementHandle == null) {
+      throw new Error(`Element does not exist or is not visible: ${selector}`);
+    }
+    await elementHandle.click();
   }
 
   async commit(commitMessage) {
