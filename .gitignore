@@ -14,12 +14,8 @@ results
 npm-debug.log
 
 public/css/
-public/js/ungit.js
-public/js/ungit.js.map
-public/js/devStyling.js
-public/js/raven.min.js
-public/js/raven.min.js.map
 public/images/
+public/js/
 
 .ungitrc
 
