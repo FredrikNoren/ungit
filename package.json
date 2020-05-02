@@ -27,7 +27,6 @@
     "bluebird": "~3.7.2",
     "blueimp-md5": "~2.13.0",
     "body-parser": "~1.19.0",
-    "color": "~3.1.2",
     "cookie-parser": "~1.4.5",
     "crossroads": "~0.12.2",
     "diff2html": "~3.1.6",
