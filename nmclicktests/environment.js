@@ -23,8 +23,8 @@ class Environment {
     this.config = config || {};
     this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 35000;
-    this.config.viewWidth = 2000;
-    this.config.viewHeight = 2000;
+    this.config.viewWidth = 1920;
+    this.config.viewHeight = 1080;
     this.config.showServerOutput = this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
     this.shuttinDown = false;
