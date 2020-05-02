@@ -15,7 +15,8 @@ npm-debug.log
 
 public/css/
 public/images/
-public/js/
+public/js/*.js
+public/js/*.map
 
 .ungitrc
 
