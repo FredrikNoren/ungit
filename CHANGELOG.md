@@ -6,6 +6,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.6...master)
 
 ### Fixed
+- Init tooltips from the app start [#1343](https://github.com/FredrikNoren/ungit/pull/1343)
 - Fixing some accessibility issues [#1318](https://github.com/FredrikNoren/ungit/pull/1318)
 
 ### Changed

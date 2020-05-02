@@ -188,7 +188,6 @@ class StagingViewModel {
       newFiles.push(fileViewModel);
     }
     this.files(newFiles);
-    programEvents.dispatch({ event: 'init-tooltip' });
   }
 
   toggleAmend() {
