@@ -72,7 +72,7 @@ module.exports = (grunt) => {
           timeout: 35000,
           bail: true
         },
-        src: 'nmclicktests/spec.*.js'
+        src: 'clicktests/spec.*.js'
       }
     },
 
@@ -139,7 +139,7 @@ module.exports = (grunt) => {
         },
         src: [
           'test/**/*.js',
-          'nmclicktests/**/*.js'
+          'clicktests/**/*.js'
         ]
       }
     },
@@ -306,7 +306,7 @@ module.exports = (grunt) => {
   grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
     const done = this.async();
 
-    fs.readdirAsync('./nmclicktests')
+    fs.readdirAsync('./clicktests')
       .then((files) => files.filter((file) => file.startsWith('spec.')))
       .then((tests) => {
         const genericIndx = tests.indexOf('spec.generic.js');
@@ -322,7 +322,7 @@ module.exports = (grunt) => {
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
           return new Bluebird((resolve, reject) => {
-            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'nmclicktests', file), '--timeout=35000', '-b'], { maxBuffer: 10*1024*1024 });
+            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'], { maxBuffer: 10*1024*1024 });
             child.stdout.on('data', outStream);
             child.stderr.on('data', outStream);
             child.on('exit', (code) => {
