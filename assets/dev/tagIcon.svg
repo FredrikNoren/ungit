@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
-   id="svg3241"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
-   inkscape:export-filename="D:\GitHub\ungit\public\images\tagIcon.png"
-   inkscape:export-xdpi="2.6512289"
-   inkscape:export-ydpi="2.6512289"
-   sodipodi:docname="New document 6">
+   id="svg3241"
+   height="327.55414"
+   width="169.7326">
   <defs
      id="defs3243" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.0074671"
-     inkscape:cx="375"
-     inkscape:cy="520"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1018"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
   <metadata
      id="metadata3246">
     <rdf:RDF>
@@ -51,14 +24,11 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
+     transform="translate(-288.8432,-328.76532)"
      id="layer1">
     <path
-       style="fill:#999999;fill-opacity:1;stroke:none"
-       d="m 288.8432,328.76532 169.73261,0 0,259.06555 -81.39226,68.48859 -88.34035,-68.48859 z"
        id="rect3249"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccc" />
+       d="M 288.8432,328.76532 H 458.57581 V 587.83087 L 377.18355,656.31946 288.8432,587.83087 Z"
+       style="fill:#999999;fill-opacity:1;stroke:none" />
   </g>
 </svg>

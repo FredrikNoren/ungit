@@ -1,44 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="765"
-   height="990"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
-   sodipodi:docname="logo2.svg"
-   inkscape:export-filename="D:\GitHub\ungit\media\icon.png"
-   inkscape:export-xdpi="13.808212"
-   inkscape:export-ydpi="13.808212">
+   id="svg2"
+   height="208.57156"
+   width="208.57143">
   <defs
      id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#e0e0e0"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.5219183"
-     inkscape:cx="-10.648576"
-     inkscape:cy="1668.5149"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     showguides="true"
-     inkscape:window-width="1364"
-     inkscape:window-height="796"
-     inkscape:window-x="359"
-     inkscape:window-y="107"
-     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -52,26 +24,19 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-62.362183)">
+     transform="translate(11.428572,676.20923)"
+     id="layer1">
     <rect
-       style="fill:#494949;stroke:none;stroke-width:18.43499947000000100;stroke-linecap:butt;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;fill-opacity:1"
-       id="rect6198"
-       width="208.57143"
-       height="208.57156"
-       x="-11.428572"
+       transform="translate(0,62.362183)"
        y="-738.57141"
-       transform="translate(0,62.362183)" />
+       x="-11.428572"
+       height="208.57156"
+       width="208.57143"
+       id="rect6198"
+       style="fill:#494949;fill-opacity:1;stroke:none;stroke-width:18.43499947;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       d="m 33.663366,-630.82133 41.091114,0 0.148644,42.77829 41.278616,-42.6123 41.56069,-0.16599 0,111.93587 -124.079064,0 z"
        id="rect2987"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccccc"
-       inkscape:export-filename="D:\GitHub\ungit\public\images\logo.png"
-       inkscape:export-xdpi="13.41745"
-       inkscape:export-ydpi="13.41745" />
+       d="M 33.663366,-630.82133 H 74.75448 l 0.148644,42.77829 41.278616,-42.6123 41.56069,-0.16599 v 111.93587 H 33.663366 Z"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
   </g>
 </svg>

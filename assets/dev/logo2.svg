@@ -1,44 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="765"
-   height="990"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
-   sodipodi:docname="logo2.svg"
-   inkscape:export-filename="D:\GitHub\ungit\public\images\logo.png"
-   inkscape:export-xdpi="13.41745"
-   inkscape:export-ydpi="13.41745">
+   id="svg2"
+   height="289.46686"
+   width="610.39911">
   <defs
      id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#e0e0e0"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="-76.526856"
-     inkscape:cy="1668.5149"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     showguides="true"
-     inkscape:window-width="1364"
-     inkscape:window-height="796"
-     inkscape:window-x="359"
-     inkscape:window-y="107"
-     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -52,58 +24,42 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-62.362183)">
+     transform="translate(-33.663366,704.07343)"
+     id="layer1">
     <path
-       style="fill:#979797;fill-opacity:1;stroke:none"
-       d="M 577.1875 -745.28125 L 577.1875 -555.96875 L 644.0625 -555.96875 L 644 -594.40625 L 629.4375 -594.46875 L 629.21875 -668.25 L 643.78125 -668.8125 L 643.6875 -718.5625 L 632.03125 -718.40625 L 631.5 -744.4375 L 577.1875 -745.28125 z M 491.59375 -742.3125 L 491.59375 -700.71875 L 551 -700.71875 L 551 -742.3125 L 491.59375 -742.3125 z M 489.0625 -673.6875 L 489.0625 -555.15625 L 549.46875 -555.15625 L 549.46875 -673.6875 L 489.0625 -673.6875 z M 195.03125 -672.84375 L 195.03125 -560.90625 L 245.78125 -561.75 L 277.21875 -593.84375 L 278.03125 -560.90625 L 319.125 -560.90625 L 319.125 -672.84375 L 195.03125 -672.84375 z M 50 -672.03125 L 50 -560.09375 L 174.09375 -560.09375 L 174.09375 -672.03125 L 123.34375 -671.21875 L 91.90625 -639.09375 L 91.09375 -672.03125 L 50 -672.03125 z M 340.0625 -671.21875 L 340.0625 -557.15625 L 415.3125 -549.25 L 340.0625 -531.40625 L 340.0625 -476.96875 L 465.75 -476.96875 L 465.75 -671.21875 L 340.0625 -671.21875 z "
+       id="path3799"
        transform="translate(0,62.362183)"
-       id="path3799" />
+       d="m 577.1875,-745.28125 v 189.3125 h 66.875 l -0.0625,-38.4375 -14.5625,-0.0625 -0.21875,-73.78125 14.5625,-0.5625 -0.0937,-49.75 -11.65625,0.15625 -0.5313,-26.03125 z m -85.59375,2.96875 v 41.59375 H 551 v -41.59375 z m -2.53125,68.625 v 118.53125 h 60.40625 V -673.6875 Z m -294.03125,0.84375 v 111.9375 l 50.75,-0.84375 31.4375,-32.09375 0.8125,32.9375 H 319.125 v -111.9375 z M 50,-672.03125 v 111.9375 h 124.09375 v -111.9375 l -50.75,0.8125 -31.4375,32.125 -0.8125,-32.9375 z m 290.0625,0.8125 v 114.0625 l 75.25,7.90625 -75.25,17.84375 v 54.4375 H 465.75 v -194.25 z"
+       style="fill:#979797;fill-opacity:1;stroke:none" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       d="m 33.663366,-630.82133 41.091114,0 0.805709,32.92231 31.422631,-32.09925 50.75961,-0.82306 0,111.93587 -124.079064,0 z"
        id="rect2987"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccccc"
-       inkscape:export-filename="D:\GitHub\ungit\public\images\logo.png"
-       inkscape:export-xdpi="13.41745"
-       inkscape:export-ydpi="13.41745" />
+       d="M 33.663366,-630.82133 H 74.75448 l 0.805709,32.92231 31.422631,-32.09925 50.75961,-0.82306 v 111.93587 H 33.663366 Z"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
     <path
-       sodipodi:nodetypes="cccccccc"
-       inkscape:connector-curvature="0"
-       id="path2990"
-       d="m 302.76989,-519.70853 -41.09112,0 -0.80571,-32.9223 -31.42261,32.09925 -50.75961,0.82305 0,-111.93586 124.07905,0 z"
        style="fill:#ffffff;fill-opacity:1;stroke:none"
-       inkscape:export-filename="D:\GitHub\ungit\public\images\logo.png"
-       inkscape:export-xdpi="13.41745"
-       inkscape:export-ydpi="13.41745" />
+       d="m 302.76989,-519.70853 h -41.09112 l -0.80571,-32.9223 -31.42261,32.09925 -50.75961,0.82305 v -111.93586 h 124.07905 z"
+       id="path2990" />
     <path
-       style="fill:#c55a51;fill-opacity:1;stroke:none"
-       d="m 323.71823,-629.99823 125.69046,0 0,194.24162 -125.69046,0 0,-54.45546 75.24752,-17.82179 -75.24752,-7.92079 z"
        id="rect2992"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccccc" />
+       d="m 323.71823,-629.99823 h 125.69046 v 194.24162 H 323.71823 v -54.45546 l 75.24752,-17.82179 -75.24752,-7.92079 z"
+       style="fill:#c55a51;fill-opacity:1;stroke:none" />
     <rect
-       style="fill:#c55a51;fill-opacity:1;stroke:none"
-       id="rect2994"
-       width="60.428104"
-       height="118.52032"
+       y="-632.46741"
        x="472.70609"
-       y="-632.46741" />
+       height="118.52032"
+       width="60.428104"
+       id="rect2994"
+       style="fill:#c55a51;fill-opacity:1;stroke:none" />
     <path
-       style="fill:#c55a51;fill-opacity:1;stroke:none"
-       d="m 560.84904,-704.07343 54.3015,0.84057 0.54155,26.04163 11.65368,-0.15488 0.0794,49.74988 -14.5421,0.55011 0.21217,73.77689 14.56821,0.0814 0.0593,38.41765 -66.87377,0 z"
        id="rect2996"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccccccc" />
+       d="m 560.84904,-704.07343 54.3015,0.84057 0.54155,26.04163 11.65368,-0.15488 0.0794,49.74988 -14.5421,0.55011 0.21217,73.77689 14.56821,0.0814 0.0593,38.41765 h -66.87377 z"
+       style="fill:#c55a51;fill-opacity:1;stroke:none" />
     <rect
-       style="fill:#c55a51;fill-opacity:1;stroke:none"
-       id="rect3000"
-       width="59.405937"
-       height="41.58408"
+       y="-701.10315"
        x="475.24753"
-       y="-701.10315" />
+       height="41.58408"
+       width="59.405937"
+       id="rect3000"
+       style="fill:#c55a51;fill-opacity:1;stroke:none" />
   </g>
 </svg>

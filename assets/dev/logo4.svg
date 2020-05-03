@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -8,171 +6,130 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="logo3.svg">
+   id="svg2"
+   height="150.92125"
+   width="835.72723">
   <defs
      id="defs4">
     <linearGradient
        id="linearGradient3816">
       <stop
-         id="stop3818"
+         style="stop-color:#000000;stop-opacity:0;"
          offset="0"
-         style="stop-color:#000000;stop-opacity:0;" />
+         id="stop3818" />
       <stop
-         id="stop3820"
+         style="stop-color:#59b239;stop-opacity:1;"
          offset="1"
-         style="stop-color:#59b239;stop-opacity:1;" />
+         id="stop3820" />
     </linearGradient>
     <linearGradient
        id="linearGradient3806">
       <stop
-         style="stop-color:#000000;stop-opacity:0;"
+         id="stop3808"
          offset="0"
-         id="stop3808" />
+         style="stop-color:#000000;stop-opacity:0;" />
       <stop
-         style="stop-color:#30abc4;stop-opacity:1;"
+         id="stop3810"
          offset="1"
-         id="stop3810" />
+         style="stop-color:#30abc4;stop-opacity:1;" />
     </linearGradient>
     <linearGradient
        id="linearGradient3796">
       <stop
-         id="stop3798"
-         offset="0"
-         style="stop-color:#000000;stop-opacity:0;" />
-      <stop
-         id="stop3800"
-         offset="1"
-         style="stop-color:#d86bc4;stop-opacity:1;" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3790">
-      <stop
          style="stop-color:#000000;stop-opacity:0;"
          offset="0"
-         id="stop3792" />
+         id="stop3798" />
       <stop
-         style="stop-color:#d83200;stop-opacity:1;"
+         style="stop-color:#d86bc4;stop-opacity:1;"
          offset="1"
-         id="stop3794" />
+         id="stop3800" />
     </linearGradient>
     <linearGradient
        id="linearGradient3780">
       <stop
-         id="stop3782"
+         style="stop-color:#000000;stop-opacity:0;"
          offset="0"
-         style="stop-color:#000000;stop-opacity:0;" />
+         id="stop3782" />
       <stop
-         id="stop3784"
+         style="stop-color:#f17b68;stop-opacity:1;"
          offset="1"
-         style="stop-color:#f17b68;stop-opacity:1;" />
+         id="stop3784" />
     </linearGradient>
     <linearGradient
        id="linearGradient3764">
       <stop
-         style="stop-color:#000000;stop-opacity:0;"
+         id="stop3766"
          offset="0"
-         id="stop3766" />
+         style="stop-color:#000000;stop-opacity:0;" />
       <stop
-         style="stop-color:#d8c200;stop-opacity:1;"
+         id="stop3768"
          offset="1"
-         id="stop3768" />
+         style="stop-color:#d8c200;stop-opacity:1;" />
     </linearGradient>
     <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3764"
-       id="radialGradient3774"
-       cx="238.09525"
-       cy="581.95404"
-       fx="238.09525"
-       fy="581.95404"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
        r="110.20408"
-       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
-       gradientUnits="userSpaceOnUse" />
+       fy="581.95404"
+       fx="238.09525"
+       cy="581.95404"
+       cx="238.09525"
+       id="radialGradient3774"
+       xlink:href="#linearGradient3764" />
     <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3780"
+       r="110.20408"
+       fy="581.95404"
+       fx="238.09525"
+       cy="581.95404"
+       cx="238.09525"
+       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
+       gradientUnits="userSpaceOnUse"
        id="radialGradient3778"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
-       cx="238.09525"
-       cy="581.95404"
-       fx="238.09525"
-       fy="581.95404"
-       r="110.20408" />
+       xlink:href="#linearGradient3780" />
     <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3796"
+       r="110.20408"
+       fy="581.95404"
+       fx="238.09525"
+       cy="581.95404"
+       cx="238.09525"
+       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
+       gradientUnits="userSpaceOnUse"
        id="radialGradient3788"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
-       cx="238.09525"
-       cy="581.95404"
-       fx="238.09525"
-       fy="581.95404"
-       r="110.20408" />
+       xlink:href="#linearGradient3796" />
     <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3806"
+       r="110.20408"
+       fy="581.95404"
+       fx="238.09525"
+       cy="581.95404"
+       cx="238.09525"
+       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
+       gradientUnits="userSpaceOnUse"
        id="radialGradient3804"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
-       cx="238.09525"
-       cy="581.95404"
-       fx="238.09525"
-       fy="581.95404"
-       r="110.20408" />
+       xlink:href="#linearGradient3806" />
     <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3816"
-       id="radialGradient3814"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
-       cx="238.09525"
-       cy="581.95404"
-       fx="238.09525"
+       r="110.20408"
        fy="581.95404"
-       r="110.20408" />
+       fx="238.09525"
+       cy="581.95404"
+       cx="238.09525"
+       gradientTransform="matrix(1,0,0,1.0401235,0,-23.350006)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient3814"
+       xlink:href="#linearGradient3816" />
     <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath3835">
-      <path
-         transform="matrix(1.0400944,0,0,1.1791444,-9.287964,-77.662229)"
-         d="m 240.13605,518.00842 a 72.108841,63.605442 0 1 1 -144.217685,0 72.108841,63.605442 0 1 1 144.217685,0 z"
-         sodipodi:ry="63.605442"
-         sodipodi:rx="72.108841"
-         sodipodi:cy="518.00842"
-         sodipodi:cx="168.02721"
-         id="path3837"
+       id="clipPath3835"
+       clipPathUnits="userSpaceOnUse">
+      <ellipse
+         ry="63.605442"
+         rx="72.108841"
+         cy="518.00842"
+         cx="168.02721"
          style="fill:#ae0000;fill-opacity:1;stroke:none"
-         sodipodi:type="arc" />
+         id="path3837"
+         transform="matrix(1.0400944,0,0,1.1791444,-9.287964,-77.662229)" />
     </clipPath>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.59"
-     inkscape:cx="222.7129"
-     inkscape:cy="625.0281"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer2"
-     showgrid="false"
-     showborder="false"
-     inkscape:window-width="1600"
-     inkscape:window-height="900"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -181,153 +138,132 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     style="display:inline">
+     transform="translate(-105.12666,-452.73751)"
+     style="display:inline"
+     id="layer1">
     <g
-       id="g3822"
+       transform="matrix(0.88935271,0,0,0.88935271,32.387665,54.044623)"
        clip-path="url(#clipPath3835)"
-       transform="matrix(0.88935271,0,0,0.88935271,32.387665,54.044623)">
-      <path
-         transform="translate(-4.7619048,-7.4829925)"
-         d="m 348.29932,581.95404 c 0,63.30611 -49.34004,114.62585 -110.20407,114.62585 -60.86404,0 -110.20408,-51.31974 -110.20408,-114.62585 0,-63.30611 49.34004,-114.62585 110.20408,-114.62585 60.86403,0 110.20407,51.31974 110.20407,114.62585 z"
-         sodipodi:ry="114.62585"
-         sodipodi:rx="110.20408"
-         sodipodi:cy="581.95404"
-         sodipodi:cx="238.09525"
-         id="path3762"
+       id="g3822">
+      <ellipse
+         ry="114.62585"
+         rx="110.20408"
+         cy="581.95404"
+         cx="238.09525"
          style="fill:url(#radialGradient3774);fill-opacity:1;stroke:none"
-         sodipodi:type="arc" />
-      <path
-         sodipodi:type="arc"
-         style="fill:url(#radialGradient3778);fill-opacity:1;stroke:none"
+         id="path3762"
+         transform="translate(-4.7619048,-7.4829925)" />
+      <ellipse
+         ry="114.62585"
+         rx="110.20408"
+         cy="581.95404"
+         cx="238.09525"
+         transform="translate(-154.42177,-2.0408156)"
          id="path3776"
-         sodipodi:cx="238.09525"
-         sodipodi:cy="581.95404"
-         sodipodi:rx="110.20408"
-         sodipodi:ry="114.62585"
-         d="m 348.29932,581.95404 c 0,63.30611 -49.34004,114.62585 -110.20407,114.62585 -60.86404,0 -110.20408,-51.31974 -110.20408,-114.62585 0,-63.30611 49.34004,-114.62585 110.20408,-114.62585 60.86403,0 110.20407,51.31974 110.20407,114.62585 z"
-         transform="translate(-154.42177,-2.0408156)" />
-      <path
-         transform="translate(-153.74149,-114.96598)"
-         d="m 348.29932,581.95404 c 0,63.30611 -49.34004,114.62585 -110.20407,114.62585 -60.86404,0 -110.20408,-51.31974 -110.20408,-114.62585 0,-63.30611 49.34004,-114.62585 110.20408,-114.62585 60.86403,0 110.20407,51.31974 110.20407,114.62585 z"
-         sodipodi:ry="114.62585"
-         sodipodi:rx="110.20408"
-         sodipodi:cy="581.95404"
-         sodipodi:cx="238.09525"
-         id="path3786"
+         style="fill:url(#radialGradient3778);fill-opacity:1;stroke:none" />
+      <ellipse
+         ry="114.62585"
+         rx="110.20408"
+         cy="581.95404"
+         cx="238.09525"
          style="fill:url(#radialGradient3788);fill-opacity:1;stroke:none"
-         sodipodi:type="arc" />
-      <path
-         sodipodi:type="arc"
-         style="fill:url(#radialGradient3804);fill-opacity:1;stroke:none"
+         id="path3786"
+         transform="translate(-153.74149,-114.96598)" />
+      <ellipse
+         ry="114.62585"
+         rx="110.20408"
+         cy="581.95404"
+         cx="238.09525"
+         transform="translate(-82.993191,78.231299)"
          id="path3802"
-         sodipodi:cx="238.09525"
-         sodipodi:cy="581.95404"
-         sodipodi:rx="110.20408"
-         sodipodi:ry="114.62585"
-         d="m 348.29932,581.95404 c 0,63.30611 -49.34004,114.62585 -110.20407,114.62585 -60.86404,0 -110.20408,-51.31974 -110.20408,-114.62585 0,-63.30611 49.34004,-114.62585 110.20408,-114.62585 60.86403,0 110.20407,51.31974 110.20407,114.62585 z"
-         transform="translate(-82.993191,78.231299)" />
-      <path
-         transform="translate(10.204088,-185.71428)"
-         d="m 348.29932,581.95404 c 0,63.30611 -49.34004,114.62585 -110.20407,114.62585 -60.86404,0 -110.20408,-51.31974 -110.20408,-114.62585 0,-63.30611 49.34004,-114.62585 110.20408,-114.62585 60.86403,0 110.20407,51.31974 110.20407,114.62585 z"
-         sodipodi:ry="114.62585"
-         sodipodi:rx="110.20408"
-         sodipodi:cy="581.95404"
-         sodipodi:cx="238.09525"
-         id="path3812"
+         style="fill:url(#radialGradient3804);fill-opacity:1;stroke:none" />
+      <ellipse
+         ry="114.62585"
+         rx="110.20408"
+         cy="581.95404"
+         cx="238.09525"
          style="fill:url(#radialGradient3814);fill-opacity:1;stroke:none"
-         sodipodi:type="arc" />
+         id="path3812"
+         transform="translate(10.204088,-185.71428)" />
       <flowRoot
-         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;line-height:0.01%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
          id="flowRoot3852"
-         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         xml:space="preserve"><flowRegion
+           style="font-family:sans-serif"
            id="flowRegion3854"><rect
-             id="rect3856"
-             width="435.01395"
-             height="156.71309"
-             x="283.70474"
+             style="font-family:sans-serif;fill:#000000"
              y="439.01956"
-             style="fill:#000000" /></flowRegion><flowPara
-           id="flowPara3858" /></flowRoot>      <text
-         xml:space="preserve"
-         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#000000;font-family:Sans"
-         x="317.92944"
-         y="569.61377"
+             x="283.70474"
+             height="156.71309"
+             width="435.01395"
+             id="rect3856" /></flowRegion><flowPara
+           style="font-size:40px;line-height:1.25;font-family:sans-serif"
+           id="flowPara3858"> </flowPara></flowRoot>      <text
          id="text3864"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan3866"
+         y="569.61377"
+         x="317.92944"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#000000"
+         xml:space="preserve"><tspan
+           style="font-size:40px;line-height:1.25;font-family:sans-serif"
+           y="569.61377"
            x="317.92944"
-           y="569.61377">Ungit</tspan></text>
+           id="tspan3866">Ungit</tspan></text>
     </g>
     <text
-       sodipodi:linespacing="125%"
-       id="text3032"
-       y="591.10858"
-       x="295.82376"
-       style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:125%;letter-spacing:13.02999973px;word-spacing:0px;fill:#ffb8b8;fill-opacity:1;stroke:none;display:inline;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light"
-       xml:space="preserve"><tspan
-         style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;letter-spacing:13.02999973px;fill:#ffb8b8;fill-opacity:1;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light"
-         y="591.10858"
-         x="295.82376"
-         id="tspan3034"
-         sodipodi:role="line">UNGIT</tspan></text>
-    <text
        xml:space="preserve"
-       style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:125%;letter-spacing:13.02999973px;word-spacing:0px;fill:#b3d3ff;fill-opacity:1;stroke:none;display:inline;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light"
-       x="287.22385"
+       style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:0%;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;word-spacing:0px;display:inline;fill:#ffb8b8;fill-opacity:1;stroke:none"
+       x="295.82376"
        y="591.10858"
-       id="text3806"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3808"
-         x="287.22385"
+       id="text3032"><tspan
+         id="tspan3034"
+         x="295.82376"
          y="591.10858"
-         style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;letter-spacing:13.02999973px;fill:#b3d3ff;fill-opacity:1;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light">UNGIT</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:180px;line-height:1.25;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;fill:#ffb8b8;fill-opacity:1">UNGIT</tspan></text>
+    <text
+       id="text3806"
+       y="591.10858"
+       x="287.22385"
+       style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:0%;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;word-spacing:0px;display:inline;fill:#b3d3ff;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:180px;line-height:1.25;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;fill:#b3d3ff;fill-opacity:1"
+         y="591.10858"
+         x="287.22385"
+         id="tspan3808">UNGIT</tspan></text>
   </g>
   <g
-     inkscape:groupmode="layer"
-     id="layer2"
-     inkscape:label="Layer"
-     style="display:inline">
-    <path
-       sodipodi:type="arc"
-       style="fill:#343434;fill-opacity:1;stroke:none;display:inline"
+     transform="translate(-105.12666,-452.73751)"
+     style="display:inline"
+     id="layer2">
+    <ellipse
+       ry="63.605442"
+       rx="72.108841"
+       cy="518.00842"
+       cx="168.02721"
+       transform="matrix(0.766491,0,0,0.86896253,50.763024,78.068221)"
        id="path2989"
-       sodipodi:cx="168.02721"
-       sodipodi:cy="518.00842"
-       sodipodi:rx="72.108841"
-       sodipodi:ry="63.605442"
-       d="m 240.13605,518.00842 a 72.108841,63.605442 0 1 1 -144.217685,0 72.108841,63.605442 0 1 1 144.217685,0 z"
-       transform="matrix(0.766491,0,0,0.86896253,50.763024,78.068221)" />
-    <path
-       sodipodi:type="arc"
-       style="fill:none;stroke:#3c3c3c;stroke-width:16.70520592;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       style="display:inline;fill:#343434;fill-opacity:1;stroke:none" />
+    <ellipse
+       ry="63.605442"
+       rx="72.108841"
+       cy="518.00842"
+       cx="168.02721"
+       transform="matrix(0.92501078,0,0,1.0486753,24.12739,-15.024508)"
        id="path2985"
-       sodipodi:cx="168.02721"
-       sodipodi:cy="518.00842"
-       sodipodi:rx="72.108841"
-       sodipodi:ry="63.605442"
-       d="m 240.13605,518.00842 a 72.108841,63.605442 0 1 1 -144.217685,0 72.108841,63.605442 0 1 1 144.217685,0 z"
-       transform="matrix(0.92501078,0,0,1.0486753,24.12739,-15.024508)" />
+       style="display:inline;fill:none;stroke:#3c3c3c;stroke-width:16.70520592;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
-       xml:space="preserve"
-       style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:125%;letter-spacing:13.02999973px;word-spacing:0px;fill:#454545;fill-opacity:1;stroke:none;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light"
-       x="291.62357"
-       y="591.10858"
        id="text3868"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3870"
-         x="291.62357"
+       y="591.10858"
+       x="291.62357"
+       style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;line-height:0%;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;word-spacing:0px;fill:#454545;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:180px;line-height:1.25;font-family:'Lato Hairline';-inkscape-font-specification:'Lato Hairline Ultra-Light';letter-spacing:13.02999973px;fill:#454545;fill-opacity:1"
          y="591.10858"
-         style="font-size:180px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;letter-spacing:13.02999973px;fill:#454545;fill-opacity:1;font-family:Lato Hairline;-inkscape-font-specification:Lato Hairline Ultra-Light">UNGIT</tspan></text>
+         x="291.62357"
+         id="tspan3870">UNGIT</tspan></text>
   </g>
 </svg>

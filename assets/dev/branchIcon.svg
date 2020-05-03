@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
-   inkscape:export-filename="D:\GitHub\ungit\public\images\branchIcon.png"
-   inkscape:export-xdpi="3.0279174"
-   inkscape:export-ydpi="3.0279174"
-   sodipodi:docname="New document 1">
+   id="svg2"
+   height="311.24469"
+   width="267.51062">
   <defs
      id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#868686"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.50980392"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.01"
-     inkscape:cx="357.67327"
-     inkscape:cy="1330.1976"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1018"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -51,53 +24,46 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
+     transform="translate(-40.905232,482.14984)"
      id="layer1">
-    <path
-       sodipodi:type="arc"
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
+    <ellipse
+       ry="42.857143"
+       rx="48.57143"
+       cy="-319.06638"
+       cx="65.714287"
+       transform="matrix(1.0294117,0,0,1.1666667,23.258175,-59.905726)"
        id="path2985"
-       sodipodi:cx="65.714287"
-       sodipodi:cy="-319.06638"
-       sodipodi:rx="48.57143"
-       sodipodi:ry="42.857143"
-       d="m 114.28572,-319.06638 a 48.57143,42.857143 0 1 1 -97.142863,0 48.57143,42.857143 0 1 1 97.142863,0 z"
-       transform="matrix(1.0294117,0,0,1.1666667,23.258175,-59.905726)" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
+    <ellipse
+       ry="42.857143"
+       rx="48.57143"
+       cy="-319.06638"
+       cx="65.714287"
+       transform="matrix(1.0294117,0,0,1.1666667,23.442053,151.33897)"
        id="path2985-1"
-       sodipodi:cx="65.714287"
-       sodipodi:cy="-319.06638"
-       sodipodi:rx="48.57143"
-       sodipodi:ry="42.857143"
-       d="m 114.28572,-319.06638 a 48.57143,42.857143 0 1 1 -97.142863,0 48.57143,42.857143 0 1 1 97.142863,0 z"
-       transform="matrix(1.0294117,0,0,1.1666667,23.442053,151.33897)" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
+    <ellipse
+       ry="42.857143"
+       rx="48.57143"
+       cy="-319.06638"
+       cx="65.714287"
+       transform="matrix(1.0294117,0,0,1.1666667,190.76879,2.8241247)"
        id="path2985-7"
-       sodipodi:cx="65.714287"
-       sodipodi:cy="-319.06638"
-       sodipodi:rx="48.57143"
-       sodipodi:ry="42.857143"
-       d="m 114.28572,-319.06638 a 48.57143,42.857143 0 1 1 -97.142863,0 48.57143,42.857143 0 1 1 97.142863,0 z"
-       transform="matrix(1.0294117,0,0,1.1666667,190.76879,2.8241247)" />
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
     <rect
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       id="rect3012"
-       width="30.693069"
-       height="94.059402"
+       y="-373.3804"
        x="75.247528"
-       y="-373.3804" />
-    <rect
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       id="rect3012-4"
-       width="30.693069"
        height="94.059402"
-       x="-113.74457"
+       width="30.693069"
+       id="rect3012"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
+    <rect
+       transform="rotate(47.483725)"
        y="-375.00372"
-       transform="matrix(0.67579961,0.7370854,-0.7370854,0.67579961,0,0)" />
+       x="-113.74457"
+       height="94.059402"
+       width="30.693069"
+       id="rect3012-4"
+       style="fill:#ffffff;fill-opacity:1;stroke:none" />
   </g>
 </svg>

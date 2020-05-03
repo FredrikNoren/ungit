@@ -1,40 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
-   sodipodi:docname="New document 1">
+   id="svg2"
+   height="135.14062"
+   width="367.24219">
   <defs
      id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.16"
-     inkscape:cx="375"
-     inkscape:cy="1370.4041"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1123"
-     inkscape:window-height="821"
-     inkscape:window-x="265"
-     inkscape:window-y="70"
-     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -48,22 +24,21 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
+     transform="translate(-58.23019,430.23241)"
      id="layer1">
     <flowRoot
-       xml:space="preserve"
+       transform="translate(62.857143,-234.28571)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0.01%;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        id="flowRoot2985"
-       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Segoe UI;-inkscape-font-specification:Segoe UI"
-       transform="translate(62.857143,-234.28571)"><flowRegion
+       xml:space="preserve"><flowRegion
          id="flowRegion2987"><rect
-           id="rect2989"
-           width="1014.2857"
-           height="337.14285"
+           y="-221.92354"
            x="-17.142857"
-           y="-221.92354" /></flowRegion><flowPara
-         id="flowPara2991"
-         style="font-size:144px;font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-family:Quicksand;-inkscape-font-specification:Quicksand Ultra-Light"><flowSpan
-   style="fill:#666666"
-   id="flowSpan2999">Un</flowSpan>git</flowPara></flowRoot>  </g>
+           height="337.14285"
+           width="1014.2857"
+           id="rect2989" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:144px;line-height:1.25;font-family:Quicksand;-inkscape-font-specification:'Quicksand Ultra-Light'"
+         id="flowPara2991"><flowSpan
+   id="flowSpan2999"
+   style="fill:#666666">Un</flowSpan>git</flowPara></flowRoot>  </g>
 </svg>
