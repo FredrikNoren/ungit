@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="1.1"
+    height="283"
+    width="610">
+    <defs>
+        <path id="u" d="M 0,73 h 40 v 33 l 33,-33 h 51 v 112 h -124 z"/>
+        <path id="n" d="M 148,73 h 124 v 112 h -40 v -33 l -33,33 h -51 z"/>
+        <path id="g" d="M 296,73 h 124 v 194 h -124 v -49 l 69,-33 h -69 z"/>
+        <path id="i" d="M 444,3 h 55 v 42 h -55 z m 0,70 h 55 v 112 h -55 z"/>
+        <path id="t" d="M 523,0 h 55 v 27 h 16 v 46 h -16 v 78 h 16 v 34 h -71 z"/>
+    </defs>
+    <g transform="translate(16, 16)" fill="#979797">
+        <use xlink:href="#u" />
+        <use xlink:href="#n" />
+        <use xlink:href="#g" />
+        <use xlink:href="#i" />
+        <use xlink:href="#t" />
+    </g>
+    <g>
+        <g fill="#ffffff">
+            <use xlink:href="#u" />
+            <use xlink:href="#n" />
+        </g>
+        <g fill="#c55a51">
+            <use xlink:href="#g" />
+            <use xlink:href="#i" />
+            <use xlink:href="#t" />
+        </g>
+    </g>
+</svg>
