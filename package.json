@@ -94,17 +94,5 @@
     "node": ">=10.18"
   },
   "license": "MIT",
-  "main": "public/main.js",
-  "window": {
-    "title": "Ungit",
-    "icon": "icon.png",
-    "toolbar": false,
-    "frame": false,
-    "show": false,
-    "width": 1000,
-    "height": 600,
-    "position": "center",
-    "min_width": 400,
-    "min_height": 200
-  }
+  "main": "public/main.js"
 }
