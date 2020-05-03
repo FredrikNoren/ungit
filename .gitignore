@@ -14,7 +14,6 @@ results
 npm-debug.log
 
 public/css/
-public/images/
 public/js/*.js
 public/js/*.map
 
