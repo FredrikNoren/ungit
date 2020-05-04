@@ -1,4 +1,5 @@
 var startLaunchTime = Date.now();
+var path = require('path');
 var winston = require('../source/utils/winston');
 var config = require('../source/config');
 var child_process = require('child_process');
@@ -60,6 +61,11 @@ function checkIfUngitIsRunning(callback) {
 }
 
 var mainWindow = null;
+
+var appPath = app.getAppPath();
+if (!appPath.endsWith('.asar')) {
+  appPath = path.resolve(appPath, '..');
+}
 
 var menuTemplate = [
   {
@@ -136,7 +142,11 @@ app.on('ready', function() {
 
       Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
-      mainWindow = new BrowserWindow({width: 1366, height: 768});
+      mainWindow = new BrowserWindow({
+        width: 1366,
+        height: 768,
+        icon: appPath + '/icon.png'
+      });
 
       mainWindow.on('closed', function() {
         mainWindow = null;
