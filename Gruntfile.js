@@ -91,20 +91,6 @@ module.exports = (grunt) => {
       }
     },
 
-    // Embed images in css
-    imageEmbed: {
-      default: {
-        files: {
-          'public/css/styles.css': [ 'public/css/styles.css' ],
-          'components/graph/graph.css': ['components/graph/graph.css'],
-          'components/header/header.css': ['components/header/header.css'],
-          'components/staging/staging.css': ['components/staging/staging.css'],
-        },
-        options: {
-          deleteAfterEncoding: false
-        }
-      }
-    },
     jshint: {
       options: {
         undef: true, // check for usage of undefined constiables
@@ -412,7 +398,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-imagemin');
-  grunt.loadNpmTasks('grunt-image-embed');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -420,7 +405,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'imageEmbed:default', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'copy:main', 'imagemin:default']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);

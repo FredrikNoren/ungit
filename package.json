@@ -77,7 +77,6 @@
     "grunt-contrib-jshint": "~2.1.0",
     "grunt-contrib-less": "~2.0.0",
     "grunt-contrib-watch": "~1.1.0",
-    "grunt-image-embed": "~0.3.3",
     "grunt-lineending": "~1.0.0",
     "grunt-mocha-istanbul": "~5.0.2",
     "grunt-mocha-test": "~0.13.3",
