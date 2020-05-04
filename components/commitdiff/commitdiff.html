@@ -1,16 +1,16 @@
 <div class="btn-toolbar" data-bind="visible: showDiffButtons" >
   <div class="btn-group btn-group-xs">
-    <button class="btn btn-default bootstrap-tooltip commit-whitespace" data-bind="click: whiteSpace.toggle, css: {active: whiteSpace.isActive}" data-toggle="tooltip" data-placement="bottom" title="Hide whitespace changes in diff" data-delay='{"show":"2000", "hide":"0"}'>
+    <button class="btn btn-default bootstrap-tooltip commit-whitespace" data-bind="click: whiteSpace.toggle, css: {active: whiteSpace.isActive}" data-toggle="tooltip" data-placement="bottom" data-container="body" title="Hide whitespace changes in diff">
       <span data-bind="text: whiteSpace.text"></span>
     </button>
   </div>
   <div class="btn-group btn-group-xs">
-    <button class="btn btn-default bootstrap-tooltip commit-sideBySideDiff" data-bind="click: textDiffType.toggle, css: {active: textDiffType.isActive}" data-toggle="tooltip" data-placement="bottom" title="Show side by side diff view" data-delay='{"show":"2000", "hide":"0"}'>
+    <button class="btn btn-default bootstrap-tooltip commit-sideBySideDiff" data-bind="click: textDiffType.toggle, css: {active: textDiffType.isActive}" data-toggle="tooltip" data-placement="bottom" data-container="body" title="Show side by side diff view">
       <span data-bind="text: textDiffType.text"></span>
     </button>
   </div>
   <div class="btn-group btn-group-xs">
-    <button class="btn btn-default bootstrap-tooltip commit-wordwrap" data-bind="click: wordWrap.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" title="Wrap words per line" data-delay='{"show":"2000", "hide":"0"}'>
+    <button class="btn btn-default bootstrap-tooltip commit-wordwrap" data-bind="click: wordWrap.toggle, css: {active: wordWrap.isActive}" data-toggle="tooltip" data-placement="bottom" data-container="body" title="Wrap words per line">
       <span data-bind="text: wordWrap.text"></span>
     </button>
   </div>

@@ -20,25 +20,14 @@
 
 // -- Application specific styling ----
 .ui-autocomplete {
-  padding: 5px 0;
-  margin: 2px 0 0 0;
+  .ui-menu-item-wrapper {
+    cursor: pointer;
 
-  &.ui-widget-content {
-    border: @dropdown-border;
-  }
-
-  .ui-menu-item {
-    list-style: none;
-
-    .ui-menu-item-wrapper {
-      padding: 3px 20px;
-
-      &.ui-state-active {
-        color: @dropdown-link-hover-color;
-        background-color: @dropdown-link-hover-bg;
-        border: none;
-        margin: 0;
-      }
+    &.ui-state-active {
+      color: @dropdown-link-hover-color;
+      background-color: @dropdown-link-hover-bg;
+      border: none;
+      margin: 0;
     }
   }
 }

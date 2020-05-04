@@ -1,4 +1,3 @@
-
 var _ = require('lodash');
 var $ = require('jquery');
 jQuery = $; // this is for old backward compatability of bootrap modules
@@ -7,7 +6,7 @@ var dndPageScroll = require('dnd-page-scroll');
 require('../vendor/js/bootstrap/modal');
 require('../vendor/js/bootstrap/dropdown');
 require('../vendor/js/bootstrap/tooltip');
-require('jquery-ui-bundle');
+require('./jquery-ui');
 require('./knockout-bindings');
 var components = require('ungit-components');
 var Server = require('./server');
