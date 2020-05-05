@@ -104,7 +104,7 @@ describe('[BRANCHES]', () => {
   it('cherrypick success case', async () => {
     await environment.click('[data-ta-clickable="node-clickable-1"]');
     await environment.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask');
-    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back
+    await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 
   it('test backward squash from own lineage', async () => {
