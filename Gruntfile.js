@@ -161,7 +161,7 @@ module.exports = (grunt) => {
         options: {
           dir: '.',
           out: './build',
-          icon: './icon',
+          icon: './public/images/icon',
           all: true,
           asar: true
         }

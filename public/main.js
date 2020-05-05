@@ -74,7 +74,7 @@ var menuTemplate = [
       { role: 'quit' }
     ]
   },
-  {  
+  {
     label: 'Edit',
     submenu: [
       { role: 'undo' },
@@ -134,7 +134,7 @@ app.on('ready', function() {
       server.started.add(function() {
         launch(function(err) {
           if (err) console.log(err);
-        })
+        });
 
         var launchTime = (Date.now() - startLaunchTime);
         console.log('Took ' + launchTime + 'ms to start server.');
@@ -145,7 +145,7 @@ app.on('ready', function() {
       mainWindow = new BrowserWindow({
         width: 1366,
         height: 768,
-        icon: appPath + '/icon.png'
+        icon: path.join(appPath, 'public/images/icon.png')
       });
 
       mainWindow.on('closed', function() {
