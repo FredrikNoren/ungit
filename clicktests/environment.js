@@ -21,8 +21,9 @@ const prependLines = (pre, text) => {
 class Environment {
   constructor(config) {
     this.config = config || {};
-    this.config.rootPath = (typeof this.config.rootPath === 'string') ? this.config.rootPath : '';
+    this.config.rootPath = typeof this.config.rootPath === 'string' ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 35000;
+    this.config.headless = this.config.headless === undefined ? true : this.config.headless;
     this.config.viewWidth = 1920;
     this.config.viewHeight = 1080;
     this.config.showServerOutput = this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
@@ -33,7 +34,7 @@ class Environment {
   getRootUrl() { return this.rootUrl; }
 
   getPort() {
-    const tmpPortrange = portrange + Math.floor((Math.random() * 5000));
+    const tmpPortrange = portrange + Math.floor(Math.random() * 5000);
 
     return new Promise((resolve, reject) => {
       const server = net.createServer();
@@ -55,11 +56,11 @@ class Environment {
   async init() {
     try {
       this.browser = await puppeteer.launch({
+        headless: this.config.headless,
         defaultViewport: {
           width: this.config.viewWidth,
           height: this.config.viewHeight
-        },
-        headless: true
+        }
       });
 
       await this.getPort();
