@@ -76,21 +76,6 @@ module.exports = (grunt) => {
       }
     },
 
-    // Minify images (basically just lossless compression)
-    imagemin: {
-      default: {
-        options: {
-          optimizationLevel: 3
-        },
-        files: [{
-          expand: true,
-          cwd: 'assets/client/images/',
-          src: ['**/*.png'],
-          dest: 'public/images/'
-        }]
-      }
-    },
-
     jshint: {
       options: {
         undef: true, // check for usage of undefined constiables
@@ -176,7 +161,7 @@ module.exports = (grunt) => {
         options: {
           dir: '.',
           out: './build',
-          icon: './icon',
+          icon: './public/images/icon',
           all: true,
           asar: true
         }
@@ -397,7 +382,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -405,7 +389,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'copy:main', 'imagemin:default']);
+  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'copy:main']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
