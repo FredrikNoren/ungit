@@ -79,6 +79,7 @@ module.exports = (grunt) => {
         undef: true, // check for usage of undefined constiables
         indent: 2,
         esversion: 6,
+        laxbreak: true,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
