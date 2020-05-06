@@ -85,7 +85,7 @@
     "istanbul": "~0.4.5",
     "mocha": "~7.1.2",
     "pkg-versions": "~2.1.0",
-    "puppeteer": "~3.0.2",
+    "puppeteer": "~3.0.3",
     "superagent": "~5.2.2",
     "supertest": "~4.0.2"
   },
