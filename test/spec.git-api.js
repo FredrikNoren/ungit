@@ -2,7 +2,7 @@
 const expect = require('expect.js');
 const request = require('supertest');
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
@@ -23,7 +23,9 @@ describe('git-api', () => {
   before('creating test dir should work', () => {
     return common.post(req, '/testing/createtempdir').then((res) => {
       expect(res.path).to.be.ok();
-      testDir = fs.realpathSync(res.path);
+      return fs.realpath(res.path).then((dir) => {
+        testDir = dir;
+      });
     });
   });
 

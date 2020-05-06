@@ -1,7 +1,6 @@
 const expect = require('expect.js');
 const path = require('path');
 const restGit = require('../source/git-api');
-const Bluebird = require('bluebird');
 
 exports.makeRequest = (method, req, path, payload) => {
   let r;
@@ -26,7 +25,7 @@ exports.makeRequest = (method, req, path, payload) => {
     }
   }
 
-  return new Bluebird((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     r.expect('Content-Type', method === 'PNG' ? 'image/png' : /json/)
       .end((err, res) => {
         if (err) {

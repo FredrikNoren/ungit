@@ -6,8 +6,7 @@ const winston = require('winston');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
-const Bluebird = require('bluebird');
-const fs = require('./utils/fs-async');
+const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitConfigArguments = ['-c', 'color.ui=false', '-c', 'core.quotepath=false', '-c', 'core.pager=cat', '-c', 'core.editor=:'];
 const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
@@ -20,7 +19,7 @@ const gitBin = (() => {
 })();
 
 // only allows ${config.maxConcurrentGitOperations} count of parallel git operations
-const rateLimiter = () => new Bluebird((resolve) => { gitSem.wait(() => { resolve(); }); });
+const rateLimiter = () => new Promise((resolve) => { gitSem.wait(() => { resolve(); }); });
 
 const isRetryableError = (err) => {
   const errMsg = ((err || {}).error || '');
@@ -34,7 +33,7 @@ const isRetryableError = (err) => {
 
 const gitExecutorProm = (args, retryCount) => {
   return rateLimiter().then(() => {
-    return new Bluebird((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (config.logGitCommands) winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
       let rejectedError = null;
       let isCompleted = false;
@@ -84,7 +83,7 @@ const gitExecutorProm = (args, retryCount) => {
     });
   }).catch((err) => {
     if (retryCount > 0 && isRetryableError(err)) {
-      return new Bluebird((resolve) => {
+      return new Promise((resolve) => {
         winston.warn(`retrying git commands after lock acquired fail. (If persists, lower 'maxConcurrentGitOperations')`);
         // sleep random amount between 250 ~ 750 ms
         setTimeout(resolve, Math.floor(Math.random() * (500) + 250));
@@ -176,32 +175,33 @@ const getGitError = (args, stderr, stdout) => {
 }
 
 git.status = (repoPath, file) => {
-  return Bluebird.props({
-    numStatsStaged: git([gitOptionalLocks, 'diff', '--numstat', '--cached', '-z', '--', (file || '')], repoPath)
+  return Promise.all([
+    // 0: numStatsStaged
+    git([gitOptionalLocks, 'diff', '--numstat', '--cached', '-z', '--', (file || '')], repoPath)
       .then(gitParser.parseGitStatusNumstat),
-    numStatsUnstaged: Bluebird.resolve().then(() => {
-      if (config.isEnableNumStat) {
-        return git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', (file || '')], repoPath)
-          .then(gitParser.parseGitStatusNumstat);
-      } else {
-        return {}
-      }
-    }),
-    status: git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', (file || '')], repoPath)
+    // 1: numStatsUnstaged
+    config.isEnableNumStat ? git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', (file || '')], repoPath)
+      .then(gitParser.parseGitStatusNumstat) : {},
+    // 2: status
+    git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', (file || '')], repoPath)
       .then(gitParser.parseGitStatus)
       .then((status) => {
-        return Bluebird.props({
-          isRebaseMerge: fs.isExists(path.join(repoPath, '.git', 'rebase-merge')),
-          isRebaseApply: fs.isExists(path.join(repoPath, '.git', 'rebase-apply')),
-          isMerge: fs.isExists(path.join(repoPath, '.git', 'MERGE_HEAD')),
-          inCherry: fs.isExists(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD'))
-        }).then((result) => {
-          status.inRebase = result.isRebaseMerge || result.isRebaseApply;
-          status.inMerge = result.isMerge;
-          status.inCherry = result.inCherry;
+        return Promise.all([
+          // 0: isRebaseMerge
+          fs.access(path.join(repoPath, '.git', 'rebase-merge')).then(() => true).catch(() => false),
+          // 1: isRebaseApply
+          fs.access(path.join(repoPath, '.git', 'rebase-apply')).then(() => true).catch(() => false),
+          // 2: isMerge
+          fs.access(path.join(repoPath, '.git', 'MERGE_HEAD')).then(() => true).catch(() => false),
+          // 3: inCherry
+          fs.access(path.join(repoPath, '.git', 'CHERRY_PICK_HEAD')).then(() => true).catch(() => false)
+        ]).then((result) => {
+          status.inRebase = result[0] || result[1];
+          status.inMerge = result[2];
+          status.inCherry = result[3];
         }).then(() => {
           if (status.inMerge || status.inCherry) {
-            return fs.readFileAsync(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+            return fs.readFile(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
               .then((commitMessage) => {
                 status.commitMessage = commitMessage;
                 return status;
@@ -215,9 +215,9 @@ git.status = (repoPath, file) => {
           return status;
         });
       })
-  }).then((result) => {
-    const numstats = [result.numStatsStaged, result.numStatsUnstaged].reduce(_.extend, {});
-    const status = result.status;
+  ]).then((result) => {
+    const numstats = [result[0], result[1]].reduce(_.extend, {});
+    const status = result[2];
     status.inConflict = false;
 
     // merge numstats
@@ -245,18 +245,16 @@ git.getRemoteAddress = (repoPath, remoteName) => {
 git.resolveConflicts = (repoPath, files) => {
   const toAdd = [];
   const toRemove = [];
-  return Bluebird.all((files || []).map((file) => {
-    return fs.isExists(path.join(repoPath, file)).then((isExist) => {
-      if (isExist) {
-        toAdd.push(file);
-      } else {
-        toRemove.push(file);
-      }
+  return Promise.all((files || []).map((file) => {
+    return fs.access(path.join(repoPath, file)).then(() => {
+      toAdd.push(file);
+    }).catch(() => {
+      toRemove.push(file);
     });
   })).then(() => {
     const addExec = toAdd.length > 0 ? git(['add', toAdd ], repoPath) : null;
     const removeExec = toRemove.length > 0 ? git(['rm', toRemove ], repoPath) : null;
-    return Bluebird.join(addExec, removeExec);
+    return Promise.all([addExec, removeExec]);
   });
 }
 
@@ -299,11 +297,10 @@ git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
     .then((status) => {
       const file = status.files[filename];
       if (!file) {
-        return fs.isExists(path.join(repoPath, filename))
-          .then((isExist) => {
-            if (isExist) return [];
-            else throw { error: `No such file: ${filename}`, errorCode: 'no-such-file' };
-          });
+        return fs.access(path.join(repoPath, filename))
+          .then(() => {
+            return [];
+          }).catch(() => { throw { error: `No such file: ${filename}`, errorCode: 'no-such-file' }; });
         // If the file is new or if it's a directory, i.e. a submodule
       } else {
         if (file && file.isNew) {
@@ -347,12 +344,13 @@ git.discardChangesInFile = (repoPath, filename) => {
         return git(['rm', '-f', filename], repoPath);
       } else if (fileStatus.isNew) {
         // new file, junst unlink
-        return fs.unlinkAsync(fullPath)
+        return fs.unlink(fullPath)
           .catch((err) => { throw { command: 'unlink', error: err }; });
       }
 
-      return fs.isExists(fullPath)
-        .then((isExists) => isExists ? fs.lstatAsync(fullPath).then((stats) => stats.isDirectory()) : false)
+      return fs.stat(fullPath)
+        .then((stats) => stats.isDirectory())
+        .catch(() => false)
         .then((isSubrepoChange) => {
           if (isSubrepoChange) {
             return git(['submodule', 'sync'], repoPath)
@@ -371,7 +369,7 @@ git.applyPatchedDiff = (repoPath, patchedDiff) => {
 }
 
 git.commit = (repoPath, amend, emptyCommit, message, files) => {
-  return (new Bluebird((resolve, reject) => {
+  return (new Promise((resolve, reject) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
     }
@@ -384,7 +382,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
   }).then((status) => {
     const toAdd = [];
     const toRemove = [];
-    const diffPatchPromises = []; // promiese that patches each files individually
+    const promises = []; // promises that patches each files individually
 
     for (let v in files) {
       let file = files[v];
@@ -396,7 +394,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       if (fileStatus.removed) {
         toRemove.push(file.name.trim());
       } else if (files[v].patchLineList) {
-        diffPatchPromises.push(git(['diff', '--', file.name.trim()], repoPath)
+        promises.push(git(['diff', '--', file.name.trim()], repoPath)
           .then(gitParser.parsePatchDiffResult.bind(null, file.patchLineList))
           .then(git.applyPatchedDiff.bind(null, repoPath)));
       } else {
@@ -404,14 +402,14 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       }
     }
 
-    let commitPromiseChain = Bluebird.resolve()
+    promises.push(Promise.resolve()
       .then(() => {
         if (toRemove.length > 0) return git(['update-index', '--remove', '--stdin'], repoPath, null, null, toRemove.join('\n'));
       }).then(() => {
         if (toAdd.length > 0) return git(['update-index', '--add', '--stdin'], repoPath, null, null, toAdd.join('\n'));
-      });
+      }));
 
-    return Bluebird.join(commitPromiseChain, Bluebird.all(diffPatchPromises));
+    return Promise.all(promises);
   }).then(() => {
     const ammendFlag = (amend ? '--amend' : '');
     const allowedEmptyFlag = ((emptyCommit ||amend) ? '--allow-empty' : '');

@@ -1,6 +1,5 @@
 const ko = require('knockout');
 const _ = require('lodash');
-const promise = require('bluebird');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
@@ -50,45 +49,45 @@ class RemotesViewModel {
     this.isFetching = true;
     const tagPromise = options.tags ? this.server.getPromise('/remote/tags', { path: this.repoPath(), remote: this.currentRemote() }) : null;
     const fetchPromise = options.nodes ? this.server.postPromise('/fetch', { path: this.repoPath(), remote: this.currentRemote() }) : null;
-    return promise.props({tag: tagPromise, fetch: fetchPromise})
+    return Promise.all([tagPromise, fetchPromise])
       .then((result) => {
         if (options.tags) {
-          programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
+          programEvents.dispatch({ event: 'remote-tags-update', tags: result[0] });
         }
         if (!this.server.isInternetConnected) {
           this.server.isInternetConnected = true;
         }
       }).catch((err) => {
-      let errorMessage;
-      let stdout;
-      let stderr;
-      try {
-        errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
-        stdout = err.res.body.stdout;
-        stderr = err.res.body.stderr;
-      } catch (e) { errorMessage = ''; }
+        let errorMessage;
+        let stdout;
+        let stderr;
+        try {
+          errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
+          stdout = err.res.body.stdout;
+          stderr = err.res.body.stderr;
+        } catch (e) { errorMessage = ''; }
 
-      if (errorMessage.includes('Could not resolve host')) {
-        if (this.server.isInternetConnected) {
-          this.server.isInternetConnected = false;
-          errorMessage = 'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
-          stdout = '';
-          stderr = '';
-        } else {
-          // Message is already seen, just return
-          return;
+        if (errorMessage.includes('Could not resolve host')) {
+          if (this.server.isInternetConnected) {
+            this.server.isInternetConnected = false;
+            errorMessage = 'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
+            stdout = '';
+            stderr = '';
+          } else {
+            // Message is already seen, just return
+            return;
+          }
         }
-      }
 
-      programEvents.dispatch({ event: 'git-error', data: {
-        isWarning: true,
-        command: err.res.body.command,
-        error: err.res.body.error,
-        stdout,
-        stderr,
-        repoPath: err.res.body.workingDirectory
-      } });
-    }).finally(() => { this.isFetching = false; });
+        programEvents.dispatch({ event: 'git-error', data: {
+            isWarning: true,
+            command: err.res.body.command,
+            error: err.res.body.error,
+            stdout,
+            stderr,
+            repoPath: err.res.body.workingDirectory
+        } });
+      }).finally(() => { this.isFetching = false; });
   }
 
   updateRemotes() {
@@ -120,7 +119,7 @@ class RemotesViewModel {
     components.create('addremotedialog')
       .show()
       .closeThen((diag) => {
-        if(diag.isSubmitted()) {
+        if (diag.isSubmitted()) {
           return this.server.postPromise(`/remotes/${encodeURIComponent(diag.name())}`, { path: this.repoPath(), url: diag.url() })
             .then(() => { this.updateRemotes(); })
             .catch((e) => this.server.unhandledRejection(e));
@@ -129,7 +128,7 @@ class RemotesViewModel {
   }
 
   remoteRemove(remote) {
-    components.create('yesnodialog', { title: 'Are you sure?', details: `Deleting ${remote.name} remote cannot be undone with ungit.`})
+    components.create('yesnodialog', { title: 'Are you sure?', details: `Deleting ${remote.name} remote cannot be undone with ungit.` })
       .show()
       .closeThen((diag) => {
         if (diag.result()) {

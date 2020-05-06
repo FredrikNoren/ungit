@@ -1,4 +1,3 @@
-const Bluebird = require('bluebird');
 const browserify = require('browserify');
 const childProcess = require('child_process');
 const cliColor = require('ansi-color');
@@ -6,8 +5,7 @@ const electronPackager = require('electron-packager');
 const path = require('path');
 const pkgVersions = require('pkg-versions');
 const semver = require('semver');
-const fs = require('./source/utils/fs-async');
-const maxConcurrency = 5;
+const fs = require('fs');
 
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
@@ -222,8 +220,8 @@ module.exports = (grunt) => {
   });
 
   grunt.registerTask('browserify-components', '',  function() {
-    Bluebird.each(fs.readdirSync('components'), (component) => {
-      return new Bluebird((resolve, reject) => {
+    Promise.all(fs.readdirSync('components').map((component) => {
+      return new Promise((resolve, reject) => {
         const src = `./components/${component}/${component}.js`;
         if (!fs.existsSync(src)) {
           grunt.log.warn(`${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
@@ -238,7 +236,7 @@ module.exports = (grunt) => {
         outFile.on('close', () => resolve());
         b.bundle().pipe(outFile);
       });
-    }).then(this.async());
+    })).then(this.async());
   });
 
   const bumpDependency = (packageJson, packageName) => {
@@ -286,7 +284,7 @@ module.exports = (grunt) => {
   grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
     const done = this.async();
 
-    fs.readdirAsync('./clicktests')
+    fs.promises.readdir('./clicktests')
       .then((files) => files.filter((file) => file.startsWith('spec.')))
       .then((tests) => {
         const genericIndx = tests.indexOf('spec.generic.js');
@@ -296,12 +294,12 @@ module.exports = (grunt) => {
         return tests;
       }).then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
-        return Bluebird.map(tests, (file) => {
+        return Promise.all(tests.map((file) => {
           let output = '';
           const outStream = (data) => output += data;
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
-          return new Bluebird((resolve, reject) => {
+          return new Promise((resolve, reject) => {
             const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'], { maxBuffer: 10*1024*1024 });
             child.stdout.on('data', outStream);
             child.stderr.on('data', outStream);
@@ -316,7 +314,7 @@ module.exports = (grunt) => {
             grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
             return { name: file, output: output, isSuccess: false };
           });
-        }, { concurrency: maxConcurrency });
+        }));
       }).then((results) => {
         let isSuccess = true;
         results.forEach((result) => {
@@ -337,14 +335,14 @@ module.exports = (grunt) => {
     const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
     const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
 
-    const bumps = Bluebird.map(keys, (dep) => {
+    const bumps = keys.map((dep) => {
       return bumpDependency(tempPackageJson, dep);
     });
 
-    Bluebird.all(bumps).then(() => {
-      fs.writeFileSync('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`);
-      grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.');
-    }).then(() => { done(); }).catch(done);
+    Promise.all(bumps)
+      .then(() => fs.promises.writeFile('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`))
+      .then(() => grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.'))
+      .then(() => { done(); }).catch(done);
   });
 
   grunt.registerMultiTask('electron', 'Package Electron apps', function() {

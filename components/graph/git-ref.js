@@ -1,6 +1,5 @@
 const ko = require('knockout');
 const md5 = require('blueimp-md5');
-const promise = require('bluebird');
 const octicons = require('octicons');
 const programEvents = require('ungit-program-events');
 const components = require('ungit-components');
@@ -152,7 +151,7 @@ class RefViewModel extends Selectable {
     let url = this.isTag ? '/tags' : '/branches';
     if (this.isRemote) url = `/remote${url}`;
 
-    return (isClientOnly ? promise.resolve() : this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }))
+    return (isClientOnly ? Promise.resolve() : this.server.delPromise(url, { path: this.graph.repoPath(), remote: this.isRemote ? this.remote : null, name: this.refName }))
       .then(() => {
         if (this.node()) this.node().removeRef(this);
         this.graph.refs.remove(this);
@@ -206,7 +205,7 @@ class RefViewModel extends Selectable {
     const isRemote = this.isRemoteBranch;
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 
-    return promise.resolve().then(() => {
+    return Promise.resolve().then(() => {
         if (isRemote && !isLocalCurrent) {
           return this.server.postPromise('/branches', {
             path: this.graph.repoPath(),
