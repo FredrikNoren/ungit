@@ -125,7 +125,7 @@ describe('git-api diff', () => {
   });
 
   it('should be possible to rename a modified file', () => {
-    return common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile, testFile2] });
+    return common.post(req, '/testing/git', { path: testDir, command: ['mv', testFile, testFile2] });
   });
 
   it('diff on renamed and modified file should work', () => {

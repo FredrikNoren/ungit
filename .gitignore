@@ -24,11 +24,7 @@ report/
 
 /node_modules/
 
-/clicktests/screenshots/
 /build
-/*.dll
-/nw.exe
-/nw.pak
 
 /components/**/*.css
 /components/**/*.bundle.js

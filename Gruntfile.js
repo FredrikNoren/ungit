@@ -69,10 +69,10 @@ module.exports = (grunt) => {
         options: {
           reporter: 'spec',
           require: './source/utils/winston.js',
-          timeout: 15000,
+          timeout: 35000,
           bail: true
         },
-        src: 'nmclicktests/spec.*.js'
+        src: 'clicktests/spec.*.js'
       }
     },
 
@@ -80,7 +80,7 @@ module.exports = (grunt) => {
       options: {
         undef: true, // check for usage of undefined constiables
         indent: 2,
-        esnext: true,
+        esversion: 6,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
@@ -124,6 +124,7 @@ module.exports = (grunt) => {
       },
       mocha: {
         options: {
+          esversion: 8,
           node: true,
           globals: {
             'it': true,
@@ -138,7 +139,7 @@ module.exports = (grunt) => {
         },
         src: [
           'test/**/*.js',
-          'nmclicktests/**/*.js'
+          'clicktests/**/*.js'
         ]
       }
     },
@@ -305,7 +306,7 @@ module.exports = (grunt) => {
   grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
     const done = this.async();
 
-    fs.readdirAsync('./nmclicktests')
+    fs.readdirAsync('./clicktests')
       .then((files) => files.filter((file) => file.startsWith('spec.')))
       .then((tests) => {
         const genericIndx = tests.indexOf('spec.generic.js');
@@ -321,7 +322,7 @@ module.exports = (grunt) => {
 
           grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
           return new Bluebird((resolve, reject) => {
-            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'nmclicktests', file), '--timeout=20000', '-b'], { maxBuffer: 10*1024*1024 });
+            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'], { maxBuffer: 10*1024*1024 });
             child.stdout.on('data', outStream);
             child.stderr.on('data', outStream);
             child.on('exit', (code) => {

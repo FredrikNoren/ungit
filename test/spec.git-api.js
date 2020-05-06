@@ -351,7 +351,7 @@ describe('git-api', () => {
   const testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
 
   it('renaming a file should work', () => {
-    return common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile3, testFile4] });
+    return common.post(req, '/testing/git', { path: testDir, command: ['mv', testFile3, testFile4] });
   });
 
   it('status should list the renamed file', () => {

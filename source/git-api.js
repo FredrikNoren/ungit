@@ -132,13 +132,13 @@ exports.registerApi = (env) => {
   }
 
   const emitWorkingTreeChanged = _.debounce((repoPath) => {
-    if (io) {
+    if (io && repoPath) {
       io.sockets.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
       winston.info('emitting working-tree-changed to sockets, manually triggered');
     }
   }, 500, { 'maxWait': 2000 })
   const emitGitDirectoryChanged = _.debounce((repoPath) => {
-    if (io) {
+    if (io && repoPath) {
       io.sockets.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
       winston.info('emitting git-directory-changed to sockets, manually triggered');
     }
@@ -692,23 +692,34 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFile(req.body.file, content, () => res.json({}));
+      fs.writeFileAsync(req.body.file, content)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : (`test content\n${Math.random()}\n`);
-      fs.writeFile(req.body.file, content, () => res.json({}));
+      fs.writeFileAsync(req.body.file, content)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
      app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png', { encoding: 'binary' }, () => res.json({}));
+      fs.writeFileAsync(req.body.file, 'png', { encoding: 'binary' })
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' }, () => res.json({}));
+      fs.writeFileAsync(req.body.file, 'png ~~', { encoding: 'binary' })
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
-      fs.unlink(req.body.file, () => res.json({}));
+      fs.unlinkAsync(req.body.file)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.repo));
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.path))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {

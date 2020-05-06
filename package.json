@@ -8,6 +8,7 @@
     "start": "node ./bin/ungit",
     "test": "grunt test",
     "unittest": "grunt unittest",
+    "clicktest": "grunt clicktest",
     "build": "grunt",
     "watch": "grunt watch",
     "package": "grunt package",
@@ -83,8 +84,8 @@
     "grunt-zip-directories": "~1.0.1",
     "istanbul": "~0.4.5",
     "mocha": "~7.1.2",
-    "nightmare": "~3.0.2",
     "pkg-versions": "~2.1.0",
+    "puppeteer": "~3.0.3",
     "superagent": "~5.2.2",
     "supertest": "~4.0.2"
   },
