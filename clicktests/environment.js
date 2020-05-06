@@ -257,15 +257,17 @@ class Environment {
   }
 
   async click(selector) {
+    let elementHandle = await this.waitForElementVisible(selector);
     try {
-      const elementHandle = await this.waitForElementVisible(selector);
-      if (elementHandle == null) {
-        throw new Error(`Element does not exist or is not visible: ${selector}`);
-      }
       await elementHandle.click();
-    } catch (err) {
-      winston.error(`Failed to click element: ${selector}`);
-      throw err;
+    } catch (err1) {
+      elementHandle = await this.waitForElementVisible(selector);
+      try {
+        await elementHandle.click(); // try click a second time to reduce test flakiness
+      } catch (err2) {
+        winston.error(`Failed to click element: ${selector}`);
+        throw err2;
+      }
     }
   }
 
