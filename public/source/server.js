@@ -1,7 +1,6 @@
 
 var programEvents = require('ungit-program-events');
 var _ = require('lodash');
-var Promise = require("bluebird");
 var rootPath = ungit.config && ungit.config.rootPath || '';
 var nprogress;
 if (ungit.config.isDisableProgressBar) {
@@ -172,9 +171,6 @@ Server.prototype.delPromise = function(url, arg) {
 }
 Server.prototype.putPromise = function(url, arg) {
   return this.queryPromise('PUT', url, arg);
-}
-Server.prototype.emptyPromise = function() {
-  return Promise.resolve();
 }
 
 Server.prototype.unhandledRejection = function(err) {

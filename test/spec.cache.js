@@ -1,12 +1,10 @@
-
 const expect = require('expect.js');
 const cache = require('../source/utils/cache');
-const Bluebird = require('bluebird');
 
 describe('cache', () => {
   it('should be invokable several times', () => {
     let i = 0;
-    const key = cache.registerFunc(() => i ++);
+    const key = cache.registerFunc(() => i++);
 
     return cache.resolveFunc(key)
       .then((val) => { expect(val).to.be(0); })
@@ -27,7 +25,7 @@ describe('cache', () => {
 
   it('should work when failing async', () => {
     const errorMsg = "A nasty error...";
-    const key = cache.registerFunc(() => Bluebird.reject(new Error(errorMsg)));
+    const key = cache.registerFunc(() => Promise.reject(new Error(errorMsg)));
 
     return cache.resolveFunc(key)
       .then(() => { throw new Error("should have thrown exception!"); })
@@ -70,7 +68,7 @@ describe('cache', () => {
       .then((val) => { expect(val).to.be(1); })
   });
 
-  it('Testing ttl', function() {
+  it('Testing ttl', function () {
     let i = 0;
     const func = () => i++
     const key = cache.registerFunc(1, null, func);
@@ -78,25 +76,16 @@ describe('cache', () => {
 
     return cache.resolveFunc(key)
       .then((val) => { expect(val).to.be(0); })
+      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
       .then(() => {
-        return new Bluebird((resolve) => {
-          setTimeout(resolve, 500);
-        });
-      }).then(() => {
         return cache.resolveFunc(key)
       }).then((val) => { expect(val).to.be(0); })
+      .then(() => new Promise((resolve) => setTimeout(resolve, 1000)))
       .then(() => {
-        return new Bluebird((resolve) => {
-          setTimeout(resolve, 1000);
-        });
-      }).then(() => {
         return cache.resolveFunc(key)
       }).then((val) => { expect(val).to.be(1); })
-      .then(() => {
-        return new Bluebird((resolve) => {
-          setTimeout(resolve, 500);
-        });
-      }).then(() => cache.resolveFunc(key))
+      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
+      .then(() => cache.resolveFunc(key))
       .then((val) => { expect(val).to.be(1); })
   });
 });

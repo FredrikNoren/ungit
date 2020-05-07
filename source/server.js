@@ -9,13 +9,12 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const semver = require('semver');
 const path = require('path');
-const fs = require('./utils/fs-async');
+const fs = require('fs').promises;
 const signals = require('signals');
 const os = require('os');
 const cache = require('./utils/cache');
 const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
-const Bluebird = require('bluebird');
 
 process.on('uncaughtException', (err) => {
   winston.error(err.stack ? err.stack.toString() : err.toString());
@@ -25,7 +24,7 @@ process.on('uncaughtException', (err) => {
 
 console.log('Setting log level to ' + config.logLevel);
 const consoleTransport = winston.default.transports.find((transport) => {
-   return transport instanceof winston.transports.Console;
+  return transport instanceof winston.transports.Console;
 });
 if (consoleTransport) {
   consoleTransport.level = config.logLevel;
@@ -33,7 +32,7 @@ if (consoleTransport) {
 if (config.logDirectory) {
   winston.add(new winston.transports.File({
     filename: path.join(config.logDirectory, 'server.log'),
-    maxsize: 100*1024,
+    maxsize: 100 * 1024,
     maxFiles: 2,
     format: winston.format.combine(
       winston.format.timestamp(),
@@ -80,7 +79,7 @@ app.use((req, res, next) => {
     next();
     return;
   }
-  res.send(400).end();
+  res.status(400).end();
 });
 
 if (config.logRESTRequests) {
@@ -95,8 +94,8 @@ if (config.allowedIPs) {
     const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
     else {
-      res.status(403).send(403, '<h3>This host is not authorized to connect</h3>' +
-      '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
+      res.status(403).send('<h3>This host is not authorized to connect</h3>' +
+        '<p>You are trying to connect to an Ungit instance from an unauthorized host.</p>');
       winston.warn(`Host trying but not authorized to connect: ${ip}`);
     }
   });
@@ -179,9 +178,9 @@ if (config.authentication) {
 
 const indexHtmlCacheKey = cache.registerFunc(() => {
   return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
-    return fs.readFileAsync(__dirname + '/../public/index.html').then((data) => {
-      return Bluebird.all(Object.keys(plugins).map((pluginName) => {
-        return plugins[pluginName].compile();
+    return fs.readFile(__dirname + '/../public/index.html').then((data) => {
+      return Promise.all(Object.values(plugins).map((plugin) => {
+        return plugin.compile();
       })).then((results) => {
         data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
@@ -239,35 +238,42 @@ gitApi.registerApi(apiEnvironment);
 
 // Init plugins
 const loadPlugins = (plugins, pluginBasePath) => {
-  fs.readdirSync(pluginBasePath).forEach((pluginDir) => {
-    const pluginPath = path.join(pluginBasePath, pluginDir);
-    // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
-    if (!fs.lstatSync(pluginPath).isDirectory() ||
-      !fs.existsSync(path.join(pluginPath, 'ungit-plugin.json'))) {
-      return;
-    }
-    winston.info('Loading plugin: ' + pluginPath);
-    const plugin = new UngitPlugin({
-      dir: pluginDir,
-      httpBasePath: 'plugins/' + pluginDir,
-      path: pluginPath
-    });
-    if (plugin.manifest.disabled || plugin.config.disabled) {
-      winston.info('Plugin disabled: ' + pluginDir);
-      return;
-    }
-    plugin.init(apiEnvironment);
-    plugins.push(plugin);
-    winston.info('Plugin loaded: ' + pluginDir);
+  return fs.readdir(pluginBasePath, { withFileTypes: true }).then((files) => {
+    return Promise.all(files.map((pluginDir) => {
+      // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
+      if (!pluginDir.isDirectory()) {
+        return;
+      }
+      const pluginPath = path.join(pluginBasePath, pluginDir.name);
+      return fs.access(path.join(pluginPath, 'ungit-plugin.json'))
+        .then(() => {
+          winston.info('Loading plugin: ' + pluginPath);
+          const plugin = new UngitPlugin({
+            dir: pluginDir.name,
+            httpBasePath: 'plugins/' + pluginDir.name,
+            path: pluginPath
+          });
+          if (plugin.manifest.disabled || plugin.config.disabled) {
+            winston.info('Plugin disabled: ' + pluginDir.name);
+            return;
+          }
+          plugin.init(apiEnvironment);
+          plugins.push(plugin);
+          winston.info('Plugin loaded: ' + pluginDir.name);
+        })
+        .catch(() => { /* ignore */ });
+    }));
   });
 };
 const pluginsCacheKey = cache.registerFunc(() => {
   const plugins = [];
-  loadPlugins(plugins, path.join(__dirname, '..', 'components'));
-  if (fs.existsSync(config.pluginDirectory)) {
-    loadPlugins(plugins, config.pluginDirectory);
-  }
-  return plugins;
+  return loadPlugins(plugins, path.join(__dirname, '..', 'components'))
+    .then(() => {
+      return fs.access(config.pluginDirectory)
+        .then(() => loadPlugins(plugins, config.pluginDirectory))
+        .catch(() => { /* ignore */ });
+    })
+    .then(() => plugins);
 });
 
 app.get('/serverdata.js', (req, res) => {
@@ -314,18 +320,19 @@ app.get('/api/gitversion', (req, res) => {
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');
 const readUserConfig = () => {
-  return fs.isExists(userConfigPath).then((hasConfig) => {
-    if (!hasConfig) return {};
-    return fs.readFileAsync(userConfigPath, { encoding: 'utf8' })
+  return fs.access(userConfigPath).then(() => {
+    return fs.readFile(userConfigPath, { encoding: 'utf8' })
       .then((content) => { return JSON.parse(content.toString()); })
       .catch((err) => {
         winston.error(`Stop at reading ~/.ungitrc because ${err}`);
         process.exit(0);
       });
+  }).catch(() => {
+    return {};
   });
 };
 const writeUserConfig = (configContent) => {
-  return fs.writeFileAsync(userConfigPath, JSON.stringify(configContent, undefined, 2));
+  return fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2));
 };
 
 app.get('/api/userconfig', ensureAuthenticated, (req, res) => {
@@ -338,18 +345,24 @@ app.post('/api/userconfig', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
-  res.json(fs.existsSync(req.query['path']));
+  fs.access(req.query['path']).then(() => {
+    res.json(true);
+  }).catch(() => {
+    res.json(false);
+  });
 });
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
   const dir = path.resolve(req.query.term.trim()).replace('/~', '');
 
-  fs.readdirAsync(dir).then(filenames => {
-    return filenames.map((filename) => path.join(dir, filename));
-  }).filter((filepath) => {
-    return fs.statAsync(filepath)
-      .then((stat) => stat.isDirectory())
-      .catch(() => false);
+  fs.readdir(dir, { withFileTypes: true }).then((files) => {
+    const dirs = [];
+    files.forEach((file) => {
+      if (file.isDirectory()) {
+        dirs.push(path.join(dir, file.name));
+      }
+    });
+    return dirs;
   }).then(filteredFiles => {
     filteredFiles.unshift(dir);
     res.json(filteredFiles);

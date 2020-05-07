@@ -1,6 +1,5 @@
 const ko = require('knockout');
 const _ = require('lodash');
-const promise = require('bluebird');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
@@ -113,7 +112,7 @@ class StagingViewModel {
   }
 
   refreshContent() {
-    return promise.all([this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
+    return Promise.all([this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
         .then(log => {
           if (log.length > 0) {
             const array = log[0].message.split('\n');
@@ -271,7 +270,7 @@ class StagingViewModel {
     if (this.commitMessageBody()) commitMessage += `\n\n${this.commitMessageBody()}`;
     this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
       .catch((e) => this.server.unhandledRejection(e))
-      .finally((err) => { this.resetMessages(); });
+      .finally(() => { this.resetMessages(); });
   }
 
   invalidateFilesDiffs() {

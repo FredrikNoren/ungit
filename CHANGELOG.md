@@ -8,6 +8,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
 
+### Removed
+- Remove bluebird dependency [#1350](https://github.com/FredrikNoren/ungit/pull/1350)
+
 ## [1.5.7](https://github.com/FredrikNoren/ungit/compare/v1.5.6...v1.5.7)
 
 ### Fixed

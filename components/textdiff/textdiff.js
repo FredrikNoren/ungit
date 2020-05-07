@@ -2,7 +2,6 @@
 const ko = require('knockout');
 const components = require('ungit-components');
 const diff2html = require('diff2html');
-const promise = require("bluebird");
 const sideBySideDiff = 'sidebysidediff';
 const textDiff = 'textdiff';
 
@@ -125,7 +124,7 @@ class TextDiffViewModel {
   }
 
   render() {
-    return (!this.diffJson ? this.getDiffJson() : promise.resolve())
+    return (!this.diffJson ? this.getDiffJson() : Promise.resolve())
       .then(() => {
         if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 

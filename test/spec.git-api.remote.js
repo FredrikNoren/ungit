@@ -16,7 +16,7 @@ let testDirLocal1, testDirLocal2, testDirRemote;
 
 const req = request(app);
 
-describe('git-api remote', function() {
+describe('git-api remote', function () {
   this.timeout(4000);
 
   before('creating test dirs should work', () => {
@@ -101,7 +101,7 @@ describe('git-api remote', function() {
   it('creating and pushing a commit in "local1" repo should work', () => {
     const testFile = path.join(testDirLocal1, "testfile2.txt");
     return common.post(req, '/testing/createfile', { file: testFile })
-      .delay(500)
+      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
       .then(() => common.post(req, '/commit', { path: testDirLocal1, message: "Commit2", files: [{ name: testFile }] }))
       .then(() => common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }))
   });
@@ -112,7 +112,7 @@ describe('git-api remote', function() {
 
   it('log in "local2" should show the branch as one behind', () => {
     common.get(req, '/gitlog', { path: testDirLocal2 })
-      .then((res) =>{
+      .then((res) => {
         expect(res.nodes).to.be.a('array');
         expect(res.nodes.length).to.be(2);
         const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0)
@@ -150,7 +150,7 @@ describe('git-api remote', function() {
   it('creating a commit in "local2" repo should work', () => {
     const testFile = path.join(testDirLocal2, "testfile3.txt");
     return common.post(req, '/testing/createfile', { file: testFile })
-      .delay(500)
+      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
       .then(() => common.post(req, '/commit', { path: testDirLocal2, message: "Commit3", files: [{ name: testFile }] }));
   });
 
@@ -194,6 +194,6 @@ describe('git-api remote', function() {
 
   it('remote tags in "local2" should show the remote tag', () => {
     return common.get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' })
-      .then((res) => expect(res.map((tag) => tag.name )).to.contain('refs/tags/v1.0^{}'));
+      .then((res) => expect(res.map((tag) => tag.name)).to.contain('refs/tags/v1.0^{}'));
   });
 });

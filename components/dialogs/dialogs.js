@@ -1,7 +1,6 @@
 
 const ko = require('knockout');
 const components = require('ungit-components');
-const Bluebird = require('bluebird');
 const programEvents = require('ungit-program-events');
 
 components.register('formdialog', args => new FormDialogViewModel(args.title));
@@ -19,7 +18,7 @@ class DialogViewModel {
     this.onclose = null;
     this.title = ko.observable(title);
     this.taDialogName = ko.observable('');
-    this.closePromise = new Bluebird(resolve => {
+    this.closePromise = new Promise((resolve) => {
       this.onclose = resolve;
     });
   }
