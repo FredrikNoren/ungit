@@ -95,7 +95,7 @@ if (config.allowedIPs) {
     if (config.allowedIPs.indexOf(ip) >= 0) next();
     else {
       res.status(403).send('<h3>This host is not authorized to connect</h3>' +
-        '<p>You are trying to connect to an Ungit instance from an unathorized host.</p>');
+        '<p>You are trying to connect to an Ungit instance from an unauthorized host.</p>');
       winston.warn(`Host trying but not authorized to connect: ${ip}`);
     }
   });
