@@ -179,8 +179,8 @@ if (config.authentication) {
 const indexHtmlCacheKey = cache.registerFunc(() => {
   return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
     return fs.readFile(__dirname + '/../public/index.html').then((data) => {
-      return Promise.all(Object.keys(plugins).map((pluginName) => {
-        return plugins[pluginName].compile();
+      return Promise.all(Object.values(plugins).map((plugin) => {
+        return plugin.compile();
       })).then((results) => {
         data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
