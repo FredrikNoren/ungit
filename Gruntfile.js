@@ -192,36 +192,29 @@ module.exports = (grunt) => {
 
   grunt.registerTask('browserify-common', '', function() {
     const done = this.async();
-    const b = browserify({
-      noParse: ['public/vendor/js/superagent.js'],
+    const b = browserify('./public/source/main.js', {
+      noParse: [
+        'dnd-page-scroll',
+        'jquery',
+        'knockout'
+      ],
       debug: true
     });
-    b.add('./public/source/main.js');
-    b.require('./public/source/main.js', { expose: 'ungit-main' });
     b.require('./public/source/components.js', { expose: 'ungit-components' });
-    b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
-    b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
-    b.require('./public/source/storage.js', { expose: 'ungit-storage' });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
+    b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
+    b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
+    b.require('./public/source/storage.js', { expose: 'ungit-storage' });
     b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
+    b.require('bluebird', { expose: 'bluebird' });
+    b.require('blueimp-md5', { expose: 'blueimp-md5' });
+    b.require('diff2html', { expose: 'diff2html' });
     b.require('knockout', { expose: 'knockout' });
     b.require('lodash', { expose: 'lodash' });
-    b.require('hasher', { expose: 'hasher' });
-    b.require('crossroads', { expose: 'crossroads' });
-    b.require('async', { expose: 'async' });
-    b.require('moment', { expose: 'moment' });
-    b.require('blueimp-md5', { expose: 'blueimp-md5' });
-    b.require('signals', { expose: 'signals' });
-    b.require('util', { expose: 'util' });
-    b.require('path', { expose: 'path' });
-    b.require('diff2html', { expose: 'diff2html' });
-    b.require('bluebird', { expose: 'bluebird' });
-    b.require('just-detect-adblock', { expose: 'just-detect-adblock' });
     b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
-    b.require('nprogress', { expose: 'nprogress' });
-    b.require('jquery', { expose: 'jquery' });
-    b.require('dnd-page-scroll', { expose: 'dnd-page-scroll' });
+    b.require('moment', { expose: 'moment' });
     b.require('@primer/octicons', { expose: 'octicons' });
+    b.require('signals', { expose: 'signals' });
     const outFile = fs.createWriteStream('./public/js/ungit.js');
     outFile.on('close', () => done());
     b.bundle().pipe(outFile);
@@ -230,30 +223,16 @@ module.exports = (grunt) => {
   grunt.registerTask('browserify-components', '',  function() {
     Bluebird.each(fs.readdirSync('components'), (component) => {
       return new Bluebird((resolve, reject) => {
-        const b = browserify({
+        const src = `./components/${component}/${component}.js`;
+        if (!fs.existsSync(src)) {
+          grunt.log.warn(`${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
+          resolve();
+          return;
+        }
+        const b = browserify(src, {
           bundleExternal: false,
           debug: true
         });
-        const src = `./components/${component}/${component}.js`;
-        if (!fs.existsSync(src)) {
-          grunt.log.error(`${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
-          return;
-        }
-        b.add(src);
-        b.external(['ungit-components',
-                'ungit-program-events',
-                'ungit-navigation',
-                'ungit-storage',
-                'ungit-main',
-                'ungit-address-parser',
-                'knockout',
-                'lodash',
-                'hasher',
-                'crossroads',
-                'async',
-                'moment',
-                'blueimp-md5']);
-
         const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
         outFile.on('close', () => resolve());
         b.bundle().pipe(outFile);
