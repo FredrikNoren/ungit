@@ -209,6 +209,7 @@ module.exports = (grunt) => {
     b.require('bluebird', { expose: 'bluebird' });
     b.require('blueimp-md5', { expose: 'blueimp-md5' });
     b.require('diff2html', { expose: 'diff2html' });
+    b.require('jquery', { expose: 'jquery' });
     b.require('knockout', { expose: 'knockout' });
     b.require('lodash', { expose: 'lodash' });
     b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
