@@ -12,7 +12,7 @@ const maxConcurrency = 5;
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
   const lessFiles = {
-    'public/css/styles.css': ['public/less/styles.less', 'public/vendor/css/animate.css', 'public/less/d2h.less']
+    'public/css/styles.css': ['public/less/styles.less']
   };
   fs.readdirSync('./components').map((component) => `components/${component}/${component}`)
     .forEach((str) => lessFiles[`${str}.css`] = `${str}.less`);
