@@ -10,6 +10,9 @@ const fs = require('./source/utils/fs-async');
 const maxConcurrency = 5;
 
 module.exports = (grunt) => {
+  const dev = Boolean(grunt.option('dev'));
+  grunt.log.writeln(`Running in ${dev ? 'dev' : 'prod'} mode`);
+
   const packageJson = grunt.file.readJSON('package.json');
   const lessFiles = {
     'public/css/styles.css': ['public/less/styles.less', 'public/vendor/css/animate.css', 'public/less/d2h.less']
@@ -20,7 +23,15 @@ module.exports = (grunt) => {
   grunt.initConfig({
     pkg: packageJson,
     less: {
-      production: { files: lessFiles }
+      default: {
+        files: lessFiles,
+        options: {
+          compress: true,
+          sourceMap: dev,
+          sourceMapFileInline: true,
+          outputSourceFiles: true
+        }
+      }
     },
     watch: {
       scripts: {
@@ -40,7 +51,7 @@ module.exports = (grunt) => {
     },
     lineending: {
       // Debian won't accept bin files with the wrong line ending
-      production: {
+      default: {
         options: {
           eol: 'lf'
         },
@@ -144,7 +155,7 @@ module.exports = (grunt) => {
       }
     },
     copy: {
-      main: {
+      default: {
         files: [
           // includes files within path
           { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' },
@@ -194,9 +205,10 @@ module.exports = (grunt) => {
     const done = this.async();
     const b = browserify({
       noParse: ['public/vendor/js/superagent.js'],
-      debug: true
+      debug: dev
     });
     b.add('./public/source/main.js');
+    b.plugin('tinyify', { flat: false });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
     b.require('./public/source/components.js', { expose: 'ungit-components' });
     b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
@@ -232,7 +244,7 @@ module.exports = (grunt) => {
       return new Bluebird((resolve, reject) => {
         const b = browserify({
           bundleExternal: false,
-          debug: true
+          debug: dev
         });
         const src = `./components/${component}/${component}.js`;
         if (!fs.existsSync(src)) {
@@ -254,12 +266,15 @@ module.exports = (grunt) => {
                 'moment',
                 'blueimp-md5']);
 
+        b.plugin('tinyify', { flat: false });
         const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
         outFile.on('close', () => resolve());
         b.bundle().pipe(outFile);
       });
     }).then(this.async());
   });
+
+  grunt.registerTask('browserify', ['browserify-common', 'browserify-components']);
 
   const bumpDependency = (packageJson, packageName) => {
     const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
@@ -390,7 +405,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'copy:main']);
+  grunt.registerTask('default', ['less', 'jshint', 'browserify', 'lineending', 'copy']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);

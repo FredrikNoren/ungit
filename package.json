@@ -10,7 +10,8 @@
     "unittest": "grunt unittest",
     "clicktest": "grunt clicktest",
     "build": "grunt",
-    "watch": "grunt watch",
+    "dev": "grunt --dev",
+    "watch": "grunt watch --dev",
     "package": "grunt package",
     "travisnpmpublish": "grunt travisnpmpublish",
     "electronpublish": "grunt electronpublish"
@@ -87,7 +88,8 @@
     "pkg-versions": "~2.1.0",
     "puppeteer": "~3.0.3",
     "superagent": "~5.2.2",
-    "supertest": "~4.0.2"
+    "supertest": "~4.0.2",
+    "tinyify": "~2.5.2"
   },
   "engines": {
     "node": ">=10.18"
