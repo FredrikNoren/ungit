@@ -6,7 +6,7 @@
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
-    "test": "prettier --check . && grunt test",
+    "test": "grunt test",
     "unittest": "grunt unittest",
     "clicktest": "grunt clicktest",
     "format": "prettier --write . bin/*",
@@ -77,7 +77,6 @@
     "grunt-contrib-jshint": "~2.1.0",
     "grunt-contrib-less": "~2.0.0",
     "grunt-contrib-watch": "~1.1.0",
-    "grunt-lineending": "~1.0.0",
     "grunt-mocha-istanbul": "~5.0.2",
     "grunt-mocha-test": "~0.13.3",
     "grunt-release": "~0.14.0",
