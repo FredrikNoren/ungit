@@ -41,7 +41,7 @@ var adBlocker = require('just-detect-adblock');
     };
 
   $(document).tooltip({
-    selector: '.bootstrap-tooltip'
+    selector: '[data-toggle="tooltip"]'
   });
 }());
 
