@@ -1,5 +1,7 @@
 'use strict';
-const environment = require('./environment')({ serverStartupOptions: ['--numberOfNodesPerLoad=1'] });
+const environment = require('./environment')({
+  serverStartupOptions: ['--numberOfNodesPerLoad=1'],
+});
 const testRepoPaths = [];
 
 describe('[LOAD-AHEAD]', () => {

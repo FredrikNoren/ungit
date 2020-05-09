@@ -12,10 +12,12 @@ class PathViewModel {
   constructor(server, path) {
     this.server = server;
     this.repoPath = ko.observable(path);
-    this.dirName = this.repoPath().replace(/\\/g, '/')
-                     .split('/')
-                     .filter((s) => s)
-                     .slice(-1)[0] || '/';
+    this.dirName =
+      this.repoPath()
+        .replace(/\\/g, '/')
+        .split('/')
+        .filter((s) => s)
+        .slice(-1)[0] || '/';
 
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
@@ -35,12 +37,15 @@ class PathViewModel {
   updateNode(parentElement) {
     ko.renderTemplate('path', this, {}, parentElement);
   }
-  shown() { this.updateStatus(); }
+  shown() {
+    this.updateStatus();
+  }
   updateAnimationFrame(deltaT) {
     if (this.repository()) this.repository().updateAnimationFrame(deltaT);
   }
   updateStatus() {
-    return this.server.getPromise('/quickstatus', { path: this.repoPath() })
+    return this.server
+      .getPromise('/quickstatus', { path: this.repoPath() })
       .then((status) => {
         if (status.type == 'inited' || status.type == 'bare') {
           if (this.repoPath() !== status.gitRootPath) {
@@ -57,12 +62,16 @@ class PathViewModel {
           this.repository(null);
         }
         return null;
-      }).catch((err) => { });
+      })
+      .catch((err) => {});
   }
   initRepository() {
-    return this.server.postPromise('/init', { path: this.repoPath() })
+    return this.server
+      .postPromise('/init', { path: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
-      .finally((res) => { this.updateStatus(); });
+      .finally((res) => {
+        this.updateStatus();
+      });
   }
   onProgramEvent(event) {
     if (event.event == 'working-tree-changed') this.updateStatus();
@@ -74,7 +83,13 @@ class PathViewModel {
     this.status('cloning');
     const dest = this.cloneDestination() || this.cloneDestinationImplicit();
 
-    return this.server.postPromise('/clone', { path: this.repoPath(), url: this.cloneUrl(), destinationDir: dest, isRecursiveSubmodule: this.isRecursiveSubmodule() })
+    return this.server
+      .postPromise('/clone', {
+        path: this.repoPath(),
+        url: this.cloneUrl(),
+        destinationDir: dest,
+        isRecursiveSubmodule: this.isRecursiveSubmodule(),
+      })
       .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)))
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
@@ -83,7 +98,8 @@ class PathViewModel {
   }
   createDir() {
     this.showDirectoryCreatedAlert(true);
-    return this.server.postPromise('/createDir', { dir: this.repoPath() })
+    return this.server
+      .postPromise('/createDir', { dir: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
       .then(() => this.updateStatus());
   }

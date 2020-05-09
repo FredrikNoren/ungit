@@ -2,15 +2,15 @@ const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
 
-components.register('gitErrors', args => new GitErrorsViewModel(args.server, args.repoPath));
+components.register('gitErrors', (args) => new GitErrorsViewModel(args.server, args.repoPath));
 
 class GitErrorsViewModel {
   constructor(server, repoPath) {
     this.server = server;
     this.repoPath = repoPath;
     this.gitErrors = ko.observableArray();
-    this.closeIcon = octicons.x.toSVG({ 'height': 18 });
-    this.alertIcon = octicons.alert.toSVG({ 'height': 24 });
+    this.closeIcon = octicons.x.toSVG({ height: 18 });
+    this.alertIcon = octicons.alert.toSVG({ height: 24 });
   }
 
   updateNode(parentElement) {
@@ -42,8 +42,9 @@ class GitErrorViewModel {
     this.bugReportWasSent = ungit.config.bugtracking;
 
     if (!data.shouldSkipReport && !ungit.config.bugtracking) {
-      this.server.getPromise('/userconfig')
-        .then(userConfig => { self.showEnableBugtracking(!userConfig.bugtracking); });
+      this.server.getPromise('/userconfig').then((userConfig) => {
+        self.showEnableBugtracking(!userConfig.bugtracking);
+      });
     }
   }
 

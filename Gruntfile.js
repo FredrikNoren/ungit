@@ -10,15 +10,16 @@ const fs = require('fs');
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
   const lessFiles = {
-    'public/css/styles.css': ['public/less/styles.less']
+    'public/css/styles.css': ['public/less/styles.less'],
   };
-  fs.readdirSync('./components').map((component) => `components/${component}/${component}`)
-    .forEach((str) => lessFiles[`${str}.css`] = `${str}.less`);
+  fs.readdirSync('./components')
+    .map((component) => `components/${component}/${component}`)
+    .forEach((str) => (lessFiles[`${str}.css`] = `${str}.less`));
 
   grunt.initConfig({
     pkg: packageJson,
     less: {
-      production: { files: lessFiles }
+      production: { files: lessFiles },
     },
     watch: {
       scripts: {
@@ -34,12 +35,12 @@ module.exports = (grunt) => {
         options: {
           spawn: false,
         },
-      }
+      },
     },
     release: {
       options: {
         commitMessage: 'Release <%= version %>',
-      }
+      },
     },
     // Run mocha tests
     mochaTest: {
@@ -47,19 +48,19 @@ module.exports = (grunt) => {
         options: {
           reporter: 'spec',
           require: './source/utils/winston.js',
-          timeout: 5000
+          timeout: 5000,
         },
-        src: 'test/*.js'
+        src: 'test/*.js',
       },
       click: {
         options: {
           reporter: 'spec',
           require: './source/utils/winston.js',
           timeout: 35000,
-          bail: true
+          bail: true,
         },
-        src: 'clicktests/spec.*.js'
-      }
+        src: 'clicktests/spec.*.js',
+      },
     },
 
     jshint: {
@@ -78,71 +79,75 @@ module.exports = (grunt) => {
           node: true,
           browser: true,
           globals: {
-            'ungit': true,
-            'io': true,
-            'Raven': true,
-            '$': true,
-            'jQuery': true,
-            'nprogress': true
-          }
+            ungit: true,
+            io: true,
+            Raven: true,
+            $: true,
+            jQuery: true,
+            nprogress: true,
+          },
         },
         files: [
           {
             src: ['public/source/**/*.js', 'components/**/*.js'],
             // Filter out the "compiled" components files; see the browserify task for components
-            filter: (src) => src.indexOf('bundle.js') == -1
-          }
-        ]
+            filter: (src) => src.indexOf('bundle.js') == -1,
+          },
+        ],
       },
       node: {
         options: {
-          node: true
+          node: true,
         },
-        src: ['source/**/*.js']
+        src: ['source/**/*.js'],
       },
       bin: {
         options: {
-          node: true
+          node: true,
         },
-        src: [
-          'Gruntfile.js',
-          'bin/*'
-        ]
+        src: ['Gruntfile.js', 'bin/*'],
       },
       mocha: {
         options: {
           esversion: 8,
           node: true,
           globals: {
-            'it': true,
-            'describe': true,
-            'before': true,
-            'after': true,
-            'window': true,
-            'document': true,
-            'navigator': true,
-            'ungit': true
-          }
+            it: true,
+            describe: true,
+            before: true,
+            after: true,
+            window: true,
+            document: true,
+            navigator: true,
+            ungit: true,
+          },
         },
-        src: [
-          'test/**/*.js',
-          'clicktests/**/*.js'
-        ]
-      }
+        src: ['test/**/*.js', 'clicktests/**/*.js'],
+      },
     },
     copy: {
       main: {
         files: [
           // includes files within path
-          { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js'], dest: 'public/js/' },
-          { expand: true, flatten: true, src: ['node_modules/raven-js/dist/raven.min.js.map'], dest: 'public/js/' }
-        ]
-      }
+          {
+            expand: true,
+            flatten: true,
+            src: ['node_modules/raven-js/dist/raven.min.js'],
+            dest: 'public/js/',
+          },
+          {
+            expand: true,
+            flatten: true,
+            src: ['node_modules/raven-js/dist/raven.min.js.map'],
+            dest: 'public/js/',
+          },
+        ],
+      },
     },
     clean: {
       electron: ['./build'],
       coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit']
+      'coverage-unit': ['./coverage/coverage-unit'],
     },
     electron: {
       package: {
@@ -151,30 +156,32 @@ module.exports = (grunt) => {
           out: './build',
           icon: './public/images/icon',
           all: true,
-          asar: true
-        }
-      }
+          asar: true,
+        },
+      },
     },
     zip_directories: {
       electron: {
-        files: [{
-          filter: 'isDirectory',
-          expand: true,
-          cwd: './build',
-          dest: './dist',
-          src: '*'
-        }]
-      }
+        files: [
+          {
+            filter: 'isDirectory',
+            expand: true,
+            cwd: './build',
+            dest: './dist',
+            src: '*',
+          },
+        ],
+      },
     },
     mocha_istanbul: {
       unit: {
         src: './test',
         options: {
           coverageFolder: './coverage/coverage-unit',
-          mask: 'spec.*.js'
-        }
-      }
-    }
+          mask: 'spec.*.js',
+        },
+      },
+    },
   });
 
   grunt.registerTask(
@@ -200,15 +207,11 @@ module.exports = (grunt) => {
     }
   );
 
-  grunt.registerTask('browserify-common', '', function() {
+  grunt.registerTask('browserify-common', '', function () {
     const done = this.async();
     const b = browserify('./public/source/main.js', {
-      noParse: [
-        'dnd-page-scroll',
-        'jquery',
-        'knockout'
-      ],
-      debug: true
+      noParse: ['dnd-page-scroll', 'jquery', 'knockout'],
+      debug: true,
     });
     b.require('./public/source/components.js', { expose: 'ungit-components' });
     b.require('./public/source/main.js', { expose: 'ungit-main' });
@@ -231,30 +234,37 @@ module.exports = (grunt) => {
     b.bundle().pipe(outFile);
   });
 
-  grunt.registerTask('browserify-components', '',  function() {
-    Promise.all(fs.readdirSync('components').map((component) => {
-      return new Promise((resolve, reject) => {
-        const src = `./components/${component}/${component}.js`;
-        if (!fs.existsSync(src)) {
-          grunt.log.warn(`${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
-          resolve();
-          return;
-        }
-        const b = browserify(src, {
-          bundleExternal: false,
-          debug: true
+  grunt.registerTask('browserify-components', '', function () {
+    Promise.all(
+      fs.readdirSync('components').map((component) => {
+        return new Promise((resolve, reject) => {
+          const src = `./components/${component}/${component}.js`;
+          if (!fs.existsSync(src)) {
+            grunt.log.warn(
+              `${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
+            );
+            resolve();
+            return;
+          }
+          const b = browserify(src, {
+            bundleExternal: false,
+            debug: true,
+          });
+          const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
+          outFile.on('close', () => resolve());
+          b.bundle().pipe(outFile);
         });
-        const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
-        outFile.on('close', () => resolve());
-        b.bundle().pipe(outFile);
-      });
-    })).then(this.async());
+      })
+    ).then(this.async());
   });
 
   const bumpDependency = (packageJson, packageName) => {
-    const dependencyType = packageJson['dependencies'][packageName] ? 'dependencies' : 'devDependencies';
+    const dependencyType = packageJson['dependencies'][packageName]
+      ? 'dependencies'
+      : 'devDependencies';
     let currentVersion = packageJson[dependencyType][packageName];
-    if (currentVersion[0] == '~' || currentVersion[0] == '^') currentVersion = currentVersion.slice(1);
+    if (currentVersion[0] == '~' || currentVersion[0] == '^')
+      currentVersion = currentVersion.slice(1);
     return pkgVersions(packageName).then((versionSet) => {
       const versions = Array.from(versionSet);
       const latestVersion = semver.maxSatisfying(versions, '*');
@@ -264,25 +274,38 @@ module.exports = (grunt) => {
     });
   };
 
-  grunt.registerTask('travisnpmpublish', 'Automatically publish to NPM via travis and create git tag.', function() {
-    const done = this.async();
-    if (process.env.TRAVIS_BRANCH != 'master' || (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')) {
-      grunt.log.writeln('Skipping travis npm publish');
-      return done();
-    }
-    childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
-      const hash = stdout.trim();
-      const packageJson = JSON.parse(fs.readFileSync('package.json'));
-      const version = packageJson.version;
-      packageJson.version += `+${hash}`;
-      fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-      fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-      childProcess.exec('npm publish', (err) => {
-        if (err) done(err);
-        else childProcess.exec(`git tag v${version} && git push -q https://${process.env.GITHUB_TOKEN}@github.com/FredrikNoren/ungit.git v${version}`, (err) => { done(err); });
+  grunt.registerTask(
+    'travisnpmpublish',
+    'Automatically publish to NPM via travis and create git tag.',
+    function () {
+      const done = this.async();
+      if (
+        process.env.TRAVIS_BRANCH != 'master' ||
+        (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')
+      ) {
+        grunt.log.writeln('Skipping travis npm publish');
+        return done();
+      }
+      childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
+        const hash = stdout.trim();
+        const packageJson = JSON.parse(fs.readFileSync('package.json'));
+        const version = packageJson.version;
+        packageJson.version += `+${hash}`;
+        fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
+        fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
+        childProcess.exec('npm publish', (err) => {
+          if (err) done(err);
+          else
+            childProcess.exec(
+              `git tag v${version} && git push -q https://${process.env.GITHUB_TOKEN}@github.com/FredrikNoren/ungit.git v${version}`,
+              (err) => {
+                done(err);
+              }
+            );
+        });
       });
-    });
-  });
+    }
+  );
 
   grunt.registerTask('electronpublish', ['zip_directories:electron']);
 
@@ -293,10 +316,11 @@ module.exports = (grunt) => {
    * triggers timeouts.
    * Use at own discretion.
    */
-  grunt.registerTask('clickParallel', 'Parallelized click tests.', function() {
+  grunt.registerTask('clickParallel', 'Parallelized click tests.', function () {
     const done = this.async();
 
-    fs.promises.readdir('./clicktests')
+    fs.promises
+      .readdir('./clicktests')
       .then((files) => files.filter((file) => file.startsWith('spec.')))
       .then((tests) => {
         const genericIndx = tests.indexOf('spec.generic.js');
@@ -304,30 +328,40 @@ module.exports = (grunt) => {
           tests.splice(0, 0, tests.splice(genericIndx, 1)[0]);
         }
         return tests;
-      }).then((tests) => {
+      })
+      .then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
-        return Promise.all(tests.map((file) => {
-          let output = '';
-          const outStream = (data) => output += data;
+        return Promise.all(
+          tests.map((file) => {
+            let output = '';
+            const outStream = (data) => (output += data);
 
-          grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
-          return new Promise((resolve, reject) => {
-            const child = childProcess.execFile('./node_modules/mocha/bin/mocha', [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'], { maxBuffer: 10*1024*1024 });
-            child.stdout.on('data', outStream);
-            child.stderr.on('data', outStream);
-            child.on('exit', (code) => {
-              if (code == 0) resolve(file);
-              else reject();
-            });
-          }).then(() => {
-            grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
-            return { name: file, output: output, isSuccess: true };
-          }).catch(() => {
-            grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
-            return { name: file, output: output, isSuccess: false };
-          });
-        }));
-      }).then((results) => {
+            grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
+            return new Promise((resolve, reject) => {
+              const child = childProcess.execFile(
+                './node_modules/mocha/bin/mocha',
+                [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'],
+                { maxBuffer: 10 * 1024 * 1024 }
+              );
+              child.stdout.on('data', outStream);
+              child.stderr.on('data', outStream);
+              child.on('exit', (code) => {
+                if (code == 0) resolve(file);
+                else reject();
+              });
+            })
+              .then(() => {
+                grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
+                return { name: file, output: output, isSuccess: true };
+              })
+              .catch(() => {
+                grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
+                return { name: file, output: output, isSuccess: false };
+              });
+          })
+        );
+      })
+      .then((results) => {
         let isSuccess = true;
         results.forEach((result) => {
           if (!result.isSuccess) {
@@ -341,25 +375,40 @@ module.exports = (grunt) => {
       });
   });
 
-  grunt.registerTask('bumpdependencies', 'Bump dependencies to their latest versions.', function() {
+  grunt.registerTask(
+    'bumpdependencies',
+    'Bump dependencies to their latest versions.',
+    function () {
+      const done = this.async();
+      grunt.log.writeln('Bumping dependencies...');
+      const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
+      const keys = Object.keys(tempPackageJson.dependencies).concat(
+        Object.keys(tempPackageJson.devDependencies)
+      );
+
+      const bumps = keys.map((dep) => {
+        return bumpDependency(tempPackageJson, dep);
+      });
+
+      Promise.all(bumps)
+        .then(() =>
+          fs.promises.writeFile('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`)
+        )
+        .then(() =>
+          grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.')
+        )
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    }
+  );
+
+  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
     const done = this.async();
-    grunt.log.writeln('Bumping dependencies...');
-    const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-    const keys = Object.keys(tempPackageJson.dependencies).concat(Object.keys(tempPackageJson.devDependencies));
-
-    const bumps = keys.map((dep) => {
-      return bumpDependency(tempPackageJson, dep);
-    });
-
-    Promise.all(bumps)
-      .then(() => fs.promises.writeFile('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`))
-      .then(() => grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.'))
-      .then(() => { done(); }).catch(done);
-  });
-
-  grunt.registerMultiTask('electron', 'Package Electron apps', function() {
-    const done = this.async();
-    electronPackager(this.options()).then(() => { done(); }, done);
+    electronPackager(this.options()).then(() => {
+      done();
+    }, done);
   });
 
   grunt.event.on('coverage', (lcovFileContents) => {
@@ -379,7 +428,14 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['checkPrettier', 'less:production', 'jshint', 'browserify-common', 'browserify-components', 'copy:main']);
+  grunt.registerTask('default', [
+    'checkPrettier',
+    'less:production',
+    'jshint',
+    'browserify-common',
+    'browserify-components',
+    'copy:main',
+  ]);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);

@@ -3,30 +3,57 @@
     <span data-bind="html: branchIcon"></span>
     <span data-bind="text: refsLabel"></span>
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-bind="enable: listRefsEnabled" aria-haspopup="true" aria-expanded="false">
+  <button
+    type="button"
+    class="btn btn-default dropdown-toggle"
+    data-toggle="dropdown"
+    data-bind="enable: listRefsEnabled"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
     <span class="caret"></span>
     <span class="sr-only">Toggle Branch List</span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <li class="dropdown-header options" onclick="event.stopPropagation()">
       <label>
-        <input class="glyphicon" type="checkbox" data-bind="checked: isShowRemote, css: { 'glyphicon-check': isShowRemote, 'glyphicon-unchecked': !isShowRemote() }" />
+        <input
+          class="glyphicon"
+          type="checkbox"
+          data-bind="checked: isShowRemote, css: { 'glyphicon-check': isShowRemote, 'glyphicon-unchecked': !isShowRemote() }"
+        />
         Remote
       </label>
       <label>
-        <input class="glyphicon" type="checkbox" data-bind="checked: isShowBranch, css: { 'glyphicon-check': isShowBranch, 'glyphicon-unchecked': !isShowBranch() }" />
+        <input
+          class="glyphicon"
+          type="checkbox"
+          data-bind="checked: isShowBranch, css: { 'glyphicon-check': isShowBranch, 'glyphicon-unchecked': !isShowBranch() }"
+        />
         Branch
       </label>
       <label>
-        <input class="glyphicon" type="checkbox" data-bind="checked: isShowTag, css: { 'glyphicon-check': isShowTag, 'glyphicon-unchecked': !isShowTag() }" />
+        <input
+          class="glyphicon"
+          type="checkbox"
+          data-bind="checked: isShowTag, css: { 'glyphicon-check': isShowTag, 'glyphicon-unchecked': !isShowTag() }"
+        />
         Tag
       </label>
     </li>
     <li class="divider" role="separator"></li>
     <!-- ko foreach: branchesAndLocalTags -->
     <li>
-      <a class="linked-remove" href="#" data-bind="html: displayHtml(), click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"></a>
-      <a class="list-link list-remove" href="#" data-bind="html: $parent.closeIcon, click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a
+        class="linked-remove"
+        href="#"
+        data-bind="html: displayHtml(), click: $parent.checkoutBranch.bind($parent), attr: { 'data-ta-clickable': 'checkout' + name }"
+      ></a>
+      <a
+        class="list-link list-remove"
+        href="#"
+        data-bind="html: $parent.closeIcon, click: $parent.branchRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"
+      ></a>
     </li>
     <!-- /ko -->
   </ul>

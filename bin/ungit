@@ -24,9 +24,10 @@ process.on('uncaughtException', (err) => {
 
 const openUngitBrowser = (pathToNavigateTo) => {
   console.log(`Navigate to ${pathToNavigateTo}`);
-  return open(pathToNavigateTo)
-    .catch(err => console.log(`failed to navigate to ${pathToNavigateTo}`, err))
-}
+  return open(pathToNavigateTo).catch((err) =>
+    console.log(`failed to navigate to ${pathToNavigateTo}`, err)
+  );
+};
 
 const navigate = () => {
   let url = config.urlBase + ':' + config.port;
@@ -41,20 +42,21 @@ const navigate = () => {
     console.log(`Running custom launch command: ${command}`);
     child_process.exec(command, (err, stdout, stderr) => {
       if (err) {
-        console.log('Failed to exec custom launchCommand', err, stderr)
+        console.log('Failed to exec custom launchCommand', err, stderr);
         return;
       }
       if (config.launchBrowser) {
-        openUngitBrowser(url)
+        openUngitBrowser(url);
       }
     });
   } else if (config.launchBrowser) {
     openUngitBrowser(url);
   }
-}
+};
 
 const launch = () => {
-  const child = child_process.spawn(process.argv[0], // because it's `nodejs` in some OS
+  const child = child_process.spawn(
+    process.argv[0], // because it's `nodejs` in some OS
     [path.join(__dirname, '..', 'source', 'server.js')].concat(process.argv.slice(2)),
     { cwd: path.join(process.cwd(), '..') }
   );
@@ -66,17 +68,17 @@ const launch = () => {
   const startupListener = (data) => {
     if (data.toString().indexOf('## Ungit started ##') >= 0) {
       child.removeListener('stdout', startupListener);
-      child.stdout.on('data', (data) => console.log(data.toString().trim()))
-      const launchTime = (Date.now() - startLaunchTime);
+      child.stdout.on('data', (data) => console.log(data.toString().trim()));
+      const launchTime = Date.now() - startLaunchTime;
       console.log(data.toString());
       console.log(`Took ${launchTime}ms to start server.`);
       navigate();
     }
-  }
+  };
 
   child.stdout.on('data', startupListener);
-  child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
-}
+  child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`));
+};
 
 server.listen(config.port, config.ungitBindIp, (err) => {
   server.close(launch);

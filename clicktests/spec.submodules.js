@@ -5,7 +5,10 @@ const testRepoPaths = [];
 describe('[SUMBODULES]', () => {
   before('Environment init', async () => {
     await environment.init();
-    await environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }, { bare: false }]);
+    await environment.createRepos(testRepoPaths, [
+      { bare: false, initCommits: 1 },
+      { bare: false },
+    ]);
   });
   after('Environment stop', () => environment.shutdown());
 
@@ -22,7 +25,9 @@ describe('[SUMBODULES]', () => {
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.click('.submodule .dropdown-toggle');
-    await environment.waitForElementVisible('.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]');
+    await environment.waitForElementVisible(
+      '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'
+    );
   });
 
   it('Submodule update', async () => {

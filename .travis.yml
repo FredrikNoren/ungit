@@ -5,8 +5,8 @@ os:
 language: node_js
 node_js:
   - node
-  - "12"
-  - "10"
+  - '12'
+  - '10'
 branches:
   only:
     - master
@@ -17,9 +17,9 @@ env:
     - GIT_VERSION=default
 jobs:
   exclude:
-    - node_js: "12"
+    - node_js: '12'
       env: GIT_VERSION=edge
-    - node_js: "10"
+    - node_js: '10'
       env: GIT_VERSION=edge
     - os: windows
       env: GIT_VERSION=edge

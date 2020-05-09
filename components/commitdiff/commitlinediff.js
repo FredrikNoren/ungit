@@ -30,7 +30,7 @@ class CommitLineDiff {
       textDiffType: this.textDiffType,
       isShowingDiffs: this.isShowingDiffs,
       whiteSpace: this.whiteSpace,
-      wordWrap: this.wordWrap
+      wordWrap: this.wordWrap,
     });
   }
 

@@ -8,7 +8,7 @@ var bugtracker = new BugTracker('electron');
 
 var { app, dialog, shell, BrowserWindow, Menu } = require('electron');
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function (err) {
   console.error(err.stack.toString());
   bugtracker.notify(err, 'ungit-launcher');
   app.quit();
@@ -30,7 +30,7 @@ function launch(callback) {
   if (config.launchCommand) {
     var command = config.launchCommand.replace(/%U/g, url);
     console.log('Running custom launch command: ' + command);
-    child_process.exec(command, function(err, stdout, stderr) {
+    child_process.exec(command, function (err, stdout, stderr) {
       if (err) {
         callback(err);
         return;
@@ -53,8 +53,8 @@ function checkIfUngitIsRunning(callback) {
       callback(true);
     }
   });
-  server.listen(config.port, config.ungitBindIp, function() {
-    server.close(function() {
+  server.listen(config.port, config.ungitBindIp, function () {
+    server.close(function () {
       callback(false);
     });
   });
@@ -70,9 +70,7 @@ if (!appPath.endsWith('.asar')) {
 var menuTemplate = [
   {
     label: 'File',
-    submenu: [
-      { role: 'quit' }
-    ]
+    submenu: [{ role: 'quit' }],
   },
   {
     label: 'Edit',
@@ -85,8 +83,8 @@ var menuTemplate = [
       { role: 'paste' },
       { role: 'delete' },
       { type: 'separator' },
-      { role: 'selectAll' }
-    ]
+      { role: 'selectAll' },
+    ],
   },
   {
     label: 'View',
@@ -99,8 +97,8 @@ var menuTemplate = [
       { role: 'zoomin' },
       { role: 'zoomout' },
       { type: 'separator' },
-      { role: 'togglefullscreen' }
-    ]
+      { role: 'togglefullscreen' },
+    ],
   },
   {
     role: 'help',
@@ -109,34 +107,33 @@ var menuTemplate = [
         label: 'Learn More',
         click: async () => {
           await shell.openExternal('https://github.com/FredrikNoren/ungit');
-        }
-      }
-    ]
-  }
+        },
+      },
+    ],
+  },
 ];
 
-app.on('window-all-closed', function() {
+app.on('window-all-closed', function () {
   app.quit();
 });
 
-app.on('ready', function() {
-  checkIfUngitIsRunning(function(ungitRunning) {
+app.on('ready', function () {
+  checkIfUngitIsRunning(function (ungitRunning) {
     if (ungitRunning) {
       dialog.showMessageBoxSync({
         type: 'error',
         title: 'Ungit',
-        message: 'Ungit instance is already running'
+        message: 'Ungit instance is already running',
       });
       app.quit();
-    }
-    else {
+    } else {
       var server = require('../source/server');
-      server.started.add(function() {
-        launch(function(err) {
+      server.started.add(function () {
+        launch(function (err) {
           if (err) console.log(err);
         });
 
-        var launchTime = (Date.now() - startLaunchTime);
+        var launchTime = Date.now() - startLaunchTime;
         console.log('Took ' + launchTime + 'ms to start server.');
       });
 
@@ -145,10 +142,10 @@ app.on('ready', function() {
       mainWindow = new BrowserWindow({
         width: 1366,
         height: 768,
-        icon: path.join(appPath, 'public/images/icon.png')
+        icon: path.join(appPath, 'public/images/icon.png'),
       });
 
-      mainWindow.on('closed', function() {
+      mainWindow.on('closed', function () {
         mainWindow = null;
       });
     }

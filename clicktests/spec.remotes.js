@@ -11,8 +11,8 @@ describe('[REMOTES]', () => {
     await environment.createRepos(testRepoPaths, [{ bare: true }, { bare: false, initCommits: 2 }]);
 
     testRepoPaths.push(`${testRepoPaths[1]}-cloned`); // A directory to test cloning
-    await rimraf(testRepoPaths[2]);   // clean clone test dir
-    await mkdirp(testRepoPaths[2]);  // create clone test dir
+    await rimraf(testRepoPaths[2]); // clean clone test dir
+    await mkdirp(testRepoPaths[2]); // create clone test dir
   });
   after('Environment stop', () => environment.shutdown());
 
@@ -40,7 +40,9 @@ describe('[REMOTES]', () => {
     await environment.click('.modal .modal-footer .btn-primary');
 
     await environment.click('.fetchButton .dropdown-toggle');
-    await environment.waitForElementVisible('.fetchButton .dropdown-menu [data-ta-clickable="myremote"]');
+    await environment.waitForElementVisible(
+      '.fetchButton .dropdown-menu [data-ta-clickable="myremote"]'
+    );
   });
 
   it('Fetch from newly added remote', async () => {
@@ -59,7 +61,9 @@ describe('[REMOTES]', () => {
 
   // ----------- CLONING -------------
   it('navigate to empty folder path', async () => {
-    await environment.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[2])}`);
+    await environment.goto(
+      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[2])}`
+    );
     await environment.waitForElementVisible('.uninited');
   });
 
@@ -112,7 +116,7 @@ describe('[REMOTES]', () => {
     await environment.insert('.staging input.form-control', 'Commit & Push');
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
-    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push"]')
+    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push"]');
   });
 
   it('Should be possible to commitnpush with ff', async () => {
@@ -121,6 +125,6 @@ describe('[REMOTES]', () => {
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
     await environment.click('.modal-dialog .btn-primary');
-    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push with ff"]')
+    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push with ff"]');
   });
 });

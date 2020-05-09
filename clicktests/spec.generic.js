@@ -1,12 +1,18 @@
 'use strict';
-const environment = require('./environment')({ serverStartupOptions: ['--no-disableDiscardWarning'], rootPath: '/deep/root/path/to/app' });
+const environment = require('./environment')({
+  serverStartupOptions: ['--no-disableDiscardWarning'],
+  rootPath: '/deep/root/path/to/app',
+});
 const mkdirp = require('mkdirp');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
 const testRepoPaths = [];
 
 const changeTestFile = async (filename, repoPath) => {
-  await environment.backgroundAction('POST', `/api/testing/changefile`, { file: filename, path: repoPath });
+  await environment.backgroundAction('POST', `/api/testing/changefile`, {
+    file: filename,
+    path: repoPath,
+  });
 };
 const checkout = async (branch) => {
   await environment.click(`.branch[data-ta-name="${branch}"]`);
@@ -73,7 +79,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Test showing commit diff between two commits', async () => {
-    await environment.click('[data-ta-clickable="node-clickable-0"]')
+    await environment.click('[data-ta-clickable="node-clickable-0"]');
     await environment.waitForElementVisible('.diff-wrapper');
     await environment.click('.commit-diff-filename');
     await environment.waitForElementVisible('.commit-line-diffs');
@@ -121,7 +127,7 @@ describe('[GENERIC]', () => {
     await environment.createTag('tagwillbedeleted');
     await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
-    await environment.click('.modal-dialog .btn-primary')
+    await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
@@ -179,7 +185,9 @@ describe('[GENERIC]', () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
     await environment.waitForElementVisible('[data-ta-action="revert"]');
     await environment.click('[data-ta-action="revert"]');
-    await environment.waitForElementVisible('[data-ta-node-title="Revert \\"Merge branch \'testbranch\'\\""]');
+    await environment.waitForElementVisible(
+      '[data-ta-node-title="Revert \\"Merge branch \'testbranch\'\\""]'
+    );
   });
 
   it('Should be possible to move a branch', async () => {

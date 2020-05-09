@@ -12,10 +12,12 @@ const portrange = 45032;
 module.exports = (config) => new Environment(config);
 
 const prependLines = (pre, text) => {
-  return text.split('\n').filter((l) => l)
+  return text
+    .split('\n')
+    .filter((l) => l)
     .map((line) => pre + line)
     .join('\n');
-}
+};
 
 // Environment provides
 class Environment {
@@ -26,12 +28,15 @@ class Environment {
     this.config.headless = this.config.headless === undefined ? true : this.config.headless;
     this.config.viewWidth = 1920;
     this.config.viewHeight = 1080;
-    this.config.showServerOutput = this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
+    this.config.showServerOutput =
+      this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
     this.shuttinDown = false;
   }
 
-  getRootUrl() { return this.rootUrl; }
+  getRootUrl() {
+    return this.rootUrl;
+  }
 
   getPort() {
     const tmpPortrange = portrange + Math.floor(Math.random() * 5000);
@@ -59,8 +64,8 @@ class Environment {
         headless: this.config.headless,
         defaultViewport: {
           width: this.config.viewWidth,
-          height: this.config.viewHeight
-        }
+          height: this.config.viewHeight,
+        },
       });
 
       await this.getPort();
@@ -75,7 +80,8 @@ class Environment {
     winston.info('Starting ungit server...', this.config.serverStartupOptions);
 
     this.hasStarted = false;
-    const options = ['bin/ungit',
+    const options = [
+      'bin/ungit',
       '--cliconfigonly',
       `--port=${this.port}`,
       `--rootPath=${this.config.rootPath}`,
@@ -87,10 +93,10 @@ class Environment {
       '--maxNAutoRestartOnCrash=0',
       '--no-autoCheckoutOnBranchCreate',
       '--alwaysLoadActiveBranch',
-      `--numRefsToShow=${this.config.numRefsToShow || 5}`]
-      .concat(this.config.serverStartupOptions);
+      `--numRefsToShow=${this.config.numRefsToShow || 5}`,
+    ].concat(this.config.serverStartupOptions);
 
-    const ungitServer = this.ungitServerProcess = child_process.spawn('node', options);
+    const ungitServer = (this.ungitServerProcess = child_process.spawn('node', options));
 
     return new Promise((resolve, reject) => {
       ungitServer.stdout.on('data', (stdout) => {
@@ -127,7 +133,7 @@ class Environment {
   async shutdown() {
     this.shuttinDown = true;
 
-    await this.backgroundAction('POST', '/api/testing/cleanup')
+    await this.backgroundAction('POST', '/api/testing/cleanup');
 
     if (this.ungitServerProcess) {
       this.ungitServerProcess.kill('SIGINT');
@@ -155,7 +161,7 @@ class Environment {
       req = request.delete(url).send(body);
     }
 
-    req.set({ 'encoding': 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json' });
+    req.set({ encoding: 'utf8', 'cache-control': 'no-cache', 'Content-Type': 'application/json' });
 
     const response = await req;
     return response.body;
@@ -188,20 +194,23 @@ class Environment {
   }
 
   async createCommits(config, limit, x) {
-    x = x || 0
+    x = x || 0;
     if (!limit || limit < 0 || x === limit) return;
 
     await this.createTestFile(`${config.path}/testy${x}`);
     await this.backgroundAction('POST', '/api/commit', {
       path: config.path,
       message: `Init Commit ${x}`,
-      files: [{ name: `testy${x}` }]
+      files: [{ name: `testy${x}` }],
     });
     await this.createCommits(config, limit, x + 1);
   }
 
   createTestFile(filename, repoPath) {
-    return this.backgroundAction('POST', '/api/testing/createfile', { file: filename, path: repoPath });
+    return this.backgroundAction('POST', '/api/testing/createfile', {
+      file: filename,
+      path: repoPath,
+    });
   }
 
   // browser helpers
@@ -211,10 +220,10 @@ class Environment {
 
     if (!this.page) {
       const pages = await this.browser.pages();
-      const page = this.page = pages[0];
+      const page = (this.page = pages[0]);
 
       page.on('console', (message) => {
-        const text = `[ui ${message.type()}] ${(new Date()).toISOString()}  - ${message.text()}}`;
+        const text = `[ui ${message.type()}] ${new Date().toISOString()}  - ${message.text()}}`;
 
         if (message.type() === 'error' && !this.shuttinDown) {
           winston.error(text);
@@ -248,7 +257,7 @@ class Environment {
   }
   async insert(selector, text) {
     await this.waitForElementVisible(selector);
-    await this.page.$eval(selector, (ele) => ele.value = '');
+    await this.page.$eval(selector, (ele) => (ele.value = ''));
     await this.page.focus(selector);
     await this.type(text);
   }
@@ -294,9 +303,14 @@ class Environment {
 
   async _verifyRefAction(action) {
     try {
-      await this.page.waitForSelector('.modal-dialog .btn-primary', { visible: true, timeout: 2000 });
+      await this.page.waitForSelector('.modal-dialog .btn-primary', {
+        visible: true,
+        timeout: 2000,
+      });
       await this.click('.modal-dialog .btn-primary');
-    } catch (err) { /* ignore */ }
+    } catch (err) {
+      /* ignore */
+    }
     await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
   }
 
@@ -308,8 +322,9 @@ class Environment {
 
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
-    await this.click(`[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`);
+    await this.click(
+      `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
+    );
     await this._verifyRefAction('move');
   }
-
 }
