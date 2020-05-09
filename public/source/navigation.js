@@ -1,20 +1,18 @@
-
 var programEvents = require('ungit-program-events');
 
 var navigation = {};
 module.exports = navigation;
 
-var hasher = navigation.hasher = require('hasher');
-var crossroads = navigation.crossroads = require('crossroads');
+var hasher = (navigation.hasher = require('hasher'));
+var crossroads = (navigation.crossroads = require('crossroads'));
 
-navigation.browseTo = function(path) {
+navigation.browseTo = function (path) {
   hasher.setHash(path);
-}
+};
 
-navigation.init = function() {
-
+navigation.init = function () {
   //setup hasher
-  function parseHash(newHash, oldHash){
+  function parseHash(newHash, oldHash) {
     crossroads.parse(newHash);
     programEvents.dispatch({ event: 'navigation-changed', path: newHash, oldPath: oldHash });
   }
@@ -23,5 +21,4 @@ navigation.init = function() {
   hasher.raw = true;
 
   hasher.init();
-
-}
+};

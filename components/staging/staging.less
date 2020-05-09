@@ -1,9 +1,9 @@
-@import "public/less/variables.less";
+@import 'public/less/variables.less';
 
 .staging {
-  background: #643A44;
+  background: #643a44;
   box-shadow: 0px -1px 15px #252833;
-  color: #B8A5A5;
+  color: #b8a5a5;
   z-index: 5;
   position: relative;
 
@@ -30,7 +30,7 @@
 
   .validationError {
     display: none;
-    color: #D6542D;
+    color: #d6542d;
     padding: 0.25em;
   }
   &:hover .validationError {
@@ -93,7 +93,7 @@
     }
   }
 
-  .d2h-code-line-prefix input[type="checkbox"] {
+  .d2h-code-line-prefix input[type='checkbox'] {
     margin: 0;
     margin-right: -6px;
     vertical-align: sub;
@@ -126,21 +126,27 @@
       }
       padding: 0.3em;
 
-      .new, .deleted, .conflict, .markresolved, .launchmergetool {
+      .new,
+      .deleted,
+      .conflict,
+      .markresolved,
+      .launchmergetool {
         padding: 3px;
         padding-left: 5px;
         padding-right: 5px;
       }
-      .new, .additions {
+      .new,
+      .additions {
         color: #949494;
         vertical-align: middle;
       }
-      .deleted, .deletions {
-        color: #7B7B7B;
+      .deleted,
+      .deletions {
+        color: #7b7b7b;
         vertical-align: middle;
       }
       .conflict {
-        color: #DB12C0;
+        color: #db12c0;
         .explanation {
           display: none;
         }
@@ -154,13 +160,13 @@
         }
       }
       .markresolved {
-        color: #DB12C0;
+        color: #db12c0;
         cursor: pointer;
         .explanation {
           display: none;
         }
         &:hover {
-          background: #A445ED;
+          background: #a445ed;
           color: #000;
           border-radius: 3px;
           .explanation {
@@ -169,13 +175,13 @@
         }
       }
       .launchmergetool {
-        color: #DB55FF;
+        color: #db55ff;
         cursor: pointer;
         .explanation {
           display: none;
         }
         &:hover {
-          background: #A477FF;
+          background: #a477ff;
           color: #000;
           border-radius: 3px;
           .explanation {

@@ -4,7 +4,7 @@ const components = require('ungit-components');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
 
-components.register('header', args => new HeaderViewModel(args.app));
+components.register('header', (args) => new HeaderViewModel(args.app));
 
 class HeaderViewModel {
   constructor(app) {
@@ -13,9 +13,11 @@ class HeaderViewModel {
     this.path = ko.observable();
     this.currentVersion = ungit.version;
     this.refreshButton = components.create('refreshbutton', { isLarge: true });
-    this.showAddToRepoListButton = ko.computed(() => this.path() && !this.app.repoList().includes(this.path()));
-    this.addIcon = octicons.plus.toSVG({ 'height': 18 });
-    this.backIcon = octicons['arrow-left'].toSVG({ 'height': 24 });
+    this.showAddToRepoListButton = ko.computed(
+      () => this.path() && !this.app.repoList().includes(this.path())
+    );
+    this.addIcon = octicons.plus.toSVG({ height: 18 });
+    this.backIcon = octicons['arrow-left'].toSVG({ height: 24 });
   }
 
   updateNode(parentElement) {

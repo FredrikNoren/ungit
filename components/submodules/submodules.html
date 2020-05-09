@@ -3,23 +3,45 @@
     <span data-bind="html: submodulesIcon"></span>
     <span data-bind="text: 'Submodules'"></span>
   </button>
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button
+    type="button"
+    class="btn btn-default dropdown-toggle"
+    data-toggle="dropdown"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
     <span class="caret"></span>
     <span class="sr-only">Toggle Submodule List</span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
     <!-- ko foreach: submodules -->
     <li>
-      <a class="linked-url" href="#" data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"></a>
-      <a class="list-link list-url" href="#" data-bind="html: $parent.linkIcon, click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"></a>
-      <a class="list-link list-remove" href="#" data-bind="html: $parent.closeIcon, click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"></a>
+      <a
+        class="linked-url"
+        href="#"
+        data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"
+      ></a>
+      <a
+        class="list-link list-url"
+        href="#"
+        data-bind="html: $parent.linkIcon, click: $parent.submoduleLinkClick, attr: { 'data-ta-clickable': name + '-weblink' }"
+      ></a>
+      <a
+        class="list-link list-remove"
+        href="#"
+        data-bind="html: $parent.closeIcon, click: $parent.submoduleRemove.bind($parent), attr: { 'data-ta-clickable': name + '-remove' }"
+      ></a>
     </li>
     <!-- /ko -->
     <!-- ko if: submodules().length-->
     <li class="divider" role="separator"></li>
-    <li><a href="#" class="update-submodule" data-bind="click: updateSubmodules">Update Submodules</a></li>
+    <li>
+      <a href="#" class="update-submodule" data-bind="click: updateSubmodules">Update Submodules</a>
+    </li>
     <li class="divider" role="separator"></li>
     <!-- /ko -->
-    <li><a href="#" class="add-submodule" data-bind="click: showAddSubmoduleDialog">Add Submodules</a></li>
+    <li>
+      <a href="#" class="add-submodule" data-bind="click: showAddSubmoduleDialog">Add Submodules</a>
+    </li>
   </ul>
 </div>

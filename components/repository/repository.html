@@ -1,5 +1,4 @@
 <div class="repository-view animated fadeInLeft">
-
   <!-- ko component: gitErrors --><!-- /ko -->
 
   <!-- ko if: isSubmodule -->
@@ -14,14 +13,17 @@
   <!-- ko component: staging --><!-- /ko -->
 
   <!-- ko if: staging.conflictText -->
-  <h2 class="text-muted"><span data-bind="text: staging.conflictText" /> in progress <small>resolve conflicts to continue</small></h2>
+  <h2 class="text-muted">
+    <span data-bind="text: staging.conflictText" /> in progress
+    <small>resolve conflicts to continue</small>
+  </h2>
   <!-- /ko -->
 
   <!-- ko if: showLog -->
 
   <div class="repository-actions">
     <!-- ko if: refreshButton -->
-      <!-- ko component: refreshButton --><!-- /ko -->
+    <!-- ko component: refreshButton --><!-- /ko -->
     <!-- /ko -->
     <!-- ko component: remotes --><!-- /ko -->
     <!-- ko component: submodules --><!-- /ko -->
@@ -38,5 +40,4 @@
   <!-- ko component: graph --><!-- /ko -->
 
   <!-- /ko -->
-
 </div>

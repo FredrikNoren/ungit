@@ -17,7 +17,7 @@ exports.parseGitStatus = (text, args) => {
     let oldFileName;
     let displayName;
     if (status[0] == 'R') {
-      oldFileName = lines[++i]
+      oldFileName = lines[++i];
       displayName = `${oldFileName} → ${newFileName}`;
     } else {
       oldFileName = newFileName;
@@ -32,7 +32,7 @@ exports.parseGitStatus = (text, args) => {
       isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
       conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
       renamed: status[0] == 'R',
-      type: fileType(newFileName)
+      type: fileType(newFileName),
     };
   }
 
@@ -40,7 +40,7 @@ exports.parseGitStatus = (text, args) => {
     isMoreToLoad: false,
     branch: branch,
     inited: true,
-    files: files
+    files: files,
   };
 };
 
@@ -53,7 +53,7 @@ exports.parseGitStatusNumstat = (text) => {
   while (match !== null) {
     result[match.groups.fileName || match.groups.newFileName] = {
       additions: match.groups.additions,
-      deletions: match.groups.deletions
+      deletions: match.groups.deletions,
     };
     match = fileChangeRegex.exec(text);
   }
@@ -62,7 +62,7 @@ exports.parseGitStatusNumstat = (text) => {
 
 const authorRegexp = /([^<]+)<([^>]+)>/;
 const gitLogHeaders = {
-  'Author': (currentCommmit, author) => {
+  Author: (currentCommmit, author) => {
     const capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.authorName = capture[1].trim();
@@ -71,7 +71,7 @@ const gitLogHeaders = {
       currentCommmit.authorName = author;
     }
   },
-  'Commit': (currentCommmit, author) => {
+  Commit: (currentCommmit, author) => {
     const capture = authorRegexp.exec(author);
     if (capture) {
       currentCommmit.committerName = capture[1].trim();
@@ -80,15 +80,15 @@ const gitLogHeaders = {
       currentCommmit.committerName = author;
     }
   },
-  'AuthorDate': (currentCommmit, date) => {
+  AuthorDate: (currentCommmit, date) => {
     currentCommmit.authorDate = date;
   },
-  'CommitDate': (currentCommmit, date) => {
+  CommitDate: (currentCommmit, date) => {
     currentCommmit.commitDate = date;
   },
-  'Reflog': (currentCommmit, data) => {
+  Reflog: (currentCommmit, data) => {
     currentCommmit.reflogId = /\{(.*?)\}/.exec(data)[1];
-    currentCommmit.reflogName = data.substring(0, data.indexOf(' ')).replace("refs/", "");
+    currentCommmit.reflogName = data.substring(0, data.indexOf(' ')).replace('refs/', '');
     const author = data.substring(data.indexOf('(') + 1, data.length - 1);
     const capture = authorRegexp.exec(author);
     if (capture) {
@@ -98,20 +98,21 @@ const gitLogHeaders = {
       currentCommmit.reflogAuthorName = author;
     }
   },
-  'gpg': (currentCommit, data) => {
+  gpg: (currentCommit, data) => {
     if (data.startsWith('Signature made')) {
       // extract sign date
       currentCommit.signatureDate = data.slice('Signature made '.length);
     } else if (data.indexOf('Good signature from') > -1) {
       // fully verified.
-      currentCommit.signatureMade = data.slice('Good signature from '.length)
+      currentCommit.signatureMade = data
+        .slice('Good signature from '.length)
         .replace('[ultimate]', '')
         .trim();
-    } else if (data.indexOf('Can\'t check signature') > -1) {
+    } else if (data.indexOf("Can't check signature") > -1) {
       // pgp signature attempt is made but failed to verify
       delete currentCommit.signatureDate;
     }
-  }
+  },
 };
 exports.parseGitLog = (data) => {
   const commits = [];
@@ -120,30 +121,38 @@ exports.parseGitLog = (data) => {
     if (!row.trim()) return;
     currentCommmit = { refs: [], fileLineDiffs: [], additions: 0, deletions: 0 };
     const refStartIndex = row.indexOf('(');
-    const sha1s = row.substring(0, refStartIndex < 0 ? row.length : refStartIndex).split(' ').slice(1).filter((sha1) => { return sha1 && sha1.length; });
+    const sha1s = row
+      .substring(0, refStartIndex < 0 ? row.length : refStartIndex)
+      .split(' ')
+      .slice(1)
+      .filter((sha1) => {
+        return sha1 && sha1.length;
+      });
     currentCommmit.sha1 = sha1s[0];
     currentCommmit.parents = sha1s.slice(1);
     if (refStartIndex > 0) {
       const refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
-    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => { return item.trim() === 'HEAD' });
+    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => {
+      return item.trim() === 'HEAD';
+    });
     commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;
     commits.push(currentCommmit);
     parser = parseHeaderLine;
-  }
+  };
   const parseHeaderLine = (row) => {
     if (row.trim() == '') {
       parser = parseCommitMessage;
     } else {
       for (const key in gitLogHeaders) {
         if (row.indexOf(`${key}: `) == 0) {
-          gitLogHeaders[key](currentCommmit, row.slice((`${key}: `).length).trim());
+          gitLogHeaders[key](currentCommmit, row.slice(`${key}: `.length).trim());
           return;
         }
       }
     }
-  }
+  };
   const parseCommitMessage = (row, index) => {
     if (currentCommmit.message) currentCommmit.message += '\n';
     else currentCommmit.message = '';
@@ -156,11 +165,11 @@ exports.parseGitLog = (data) => {
       parser = parseCommitLine;
       return;
     }
-  }
+  };
   const parseFileChanges = (row, index) => {
     // git log is using -z so all the file changes are on one line
     // merge commits start the file changes with a null
-    if (row[0] === '\x00'){
+    if (row[0] === '\x00') {
       row = row.slice(1);
     }
     fileChangeRegex.lastIndex = 0;
@@ -169,7 +178,7 @@ exports.parseGitLog = (data) => {
       let fileName = match.groups.fileName || match.groups.newFileName;
       let oldFileName = match.groups.oldFileName || match.groups.fileName;
       let displayName;
-      if(match.groups.oldFileName) {
+      if (match.groups.oldFileName) {
         displayName = `${match.groups.oldFileName} → ${match.groups.newFileName}`;
       } else {
         displayName = fileName;
@@ -180,7 +189,7 @@ exports.parseGitLog = (data) => {
         fileName: fileName,
         oldFileName: oldFileName,
         displayName: displayName,
-        type: fileType(fileName)
+        type: fileType(fileName),
       });
     }
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
@@ -197,17 +206,18 @@ exports.parseGitLog = (data) => {
       parser(nextRow, index);
     }
     return;
-  }
+  };
   let parser = parseCommitLine;
   const rows = data.split('\n');
   rows.forEach((row, index) => {
     parser(row, index);
   });
 
-  commits.forEach((commit) => { commit.message = (typeof commit.message) === 'string' ? commit.message.trim() : ''; });
+  commits.forEach((commit) => {
+    commit.message = typeof commit.message === 'string' ? commit.message.trim() : '';
+  });
   return commits;
 };
-
 
 exports.parseGitConfig = (text) => {
   const conf = {};
@@ -216,45 +226,50 @@ exports.parseGitConfig = (text) => {
     conf[ss[0]] = ss[1];
   });
   return conf;
-}
+};
 
 exports.parseGitBranches = (text) => {
   const branches = [];
   text.split('\n').forEach((row) => {
     if (row.trim() == '') return;
     const branch = { name: row.slice(2) };
-    if(row[0] == '*') branch.current = true;
+    if (row[0] == '*') branch.current = true;
     branches.push(branch);
   });
   return branches;
-}
+};
 
 exports.parseGitTags = (text) => {
-  return text.split('\n')
-    .filter((tag) => { return tag != '' });
-}
+  return text.split('\n').filter((tag) => {
+    return tag != '';
+  });
+};
 
 exports.parseGitRemotes = (text) => {
-  return text.split('\n')
-    .filter((remote) => { return remote != '' });
-}
+  return text.split('\n').filter((remote) => {
+    return remote != '';
+  });
+};
 
 exports.parseGitLsRemote = (text) => {
-  return text.split('\n').filter((item) => {
-    return item && item.indexOf('From ') != 0;
-  }).map((line) => {
-    const sha1 = line.slice(0, 40);
-    const name = line.slice(41).trim();
-    return { sha1: sha1, name: name };
-  });
-}
+  return text
+    .split('\n')
+    .filter((item) => {
+      return item && item.indexOf('From ') != 0;
+    })
+    .map((line) => {
+      const sha1 = line.slice(0, 40);
+      const name = line.slice(41).trim();
+      return { sha1: sha1, name: name };
+    });
+};
 
 exports.parseGitStashShow = (text) => {
-  const lines = text.split('\n').filter((item) =>  item );
+  const lines = text.split('\n').filter((item) => item);
   return lines.slice(0, lines.length - 1).map((line) => {
-    return { filename: line.substring(0, line.indexOf('|')).trim() }
+    return { filename: line.substring(0, line.indexOf('|')).trim() };
   });
-}
+};
 
 exports.parseGitSubmodule = (text, args) => {
   if (!text) {
@@ -264,47 +279,57 @@ exports.parseGitSubmodule = (text, args) => {
   let submodule;
   const submodules = [];
 
-  text.trim().split('\n').filter((line) => line)
-  .forEach((line) => {
-    if (line.indexOf("[submodule") === 0) {
-      submodule = { name: line.match(/"(.*?)"/)[1] };
-      submodules.push(submodule);
-    } else {
-      const parts = line.split("=");
-      const key = parts[0].trim();
-      let value = parts.slice(1).join("=").trim();
+  text
+    .trim()
+    .split('\n')
+    .filter((line) => line)
+    .forEach((line) => {
+      if (line.indexOf('[submodule') === 0) {
+        submodule = { name: line.match(/"(.*?)"/)[1] };
+        submodules.push(submodule);
+      } else {
+        const parts = line.split('=');
+        const key = parts[0].trim();
+        let value = parts.slice(1).join('=').trim();
 
-      if (key == "path") {
-        value = path.normalize(value);
-      } else if (key == "url") {
-        // keep a reference to the raw url
-        let url = submodule.rawUrl = value;
+        if (key == 'path') {
+          value = path.normalize(value);
+        } else if (key == 'url') {
+          // keep a reference to the raw url
+          let url = (submodule.rawUrl = value);
 
-        // When a repo is checkout with ssh or git instead of an url
-        if (url.indexOf('http') != 0) {
-          if (url.indexOf('git:') == 0) { // git
-            url = `http${url.substr(url.indexOf(':'))}`;
-          } else { // ssh
-            url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+          // When a repo is checkout with ssh or git instead of an url
+          if (url.indexOf('http') != 0) {
+            if (url.indexOf('git:') == 0) {
+              // git
+              url = `http${url.substr(url.indexOf(':'))}`;
+            } else {
+              // ssh
+              url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+            }
           }
+
+          value = url;
         }
 
-        value = url;
+        submodule[key] = value;
       }
+    });
 
-      submodule[key] = value;
-    }
-  });
-
-  let sorted_submodules = submodules.sort((a,b) => a.name.localeCompare(b.name));
+  let sorted_submodules = submodules.sort((a, b) => a.name.localeCompare(b.name));
 
   return sorted_submodules;
-}
+};
 
-const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent) => {
+const updatePatchHeader = (
+  result,
+  lastHeaderIndex,
+  ignoredDiffCountTotal,
+  ignoredDiffCountCurrent
+) => {
   const splitedHeader = result[lastHeaderIndex].split(' ');
   const start = splitedHeader[1].split(','); // start of block
-  const end = splitedHeader[2].split(',');   // end of block
+  const end = splitedHeader[2].split(','); // end of block
   const startLeft = Math.abs(start[0]);
   const startRight = Math.abs(start[1]);
   const endLeft = end[0];
@@ -320,11 +345,9 @@ const updatePatchHeader = (result, lastHeaderIndex, ignoredDiffCountTotal, ignor
       break;
     }
   }
-  if (allSpace)
-    result.splice(lastHeaderIndex, result.length - lastHeaderIndex);
-  else
-    result[lastHeaderIndex] = splitedHeader.join(' ');
-}
+  if (allSpace) result.splice(lastHeaderIndex, result.length - lastHeaderIndex);
+  else result[lastHeaderIndex] = splitedHeader.join(' ');
+};
 
 exports.parsePatchDiffResult = (patchLineList, text) => {
   if (!text) return null;
@@ -357,7 +380,8 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
       } else if (line[0] === '+') {
         // added line diff is selected to be ignored
         ignoredDiffCountCurrent++;
-      } else { // lines[0] === '-'
+      } else {
+        // lines[0] === '-'
         // deleted line diff is selected to be ignored
         ignoredDiffCountCurrent--;
         result.push(` ${line.slice(1)}`);
@@ -367,7 +391,12 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
       if (/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/.test(line)) {
         // update previous header to match line numbers
         if (lastHeaderIndex > -1) {
-          updatePatchHeader(result, lastHeaderIndex, ignoredDiffCountTotal, ignoredDiffCountCurrent);
+          updatePatchHeader(
+            result,
+            lastHeaderIndex,
+            ignoredDiffCountTotal,
+            ignoredDiffCountCurrent
+          );
         }
         // diff block header
         ignoredDiffCountTotal += ignoredDiffCountCurrent;
@@ -387,4 +416,4 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   } else {
     return null;
   }
-}
+};

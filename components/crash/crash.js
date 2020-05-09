@@ -5,7 +5,7 @@ components.register('crash', (err) => new CrashViewModel(err));
 
 class CrashViewModel {
   constructor(err) {
-    this.eventcause = err ? err : 'unknown error'
+    this.eventcause = err ? err : 'unknown error';
   }
 
   updateNode(parentElement) {

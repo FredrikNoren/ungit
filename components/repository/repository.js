@@ -3,7 +3,7 @@ const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 
-components.register('repository', args => new RepositoryViewModel(args.server, args.path));
+components.register('repository', (args) => new RepositoryViewModel(args.server, args.path));
 
 class RepositoryViewModel {
   constructor(server, path) {
@@ -14,10 +14,20 @@ class RepositoryViewModel {
     this.graph = components.create('graph', { server, repoPath: this.repoPath });
     this.remotes = components.create('remotes', { server, repoPath: this.repoPath });
     this.submodules = components.create('submodules', { server, repoPath: this.repoPath });
-    this.stash = this.isBareDir ? {} : components.create('stash', { server, repoPath: this.repoPath });
-    this.staging = this.isBareDir ? {} : components.create('staging', { server, repoPath: this.repoPath, graph: this.graph });
-    this.branches = components.create('branches', { server, graph: this.graph, repoPath: this.repoPath });
-    this.repoPath.subscribe(value => { this.sever.watchRepository(value); });
+    this.stash = this.isBareDir
+      ? {}
+      : components.create('stash', { server, repoPath: this.repoPath });
+    this.staging = this.isBareDir
+      ? {}
+      : components.create('staging', { server, repoPath: this.repoPath, graph: this.graph });
+    this.branches = components.create('branches', {
+      server,
+      graph: this.graph,
+      repoPath: this.repoPath,
+    });
+    this.repoPath.subscribe((value) => {
+      this.sever.watchRepository(value);
+    });
     this.server.watchRepository(this.repoPath());
     this.showLog = this.isBareDir ? ko.observable(true) : this.staging.isStageValid;
     this.parentModulePath = ko.observable();
@@ -29,7 +39,7 @@ class RepositoryViewModel {
     } else {
       this.refreshButton = false;
     }
-    this.ignoreIcon = octicons.file.toSVG({ 'height': 18 });
+    this.ignoreIcon = octicons.file.toSVG({ height: 18 });
   }
 
   updateNode(parentElement) {
@@ -55,48 +65,65 @@ class RepositoryViewModel {
   }
 
   refreshSubmoduleStatus() {
-    return this.server.getPromise('/baserepopath', { path: this.repoPath() })
-      .then(baseRepoPath => {
+    return this.server
+      .getPromise('/baserepopath', { path: this.repoPath() })
+      .then((baseRepoPath) => {
         if (baseRepoPath.path) {
-          return this.server.getProimse('/submodules', { path: baseRepoPath.path })
-            .then(submodules => {
+          return this.server
+            .getProimse('/submodules', { path: baseRepoPath.path })
+            .then((submodules) => {
               if (Array.isArray(submodules)) {
                 const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
                 for (let n = 0; n < submodules.length; n++) {
                   if (submodules[n].path === baseName) {
                     this.parentModulePath(baseRepoPath.path);
-                    this.parentModuleLink(`/#/repository?path=${encodeURIComponent(baseRepoPath.path)}`);
+                    this.parentModuleLink(
+                      `/#/repository?path=${encodeURIComponent(baseRepoPath.path)}`
+                    );
                     return;
                   }
                 }
               }
             });
         }
-      }).catch(err => {
+      })
+      .catch((err) => {
         this.parentModuleLink(undefined);
         this.parentModulePath(undefined);
       });
   }
 
   editGitignore() {
-    return this.server.getPromise('/gitignore', { path: this.repoPath() })
+    return this.server
+      .getPromise('/gitignore', { path: this.repoPath() })
       .then((res) => {
-        return components.create('texteditdialog', { title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`, content: res.content })
+        return components
+          .create('texteditdialog', {
+            title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
+            content: res.content,
+          })
           .show()
-          .closeThen(diag => {
+          .closeThen((diag) => {
             if (diag.result()) {
-              return this.server.putPromise('/gitignore', { path: this.repoPath(), data: diag.textAreaContent });
+              return this.server.putPromise('/gitignore', {
+                path: this.repoPath(),
+                data: diag.textAreaContent,
+              });
             }
           });
-      }).catch(e => {
+      })
+      .catch((e) => {
         // Not a git error but we are going to treat like one
-        programEvents.dispatch({ event: 'git-error', data: {
-          command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
-          error: e.message || e.errorSummary,
-          stdout: '',
-          stderr: e.stack,
-          repoPath: this.repoPath()
-        }});
+        programEvents.dispatch({
+          event: 'git-error',
+          data: {
+            command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
+            error: e.message || e.errorSummary,
+            stdout: '',
+            stderr: e.stack,
+            repoPath: this.repoPath(),
+          },
+        });
       });
   }
 }

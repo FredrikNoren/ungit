@@ -1,34 +1,62 @@
-<div class="commit" data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }">
-  <div class="commit-box panel panel-default" data-bind="element: element, click: stopClickPropagation">
+<div
+  class="commit"
+  data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }"
+>
+  <div
+    class="commit-box panel panel-default"
+    data-bind="element: element, click: stopClickPropagation"
+  >
     <div class="panel-body">
       <div class="arrow shadow"></div>
       <div class="arrow"></div>
       <div class="clearfix">
-        <img class="pull-left img-circle gravatar"
+        <img
+          class="pull-left img-circle gravatar"
           data-bind="attr: { src: `https://www.gravatar.com/avatar/${authorGravatar()}?default=404`, alt: `Profile Picture of ${authorName()}` }"
-          onerror="this.style.display='none';" />
+          onerror="this.style.display='none';"
+        />
         <div>
           <div>
-            <span class="title" data-bind="text: (title().length > 72 ? title().substring(0, 72) + '...' : title)"></span>
-            <span class="text-muted">by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a></span>
+            <span
+              class="title"
+              data-bind="text: (title().length > 72 ? title().substring(0, 72) + '...' : title)"
+            ></span>
+            <span class="text-muted"
+              >by <a data-bind="text: authorName, attr: { href: 'mailto:' + authorEmail() }"></a
+            ></span>
             <!-- ko if: pgpVerifiedString() -->
-              <span class="text-muted" data-bind="html: pgpIcon, attr: { title: pgpVerifiedString() }" data-toggle="tooltip"></span>
+            <span
+              class="text-muted"
+              data-bind="html: pgpIcon, attr: { title: pgpVerifiedString() }"
+              data-toggle="tooltip"
+            ></span>
             <!-- /ko -->
           </div>
           <div class="text-muted nodeSummaryContainer">
-            <span data-bind="text: authorDateFromNow, attr: { title: authorDate }" data-toggle="tooltip" data-placement="bottom"></span> |
-            +<span data-bind="text: numberOfAddedLines"></span>,
-            -<span data-bind="text: numberOfRemovedLines"></span>
-             |
+            <span
+              data-bind="text: authorDateFromNow, attr: { title: authorDate }"
+              data-toggle="tooltip"
+              data-placement="bottom"
+            ></span>
+            | +<span data-bind="text: numberOfAddedLines"></span>, -<span
+              data-bind="text: numberOfRemovedLines"
+            ></span>
+            |
             <span data-bind="text: sha1.substr(0, 8)"></span>
           </div>
         </div>
       </div>
       <!-- ko if: selected() || nodeIsMousehover() -->
       <div class="details">
-        <div class="body" data-bind="visible: title().length > 72, text: '...' + title().substring(72)"></div>
+        <div
+          class="body"
+          data-bind="visible: title().length > 72, text: '...' + title().substring(72)"
+        ></div>
         <div class="body" data-bind="text: body, visible: body"></div>
-        <div class="diff-wrapper" data-bind="visible: showCommitDiff, style: diffStyle, click: stopClickPropagation">
+        <div
+          class="diff-wrapper"
+          data-bind="visible: showCommitDiff, style: diffStyle, click: stopClickPropagation"
+        >
           <div class="diff-inner" data-bind="component: commitDiff"></div>
         </div>
       </div>

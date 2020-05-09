@@ -18,7 +18,9 @@ describe('[SCREENS]', () => {
   it('Open path screen', async () => {
     testRepoPaths.push(await environment.createTempFolder());
 
-    await environment.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[0])}`);
+    await environment.goto(
+      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[0])}`
+    );
     await environment.waitForElementVisible('.uninited');
   });
 
@@ -33,7 +35,10 @@ describe('[SCREENS]', () => {
   });
 
   it('Entering an invalid path and create directory in that location', async () => {
-    await environment.insert('.navbar .path-input-form input', `${testRepoPaths[0]}-test0/not/existing`);
+    await environment.insert(
+      '.navbar .path-input-form input',
+      `${testRepoPaths[0]}-test0/not/existing`
+    );
     await environment.press('Enter');
     await environment.waitForElementVisible('.invalid-path');
     await environment.click('.invalid-path button');
@@ -59,7 +64,9 @@ describe('[SCREENS]', () => {
     await rimraf(specialRepoPath);
     await mkdirp(specialRepoPath);
 
-    await environment.goto(`${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(specialRepoPath)}`);
+    await environment.goto(
+      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(specialRepoPath)}`
+    );
 
     await environment.waitForElementVisible('.uninited');
   });

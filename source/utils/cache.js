@@ -25,10 +25,10 @@ cache.resolveFunc = (key) => {
   }
   return Promise.resolve(result) // func is found, resolve, set with TTL and return result
     .then((r) => {
-      cache.set(key, r, funcMap[key].ttl)
+      cache.set(key, r, funcMap[key].ttl);
       return r;
     });
-}
+};
 
 /**
  * @function registerFunc
@@ -43,12 +43,12 @@ cache.registerFunc = (...args) => {
   let key = args.pop() || md5(func);
   let ttl = args.pop() || cache.options.stdTTL;
 
-  if (typeof func !== "function") {
-    throw new Error("no function was passed in.");
+  if (typeof func !== 'function') {
+    throw new Error('no function was passed in.');
   }
 
   if (isNaN(ttl) || ttl < 0) {
-    throw new Error("ttl value is not valid.");
+    throw new Error('ttl value is not valid.');
   }
 
   if (funcMap[key]) {
@@ -57,11 +57,11 @@ cache.registerFunc = (...args) => {
 
   funcMap[key] = {
     func: func,
-    ttl: ttl
-  }
+    ttl: ttl,
+  };
 
   return key;
-}
+};
 
 /**
  * @function invalidateFunc
@@ -70,7 +70,7 @@ cache.registerFunc = (...args) => {
  */
 cache.invalidateFunc = (key) => {
   cache.del(key);
-}
+};
 
 /**
  * @function deregisterFunc
@@ -80,6 +80,6 @@ cache.invalidateFunc = (key) => {
 cache.deregisterFunc = (key) => {
   cache.invalidateFunc(key);
   delete funcMap[key];
-}
+};
 
 module.exports = cache;

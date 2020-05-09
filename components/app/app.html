@@ -1,35 +1,38 @@
 <!-- ko component: header --><!-- /ko -->
 
 <div class="app">
+  <div class="container" data-bind="shown: shown">
+    <div class="alert alert-danger" data-bind="visible: gitVersionErrorVisible">
+      <span data-bind="text: gitVersionError"></span>
+      <button type="button" class="close" data-bind="click: dismissGitVersionError">&times;</button>
+    </div>
 
-<div class="container" data-bind="shown: shown">
-  <div class="alert alert-danger" data-bind="visible: gitVersionErrorVisible">
-    <span data-bind="text: gitVersionError"></span>
-    <button type="button" class="close" data-bind="click: dismissGitVersionError">&times;</button>
+    <div class="alert alert-info" data-bind="visible: showNewVersionAvailable">
+      A new version of ungit (<span data-bind="text: latestVersion"></span>) is
+      <a href="https://github.com/FredrikNoren/ungit">available</a>! Run
+      <code data-bind="text: newVersionInstallCommand"></code> to install. See what's new in the
+      <a href="https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md">changelog</a>.
+      <button type="button" class="close" data-bind="click: dismissNewVersion">&times;</button>
+    </div>
+
+    <div class="alert alert-info clearfix" data-bind="visible: showBugtrackingNagscreen">
+      <button type="button" class="close" data-bind="click: dismissBugtrackingNagscreen">
+        &times;
+      </button>
+      <p><strong>Help make ungit better with the press of a button!</strong></p>
+
+      <button class="btn btn-primary" data-bind="click: enableBugtracking">
+        Enable automatic bug reports
+      </button>
+      <button class="btn btn-default" data-bind="click: dismissBugtrackingNagscreen">
+        Naah, I&#39;ll skip that
+      </button>
+    </div>
   </div>
 
-  <div class="alert alert-info" data-bind="visible: showNewVersionAvailable">
-    A new version of ungit (<span data-bind="text: latestVersion"></span>) is
-    <a href="https://github.com/FredrikNoren/ungit">available</a>! Run
-    <code data-bind="text: newVersionInstallCommand"></code> to install.
-    See what's new in the
-    <a href="https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md">changelog</a>.
-    <button type="button" class="close" data-bind="click: dismissNewVersion">&times;</button>
-  </div>
-
-  <div class="alert alert-info clearfix" data-bind="visible: showBugtrackingNagscreen">
-    <button type="button" class="close" data-bind="click: dismissBugtrackingNagscreen">&times;</button>
-    <p><strong>Help make ungit better with the press of a button!</strong></p>
-
-    <button class="btn btn-primary" data-bind="click: enableBugtracking">Enable automatic bug reports</button>
-    <button class="btn btn-default" data-bind="click: dismissBugtrackingNagscreen">Naah, I&#39;ll skip that</button>
-  </div>
-</div>
-
-<!-- ko if: content -->
-<div class="container-wide" data-bind="component: content"></div>
-<!-- /ko -->
-
+  <!-- ko if: content -->
+  <div class="container-wide" data-bind="component: content"></div>
+  <!-- /ko -->
 </div>
 
 <!-- ko if: dialog -->

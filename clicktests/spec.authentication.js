@@ -1,8 +1,8 @@
 'use strict';
-const testuser = { username: 'testuser', password: 'testpassword' }
+const testuser = { username: 'testuser', password: 'testpassword' };
 const environment = require('./environment')({
   serverStartupOptions: ['--authentication', `--users.${testuser.username}=${testuser.password}`],
-  showServerOutput: true
+  showServerOutput: true,
 });
 
 describe('[AUTHENTICATION]', () => {

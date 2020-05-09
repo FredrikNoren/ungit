@@ -1,4 +1,3 @@
-
 const expect = require('expect.js');
 const child_process = require('child_process');
 const http = require('http');
@@ -7,10 +6,9 @@ const url = require('url');
 const querystring = require('querystring');
 
 describe('credentials-helper', () => {
-
   it('should be invokable', (done) => {
     const socketId = Math.floor(Math.random() * 1000);
-    const remote = "origin";
+    const remote = 'origin';
     const payload = { username: 'testuser', password: 'testpassword' };
     const server = http.createServer((req, res) => {
       const reqUrl = url.parse(req.url);
@@ -20,7 +18,7 @@ describe('credentials-helper', () => {
       expect(params['remote']).to.be(`${remote}`);
       expect(params['socketId']).to.be(`${socketId}`);
 
-      res.writeHead(200, {'Content-Type': 'application/json'});
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(payload));
     });
 

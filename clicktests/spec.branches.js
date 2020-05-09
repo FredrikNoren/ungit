@@ -16,7 +16,7 @@ describe('[BRANCHES]', () => {
   it('add a commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-1');
-  })
+  });
 
   // < branch search test >
   it('add branches', async () => {
@@ -93,7 +93,9 @@ describe('[BRANCHES]', () => {
 
   it('cherrypick fail case', async () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
-    await environment.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask');
+    await environment.click(
+      '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
+    );
 
     await environment.click('.staging .btn-stg-abort');
     await environment.click('.modal-dialog .btn-primary');
@@ -103,7 +105,9 @@ describe('[BRANCHES]', () => {
 
   it('cherrypick success case', async () => {
     await environment.click('[data-ta-clickable="node-clickable-1"]');
-    await environment.click('[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask');
+    await environment.click(
+      '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
+    );
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 
@@ -123,9 +127,8 @@ describe('[BRANCHES]', () => {
   });
 
   it('Auto checkout on branch creation.', async () => {
-    await environment.page.evaluate(() => ungit.config.autoCheckoutOnBranchCreate = true);
+    await environment.page.evaluate(() => (ungit.config.autoCheckoutOnBranchCreate = true));
     await environment.createBranch('autoCheckout');
     await environment.waitForElementVisible('[data-ta-name="autoCheckout"].current');
   });
-
 });
