@@ -90,6 +90,7 @@ class GitNodeViewModel extends Animateable {
       new GraphActions.Move(this.graph, this),
       new GraphActions.Rebase(this.graph, this),
       new GraphActions.Merge(this.graph, this),
+      new GraphActions.MergeSquash(this.graph, this),
       new GraphActions.Push(this.graph, this),
       new GraphActions.Reset(this.graph, this),
       new GraphActions.Checkout(this.graph, this),

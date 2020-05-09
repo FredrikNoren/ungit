@@ -101,3 +101,10 @@ class SquashViewModel extends HoverViewModel {
   }
 }
 exports.SquashViewModel = SquashViewModel;
+
+class MergeSquashViewModel extends SquashViewModel {
+  constructor(from, onto) {
+    super(from, onto);
+  }
+}
+exports.MergeSquashViewModel = MergeSquashViewModel;

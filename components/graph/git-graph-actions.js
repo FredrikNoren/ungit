@@ -10,6 +10,7 @@ const MergeViewModel = HoverActions.MergeViewModel;
 const ResetViewModel = HoverActions.ResetViewModel;
 const PushViewModel = HoverActions.PushViewModel;
 const SquashViewModel = HoverActions.SquashViewModel;
+const MergeSquashViewModel = HoverActions.MergeSquashViewModel;
 
 class ActionBase {
   constructor(graph, text, style, icon) {
@@ -18,13 +19,13 @@ class ActionBase {
     this.isRunning = ko.observable(false);
     this.isHighlighted = ko.computed(() => !graph.hoverGraphAction() || graph.hoverGraphAction() == this);
     this.text = text;
-    this.style = style;
+    this.style = ko.observable(style);
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
       if (!this.isHighlighted() || this.isRunning()) {
-        return `${this.style} dimmed`;
+        return `${this.style()} dimmed`;
       } else {
-        return this.style;
+        return this.style();
       }
     });
   }
@@ -168,6 +169,25 @@ class Merge extends ActionBase {
   }
 }
 
+class MergeSquash extends Merge {
+  constructor(graph, node) {
+    super(graph, node)
+    this.text = "Merge Squash";
+    this.style("merge-squash");
+  }
+
+  createHoverGraphic() {
+    let from = this.graph.currentActionContext();
+    if (!from) return;
+    if (from instanceof RefViewModel) from = from.node();
+    return new MergeSquashViewModel(from, this.node);
+  }
+
+  perform() {
+    return this.server.postPromise('/squash', { path: this.graph.repoPath(), target: this.graph.currentActionContext().localRefName })
+      .catch((err) => { if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err); });
+  }
+}
 
 class Push extends ActionBase {
   constructor(graph, node) {
@@ -369,6 +389,7 @@ const GraphActions = {
   Move: Move,
   Rebase: Rebase,
   Merge: Merge,
+  MergeSquash: MergeSquash,
   Push: Push,
   Reset: Reset,
   Checkout: Checkout,
