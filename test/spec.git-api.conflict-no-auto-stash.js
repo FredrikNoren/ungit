@@ -18,23 +18,25 @@ describe('git-api conflict checkout no auto stash', function () {
   const testBranch = 'testBranch';
   const testFile1 = 'testfile1.txt';
 
-  before(() => {
-    return common.initRepo(req).then((dir) => {
-      testDir = dir;
-      return common
-        .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-        .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] })
-        )
-        .then(() =>
-          common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' })
-        )
-        .then(() =>
-          common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
-        )
-        .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] })
-        );
+  before(async () => {
+    const dir = await common.initRepo(req);
+    testDir = dir;
+
+    await common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) });
+
+    await common.post(req, '/commit', {
+      path: testDir,
+      message: 'a',
+      files: [{ name: testFile1 }],
+    });
+    await common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' });
+
+    await common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) });
+
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: 'b',
+      files: [{ name: testFile1 }],
     });
   });
   after(() => {
@@ -45,15 +47,18 @@ describe('git-api conflict checkout no auto stash', function () {
     return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) });
   });
 
-  it('should not be possible to checkout with local files that will conflict', () => {
-    return common
-      .post(req, `${restGit.pathPrefix}/checkout`, { path: testDir, name: testBranch })
-      .then((gitErr) => expect(gitErr.errorCode).to.be('local-changes-would-be-overwritten'));
+  it('should not be possible to checkout with local files that will conflict', async () => {
+    const gitErr = await common.post(req, `${restGit.pathPrefix}/checkout`, {
+      path: testDir,
+      name: testBranch,
+    });
+
+    return expect(gitErr.errorCode).to.be('local-changes-would-be-overwritten');
   });
 
-  it('checkout should say we are still on master', () => {
-    return common
-      .get(req, '/checkout', { path: testDir })
-      .then((res) => expect(res).to.be('master'));
+  it('checkout should say we are still on master', async () => {
+    const res = await common.get(req, '/checkout', { path: testDir });
+
+    return expect(res).to.be('master');
   });
 });

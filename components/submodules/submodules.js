@@ -26,14 +26,15 @@ class SubmodulesViewModel {
     });
   }
 
-  fetchSubmodules() {
-    return this.server
-      .getPromise('/submodules', { path: this.repoPath() })
-      .then((submodules) => {
-        this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
-        return this;
-      })
-      .catch((e) => this.server.unhandledRejection(e));
+  async fetchSubmodules() {
+    try {
+      const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
+
+      this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      return this;
+    } catch (e) {
+      return this.server.unhandledRejection(e);
+    }
   }
 
   updateSubmodules() {

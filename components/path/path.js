@@ -43,27 +43,26 @@ class PathViewModel {
   updateAnimationFrame(deltaT) {
     if (this.repository()) this.repository().updateAnimationFrame(deltaT);
   }
-  updateStatus() {
-    return this.server
-      .getPromise('/quickstatus', { path: this.repoPath() })
-      .then((status) => {
-        if (status.type == 'inited' || status.type == 'bare') {
-          if (this.repoPath() !== status.gitRootPath) {
-            this.repoPath(status.gitRootPath);
-            programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
-            programEvents.dispatch({ event: 'working-tree-changed' });
-          }
-          this.status(status.type);
-          if (!this.repository()) {
-            this.repository(components.create('repository', { server: this.server, path: this }));
-          }
-        } else if (status.type == 'uninited' || status.type == 'no-such-path') {
-          this.status(status.type);
-          this.repository(null);
+  async updateStatus() {
+    try {
+      const status = await this.server.getPromise('/quickstatus', { path: this.repoPath() });
+
+      if (status.type == 'inited' || status.type == 'bare') {
+        if (this.repoPath() !== status.gitRootPath) {
+          this.repoPath(status.gitRootPath);
+          programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
+          programEvents.dispatch({ event: 'working-tree-changed' });
         }
-        return null;
-      })
-      .catch((err) => {});
+        this.status(status.type);
+        if (!this.repository()) {
+          this.repository(components.create('repository', { server: this.server, path: this }));
+        }
+      } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+        this.status(status.type);
+        this.repository(null);
+      }
+      return null;
+    } catch (err) {}
   }
   initRepository() {
     return this.server
@@ -96,11 +95,13 @@ class PathViewModel {
         programEvents.dispatch({ event: 'working-tree-changed' });
       });
   }
-  createDir() {
+  async createDir() {
     this.showDirectoryCreatedAlert(true);
-    return this.server
+
+    await this.server
       .postPromise('/createDir', { dir: this.repoPath() })
-      .catch((e) => this.server.unhandledRejection(e))
-      .then(() => this.updateStatus());
+      .catch((e) => this.server.unhandledRejection(e));
+
+    return this.updateStatus();
   }
 }

@@ -113,35 +113,34 @@ class RemotesViewModel {
       });
   }
 
-  updateRemotes() {
-    return this.server
-      .getPromise('/remotes', { path: this.repoPath() })
-      .then((remotes) => {
-        remotes = remotes.map((remote) => ({
-          name: remote,
-          changeRemote: () => {
-            this.currentRemote(remote);
-          },
-        }));
-        this.remotes(remotes);
-        if (!this.currentRemote() && remotes.length > 0) {
-          if (_.find(remotes, { name: 'origin' })) {
-            // default to origin if it exists
-            this.currentRemote('origin');
-          } else {
-            // otherwise take the first one
-            this.currentRemote(remotes[0].name);
-          }
+  async updateRemotes() {
+    try {
+      let remotes = await this.server.getPromise('/remotes', { path: this.repoPath() });
 
-          if (this.shouldAutoFetch) {
-            this.shouldAutoFetch = false;
-            return this.fetch({ nodes: true, tags: true });
-          }
+      remotes = remotes.map((remote) => ({
+        name: remote,
+        changeRemote: () => {
+          this.currentRemote(remote);
+        },
+      }));
+      this.remotes(remotes);
+      if (!this.currentRemote() && remotes.length > 0) {
+        if (_.find(remotes, { name: 'origin' })) {
+          // default to origin if it exists
+          this.currentRemote('origin');
+        } else {
+          // otherwise take the first one
+          this.currentRemote(remotes[0].name);
         }
-      })
-      .catch((err) => {
-        if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
-      });
+
+        if (this.shouldAutoFetch) {
+          this.shouldAutoFetch = false;
+          return this.fetch({ nodes: true, tags: true });
+        }
+      }
+    } catch (err) {
+      if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
+    }
   }
 
   showAddRemoteDialog() {

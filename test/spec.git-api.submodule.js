@@ -17,16 +17,13 @@ describe('git-api submodule', function () {
 
   let testDirMain, testDirSecondary;
 
-  before(() => {
-    return common
-      .createSmallRepo(req)
-      .then((dir) => {
-        testDirMain = dir;
-      })
-      .then(() => common.createSmallRepo(req))
-      .then((dir) => {
-        testDirSecondary = dir;
-      });
+  before(async () => {
+    const dir2 = await common.createSmallRepo(req);
+
+    testDirMain = dir2;
+    const dir = await common.createSmallRepo(req);
+
+    testDirSecondary = dir;
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -41,35 +38,34 @@ describe('git-api submodule', function () {
     });
   });
 
-  it('submodule should show up in status', () => {
-    return common.get(req, '/status', { path: testDirMain }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(2);
-      expect(res.files[submodulePath]).to.eql({
-        displayName: submodulePath,
-        fileName: submodulePath,
-        oldFileName: submodulePath,
-        isNew: true,
-        staged: true,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '1',
-        deletions: '0',
-      });
-      expect(res.files['.gitmodules']).to.eql({
-        displayName: '.gitmodules',
-        fileName: '.gitmodules',
-        oldFileName: '.gitmodules',
-        isNew: true,
-        staged: true,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '3',
-        deletions: '0',
-      });
+  it('submodule should show up in status', async () => {
+    const res = await common.get(req, '/status', { path: testDirMain });
+    expect(Object.keys(res.files).length).to.be(2);
+    expect(res.files[submodulePath]).to.eql({
+      displayName: submodulePath,
+      fileName: submodulePath,
+      oldFileName: submodulePath,
+      isNew: true,
+      staged: true,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '1',
+      deletions: '0',
+    });
+    expect(res.files['.gitmodules']).to.eql({
+      displayName: '.gitmodules',
+      fileName: '.gitmodules',
+      oldFileName: '.gitmodules',
+      isNew: true,
+      staged: true,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '3',
+      deletions: '0',
     });
   });
 
@@ -81,10 +77,10 @@ describe('git-api submodule', function () {
     });
   });
 
-  it('status should be empty after commit', () => {
-    return common
-      .get(req, '/status', { path: testDirMain })
-      .then((res) => expect(Object.keys(res.files).length).to.be(0));
+  it('status should be empty after commit', async () => {
+    const res = await common.get(req, '/status', { path: testDirMain });
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
   it('creating a test file in sub dir should work', () => {
@@ -92,29 +88,27 @@ describe('git-api submodule', function () {
     return common.post(req, '/testing/createfile', { file: path.join(testDirMain, testFile) });
   });
 
-  it("submodule should show up in status when it's dirty", () => {
-    return common.get(req, '/status', { path: testDirMain }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[submodulePath]).to.eql({
-        displayName: submodulePath,
-        fileName: submodulePath,
-        oldFileName: submodulePath,
-        isNew: false,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '0',
-        deletions: '0',
-      });
+  it("submodule should show up in status when it's dirty", async () => {
+    const res = await common.get(req, '/status', { path: testDirMain });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[submodulePath]).to.eql({
+      displayName: submodulePath,
+      fileName: submodulePath,
+      oldFileName: submodulePath,
+      isNew: false,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '0',
+      deletions: '0',
     });
   });
 
-  it('diff on submodule should work', () => {
-    return common.get(req, '/diff', { path: testDirMain, file: submodulePath }).then((res) => {
-      expect(res.indexOf('-Subproject commit')).to.be.above(-1);
-      expect(res.indexOf('+Subproject commit')).to.be.above(-1);
-    });
+  it('diff on submodule should work', async () => {
+    const res = await common.get(req, '/diff', { path: testDirMain, file: submodulePath });
+    expect(res.indexOf('-Subproject commit')).to.be.above(-1);
+    expect(res.indexOf('+Subproject commit')).to.be.above(-1);
   });
 });

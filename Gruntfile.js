@@ -67,7 +67,7 @@ module.exports = (grunt) => {
       options: {
         undef: true, // check for usage of undefined constiables
         indent: 2,
-        esversion: 6,
+        esversion: 8,
         laxbreak: true,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
@@ -258,20 +258,19 @@ module.exports = (grunt) => {
     ).then(this.async());
   });
 
-  const bumpDependency = (packageJson, packageName) => {
+  const bumpDependency = async (packageJson, packageName) => {
     const dependencyType = packageJson['dependencies'][packageName]
       ? 'dependencies'
       : 'devDependencies';
     let currentVersion = packageJson[dependencyType][packageName];
     if (currentVersion[0] == '~' || currentVersion[0] == '^')
       currentVersion = currentVersion.slice(1);
-    return pkgVersions(packageName).then((versionSet) => {
-      const versions = Array.from(versionSet);
-      const latestVersion = semver.maxSatisfying(versions, '*');
-      if (semver.gt(latestVersion, currentVersion)) {
-        packageJson[dependencyType][packageName] = '~' + latestVersion;
-      }
-    });
+    const versionSet = await pkgVersions(packageName);
+    const versions = Array.from(versionSet);
+    const latestVersion = semver.maxSatisfying(versions, '*');
+    if (semver.gt(latestVersion, currentVersion)) {
+      packageJson[dependencyType][packageName] = '~' + latestVersion;
+    }
   };
 
   grunt.registerTask(
@@ -332,32 +331,33 @@ module.exports = (grunt) => {
       .then((tests) => {
         grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
         return Promise.all(
-          tests.map((file) => {
+          tests.map(async (file) => {
             let output = '';
             const outStream = (data) => (output += data);
 
             grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
-            return new Promise((resolve, reject) => {
-              const child = childProcess.execFile(
-                './node_modules/mocha/bin/mocha',
-                [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'],
-                { maxBuffer: 10 * 1024 * 1024 }
-              );
-              child.stdout.on('data', outStream);
-              child.stderr.on('data', outStream);
-              child.on('exit', (code) => {
-                if (code == 0) resolve(file);
-                else reject();
+
+            try {
+              await new Promise((resolve, reject) => {
+                const child = childProcess.execFile(
+                  './node_modules/mocha/bin/mocha',
+                  [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'],
+                  { maxBuffer: 10 * 1024 * 1024 }
+                );
+                child.stdout.on('data', outStream);
+                child.stderr.on('data', outStream);
+                child.on('exit', (code) => {
+                  if (code == 0) resolve(file);
+                  else reject();
+                });
               });
-            })
-              .then(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
-                return { name: file, output: output, isSuccess: true };
-              })
-              .catch(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
-                return { name: file, output: output, isSuccess: false };
-              });
+
+              grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
+              return { name: file, output: output, isSuccess: true };
+            } catch (error) {
+              grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
+              return { name: file, output: output, isSuccess: false };
+            }
           })
         );
       })

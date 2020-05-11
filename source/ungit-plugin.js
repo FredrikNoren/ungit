@@ -39,74 +39,46 @@ class UngitPlugin {
     env.app.use(`/plugins/${this.name}`, express.static(this.path));
   }
 
-  compile() {
+  async compile() {
     winston.info(`Compiling plugin ${this.path}`);
     const exports = this.manifest.exports || {};
 
-    return Promise.resolve()
-      .then(() => {
-        if (exports.raw) {
-          return Promise.all(
-            assureArray(exports.raw).map((rawSource) => {
-              return fs.readFile(path.join(this.path, rawSource)).then((text) => {
-                return text + '\n';
-              });
-            })
-          ).then((result) => {
-            return result.join('\n');
-          });
-        } else {
-          return '';
-        }
-      })
-      .then((result) => {
-        if (exports.javascript) {
-          return (
-            result +
-            assureArray(exports.javascript)
-              .map((filename) => {
-                return `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`;
-              })
-              .join('\n')
-          );
-        } else {
-          return result;
-        }
-      })
-      .then((result) => {
-        if (exports.knockoutTemplates) {
-          return Promise.all(
-            Object.keys(exports.knockoutTemplates).map((templateName) => {
-              return fs
-                .readFile(path.join(this.path, exports.knockoutTemplates[templateName]))
-                .then((text) => {
-                  return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
-                });
-            })
-          ).then((templates) => {
-            return result + templates.join('\n');
-          });
-        } else {
-          return result;
-        }
-      })
-      .then((result) => {
-        if (exports.css) {
-          return (
-            result +
-            assureArray(exports.css)
-              .map((cssSource) => {
-                return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
-              })
-              .join('\n')
-          );
-        } else {
-          return result;
-        }
-      })
-      .then((result) => {
-        return `<!-- Component: ${this.name} -->\n${result}`;
-      });
+    let result = '';
+    if (exports.raw)
+      result += (
+        await Promise.all(
+          assureArray(exports.raw).map(async (rawSource) => {
+            const text = await fs.readFile(path.join(this.path, rawSource));
+            return text + '\n';
+          })
+        )
+      ).join('\n');
+    if (exports.javascript)
+      result += assureArray(exports.javascript)
+        .map((filename) => {
+          return `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`;
+        })
+        .join('\n');
+    if (exports.knockoutTemplates)
+      result += (
+        await Promise.all(
+          Object.keys(exports.knockoutTemplates).map(async (templateName) => {
+            const text = await fs.readFile(
+              path.join(this.path, exports.knockoutTemplates[templateName])
+            );
+
+            return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
+          })
+        )
+      ).join('\n');
+    if (exports.css)
+      result += assureArray(exports.css)
+        .map((cssSource) => {
+          return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
+        })
+        .join('\n');
+
+    return `<!-- Component: ${this.name} -->\n${result}`;
   }
 }
 module.exports = UngitPlugin;

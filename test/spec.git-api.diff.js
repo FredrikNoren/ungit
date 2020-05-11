@@ -15,12 +15,13 @@ const req = request(app);
 describe('git-api diff', () => {
   let testDir, testBareDir;
 
-  before(() => {
-    return common
-      .initRepo(req)
-      .then((dir) => (testDir = dir))
-      .then(() => common.initRepo(req, { bare: true }))
-      .then((dir) => (testBareDir = dir));
+  before(async () => {
+    const dir2 = await common.initRepo(req);
+
+    testDir = dir2;
+    const dir = await common.initRepo(req, { bare: true });
+
+    return (testBareDir = dir);
   });
   after(() => common.post(req, '/testing/cleanup', undefined));
 
@@ -47,18 +48,21 @@ describe('git-api diff', () => {
     return common.post(req, '/testing/createimagefile', { file: path.join(testDir, testImage) });
   });
 
-  it('diff on created file should work', () => {
-    return common.get(req, '/diff', { path: testDir, file: testFile }).then((res) => {
-      for (let i = 0; i < content.length; i++) {
-        expect(res.indexOf(content[i])).to.be.above(-1);
-      }
-    });
+  it('diff on created file should work', async () => {
+    const res = await common.get(req, '/diff', { path: testDir, file: testFile });
+    for (let i = 0; i < content.length; i++) {
+      expect(res.indexOf(content[i])).to.be.above(-1);
+    }
   });
 
-  it('diff on image file should work', () => {
-    return common
-      .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' })
-      .then((res) => expect(res.toString()).to.be('png'));
+  it('diff on image file should work', async () => {
+    const res = await common.getPng(req, '/diff/image', {
+      path: testDir,
+      filename: testImage,
+      version: 'current',
+    });
+
+    return expect(res.toString()).to.be('png');
   });
 
   it('should be possible to commit a file', () => {
@@ -76,31 +80,34 @@ describe('git-api diff', () => {
     });
   });
 
-  it('diff on first commit should work', () => {
-    return common
-      .get(req, '/gitlog', { path: testDir })
-      .then((res) => {
-        expect(res.nodes.length).to.be(2);
-        return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
-      })
-      .then((res) => {
-        for (let i = 0; i < content.length; i++) {
-          expect(res.indexOf(content[i])).to.be.above(-1);
-        }
-      });
-  });
-
-  it('diff on commited file should work', () => {
-    return common.get(req, '/diff', { path: testDir, file: testFile }).then((res) => {
-      expect(res).to.be.an('array');
-      expect(res.length).to.be(0);
+  it('diff on first commit should work', async () => {
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(2);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile,
+      sha1: res2.nodes[1].sha1,
     });
+
+    for (let i = 0; i < content.length; i++) {
+      expect(res.indexOf(content[i])).to.be.above(-1);
+    }
   });
 
-  it('diff on commited image file should work', () => {
-    return common
-      .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' })
-      .then((res) => expect(res.toString()).to.be('png'));
+  it('diff on commited file should work', async () => {
+    const res = await common.get(req, '/diff', { path: testDir, file: testFile });
+    expect(res).to.be.an('array');
+    expect(res.length).to.be(0);
+  });
+
+  it('diff on commited image file should work', async () => {
+    const res = await common.getPng(req, '/diff/image', {
+      path: testDir,
+      filename: testImage,
+      version: 'current',
+    });
+
+    return expect(res.toString()).to.be('png');
   });
 
   it('should be possible to modify a file', () => {
@@ -115,36 +122,43 @@ describe('git-api diff', () => {
     return common.post(req, '/testing/changeimagefile', { file: path.join(testDir, testImage) });
   });
 
-  it('diff on modified file should work', () => {
-    return common.get(req, '/diff', { path: testDir, file: testFile }).then((res) => {
-      expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
-      expect(res.indexOf('+more')).to.be.above(-1);
+  it('diff on modified file should work', async () => {
+    const res = await common.get(req, '/diff', { path: testDir, file: testFile });
+    expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
+    expect(res.indexOf('+more')).to.be.above(-1);
+  });
+
+  it('diff on file commit should work if file is changing', async () => {
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(2);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile,
+      sha1: res2.nodes[1].sha1,
     });
+
+    expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
+    expect(res.indexOf('+more')).to.be(-1);
   });
 
-  it('diff on file commit should work if file is changing', () => {
-    return common
-      .get(req, '/gitlog', { path: testDir })
-      .then((res) => {
-        expect(res.nodes.length).to.be(2);
-        return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
-      })
-      .then((res) => {
-        expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
-        expect(res.indexOf('+more')).to.be(-1);
-      });
+  it('getting current image file should work', async () => {
+    const res = await common.getPng(req, '/diff/image', {
+      path: testDir,
+      filename: testImage,
+      version: 'current',
+    });
+
+    return expect(res.toString()).to.be('png ~~');
   });
 
-  it('getting current image file should work', () => {
-    return common
-      .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'current' })
-      .then((res) => expect(res.toString()).to.be('png ~~'));
-  });
+  it('getting previous image file should work', async () => {
+    const res = await common.getPng(req, '/diff/image', {
+      path: testDir,
+      filename: testImage,
+      version: 'HEAD',
+    });
 
-  it('getting previous image file should work', () => {
-    return common
-      .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' })
-      .then((res) => expect(res.toString()).to.be('png'));
+    return expect(res.toString()).to.be('png');
   });
 
   it('should be possible to rename a modified file', () => {
@@ -154,13 +168,15 @@ describe('git-api diff', () => {
     });
   });
 
-  it('diff on renamed and modified file should work', () => {
-    return common
-      .get(req, '/diff', { path: testDir, file: testFile2, oldFile: testFile })
-      .then((res) => {
-        expect(res.indexOf('diff --git a/afile.txt b/anotherfile.txt')).to.be.above(-1);
-        expect(res.indexOf('+more')).to.be.above(-1);
-      });
+  it('diff on renamed and modified file should work', async () => {
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile2,
+      oldFile: testFile,
+    });
+
+    expect(res.indexOf('diff --git a/afile.txt b/anotherfile.txt')).to.be.above(-1);
+    expect(res.indexOf('+more')).to.be.above(-1);
   });
 
   it('should be possible to commit the renamed and modified file', () => {
@@ -171,23 +187,19 @@ describe('git-api diff', () => {
     });
   });
 
-  it('diff on commit with renamed and modified file should work', () => {
-    return common
-      .get(req, '/gitlog', { path: testDir })
-      .then((res) => {
-        expect(res.nodes.length).to.be(3);
-        return common.get(req, '/diff', {
-          path: testDir,
-          file: testFile2,
-          oldFile: testFile,
-          sha1: res.nodes[0].sha1,
-        });
-      })
-      .then((res) => {
-        for (let i = 0; i < content.length; i++) {
-          expect(res.indexOf(content[i])).to.be.above(-1);
-        }
-      });
+  it('diff on commit with renamed and modified file should work', async () => {
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(3);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile2,
+      oldFile: testFile,
+      sha1: res2.nodes[0].sha1,
+    });
+
+    for (let i = 0; i < content.length; i++) {
+      expect(res.indexOf(content[i])).to.be.above(-1);
+    }
   });
 
   it('removing a test file should work', () => {
@@ -205,31 +217,33 @@ describe('git-api diff', () => {
     return common.post(req, '/testing/removefile', { file: path.join(testDir, testImage) });
   });
 
-  it('diff on removed file should work', () => {
-    return common.get(req, '/diff', { path: testDir, file: testFile2 }).then((res) => {
-      expect(res.indexOf('deleted file')).to.be.above(-1);
-      expect(res.indexOf('@@ -1,6 +0,0 @@')).to.be.above(-1);
+  it('diff on removed file should work', async () => {
+    const res = await common.get(req, '/diff', { path: testDir, file: testFile2 });
+    expect(res.indexOf('deleted file')).to.be.above(-1);
+    expect(res.indexOf('@@ -1,6 +0,0 @@')).to.be.above(-1);
+  });
+
+  it('getting previous image file should work', async () => {
+    const res = await common.getPng(req, '/diff/image', {
+      path: testDir,
+      filename: testImage,
+      version: 'HEAD',
     });
+
+    return expect(res.toString()).to.be('png ~~');
   });
 
-  it('getting previous image file should work', () => {
-    return common
-      .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' })
-      .then((res) => expect(res.toString()).to.be('png ~~'));
-  });
+  it('diff on bare repository file should work', async () => {
+    await common.post(req, '/remotes/barerepository', { path: testDir, url: testBareDir });
 
-  it('diff on bare repository file should work', () => {
+    await common.post(req, '/push', { path: testDir, remote: 'barerepository' });
     // first add remote and push all commits
-    return common
-      .post(req, '/remotes/barerepository', { path: testDir, url: testBareDir })
-      .then(() => common.post(req, '/push', { path: testDir, remote: 'barerepository' }))
-      .then(() => common.get(req, '/gitlog', { path: testDir }))
-      .then((res) => {
-        // find a commit which contains the testFile
-        const commit = res.nodes.filter((commit) =>
-          commit.fileLineDiffs.some((lineDiff) => lineDiff.fileName == testFile)
-        )[0];
-        return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile });
-      });
+    const res = await common.get(req, '/gitlog', { path: testDir });
+
+    // find a commit which contains the testFile
+    const commit = res.nodes.filter((commit) =>
+      commit.fileLineDiffs.some((lineDiff) => lineDiff.fileName == testFile)
+    )[0];
+    return common.get(req, '/diff', { path: testDir, sha1: commit.sha1, file: testFile });
   });
 });

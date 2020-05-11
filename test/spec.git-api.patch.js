@@ -14,33 +14,29 @@ restGit.registerApi({ app: app, config: { dev: true } });
 let testDir;
 const req = request(app);
 
-const testPatch = (req, testDir, testFileName, contentsToPatch, files) => {
+const testPatch = async (req, testDir, testFileName, contentsToPatch, files) => {
+  await common.post(req, '/testing/createfile', {
+    file: path.join(testDir, testFileName),
+    content: contentsToPatch[0],
+  });
+
+  await common.post(req, '/commit', {
+    path: testDir,
+    message: `a commit for ${testFileName}`,
+    files: [{ name: testFileName }],
+  });
+
   // testDir = '/tmp/testdir';
-  return common
-    .post(req, '/testing/createfile', {
-      file: path.join(testDir, testFileName),
-      content: contentsToPatch[0],
-    })
-    .then(() =>
-      common.post(req, '/commit', {
-        path: testDir,
-        message: `a commit for ${testFileName}`,
-        files: [{ name: testFileName }],
-      })
-    )
-    .then(() =>
-      common.post(req, '/testing/changefile', {
-        file: path.join(testDir, testFileName),
-        content: contentsToPatch[1],
-      })
-    )
-    .then(() =>
-      common.post(req, '/commit', {
-        path: testDir,
-        message: `patched commit ${testFileName}`,
-        files: files,
-      })
-    );
+  await common.post(req, '/testing/changefile', {
+    file: path.join(testDir, testFileName),
+    content: contentsToPatch[1],
+  });
+
+  return common.post(req, '/commit', {
+    path: testDir,
+    message: `patched commit ${testFileName}`,
+    files: files,
+  });
 };
 
 const getPatchLineList = (size, notSelected) => {
@@ -108,11 +104,10 @@ const getContentsToPatchWithDelete = (size, numLinesToDelete) => {
 };
 
 describe('git-api: test patch api', () => {
-  it('creating test dir should work', () => {
-    return common.post(req, '/testing/createtempdir').then((res) => {
-      expect(res.path).to.be.ok();
-      testDir = res.path;
-    });
+  it('creating test dir should work', async () => {
+    const res = await common.post(req, '/testing/createtempdir');
+    expect(res.path).to.be.ok();
+    testDir = res.path;
   });
 
   it('init test dir should work', () => {

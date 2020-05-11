@@ -9,7 +9,7 @@ const funcMap = {}; // Will there ever be a use case where this is a cache with 
  * @param {string} [key] - A key associated with a function to be executed.
  * @return {Promise} - Promise either resolved with cached result of the function or rejected with function not found.
  */
-cache.resolveFunc = (key) => {
+cache.resolveFunc = async (key) => {
   let result = cache.get(key);
   if (result !== undefined) {
     return Promise.resolve(result);
@@ -23,11 +23,12 @@ cache.resolveFunc = (key) => {
   } catch (err) {
     return Promise.reject(err);
   }
-  return Promise.resolve(result) // func is found, resolve, set with TTL and return result
-    .then((r) => {
-      cache.set(key, r, funcMap[key].ttl);
-      return r;
-    });
+
+  const r = await // func is found, resolve, set with TTL and return result
+  Promise.resolve(result);
+
+  cache.set(key, r, funcMap[key].ttl);
+  return r;
 };
 
 /**

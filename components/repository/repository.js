@@ -64,66 +64,64 @@ class RepositoryViewModel {
     if (this.graph.updateAnimationFrame) this.graph.updateAnimationFrame(deltaT);
   }
 
-  refreshSubmoduleStatus() {
-    return this.server
-      .getPromise('/baserepopath', { path: this.repoPath() })
-      .then((baseRepoPath) => {
-        if (baseRepoPath.path) {
-          return this.server
-            .getProimse('/submodules', { path: baseRepoPath.path })
-            .then((submodules) => {
-              if (Array.isArray(submodules)) {
-                const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
-                for (let n = 0; n < submodules.length; n++) {
-                  if (submodules[n].path === baseName) {
-                    this.parentModulePath(baseRepoPath.path);
-                    this.parentModuleLink(
-                      `/#/repository?path=${encodeURIComponent(baseRepoPath.path)}`
-                    );
-                    return;
-                  }
+  async refreshSubmoduleStatus() {
+    try {
+      const baseRepoPath = await this.server.getPromise('/baserepopath', { path: this.repoPath() });
+
+      if (baseRepoPath.path) {
+        return this.server
+          .getProimse('/submodules', { path: baseRepoPath.path })
+          .then((submodules) => {
+            if (Array.isArray(submodules)) {
+              const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
+              for (let n = 0; n < submodules.length; n++) {
+                if (submodules[n].path === baseName) {
+                  this.parentModulePath(baseRepoPath.path);
+                  this.parentModuleLink(
+                    `/#/repository?path=${encodeURIComponent(baseRepoPath.path)}`
+                  );
+                  return;
                 }
               }
-            });
-        }
-      })
-      .catch((err) => {
-        this.parentModuleLink(undefined);
-        this.parentModulePath(undefined);
-      });
-  }
-
-  editGitignore() {
-    return this.server
-      .getPromise('/gitignore', { path: this.repoPath() })
-      .then((res) => {
-        return components
-          .create('texteditdialog', {
-            title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
-            content: res.content,
-          })
-          .show()
-          .closeThen((diag) => {
-            if (diag.result()) {
-              return this.server.putPromise('/gitignore', {
-                path: this.repoPath(),
-                data: diag.textAreaContent,
-              });
             }
           });
-      })
-      .catch((e) => {
-        // Not a git error but we are going to treat like one
-        programEvents.dispatch({
-          event: 'git-error',
-          data: {
-            command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
-            error: e.message || e.errorSummary,
-            stdout: '',
-            stderr: e.stack,
-            repoPath: this.repoPath(),
-          },
+      }
+    } catch (err) {
+      this.parentModuleLink(undefined);
+      this.parentModulePath(undefined);
+    }
+  }
+
+  async editGitignore() {
+    try {
+      const res = await this.server.getPromise('/gitignore', { path: this.repoPath() });
+
+      return components
+        .create('texteditdialog', {
+          title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
+          content: res.content,
+        })
+        .show()
+        .closeThen((diag) => {
+          if (diag.result()) {
+            return this.server.putPromise('/gitignore', {
+              path: this.repoPath(),
+              data: diag.textAreaContent,
+            });
+          }
         });
+    } catch (e) {
+      // Not a git error but we are going to treat like one
+      programEvents.dispatch({
+        event: 'git-error',
+        data: {
+          command: `fs.write "${this.repoPath()}${ungit.config.fileSeparator}.gitignore"`,
+          error: e.message || e.errorSummary,
+          stdout: '',
+          stderr: e.stack,
+          repoPath: this.repoPath(),
+        },
       });
+    }
   }
 }

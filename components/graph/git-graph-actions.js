@@ -117,13 +117,16 @@ class Reset extends ActionBase {
         details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.',
       })
       .show()
-      .closeThen((diag) => {
+      .closeThen(async (diag) => {
         if (!diag.result()) return;
-        return this.server
-          .postPromise('/reset', { path: this.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
-          .then(() => {
-            context.node(remoteRef.node());
-          });
+
+        await this.server.postPromise('/reset', {
+          path: this.graph.repoPath(),
+          to: remoteRef.name,
+          mode: 'hard',
+        });
+
+        context.node(remoteRef.node());
       }).closePromise;
   }
 }
@@ -316,17 +319,19 @@ class Uncommit extends ActionBase {
     });
   }
 
-  perform() {
-    return this.server
-      .postPromise('/reset', { path: this.graph.repoPath(), to: 'HEAD^', mode: 'mixed' })
-      .then(() => {
-        let targetNode = this.node.belowNode;
-        while (targetNode && !targetNode.ancestorOfHEAD()) {
-          targetNode = targetNode.belowNode;
-        }
-        this.graph.HEADref().node(targetNode ? targetNode : null);
-        this.graph.checkedOutRef().node(targetNode ? targetNode : null);
-      });
+  async perform() {
+    await this.server.postPromise('/reset', {
+      path: this.graph.repoPath(),
+      to: 'HEAD^',
+      mode: 'mixed',
+    });
+
+    let targetNode = this.node.belowNode;
+    while (targetNode && !targetNode.ancestorOfHEAD()) {
+      targetNode = targetNode.belowNode;
+    }
+    this.graph.HEADref().node(targetNode ? targetNode : null);
+    this.graph.checkedOutRef().node(targetNode ? targetNode : null);
   }
 }
 
