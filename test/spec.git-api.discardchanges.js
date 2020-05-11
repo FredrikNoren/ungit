@@ -19,10 +19,11 @@ describe('git-api discardchanges', () => {
     const dir = await common.createSmallRepo(req);
     const testFile1 = 'test.txt';
 
-    const res = await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
+
+    await common.post(req, '/discardchanges', { path: dir, file: testFile1 });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -31,14 +32,13 @@ describe('git-api discardchanges', () => {
     const dir = await common.createSmallRepo(req);
     const testFile1 = 'test.txt';
 
-    const res = await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-      .then(() =>
-        common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
-      )
-      .then(() => common.post(req, '/testing/changefile', { file: path.join(dir, testFile1) }))
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
+
+    await common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] });
+    await common.post(req, '/testing/changefile', { file: path.join(dir, testFile1) });
+    await common.post(req, '/discardchanges', { path: dir, file: testFile1 });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -47,14 +47,13 @@ describe('git-api discardchanges', () => {
     const dir = await common.createSmallRepo(req);
     const testFile1 = 'test.txt';
 
-    const res = await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-      .then(() =>
-        common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
-      )
-      .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
+
+    await common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] });
+    await common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) });
+    await common.post(req, '/discardchanges', { path: dir, file: testFile1 });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -63,11 +62,12 @@ describe('git-api discardchanges', () => {
     const dir = await common.createSmallRepo(req);
     const testFile1 = 'test.txt';
 
-    const res = await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-      .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
+
+    await common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] });
+    await common.post(req, '/discardchanges', { path: dir, file: testFile1 });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -76,12 +76,13 @@ describe('git-api discardchanges', () => {
     const dir = await common.createSmallRepo(req);
     const testFile1 = 'test.txt';
 
-    const res = await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-      .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
-      .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile1) });
+
+    await common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] });
+    await common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) });
+    await common.post(req, '/discardchanges', { path: dir, file: testFile1 });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -91,27 +92,30 @@ describe('git-api discardchanges', () => {
     const submodulePath = 'subrepo';
     this.timeout(5000);
 
-    const dir = await common.createSmallRepo(req).then(async (dir) => {
-      const subrepoDir = await common.createSmallRepo(req);
+    const dir2 = await common.createSmallRepo(req);
+    const subrepoDir = await common.createSmallRepo(req);
 
-      await common.post(req, '/submodules/add', {
-        submoduleUrl: subrepoDir,
-        submodulePath: submodulePath,
-        path: dir,
-      });
-
-      return dir;
+    await common.post(req, '/submodules/add', {
+      submoduleUrl: subrepoDir,
+      submodulePath: submodulePath,
+      path: dir2,
     });
 
-    const res = await common
-      .post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] })
-      .then(() =>
-        common.post(req, '/testing/changefile', {
-          file: path.join(dir, submodulePath, testFile),
-        })
-      )
-      .then(() => common.post(req, '/discardchanges', { path: dir, file: submodulePath }))
-      .then(() => common.get(req, '/status', { path: dir }));
+    const dir = await dir2;
+
+    await common.post(req, '/commit', {
+      path: dir,
+      message: 'lol',
+      files: [{ name: '.gitmodules' }],
+    });
+
+    await common.post(req, '/testing/changefile', {
+      file: path.join(dir, submodulePath, testFile),
+    });
+
+    await common.post(req, '/discardchanges', { path: dir, file: submodulePath });
+
+    const res = await common.get(req, '/status', { path: dir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });

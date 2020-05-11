@@ -20,15 +20,15 @@ describe('git-api: test ignorefile call', () => {
     const dir = await common.createSmallRepo(req);
     const testFile = 'test.txt';
 
+    await fs.writeFile(path.join(dir, '.gitignore'), 'test git ignore file...');
+
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile) });
+
     // Create .gitignore file prior to append
-    await fs
-      .writeFile(path.join(dir, '.gitignore'), 'test git ignore file...')
-      .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
-      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-      .then(async () => {
-        const res = await common.get(req, '/status', { path: dir });
-        expect(Object.keys(res.files).toString()).to.be('.gitignore');
-      });
+    await common.post(req, '/ignorefile', { path: dir, file: testFile });
+
+    const res = await common.get(req, '/status', { path: dir });
+    expect(Object.keys(res.files).toString()).to.be('.gitignore');
 
     const data = await fs.readFile(path.join(dir, '.gitignore'));
     if (data.toString().indexOf(testFile) < 0) {
@@ -40,13 +40,11 @@ describe('git-api: test ignorefile call', () => {
     const dir = await common.createSmallRepo(req);
     const testFile = 'test.txt';
 
-    await common
-      .post(req, '/testing/createfile', { file: path.join(dir, testFile) })
-      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-      .then(async () => {
-        const res = await common.get(req, '/status', { path: dir });
-        expect(Object.keys(res.files).toString()).to.be('.gitignore');
-      });
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile) });
+
+    await common.post(req, '/ignorefile', { path: dir, file: testFile });
+    const res = await common.get(req, '/status', { path: dir });
+    expect(Object.keys(res.files).toString()).to.be('.gitignore');
 
     const data = await fs.readFile(path.join(dir, '.gitignore'));
     if (data.toString().indexOf(testFile) < 0) {
@@ -58,15 +56,15 @@ describe('git-api: test ignorefile call', () => {
     const dir = await common.createSmallRepo(req);
     const testFile = 'test.txt';
 
+    await fs.appendFile(path.join(dir, '.gitignore'), testFile.split('.')[0]);
+
+    await common.post(req, '/testing/createfile', { file: path.join(dir, testFile) });
+
     // add part of file name to gitignore
-    await fs
-      .appendFile(path.join(dir, '.gitignore'), testFile.split('.')[0])
-      .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
-      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-      .then(async () => {
-        const res = await common.get(req, '/status', { path: dir });
-        expect(Object.keys(res.files).toString()).to.be('.gitignore');
-      });
+    await common.post(req, '/ignorefile', { path: dir, file: testFile });
+
+    const res = await common.get(req, '/status', { path: dir });
+    expect(Object.keys(res.files).toString()).to.be('.gitignore');
 
     const data = await fs.readFile(path.join(dir, '.gitignore'));
     if (data.toString().indexOf(testFile) < 0) {

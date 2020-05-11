@@ -398,12 +398,12 @@ describe('git-api', () => {
   });
 
   it('test gitignore api endpoint', async () => {
-    const res = await common
-      .put(req, '/gitignore', { path: testDir, data: 'abc' })
-      .then(() => common.get(req, '/gitignore', { path: testDir }))
-      .then((res) => expect(res.content).to.be('abc'))
-      .then(() => common.put(req, '/gitignore', { path: testDir, data: '' }))
-      .then(() => common.get(req, '/gitignore', { path: testDir }));
+    await common.put(req, '/gitignore', { path: testDir, data: 'abc' });
+
+    const res2 = await common.get(req, '/gitignore', { path: testDir });
+    await expect(res2.content).to.be('abc');
+    await common.put(req, '/gitignore', { path: testDir, data: '' });
+    const res = await common.get(req, '/gitignore', { path: testDir });
 
     return expect(res.content).to.be('');
   });

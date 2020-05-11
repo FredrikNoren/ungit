@@ -89,10 +89,10 @@ class UngitPlugin {
           return result;
         }
       })
-      .then((result) => {
+      .then((result2) => {
         if (exports.css) {
           return (
-            result +
+            result2 +
             assureArray(exports.css)
               .map((cssSource) => {
                 return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
@@ -100,7 +100,7 @@ class UngitPlugin {
               .join('\n')
           );
         } else {
-          return result;
+          return result2;
         }
       });
 

@@ -18,12 +18,10 @@ describe('git-api submodule', function () {
   let testDirMain, testDirSecondary;
 
   before(async () => {
-    const dir = await common
-      .createSmallRepo(req)
-      .then((dir) => {
-        testDirMain = dir;
-      })
-      .then(() => common.createSmallRepo(req));
+    const dir2 = await common.createSmallRepo(req);
+
+    testDirMain = dir2;
+    const dir = await common.createSmallRepo(req);
 
     testDirSecondary = dir;
   });

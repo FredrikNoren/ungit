@@ -61,9 +61,9 @@ exports.createSmallRepo = async (req) => {
   const dir = await this.initRepo(req);
   const testFile = 'smalltestfile.txt';
 
-  await this.post(req, '/testing/createfile', { file: path.join(dir, testFile) }).then(() =>
-    this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] })
-  );
+  await this.post(req, '/testing/createfile', { file: path.join(dir, testFile) });
+
+  await this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] });
 
   return dir;
 };

@@ -6,12 +6,11 @@ describe('cache', () => {
     let i = 0;
     const key = cache.registerFunc(() => i++);
 
-    const val = await cache
-      .resolveFunc(key)
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => cache.resolveFunc(key));
+    const val2 = await cache.resolveFunc(key);
+
+    expect(val2).to.be(0);
+
+    const val = await cache.resolveFunc(key);
 
     return expect(val).to.be(0);
   });
@@ -48,15 +47,12 @@ describe('cache', () => {
     let i = 0;
     const key = cache.registerFunc(() => i++);
 
-    const val = await cache
-      .resolveFunc(key)
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => {
-        cache.invalidateFunc(key);
-        return cache.resolveFunc(key);
-      });
+    const val2 = await cache.resolveFunc(key);
+
+    expect(val2).to.be(0);
+    cache.invalidateFunc(key);
+
+    const val = await cache.resolveFunc(key);
 
     expect(val).to.be(1);
   });
@@ -69,27 +65,18 @@ describe('cache', () => {
     cache.registerFunc(key1, func);
     cache.registerFunc(key2, func);
 
-    const val = await cache
-      .resolveFunc(key1)
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => cache.resolveFunc(key1))
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => cache.resolveFunc(key2))
-      .then((val) => {
-        expect(val).to.be(1);
-      })
-      .then(() => {
-        cache.invalidateFunc(key1);
-        return cache.resolveFunc(key1);
-      })
-      .then((val) => {
-        expect(val).to.be(2);
-      })
-      .then(() => cache.resolveFunc(key2));
+    const val5 = await cache.resolveFunc(key1);
+
+    expect(val5).to.be(0);
+    const val4 = await cache.resolveFunc(key1);
+    expect(val4).to.be(0);
+    const val3 = await cache.resolveFunc(key2);
+    expect(val3).to.be(1);
+    cache.invalidateFunc(key1);
+    const val2 = await cache.resolveFunc(key1);
+    expect(val2).to.be(2);
+
+    const val = await cache.resolveFunc(key2);
 
     expect(val).to.be(1);
   });
@@ -100,27 +87,18 @@ describe('cache', () => {
     const key = cache.registerFunc(1, null, func);
     this.timeout(3000);
 
-    const val = await cache
-      .resolveFunc(key)
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
-      .then(() => {
-        return cache.resolveFunc(key);
-      })
-      .then((val) => {
-        expect(val).to.be(0);
-      })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 1000)))
-      .then(() => {
-        return cache.resolveFunc(key);
-      })
-      .then((val) => {
-        expect(val).to.be(1);
-      })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
-      .then(() => cache.resolveFunc(key));
+    const val4 = await cache.resolveFunc(key);
+
+    expect(val4).to.be(0);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const val3 = await cache.resolveFunc(key);
+    expect(val3).to.be(0);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const val2 = await cache.resolveFunc(key);
+    expect(val2).to.be(1);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const val = await cache.resolveFunc(key);
 
     expect(val).to.be(1);
   });

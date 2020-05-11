@@ -294,13 +294,12 @@ const loadPlugins = async (plugins, pluginBasePath) => {
 const pluginsCacheKey = cache.registerFunc(async () => {
   const plugins = [];
 
-  await loadPlugins(plugins, path.join(__dirname, '..', 'components')).then(async () => {
-    try {
-      await fs.access(config.pluginDirectory);
+  await loadPlugins(plugins, path.join(__dirname, '..', 'components'));
+  try {
+    await fs.access(config.pluginDirectory);
 
-      return loadPlugins(plugins, config.pluginDirectory);
-    } catch (error) {}
-  });
+    return loadPlugins(plugins, config.pluginDirectory);
+  } catch (error) {}
 
   return plugins;
 });

@@ -19,16 +19,12 @@ describe('git-api remote', function () {
   this.timeout(4000);
 
   before('creating test dirs should work', async () => {
-    const dir = await common
-      .post(req, '/testing/createtempdir')
-      .then((dir) => {
-        testDirLocal1 = dir.path;
-      })
-      .then(() => common.post(req, '/testing/createtempdir'))
-      .then((dir) => {
-        testDirLocal2 = dir.path;
-      })
-      .then(() => common.post(req, '/testing/createtempdir'));
+    const dir3 = await common.post(req, '/testing/createtempdir');
+
+    testDirLocal1 = dir3.path;
+    const dir2 = await common.post(req, '/testing/createtempdir');
+    testDirLocal2 = dir2.path;
+    const dir = await common.post(req, '/testing/createtempdir');
 
     testDirRemote = dir.path;
   });
@@ -114,16 +110,15 @@ describe('git-api remote', function () {
   it('creating and pushing a commit in "local1" repo should work', async () => {
     const testFile = path.join(testDirLocal1, 'testfile2.txt');
 
-    await common
-      .post(req, '/testing/createfile', { file: testFile })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
-      .then(() =>
-        common.post(req, '/commit', {
-          path: testDirLocal1,
-          message: 'Commit2',
-          files: [{ name: testFile }],
-        })
-      );
+    await common.post(req, '/testing/createfile', { file: testFile });
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    await common.post(req, '/commit', {
+      path: testDirLocal1,
+      message: 'Commit2',
+      files: [{ name: testFile }],
+    });
 
     return common.post(req, '/push', { path: testDirLocal1, remote: 'origin' });
   });
@@ -170,9 +165,9 @@ describe('git-api remote', function () {
   it('creating a commit in "local2" repo should work', async () => {
     const testFile = path.join(testDirLocal2, 'testfile3.txt');
 
-    await common
-      .post(req, '/testing/createfile', { file: testFile })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 500)));
+    await common.post(req, '/testing/createfile', { file: testFile });
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     return common.post(req, '/commit', {
       path: testDirLocal2,

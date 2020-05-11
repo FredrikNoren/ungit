@@ -15,25 +15,22 @@ let testDir;
 const req = request(app);
 
 const testPatch = async (req, testDir, testFileName, contentsToPatch, files) => {
+  await common.post(req, '/testing/createfile', {
+    file: path.join(testDir, testFileName),
+    content: contentsToPatch[0],
+  });
+
+  await common.post(req, '/commit', {
+    path: testDir,
+    message: `a commit for ${testFileName}`,
+    files: [{ name: testFileName }],
+  });
+
   // testDir = '/tmp/testdir';
-  await common
-    .post(req, '/testing/createfile', {
-      file: path.join(testDir, testFileName),
-      content: contentsToPatch[0],
-    })
-    .then(() =>
-      common.post(req, '/commit', {
-        path: testDir,
-        message: `a commit for ${testFileName}`,
-        files: [{ name: testFileName }],
-      })
-    )
-    .then(() =>
-      common.post(req, '/testing/changefile', {
-        file: path.join(testDir, testFileName),
-        content: contentsToPatch[1],
-      })
-    );
+  await common.post(req, '/testing/changefile', {
+    file: path.join(testDir, testFileName),
+    content: contentsToPatch[1],
+  });
 
   return common.post(req, '/commit', {
     path: testDir,

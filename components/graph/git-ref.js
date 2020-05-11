@@ -247,29 +247,26 @@ class RefViewModel extends Selectable {
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 
     try {
-      await Promise.resolve()
-        .then(() => {
-          if (isRemote && !isLocalCurrent) {
-            return this.server.postPromise('/branches', {
-              path: this.graph.repoPath(),
-              name: this.refName,
-              sha1: this.name,
-              force: true,
-            });
-          }
-        })
-        .then(() =>
-          this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName })
-        )
-        .then(() => {
-          if (isRemote && isLocalCurrent) {
-            return this.server.postPromise('/reset', {
-              path: this.graph.repoPath(),
-              to: this.name,
-              mode: 'hard',
-            });
-          }
+      await Promise.resolve();
+      if (isRemote && !isLocalCurrent) {
+        return this.server.postPromise('/branches', {
+          path: this.graph.repoPath(),
+          name: this.refName,
+          sha1: this.name,
+          force: true,
         });
+      }
+      await this.server.postPromise('/checkout', {
+        path: this.graph.repoPath(),
+        name: this.refName,
+      });
+      if (isRemote && isLocalCurrent) {
+        return this.server.postPromise('/reset', {
+          path: this.graph.repoPath(),
+          to: this.name,
+          mode: 'hard',
+        });
+      }
 
       this.graph.HEADref().node(this.node());
     } catch (err) {

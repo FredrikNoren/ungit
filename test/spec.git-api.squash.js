@@ -35,16 +35,15 @@ describe('git-api conflict rebase', function () {
   });
 
   it('create some commits', async () => {
-    await common
-      .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() =>
-        common.post(req, '/commit', {
-          path: testDir,
-          message: `a commit for ${testFile1}`,
-          files: [{ name: testFile1 }],
-        })
-      )
-      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }));
+    await common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) });
+
+    await common.post(req, '/commit', {
+      path: testDir,
+      message: `a commit for ${testFile1}`,
+      files: [{ name: testFile1 }],
+    });
+
+    await common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) });
 
     return common.post(req, '/commit', {
       path: testDir,
@@ -58,17 +57,17 @@ describe('git-api conflict rebase', function () {
   });
 
   it('squash 2 commits to 1', async () => {
-    const res = await common
-      .post(req, '/squash', { path: testDir, target: 'master' })
-      .then(() => common.get(req, '/status', { path: testDir }));
+    await common.post(req, '/squash', { path: testDir, target: 'master' });
+
+    const res = await common.get(req, '/status', { path: testDir });
 
     return expect(Object.keys(res.files).length).to.be(2);
   });
 
   it('discard all', async () => {
-    const res = await common
-      .post(req, '/discardchanges', { path: testDir, all: true })
-      .then(() => common.get(req, '/status', { path: testDir }));
+    await common.post(req, '/discardchanges', { path: testDir, all: true });
+
+    const res = await common.get(req, '/status', { path: testDir });
 
     return expect(Object.keys(res.files).length).to.be(0);
   });
@@ -84,9 +83,9 @@ describe('git-api conflict rebase', function () {
   });
 
   it('squash 2 commits to 1 with conflict', async () => {
-    const res = await common
-      .post(req, '/squash', { path: testDir, target: 'master' })
-      .then(() => common.get(req, '/status', { path: testDir }));
+    await common.post(req, '/squash', { path: testDir, target: 'master' });
+
+    const res = await common.get(req, '/status', { path: testDir });
 
     expect(res.inConflict).to.be(true);
     expect(Object.keys(res.files).length).to.be(2);

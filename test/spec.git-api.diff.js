@@ -16,10 +16,10 @@ describe('git-api diff', () => {
   let testDir, testBareDir;
 
   before(async () => {
-    const dir = await common
-      .initRepo(req)
-      .then((dir) => (testDir = dir))
-      .then(() => common.initRepo(req, { bare: true }));
+    const dir2 = await common.initRepo(req);
+
+    testDir = dir2;
+    const dir = await common.initRepo(req, { bare: true });
 
     return (testBareDir = dir);
   });
@@ -81,9 +81,12 @@ describe('git-api diff', () => {
   });
 
   it('diff on first commit should work', async () => {
-    const res = await common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes.length).to.be(2);
-      return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(2);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile,
+      sha1: res2.nodes[1].sha1,
     });
 
     for (let i = 0; i < content.length; i++) {
@@ -126,9 +129,12 @@ describe('git-api diff', () => {
   });
 
   it('diff on file commit should work if file is changing', async () => {
-    const res = await common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes.length).to.be(2);
-      return common.get(req, '/diff', { path: testDir, file: testFile, sha1: res.nodes[1].sha1 });
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(2);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile,
+      sha1: res2.nodes[1].sha1,
     });
 
     expect(res.indexOf('diff --git a/afile.txt b/afile.txt')).to.be.above(-1);
@@ -182,14 +188,13 @@ describe('git-api diff', () => {
   });
 
   it('diff on commit with renamed and modified file should work', async () => {
-    const res = await common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes.length).to.be(3);
-      return common.get(req, '/diff', {
-        path: testDir,
-        file: testFile2,
-        oldFile: testFile,
-        sha1: res.nodes[0].sha1,
-      });
+    const res2 = await common.get(req, '/gitlog', { path: testDir });
+    expect(res2.nodes.length).to.be(3);
+    const res = await common.get(req, '/diff', {
+      path: testDir,
+      file: testFile2,
+      oldFile: testFile,
+      sha1: res2.nodes[0].sha1,
     });
 
     for (let i = 0; i < content.length; i++) {
@@ -229,11 +234,11 @@ describe('git-api diff', () => {
   });
 
   it('diff on bare repository file should work', async () => {
+    await common.post(req, '/remotes/barerepository', { path: testDir, url: testBareDir });
+
+    await common.post(req, '/push', { path: testDir, remote: 'barerepository' });
     // first add remote and push all commits
-    const res = await common
-      .post(req, '/remotes/barerepository', { path: testDir, url: testBareDir })
-      .then(() => common.post(req, '/push', { path: testDir, remote: 'barerepository' }))
-      .then(() => common.get(req, '/gitlog', { path: testDir }));
+    const res = await common.get(req, '/gitlog', { path: testDir });
 
     // find a commit which contains the testFile
     const commit = res.nodes.filter((commit) =>

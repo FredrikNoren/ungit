@@ -19,12 +19,10 @@ describe('git-api branching', function () {
   this.timeout(8000);
 
   before(async () => {
-    const res = await common
-      .initRepo(req)
-      .then((res) => {
-        testDir = res;
-      })
-      .then(() => common.get(req, '/gitconfig', { path: testDir }));
+    const res2 = await common.initRepo(req);
+
+    testDir = res2;
+    const res = await common.get(req, '/gitconfig', { path: testDir });
 
     gitConfig = res;
   });

@@ -22,15 +22,16 @@ describe('git-api conflict checkout no auto stash', function () {
     const dir = await common.initRepo(req);
     testDir = dir;
 
-    await common
-      .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() =>
-        common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] })
-      )
-      .then(() =>
-        common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' })
-      )
-      .then(() => common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) }));
+    await common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) });
+
+    await common.post(req, '/commit', {
+      path: testDir,
+      message: 'a',
+      files: [{ name: testFile1 }],
+    });
+    await common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' });
+
+    await common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) });
 
     return common.post(req, '/commit', {
       path: testDir,
