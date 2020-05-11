@@ -9,6 +9,7 @@
     "test": "grunt test",
     "unittest": "grunt unittest",
     "clicktest": "grunt clicktest",
+    "format": "prettier --write . bin/*",
     "build": "grunt",
     "watch": "grunt watch",
     "package": "grunt package",
@@ -76,7 +77,6 @@
     "grunt-contrib-jshint": "~2.1.0",
     "grunt-contrib-less": "~2.0.0",
     "grunt-contrib-watch": "~1.1.0",
-    "grunt-lineending": "~1.0.0",
     "grunt-mocha-istanbul": "~5.0.2",
     "grunt-mocha-test": "~0.13.3",
     "grunt-release": "~0.14.0",
@@ -84,6 +84,7 @@
     "istanbul": "~0.4.5",
     "mocha": "~7.1.2",
     "pkg-versions": "~2.1.0",
+    "prettier": "^2.0.5",
     "puppeteer": "~3.0.4",
     "superagent": "~5.2.2",
     "supertest": "~4.0.2"

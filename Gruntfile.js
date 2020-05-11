@@ -36,18 +36,6 @@ module.exports = (grunt) => {
         },
       }
     },
-    lineending: {
-      // Debian won't accept bin files with the wrong line ending
-      production: {
-        options: {
-          eol: 'lf'
-        },
-        files: {
-          './bin/ungit': ['./bin/ungit'],
-          './bin/credentials-helper': ['./bin/credentials-helper']
-        }
-      },
-    },
     release: {
       options: {
         commitMessage: 'Release <%= version %>',
@@ -79,6 +67,7 @@ module.exports = (grunt) => {
         undef: true, // check for usage of undefined constiables
         indent: 2,
         esversion: 6,
+        laxbreak: true,
         '-W033': true, // ignore Missing semicolon
         '-W041': true, // ignore Use '===' to compare with '0'
         '-W065': true, // ignore Missing radix parameter
@@ -187,6 +176,29 @@ module.exports = (grunt) => {
       }
     }
   });
+
+  grunt.registerTask(
+    'checkPrettier',
+    'Verify that all files are correctly formatted.',
+    function () {
+      const done = this.async();
+      childProcess.exec('npx prettier -l . bin/*', (err, stdout, stderr) => {
+        const files = stdout.trim();
+        if (files) {
+          return done(
+            new Error(
+              `Files with incorrect formatting (run "npm run format" and consider a Prettier plugin for your editor):\n${files}\n`
+            )
+          );
+        }
+        if (err) {
+          console.error(stderr);
+          return done(err);
+        }
+        done();
+      });
+    }
+  );
 
   grunt.registerTask('browserify-common', '', function() {
     const done = this.async();
@@ -358,7 +370,6 @@ module.exports = (grunt) => {
 
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-lineending');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -368,7 +379,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
-  grunt.registerTask('default', ['less:production', 'jshint', 'browserify-common', 'browserify-components', 'lineending:production', 'copy:main']);
+  grunt.registerTask('default', ['checkPrettier', 'less:production', 'jshint', 'browserify-common', 'browserify-components', 'copy:main']);
 
   // Run tests without compile (use watcher or manually build)
   grunt.registerTask('unittest', ['mochaTest:unit']);
