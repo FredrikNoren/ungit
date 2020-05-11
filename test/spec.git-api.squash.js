@@ -23,10 +23,9 @@ const testFile2 = 'testFile2.txt';
 describe('git-api conflict rebase', function () {
   this.timeout(8000);
 
-  before(() => {
-    return common.createSmallRepo(req).then((dir) => {
-      testDir = dir;
-    });
+  before(async () => {
+    const dir = await common.createSmallRepo(req);
+    testDir = dir;
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -35,8 +34,8 @@ describe('git-api conflict rebase', function () {
     return common.post(req, '/branches', { path: testDir, name: rootBranch, startPoint: 'master' });
   });
 
-  it('create some commits', () => {
-    return common
+  it('create some commits', async () => {
+    await common
       .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
       .then(() =>
         common.post(req, '/commit', {
@@ -45,53 +44,51 @@ describe('git-api conflict rebase', function () {
           files: [{ name: testFile1 }],
         })
       )
-      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }))
-      .then(() =>
-        common.post(req, '/commit', {
-          path: testDir,
-          message: `a commit for ${testFile2}`,
-          files: [{ name: testFile2 }],
-        })
-      );
+      .then(() => common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) }));
+
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: `a commit for ${testFile2}`,
+      files: [{ name: testFile2 }],
+    });
   });
 
   it('checkout master', () => {
     return common.post(req, '/checkout', { path: testDir, name: rootBranch });
   });
 
-  it('squash 2 commits to 1', () => {
-    return common
+  it('squash 2 commits to 1', async () => {
+    const res = await common
       .post(req, '/squash', { path: testDir, target: 'master' })
-      .then(() => common.get(req, '/status', { path: testDir }))
-      .then((res) => expect(Object.keys(res.files).length).to.be(2));
+      .then(() => common.get(req, '/status', { path: testDir }));
+
+    return expect(Object.keys(res.files).length).to.be(2);
   });
 
-  it('discard all', () => {
-    return common
+  it('discard all', async () => {
+    const res = await common
       .post(req, '/discardchanges', { path: testDir, all: true })
-      .then(() => common.get(req, '/status', { path: testDir }))
-      .then((res) => expect(Object.keys(res.files).length).to.be(0));
+      .then(() => common.get(req, '/status', { path: testDir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('making conflicting commit', () => {
-    return common
-      .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() =>
-        common.post(req, '/commit', {
-          path: testDir,
-          message: `a 2nd commit for ${testFile1}`,
-          files: [{ name: testFile1 }],
-        })
-      );
+  it('making conflicting commit', async () => {
+    await common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) });
+
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: `a 2nd commit for ${testFile1}`,
+      files: [{ name: testFile1 }],
+    });
   });
 
-  it('squash 2 commits to 1 with conflict', () => {
-    return common
+  it('squash 2 commits to 1 with conflict', async () => {
+    const res = await common
       .post(req, '/squash', { path: testDir, target: 'master' })
-      .then(() => common.get(req, '/status', { path: testDir }))
-      .then((res) => {
-        expect(res.inConflict).to.be(true);
-        expect(Object.keys(res.files).length).to.be(2);
-      });
+      .then(() => common.get(req, '/status', { path: testDir }));
+
+    expect(res.inConflict).to.be(true);
+    expect(Object.keys(res.files).length).to.be(2);
   });
 });

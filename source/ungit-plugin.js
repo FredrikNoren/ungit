@@ -39,18 +39,17 @@ class UngitPlugin {
     env.app.use(`/plugins/${this.name}`, express.static(this.path));
   }
 
-  compile() {
+  async compile() {
     winston.info(`Compiling plugin ${this.path}`);
     const exports = this.manifest.exports || {};
 
-    return Promise.resolve()
+    const result = await Promise.resolve()
       .then(() => {
         if (exports.raw) {
           return Promise.all(
-            assureArray(exports.raw).map((rawSource) => {
-              return fs.readFile(path.join(this.path, rawSource)).then((text) => {
-                return text + '\n';
-              });
+            assureArray(exports.raw).map(async (rawSource) => {
+              const text = await fs.readFile(path.join(this.path, rawSource));
+              return text + '\n';
             })
           ).then((result) => {
             return result.join('\n');
@@ -76,12 +75,12 @@ class UngitPlugin {
       .then((result) => {
         if (exports.knockoutTemplates) {
           return Promise.all(
-            Object.keys(exports.knockoutTemplates).map((templateName) => {
-              return fs
-                .readFile(path.join(this.path, exports.knockoutTemplates[templateName]))
-                .then((text) => {
-                  return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
-                });
+            Object.keys(exports.knockoutTemplates).map(async (templateName) => {
+              const text = await fs.readFile(
+                path.join(this.path, exports.knockoutTemplates[templateName])
+              );
+
+              return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
             })
           ).then((templates) => {
             return result + templates.join('\n');
@@ -103,10 +102,9 @@ class UngitPlugin {
         } else {
           return result;
         }
-      })
-      .then((result) => {
-        return `<!-- Component: ${this.name} -->\n${result}`;
       });
+
+    return `<!-- Component: ${this.name} -->\n${result}`;
   }
 }
 module.exports = UngitPlugin;

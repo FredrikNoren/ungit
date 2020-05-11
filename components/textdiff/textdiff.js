@@ -110,81 +110,78 @@ class TextDiffViewModel {
     if (this.isShowingDiffs()) this.render();
   }
 
-  getDiffJson() {
-    return this.server
-      .getPromise('/diff', this.getDiffArguments())
-      .then((diffs) => {
-        if (typeof diffs !== 'string') {
-          // Invalid value means there is no changes, show dummy diff without any changes
-          diffs = `diff --git a/${this.filename} b/${this.filename}
-                  index aaaaaaaa..bbbbbbbb 111111
-                  --- a/${this.filename}
-                  +++ b/${this.filename}`;
-        }
-        this.diffJson = diff2html.parse(diffs);
-      })
-      .catch((err) => {
-        // The file existed before but has been removed, but we're trying to get a diff for it
-        // Most likely it will just disappear with the next refresh of the staging area
-        // so we just ignore the error here
-        if (err.errorCode != 'no-such-file') this.server.unhandledRejection(err);
-      });
+  async getDiffJson() {
+    try {
+      let diffs = await this.server.getPromise('/diff', this.getDiffArguments());
+
+      if (typeof diffs !== 'string') {
+        // Invalid value means there is no changes, show dummy diff without any changes
+        diffs = `diff --git a/${this.filename} b/${this.filename}
+                index aaaaaaaa..bbbbbbbb 111111
+                --- a/${this.filename}
+                +++ b/${this.filename}`;
+      }
+      this.diffJson = diff2html.parse(diffs);
+    } catch (err) {
+      // The file existed before but has been removed, but we're trying to get a diff for it
+      // Most likely it will just disappear with the next refresh of the staging area
+      // so we just ignore the error here
+      if (err.errorCode != 'no-such-file') this.server.unhandledRejection(err);
+    }
   }
 
-  render() {
-    return (!this.diffJson ? this.getDiffJson() : Promise.resolve()).then(() => {
-      if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
+  async render() {
+    (await !this.diffJson) ? this.getDiffJson() : Promise.resolve();
+    if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
-      if (!this.diffJson[0].allBlocks) {
-        this.diffJson[0].allBlocks = this.diffJson[0].blocks;
+    if (!this.diffJson[0].allBlocks) {
+      this.diffJson[0].allBlocks = this.diffJson[0].blocks;
+    }
+
+    let currentLoadCount = Math.max(this.loadCount, loadLimit);
+    let lineCount = 0;
+    let loadCount = 0;
+    this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
+      const length = block.lines.length;
+      const remaining = currentLoadCount - lineCount;
+      if (remaining > 0) {
+        loadCount += length;
+        blocks.push(block);
       }
+      lineCount += length;
+      return blocks;
+    }, []);
 
-      let currentLoadCount = Math.max(this.loadCount, loadLimit);
-      let lineCount = 0;
-      let loadCount = 0;
-      this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
-        const length = block.lines.length;
-        const remaining = currentLoadCount - lineCount;
-        if (remaining > 0) {
-          loadCount += length;
-          blocks.push(block);
-        }
-        lineCount += length;
-        return blocks;
-      }, []);
+    this.loadCount = loadCount;
+    this.hasMore(lineCount > loadCount);
 
-      this.loadCount = loadCount;
-      this.hasMore(lineCount > loadCount);
-
-      let html = diff2html.html(this.diffJson, {
-        outputFormat:
-          this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
-        drawFileList: false,
-      });
-
-      this.numberOfSelectedPatchLines = 0;
-      let index = 0;
-
-      // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
-      // data bind at getPatchCheckBox that is rendered with "html" binding.
-      // which is reason why manually updating the html content and refreshing kobinding to have it render...
-      if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, (match, capture) => {
-          if (this.patchLineList()[index] === undefined) {
-            this.patchLineList()[index] = true;
-          }
-
-          return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
-        });
-      }
-
-      if (html !== this.htmlSrc) {
-        // diff has changed since last we displayed and need refresh
-        this.htmlSrc = html;
-        this.isParsed(false);
-        this.isParsed(true);
-      }
+    let html = diff2html.html(this.diffJson, {
+      outputFormat: this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
+      drawFileList: false,
     });
+
+    this.numberOfSelectedPatchLines = 0;
+    let index = 0;
+
+    // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
+    // data bind at getPatchCheckBox that is rendered with "html" binding.
+    // which is reason why manually updating the html content and refreshing kobinding to have it render...
+    if (this.patchLineList) {
+      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, (match, capture) => {
+        if (this.patchLineList()[index] === undefined) {
+          this.patchLineList()[index] = true;
+        }
+
+        return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+      });
+    }
+
+    if (html !== this.htmlSrc) {
+      // diff has changed since last we displayed and need refresh
+      this.htmlSrc = html;
+      this.isParsed(false);
+      this.isParsed(true);
+    }
   }
 
   loadMore() {

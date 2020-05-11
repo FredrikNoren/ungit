@@ -16,73 +16,61 @@ const req = request(app);
 describe('git-api: test ignorefile call', () => {
   after(() => common.post(req, '/testing/cleanup'));
 
-  it('Add a file to .gitignore file through api call', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile = 'test.txt';
+  it('Add a file to .gitignore file through api call', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile = 'test.txt';
 
-      // Create .gitignore file prior to append
-      return fs
-        .writeFile(path.join(dir, '.gitignore'), 'test git ignore file...')
-        .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
-        .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-        .then(() => {
-          return common.get(req, '/status', { path: dir }).then((res) => {
-            expect(Object.keys(res.files).toString()).to.be('.gitignore');
-          });
-        })
-        .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
-              throw new Error('Test file is not added to the .gitignore file.');
-            }
-          });
-        });
-    });
+    // Create .gitignore file prior to append
+    await fs
+      .writeFile(path.join(dir, '.gitignore'), 'test git ignore file...')
+      .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
+      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
+      .then(async () => {
+        const res = await common.get(req, '/status', { path: dir });
+        expect(Object.keys(res.files).toString()).to.be('.gitignore');
+      });
+
+    const data = await fs.readFile(path.join(dir, '.gitignore'));
+    if (data.toString().indexOf(testFile) < 0) {
+      throw new Error('Test file is not added to the .gitignore file.');
+    }
   });
 
-  it('Add a file to .gitignore file through api call when .gitignore is missing', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile = 'test.txt';
+  it('Add a file to .gitignore file through api call when .gitignore is missing', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile = 'test.txt';
 
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile) })
-        .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-        .then(() => {
-          return common.get(req, '/status', { path: dir }).then((res) => {
-            expect(Object.keys(res.files).toString()).to.be('.gitignore');
-          });
-        })
-        .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
-              throw new Error('Test file is not added to the .gitignore file.');
-            }
-          });
-        });
-    });
+    await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile) })
+      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
+      .then(async () => {
+        const res = await common.get(req, '/status', { path: dir });
+        expect(Object.keys(res.files).toString()).to.be('.gitignore');
+      });
+
+    const data = await fs.readFile(path.join(dir, '.gitignore'));
+    if (data.toString().indexOf(testFile) < 0) {
+      throw new Error('Test file is not added to the .gitignore file.');
+    }
   });
 
-  it('Attempt to add a file where similar name alread exist in .gitignore through api call', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile = 'test.txt';
+  it('Attempt to add a file where similar name alread exist in .gitignore through api call', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile = 'test.txt';
 
-      // add part of file name to gitignore
-      return fs
-        .appendFile(path.join(dir, '.gitignore'), testFile.split('.')[0])
-        .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
-        .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
-        .then(() => {
-          return common.get(req, '/status', { path: dir }).then((res) => {
-            expect(Object.keys(res.files).toString()).to.be('.gitignore');
-          });
-        })
-        .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
-              throw new Error('Test file is not added to the .gitignore file.');
-            }
-          });
-        });
-    });
+    // add part of file name to gitignore
+    await fs
+      .appendFile(path.join(dir, '.gitignore'), testFile.split('.')[0])
+      .then(() => common.post(req, '/testing/createfile', { file: path.join(dir, testFile) }))
+      .then(() => common.post(req, '/ignorefile', { path: dir, file: testFile }))
+      .then(async () => {
+        const res = await common.get(req, '/status', { path: dir });
+        expect(Object.keys(res.files).toString()).to.be('.gitignore');
+      });
+
+    const data = await fs.readFile(path.join(dir, '.gitignore'));
+    if (data.toString().indexOf(testFile) < 0) {
+      throw new Error('Test file is not added to the .gitignore file.');
+    }
   });
 });

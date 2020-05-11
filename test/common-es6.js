@@ -49,23 +49,23 @@ exports.post = this.makeRequest.bind(this, 'POST');
 exports.delete = this.makeRequest.bind(this, 'DELETE');
 exports.put = this.makeRequest.bind(this, 'PUT');
 
-exports.initRepo = (req, config) => {
+exports.initRepo = async (req, config) => {
   config = config || {};
-  return this.post(req, '/testing/createtempdir', config.path).then((res) => {
-    expect(res.path).to.be.ok();
-    return this.post(req, '/init', { path: res.path, bare: !!config.bare }).then(() => res.path);
-  });
+  const res = await this.post(req, '/testing/createtempdir', config.path);
+  expect(res.path).to.be.ok();
+  await this.post(req, '/init', { path: res.path, bare: !!config.bare });
+  return res.path;
 };
 
-exports.createSmallRepo = (req) => {
-  return this.initRepo(req).then((dir) => {
-    const testFile = 'smalltestfile.txt';
-    return this.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
-      .then(() =>
-        this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] })
-      )
-      .then(() => dir);
-  });
+exports.createSmallRepo = async (req) => {
+  const dir = await this.initRepo(req);
+  const testFile = 'smalltestfile.txt';
+
+  await this.post(req, '/testing/createfile', { file: path.join(dir, testFile) }).then(() =>
+    this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] })
+  );
+
+  return dir;
 };
 
 // Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.

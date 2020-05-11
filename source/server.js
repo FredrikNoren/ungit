@@ -199,21 +199,20 @@ if (config.authentication) {
   };
 }
 
-const indexHtmlCacheKey = cache.registerFunc(() => {
-  return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
-    return fs.readFile(__dirname + '/../public/index.html').then((data) => {
-      return Promise.all(
-        Object.values(plugins).map((plugin) => {
-          return plugin.compile();
-        })
-      ).then((results) => {
-        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
-        data = data.replace(/__ROOT_PATH__/g, config.rootPath);
+const indexHtmlCacheKey = cache.registerFunc(async () => {
+  const plugins = await cache.resolveFunc(pluginsCacheKey);
+  let data = await fs.readFile(__dirname + '/../public/index.html');
 
-        return data;
-      });
-    });
-  });
+  const results = await Promise.all(
+    Object.values(plugins).map((plugin) => {
+      return plugin.compile();
+    })
+  );
+
+  data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
+  data = data.replace(/__ROOT_PATH__/g, config.rootPath);
+
+  return data;
 });
 
 app.get('/', (req, res) => {
@@ -262,51 +261,48 @@ const apiEnvironment = {
 gitApi.registerApi(apiEnvironment);
 
 // Init plugins
-const loadPlugins = (plugins, pluginBasePath) => {
-  return fs.readdir(pluginBasePath, { withFileTypes: true }).then((files) => {
-    return Promise.all(
-      files.map((pluginDir) => {
-        // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
-        if (!pluginDir.isDirectory()) {
+const loadPlugins = async (plugins, pluginBasePath) => {
+  const files = await fs.readdir(pluginBasePath, { withFileTypes: true });
+  return Promise.all(
+    files.map(async (pluginDir) => {
+      // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
+      if (!pluginDir.isDirectory()) {
+        return;
+      }
+      const pluginPath = path.join(pluginBasePath, pluginDir.name);
+
+      try {
+        await fs.access(path.join(pluginPath, 'ungit-plugin.json'));
+
+        winston.info('Loading plugin: ' + pluginPath);
+        const plugin = new UngitPlugin({
+          dir: pluginDir.name,
+          httpBasePath: 'plugins/' + pluginDir.name,
+          path: pluginPath,
+        });
+        if (plugin.manifest.disabled || plugin.config.disabled) {
+          winston.info('Plugin disabled: ' + pluginDir.name);
           return;
         }
-        const pluginPath = path.join(pluginBasePath, pluginDir.name);
-        return fs
-          .access(path.join(pluginPath, 'ungit-plugin.json'))
-          .then(() => {
-            winston.info('Loading plugin: ' + pluginPath);
-            const plugin = new UngitPlugin({
-              dir: pluginDir.name,
-              httpBasePath: 'plugins/' + pluginDir.name,
-              path: pluginPath,
-            });
-            if (plugin.manifest.disabled || plugin.config.disabled) {
-              winston.info('Plugin disabled: ' + pluginDir.name);
-              return;
-            }
-            plugin.init(apiEnvironment);
-            plugins.push(plugin);
-            winston.info('Plugin loaded: ' + pluginDir.name);
-          })
-          .catch(() => {
-            /* ignore */
-          });
-      })
-    );
-  });
-};
-const pluginsCacheKey = cache.registerFunc(() => {
-  const plugins = [];
-  return loadPlugins(plugins, path.join(__dirname, '..', 'components'))
-    .then(() => {
-      return fs
-        .access(config.pluginDirectory)
-        .then(() => loadPlugins(plugins, config.pluginDirectory))
-        .catch(() => {
-          /* ignore */
-        });
+        plugin.init(apiEnvironment);
+        plugins.push(plugin);
+        winston.info('Plugin loaded: ' + pluginDir.name);
+      } catch (error) {}
     })
-    .then(() => plugins);
+  );
+};
+const pluginsCacheKey = cache.registerFunc(async () => {
+  const plugins = [];
+
+  await loadPlugins(plugins, path.join(__dirname, '..', 'components')).then(async () => {
+    try {
+      await fs.access(config.pluginDirectory);
+
+      return loadPlugins(plugins, config.pluginDirectory);
+    } catch (error) {}
+  });
+
+  return plugins;
 });
 
 app.get('/serverdata.js', (req, res) => {
@@ -359,23 +355,22 @@ app.get('/api/gitversion', (req, res) => {
 });
 
 const userConfigPath = path.join(config.homedir, '.ungitrc');
-const readUserConfig = () => {
-  return fs
-    .access(userConfigPath)
-    .then(() => {
-      return fs
-        .readFile(userConfigPath, { encoding: 'utf8' })
-        .then((content) => {
-          return JSON.parse(content.toString());
-        })
-        .catch((err) => {
-          winston.error(`Stop at reading ~/.ungitrc because ${err}`);
-          process.exit(0);
-        });
-    })
-    .catch(() => {
-      return {};
-    });
+const readUserConfig = async () => {
+  try {
+    await fs.access(userConfigPath);
+
+    return fs
+      .readFile(userConfigPath, { encoding: 'utf8' })
+      .then((content) => {
+        return JSON.parse(content.toString());
+      })
+      .catch((err) => {
+        winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+        process.exit(0);
+      });
+  } catch (error) {
+    return {};
+  }
 };
 const writeUserConfig = (configContent) => {
   return fs.writeFile(userConfigPath, JSON.stringify(configContent, undefined, 2));

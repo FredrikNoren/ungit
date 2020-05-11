@@ -18,8 +18,8 @@ const req = request(app);
 describe('git-api remote', function () {
   this.timeout(4000);
 
-  before('creating test dirs should work', () => {
-    return common
+  before('creating test dirs should work', async () => {
+    const dir = await common
       .post(req, '/testing/createtempdir')
       .then((dir) => {
         testDirLocal1 = dir.path;
@@ -28,10 +28,9 @@ describe('git-api remote', function () {
       .then((dir) => {
         testDirLocal2 = dir.path;
       })
-      .then(() => common.post(req, '/testing/createtempdir'))
-      .then((dir) => {
-        testDirRemote = dir.path;
-      });
+      .then(() => common.post(req, '/testing/createtempdir'));
+
+    testDirRemote = dir.path;
   });
 
   after(() => common.post(req, '/testing/cleanup'));
@@ -40,10 +39,10 @@ describe('git-api remote', function () {
     return common.post(req, '/init', { path: testDirRemote, bare: true });
   });
 
-  it('remotes in no-remotes-repo should be zero', () => {
-    return common
-      .get(req, '/remotes', { path: testDirRemote })
-      .then((res) => expect(res.length).to.be(0));
+  it('remotes in no-remotes-repo should be zero', async () => {
+    const res = await common.get(req, '/remotes', { path: testDirRemote });
+
+    return expect(res.length).to.be(0);
   });
 
   it('cloning "remote" to "local1" should work', () => {
@@ -54,39 +53,36 @@ describe('git-api remote', function () {
     });
   });
 
-  it('remotes in cloned-repo should be one', () => {
-    return common.get(req, '/remotes', { path: testDirLocal1 }).then((res) => {
-      expect(res.length).to.be(1);
-      expect(res[0]).to.be('origin');
-    });
+  it('remotes in cloned-repo should be one', async () => {
+    const res = await common.get(req, '/remotes', { path: testDirLocal1 });
+    expect(res.length).to.be(1);
+    expect(res[0]).to.be('origin');
   });
 
-  it('remote/origin in cloned-repo should work', () => {
-    return common
-      .get(req, '/remotes/origin', { path: testDirLocal1 })
-      .then((res) => expect(res.address).to.be(testDirRemote));
+  it('remote/origin in cloned-repo should work', async () => {
+    const res = await common.get(req, '/remotes/origin', { path: testDirLocal1 });
+
+    return expect(res.address).to.be(testDirRemote);
   });
 
-  it('creating a commit in "local1" repo should work', () => {
+  it('creating a commit in "local1" repo should work', async () => {
     const testFile = path.join(testDirLocal1, 'testfile1.txt');
-    return common.post(req, '/testing/createfile', { file: testFile }).then(() => {
-      return common.post(req, '/commit', {
-        path: testDirLocal1,
-        message: 'Init',
-        files: [{ name: testFile }],
-      });
+    await common.post(req, '/testing/createfile', { file: testFile });
+    return common.post(req, '/commit', {
+      path: testDirLocal1,
+      message: 'Init',
+      files: [{ name: testFile }],
     });
   });
 
-  it('log in "local1" should show the init commit', () => {
-    return common.get(req, '/gitlog', { path: testDirLocal1 }).then((res) => {
-      expect(res.nodes).to.be.a('array');
-      expect(res.nodes.length).to.be(1);
-      const init = res.nodes[0];
-      expect(init.message.indexOf('Init')).to.be(0);
-      expect(init.refs).to.contain('HEAD');
-      expect(init.refs).to.contain('refs/heads/master');
-    });
+  it('log in "local1" should show the init commit', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDirLocal1 });
+    expect(res.nodes).to.be.a('array');
+    expect(res.nodes.length).to.be(1);
+    const init = res.nodes[0];
+    expect(init.message.indexOf('Init')).to.be(0);
+    expect(init.refs).to.contain('HEAD');
+    expect(init.refs).to.contain('refs/heads/master');
   });
 
   it('pushing form "local1" to "remote" should work', () => {
@@ -115,9 +111,10 @@ describe('git-api remote', function () {
     });
   });
 
-  it('creating and pushing a commit in "local1" repo should work', () => {
+  it('creating and pushing a commit in "local1" repo should work', async () => {
     const testFile = path.join(testDirLocal1, 'testfile2.txt');
-    return common
+
+    await common
       .post(req, '/testing/createfile', { file: testFile })
       .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
       .then(() =>
@@ -126,8 +123,9 @@ describe('git-api remote', function () {
           message: 'Commit2',
           files: [{ name: testFile }],
         })
-      )
-      .then(() => common.post(req, '/push', { path: testDirLocal1, remote: 'origin' }));
+      );
+
+    return common.post(req, '/push', { path: testDirLocal1, remote: 'origin' });
   });
 
   it('fetching in "local2" should work', () => {
@@ -169,18 +167,18 @@ describe('git-api remote', function () {
     });
   });
 
-  it('creating a commit in "local2" repo should work', () => {
+  it('creating a commit in "local2" repo should work', async () => {
     const testFile = path.join(testDirLocal2, 'testfile3.txt');
-    return common
+
+    await common
       .post(req, '/testing/createfile', { file: testFile })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 500)))
-      .then(() =>
-        common.post(req, '/commit', {
-          path: testDirLocal2,
-          message: 'Commit3',
-          files: [{ name: testFile }],
-        })
-      );
+      .then(() => new Promise((resolve) => setTimeout(resolve, 500)));
+
+    return common.post(req, '/commit', {
+      path: testDirLocal2,
+      message: 'Commit3',
+      files: [{ name: testFile }],
+    });
   });
 
   it('resetting local master to remote master should work in "local2"', () => {
@@ -200,10 +198,10 @@ describe('git-api remote', function () {
     });
   });
 
-  it('status should show nothing', () => {
-    return common
-      .get(req, '/status', { path: testDirLocal2 })
-      .then((res) => expect(Object.keys(res.files).length).to.be(0));
+  it('status should show nothing', async () => {
+    const res = await common.get(req, '/status', { path: testDirLocal2 });
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
   it('should be possible to create a tag in "local2"', () => {
@@ -219,16 +217,15 @@ describe('git-api remote', function () {
     });
   });
 
-  it('log in "local2" should show the local tag', () => {
-    return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
-      const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
-      expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
-    });
+  it('log in "local2" should show the local tag', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDirLocal2 });
+    const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
+    expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
   });
 
-  it('remote tags in "local2" should show the remote tag', () => {
-    return common
-      .get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' })
-      .then((res) => expect(res.map((tag) => tag.name)).to.contain('refs/tags/v1.0^{}'));
+  it('remote tags in "local2" should show the remote tag', async () => {
+    const res = await common.get(req, '/remote/tags', { path: testDirLocal2, remote: 'origin' });
+
+    return expect(res.map((tag) => tag.name)).to.contain('refs/tags/v1.0^{}');
   });
 });

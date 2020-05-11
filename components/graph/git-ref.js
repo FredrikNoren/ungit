@@ -99,7 +99,7 @@ class RefViewModel extends Selectable {
     this.isDragging(false);
   }
 
-  moveTo(target, rewindWarnOverride) {
+  async moveTo(target, rewindWarnOverride) {
     let promise;
     if (this.isLocal) {
       const toNode = this.graph.nodesById[target];
@@ -161,16 +161,17 @@ class RefViewModel extends Selectable {
       });
     }
 
-    return promise
-      .then((res) => {
-        if (!res) return;
-        const targetNode = this.graph.getNode(target);
-        if (this.graph.checkedOutBranch() == this.refName) {
-          this.graph.HEADref().node(targetNode);
-        }
-        this.node(targetNode);
-      })
-      .catch((e) => this.server.unhandledRejection(e));
+    try {
+      const res = await promise;
+      if (!res) return;
+      const targetNode = this.graph.getNode(target);
+      if (this.graph.checkedOutBranch() == this.refName) {
+        this.graph.HEADref().node(targetNode);
+      }
+      this.node(targetNode);
+    } catch (e) {
+      return this.server.unhandledRejection(e);
+    }
   }
 
   remove(isClientOnly) {
@@ -241,39 +242,39 @@ class RefViewModel extends Selectable {
       .catch((e) => this.server.unhandledRejection(e));
   }
 
-  checkout() {
+  async checkout() {
     const isRemote = this.isRemoteBranch;
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 
-    return Promise.resolve()
-      .then(() => {
-        if (isRemote && !isLocalCurrent) {
-          return this.server.postPromise('/branches', {
-            path: this.graph.repoPath(),
-            name: this.refName,
-            sha1: this.name,
-            force: true,
-          });
-        }
-      })
-      .then(() =>
-        this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName })
-      )
-      .then(() => {
-        if (isRemote && isLocalCurrent) {
-          return this.server.postPromise('/reset', {
-            path: this.graph.repoPath(),
-            to: this.name,
-            mode: 'hard',
-          });
-        }
-      })
-      .then(() => {
-        this.graph.HEADref().node(this.node());
-      })
-      .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
-      });
+    try {
+      await Promise.resolve()
+        .then(() => {
+          if (isRemote && !isLocalCurrent) {
+            return this.server.postPromise('/branches', {
+              path: this.graph.repoPath(),
+              name: this.refName,
+              sha1: this.name,
+              force: true,
+            });
+          }
+        })
+        .then(() =>
+          this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName })
+        )
+        .then(() => {
+          if (isRemote && isLocalCurrent) {
+            return this.server.postPromise('/reset', {
+              path: this.graph.repoPath(),
+              to: this.name,
+              mode: 'hard',
+            });
+          }
+        });
+
+      this.graph.HEADref().node(this.node());
+    } catch (err) {
+      if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+    }
   }
 }
 

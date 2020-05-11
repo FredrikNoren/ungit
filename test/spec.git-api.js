@@ -18,24 +18,21 @@ let gitConfig;
 const req = request(app);
 
 describe('git-api', () => {
-  before('creating test dir should work', () => {
-    return common.post(req, '/testing/createtempdir').then((res) => {
-      expect(res.path).to.be.ok();
-      return fs.realpath(res.path).then((dir) => {
-        testDir = dir;
-      });
-    });
+  before('creating test dir should work', async () => {
+    const res = await common.post(req, '/testing/createtempdir');
+    expect(res.path).to.be.ok();
+    const dir = await fs.realpath(res.path);
+    testDir = dir;
   });
 
   after(() => common.post(req, '/testing/cleanup'));
 
-  it('gitconfig should return config data', () => {
-    return common.get(req, '/gitconfig', { path: testDir }).then((res) => {
-      expect(res).to.be.an('object');
-      expect(res['user.name']).to.be.ok();
-      expect(res['user.email']).to.be.ok();
-      gitConfig = res;
-    });
+  it('gitconfig should return config data', async () => {
+    const res = await common.get(req, '/gitconfig', { path: testDir });
+    expect(res).to.be.an('object');
+    expect(res['user.name']).to.be.ok();
+    expect(res['user.email']).to.be.ok();
+    gitConfig = res;
   });
 
   it('status should fail in uninited directory', (done) => {
@@ -51,10 +48,10 @@ describe('git-api', () => {
       });
   });
 
-  it('quickstatus should say uninited in uninited directory', () => {
-    return common
-      .get(req, '/quickstatus', { path: testDir })
-      .then((res) => expect(res).to.eql({ type: 'uninited', gitRootPath: testDir }));
+  it('quickstatus should say uninited in uninited directory', async () => {
+    const res = await common.get(req, '/quickstatus', { path: testDir });
+
+    return expect(res).to.eql({ type: 'uninited', gitRootPath: testDir });
   });
 
   it('status should fail in non-existing directory', () => {
@@ -63,12 +60,10 @@ describe('git-api', () => {
       .catch((e) => expect(e.errorCode).to.be('no-such-path'));
   });
 
-  it('quickstatus should say false in non-existing directory', () => {
-    return common
-      .get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') })
-      .then((res) =>
-        expect(res).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') })
-      );
+  it('quickstatus should say false in non-existing directory', async () => {
+    const res = await common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') });
+
+    return expect(res).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') });
   });
 
   it('init should succeed in uninited directory', () => {
@@ -79,10 +74,10 @@ describe('git-api', () => {
     return common.get(req, '/status', { path: testDir });
   });
 
-  it('quickstatus should say inited in inited directory', () => {
-    return common
-      .get(req, '/quickstatus', { path: testDir })
-      .then((res) => expect(res).to.eql({ type: 'inited', gitRootPath: testDir }));
+  it('quickstatus should say inited in inited directory', async () => {
+    const res = await common.get(req, '/quickstatus', { path: testDir });
+
+    return expect(res).to.eql({ type: 'inited', gitRootPath: testDir });
   });
 
   it("commit should fail on when there's no files to commit", (done) => {
@@ -97,18 +92,16 @@ describe('git-api', () => {
 
   const testFile = 'somefile';
 
-  it('log should be empty before first commit', () => {
-    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes).to.be.a('array');
-      expect(res.nodes.length).to.be(0);
-    });
+  it('log should be empty before first commit', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDir });
+    expect(res.nodes).to.be.a('array');
+    expect(res.nodes.length).to.be(0);
   });
 
-  it('head should be empty before first commit', () => {
-    return common.get(req, '/head', { path: testDir }).then((res) => {
-      expect(res).to.be.a('array');
-      expect(res.length).to.be(0);
-    });
+  it('head should be empty before first commit', async () => {
+    const res = await common.get(req, '/head', { path: testDir });
+    expect(res).to.be.a('array');
+    expect(res.length).to.be(0);
   });
 
   it('commit should fail on non-existing file', (done) => {
@@ -125,22 +118,21 @@ describe('git-api', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile) });
   });
 
-  it('status should list untracked file', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile]).to.eql({
-        displayName: testFile,
-        fileName: testFile,
-        oldFileName: testFile,
-        isNew: true,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '-',
-        deletions: '-',
-      });
+  it('status should list untracked file', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile]).to.eql({
+      displayName: testFile,
+      fileName: testFile,
+      oldFileName: testFile,
+      isNew: true,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '-',
+      deletions: '-',
     });
   });
 
@@ -164,46 +156,43 @@ describe('git-api', () => {
     });
   });
 
-  it('log should show latest commit', () => {
-    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes).to.be.a('array');
-      expect(res.nodes.length).to.be(1);
-      expect(res.nodes[0].message.indexOf(commitMessage)).to.be(0);
-      expect(res.nodes[0].authorName).to.be(gitConfig['user.name']);
-      expect(res.nodes[0].authorEmail).to.be(gitConfig['user.email']);
-    });
+  it('log should show latest commit', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDir });
+    expect(res.nodes).to.be.a('array');
+    expect(res.nodes.length).to.be(1);
+    expect(res.nodes[0].message.indexOf(commitMessage)).to.be(0);
+    expect(res.nodes[0].authorName).to.be(gitConfig['user.name']);
+    expect(res.nodes[0].authorEmail).to.be(gitConfig['user.email']);
   });
 
-  it('head should show latest commit', () => {
-    return common.get(req, '/head', { path: testDir }).then((res) => {
-      expect(res).to.be.a('array');
-      expect(res.length).to.be(1);
-      expect(res[0].message.indexOf(commitMessage)).to.be(0);
-      expect(res[0].authorName).to.be(gitConfig['user.name']);
-      expect(res[0].authorEmail).to.be(gitConfig['user.email']);
-    });
+  it('head should show latest commit', async () => {
+    const res = await common.get(req, '/head', { path: testDir });
+    expect(res).to.be.a('array');
+    expect(res.length).to.be(1);
+    expect(res[0].message.indexOf(commitMessage)).to.be(0);
+    expect(res[0].authorName).to.be(gitConfig['user.name']);
+    expect(res[0].authorEmail).to.be(gitConfig['user.email']);
   });
 
   it('modifying a test file should work', () => {
     return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) });
   });
 
-  it('modified file should show up in status', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile]).to.eql({
-        displayName: testFile,
-        fileName: testFile,
-        oldFileName: testFile,
-        isNew: false,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '1',
-        deletions: '1',
-      });
+  it('modified file should show up in status', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile]).to.eql({
+      displayName: testFile,
+      fileName: testFile,
+      oldFileName: testFile,
+      isNew: false,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '1',
+      deletions: '1',
     });
   });
 
@@ -224,10 +213,10 @@ describe('git-api', () => {
     });
   });
 
-  it('amend should not produce additional log-entry', () => {
-    return common
-      .get(req, '/gitlog', { path: testDir })
-      .then((res) => expect(res.nodes.length).to.be(1));
+  it('amend should not produce additional log-entry', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDir });
+
+    return expect(res.nodes.length).to.be(1);
   });
 
   const testFile2 = 'my test.txt';
@@ -236,22 +225,21 @@ describe('git-api', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) });
   });
 
-  it('status should list the new file', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile2]).to.eql({
-        displayName: testFile2,
-        fileName: testFile2,
-        oldFileName: testFile2,
-        isNew: true,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '-',
-        deletions: '-',
-      });
+  it('status should list the new file', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile2]).to.eql({
+      displayName: testFile2,
+      fileName: testFile2,
+      oldFileName: testFile2,
+      isNew: true,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '-',
+      deletions: '-',
     });
   });
 
@@ -283,22 +271,21 @@ describe('git-api', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile3) });
   });
 
-  it('status should list the new file', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile3]).to.eql({
-        displayName: testFile3,
-        fileName: testFile3,
-        oldFileName: testFile3,
-        isNew: true,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '-',
-        deletions: '-',
-      });
+  it('status should list the new file', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile3]).to.eql({
+      displayName: testFile3,
+      fileName: testFile3,
+      oldFileName: testFile3,
+      isNew: true,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '-',
+      deletions: '-',
     });
   });
 
@@ -312,43 +299,41 @@ describe('git-api', () => {
     });
   });
 
-  it('log should show last commit', () => {
-    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
-      expect(res.nodes).to.be.a('array');
-      expect(res.nodes.length).to.be(2);
-      const HEAD = res.nodes[0];
+  it('log should show last commit', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDir });
+    expect(res.nodes).to.be.a('array');
+    expect(res.nodes.length).to.be(2);
+    const HEAD = res.nodes[0];
 
-      expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
-      expect(HEAD.authorDate).to.be.a('string');
-      expect(HEAD.authorName).to.be(gitConfig['user.name']);
-      expect(HEAD.authorEmail).to.be(gitConfig['user.email']);
-      expect(HEAD.commitDate).to.be.a('string');
-      expect(HEAD.committerName).to.be(gitConfig['user.name']);
-      expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
-      expect(HEAD.sha1).to.be.ok();
-    });
+    expect(HEAD.message.indexOf(commitMessage3)).to.be(0);
+    expect(HEAD.authorDate).to.be.a('string');
+    expect(HEAD.authorName).to.be(gitConfig['user.name']);
+    expect(HEAD.authorEmail).to.be(gitConfig['user.email']);
+    expect(HEAD.commitDate).to.be.a('string');
+    expect(HEAD.committerName).to.be(gitConfig['user.name']);
+    expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
+    expect(HEAD.sha1).to.be.ok();
   });
 
   it('removing a test file should work', () => {
     return common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) });
   });
 
-  it('status should list the removed file', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile]).to.eql({
-        displayName: testFile,
-        fileName: testFile,
-        oldFileName: testFile,
-        isNew: false,
-        staged: false,
-        removed: true,
-        conflict: false,
-        renamed: false,
-        type: 'text',
-        additions: '0',
-        deletions: '2',
-      });
+  it('status should list the removed file', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile]).to.eql({
+      displayName: testFile,
+      fileName: testFile,
+      oldFileName: testFile,
+      isNew: false,
+      staged: false,
+      removed: true,
+      conflict: false,
+      renamed: false,
+      type: 'text',
+      additions: '0',
+      deletions: '2',
     });
   });
 
@@ -362,10 +347,10 @@ describe('git-api', () => {
     });
   });
 
-  it('status should list nothing', () => {
-    return common
-      .get(req, '/status', { path: testDir })
-      .then((res) => expect(Object.keys(res.files).length).to.be(0));
+  it('status should list nothing', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
   const testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
@@ -377,51 +362,49 @@ describe('git-api', () => {
     });
   });
 
-  it('status should list the renamed file', () => {
-    return common.get(req, '/status', { path: testDir }).then((res) => {
-      expect(Object.keys(res.files).length).to.be(1);
-      expect(res.files[testFile4]).to.eql({
-        displayName: `${testFile3} → ${testFile4}`,
-        fileName: testFile4,
-        oldFileName: testFile3,
-        isNew: false,
-        staged: false,
-        removed: false,
-        conflict: false,
-        renamed: true,
-        type: 'text',
-        additions: '0',
-        deletions: '0',
-      });
+  it('status should list the renamed file', async () => {
+    const res = await common.get(req, '/status', { path: testDir });
+    expect(Object.keys(res.files).length).to.be(1);
+    expect(res.files[testFile4]).to.eql({
+      displayName: `${testFile3} → ${testFile4}`,
+      fileName: testFile4,
+      oldFileName: testFile3,
+      isNew: false,
+      staged: false,
+      removed: false,
+      conflict: false,
+      renamed: true,
+      type: 'text',
+      additions: '0',
+      deletions: '0',
     });
   });
 
-  it('log with limit should only return specified number of items', () => {
-    return common.get(req, '/gitlog', { path: testDir, limit: 1 }).then((res) => {
-      expect(res.nodes).to.be.a('array');
-      expect(res.nodes.length).to.be(1);
-    });
+  it('log with limit should only return specified number of items', async () => {
+    const res = await common.get(req, '/gitlog', { path: testDir, limit: 1 });
+    expect(res.nodes).to.be.a('array');
+    expect(res.nodes.length).to.be(1);
   });
 
   it('get the baserepopath without base repo should work', (done) => {
     const baseRepoPathTestDir = path.join(testDir, 'depth1', 'depth2');
 
-    mkdirp(baseRepoPathTestDir).then(() => {
-      return common.get(req, '/baserepopath', { path: baseRepoPathTestDir }).then((res) => {
-        // Some oses uses symlink and path will be different as git will return resolved symlink
-        expect(res.path).to.contain(testDir);
-        done();
-      });
+    mkdirp(baseRepoPathTestDir).then(async () => {
+      const res = await common.get(req, '/baserepopath', { path: baseRepoPathTestDir });
+      // Some oses uses symlink and path will be different as git will return resolved symlink
+      expect(res.path).to.contain(testDir);
+      done();
     });
   });
 
-  it('test gitignore api endpoint', () => {
-    return common
+  it('test gitignore api endpoint', async () => {
+    const res = await common
       .put(req, '/gitignore', { path: testDir, data: 'abc' })
       .then(() => common.get(req, '/gitignore', { path: testDir }))
       .then((res) => expect(res.content).to.be('abc'))
       .then(() => common.put(req, '/gitignore', { path: testDir, data: '' }))
-      .then(() => common.get(req, '/gitignore', { path: testDir }))
-      .then((res) => expect(res.content).to.be(''));
+      .then(() => common.get(req, '/gitignore', { path: testDir }));
+
+    return expect(res.content).to.be('');
   });
 });

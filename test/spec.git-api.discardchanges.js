@@ -15,106 +15,105 @@ const req = request(app);
 describe('git-api discardchanges', () => {
   after(() => common.post(req, '/testing/cleanup'));
 
-  it('should be able to discard a new file', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile1 = 'test.txt';
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-        .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => expect(Object.keys(res.files).length).to.be(0));
-    });
+  it('should be able to discard a new file', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile1 = 'test.txt';
+
+    const res = await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('should be able to discard a changed file', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile1 = 'test.txt';
+  it('should be able to discard a changed file', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile1 = 'test.txt';
 
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() =>
-          common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
-        )
-        .then(() => common.post(req, '/testing/changefile', { file: path.join(dir, testFile1) }))
-        .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-        .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => expect(Object.keys(res.files).length).to.be(0));
-    });
+    const res = await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
+      .then(() =>
+        common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
+      )
+      .then(() => common.post(req, '/testing/changefile', { file: path.join(dir, testFile1) }))
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('should be able to discard a removed file', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile1 = 'test.txt';
+  it('should be able to discard a removed file', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile1 = 'test.txt';
 
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() =>
-          common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
-        )
-        .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
-        .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-        .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => expect(Object.keys(res.files).length).to.be(0));
-    });
+    const res = await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
+      .then(() =>
+        common.post(req, '/commit', { path: dir, message: 'lol', files: [{ name: testFile1 }] })
+      )
+      .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('should be able to discard a new and staged file', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile1 = 'test.txt';
+  it('should be able to discard a new and staged file', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile1 = 'test.txt';
 
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
-        .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-        .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => expect(Object.keys(res.files).length).to.be(0));
-    });
+    const res = await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
+      .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('should be able to discard a staged and removed file', () => {
-    return common.createSmallRepo(req).then((dir) => {
-      const testFile1 = 'test.txt';
+  it('should be able to discard a staged and removed file', async () => {
+    const dir = await common.createSmallRepo(req);
+    const testFile1 = 'test.txt';
 
-      return common
-        .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
-        .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
-        .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
-        .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
-        .then(() => common.get(req, '/status', { path: dir }))
-        .then((res) => expect(Object.keys(res.files).length).to.be(0));
-    });
+    const res = await common
+      .post(req, '/testing/createfile', { file: path.join(dir, testFile1) })
+      .then(() => common.post(req, '/testing/git', { path: dir, command: ['add', testFile1] }))
+      .then(() => common.post(req, '/testing/removefile', { file: path.join(dir, testFile1) }))
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: testFile1 }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
-  it('should be able to discard discard submodule changes', function () {
+  it('should be able to discard discard submodule changes', async function () {
     const testFile = 'smalltestfile.txt';
     const submodulePath = 'subrepo';
     this.timeout(5000);
 
-    return common
-      .createSmallRepo(req)
-      .then((dir) => {
-        return common.createSmallRepo(req).then((subrepoDir) => {
-          return common
-            .post(req, '/submodules/add', {
-              submoduleUrl: subrepoDir,
-              submodulePath: submodulePath,
-              path: dir,
-            })
-            .then(() => dir);
-        });
-      })
-      .then((dir) => {
-        return common
-          .post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] })
-          .then(() =>
-            common.post(req, '/testing/changefile', {
-              file: path.join(dir, submodulePath, testFile),
-            })
-          )
-          .then(() => common.post(req, '/discardchanges', { path: dir, file: submodulePath }))
-          .then(() => common.get(req, '/status', { path: dir }))
-          .then((res) => expect(Object.keys(res.files).length).to.be(0));
+    const dir = await common.createSmallRepo(req).then(async (dir) => {
+      const subrepoDir = await common.createSmallRepo(req);
+
+      await common.post(req, '/submodules/add', {
+        submoduleUrl: subrepoDir,
+        submodulePath: submodulePath,
+        path: dir,
       });
+
+      return dir;
+    });
+
+    const res = await common
+      .post(req, '/commit', { path: dir, message: 'lol', files: [{ name: '.gitmodules' }] })
+      .then(() =>
+        common.post(req, '/testing/changefile', {
+          file: path.join(dir, submodulePath, testFile),
+        })
+      )
+      .then(() => common.post(req, '/discardchanges', { path: dir, file: submodulePath }))
+      .then(() => common.get(req, '/status', { path: dir }));
+
+    return expect(Object.keys(res.files).length).to.be(0);
   });
 
   // Need to make discardchanges even more powerful to handle this
