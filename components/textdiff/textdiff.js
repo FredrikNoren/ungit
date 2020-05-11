@@ -131,7 +131,7 @@ class TextDiffViewModel {
   }
 
   async render() {
-    (await !this.diffJson) ? this.getDiffJson() : Promise.resolve();
+    if (!this.diffJson) await this.getDiffJson();
     if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
 
     if (!this.diffJson[0].allBlocks) {
