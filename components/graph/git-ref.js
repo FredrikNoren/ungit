@@ -174,33 +174,31 @@ class RefViewModel extends Selectable {
     }
   }
 
-  remove(isClientOnly) {
+  async remove(isClientOnly) {
     let url = this.isTag ? '/tags' : '/branches';
     if (this.isRemote) url = `/remote${url}`;
-
-    return (isClientOnly
-      ? Promise.resolve()
-      : this.server.delPromise(url, {
+    try {
+      if (!isClientOnly)
+        await this.server.delPromise(url, {
           path: this.graph.repoPath(),
           remote: this.isRemote ? this.remote : null,
           name: this.refName,
-        })
-    )
-      .then(() => {
-        if (this.node()) this.node().removeRef(this);
-        this.graph.refs.remove(this);
-        delete this.graph.refsByRefName[this.name];
-      })
-      .catch((e) => this.server.unhandledRejection(e))
-      .finally(() => {
-        if (!isClientOnly) {
-          if (url == '/remote/tags') {
-            programEvents.dispatch({ event: 'request-fetch-tags' });
-          } else {
-            programEvents.dispatch({ event: 'branch-updated' });
-          }
+        });
+
+      if (this.node()) this.node().removeRef(this);
+      this.graph.refs.remove(this);
+      delete this.graph.refsByRefName[this.name];
+    } catch (e) {
+      this.server.unhandledRejection(e);
+    } finally {
+      if (!isClientOnly) {
+        if (url == '/remote/tags') {
+          programEvents.dispatch({ event: 'request-fetch-tags' });
+        } else {
+          programEvents.dispatch({ event: 'branch-updated' });
         }
-      });
+      }
+    }
   }
 
   getLocalRef() {
@@ -247,7 +245,6 @@ class RefViewModel extends Selectable {
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 
     try {
-      await Promise.resolve();
       if (isRemote && !isLocalCurrent) {
         return this.server.postPromise('/branches', {
           path: this.graph.repoPath(),
