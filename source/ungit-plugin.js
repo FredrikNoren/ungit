@@ -43,66 +43,40 @@ class UngitPlugin {
     winston.info(`Compiling plugin ${this.path}`);
     const exports = this.manifest.exports || {};
 
-    const result = await Promise.resolve()
-      .then(() => {
-        if (exports.raw) {
-          return Promise.all(
-            assureArray(exports.raw).map(async (rawSource) => {
-              const text = await fs.readFile(path.join(this.path, rawSource));
-              return text + '\n';
-            })
-          ).then((result) => {
-            return result.join('\n');
-          });
-        } else {
-          return '';
-        }
-      })
-      .then((result) => {
-        if (exports.javascript) {
-          return (
-            result +
-            assureArray(exports.javascript)
-              .map((filename) => {
-                return `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`;
-              })
-              .join('\n')
-          );
-        } else {
-          return result;
-        }
-      })
-      .then((result) => {
-        if (exports.knockoutTemplates) {
-          return Promise.all(
-            Object.keys(exports.knockoutTemplates).map(async (templateName) => {
-              const text = await fs.readFile(
-                path.join(this.path, exports.knockoutTemplates[templateName])
-              );
+    let result = '';
+    if (exports.raw)
+      result += (
+        await Promise.all(
+          assureArray(exports.raw).map(async (rawSource) => {
+            const text = await fs.readFile(path.join(this.path, rawSource));
+            return text + '\n';
+          })
+        )
+      ).join('\n');
+    if (exports.javascript)
+      result += assureArray(exports.javascript)
+        .map((filename) => {
+          return `<script type="text/javascript" src="${config.rootPath}/plugins/${this.name}/${filename}"></script>`;
+        })
+        .join('\n');
+    if (exports.knockoutTemplates)
+      result += (
+        await Promise.all(
+          Object.keys(exports.knockoutTemplates).map(async (templateName) => {
+            const text = await fs.readFile(
+              path.join(this.path, exports.knockoutTemplates[templateName])
+            );
 
-              return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
-            })
-          ).then((templates) => {
-            return result + templates.join('\n');
-          });
-        } else {
-          return result;
-        }
-      })
-      .then((result2) => {
-        if (exports.css) {
-          return (
-            result2 +
-            assureArray(exports.css)
-              .map((cssSource) => {
-                return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
-              })
-              .join('\n')
-          );
-        } else {
-          return result2;
-        }
-      });
+            return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
+          })
+        )
+      ).join('\n');
+    if (exports.css)
+      result += assureArray(exports.css)
+        .map((cssSource) => {
+          return `<link rel="stylesheet" type="text/css" href="${config.rootPath}/plugins/${this.name}/${cssSource}" />`;
+        })
+        .join('\n');
 
     return `<!-- Component: ${this.name} -->\n${result}`;
   }
