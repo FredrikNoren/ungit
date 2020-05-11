@@ -53,6 +53,7 @@ const gitExecutorProm = (args, retryCount) => {
           winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
         let rejectedError = null;
         let isCompleted = false;
+        let timer = null;
         let stdout = '';
         let stderr = '';
         let env = JSON.parse(JSON.stringify(process.env));
@@ -65,9 +66,10 @@ const gitExecutorProm = (args, retryCount) => {
         };
         const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
         if (args.timeout) {
-          setTimeout(() => {
+          timer = setTimeout(() => {
             if (isCompleted) return;
             isCompleted = true;
+            timer = null;
             winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
             gitSem.signal();
             gitProcess.kill('SIGINT');
@@ -90,7 +92,10 @@ const gitExecutorProm = (args, retryCount) => {
         gitProcess.on('close', (code) => {
           if (isCompleted) return;
           isCompleted = true;
-
+          if (timer) {
+            clearTimeout(timer);
+            timer = null;
+          }
           if (config.logGitCommands)
             winston.info(
               `git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(
