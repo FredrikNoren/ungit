@@ -441,19 +441,21 @@ exports.registerApi = (env) => {
     if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
 
     const task = gitPromise(['remote'], req.query.path)
-      .then((remoteText) => {
+      .then(async (remoteText) => {
         const remotes = remoteText.trim().split('\n');
 
         // making calls serially as credential helpers may get confused to which cred to get.
-        return remotes.reduce(async (promise, remote) => {
-          if (!remote || remote === '') return promise;
-          await promise;
-          return gitPromise({
+        for (const remote of remotes) {
+          if (!remote) continue;
+          await gitPromise({
             commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
             repoPath: req.query.path,
             timeout: tenMinTimeoutMs,
-          }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
-        }, Promise.resolve());
+          }).catch((e) =>
+            // ignore fetch err as it is most likely credential
+            winston.warn('err during remote fetch for /refs', e)
+          );
+        }
       })
       .then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
