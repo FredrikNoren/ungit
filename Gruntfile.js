@@ -63,68 +63,6 @@ module.exports = (grunt) => {
       },
     },
 
-    jshint: {
-      options: {
-        undef: true, // check for usage of undefined constiables
-        indent: 2,
-        esversion: 6,
-        laxbreak: true,
-        '-W033': true, // ignore Missing semicolon
-        '-W041': true, // ignore Use '===' to compare with '0'
-        '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation
-      },
-      web: {
-        options: {
-          node: true,
-          browser: true,
-          globals: {
-            ungit: true,
-            io: true,
-            Raven: true,
-            $: true,
-            jQuery: true,
-            nprogress: true,
-          },
-        },
-        files: [
-          {
-            src: ['public/source/**/*.js', 'components/**/*.js'],
-            // Filter out the "compiled" components files; see the browserify task for components
-            filter: (src) => src.indexOf('bundle.js') == -1,
-          },
-        ],
-      },
-      node: {
-        options: {
-          node: true,
-        },
-        src: ['source/**/*.js'],
-      },
-      bin: {
-        options: {
-          node: true,
-        },
-        src: ['Gruntfile.js', 'bin/*'],
-      },
-      mocha: {
-        options: {
-          esversion: 8,
-          node: true,
-          globals: {
-            it: true,
-            describe: true,
-            before: true,
-            after: true,
-            window: true,
-            document: true,
-            navigator: true,
-            ungit: true,
-          },
-        },
-        src: ['test/**/*.js', 'clicktests/**/*.js'],
-      },
-    },
     copy: {
       main: {
         files: [
@@ -421,7 +359,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
@@ -431,7 +368,6 @@ module.exports = (grunt) => {
   grunt.registerTask('default', [
     'checkPrettier',
     'less:production',
-    'jshint',
     'browserify-common',
     'browserify-components',
     'copy:main',
