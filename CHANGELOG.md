@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.7...master)
 
+### Fixed
+- Clear git-promise timeout when git command was successful [#1357](https://github.com/FredrikNoren/ungit/pull/1357)
+
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
 
