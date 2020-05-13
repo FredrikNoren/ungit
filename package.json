@@ -65,7 +65,6 @@
     "yargs": "~15.3.1"
   },
   "devDependencies": {
-    "ansi-color": "~0.2.1",
     "browserify": "~16.5.1",
     "dedent": "~0.7.0",
     "electron": "~8.2.5",

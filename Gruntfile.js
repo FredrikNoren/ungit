@@ -1,6 +1,5 @@
 const browserify = require('browserify');
 const childProcess = require('child_process');
-const cliColor = require('ansi-color');
 const electronPackager = require('electron-packager');
 const path = require('path');
 const pkgVersions = require('pkg-versions');
@@ -336,7 +335,7 @@ module.exports = (grunt) => {
             let output = '';
             const outStream = (data) => (output += data);
 
-            grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
+            grunt.log.writeln(`Clicktest started! \t${file}`);
             return new Promise((resolve, reject) => {
               const child = childProcess.execFile(
                 './node_modules/mocha/bin/mocha',
@@ -351,11 +350,11 @@ module.exports = (grunt) => {
               });
             })
               .then(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
+                grunt.log.ok(`'Clicktest success! \t${file}`);
                 return { name: file, output: output, isSuccess: true };
               })
               .catch(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
+                grunt.log.error(`'Clicktest fail! \t'${file}`);
                 return { name: file, output: output, isSuccess: false };
               });
           })
