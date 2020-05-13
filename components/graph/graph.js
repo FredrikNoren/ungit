@@ -3,7 +3,6 @@ const _ = require('lodash');
 const moment = require('moment');
 const octicons = require('octicons');
 const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
 const EdgeViewModel = require('./edge');

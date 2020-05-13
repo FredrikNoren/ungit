@@ -10,6 +10,6 @@
   },
   "rules": {
     "quotes": ["warn", "single", { "avoidEscape": true }],
-    "no-unused-vars": "off" // Off for now
+    "no-unused-vars": ["error", { "args": "none" }]
   }
 }

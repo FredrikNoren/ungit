@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var $ = require('jquery');
 var ko = require('knockout');
 

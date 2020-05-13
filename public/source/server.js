@@ -1,5 +1,5 @@
 var programEvents = require('ungit-program-events');
-var _ = require('lodash');
+
 var rootPath = (ungit.config && ungit.config.rootPath) || '';
 var nprogress;
 if (ungit.config.isDisableProgressBar) {

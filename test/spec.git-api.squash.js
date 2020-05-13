@@ -14,8 +14,6 @@ let testDir;
 
 const req = request(app);
 const rootBranch = 'root';
-const branch1 = 'branch1';
-const branch2 = 'branch2';
 
 const testFile1 = 'testFile1.txt';
 const testFile2 = 'testFile2.txt';

@@ -356,7 +356,6 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   const result = [];
   let ignoredDiffCountTotal = 0;
   let ignoredDiffCountCurrent = 0;
-  let headerIndex = null;
   let lastHeaderIndex = -1;
   let n = 0;
   let selectedLines = 0;

@@ -19,7 +19,6 @@ exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
   const app = env.app;
-  const server = env.server;
   const ensureAuthenticated = env.ensureAuthenticated || ((req, res, next) => next());
   const config = env.config;
   const io = env.socketIO;

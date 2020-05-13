@@ -1,8 +1,10 @@
 var startLaunchTime = Date.now();
+
+var child_process = require('child_process');
 var path = require('path');
+// eslint-disable-next-line no-unused-vars -- Imported for side effects
 var winston = require('../source/utils/winston');
 var config = require('../source/config');
-var child_process = require('child_process');
 var BugTracker = require('../source/bugtracker');
 var bugtracker = new BugTracker('electron');
 
