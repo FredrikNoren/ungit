@@ -9,7 +9,7 @@ const rimraf = util.promisify(require('rimraf'));
 const testRepoPaths = [];
 
 const changeTestFile = async (filename, repoPath) => {
-  await environment.backgroundAction('POST', `/api/testing/changefile`, {
+  await environment.backgroundAction('POST', '/api/testing/changefile', {
     file: filename,
     path: repoPath,
   });
@@ -149,6 +149,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Should be possible to patch a file', async () => {
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     //   .patch('patch')

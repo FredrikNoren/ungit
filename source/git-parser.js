@@ -371,7 +371,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   while (n < lines.length) {
     const line = lines[n];
 
-    if (/^[\-\+]/.test(line)) {
+    if (/^[-+]/.test(line)) {
       // Modified line
       if (patchLineList.shift()) {
         selectedLines++;

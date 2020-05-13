@@ -724,7 +724,8 @@ describe('parseGitLsRemote', () => {
 
 describe('parseGitStatusNumstat', () => {
   it('parses the git status numstat', () => {
-    const gitStatusNumstat = `1459	202	package-lock.json\x002	1	package.json\x0013	0	test/spec.git-parser.js\x00`;
+    const gitStatusNumstat =
+      '1459	202	package-lock.json\x002	1	package.json\x0013	0	test/spec.git-parser.js\x00';
 
     expect(gitParser.parseGitStatusNumstat(gitStatusNumstat)).to.eql({
       'package-lock.json': { additions: '1459', deletions: '202' },
@@ -751,21 +752,21 @@ describe('parseGitStatusNumstat', () => {
 describe('parseGitStatus', () => {
   it('parses git status', () => {
     const gitStatus =
-      `## git-parser-specs\x00` +
-      `A  file1.js\x00` +
-      `M  file2.js\x00` +
-      `D  file3.js\x00` +
-      ` D file4.js\x00` +
-      ` U file5.js\x00` +
-      `U  file6.js\x00` +
-      `AA file7.js\x00` +
-      `?  file8.js\x00` +
-      `A  file9.js\x00` +
-      `?D file10.js\x00` +
-      `AD file11.js\x00` +
-      ` M file12.js\x00` +
-      `?? file13.js\x00` +
-      `R  ../source/sys.js\x00../source/sysinfo.js\x00`;
+      '## git-parser-specs\x00' +
+      'A  file1.js\x00' +
+      'M  file2.js\x00' +
+      'D  file3.js\x00' +
+      ' D file4.js\x00' +
+      ' U file5.js\x00' +
+      'U  file6.js\x00' +
+      'AA file7.js\x00' +
+      '?  file8.js\x00' +
+      'A  file9.js\x00' +
+      '?D file10.js\x00' +
+      'AD file11.js\x00' +
+      ' M file12.js\x00' +
+      '?? file13.js\x00' +
+      'R  ../source/sys.js\x00../source/sysinfo.js\x00';
 
     expect(gitParser.parseGitStatus(gitStatus)).to.eql({
       branch: 'git-parser-specs',

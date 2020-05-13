@@ -95,7 +95,7 @@
     "supertest": "~4.0.2"
   },
   "engines": {
-    "node": ">=10.18"
+    "node": "^10.18.0 || >=11.14.0"
   },
   "license": "MIT",
   "main": "public/main.js"

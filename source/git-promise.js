@@ -114,7 +114,7 @@ const gitExecutorProm = (args, retryCount) => {
       if (retryCount > 0 && isRetryableError(err)) {
         return new Promise((resolve) => {
           winston.warn(
-            `retrying git commands after lock acquired fail. (If persists, lower 'maxConcurrentGitOperations')`
+            'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
           );
           // sleep random amount between 250 ~ 750 ms
           setTimeout(resolve, Math.floor(Math.random() * 500 + 250));

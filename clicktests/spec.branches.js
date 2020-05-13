@@ -79,7 +79,7 @@ describe('[BRANCHES]', () => {
     await environment.waitForElementHidden('#nprogress');
   });
 
-  it('add a commit', async () => {
+  it('add another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.commit('commit-3');
   });
