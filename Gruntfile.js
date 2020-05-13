@@ -122,29 +122,6 @@ module.exports = (grunt) => {
     },
   });
 
-  grunt.registerTask(
-    'checkPrettier',
-    'Verify that all files are correctly formatted.',
-    function () {
-      const done = this.async();
-      childProcess.exec('npx prettier -l . bin/*', (err, stdout, stderr) => {
-        const files = stdout.trim();
-        if (files) {
-          return done(
-            new Error(
-              `Files with incorrect formatting (run "npm run format" and consider a Prettier plugin for your editor):\n${files}\n`
-            )
-          );
-        }
-        if (err) {
-          console.error(stderr);
-          return done(err);
-        }
-        done();
-      });
-    }
-  );
-
   grunt.registerTask('browserify-common', '', function () {
     const done = this.async();
     const b = browserify('./public/source/main.js', {
@@ -366,8 +343,7 @@ module.exports = (grunt) => {
 
   // Default task, builds everything needed
   grunt.registerTask('default', [
-    'checkPrettier',
-    'less:production',
+    'less',
     'browserify-common',
     'browserify-components',
     'copy:main',

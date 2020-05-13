@@ -9,7 +9,6 @@
     "node": true
   },
   "rules": {
-    "prettier/prettier": "error",
     "quotes": ["warn", "single", { "avoidEscape": true }],
     "no-unused-vars": "off" // Off for now
   }
