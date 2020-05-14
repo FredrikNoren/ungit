@@ -50,7 +50,10 @@
         <div data-bind="foreach: commitMessageTags">
           <button class="tag-button btn btn-link" data-bind="click: toggle">
             <div class="checkmark" data-bind="css: { checked: selected }">
-              <span class="glyphicon" data-bind="css: { 'glyphicon-check': selected, 'glyphicon-unchecked': !selected() }"></span>
+              <span
+                class="glyphicon"
+                data-bind="css: { 'glyphicon-check': selected, 'glyphicon-unchecked': !selected() }"
+              ></span>
             </div>
             <span data-bind="text: text"></span>
           </button>

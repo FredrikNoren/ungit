@@ -116,13 +116,15 @@ class StagingViewModel {
     this.commitMessageTags = [];
 
     ungit.config.commitMessageTags.forEach((elt) => {
-      let selected = ko.observable(false)
+      let selected = ko.observable(false);
       this.commitMessageTags.push({
         text: elt,
         selected,
-        toggle() { selected(!selected()) }
-      })
-    })
+        toggle() {
+          selected(!selected());
+        },
+      });
+    });
   }
 
   updateNode(parentElement) {
@@ -266,7 +268,7 @@ class StagingViewModel {
     }
     this.amend(false);
     this.emptyCommit(false);
-    this.commitMessageTags.forEach(function(elt) {
+    this.commitMessageTags.forEach(function (elt) {
       elt.selected(false);
     });
   }
@@ -275,11 +277,11 @@ class StagingViewModel {
     var commitMessage = this.commitMessageTitle();
     if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
 
-    this.commitMessageTags.forEach(function(elt) {
+    this.commitMessageTags.forEach(function (elt) {
       if (elt.selected()) {
-        commitMessage = elt.text + " " + commitMessage;
+        commitMessage = elt.text + ' ' + commitMessage;
       }
-    })
+    });
     return commitMessage;
   }
 
