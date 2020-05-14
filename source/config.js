@@ -318,9 +318,9 @@ let argv = yargs
     'isEnableNumStat',
     'when false, disables numstats during git status for performance.  see #1193'
   )
-  .describe('commitMessageTags', 'tags prepended to the commit message when selected (e.g. [SKIP CI])')
-.  array('commitMessageTags')
   .boolean('isEnableNumStat');
+  .describe('commitMessageTags', 'tags prepended to the commit message when selected (e.g. [SKIP CI])')
+  .array('commitMessageTags')
 const argvConfig = argv.argv;
 
 // For testing, $0 is grunt.  For credential-parser test, $0 is node
