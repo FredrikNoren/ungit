@@ -194,7 +194,7 @@ module.exports = (grunt) => {
         if (files) {
           return done(
             new Error(
-              `Files with incorrect formatting (run "npm run format" and consider a Prettier plugin for your editor):\n${files}\n`
+              `Files with incorrect formatting (run "npm run format" additionally you could add a Prettier plugin to your editor to handle formating automatically):\n${files}\n`
             )
           );
         }
