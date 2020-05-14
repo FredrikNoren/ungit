@@ -1,10 +1,11 @@
-
 .commitdiff {
   width: 100%;
+
   .file {
     margin-top: 5px;
     background: rgba(255, 255, 255, 0.16);
     border-radius: 3px;
+
     .head {
       display: block;
       cursor: pointer;
@@ -13,25 +14,36 @@
       padding-right: 6px;
       color: rgba(255, 255, 255, 0.79);
       word-wrap: break-word;
+
       .file-stats {
-        span:nth-of-type(1)::Before{ content: "+" }
-        span:nth-of-type(1){
-          color: #9BF3A9;
+        span:nth-of-type(1)::before {
+          content: '+';
         }
-        span:nth-of-type(2)::Before{ content: "-" }
-        span:nth-of-type(2){
-          color: #EC9D93;
+
+        span:nth-of-type(1) {
+          color: #9bf3a9;
+        }
+
+        span:nth-of-type(2)::before {
+          content: '-';
+        }
+
+        span:nth-of-type(2) {
+          color: #ec9d93;
         }
       }
     }
+
     .diff {
       background: rgba(0, 0, 0, 0.11);
+
       .textDiff {
         color: rgba(255, 255, 255, 0.3);
       }
     }
   }
 }
+
 .loadMore {
   .btn {
     display: block;

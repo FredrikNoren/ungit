@@ -5,8 +5,8 @@ os:
 language: node_js
 node_js:
   - node
-  - "12"
-  - "10"
+  - '12'
+  - '10'
 branches:
   only:
     - master
@@ -17,17 +17,16 @@ env:
     - GIT_VERSION=default
 jobs:
   exclude:
-    - node_js: "12"
+    - node_js: '12'
       env: GIT_VERSION=edge
-    - node_js: "10"
+    - node_js: '10'
       env: GIT_VERSION=edge
     - os: windows
       env: GIT_VERSION=edge
 addons:
   apt:
     packages:
-      - xvfb
-      - libgconf-2-4
+      - libgbm1
       - wine
   homebrew:
     update: true
@@ -36,8 +35,6 @@ addons:
       - wine-stable
 before_install:
   # linux
-  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then export DISPLAY=':99.0'; fi
-  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & fi
   - if [[ $TRAVIS_OS_NAME = "linux" ]]; then wine --version; fi
   - if [[ $TRAVIS_OS_NAME = "linux" && $GIT_VERSION = "edge" ]]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   # osx
@@ -55,7 +52,7 @@ before_script:
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git --version
-  - DISPLAY= npm run package
+  - npm run package
 after_success:
   - npm run travisnpmpublish
 before_deploy:

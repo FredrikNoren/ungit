@@ -4,7 +4,7 @@ const moment = require('moment');
 const octicons = require('octicons');
 const components = require('ungit-components');
 
-components.register('commit', args => new CommitViewModel(args));
+components.register('commit', (args) => new CommitViewModel(args));
 
 class CommitViewModel {
   constructor(gitNode) {
@@ -15,7 +15,7 @@ class CommitViewModel {
     this.nodeIsMousehover = gitNode.nodeIsMousehover;
     this.selected = gitNode.selected;
     this.pgpVerifiedString = gitNode.pgpVerifiedString;
-    this.pgpIcon = octicons.verified.toSVG({ 'height': 18 });
+    this.pgpIcon = octicons.verified.toSVG({ height: 18 });
     this.element = ko.observable();
     this.commitTime = ko.observable();
     this.authorTime = ko.observable();
@@ -31,11 +31,14 @@ class CommitViewModel {
     this.numberOfRemovedLines = ko.observable();
     this.authorGravatar = ko.computed(() => md5((this.authorEmail() || '').trim().toLowerCase()));
 
-    this.showCommitDiff = ko.computed(() => this.fileLineDiffs() && this.fileLineDiffs().length > 0);
+    this.showCommitDiff = ko.computed(
+      () => this.fileLineDiffs() && this.fileLineDiffs().length > 0
+    );
 
     this.diffStyle = ko.computed(() => {
-      const marginLeft = Math.min((gitNode.branchOrder() * 70), 450) * -1;
-      if (this.selected() && this.element()) return { 'margin-left': `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
+      const marginLeft = Math.min(gitNode.branchOrder() * 70, 450) * -1;
+      if (this.selected() && this.element())
+        return { 'margin-left': `${marginLeft}px`, width: `${window.innerWidth - 220}px` };
       else return {};
     });
   }
@@ -50,7 +53,7 @@ class CommitViewModel {
     const message = args.message.split('\n');
     this.message(args.message);
     this.title(message[0]);
-    this.body(message.slice((message[1] ? 1 : 2)).join('\n'));
+    this.body(message.slice(message[1] ? 1 : 2).join('\n'));
     this.authorDate(moment(new Date(args.authorDate)));
     this.authorDateFromNow(this.authorDate().fromNow());
     this.authorName(args.authorName);
@@ -59,19 +62,21 @@ class CommitViewModel {
     this.numberOfRemovedLines(args.deletions);
     this.fileLineDiffs(args.fileLineDiffs);
     this.isInited = true;
-    this.commitDiff = ko.observable(components.create('commitDiff', {
-      fileLineDiffs: this.fileLineDiffs(),
-      sha1: this.sha1,
-      repoPath: this.repoPath,
-      server: this.server,
-      showDiffButtons: this.selected
-    }));
+    this.commitDiff = ko.observable(
+      components.create('commitDiff', {
+        fileLineDiffs: this.fileLineDiffs(),
+        sha1: this.sha1,
+        repoPath: this.repoPath,
+        server: this.server,
+        showDiffButtons: this.selected,
+      })
+    );
   }
 
   updateLastAuthorDateFromNow(deltaT) {
     this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
     this.lastUpdatedAuthorDateFromNow += deltaT;
-    if(this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
+    if (this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
       this.lastUpdatedAuthorDateFromNow = 0;
       this.authorDateFromNow(this.authorDate().fromNow());
     }

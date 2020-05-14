@@ -4,18 +4,24 @@
  */
 var storage;
 try {
-    storage = {
-        getItem: localStorage.getItem.bind(localStorage),
-        setItem: localStorage.setItem.bind(localStorage),
-    };
-} catch (e) { /* Ignore Exception, use fallback implementation. */ }
+  storage = {
+    getItem: localStorage.getItem.bind(localStorage),
+    setItem: localStorage.setItem.bind(localStorage),
+  };
+} catch (e) {
+  /* Ignore Exception, use fallback implementation. */
+}
 
 if (!storage) {
-    var cache = Object.create(null);
-    storage = {
-        getItem: function (key) { return cache[key] || null; },
-        setItem: function (key, value) { cache[key] = value; },
-    };
+  var cache = Object.create(null);
+  storage = {
+    getItem: function (key) {
+      return cache[key] || null;
+    },
+    setItem: function (key, value) {
+      cache[key] = value;
+    },
+  };
 }
 
 module.exports = storage;

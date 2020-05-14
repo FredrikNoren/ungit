@@ -1,50 +1,97 @@
-
 <div class="graph" data-bind="scrolledToEnd: scrolledToEnd, click: handleBubbledClick">
-
   <!-- ko template: { name: 'graphGraphics' } --><!-- /ko -->
 
   <div class="nodes" data-bind="foreach: nodes">
-    <div class="nodeContainer animation" data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
-      <div class="commit-container animation" data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
+    <div
+      class="nodeContainer animation"
+      data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }"
+    >
+      <div
+        class="commit-container animation"
+        data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }"
+      >
         <!-- ko component: commitComponent -->
         <!-- /ko -->
       </div>
 
       <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
         <!-- ko foreach: branchesToDisplay -->
-        <span class="ref branch" draggable="true" tabIndex="-1"
-            data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
+        <span
+          class="ref branch"
+          draggable="true"
+          tabIndex="-1"
+          data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               html: displayHtml(true),
               click: selected,
-              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-local': isLocal }">
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-local': isLocal }"
+        >
         </span>
         <!-- /ko -->
 
         <!-- ko foreach: tagsToDisplay -->
-        <span class="ref tag" draggable="true" tabIndex="0"
-            data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
+        <span
+          class="ref tag"
+          draggable="true"
+          tabIndex="0"
+          data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               html: displayHtml(true),
               click: selected,
-              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }">
+              dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }"
+        >
         </span>
         <!-- /ko -->
 
         <!-- ko foreach: dropareaGraphActions -->
-        <span class="graphAction" data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
+        <span
+          class="graphAction"
+          data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }"
+        >
           <span data-bind="html: icon"></span>
           <span data-bind="text: text"></span>
-          <div class="dropmask" tabIndex="0" role="button" data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"></div>
+          <div
+            class="dropmask"
+            tabindex="0"
+            role="button"
+            data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform"
+          ></div>
         </span>
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->
         <span class="ref-icons new-ref" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showBranchingForm bootstrap-tooltip" type="button" data-bind="html: $parent.plusIcon, click: showBranchingForm, visible: !branchingFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Create a branch or tag"></button>
+          <button
+            class="showBranchingForm"
+            type="button"
+            data-bind="html: $parent.plusIcon, click: showBranchingForm, visible: !branchingFormVisible()"
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Create a branch or tag"
+          ></button>
           <!-- ko if: branchingFormVisible -->
-          <form class="form-inline" data-bind="hasfocus2: branchingFormVisible, submit: createBranch">
-            <input class="name form-control" type="text" aria-label="New branch name" data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'" />
-            <button class="btn btn-primary" type="submit" data-bind="click: createBranch, enable: canCreateRef">Branch</button>
-            <button class="btn btn-default" type="button" data-bind="click: createTag, enable: canCreateRef">Tag</button>
+          <form
+            class="form-inline"
+            data-bind="hasfocus2: branchingFormVisible, submit: createBranch"
+          >
+            <input
+              class="name form-control"
+              type="text"
+              aria-label="New branch name"
+              data-bind="value: newBranchName, hasfocus: newBranchNameHasFocus, valueUpdate: 'afterkeydown'"
+            />
+            <button
+              class="btn btn-primary"
+              type="submit"
+              data-bind="click: createBranch, enable: canCreateRef"
+            >
+              Branch
+            </button>
+            <button
+              class="btn btn-default"
+              type="button"
+              data-bind="click: createTag, enable: canCreateRef"
+            >
+              Tag
+            </button>
           </form>
           <!-- /ko -->
         </span>
@@ -52,15 +99,25 @@
 
         <!-- ko if: showRefSearch -->
         <span class="ref-icons" data-bind="css: { editing: branchingFormVisible }">
-          <button class="showSearchForm bootstrap-tooltip" type="button" data-bind="html: $parent.searchIcon, click: showRefSearchForm, visible: !refSearchFormVisible()" data-toggle="tooltip" data-placement="bottom" title="Search for a branch or tag"></button>
+          <button
+            class="showSearchForm"
+            type="button"
+            data-bind="html: $parent.searchIcon, click: showRefSearchForm, visible: !refSearchFormVisible()"
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Search for a branch or tag"
+          ></button>
           <div class="form-inline" data-bind="visible: refSearchFormVisible()">
-            <input class="name form-control" type="search" aria-label="Filter branches and tags" data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeydown'" />
+            <input
+              class="name form-control"
+              type="search"
+              aria-label="Filter branches and tags"
+              data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeydown'"
+            />
           </div>
         </span>
         <!-- /ko -->
-
       </div>
-
     </div>
   </div>
 </div>

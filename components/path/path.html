@@ -1,5 +1,4 @@
 <div class="path" data-bind="shown: shown">
-
   <!-- ko if: status() == 'uninited' -->
   <div class="uninited container">
     <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
@@ -10,7 +9,9 @@
     <div class="row">
       <div class="col-lg-6">
         <div class="panel panel-default">
-          <div class="panel-heading">Create a new git repository in "<span data-bind="text: dirName"></span>"</div>
+          <div class="panel-heading">
+            Create a new git repository in "<span data-bind="text: dirName"></span>"
+          </div>
           <div class="panel-body">
             <button class="btn btn-primary btn-lg" data-bind="click: initRepository">
               Create Repository
@@ -20,16 +21,30 @@
       </div>
       <div class="col-lg-6">
         <div class="panel panel-default">
-          <div class="panel-heading">Clone a git repository into a subfolder of "<span data-bind="text: dirName"></span>"</div>
+          <div class="panel-heading">
+            Clone a git repository into a subfolder of "<span data-bind="text: dirName"></span>"
+          </div>
           <div class="panel-body">
             <form data-bind="submit: cloneRepository">
               <div class="form-group">
                 <label for="cloneFromInput">Clone from</label>
-                <input class="form-control" id="cloneFromInput" type="text" placeholder="URL" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'" required />
+                <input
+                  class="form-control"
+                  id="cloneFromInput"
+                  type="text"
+                  placeholder="URL"
+                  data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="cloneToInput">into</label>
-                <input class="form-control" id="cloneToInput" type="text" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }" />
+                <input
+                  class="form-control"
+                  id="cloneToInput"
+                  type="text"
+                  data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }"
+                />
               </div>
               <div class="form-group">
                 <label>
@@ -59,5 +74,4 @@
   <!-- ko if: repository -->
   <!-- ko component: repository --><!-- /ko -->
   <!-- /ko -->
-
 </div>

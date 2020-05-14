@@ -1,4 +1,3 @@
-const Bluebird = require('bluebird');
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 0 });
 const md5 = require('blueimp-md5');
@@ -13,38 +12,23 @@ const funcMap = {}; // Will there ever be a use case where this is a cache with 
 cache.resolveFunc = (key) => {
   let result = cache.get(key);
   if (result !== undefined) {
-    return Bluebird.resolve(result);
+    return Promise.resolve(result);
   }
   result = funcMap[key];
   if (result === undefined) {
-    return Bluebird.reject(new Error(`Cache entry ${key} not found`));
+    return Promise.reject(new Error(`Cache entry ${key} not found`));
   }
   try {
     result = result.func();
   } catch (err) {
-    return Bluebird.reject(err);
+    return Promise.reject(err);
   }
-  return getHardValue(result) // func is found, resolve, set with TTL and return result
+  return Promise.resolve(result) // func is found, resolve, set with TTL and return result
     .then((r) => {
-      cache.set(key, r, funcMap[key].ttl)
+      cache.set(key, r, funcMap[key].ttl);
       return r;
     });
-}
-
-/**
- * @function getHardValue
- * @description In Linux, or certain settings, it seems that cached promises
- *   are not able to resolved and we need to cache raw result of promieses.
- * @param {prom} - raw value or promise to be returned or resolved
- * @param {promise} - a promise where next "then" will result in raw value.
- */
-const getHardValue = (prom) => {
-  if (prom.then) {
-    return prom.then(getHardValue);
-  } else {
-    return Bluebird.resolve(prom);
-  }
-}
+};
 
 /**
  * @function registerFunc
@@ -59,12 +43,12 @@ cache.registerFunc = (...args) => {
   let key = args.pop() || md5(func);
   let ttl = args.pop() || cache.options.stdTTL;
 
-  if (typeof func !== "function") {
-    throw new Error("no function was passed in.");
+  if (typeof func !== 'function') {
+    throw new Error('no function was passed in.');
   }
 
   if (isNaN(ttl) || ttl < 0) {
-    throw new Error("ttl value is not valid.");
+    throw new Error('ttl value is not valid.');
   }
 
   if (funcMap[key]) {
@@ -73,11 +57,11 @@ cache.registerFunc = (...args) => {
 
   funcMap[key] = {
     func: func,
-    ttl: ttl
-  }
+    ttl: ttl,
+  };
 
   return key;
-}
+};
 
 /**
  * @function invalidateFunc
@@ -86,7 +70,7 @@ cache.registerFunc = (...args) => {
  */
 cache.invalidateFunc = (key) => {
   cache.del(key);
-}
+};
 
 /**
  * @function deregisterFunc
@@ -96,6 +80,6 @@ cache.invalidateFunc = (key) => {
 cache.deregisterFunc = (key) => {
   cache.invalidateFunc(key);
   delete funcMap[key];
-}
+};
 
 module.exports = cache;

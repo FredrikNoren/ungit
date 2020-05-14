@@ -1,5 +1,4 @@
-
-@import "public/less/variables.less";
+@import 'public/less/variables.less';
 
 .graph {
   position: relative;
@@ -8,6 +7,7 @@
 
   .graphLog {
     left: 575px;
+
     .loadAhead {
       cursor: pointer;
       animation: throb 1s ease alternate infinite;
@@ -18,6 +18,7 @@
     50% {
       r: 20;
     }
+
     100% {
       r: 18;
     }
@@ -47,7 +48,7 @@
       display: inline-block;
       opacity: 0.6;
       cursor: move;
-      margin: 7px 0px 4px 0px;
+      margin: 7px 0 4px 0;
       outline: none;
       padding: 2px 5px 2px 5px;
       border: 3px solid transparent;
@@ -58,8 +59,9 @@
       &.dragging.focused {
         border-color: transparent;
       }
+
       &.focused {
-        border-color: #fff;
+        border-color: #ffffff;
       }
 
       &.current {
@@ -69,16 +71,18 @@
         margin-top: 2px;
         margin-bottom: -2px;
       }
+
       &.remote {
-        color: #5DB4FF;
+        color: #5db4ff;
       }
+
       &.tag {
-        color: #EEF266;
+        color: #eef266;
       }
     }
 
     .graphAction {
-      color: #fff;
+      color: #ffffff;
       cursor: pointer;
       transition: all 0.5s ease 0.2s;
       transition-property: opacity;
@@ -102,36 +106,47 @@
       &.push {
         background: rgba(61, 139, 255, 0.9);
       }
+
       &.pull {
         background: rgba(38, 189, 189, 0.9);
       }
+
       &.reset {
         background: rgba(255, 129, 31, 0.9);
       }
+
       &.rebase {
         background: rgba(65, 222, 60, 0.9);
       }
+
       &.squash {
         background: rgba(100, 60, 222, 0.9);
       }
+
       &.move {
         background: rgba(0, 0, 0, 0.1);
       }
+
       &.merge {
         background: rgba(208, 135, 212, 0.9);
       }
+
       &.checkout {
         background: rgba(205, 219, 55, 0.9);
       }
+
       &.delete {
         background: rgba(214, 77, 56, 0.9);
       }
+
       &.cherry-pick {
         background: rgba(110, 156, 110, 0.9);
       }
+
       &.uncommit {
         background: rgba(158, 53, 20, 0.9);
       }
+
       &.revert {
         background: rgba(179, 135, 43, 0.9);
       }
@@ -142,35 +157,41 @@
       padding-top: 2px;
       padding-bottom: 2px;
       margin-left: 5px;
+
       .showBranchingForm {
         background: transparent;
-        border: 0px;
+        border: 0;
         cursor: pointer;
-        padding: 0px;
-        margin: 0px;
+        padding: 0;
+        margin: 0;
         margin-top: 9px;
         -webkit-text-stroke-width: 1px;
         color: rgba(255, 255, 255, 0.3);
+
         &:hover {
           color: rgba(255, 255, 255, 0.8);
         }
       }
+
       .showSearchForm {
         background: transparent;
-        border: 0px;
+        border: 0;
         cursor: pointer;
-        padding: 0px;
-        margin: 0px;
+        padding: 0;
+        margin: 0;
         margin-top: 9px;
         -webkit-text-stroke-width: 1px;
         color: rgba(255, 255, 255, 0.3);
+
         &:hover {
           color: rgba(255, 255, 255, 0.8);
         }
       }
+
       .form-inline {
         display: inline-block;
       }
+
       input.name {
         width: 150px;
       }

@@ -5,7 +5,7 @@ const programEvents = require('ungit-program-events');
 const Animateable = require('./animateable');
 const GraphActions = require('./git-graph-actions');
 
-const maxBranchesToDisplay = parseInt(ungit.config.numRefsToShow / 5 * 3);  // 3/5 of refs to show to branches
+const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 class GitNodeViewModel extends Animateable {
@@ -17,7 +17,7 @@ class GitNodeViewModel extends Animateable {
     this.title = ko.observable();
     this.parents = ko.observableArray();
     this.commitTime = undefined; // commit time in string
-    this.date = undefined;       // commit time in numeric format for sort
+    this.date = undefined; // commit time in numeric format for sort
     this.color = ko.observable();
     this.ideologicalBranch = ko.observable();
     this.remoteTags = ko.observableArray();
@@ -51,8 +51,15 @@ class GitNodeViewModel extends Animateable {
       if (newValue) {
         this.branches(newValue.filter((r) => r.isBranch));
         this.tags(newValue.filter((r) => r.isTag));
-        this.branchesToDisplay(this.branches.slice(0, ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)));
-        this.tagsToDisplay(this.tags.slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length));
+        this.branchesToDisplay(
+          this.branches.slice(
+            0,
+            ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)
+          )
+        );
+        this.tagsToDisplay(
+          this.tags.slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length)
+        );
       } else {
         this.branches.removeAll();
         this.tags.removeAll();
@@ -62,7 +69,9 @@ class GitNodeViewModel extends Animateable {
     });
     this.ancestorOfHEAD = ko.observable(false);
     this.nodeIsMousehover = ko.observable(false);
-    this.commitContainerVisible = ko.computed(() => this.ancestorOfHEAD() || this.nodeIsMousehover() || this.selected());
+    this.commitContainerVisible = ko.computed(
+      () => this.ancestorOfHEAD() || this.nodeIsMousehover() || this.selected()
+    );
     this.isEdgeHighlighted = ko.observable(false);
     // for small empty black circle to highlight a node
     this.isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
@@ -72,11 +81,16 @@ class GitNodeViewModel extends Animateable {
       programEvents.dispatch({ event: 'graph-render' });
     });
     this.showNewRefAction = ko.computed(() => !graph.currentActionContext());
-    this.showRefSearch = ko.computed(() => (this.branches().length + this.tags().length) > ungit.config.numRefsToShow);
+    this.showRefSearch = ko.computed(
+      () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
+    );
     this.newBranchName = ko.observable();
     this.newBranchNameHasFocus = ko.observable(true);
     this.branchingFormVisible = ko.observable(false);
-    this.canCreateRef = ko.computed(() => this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' '));
+    this.canCreateRef = ko.computed(
+      () =>
+        this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' ')
+    );
     this.branchOrder = ko.observable();
     this.aboveNode = undefined;
     this.belowNode = undefined;
@@ -97,7 +111,7 @@ class GitNodeViewModel extends Animateable {
       new GraphActions.CherryPick(this.graph, this),
       new GraphActions.Uncommit(this.graph, this),
       new GraphActions.Revert(this.graph, this),
-      new GraphActions.Squash(this.graph, this)
+      new GraphActions.Squash(this.graph, this),
     ];
   }
 
@@ -126,7 +140,7 @@ class GitNodeViewModel extends Animateable {
       }
     } else {
       this.r(15);
-      this.cx(610 + (90 * this.branchOrder()));
+      this.cx(610 + 90 * this.branchOrder());
       this.cy(this.aboveNode ? this.aboveNode.cy() + 60 : 120);
     }
 
@@ -147,7 +161,7 @@ class GitNodeViewModel extends Animateable {
     this.signatureMade(logEntry.signatureMade);
     this.signatureDate(logEntry.signatureDate);
 
-    (logEntry.refs || []).forEach(ref => {
+    (logEntry.refs || []).forEach((ref) => {
       this.graph.getRef(ref).node(this);
     });
     this.isInited = true;
@@ -168,9 +182,9 @@ class GitNodeViewModel extends Animateable {
       const renderItem = (ul, item) => $(`<li><a>${item.displayHtml()}</a></li>`).appendTo(ul);
       $textBox.autocomplete({
         classes: {
-          'ui-autocomplete': 'dropdown-menu'
+          'ui-autocomplete': 'dropdown-menu',
         },
-        source: this.refs().filter(ref => !ref.isHEAD),
+        source: this.refs().filter((ref) => !ref.isHEAD),
         minLength: 0,
         create: (event) => {
           $(event.target).data('ui-autocomplete')._renderItem = renderItem;
@@ -197,13 +211,22 @@ class GitNodeViewModel extends Animateable {
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.graph.server.postPromise('/branches', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
+    this.graph.server
+      .postPromise('/branches', {
+        path: this.graph.repoPath(),
+        name: this.newBranchName(),
+        sha1: this.sha1,
+      })
       .then(() => {
         this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.graph.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.newBranchName() });
+          return this.graph.server.postPromise('/checkout', {
+            path: this.graph.repoPath(),
+            name: this.newBranchName(),
+          });
         }
-      }).catch((e) => this.graph.server.unhandledRejection(e))
+      })
+      .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -213,8 +236,13 @@ class GitNodeViewModel extends Animateable {
 
   createTag() {
     if (!this.canCreateRef()) return;
-    this.graph.server.postPromise('/tags', { path: this.graph.repoPath(), name: this.newBranchName(), sha1: this.sha1 })
-      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this) )
+    this.graph.server
+      .postPromise('/tags', {
+        path: this.graph.repoPath(),
+        name: this.newBranchName(),
+        sha1: this.sha1,
+      })
+      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
       .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
@@ -229,9 +257,11 @@ class GitNodeViewModel extends Animateable {
       beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
     }
 
-    let prevSelected  = this.graph.currentActionContext();
+    let prevSelected = this.graph.currentActionContext();
     if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
-    const prevSelectedCR = prevSelected ? prevSelected.commitComponent.element().getBoundingClientRect() : null;
+    const prevSelectedCR = prevSelected
+      ? prevSelected.commitComponent.element().getBoundingClientRect()
+      : null;
     this.selected(!this.selected());
 
     // If we are deselecting
@@ -241,16 +271,19 @@ class GitNodeViewModel extends Animateable {
         // If the next node is showing, try to keep it in the screen (no jumping)
         if (beforeBelowCR.top < window.innerHeight) {
           window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
-        // Otherwise just try to bring them to the middle of the screen
+          // Otherwise just try to bring them to the middle of the screen
         } else {
           window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
         }
       }
-    // If we are selecting
+      // If we are selecting
     } else {
       const afterThisCR = this.commitComponent.element().getBoundingClientRect();
-      if ((prevSelectedCR && (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight)) &&
-        afterThisCR.top != beforeThisCR.top) {
+      if (
+        prevSelectedCR &&
+        (prevSelectedCR.top < 0 || prevSelectedCR.top > window.innerHeight) &&
+        afterThisCR.top != beforeThisCR.top
+      ) {
         window.scrollBy(0, -(beforeThisCR.top - afterThisCR.top));
         console.log('Fix');
       }
@@ -269,7 +302,7 @@ class GitNodeViewModel extends Animateable {
   pushRef(ref) {
     if (ref.isRemoteTag && !this.remoteTags().includes(ref)) {
       this.remoteTags.push(ref);
-    } else if(!this.branchesAndLocalTags().includes(ref)) {
+    } else if (!this.branchesAndLocalTags().includes(ref)) {
       this.branchesAndLocalTags.push(ref);
     }
   }

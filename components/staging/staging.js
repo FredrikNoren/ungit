@@ -1,6 +1,5 @@
 const ko = require('knockout');
 const _ = require('lodash');
-const promise = require('bluebird');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
@@ -8,7 +7,10 @@ const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
 
-components.register('staging', args => new StagingViewModel(args.server, args.repoPath, args.graph));
+components.register(
+  'staging',
+  (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
+);
 
 class StagingViewModel {
   constructor(server, repoPath, graph) {
@@ -19,7 +21,7 @@ class StagingViewModel {
     this.files = ko.observableArray();
     this.commitMessageTitleCount = ko.observable(0);
     this.commitMessageTitle = ko.observable();
-    this.commitMessageTitle.subscribe(value => {
+    this.commitMessageTitle.subscribe((value) => {
       this.commitMessageTitleCount(value.length);
     });
     this.commitMessageBody = ko.observable();
@@ -51,22 +53,34 @@ class StagingViewModel {
     this.HEAD = ko.observable();
     this.isStageValid = ko.computed(() => !this.inRebase() && !this.inMerge() && !this.inCherry());
     this.nFiles = ko.computed(() => this.files().length);
-    this.nStagedFiles = ko.computed(() => this.files().filter(f => f.editState() === 'staged').length);
+    this.nStagedFiles = ko.computed(
+      () => this.files().filter((f) => f.editState() === 'staged').length
+    );
     this.allStageFlag = ko.computed(() => this.nFiles() !== this.nStagedFiles());
     this.stats = ko.computed(() => `${this.nFiles()} files, ${this.nStagedFiles()} to be commited`);
     this.amend = ko.observable(false);
-    this.canAmend = ko.computed(() => this.HEAD() && !this.inRebase() && !this.inMerge() && !this.emptyCommit());
+    this.canAmend = ko.computed(
+      () => this.HEAD() && !this.inRebase() && !this.inMerge() && !this.emptyCommit()
+    );
     this.emptyCommit = ko.observable(false);
     this.canEmptyCommit = ko.computed(() => this.HEAD() && !this.inRebase() && !this.inMerge());
     this.canStashAll = ko.computed(() => !this.amend());
     this.canPush = ko.computed(() => !!this.graph.currentRemote());
-    this.showNux = ko.computed(() => this.files().length == 0 && !this.amend() && !this.inRebase() && !this.emptyCommit());
+    this.showNux = ko.computed(
+      () => this.files().length == 0 && !this.amend() && !this.inRebase() && !this.emptyCommit()
+    );
     this.showCancelButton = ko.computed(() => this.amend() || this.emptyCommit());
     this.commitValidationError = ko.computed(() => {
       if (this.conflictText()) {
         if (this.files().some((file) => file.conflict())) return 'Files in conflict';
       } else {
-        if (!this.emptyCommit() && !this.amend() && !this.files().some((file) => file.editState() === 'staged' || file.editState() === 'patched')) {
+        if (
+          !this.emptyCommit() &&
+          !this.amend() &&
+          !this.files().some(
+            (file) => file.editState() === 'staged' || file.editState() === 'patched'
+          )
+        ) {
           return 'No files to commit';
         }
         if (!this.commitMessageTitle()) {
@@ -74,7 +88,7 @@ class StagingViewModel {
         }
 
         if (this.textDiffType.value() === 'sidebysidediff') {
-          const patchFiles = this.files().filter(file => file.editState() === 'patched');
+          const patchFiles = this.files().filter((file) => file.editState() === 'patched');
           if (patchFiles.length > 0) return 'Cannot patch with side by side view.';
         }
       }
@@ -85,16 +99,20 @@ class StagingViewModel {
       else return 'glyphicon-check';
     });
 
-    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, { trailing: true });
-    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, { trailing: true });
+    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, {
+      trailing: true,
+    });
+    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, {
+      trailing: true,
+    });
     this.refreshContentThrottled();
     this.loadAnyway = false;
     this.isDiagOpen = false;
     this.mutedTime = null;
-    this.discardAllIcon = octicons.trashcan.toSVG({ 'height': 15 });
-    this.stashIcon = octicons.pin.toSVG({ 'height': 15 });
-    this.discardIcon = octicons.x.toSVG({ 'height': 18 });
-    this.ignoreIcon = octicons.skip.toSVG({ 'height': 18 });
+    this.discardAllIcon = octicons.trashcan.toSVG({ height: 15 });
+    this.stashIcon = octicons.pin.toSVG({ height: 15 });
+    this.discardIcon = octicons.x.toSVG({ height: 18 });
+    this.ignoreIcon = octicons.skip.toSVG({ height: 18 });
     this.commitMessageTags = [];
 
     ungit.config.commitMessageTags.forEach((elt) => {
@@ -123,28 +141,35 @@ class StagingViewModel {
   }
 
   refreshContent() {
-    return promise.all([this.server.getPromise('/head', { path: this.repoPath(), limit: 1 })
-        .then(log => {
+    return Promise.all([
+      this.server
+        .getPromise('/head', { path: this.repoPath(), limit: 1 })
+        .then((log) => {
           if (log.length > 0) {
             const array = log[0].message.split('\n');
-            this.HEAD({title: array[0], body: array.slice(2).join('\n')});
-          }
-          else this.HEAD(null);
-        }).catch(err => {
+            this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
+          } else this.HEAD(null);
+        })
+        .catch((err) => {
           if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
             this.server.unhandledRejection(err);
           }
         }),
-      this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
-        .then(status => {
+      this.server
+        .getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
+        .then((status) => {
           if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
             if (this.isDiagOpen) {
               return;
             }
             this.isDiagOpen = true;
-            return components.create('toomanyfilesdialogviewmodel', { title: 'Too many unstaged files', details: 'It is recommended to use command line as ungit may be too slow.'})
+            return components
+              .create('toomanyfilesdialogviewmodel', {
+                title: 'Too many unstaged files',
+                details: 'It is recommended to use command line as ungit may be too slow.',
+              })
               .show()
-              .closeThen(diag => {
+              .closeThen((diag) => {
                 this.isDiagOpen = false;
                 if (diag.result()) {
                   this.loadAnyway = true;
@@ -156,11 +181,13 @@ class StagingViewModel {
           } else {
             this.loadStatus(status);
           }
-        }).catch(err => {
+        })
+        .catch((err) => {
           if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
             this.server.unhandledRejection(err);
           }
-        })]);
+        }),
+    ]);
   }
 
   loadStatus(status) {
@@ -185,10 +212,15 @@ class StagingViewModel {
 
   setFiles(files) {
     const newFiles = [];
-    for(let fileStatus of Object.values(files)) {
+    for (let fileStatus of Object.values(files)) {
       let fileViewModel = this.filesByPath[fileStatus.fileName];
       if (!fileViewModel) {
-        this.filesByPath[fileStatus.fileName] = fileViewModel = new FileViewModel(this, fileStatus.fileName, fileStatus.oldFileName, fileStatus.displayName);
+        this.filesByPath[fileStatus.fileName] = fileViewModel = new FileViewModel(
+          this,
+          fileStatus.fileName,
+          fileStatus.oldFileName,
+          fileStatus.displayName
+        );
       } else {
         // this is mainly for patching and it may not fire due to the fact that
         // '/commit' triggers working-tree-changed which triggers throttled refresh
@@ -198,14 +230,13 @@ class StagingViewModel {
       newFiles.push(fileViewModel);
     }
     this.files(newFiles);
-    programEvents.dispatch({ event: 'init-tooltip' });
   }
 
   toggleAmend() {
     if (!this.amend() && !this.commitMessageTitle()) {
       this.commitMessageTitle(this.HEAD().title);
       this.commitMessageBody(this.HEAD().body);
-    } else if(this.amend()) {
+    } else if (this.amend()) {
       const isPrevDefaultMsg =
         this.commitMessageTitle() == this.HEAD().title &&
         this.commitMessageBody() == this.HEAD().body;
@@ -253,38 +284,69 @@ class StagingViewModel {
   }
 
   commit() {
-    const files = this.files().filter(file => file.editState() !== 'none').map(file => ({
-      name: file.name(),
-      patchLineList: file.editState() === 'patched' ? file.patchLineList() : null
-    }));
+    const files = this.files()
+      .filter((file) => file.editState() !== 'none')
+      .map((file) => ({
+        name: file.name(),
+        patchLineList: file.editState() === 'patched' ? file.patchLineList() : null,
+      }));
 
     let commitMessage = this.buildCommitMessage();
 
-    this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files, amend: this.amend(), emptyCommit: this.emptyCommit() })
-      .then(() => { this.resetMessages(); })
+    this.server
+      .postPromise('/commit', {
+        path: this.repoPath(),
+        message: commitMessage,
+        files,
+        amend: this.amend(),
+        emptyCommit: this.emptyCommit(),
+      })
+      .then(() => {
+        this.resetMessages();
+      })
       .catch((e) => this.server.unhandledRejection(e));
   }
 
   commitnpush() {
-    const files = this.files().filter(file => file.editState() !== 'none').map(file => ({
-      name: file.name(),
-      patchLineList: file.editState() === 'patched' ? file.patchLineList() : null
-    }));
+    const files = this.files()
+      .filter((file) => file.editState() !== 'none')
+      .map((file) => ({
+        name: file.name(),
+        patchLineList: file.editState() === 'patched' ? file.patchLineList() : null,
+      }));
 
     let commitMessage = this.buildCommitMessage();
 
-    this.server.postPromise('/commit', { path: this.repoPath(), message: commitMessage, files, amend: this.amend(), emptyCommit: this.emptyCommit() })
+    this.server
+      .postPromise('/commit', {
+        path: this.repoPath(),
+        message: commitMessage,
+        files,
+        amend: this.amend(),
+        emptyCommit: this.emptyCommit(),
+      })
       .then(() => {
         this.resetMessages();
-        return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote() });
+        return this.server.postPromise('/push', {
+          path: this.repoPath(),
+          remote: this.graph.currentRemote(),
+        });
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.errorCode == 'non-fast-forward') {
-          return components.create('yesnodialog', { title: 'Force push?', details: 'The remote branch can\'t be fast-forwarded.' })
+          return components
+            .create('yesnodialog', {
+              title: 'Force push?',
+              details: "The remote branch can't be fast-forwarded.",
+            })
             .show()
-            .closeThen(diag => {
+            .closeThen((diag) => {
               if (!diag.result()) return false;
-              return this.server.postPromise('/push', { path: this.repoPath(), remote: this.graph.currentRemote(), force: true });
+              return this.server.postPromise('/push', {
+                path: this.repoPath(),
+                remote: this.graph.currentRemote(),
+                force: true,
+              });
             }).closePromise;
         } else {
           this.server.unhandledRejection(err);
@@ -295,13 +357,16 @@ class StagingViewModel {
   conflictResolution(apiPath) {
     let commitMessage = this.commitMessageTitle();
     if (this.commitMessageBody()) commitMessage += `\n\n${this.commitMessageBody()}`;
-    this.server.postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
+    this.server
+      .postPromise(apiPath, { path: this.repoPath(), message: commitMessage })
       .catch((e) => this.server.unhandledRejection(e))
-      .finally((err) => { this.resetMessages(); });
+      .finally(() => {
+        this.resetMessages();
+      });
   }
 
   invalidateFilesDiffs() {
-    this.files().forEach(file => {
+    this.files().forEach((file) => {
       file.diff().invalidateDiff();
     });
   }
@@ -311,40 +376,46 @@ class StagingViewModel {
   }
 
   discardAllChanges() {
-    components.create('yesnodialog', { title: 'Are you sure you want to discard all changes?', details: 'This operation cannot be undone.'})
+    components
+      .create('yesnodialog', {
+        title: 'Are you sure you want to discard all changes?',
+        details: 'This operation cannot be undone.',
+      })
       .show()
       .closeThen((diag) => {
         if (diag.result()) {
-          this.server.postPromise('/discardchanges', { path: this.repoPath(), all: true })
+          this.server
+            .postPromise('/discardchanges', { path: this.repoPath(), all: true })
             .catch((e) => this.server.unhandledRejection(e));
         }
       });
   }
 
   stashAll() {
-    this.server.postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() })
+    this.server
+      .postPromise('/stashes', { path: this.repoPath(), message: this.commitMessageTitle() })
       .catch((e) => this.server.unhandledRejection(e));
   }
 
   toggleAllStages() {
     const allStageFlag = this.allStageFlag();
-    for (const n in this.files()){
+    for (const n in this.files()) {
       this.files()[n].editState(allStageFlag ? 'staged' : 'none');
     }
   }
 
   onEnter(d, e) {
-      if (e.keyCode === 13 && !this.commitValidationError()) {
-        this.commit();
-      }
-      return true;
+    if (e.keyCode === 13 && !this.commitValidationError()) {
+      this.commit();
+    }
+    return true;
   }
 
   onAltEnter(d, e) {
-      if (e.keyCode === 13 && e.altKey && !this.commitValidationError()) {
-        this.commit();
-      }
-      return true;
+    if (e.keyCode === 13 && e.altKey && !this.commitValidationError()) {
+      this.commit();
+    }
+    return true;
   }
 }
 
@@ -366,21 +437,33 @@ class FileViewModel {
     this.modified = ko.computed(() => {
       // only show modfied whe not removed, not conflicted, not new, not renamed
       // and length of additions and deletions is 0.
-      return !this.removed() && !this.conflict() && !this.isNew() &&
-        this.additions().length === 0 && this.deletions().length === 0;
+      return (
+        !this.removed() &&
+        !this.conflict() &&
+        !this.isNew() &&
+        this.additions().length === 0 &&
+        this.deletions().length === 0
+      );
     });
     this.fileType = ko.observable('text');
     this.patchLineList = ko.observableArray();
     this.diff = ko.observable();
-    this.isShowPatch = ko.computed(() => // if not new file
-    // and if not merging
-    // and if not rebasing
-    // and if text file
-    // and if diff is showing, display patch button
-    !this.isNew() && !staging.inMerge() && !staging.inRebase() && this.fileType() === 'text' && this.isShowingDiffs());
+    this.isShowPatch = ko.computed(
+      () =>
+        // if not new file
+        // and if not merging
+        // and if not rebasing
+        // and if text file
+        // and if diff is showing, display patch button
+        !this.isNew() &&
+        !staging.inMerge() &&
+        !staging.inRebase() &&
+        this.fileType() === 'text' &&
+        this.isShowingDiffs()
+    );
     this.mergeTool = ko.computed(() => this.conflict() && mergeTool !== false);
 
-    this.editState.subscribe(value => {
+    this.editState.subscribe((value) => {
       if (value === 'none') {
         this.patchLineList.removeAll();
       } else if (value === 'patched') {
@@ -401,7 +484,7 @@ class FileViewModel {
       isShowingDiffs: this.isShowingDiffs,
       patchLineList: this.patchLineList,
       editState: this.editState,
-      wordWrap: this.staging.wordWrap
+      wordWrap: this.staging.wordWrap,
     });
   }
 
@@ -433,15 +516,24 @@ class FileViewModel {
   }
 
   discardChanges() {
-    if (ungit.config.disableDiscardWarning || new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime) {
-      this.server.postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
+    if (
+      ungit.config.disableDiscardWarning ||
+      new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime
+    ) {
+      this.server
+        .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
         .catch((e) => this.server.unhandledRejection(e));
     } else {
-      components.create('yesnomutedialog', { title: 'Are you sure you want to discard these changes?', details: 'This operation cannot be undone.'})
+      components
+        .create('yesnomutedialog', {
+          title: 'Are you sure you want to discard these changes?',
+          details: 'This operation cannot be undone.',
+        })
         .show()
         .closeThen((diag) => {
           if (diag.result()) {
-            this.server.postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
+            this.server
+              .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
               .catch((e) => this.server.unhandledRejection(e));
           }
           if (diag.result() === 'mute') this.staging.mutedTime = new Date().getTime();
@@ -450,8 +542,9 @@ class FileViewModel {
   }
 
   ignoreFile() {
-    this.server.postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
-      .catch(err => {
+    this.server
+      .postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
+      .catch((err) => {
         if (err.errorCode == 'file-already-git-ignored') {
           // The file was already in the .gitignore, so force an update of the staging area (to hopefully clear away this file)
           programEvents.dispatch({ event: 'working-tree-changed' });
@@ -462,12 +555,18 @@ class FileViewModel {
   }
 
   resolveConflict() {
-    this.server.postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] })
+    this.server
+      .postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] })
       .catch((e) => this.server.unhandledRejection(e));
   }
 
   launchMergeTool() {
-    this.server.postPromise('/launchmergetool', { path: this.staging.repoPath(), file: this.name(), tool: mergeTool })
+    this.server
+      .postPromise('/launchmergetool', {
+        path: this.staging.repoPath(),
+        file: this.name(),
+        tool: mergeTool,
+      })
       .catch((e) => this.server.unhandledRejection(e));
   }
 

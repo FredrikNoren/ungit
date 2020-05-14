@@ -1,9 +1,9 @@
-@import "public/less/variables.less";
+@import 'public/less/variables.less';
 
 .staging {
-  background: #643A44;
-  box-shadow: 0px -1px 15px #252833;
-  color: #B8A5A5;
+  background: #643a44;
+  box-shadow: 0 -1px 15px #252833;
+  color: #b8a5a5;
   z-index: 5;
   position: relative;
 
@@ -30,15 +30,16 @@
 
   .validationError {
     display: none;
-    color: #D6542D;
+    color: #d6542d;
     padding: 0.25em;
   }
+
   &:hover .validationError {
     display: inline-block;
   }
 
   .diffContainer {
-    margin-top: 0px;
+    margin-top: 0;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
   }
@@ -54,7 +55,7 @@
 
     &:focus,
     &:hover {
-      background: #000;
+      background: #000000;
       color: rgba(255, 255, 255, 0.9);
     }
   }
@@ -71,7 +72,7 @@
 
     &:focus,
     &:hover {
-      background: #55f;
+      background: #5555ff;
       color: rgba(255, 255, 255, 0.9);
     }
   }
@@ -93,7 +94,7 @@
     }
   }
 
-  .d2h-code-line-prefix input[type="checkbox"] {
+  .d2h-code-line-prefix input[type='checkbox'] {
     margin: 0;
     margin-right: -6px;
     vertical-align: sub;
@@ -101,83 +102,107 @@
 
   .files {
     position: relative;
+
     .file {
+      padding: 0.3em;
+
       &.showingDiffs {
         .name {
           background: rgba(255, 255, 255, 0.1);
-          color: #000;
-          border-bottom-left-radius: 0px;
-          border-bottom-right-radius: 0px;
+          color: #000000;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
         }
       }
+
       .checkmark {
         span {
           top: 5px;
         }
       }
+
       .name {
         background: transparent;
         font-size: 1.3em;
         cursor: pointer;
         padding: 3px;
-        border: 0px;
+        border: 0;
         border-radius: 3px;
         color: rgba(255, 255, 255, 0.8);
       }
-      padding: 0.3em;
 
-      .new, .deleted, .conflict, .markresolved, .launchmergetool {
+      .new,
+      .deleted,
+      .conflict,
+      .markresolved,
+      .launchmergetool {
         padding: 3px;
         padding-left: 5px;
         padding-right: 5px;
       }
-      .new, .additions {
+
+      .new,
+      .additions {
         color: #949494;
         vertical-align: middle;
       }
-      .deleted, .deletions {
-        color: #7B7B7B;
+
+      .deleted,
+      .deletions {
+        color: #7b7b7b;
         vertical-align: middle;
       }
+
       .conflict {
-        color: #DB12C0;
+        color: #db12c0;
+
         .explanation {
           display: none;
         }
+
         &:hover {
           .explanation {
             display: inline;
           }
+
           .temporary {
             display: none;
           }
         }
       }
+
       .markresolved {
-        color: #DB12C0;
+        color: #db12c0;
         cursor: pointer;
+
         .explanation {
           display: none;
         }
+
         &:hover {
-          background: #A445ED;
-          color: #000;
+          background: #a445ed;
+          color: #000000;
           border-radius: 3px;
+
           .explanation {
             display: inline;
           }
         }
       }
+
       .launchmergetool {
-        color: #DB55FF;
+        color: #db55ff;
         cursor: pointer;
+
         .explanation {
           display: none;
         }
+
         &:hover {
-          background: #A477FF;
-          color: #000;
+          background: #a477ff;
+          color: #000000;
           border-radius: 3px;
+
           .explanation {
             display: inline;
           }
@@ -195,9 +220,6 @@
   }
 }
 
-@media (min-width: @screen-lg-min) {
-}
-
 .commit-message-title-counter {
   right: 20px;
   position: absolute;
@@ -205,6 +227,7 @@
 
 .amend-button {
   padding: 0;
+
   &:active,
   &:focus,
   &:hover {
@@ -222,10 +245,11 @@
 }
 
 .checkmark {
-  color: #fff;
+  color: #ffffff;
   display: inline-block;
   opacity: 0.3;
   cursor: pointer;
+
   &.checked {
     opacity: 0.8;
   }

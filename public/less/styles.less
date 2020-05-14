@@ -1,11 +1,93 @@
-// Styles.less
-// This file contains styling that's only used in this app
+@import 'variables.less';
+@import 'bootstrap.less';
+@import (less) '../../node_modules/nprogress/nprogress.css';
+@import (less) '../../node_modules/jquery-ui/themes/base/core.css';
+@import (less) '../../node_modules/diff2html/bundles/css/diff2html.min.css';
+@import (less) '../../node_modules/@primer/octicons/build/build.css';
+@import (less) '../vendor/css/animate.css';
+@import 'd2h.less';
 
-@import "generic.less";
+// Font face declarations
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url('../fonts/OpenSans.woff') format('woff');
+}
 
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Source Code Pro Medium'), local('SourceCodePro-Medium'),
+    url('../fonts/SourceCodePro-Medium.woff') format('woff');
+}
 
-// -- Application specific layout ----
-// Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
+// Custom Scrollbar for Webkit
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #2b3844;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-button {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: black;
+}
+
+// Matching jQuery-UI autocomplete style to bootstrap dropdown
+.ui-autocomplete {
+  .ui-menu-item-wrapper {
+    cursor: pointer;
+
+    &.ui-state-active {
+      color: @dropdown-link-hover-color;
+      background-color: @dropdown-link-hover-bg;
+      border: none;
+      margin: 0;
+    }
+  }
+}
+
+//New shared styles
+.list-group-item .list-item-remove {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: transparent;
+  border: none;
+  opacity: 0.3;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+div.list-group-item {
+  &:hover {
+    background: @list-group-hover-bg;
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
+}
+
+.arrow {
+  position: absolute;
+  height: 0;
+  width: 0;
+  border: 15px solid transparent;
+}
 
 .octicon-circled {
   margin-right: 15px;
@@ -18,35 +100,7 @@
   vertical-align: top;
 }
 
-// -- Application specific styling ----
-.ui-autocomplete {
-  padding: 5px 0;
-  margin: 2px 0 0 0;
-
-  &.ui-widget-content {
-    border: @dropdown-border;
-  }
-
-  .ui-menu-item {
-    list-style: none;
-
-    .ui-menu-item-wrapper {
-      padding: 3px 20px;
-
-      &.ui-state-active {
-        color: @dropdown-link-hover-color;
-        background-color: @dropdown-link-hover-bg;
-        border: none;
-        margin: 0;
-      }
-    }
-  }
-}
-
 .dropdown-menu {
-  max-height: 500px;
-  overflow-y: auto;
-
   .linked-remove {
     padding-right: 40px;
   }
@@ -58,7 +112,7 @@
   .list-link {
     float: right;
     margin-top: -23px;
-    padding: 0px 4px;
+    padding: 0 4px;
   }
 
   .list-url {

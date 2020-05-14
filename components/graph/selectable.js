@@ -14,7 +14,7 @@ class Selectable {
           graph.currentActionContext(null);
         }
       },
-      owner: this
+      owner: this,
     });
   }
 }

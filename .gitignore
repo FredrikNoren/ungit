@@ -14,12 +14,8 @@ results
 npm-debug.log
 
 public/css/
-public/js/ungit.js
-public/js/ungit.js.map
-public/js/devStyling.js
-public/js/raven.min.js
-public/js/raven.min.js.map
-public/images/
+public/js/*.js
+public/js/*.map
 
 .ungitrc
 
@@ -28,11 +24,7 @@ report/
 
 /node_modules/
 
-/clicktests/screenshots/
 /build
-/*.dll
-/nw.exe
-/nw.pak
 
 /components/**/*.css
 /components/**/*.bundle.js

@@ -1,8 +1,7 @@
-
 const expect = require('expect.js');
 const request = require('supertest');
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
@@ -19,11 +18,12 @@ let gitConfig;
 const req = request(app);
 
 describe('git-api', () => {
-
   before('creating test dir should work', () => {
     return common.post(req, '/testing/createtempdir').then((res) => {
       expect(res.path).to.be.ok();
-      testDir = fs.realpathSync(res.path);
+      return fs.realpath(res.path).then((dir) => {
+        testDir = dir;
+      });
     });
   });
 
@@ -37,7 +37,6 @@ describe('git-api', () => {
       gitConfig = res;
     });
   });
-
 
   it('status should fail in uninited directory', (done) => {
     req
@@ -53,18 +52,23 @@ describe('git-api', () => {
   });
 
   it('quickstatus should say uninited in uninited directory', () => {
-    return common.get(req, '/quickstatus', { path: testDir })
-    .then((res) => expect(res).to.eql({ type: 'uninited', gitRootPath: testDir }));
+    return common
+      .get(req, '/quickstatus', { path: testDir })
+      .then((res) => expect(res).to.eql({ type: 'uninited', gitRootPath: testDir }));
   });
 
   it('status should fail in non-existing directory', () => {
-    return common.get(req, '/status', { path: testDir })
+    return common
+      .get(req, '/status', { path: testDir })
       .catch((e) => expect(e.errorCode).to.be('no-such-path'));
   });
 
   it('quickstatus should say false in non-existing directory', () => {
-    return common.get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') })
-      .then((res) => expect(res).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') }));
+    return common
+      .get(req, '/quickstatus', { path: path.join(testDir, 'nowhere') })
+      .then((res) =>
+        expect(res).to.eql({ type: 'no-such-path', gitRootPath: path.join(testDir, 'nowhere') })
+      );
   });
 
   it('init should succeed in uninited directory', () => {
@@ -76,11 +80,12 @@ describe('git-api', () => {
   });
 
   it('quickstatus should say inited in inited directory', () => {
-    return common.get(req, '/quickstatus', { path: testDir })
+    return common
+      .get(req, '/quickstatus', { path: testDir })
       .then((res) => expect(res).to.eql({ type: 'inited', gitRootPath: testDir }));
   });
 
-  it('commit should fail on when there\'s no files to commit', (done) => {
+  it("commit should fail on when there's no files to commit", (done) => {
     req
       .post(`${restGit.pathPrefix}/commit`)
       .send({ path: testDir, message: 'test', files: [] })
@@ -94,9 +99,9 @@ describe('git-api', () => {
 
   it('log should be empty before first commit', () => {
     return common.get(req, '/gitlog', { path: testDir }).then((res) => {
-        expect(res.nodes).to.be.a('array');
-        expect(res.nodes.length).to.be(0);
-      });
+      expect(res.nodes).to.be.a('array');
+      expect(res.nodes.length).to.be(0);
+    });
   });
 
   it('head should be empty before first commit', () => {
@@ -134,11 +139,10 @@ describe('git-api', () => {
         renamed: false,
         type: 'text',
         additions: '-',
-        deletions: '-'
+        deletions: '-',
       });
     });
   });
-
 
   const commitMessage = 'test';
 
@@ -152,8 +156,12 @@ describe('git-api', () => {
       .end(done);
   });
 
-  it('commit should succeed when there\'s files to commit', () => {
-    return common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }] });
+  it("commit should succeed when there's files to commit", () => {
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: commitMessage,
+      files: [{ name: testFile }],
+    });
   });
 
   it('log should show latest commit', () => {
@@ -176,7 +184,6 @@ describe('git-api', () => {
     });
   });
 
-
   it('modifying a test file should work', () => {
     return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) });
   });
@@ -195,7 +202,7 @@ describe('git-api', () => {
         renamed: false,
         type: 'text',
         additions: '1',
-        deletions: '1'
+        deletions: '1',
       });
     });
   });
@@ -209,11 +216,17 @@ describe('git-api', () => {
   });
 
   it('commit ammend should work', () => {
-    return common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile }], amend: true });
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: commitMessage,
+      files: [{ name: testFile }],
+      amend: true,
+    });
   });
 
   it('amend should not produce additional log-entry', () => {
-    return common.get(req, '/gitlog', { path: testDir })
+    return common
+      .get(req, '/gitlog', { path: testDir })
       .then((res) => expect(res.nodes.length).to.be(1));
   });
 
@@ -237,19 +250,19 @@ describe('git-api', () => {
         renamed: false,
         type: 'text',
         additions: '-',
-        deletions: '-'
+        deletions: '-',
       });
     });
   });
 
   it('discarding the new file should work', (done) => {
     req
-     .post(`${restGit.pathPrefix}/discardchanges`)
-     .send({ path: testDir, file: testFile2 })
-     .set('Accept', 'application/json')
-     .expect('Content-Type', /json/)
-     .expect(200)
-     .end(done);
+      .post(`${restGit.pathPrefix}/discardchanges`)
+      .send({ path: testDir, file: testFile2 })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(done);
   });
 
   const testSubDir = 'sub';
@@ -259,7 +272,9 @@ describe('git-api', () => {
   });
 
   it('creating test multi layer dir should work', () => {
-    return common.post(req, '/createdir', { dir: path.join(testDir, `${testSubDir}test/moretest/andmore`) });
+    return common.post(req, '/createdir', {
+      dir: path.join(testDir, `${testSubDir}test/moretest/andmore`),
+    });
   });
 
   const testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
@@ -282,7 +297,7 @@ describe('git-api', () => {
         renamed: false,
         type: 'text',
         additions: '-',
-        deletions: '-'
+        deletions: '-',
       });
     });
   });
@@ -290,12 +305,15 @@ describe('git-api', () => {
   const commitMessage3 = 'commit3';
 
   it('commit should succeed with file in sub dir', () => {
-    return common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [{ name: testFile3 }] });
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: commitMessage3,
+      files: [{ name: testFile3 }],
+    });
   });
 
   it('log should show last commit', () => {
     return common.get(req, '/gitlog', { path: testDir }).then((res) => {
-
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
       const HEAD = res.nodes[0];
@@ -308,10 +326,8 @@ describe('git-api', () => {
       expect(HEAD.committerName).to.be(gitConfig['user.name']);
       expect(HEAD.committerEmail).to.be(gitConfig['user.email']);
       expect(HEAD.sha1).to.be.ok();
-
     });
   });
-
 
   it('removing a test file should work', () => {
     return common.post(req, '/testing/removefile', { file: path.join(testDir, testFile) });
@@ -331,27 +347,34 @@ describe('git-api', () => {
         renamed: false,
         type: 'text',
         additions: '0',
-        deletions: '2'
+        deletions: '2',
       });
-
     });
   });
 
   const commitMessage4 = 'Removed some file';
 
   it('commit on removed file should work', () => {
-    return common.post(req, '/commit', { path: testDir, message: commitMessage4, files: [{ name: testFile }] });
+    return common.post(req, '/commit', {
+      path: testDir,
+      message: commitMessage4,
+      files: [{ name: testFile }],
+    });
   });
 
   it('status should list nothing', () => {
-    return common.get(req, '/status', { path: testDir })
+    return common
+      .get(req, '/status', { path: testDir })
       .then((res) => expect(Object.keys(res.files).length).to.be(0));
   });
 
   const testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
 
   it('renaming a file should work', () => {
-    return common.post(req, '/testing/git', { repo: testDir, command: ['mv', testFile3, testFile4] });
+    return common.post(req, '/testing/git', {
+      path: testDir,
+      command: ['mv', testFile3, testFile4],
+    });
   });
 
   it('status should list the renamed file', () => {
@@ -368,7 +391,7 @@ describe('git-api', () => {
         renamed: true,
         type: 'text',
         additions: '0',
-        deletions: '0'
+        deletions: '0',
       });
     });
   });
@@ -393,11 +416,12 @@ describe('git-api', () => {
   });
 
   it('test gitignore api endpoint', () => {
-    return common.put(req, '/gitignore', { path: testDir, data: 'abc' })
+    return common
+      .put(req, '/gitignore', { path: testDir, data: 'abc' })
       .then(() => common.get(req, '/gitignore', { path: testDir }))
       .then((res) => expect(res.content).to.be('abc'))
       .then(() => common.put(req, '/gitignore', { path: testDir, data: '' }))
       .then(() => common.get(req, '/gitignore', { path: testDir }))
       .then((res) => expect(res.content).to.be(''));
   });
-})
+});

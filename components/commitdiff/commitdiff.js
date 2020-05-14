@@ -2,7 +2,7 @@ const ko = require('knockout');
 const CommitLineDiff = require('./commitlinediff.js').CommitLineDiff;
 const components = require('ungit-components');
 
-components.register('commitDiff', args => new CommitDiff(args));
+components.register('commitDiff', (args) => new CommitDiff(args));
 
 class CommitDiff {
   constructor(args) {
@@ -25,9 +25,11 @@ class CommitDiff {
     const tempCommitLineDiffs = [];
     const lineDiffLength = this.commitLineDiffs().length;
 
-    args.fileLineDiffs.slice(lineDiffLength === 0 ? 0 : lineDiffLength + 1, this.maxNumberOfFilesShown).forEach(fileLineDiff => {
-      tempCommitLineDiffs.push(new CommitLineDiff(args, fileLineDiff));
-    });
+    args.fileLineDiffs
+      .slice(lineDiffLength === 0 ? 0 : lineDiffLength + 1, this.maxNumberOfFilesShown)
+      .forEach((fileLineDiff) => {
+        tempCommitLineDiffs.push(new CommitLineDiff(args, fileLineDiff));
+      });
 
     this.commitLineDiffs(this.commitLineDiffs().concat(tempCommitLineDiffs));
   }

@@ -1,13 +1,14 @@
-@import "public/less/variables.less";
+@import 'public/less/variables.less';
 
 .commit {
   position: relative;
 
   &.highlighted {
     z-index: 2;
+
     .commit-box {
-      box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
-      background: #4B5766;
+      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+      background: #4b5766;
       left: -5px;
 
       .arrow {
@@ -19,20 +20,24 @@
       }
     }
   }
+
   &.hover {
     z-index: 3;
   }
+
   &.selected {
     .details {
       .diff-wrapper {
         margin-bottom: 5px;
-        transition:width 0.1s, left 0.05s;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+        transition: width 0.1s, left 0.05s;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+
         .diff-inner {
-          box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+          box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
           padding: 10px;
-          padding-top: 0px;
+          padding-top: 0;
         }
+
         .btn-group {
           margin-top: 10px;
         }
@@ -57,9 +62,8 @@
 
   .commit-box > .panel-body {
     position: relative;
-
     padding: 10px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     width: @log-width-small;
     min-height: 85px;
 
@@ -73,15 +77,17 @@
       word-wrap: break-word;
       display: block;
     }
+
     .details {
       .body {
         white-space: pre-wrap;
         word-wrap: break-word;
-        color: #8F9FA6;
+        color: #8f9fa6;
       }
+
       .diff-wrapper {
         margin-top: 10px;
-        background: #4B5766;
+        background: #4b5766;
         border-radius: 3px;
       }
     }
@@ -92,6 +98,7 @@
   .commit {
     .commit-box > .panel-body {
       width: @log-width-large;
+
       .gravatar {
         display: block;
       }
