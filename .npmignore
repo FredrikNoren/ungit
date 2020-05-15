@@ -19,6 +19,8 @@ node_modules/
 .github/
 .eslintignore
 .eslintrc.json
+.mochaclicktest.json
+.mochatest.json
 .prettierignore
 .prettierrc
 .travis.yml
