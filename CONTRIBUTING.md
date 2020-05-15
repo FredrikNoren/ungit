@@ -83,7 +83,7 @@ Ungit has two major parts; the server and the UI. The server exposes a REST inte
 
 ### Running tests
 
-`npm test` will run both unit tests, REST-interface tests, and click tests. `npm run unittest` only runs the tests in the test/ folder, `npm run clicktest` runs only the tests in the clicktests/ folder. Install mocha (`npm install -g mocha`) to run specific tests in the test folder and get better stack traces: `mocha test/spec.git-api.js`.
+`npm test` will run both unit tests, REST-interface tests, and click tests. `npm run unittest` only runs the tests in the `test/` folder, `npm run clicktest` runs only the tests in the `clicktests/` folder. Install Mocha (`npm install -g mocha`) to run specific tests in the test folder and get better stack traces: `mocha test/spec.git-api.js`.
 
 ### Things to consider when developing
 
