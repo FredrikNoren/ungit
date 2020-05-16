@@ -265,33 +265,32 @@ gitApi.registerApi(apiEnvironment);
 const loadPlugins = (plugins, pluginBasePath) => {
   return fs.readdir(pluginBasePath, { withFileTypes: true }).then((files) => {
     return Promise.all(
-      files.map((pluginDir) => {
-        // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
-        if (!pluginDir.isDirectory()) {
-          return;
-        }
-        const pluginPath = path.join(pluginBasePath, pluginDir.name);
-        return fs
-          .access(path.join(pluginPath, 'ungit-plugin.json'))
-          .then(() => {
-            winston.info('Loading plugin: ' + pluginPath);
-            const plugin = new UngitPlugin({
-              dir: pluginDir.name,
-              httpBasePath: 'plugins/' + pluginDir.name,
-              path: pluginPath,
+      files
+        // Only look at directories.
+        .filter((pluginDir) => pluginDir.isDirectory())
+        .map((pluginDir) => {
+          const pluginPath = path.join(pluginBasePath, pluginDir.name);
+          return fs
+            .access(path.join(pluginPath, 'ungit-plugin.json'))
+            .then(() => {
+              winston.info('Loading plugin: ' + pluginPath);
+              const plugin = new UngitPlugin({
+                dir: pluginDir.name,
+                httpBasePath: 'plugins/' + pluginDir.name,
+                path: pluginPath,
+              });
+              if (plugin.manifest.disabled || plugin.config.disabled) {
+                winston.info('Plugin disabled: ' + pluginDir.name);
+                return;
+              }
+              plugin.init(apiEnvironment);
+              plugins.push(plugin);
+              winston.info('Plugin loaded: ' + pluginDir.name);
+            })
+            .catch(() => {
+              // Skip direcories that don't contain an "ungit-plugin.json".
             });
-            if (plugin.manifest.disabled || plugin.config.disabled) {
-              winston.info('Plugin disabled: ' + pluginDir.name);
-              return;
-            }
-            plugin.init(apiEnvironment);
-            plugins.push(plugin);
-            winston.info('Plugin loaded: ' + pluginDir.name);
-          })
-          .catch(() => {
-            /* ignore */
-          });
-      })
+        })
     );
   });
 };

@@ -9,6 +9,7 @@
     "node": true
   },
   "rules": {
+    "array-callback-return": "error",
     "no-unused-vars": ["error", { "args": "none" }],
     "prefer-const": "warn",
     "quotes": ["warn", "single", { "avoidEscape": true }]
