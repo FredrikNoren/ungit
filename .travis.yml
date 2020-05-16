@@ -52,6 +52,7 @@ before_script:
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git --version
+  - npm run lint
   - npm run package
 after_success:
   - npm run travisnpmpublish

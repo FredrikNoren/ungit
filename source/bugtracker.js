@@ -21,7 +21,7 @@ class BugTracker {
   notify(exception, clientName) {
     if (!config.bugtracking) return;
 
-    let options = {
+    const options = {
       user: { id: this.userHash },
       tags: {
         version: this.appVersion,

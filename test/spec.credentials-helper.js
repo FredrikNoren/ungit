@@ -12,7 +12,7 @@ describe('credentials-helper', () => {
     const payload = { username: 'testuser', password: 'testpassword' };
     const server = http.createServer((req, res) => {
       const reqUrl = url.parse(req.url);
-      expect(reqUrl.pathname).to.be(`/api/credentials`);
+      expect(reqUrl.pathname).to.be('/api/credentials');
 
       const params = querystring.parse(reqUrl.query);
       expect(params['remote']).to.be(`${remote}`);

@@ -168,7 +168,7 @@ const defaultConfig = {
 };
 
 // Works for now but should be moved to bin/ungit
-let argv = yargs
+const argv = yargs
   .usage('$0 [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
   .example('$0 --port=8888', 'Run Ungit on port 8888')
   .example(
@@ -361,7 +361,7 @@ module.exports.rootPath = currentRootPath;
 // http://stackoverflow.com/a/18391400
 Object.defineProperty(Error.prototype, 'toJSON', {
   value: function () {
-    let alt = {};
+    const alt = {};
     Object.getOwnPropertyNames(this).forEach((key) => {
       alt[key] = this[key];
     });

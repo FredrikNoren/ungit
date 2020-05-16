@@ -36,7 +36,9 @@ exports.makeRequest = (method, req, path, payload) => {
         let data = (res || {}).body;
         try {
           data = JSON.parse(data);
-        } catch (ex) {}
+        } catch (ex) {
+          /* Ignore error */
+        }
         resolve(data);
       }
     });
@@ -66,18 +68,4 @@ exports.createSmallRepo = (req) => {
       )
       .then(() => dir);
   });
-};
-
-// Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.
-exports.initDummyBrowserEnvironment = () => {
-  window = {};
-  document = {
-    createElement: () => {
-      return { getElementsByTagName: () => [] };
-    },
-    createComment: () => {
-      return {};
-    },
-  };
-  navigator = {};
 };

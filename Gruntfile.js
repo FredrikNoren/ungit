@@ -9,10 +9,16 @@ const fs = require('fs');
 
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
+
+  const components = fs
+    .readdirSync('components', { withFileTypes: true })
+    .filter((component) => component.isDirectory())
+    .map((component) => component.name);
+
   const lessFiles = {
     'public/css/styles.css': ['public/less/styles.less'],
   };
-  fs.readdirSync('./components')
+  components
     .map((component) => `components/${component}/${component}`)
     .forEach((str) => (lessFiles[`${str}.css`] = `${str}.less`));
 
@@ -63,68 +69,6 @@ module.exports = (grunt) => {
       },
     },
 
-    jshint: {
-      options: {
-        undef: true, // check for usage of undefined constiables
-        indent: 2,
-        esversion: 6,
-        laxbreak: true,
-        '-W033': true, // ignore Missing semicolon
-        '-W041': true, // ignore Use '===' to compare with '0'
-        '-W065': true, // ignore Missing radix parameter
-        '-W069': true, // ignore ['HEAD'] is better written in dot notation
-      },
-      web: {
-        options: {
-          node: true,
-          browser: true,
-          globals: {
-            ungit: true,
-            io: true,
-            Raven: true,
-            $: true,
-            jQuery: true,
-            nprogress: true,
-          },
-        },
-        files: [
-          {
-            src: ['public/source/**/*.js', 'components/**/*.js'],
-            // Filter out the "compiled" components files; see the browserify task for components
-            filter: (src) => src.indexOf('bundle.js') == -1,
-          },
-        ],
-      },
-      node: {
-        options: {
-          node: true,
-        },
-        src: ['source/**/*.js'],
-      },
-      bin: {
-        options: {
-          node: true,
-        },
-        src: ['Gruntfile.js', 'bin/*'],
-      },
-      mocha: {
-        options: {
-          esversion: 8,
-          node: true,
-          globals: {
-            it: true,
-            describe: true,
-            before: true,
-            after: true,
-            window: true,
-            document: true,
-            navigator: true,
-            ungit: true,
-          },
-        },
-        src: ['test/**/*.js', 'clicktests/**/*.js'],
-      },
-    },
     copy: {
       main: {
         files: [
@@ -184,29 +128,6 @@ module.exports = (grunt) => {
     },
   });
 
-  grunt.registerTask(
-    'checkPrettier',
-    'Verify that all files are correctly formatted.',
-    function () {
-      const done = this.async();
-      childProcess.exec('npx prettier -l . bin/*', (err, stdout, stderr) => {
-        const files = stdout.trim();
-        if (files) {
-          return done(
-            new Error(
-              `Files with incorrect formatting (run "npm run format" and consider a Prettier plugin for your editor):\n${files}\n`
-            )
-          );
-        }
-        if (err) {
-          console.error(stderr);
-          return done(err);
-        }
-        done();
-      });
-    }
-  );
-
   grunt.registerTask('browserify-common', '', function () {
     const done = this.async();
     const b = browserify('./public/source/main.js', {
@@ -235,9 +156,10 @@ module.exports = (grunt) => {
   });
 
   grunt.registerTask('browserify-components', '', function () {
+    const done = this.async();
     Promise.all(
-      fs.readdirSync('components').map((component) => {
-        return new Promise((resolve, reject) => {
+      components.map((component) => {
+        return new Promise((resolve) => {
           const src = `./components/${component}/${component}.js`;
           if (!fs.existsSync(src)) {
             grunt.log.warn(
@@ -255,7 +177,10 @@ module.exports = (grunt) => {
           b.bundle().pipe(outFile);
         });
       })
-    ).then(this.async());
+    ).then((results) => {
+      grunt.log.ok(`Browserified ${results.length} components.`);
+      done();
+    });
   });
 
   const bumpDependency = (packageJson, packageName) => {
@@ -421,7 +346,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
@@ -429,9 +353,7 @@ module.exports = (grunt) => {
 
   // Default task, builds everything needed
   grunt.registerTask('default', [
-    'checkPrettier',
-    'less:production',
-    'jshint',
+    'less',
     'browserify-common',
     'browserify-components',
     'copy:main',

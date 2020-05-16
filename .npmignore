@@ -17,6 +17,10 @@ node_modules/
 
 .ungitrc
 .github/
+.eslintignore
+.eslintrc.json
+.prettierignore
+.prettierrc
 .travis.yml
 appveyor.yml
 Gruntfile.js

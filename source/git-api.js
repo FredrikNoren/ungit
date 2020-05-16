@@ -19,7 +19,6 @@ exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
   const app = env.app;
-  const server = env.server;
   const ensureAuthenticated = env.ensureAuthenticated || ((req, res, next) => next());
   const config = env.config;
   const io = env.socketIO;
@@ -401,7 +400,7 @@ exports.registerApi = (env) => {
         if (err.stderr && err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) {
           return { limit: limit, skip: skip, nodes: [] };
         } else if (
-          /fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)
+          /fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr)
         ) {
           return { limit: limit, skip: skip, nodes: [] };
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
@@ -430,9 +429,7 @@ exports.registerApi = (env) => {
       .then(gitParser.parseGitLog)
       .catch((err) => {
         if (err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) return [];
-        else if (
-          /fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)
-        )
+        else if (/fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr))
           return [];
         else if (err.stderr.indexOf('fatal: Not a git repository') == 0) return [];
         throw err;
@@ -620,7 +617,7 @@ exports.registerApi = (env) => {
   );
 
   app.post(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const arg = !!req.body.sha1
+    const arg = req.body.sha1
       ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
       : ['checkout', req.body.name.trim()];
 

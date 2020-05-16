@@ -1,0 +1,6 @@
+# Third-party files
+public/js
+public/vendor/
+
+# Browserify bundles
+**/*.bundle.js
