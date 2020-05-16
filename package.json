@@ -10,7 +10,7 @@
     "unittest": "grunt unittest",
     "clicktest": "grunt clicktest",
     "lint": "eslint . bin/*",
-    "format": "prettier --write . bin/*",
+    "format": "npm run lint -- --fix",
     "build": "grunt",
     "watch": "grunt watch",
     "package": "grunt package",
