@@ -15,17 +15,23 @@ module.exports = (grunt) => {
     .filter((component) => component.isDirectory())
     .map((component) => component.name);
 
-  const lessFiles = {
-    'public/css/styles.css': ['public/less/styles.less'],
-  };
-  components
-    .map((component) => `components/${component}/${component}`)
-    .forEach((str) => (lessFiles[`${str}.css`] = `${str}.less`));
-
   grunt.initConfig({
     pkg: packageJson,
     less: {
-      production: { files: lessFiles },
+      common: {
+        files: {
+          'public/css/styles.css': ['public/less/styles.less'],
+        },
+      },
+      components: {
+        files: components
+          .map((component) => `components/${component}/${component}`)
+          .filter((componentPath) => fs.existsSync(`${componentPath}.less`))
+          .reduce((files, componentPath) => {
+            files[`${componentPath}.css`] = `${componentPath}.less`;
+            return files;
+          }, {}),
+      },
     },
     watch: {
       scripts: {
@@ -36,8 +42,15 @@ module.exports = (grunt) => {
         },
       },
       less: {
-        files: ['public/less/*.less', 'public/styles/*.less', 'components/**/*.less'],
-        tasks: ['less:production'],
+        files: ['public/less/*.less'],
+        tasks: ['less:common'],
+        options: {
+          spawn: false,
+        },
+      },
+      componentsLess: {
+        files: ['components/**/*.less'],
+        tasks: ['less:components'],
         options: {
           spawn: false,
         },
