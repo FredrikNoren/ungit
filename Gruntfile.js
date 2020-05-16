@@ -9,10 +9,16 @@ const fs = require('fs');
 
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
+
+  const components = fs
+    .readdirSync('components', { withFileTypes: true })
+    .filter((component) => component.isDirectory())
+    .map((component) => component.name);
+
   const lessFiles = {
     'public/css/styles.css': ['public/less/styles.less'],
   };
-  fs.readdirSync('./components')
+  components
     .map((component) => `components/${component}/${component}`)
     .forEach((str) => (lessFiles[`${str}.css`] = `${str}.less`));
 
@@ -152,30 +158,25 @@ module.exports = (grunt) => {
   grunt.registerTask('browserify-components', '', function () {
     const done = this.async();
     Promise.all(
-      fs
-        .readdirSync('components', { withFileTypes: true })
-        .filter((component) => component.isDirectory())
-        .map((component) => {
-          return new Promise((resolve) => {
-            const src = `./components/${component.name}/${component.name}.js`;
-            if (!fs.existsSync(src)) {
-              grunt.log.warn(
-                `${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
-              );
-              resolve();
-              return;
-            }
-            const b = browserify(src, {
-              bundleExternal: false,
-              debug: true,
-            });
-            const outFile = fs.createWriteStream(
-              `./components/${component.name}/${component.name}.bundle.js`
+      components.map((component) => {
+        return new Promise((resolve) => {
+          const src = `./components/${component}/${component}.js`;
+          if (!fs.existsSync(src)) {
+            grunt.log.warn(
+              `${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
             );
-            outFile.on('close', () => resolve());
-            b.bundle().pipe(outFile);
+            resolve();
+            return;
+          }
+          const b = browserify(src, {
+            bundleExternal: false,
+            debug: true,
           });
-        })
+          const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
+          outFile.on('close', () => resolve());
+          b.bundle().pipe(outFile);
+        });
+      })
     ).then((results) => {
       grunt.log.ok(`Browserified ${results.length} components.`);
       done();
