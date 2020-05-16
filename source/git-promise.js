@@ -54,7 +54,7 @@ const gitExecutorProm = (args, retryCount) => {
         let rejectedError = null;
         let stdout = '';
         let stderr = '';
-        let env = JSON.parse(JSON.stringify(process.env));
+        const env = JSON.parse(JSON.stringify(process.env));
         env['LC_ALL'] = 'C';
         const procOpts = {
           cwd: args.repoPath,
@@ -364,7 +364,7 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
   if (sha1) {
     return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
-      let prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
+      const prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
       if (oldFilename && oldFilename !== filename) {
         return git(
           [
@@ -427,7 +427,7 @@ git.getCurrentBranch = (repoPath) => {
   return git(['branch'], repoPath)
     .then(gitParser.parseGitBranches)
     .then((branches) => {
-      let branch = branches.find((branch) => branch.current);
+      const branch = branches.find((branch) => branch.current);
       if (branch) {
         return branch.name;
       } else {
@@ -499,9 +499,9 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       const toRemove = [];
       const promises = []; // promises that patches each files individually
 
-      for (let v in files) {
-        let file = files[v];
-        let fileStatus =
+      for (const v in files) {
+        const file = files[v];
+        const fileStatus =
           status.files[file.name] || status.files[path.relative(repoPath, file.name)];
         if (!fileStatus) {
           throw { error: `No such file in staging: ${file.name}` };

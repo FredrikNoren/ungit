@@ -9,7 +9,8 @@
     "node": true
   },
   "rules": {
-    "quotes": ["warn", "single", { "avoidEscape": true }],
-    "no-unused-vars": ["error", { "args": "none" }]
+    "no-unused-vars": ["error", { "args": "none" }],
+    "prefer-const": "warn",
+    "quotes": ["warn", "single", { "avoidEscape": true }]
   }
 }

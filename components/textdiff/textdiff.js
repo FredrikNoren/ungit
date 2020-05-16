@@ -139,7 +139,7 @@ class TextDiffViewModel {
         this.diffJson[0].allBlocks = this.diffJson[0].blocks;
       }
 
-      let currentLoadCount = Math.max(this.loadCount, loadLimit);
+      const currentLoadCount = Math.max(this.loadCount, loadLimit);
       let lineCount = 0;
       let loadCount = 0;
       this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {

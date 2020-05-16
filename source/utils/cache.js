@@ -39,9 +39,9 @@ cache.resolveFunc = (key) => {
  * @return {string} - key to retrieve cached function result.
  */
 cache.registerFunc = (...args) => {
-  let func = args.pop();
-  let key = args.pop() || md5(func);
-  let ttl = args.pop() || cache.options.stdTTL;
+  const func = args.pop();
+  const key = args.pop() || md5(func);
+  const ttl = args.pop() || cache.options.stdTTL;
 
   if (typeof func !== 'function') {
     throw new Error('no function was passed in.');

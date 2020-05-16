@@ -332,9 +332,9 @@ app.get('/api/latestversion', (req, res) => {
         });
       } else {
         // We only want to show the "new version" banner if the major/minor version was bumped
-        let latestSansPatch = semver(latestVersion);
+        const latestSansPatch = semver(latestVersion);
         latestSansPatch.patch = 0;
-        let currentSansPatch = semver(config.ungitDevVersion);
+        const currentSansPatch = semver(config.ungitDevVersion);
         currentSansPatch.patch = 0;
         res.json({
           latestVersion: latestVersion,
