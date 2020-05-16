@@ -48,26 +48,6 @@ module.exports = (grunt) => {
         commitMessage: 'Release <%= version %>',
       },
     },
-    // Run mocha tests
-    mochaTest: {
-      unit: {
-        options: {
-          reporter: 'spec',
-          require: './source/utils/winston.js',
-          timeout: 5000,
-        },
-        src: 'test/*.js',
-      },
-      click: {
-        options: {
-          reporter: 'spec',
-          require: './source/utils/winston.js',
-          timeout: 35000,
-          bail: true,
-        },
-        src: 'clicktests/spec.*.js',
-      },
-    },
 
     copy: {
       main: {
@@ -345,7 +325,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
-  grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
@@ -359,16 +338,11 @@ module.exports = (grunt) => {
     'copy:main',
   ]);
 
-  // Run tests without compile (use watcher or manually build)
-  grunt.registerTask('unittest', ['mochaTest:unit']);
-  grunt.registerTask('clicktest', ['mochaTest:click']);
-  grunt.registerTask('test', ['unittest', 'clicktest']);
-
   // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
-  grunt.registerTask('publish', ['default', 'test', 'release:patch']);
+  grunt.registerTask('publish', ['default', 'release:patch']);
 
   // Same as publish but for minor version
-  grunt.registerTask('publishminor', ['default', 'test', 'release:minor']);
+  grunt.registerTask('publishminor', ['default', 'release:minor']);
 
   // Create electron package
   grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
