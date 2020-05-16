@@ -29,4 +29,5 @@ report/
 /components/**/*.css
 /components/**/*.bundle.js
 
-coverage
+/.nyc_output/
+/coverage/

@@ -37,6 +37,9 @@ public/templates/
 public/devStyling.html
 public/js/devStyling.js
 
+/.nyc_output/
+/coverage/
+
 clicktests/
 
 teststabilitytester.js

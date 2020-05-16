@@ -70,8 +70,6 @@ module.exports = (grunt) => {
     },
     clean: {
       electron: ['./build'],
-      coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit'],
     },
     electron: {
       package: {
@@ -95,15 +93,6 @@ module.exports = (grunt) => {
             src: '*',
           },
         ],
-      },
-    },
-    mocha_istanbul: {
-      unit: {
-        src: './test',
-        options: {
-          coverageFolder: './coverage/coverage-unit',
-          mask: 'spec.*.js',
-        },
       },
     },
   });
@@ -316,18 +305,11 @@ module.exports = (grunt) => {
     }, done);
   });
 
-  grunt.event.on('coverage', (lcovFileContents) => {
-    // Check below on the section "The coverage event"
-    console.log(lcovFileContents);
-    console.log('\n\n=== html report: ./coverage/coverage-unit/lcove-report/index.html ===\n\n');
-  });
-
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
@@ -346,7 +328,4 @@ module.exports = (grunt) => {
 
   // Create electron package
   grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
-
-  // run unit test coverage, assumes project is compiled
-  grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
 };
