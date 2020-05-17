@@ -16,8 +16,8 @@
     "watch": "grunt watch",
     "bumpdependencies": "ncu --upgrade",
     "package": "grunt package",
-    "travisnpmpublish": "grunt travisnpmpublish",
-    "electronpublish": "grunt electronpublish"
+    "electronpublish": "grunt electronpublish",
+    "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
   },
   "repository": {
     "type": "git",
