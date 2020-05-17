@@ -15,7 +15,7 @@
     "build": "grunt",
     "watch": "grunt watch",
     "bumpdependencies": "ncu --upgrade",
-    "package": "grunt package",
+    "package": "npm run build && node ./scripts/package.js",
     "electronpublish": "grunt electronpublish",
     "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
   },

@@ -1,5 +1,4 @@
 const browserify = require('browserify');
-const electronPackager = require('electron-packager');
 const fs = require('fs');
 
 module.exports = (grunt) => {
@@ -64,26 +63,8 @@ module.exports = (grunt) => {
       },
     },
     clean: {
-      electron: ['./build'],
       coverage: ['./coverage'],
       'coverage-unit': ['./coverage/coverage-unit'],
-    },
-    electron: {
-      package: {
-        options: {
-          dir: '.',
-          out: './build',
-          icon: './public/images/icon',
-          all: true,
-          asar: true,
-          ignore: [
-            /^\/(?:[^/]+?\/)*(?:\..+|.+\.less)$/, // dot-files and less files anywhere
-            /^\/(?:\..+|assets|clicktests|coverage|dist|test)\//, // folders in root
-            /^\/[^/]+?\.(?:js|md|png|tgz|yml)$/, // files in root
-            /^\/public\/(?:source|vendor)\//, // folders in /public
-          ],
-        },
-      },
     },
     zip_directories: {
       electron: {
@@ -166,13 +147,6 @@ module.exports = (grunt) => {
 
   grunt.registerTask('electronpublish', ['zip_directories:electron']);
 
-  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
-    const done = this.async();
-    electronPackager(this.options()).then(() => {
-      done();
-    }, done);
-  });
-
   grunt.event.on('coverage', (lcovFileContents) => {
     // Check below on the section "The coverage event"
     console.log(lcovFileContents);
@@ -200,9 +174,6 @@ module.exports = (grunt) => {
 
   // Same as publish but for minor version
   grunt.registerTask('publishminor', ['default', 'release:minor']);
-
-  // Create electron package
-  grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);

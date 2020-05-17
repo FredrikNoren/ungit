@@ -55,7 +55,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run package
+      - run: npm run package -- --all
       - run: npm test
 
       # publish artifacts
