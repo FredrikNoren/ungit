@@ -22,15 +22,19 @@ describe('credentials-helper', () => {
       res.end(JSON.stringify(payload));
     });
 
+    // to avoid tests hanging after they finished
+    // set a low timeout so when an exception occurs inside of the request handler
+    // it times out faster because no response will be generated
+    server.timeout = 200;
     server.listen(config.port, '127.0.0.1');
 
     const command = `node bin/credentials-helper ${socketId} ${config.port} ${remote} get`;
     child_process.exec(command, (err, stdout, stderr) => {
+      server.close();
       expect(err).to.not.be.ok();
       const ss = stdout.split('\n');
       expect(ss[0]).to.be(`username=${payload.username}`);
       expect(ss[1]).to.be(`password=${payload.password}`);
-      server.close();
       done();
     });
   });
