@@ -76,6 +76,12 @@ module.exports = (grunt) => {
           icon: './public/images/icon',
           all: true,
           asar: true,
+          ignore: [
+            /^\/(?:[^/]+?\/)*(?:\..+|.+\.less)$/, // dot-files and less files anywhere
+            /^\/(?:\..+|assets|clicktests|coverage|dist|test)\//, // folders in root
+            /^\/[^/]+?\.(?:js|md|png|tgz|yml)$/, // files in root
+            /^\/public\/(?:source|vendor)\//, // folders in /public
+          ],
         },
       },
     },
