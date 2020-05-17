@@ -66,19 +66,6 @@ module.exports = (grunt) => {
       coverage: ['./coverage'],
       'coverage-unit': ['./coverage/coverage-unit'],
     },
-    zip_directories: {
-      electron: {
-        files: [
-          {
-            filter: 'isDirectory',
-            expand: true,
-            cwd: './build',
-            dest: './dist',
-            src: '*',
-          },
-        ],
-      },
-    },
     mocha_istanbul: {
       unit: {
         src: './test',
@@ -145,8 +132,6 @@ module.exports = (grunt) => {
     });
   });
 
-  grunt.registerTask('electronpublish', ['zip_directories:electron']);
-
   grunt.event.on('coverage', (lcovFileContents) => {
     // Check below on the section "The coverage event"
     console.log(lcovFileContents);
@@ -159,7 +144,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
-  grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
   grunt.registerTask('default', [

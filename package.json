@@ -16,7 +16,7 @@
     "watch": "grunt watch",
     "bumpdependencies": "ncu --upgrade",
     "package": "npm run build && node ./scripts/package.js",
-    "electronpublish": "grunt electronpublish",
+    "electronpublish": "node ./scripts/electronpublish.js",
     "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
   },
   "repository": {
@@ -68,6 +68,7 @@
     "yargs": "~15.3.1"
   },
   "devDependencies": {
+    "archiver": "~4.0.1",
     "browserify": "~16.5.1",
     "dedent": "~0.7.0",
     "electron": "~8.2.5",
@@ -85,7 +86,6 @@
     "grunt-contrib-watch": "~1.1.0",
     "grunt-mocha-istanbul": "~5.0.2",
     "grunt-release": "~0.14.0",
-    "grunt-zip-directories": "~1.0.1",
     "istanbul": "~0.4.5",
     "mocha": "~7.1.2",
     "mocha-parallel-tests": "~2.3.0",
