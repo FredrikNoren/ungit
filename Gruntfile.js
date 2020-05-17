@@ -1,26 +1,8 @@
-const browserify = require('browserify');
-const fs = require('fs');
-
 module.exports = (grunt) => {
   const packageJson = grunt.file.readJSON('package.json');
 
-  const components = fs
-    .readdirSync('components', { withFileTypes: true })
-    .filter((component) => component.isDirectory())
-    .map((component) => component.name);
-
-  const lessFiles = {
-    'public/css/styles.css': ['public/less/styles.less'],
-  };
-  components
-    .map((component) => `components/${component}/${component}`)
-    .forEach((str) => (lessFiles[`${str}.css`] = `${str}.less`));
-
   grunt.initConfig({
     pkg: packageJson,
-    less: {
-      production: { files: lessFiles },
-    },
     watch: {
       scripts: {
         files: ['public/source/**/*.js', 'source/**/*.js', 'components/**/*.js'],
@@ -42,99 +24,8 @@ module.exports = (grunt) => {
         commitMessage: 'Release <%= version %>',
       },
     },
-
-    copy: {
-      main: {
-        files: [
-          // includes files within path
-          {
-            expand: true,
-            flatten: true,
-            src: ['node_modules/raven-js/dist/raven.min.js'],
-            dest: 'public/js/',
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: ['node_modules/raven-js/dist/raven.min.js.map'],
-            dest: 'public/js/',
-          },
-        ],
-      },
-    },
   });
 
-  grunt.registerTask('browserify-common', '', function () {
-    const done = this.async();
-    const b = browserify('./public/source/main.js', {
-      noParse: ['dnd-page-scroll', 'jquery', 'knockout'],
-      debug: true,
-    });
-    b.require('./public/source/components.js', { expose: 'ungit-components' });
-    b.require('./public/source/main.js', { expose: 'ungit-main' });
-    b.require('./public/source/navigation.js', { expose: 'ungit-navigation' });
-    b.require('./public/source/program-events.js', { expose: 'ungit-program-events' });
-    b.require('./public/source/storage.js', { expose: 'ungit-storage' });
-    b.require('./source/address-parser.js', { expose: 'ungit-address-parser' });
-    b.require('bluebird', { expose: 'bluebird' });
-    b.require('blueimp-md5', { expose: 'blueimp-md5' });
-    b.require('diff2html', { expose: 'diff2html' });
-    b.require('jquery', { expose: 'jquery' });
-    b.require('knockout', { expose: 'knockout' });
-    b.require('lodash', { expose: 'lodash' });
-    b.require('./node_modules/snapsvg/src/mina.js', { expose: 'mina' });
-    b.require('moment', { expose: 'moment' });
-    b.require('@primer/octicons', { expose: 'octicons' });
-    b.require('signals', { expose: 'signals' });
-    const outFile = fs.createWriteStream('./public/js/ungit.js');
-    outFile.on('close', () => done());
-    b.bundle().pipe(outFile);
-  });
-
-  grunt.registerTask('browserify-components', '', function () {
-    const done = this.async();
-    Promise.all(
-      components.map((component) => {
-        return new Promise((resolve) => {
-          const src = `./components/${component}/${component}.js`;
-          if (!fs.existsSync(src)) {
-            grunt.log.warn(
-              `${src} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
-            );
-            resolve();
-            return;
-          }
-          const b = browserify(src, {
-            bundleExternal: false,
-            debug: true,
-          });
-          const outFile = fs.createWriteStream(`./components/${component}/${component}.bundle.js`);
-          outFile.on('close', () => resolve());
-          b.bundle().pipe(outFile);
-        });
-      })
-    ).then((results) => {
-      grunt.log.ok(`Browserified ${results.length} components.`);
-      done();
-    });
-  });
-
-  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-
-  // Default task, builds everything needed
-  grunt.registerTask('default', [
-    'less',
-    'browserify-common',
-    'browserify-components',
-    'copy:main',
-  ]);
-
-  // Builds, and then creates a release (bump patch version, create a commit & tag, publish to npm)
-  grunt.registerTask('publish', ['default', 'release:patch']);
-
-  // Same as publish but for minor version
-  grunt.registerTask('publishminor', ['default', 'release:minor']);
 };
