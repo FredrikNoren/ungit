@@ -9,6 +9,7 @@
     "test": "npm run unittest && npm run clicktest",
     "unittest": "mocha --config .mochatest.json",
     "clicktest": "mocha --config .mochaclicktest.json",
+    "clicktest-parallel": "mocha-parallel-tests --config .mochaclicktest.json",
     "lint": "eslint . bin/*",
     "format": "npm run lint -- --fix",
     "build": "grunt",
@@ -66,7 +67,6 @@
     "yargs": "~15.3.1"
   },
   "devDependencies": {
-    "ansi-color": "~0.2.1",
     "browserify": "~16.5.1",
     "dedent": "~0.7.0",
     "electron": "~8.2.5",
@@ -87,6 +87,7 @@
     "grunt-zip-directories": "~1.0.1",
     "istanbul": "~0.4.5",
     "mocha": "~7.1.2",
+    "mocha-parallel-tests": "~2.3.0",
     "pkg-versions": "~2.1.0",
     "prettier": "~2.0.5",
     "puppeteer": "~3.0.4",
