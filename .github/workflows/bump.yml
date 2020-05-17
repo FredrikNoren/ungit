@@ -21,7 +21,7 @@ jobs:
           node-version: '*'
 
       - run: npm ci
-      - run: ./node_modules/.bin/grunt bumpdependencies
+      - run: npm run bumpdependencies
       - run: npm install
 
       - name: Create Pull Request
