@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node ./bin/ungit",
     "test": "npm run unittest && npm run clicktest",
-    "unittest": "mocha test/spec.*.js --file ./source/utils/winston.js --timeout 5000",
-    "clicktest": "mocha clicktests/spec.*.js --file ./source/utils/winston.js --bail --timeout 35000",
+    "unittest": "mocha --config .mochatest.json",
+    "clicktest": "mocha --config .mochaclicktest.json",
     "coverage": "nyc npm run unittest",
     "lint": "eslint . bin/*",
     "format": "npm run lint -- --fix",
