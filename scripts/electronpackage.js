@@ -1,8 +1,10 @@
 const process = require('process');
 const path = require('path');
+const electronPackager = require('electron-packager');
+
 const baseDir = path.join(__dirname, '..');
 
-require('electron-packager')({
+electronPackager({
   dir: baseDir,
   out: path.join(baseDir, 'build'),
   icon: path.join(baseDir, 'public/images/icon'),

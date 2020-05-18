@@ -55,11 +55,13 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run package -- --all
+      - run: npm run build
       - run: npm test
 
       # publish artifacts
-      - run: npm run electronpublish
+      - run: npm run electronpackage -- --all
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+      - run: npm run electronzip
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
 
       - name: Upload ungit-darwin-x64

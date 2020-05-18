@@ -53,11 +53,12 @@ before_script:
   - git config --global user.name "Test testy"
   - git --version
   - npm run lint
-  - npm run package -- --all
+  - npm run build
 after_success:
   - npm run travisnpmpublish
 before_deploy:
-  - npm run electronpublish
+  - npm run electronpackage -- --all
+  - npm run electronzip
 deploy:
   provider: releases
   api_key: ${GITHUB_TOKEN}
