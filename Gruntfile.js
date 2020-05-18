@@ -1,8 +1,6 @@
 const browserify = require('browserify');
 const childProcess = require('child_process');
 const electronPackager = require('electron-packager');
-const pkgVersions = require('pkg-versions');
-const semver = require('semver');
 const fs = require('fs');
 
 module.exports = (grunt) => {
@@ -161,22 +159,6 @@ module.exports = (grunt) => {
     });
   });
 
-  const bumpDependency = (packageJson, packageName) => {
-    const dependencyType = packageJson['dependencies'][packageName]
-      ? 'dependencies'
-      : 'devDependencies';
-    let currentVersion = packageJson[dependencyType][packageName];
-    if (currentVersion[0] == '~' || currentVersion[0] == '^')
-      currentVersion = currentVersion.slice(1);
-    return pkgVersions(packageName).then((versionSet) => {
-      const versions = Array.from(versionSet);
-      const latestVersion = semver.maxSatisfying(versions, '*');
-      if (semver.gt(latestVersion, currentVersion)) {
-        packageJson[dependencyType][packageName] = '~' + latestVersion;
-      }
-    });
-  };
-
   grunt.registerTask(
     'travisnpmpublish',
     'Automatically publish to NPM via travis and create git tag.',
@@ -211,35 +193,6 @@ module.exports = (grunt) => {
   );
 
   grunt.registerTask('electronpublish', ['zip_directories:electron']);
-
-  grunt.registerTask(
-    'bumpdependencies',
-    'Bump dependencies to their latest versions.',
-    function () {
-      const done = this.async();
-      grunt.log.writeln('Bumping dependencies...');
-      const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      const keys = Object.keys(tempPackageJson.dependencies).concat(
-        Object.keys(tempPackageJson.devDependencies)
-      );
-
-      const bumps = keys.map((dep) => {
-        return bumpDependency(tempPackageJson, dep);
-      });
-
-      Promise.all(bumps)
-        .then(() =>
-          fs.promises.writeFile('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`)
-        )
-        .then(() =>
-          grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.')
-        )
-        .then(() => {
-          done();
-        })
-        .catch(done);
-    }
-  );
 
   grunt.registerMultiTask('electron', 'Package Electron apps', function () {
     const done = this.async();

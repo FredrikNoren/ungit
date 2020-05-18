@@ -21,7 +21,14 @@ jobs:
           node-version: '*'
 
       - run: npm ci
-      - run: ./node_modules/.bin/grunt bumpdependencies
+      - run: |
+          body="$(npm run bumpdependencies)"
+          echo "$body"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo "::set-output name=body::$body"
+        id: bumpdependencies
       - run: npm install
 
       - name: Create Pull Request
@@ -30,6 +37,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Bump Dependencies
           title: Bump Dependencies
-          body: Bump Dependencies
+          body: |
+            ```
+            ${{ steps.bumpdependencies.outputs.body }}
+            ```
           labels: dependencies
           branch: bumpdependencies
