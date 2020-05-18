@@ -13,7 +13,7 @@ electronPackager({
   overwrite: true,
   ignore: [
     /^\/(?:[^/]+?\/)*(?:\..+|.+\.less)$/, // dot-files and less files anywhere
-    /^\/(?:\..+|assets|clicktests|coverage|dist|test)\//, // folders in root
+    /^\/(?:\..+|assets|clicktests|coverage|dist|scripts|test)\//, // folders in root
     /^\/[^/]+?\.(?:js|md|png|tgz|yml)$/, // files in root
     /^\/public\/(?:source|vendor)\//, // folders in /public
   ],
