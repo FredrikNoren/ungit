@@ -50,7 +50,7 @@ To provide easier access to launch ungit a standalone application container usin
 #### To get started
 
  1. Follow steps in 'Getting started' to get a development environment ready.
- 2. Run `npm run package`. This will create a standalone application package under `build/`
+ 2. Run `npm run electronpackage`. This will create a standalone application package under `build/`
 
 #### Known limitations
 
