@@ -263,48 +263,33 @@ gitApi.registerApi(apiEnvironment);
 
 // Init plugins
 const loadPlugins = (plugins, pluginBasePath) => {
-  // Only look at directories.
-  return fs
-    .readdir(pluginBasePath)
-    .then((files) => {
-      const pluginDirs = [];
-      return Promise.all(
-        files.map((file) => {
-          return fs.stat(path.join(pluginBasePath, file)).then((stat) => {
-            if (stat.isDirectory()) {
-              pluginDirs.push(file);
-            }
-          });
-        })
-      ).then(() => pluginDirs);
-    })
-    .then((pluginDirs) => {
-      return Promise.all(
-        pluginDirs.map((pluginDir) => {
-          const pluginPath = path.join(pluginBasePath, pluginDir);
-          return fs
-            .access(path.join(pluginPath, 'ungit-plugin.json'))
-            .then(() => {
-              winston.info('Loading plugin: ' + pluginPath);
-              const plugin = new UngitPlugin({
-                dir: pluginDir,
-                httpBasePath: 'plugins/' + pluginDir,
-                path: pluginPath,
-              });
-              if (plugin.manifest.disabled || plugin.config.disabled) {
-                winston.info('Plugin disabled: ' + pluginDir);
-                return;
-              }
-              plugin.init(apiEnvironment);
-              plugins.push(plugin);
-              winston.info('Plugin loaded: ' + pluginDir);
-            })
-            .catch(() => {
-              // Skip direcories that don't contain an "ungit-plugin.json".
+  return fs.readdir(pluginBasePath).then((pluginDirs) => {
+    return Promise.all(
+      pluginDirs.map((pluginDir) => {
+        const pluginPath = path.join(pluginBasePath, pluginDir);
+        return fs
+          .access(path.join(pluginPath, 'ungit-plugin.json'))
+          .then(() => {
+            winston.info('Loading plugin: ' + pluginPath);
+            const plugin = new UngitPlugin({
+              dir: pluginDir,
+              httpBasePath: 'plugins/' + pluginDir,
+              path: pluginPath,
             });
-        })
-      );
-    });
+            if (plugin.manifest.disabled || plugin.config.disabled) {
+              winston.info('Plugin disabled: ' + pluginDir);
+              return;
+            }
+            plugin.init(apiEnvironment);
+            plugins.push(plugin);
+            winston.info('Plugin loaded: ' + pluginDir);
+          })
+          .catch(() => {
+            // Skip direcories that don't contain an "ungit-plugin.json".
+          });
+      })
+    );
+  });
 };
 const pluginsCacheKey = cache.registerFunc(() => {
   const plugins = [];
