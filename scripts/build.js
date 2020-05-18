@@ -3,6 +3,7 @@ const fs = fsSync.promises;
 const path = require('path');
 const less = require('less');
 const browserify = require('browserify');
+
 const baseDir = path.join(__dirname, '..');
 
 (async () => {
