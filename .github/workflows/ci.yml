@@ -10,9 +10,9 @@ jobs:
         node-version: ['10', '12', '*']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      # electron packager (win32 ia32 on macos) https://github.com/electron/electron-packager/pull/449#issuecomment-240508298
-      WINEDLLOVERRIDES: 'mscoree,mshtml='
+#    env:
+      # electron-packager (win32 ia32 on macos) https://github.com/electron/electron-packager/pull/449#issuecomment-240508298
+#      WINEDLLOVERRIDES: 'mscoree,mshtml='
 
     steps:
       - uses: actions/checkout@v2
@@ -34,12 +34,13 @@ jobs:
       - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
       # macos dependencies
-      - run: brew update
-        if: matrix.os == 'macos-latest'
-      - run: brew cask install xquartz wine-stable
-        if: matrix.os == 'macos-latest'
-      - run: wine64 --version
-        if: matrix.os == 'macos-latest'
+# required for electron-packager
+#      - run: brew update
+#        if: matrix.os == 'macos-latest'
+#      - run: brew cask install xquartz wine-stable
+#        if: matrix.os == 'macos-latest'
+#      - run: wine64 --version
+#        if: matrix.os == 'macos-latest'
       - run: brew reinstall git
         if: matrix.os == 'macos-latest' && matrix.node-version == '*'
       # windows dependencies
