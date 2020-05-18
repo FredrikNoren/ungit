@@ -26,7 +26,6 @@ jobs:
 addons:
   apt:
     packages:
-      - libgbm1
       - wine
 # required for electron-packager
 #  homebrew:

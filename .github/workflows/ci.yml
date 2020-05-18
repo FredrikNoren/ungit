@@ -25,8 +25,6 @@ jobs:
       # linux dependencies
       - run: sudo apt update
         if: matrix.os == 'ubuntu-latest'
-      - run: sudo apt install -y libgbm1
-        if: matrix.os == 'ubuntu-latest'
       - run: sudo apt install -y wine64
         if: matrix.os == 'ubuntu-latest'
       - run: wine --version
