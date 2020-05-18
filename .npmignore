@@ -1,49 +1,49 @@
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
-
-pids
-logs
-results
-
-npm-debug.log
-
-node_modules/
-
-.ungitrc
+# Ignore whole folders
 .github/
+.nyc_output/
+assets/
+build/
+clicktests/
+coverage/
+dist/
+test/
+
+# Ignore non-compiled sources
+components/**/*.less
+components/**/*.js
+!components/**/*.bundle.js
+public/images/icon.icns
+public/images/icon.ico
+public/js/.keep
+public/js/raven.min.js.map
+public/less/
+public/source/
+public/vendor/
+
+# Ignore dot-files
 .eslintignore
 .eslintrc.json
+.gitattributes
 .mochaclicktest.json
 .mochatest.json
 .prettierignore
 .prettierrc
 .travis.yml
 appveyor.yml
+
+# Ignore dev scripts
 Gruntfile.js
-
-assets/
-test/
-report/
-public/source/
-public/vendor/css/
-public/vendor/js/
-public/templates/
-public/devStyling.html
-public/js/devStyling.js
-
-clicktests/
-
 teststabilitytester.js
 
-build/
-*.dll
-nw.exe
-nw.pak
+# Ignore docs
+CONTRIBUTING.md
+gpg_save_screenshot.png
+MERGETOOL.md
+PLUGINS.md
+screenshot.png
+xkcd.png
 
-.npmrc
+# Ignore potential files
+.vscode/
+.ungitrc
+ungit-*.tgz

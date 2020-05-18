@@ -1,9 +1,7 @@
-.git/
-coverage
-assets/
+# Generated folders
+.nyc_output/
 build/
-package-lock.json
-package.json
+coverage/
 
 # Third-party files
 public/css/
@@ -16,3 +14,7 @@ public/vendor/
 **/*.css
 # We don't like the prettier Markdown formatting
 **/*.md
+
+# Don't interfere with npm
+package-lock.json
+package.json
