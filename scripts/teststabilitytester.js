@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // This repeatedly runs the click and unit tests to verify their stability
 
 var childProcess = require('child_process');

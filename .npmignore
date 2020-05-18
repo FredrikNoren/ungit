@@ -6,6 +6,7 @@ build/
 clicktests/
 coverage/
 dist/
+scripts/
 test/
 
 # Ignore non-compiled sources
@@ -33,7 +34,6 @@ appveyor.yml
 
 # Ignore dev scripts
 Gruntfile.js
-teststabilitytester.js
 
 # Ignore docs
 CONTRIBUTING.md

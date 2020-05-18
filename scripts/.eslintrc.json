@@ -1,0 +1,4 @@
+{
+  "extends": ["../.eslintrc.json", "plugin:node/recommended"],
+  "plugins": ["node"]
+}
