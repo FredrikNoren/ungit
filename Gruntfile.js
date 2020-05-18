@@ -1,5 +1,4 @@
 const browserify = require('browserify');
-const electronPackager = require('electron-packager');
 const fs = require('fs');
 
 module.exports = (grunt) => {
@@ -64,33 +63,8 @@ module.exports = (grunt) => {
       },
     },
     clean: {
-      electron: ['./build'],
       coverage: ['./coverage'],
       'coverage-unit': ['./coverage/coverage-unit'],
-    },
-    electron: {
-      package: {
-        options: {
-          dir: '.',
-          out: './build',
-          icon: './public/images/icon',
-          all: true,
-          asar: true,
-        },
-      },
-    },
-    zip_directories: {
-      electron: {
-        files: [
-          {
-            filter: 'isDirectory',
-            expand: true,
-            cwd: './build',
-            dest: './dist',
-            src: '*',
-          },
-        ],
-      },
     },
     mocha_istanbul: {
       unit: {
@@ -158,15 +132,6 @@ module.exports = (grunt) => {
     });
   });
 
-  grunt.registerTask('electronpublish', ['zip_directories:electron']);
-
-  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
-    const done = this.async();
-    electronPackager(this.options()).then(() => {
-      done();
-    }, done);
-  });
-
   grunt.event.on('coverage', (lcovFileContents) => {
     // Check below on the section "The coverage event"
     console.log(lcovFileContents);
@@ -179,7 +144,6 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
-  grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
   grunt.registerTask('default', [
@@ -194,9 +158,6 @@ module.exports = (grunt) => {
 
   // Same as publish but for minor version
   grunt.registerTask('publishminor', ['default', 'release:minor']);
-
-  // Create electron package
-  grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
 
   // run unit test coverage, assumes project is compiled
   grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
