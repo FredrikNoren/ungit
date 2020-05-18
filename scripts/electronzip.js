@@ -8,19 +8,25 @@ const buildDir = path.join(baseDir, 'build');
 const distDir = path.join(baseDir, 'dist');
 
 (async () => {
-  let distFolders = [];
+  let distFiles = [];
   try {
-    distFolders = await fs.readdir(distDir);
+    distFiles = await fs.readdir(distDir);
   } catch (e) {
     await fs.mkdir(distDir);
   }
-  for (const oldZip of distFolders) {
-    await fs.unlink(path.join(distDir, oldZip));
+  for (const distFile of distFiles) {
+    await fs.unlink(path.join(distDir, distFile));
   }
 
-  const folders = await fs.readdir(buildDir);
+  let buildFolders = [];
+  try {
+    buildFolders = await fs.readdir(buildDir);
+  } catch (e) {
+    console.error('Run "npm run electronpackage" before zipping');
+    throw e;
+  }
   return Promise.all(
-    folders.map((folder) => {
+    buildFolders.map((folder) => {
       const source = path.join(buildDir, folder);
       const destination = path.join(distDir, `${folder}.zip`);
       return zipDirectory(source, destination);
