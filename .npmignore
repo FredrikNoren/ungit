@@ -32,9 +32,6 @@ public/vendor/
 .travis.yml
 appveyor.yml
 
-# Ignore dev scripts
-Gruntfile.js
-
 # Ignore docs
 CONTRIBUTING.md
 gpg_save_screenshot.png
