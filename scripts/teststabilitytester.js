@@ -11,14 +11,14 @@ var run = function () {
   var testTime = Date.now();
   count++;
   console.log('Round ' + count + '...');
-  childProcess.exec('grunt clicktest', function (err, stdout, stderr) {
+  childProcess.exec('npm run clicktest', function (err, stdout, stderr) {
     if (err) {
       clickTestErrors++;
       console.log(stdout);
       console.log(stderr);
       console.log('Clicktest failed!');
     }
-    childProcess.exec('grunt unittest', function (err, stdout, stderr) {
+    childProcess.exec('npm run unittest', function (err, stdout, stderr) {
       if (err) {
         unitTestErrors++;
         console.log(stdout);

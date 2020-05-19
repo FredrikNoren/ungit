@@ -69,8 +69,8 @@ An [example](https://github.com/FredrikNoren/ungit/tree/master/components/stagin
    Each component can have multiple views as exampled [here](https://github.com/FredrikNoren/ungit/tree/master/components/dialogs).
 
 * CSS for Component
-   css file can be easily defined per components and in above example we can see that `staging.less` file is compiled into `staging.css` via grunt job.  If you are using less file please modify [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js) file to include new less file.
+   css file can be easily defined per components and in above example we can see that `staging.less` file is compiled into `staging.css` via `npm run build` script.
 
 * JS for Component
 
-   Each component gets to have one javascipt files.  However each javasciprt file can require other javascript in it's directory or other libraries.  If you are doing require by relative pass as exampled in [graph.js](https://github.com/FredrikNoren/ungit/blob/master/components/graph/graph.js), you wouldn't have to include the js in browserify job in [Gruntfile.js](https://github.com/FredrikNoren/ungit/blob/master/Gruntfile.js).
+   Each component gets to have one javascipt files.  However each javasciprt file can require other javascript in it's directory or other libraries.  If you are doing require by relative paths as exampled in [graph.js](https://github.com/FredrikNoren/ungit/blob/master/components/graph/graph.js), you wouldn't have to include the js in browserify job in [`scripts/build.js`](https://github.com/FredrikNoren/ungit/blob/master/scripts/build.js).

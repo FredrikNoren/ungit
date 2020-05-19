@@ -8,9 +8,6 @@ node_modules/
 # Ignore compiled files
 components/**/*.bundle.js
 components/**/*.css
-public/css/
-public/js/*.js
-public/js/*.map
 
 # Ignore potential files
 .vscode/
