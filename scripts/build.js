@@ -24,12 +24,12 @@ const baseDir = path.join(__dirname, '..');
     components.map(async (component) => {
       const componentPath = path.join(baseDir, `components/${component}/${component}`);
       try {
-        await fs.access(componentPath + '.less');
+        await fs.access(`${componentPath}.less`);
       } catch (e) {
         /* ignore */
         return;
       }
-      return lessFile(componentPath + '.less', componentPath + '.css');
+      return lessFile(`${componentPath}.less`, `${componentPath}.css`);
     })
   );
 
