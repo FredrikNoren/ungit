@@ -62,19 +62,6 @@ module.exports = (grunt) => {
         ],
       },
     },
-    clean: {
-      coverage: ['./coverage'],
-      'coverage-unit': ['./coverage/coverage-unit'],
-    },
-    mocha_istanbul: {
-      unit: {
-        src: './test',
-        options: {
-          coverageFolder: './coverage/coverage-unit',
-          mask: 'spec.*.js',
-        },
-      },
-    },
   });
 
   grunt.registerTask('browserify-common', '', function () {
@@ -132,18 +119,10 @@ module.exports = (grunt) => {
     });
   });
 
-  grunt.event.on('coverage', (lcovFileContents) => {
-    // Check below on the section "The coverage event"
-    console.log(lcovFileContents);
-    console.log('\n\n=== html report: ./coverage/coverage-unit/lcove-report/index.html ===\n\n');
-  });
-
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-mocha-istanbul');
 
   // Default task, builds everything needed
   grunt.registerTask('default', [
@@ -158,7 +137,4 @@ module.exports = (grunt) => {
 
   // Same as publish but for minor version
   grunt.registerTask('publishminor', ['default', 'release:minor']);
-
-  // run unit test coverage, assumes project is compiled
-  grunt.registerTask('coverage-unit', ['clean:coverage-unit', 'mocha_istanbul:unit']);
 };
