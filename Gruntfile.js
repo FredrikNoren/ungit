@@ -1,10 +1,4 @@
 const browserify = require('browserify');
-const childProcess = require('child_process');
-const cliColor = require('ansi-color');
-const electronPackager = require('electron-packager');
-const path = require('path');
-const pkgVersions = require('pkg-versions');
-const semver = require('semver');
 const fs = require('fs');
 
 module.exports = (grunt) => {
@@ -68,33 +62,6 @@ module.exports = (grunt) => {
         ],
       },
     },
-    clean: {
-      electron: ['./build'],
-    },
-    electron: {
-      package: {
-        options: {
-          dir: '.',
-          out: './build',
-          icon: './public/images/icon',
-          all: true,
-          asar: true,
-        },
-      },
-    },
-    zip_directories: {
-      electron: {
-        files: [
-          {
-            filter: 'isDirectory',
-            expand: true,
-            cwd: './build',
-            dest: './dist',
-            src: '*',
-          },
-        ],
-      },
-    },
   });
 
   grunt.registerTask('browserify-common', '', function () {
@@ -152,165 +119,11 @@ module.exports = (grunt) => {
     });
   });
 
-  const bumpDependency = (packageJson, packageName) => {
-    const dependencyType = packageJson['dependencies'][packageName]
-      ? 'dependencies'
-      : 'devDependencies';
-    let currentVersion = packageJson[dependencyType][packageName];
-    if (currentVersion[0] == '~' || currentVersion[0] == '^')
-      currentVersion = currentVersion.slice(1);
-    return pkgVersions(packageName).then((versionSet) => {
-      const versions = Array.from(versionSet);
-      const latestVersion = semver.maxSatisfying(versions, '*');
-      if (semver.gt(latestVersion, currentVersion)) {
-        packageJson[dependencyType][packageName] = '~' + latestVersion;
-      }
-    });
-  };
-
-  grunt.registerTask(
-    'travisnpmpublish',
-    'Automatically publish to NPM via travis and create git tag.',
-    function () {
-      const done = this.async();
-      if (
-        process.env.TRAVIS_BRANCH != 'master' ||
-        (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != 'false')
-      ) {
-        grunt.log.writeln('Skipping travis npm publish');
-        return done();
-      }
-      childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
-        const hash = stdout.trim();
-        const packageJson = JSON.parse(fs.readFileSync('package.json'));
-        const version = packageJson.version;
-        packageJson.version += `+${hash}`;
-        fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
-        fs.writeFileSync('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
-        childProcess.exec('npm publish', (err) => {
-          if (err) done(err);
-          else
-            childProcess.exec(
-              `git tag v${version} && git push -q https://${process.env.GITHUB_TOKEN}@github.com/FredrikNoren/ungit.git v${version}`,
-              (err) => {
-                done(err);
-              }
-            );
-        });
-      });
-    }
-  );
-
-  grunt.registerTask('electronpublish', ['zip_directories:electron']);
-
-  /**
-   * Run clicktest in parallel at test suite level.
-   * This test does intermittently fails depends on the maxConcurrency level set
-   * above and the capacity of the computer as sometimes lack of resource allocation
-   * triggers timeouts.
-   * Use at own discretion.
-   */
-  grunt.registerTask('clickParallel', 'Parallelized click tests.', function () {
-    const done = this.async();
-
-    fs.promises
-      .readdir('./clicktests')
-      .then((files) => files.filter((file) => file.startsWith('spec.')))
-      .then((tests) => {
-        const genericIndx = tests.indexOf('spec.generic.js');
-        if (genericIndx > -1) {
-          tests.splice(0, 0, tests.splice(genericIndx, 1)[0]);
-        }
-        return tests;
-      })
-      .then((tests) => {
-        grunt.log.writeln('Running click tests in parallel... (this will take a while...)');
-        return Promise.all(
-          tests.map((file) => {
-            let output = '';
-            const outStream = (data) => (output += data);
-
-            grunt.log.writeln(cliColor.set(`Clicktest started! \t${file}`, 'blue'));
-            return new Promise((resolve, reject) => {
-              const child = childProcess.execFile(
-                './node_modules/mocha/bin/mocha',
-                [path.join(__dirname, 'clicktests', file), '--timeout=35000', '-b'],
-                { maxBuffer: 10 * 1024 * 1024 }
-              );
-              child.stdout.on('data', outStream);
-              child.stderr.on('data', outStream);
-              child.on('exit', (code) => {
-                if (code == 0) resolve(file);
-                else reject();
-              });
-            })
-              .then(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest success! \t${file}`, 'green'));
-                return { name: file, output: output, isSuccess: true };
-              })
-              .catch(() => {
-                grunt.log.writeln(cliColor.set(`'Clicktest fail! \t'${file}`, 'red'));
-                return { name: file, output: output, isSuccess: false };
-              });
-          })
-        );
-      })
-      .then((results) => {
-        let isSuccess = true;
-        results.forEach((result) => {
-          if (!result.isSuccess) {
-            grunt.log.writeln(`---- start of ${result.name} log ----`);
-            grunt.log.writeln(result.output);
-            grunt.log.writeln(`----- end of ${result.name} log -----`);
-            isSuccess = false;
-          }
-        });
-        done(isSuccess);
-      });
-  });
-
-  grunt.registerTask(
-    'bumpdependencies',
-    'Bump dependencies to their latest versions.',
-    function () {
-      const done = this.async();
-      grunt.log.writeln('Bumping dependencies...');
-      const tempPackageJson = JSON.parse(JSON.stringify(packageJson));
-      const keys = Object.keys(tempPackageJson.dependencies).concat(
-        Object.keys(tempPackageJson.devDependencies)
-      );
-
-      const bumps = keys.map((dep) => {
-        return bumpDependency(tempPackageJson, dep);
-      });
-
-      Promise.all(bumps)
-        .then(() =>
-          fs.promises.writeFile('package.json', `${JSON.stringify(tempPackageJson, null, 2)}\n`)
-        )
-        .then(() =>
-          grunt.log.writeln('Dependencies bumped, run npm install to install latest versions.')
-        )
-        .then(() => {
-          done();
-        })
-        .catch(done);
-    }
-  );
-
-  grunt.registerMultiTask('electron', 'Package Electron apps', function () {
-    const done = this.async();
-    electronPackager(this.options()).then(() => {
-      done();
-    }, done);
-  });
-
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-zip-directories');
 
   // Default task, builds everything needed
   grunt.registerTask('default', [
@@ -325,7 +138,4 @@ module.exports = (grunt) => {
 
   // Same as publish but for minor version
   grunt.registerTask('publishminor', ['default', 'release:minor']);
-
-  // Create electron package
-  grunt.registerTask('package', ['default', 'clean:electron', 'electron']);
 };

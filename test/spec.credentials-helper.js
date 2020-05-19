@@ -11,26 +11,33 @@ describe('credentials-helper', () => {
     const remote = 'origin';
     const payload = { username: 'testuser', password: 'testpassword' };
     const server = http.createServer((req, res) => {
-      const reqUrl = url.parse(req.url);
-      expect(reqUrl.pathname).to.be('/api/credentials');
+      try {
+        const reqUrl = url.parse(req.url);
+        expect(reqUrl.pathname).to.be('/api/credentials');
 
-      const params = querystring.parse(reqUrl.query);
-      expect(params['remote']).to.be(`${remote}`);
-      expect(params['socketId']).to.be(`${socketId}`);
+        const params = querystring.parse(reqUrl.query);
+        expect(params['remote']).to.be(`${remote}`);
+        expect(params['socketId']).to.be(`${socketId}`);
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(payload));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+      } finally {
+        if (!res.finished) {
+          res.statusCode = 500;
+          res.end();
+        }
+      }
     });
 
     server.listen(config.port, '127.0.0.1');
 
     const command = `node bin/credentials-helper ${socketId} ${config.port} ${remote} get`;
     child_process.exec(command, (err, stdout, stderr) => {
+      server.close();
       expect(err).to.not.be.ok();
       const ss = stdout.split('\n');
       expect(ss[0]).to.be(`username=${payload.username}`);
       expect(ss[1]).to.be(`password=${payload.password}`);
-      server.close();
       done();
     });
   });

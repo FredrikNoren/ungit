@@ -9,14 +9,16 @@
     "test": "npm run unittest && npm run clicktest",
     "unittest": "mocha --config .mochatest.json",
     "clicktest": "mocha --config .mochaclicktest.json",
+    "clicktest-parallel": "mocha-parallel-tests --config .mochaclicktest.json",
     "coverage": "nyc npm run unittest",
     "lint": "eslint . bin/*",
     "format": "npm run lint -- --fix",
     "build": "grunt",
     "watch": "grunt watch",
-    "package": "grunt package",
-    "travisnpmpublish": "grunt travisnpmpublish",
-    "electronpublish": "grunt electronpublish"
+    "bumpdependencies": "ncu --upgrade",
+    "electronpackage": "node ./scripts/electronpackage.js",
+    "electronzip": "node ./scripts/electronzip.js",
+    "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
   },
   "repository": {
     "type": "git",
@@ -67,7 +69,7 @@
     "yargs": "~15.3.1"
   },
   "devDependencies": {
-    "ansi-color": "~0.2.1",
+    "archiver": "~4.0.1",
     "browserify": "~16.5.1",
     "dedent": "~0.7.0",
     "electron": "~8.2.5",
@@ -84,10 +86,10 @@
     "grunt-contrib-less": "~2.0.0",
     "grunt-contrib-watch": "~1.1.0",
     "grunt-release": "~0.14.0",
-    "grunt-zip-directories": "~1.0.1",
     "mocha": "~7.1.2",
+    "mocha-parallel-tests": "~2.3.0",
+    "npm-check-updates": "~6.0.1",
     "nyc": "^15.0.1",
-    "pkg-versions": "~2.1.0",
     "prettier": "~2.0.5",
     "puppeteer": "~3.0.4",
     "superagent": "~5.2.2",
