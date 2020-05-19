@@ -2,5 +2,6 @@
   "spec": "clicktests/spec.*.js",
   "file": "./source/utils/winston.js",
   "timeout": 35000,
-  "bail": true
+  "bail": true,
+  "exit": true
 }
