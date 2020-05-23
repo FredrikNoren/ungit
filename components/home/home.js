@@ -29,7 +29,7 @@ class HomeRepositoryViewModel {
     this.server
       .getPromise(`/remotes/origin?path=${encodeURIComponent(this.path)}`)
       .then((remote) => {
-        this.remote(remote.address.replace(/\/\/.*?\@/, '//***@'));
+        this.remote(remote.address.replace(/\/\/.*?@/, '//***@'));
       })
       .catch((err) => {
         this.remote('');

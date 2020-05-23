@@ -263,33 +263,29 @@ gitApi.registerApi(apiEnvironment);
 
 // Init plugins
 const loadPlugins = (plugins, pluginBasePath) => {
-  return fs.readdir(pluginBasePath, { withFileTypes: true }).then((files) => {
+  return fs.readdir(pluginBasePath).then((pluginDirs) => {
     return Promise.all(
-      files.map((pluginDir) => {
-        // if not a directory or doesn't contain an ungit-plugin.json, just skip it.
-        if (!pluginDir.isDirectory()) {
-          return;
-        }
-        const pluginPath = path.join(pluginBasePath, pluginDir.name);
+      pluginDirs.map((pluginDir) => {
+        const pluginPath = path.join(pluginBasePath, pluginDir);
         return fs
           .access(path.join(pluginPath, 'ungit-plugin.json'))
           .then(() => {
             winston.info('Loading plugin: ' + pluginPath);
             const plugin = new UngitPlugin({
-              dir: pluginDir.name,
-              httpBasePath: 'plugins/' + pluginDir.name,
+              dir: pluginDir,
+              httpBasePath: 'plugins/' + pluginDir,
               path: pluginPath,
             });
             if (plugin.manifest.disabled || plugin.config.disabled) {
-              winston.info('Plugin disabled: ' + pluginDir.name);
+              winston.info('Plugin disabled: ' + pluginDir);
               return;
             }
             plugin.init(apiEnvironment);
             plugins.push(plugin);
-            winston.info('Plugin loaded: ' + pluginDir.name);
+            winston.info('Plugin loaded: ' + pluginDir);
           })
           .catch(() => {
-            /* ignore */
+            // Skip direcories that don't contain an "ungit-plugin.json".
           });
       })
     );
@@ -332,9 +328,9 @@ app.get('/api/latestversion', (req, res) => {
         });
       } else {
         // We only want to show the "new version" banner if the major/minor version was bumped
-        let latestSansPatch = semver(latestVersion);
+        const latestSansPatch = semver(latestVersion);
         latestSansPatch.patch = 0;
-        let currentSansPatch = semver(config.ungitDevVersion);
+        const currentSansPatch = semver(config.ungitDevVersion);
         currentSansPatch.patch = 0;
         res.json({
           latestVersion: latestVersion,

@@ -10,7 +10,7 @@ exports.parseGitStatus = (text, args) => {
   const files = {};
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
+    const line = lines[i];
     if (line == '') continue;
     const status = line.slice(0, 2);
     const newFileName = line.slice(3).trim();
@@ -174,9 +174,9 @@ exports.parseGitLog = (data) => {
     }
     fileChangeRegex.lastIndex = 0;
     while (row[fileChangeRegex.lastIndex] && row[fileChangeRegex.lastIndex] !== '\x00') {
-      let match = fileChangeRegex.exec(row);
-      let fileName = match.groups.fileName || match.groups.newFileName;
-      let oldFileName = match.groups.oldFileName || match.groups.fileName;
+      const match = fileChangeRegex.exec(row);
+      const fileName = match.groups.fileName || match.groups.newFileName;
+      const oldFileName = match.groups.oldFileName || match.groups.fileName;
       let displayName;
       if (match.groups.oldFileName) {
         displayName = `${match.groups.oldFileName} → ${match.groups.newFileName}`;
@@ -193,7 +193,7 @@ exports.parseGitLog = (data) => {
       });
     }
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
-    for (let fileLineDiff of currentCommmit.fileLineDiffs) {
+    for (const fileLineDiff of currentCommmit.fileLineDiffs) {
       if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
         currentCommmit.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
       }
@@ -316,7 +316,7 @@ exports.parseGitSubmodule = (text, args) => {
       }
     });
 
-  let sorted_submodules = submodules.sort((a, b) => a.name.localeCompare(b.name));
+  const sorted_submodules = submodules.sort((a, b) => a.name.localeCompare(b.name));
 
   return sorted_submodules;
 };
@@ -356,7 +356,6 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   const result = [];
   let ignoredDiffCountTotal = 0;
   let ignoredDiffCountCurrent = 0;
-  let headerIndex = null;
   let lastHeaderIndex = -1;
   let n = 0;
   let selectedLines = 0;
@@ -371,7 +370,7 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
   while (n < lines.length) {
     const line = lines[n];
 
-    if (/^[\-\+]/.test(line)) {
+    if (/^[-+]/.test(line)) {
       // Modified line
       if (patchLineList.shift()) {
         selectedLines++;

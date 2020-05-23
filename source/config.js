@@ -171,7 +171,7 @@ const defaultConfig = {
 };
 
 // Works for now but should be moved to bin/ungit
-let argv = yargs
+const argv = yargs
   .usage('$0 [-v] [-b] [--cliconfigonly] [--gitVersionCheckOverride]')
   .example('$0 --port=8888', 'Run Ungit on port 8888')
   .example(
@@ -326,7 +326,6 @@ let argv = yargs
   .array('commitMessageTags');
 const argvConfig = argv.argv;
 
-// For testing, $0 is grunt.  For credential-parser test, $0 is node
 // When ungit is started normally, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argvConfig.$0.endsWith('ungit') && argvConfig._ && argvConfig._.length > 0) {
   yargs.showHelp();
@@ -369,7 +368,7 @@ module.exports.rootPath = currentRootPath;
 // http://stackoverflow.com/a/18391400
 Object.defineProperty(Error.prototype, 'toJSON', {
   value: function () {
-    let alt = {};
+    const alt = {};
     Object.getOwnPropertyNames(this).forEach((key) => {
       alt[key] = this[key];
     });

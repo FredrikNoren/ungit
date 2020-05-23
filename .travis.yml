@@ -26,20 +26,20 @@ jobs:
 addons:
   apt:
     packages:
-      - libgbm1
       - wine
-  homebrew:
-    update: true
-    casks:
-      - xquartz
-      - wine-stable
+# required for electron-packager
+#  homebrew:
+#    update: true
+#    casks:
+#      - xquartz
+#      - wine-stable
 before_install:
   # linux
   - if [[ $TRAVIS_OS_NAME = "linux" ]]; then wine --version; fi
   - if [[ $TRAVIS_OS_NAME = "linux" && $GIT_VERSION = "edge" ]]; then sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git; fi
   # osx
-  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then export WINEDLLOVERRIDES='mscoree,mshtml='; fi
-  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then wine64 --version; fi
+#  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then export WINEDLLOVERRIDES='mscoree,mshtml='; fi
+#  - if [[ $TRAVIS_OS_NAME = "osx" ]]; then wine64 --version; fi
   - if [[ $TRAVIS_OS_NAME = "osx" && $GIT_VERSION = "edge" ]]; then brew reinstall git; fi
   # windows
   # required for git clone ("git-receive-pack") and submodule ("git-submodule") tests
@@ -52,11 +52,13 @@ before_script:
   - git config --global user.email "test@testy.com"
   - git config --global user.name "Test testy"
   - git --version
-  - npm run package
+  - npm run lint
+  - npm run build
 after_success:
   - npm run travisnpmpublish
 before_deploy:
-  - npm run electronpublish
+  - npm run electronpackage -- --all
+  - npm run electronzip
 deploy:
   provider: releases
   api_key: ${GITHUB_TOKEN}

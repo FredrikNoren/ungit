@@ -22,6 +22,7 @@ describe('git-api diff', () => {
       .then(() => common.initRepo(req, { bare: true }))
       .then((dir) => (testBareDir = dir));
   });
+
   after(() => common.post(req, '/testing/cleanup', undefined));
 
   const testFile = 'afile.txt';
@@ -68,6 +69,7 @@ describe('git-api diff', () => {
       files: [{ name: testFile }],
     });
   });
+
   it('should be possible to commit an image file', () => {
     return common.post(req, '/commit', {
       path: testDir,
@@ -201,6 +203,7 @@ describe('git-api diff', () => {
       files: [{ name: testImage }],
     });
   });
+
   it('removing a test image file should work', () => {
     return common.post(req, '/testing/removefile', { file: path.join(testDir, testImage) });
   });

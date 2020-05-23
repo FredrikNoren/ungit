@@ -1,32 +1,15 @@
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
+# Ignore generated folders
+.nyc_output/
+build/
+coverage/
+dist/
+node_modules/
 
-pids
-logs
-results
+# Ignore compiled files
+components/**/*.bundle.js
+components/**/*.css
 
-npm-debug.log
-
-public/css/
-public/js/*.js
-public/js/*.map
-
+# Ignore potential files
+.vscode/
 .ungitrc
-
-report/
-.bin/
-
-/node_modules/
-
-/build
-
-/components/**/*.css
-/components/**/*.bundle.js
-
-coverage
+ungit-*.tgz

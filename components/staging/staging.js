@@ -214,7 +214,7 @@ class StagingViewModel {
 
   setFiles(files) {
     const newFiles = [];
-    for (let fileStatus of Object.values(files)) {
+    for (const fileStatus of Object.values(files)) {
       let fileViewModel = this.filesByPath[fileStatus.fileName];
       if (!fileViewModel) {
         this.filesByPath[fileStatus.fileName] = fileViewModel = new FileViewModel(

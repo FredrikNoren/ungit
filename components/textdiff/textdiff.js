@@ -139,7 +139,7 @@ class TextDiffViewModel {
         this.diffJson[0].allBlocks = this.diffJson[0].blocks;
       }
 
-      let currentLoadCount = Math.max(this.loadCount, loadLimit);
+      const currentLoadCount = Math.max(this.loadCount, loadLimit);
       let lineCount = 0;
       let loadCount = 0;
       this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
@@ -169,7 +169,7 @@ class TextDiffViewModel {
       // data bind at getPatchCheckBox that is rendered with "html" binding.
       // which is reason why manually updating the html content and refreshing kobinding to have it render...
       if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, (match, capture) => {
+        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, (match, capture) => {
           if (this.patchLineList()[index] === undefined) {
             this.patchLineList()[index] = true;
           }

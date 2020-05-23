@@ -44,7 +44,7 @@ const testPatch = (req, testDir, testFileName, contentsToPatch, files) => {
 };
 
 const getPatchLineList = (size, notSelected) => {
-  let patchLineList = [];
+  const patchLineList = [];
   for (let n = 0; n < size; n++) {
     patchLineList.push(false);
   }
@@ -127,7 +127,7 @@ describe('git-api: test patch api', () => {
     const testFileName = md5(Date.now());
     const testFileSize = 10;
     const contentsToPatch = getContentsToPatch(testFileSize);
-    let patchLineList = [];
+    const patchLineList = [];
 
     for (let n = 0; n < testFileSize * 2; n++) {
       patchLineList.push(true);
