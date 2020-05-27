@@ -90,7 +90,7 @@ class PathViewModel {
         destinationDir: dest,
         isRecursiveSubmodule: this.isRecursiveSubmodule(),
       })
-      .then((res) => navigation.browseTo('repository?path=' + encodeURIComponent(res.path)))
+      .then((res) => navigation.browseTo('repository?path=' + addressParser.encodePath(res.path)))
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
         programEvents.dispatch({ event: 'working-tree-changed' });

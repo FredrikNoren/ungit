@@ -3,6 +3,7 @@ const octicons = require('octicons');
 const components = require('ungit-components');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
+const { encodePath } = require('ungit-address-parser');
 
 components.register('header', (args) => new HeaderViewModel(args.app));
 
@@ -25,7 +26,7 @@ class HeaderViewModel {
   }
 
   submitPath() {
-    navigation.browseTo(`repository?path=${encodeURIComponent(this.path())}`);
+    navigation.browseTo(`repository?path=${encodePath(this.path())}`);
   }
 
   onProgramEvent(event) {

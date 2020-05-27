@@ -2,6 +2,7 @@ const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const { encodePath } = require('ungit-address-parser');
 
 components.register('repository', (args) => new RepositoryViewModel(args.server, args.path));
 
@@ -77,9 +78,7 @@ class RepositoryViewModel {
                 for (let n = 0; n < submodules.length; n++) {
                   if (submodules[n].path === baseName) {
                     this.parentModulePath(baseRepoPath.path);
-                    this.parentModuleLink(
-                      `/#/repository?path=${encodeURIComponent(baseRepoPath.path)}`
-                    );
+                    this.parentModuleLink(`/#/repository?path=${encodePath(baseRepoPath.path)}`);
                     return;
                   }
                 }
