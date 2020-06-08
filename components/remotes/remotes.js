@@ -45,7 +45,11 @@ class RemotesViewModel {
       event.event === 'request-fetch-tags' ||
       event.event === 'git-directory-changed'
     ) {
-      this.fetchDebounced();
+      if (
+        (event.event != 'working-tree-changed' && event.event != 'git-directory-changed') ||
+        this.shouldAutoFetch
+      )
+        this.fetchDebounced();
     }
   }
 

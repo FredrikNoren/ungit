@@ -440,22 +440,27 @@ exports.registerApi = (env) => {
   app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
     if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
 
-    const task = gitPromise(['remote'], req.query.path)
-      .then((remoteText) => {
-        const remotes = remoteText.trim().split('\n');
+    let task = Promise.resolve();
+    if (req.query.remoteFetch) {
+      task = task.then(() =>
+        gitPromise(['remote'], req.query.path).then((remoteText) => {
+          const remotes = remoteText.trim().split('\n');
 
-        // making calls serially as credential helpers may get confused to which cred to get.
-        return remotes.reduce((promise, remote) => {
-          if (!remote || remote === '') return promise;
-          return promise.then(() => {
-            return gitPromise({
-              commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
-              repoPath: req.query.path,
-              timeout: tenMinTimeoutMs,
-            }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
-          });
-        }, Promise.resolve());
-      })
+          // making calls serially as credential helpers may get confused to which cred to get.
+          return remotes.reduce((promise, remote) => {
+            if (!remote || remote === '') return promise;
+            return promise.then(() => {
+              return gitPromise({
+                commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
+                repoPath: req.query.path,
+                timeout: tenMinTimeoutMs,
+              }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
+            });
+          }, Promise.resolve());
+        })
+      );
+    }
+    task = task
       .then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
       .catch((e) => {
