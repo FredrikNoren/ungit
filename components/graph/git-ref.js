@@ -124,7 +124,7 @@ class RefViewModel extends Selectable {
         promise = components
           .create('yesnodialog', {
             title: 'Are you sure?',
-            details: 'This operation potentially going back in history.',
+            details: 'This operation may be reversing history.',
           })
           .show()
           .closeThen((diag) => {
