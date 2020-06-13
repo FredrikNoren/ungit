@@ -10,7 +10,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
-- Change warning message to be gramatically correct [#1383](https://github.com/FredrikNoren/ungit/pull/1383)
+- Change warning message to be grammatically correct [#1383](https://github.com/FredrikNoren/ungit/pull/1383)
 
 ### Removed
 - Remove bluebird dependency [#1350](https://github.com/FredrikNoren/ungit/pull/1350)
