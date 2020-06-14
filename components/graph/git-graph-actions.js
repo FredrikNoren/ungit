@@ -288,7 +288,7 @@ class Delete extends ActionBase {
 
 class CherryPick extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Cherry pick', 'cherry-pick', octicons['circuit-board'].toSVG({ height: 18 }));
+    super(graph, 'Cherry pick', 'cherry-pick', octicons.cpu.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
