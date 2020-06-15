@@ -7,13 +7,18 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Fixed
 - Clear git-promise timeout when git command was successful [#1357](https://github.com/FredrikNoren/ungit/pull/1357)
+- When autoFetch=false don't make remote repo calls automatically [#1381](https://github.com/FredrikNoren/ungit/pull/1381)
 
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
 - Change warning message to be grammatically correct [#1383](https://github.com/FredrikNoren/ungit/pull/1383)
+- Prettify code with prettier [#1316](https://github.com/FredrikNoren/ungit/pull/1316)
+- Switch from JSHint to ESLint [#1360](https://github.com/FredrikNoren/ungit/pull/1360)
+- Bump Dependencies [#1355](https://github.com/FredrikNoren/ungit/pull/1355)
 
 ### Removed
 - Remove bluebird dependency [#1350](https://github.com/FredrikNoren/ungit/pull/1350)
+- Remove grunt [#895](https://github.com/FredrikNoren/ungit/issues/895)
 
 ## [1.5.7](https://github.com/FredrikNoren/ungit/compare/v1.5.6...v1.5.7)
 
