@@ -169,13 +169,16 @@ class TextDiffViewModel {
       // data bind at getPatchCheckBox that is rendered with "html" binding.
       // which is reason why manually updating the html content and refreshing kobinding to have it render...
       if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, (match, capture) => {
-          if (this.patchLineList()[index] === undefined) {
-            this.patchLineList()[index] = true;
-          }
+        html = html.replace(
+          /<span class="d2h-code-line-[a-z]+">(\+|-)<\/span>/g,
+          (match, capture) => {
+            if (this.patchLineList()[index] === undefined) {
+              this.patchLineList()[index] = true;
+            }
 
-          return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
-        });
+            return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+          }
+        );
       }
 
       if (html !== this.htmlSrc) {
