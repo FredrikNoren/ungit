@@ -8,6 +8,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ### Fixed
 - Clear git-promise timeout when git command was successful [#1357](https://github.com/FredrikNoren/ungit/pull/1357)
 - When autoFetch=false don't make remote repo calls automatically [#1381](https://github.com/FredrikNoren/ungit/pull/1381)
+- Prevent commit message <textarea> from resizing horizontally [#1390](https://github.com/FredrikNoren/ungit/pull/1390)
 
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
