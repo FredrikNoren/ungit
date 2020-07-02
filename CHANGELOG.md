@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.7...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.8...master)
+
+## [1.5.8](https://github.com/FredrikNoren/ungit/compare/v1.5.7...v1.5.8)
 
 ### Fixed
 - Clear git-promise timeout when git command was successful [#1357](https://github.com/FredrikNoren/ungit/pull/1357)
