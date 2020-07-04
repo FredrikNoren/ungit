@@ -15,7 +15,6 @@ components/**/*.js
 !components/**/*.bundle.js
 public/images/icon.icns
 public/images/icon.ico
-public/js/.keep
 public/js/raven.min.js.map
 public/less/
 public/source/
