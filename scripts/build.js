@@ -3,6 +3,7 @@ const fs = fsSync.promises;
 const path = require('path');
 
 const browserify = require('browserify');
+const exorcist = require('exorcist');
 const less = require('less');
 const mkdirp = require('mkdirp');
 
@@ -62,10 +63,11 @@ const baseDir = path.join(__dirname, '..');
   b.require('@primer/octicons', { expose: 'octicons' });
   b.require('signals', { expose: 'signals' });
   const ungitjsFile = path.join(baseDir, 'public/js/ungit.js');
+  const mapFile = path.join(baseDir, 'public/js/ungit.js.map');
   await new Promise((resolve) => {
     const outFile = fsSync.createWriteStream(ungitjsFile);
     outFile.on('close', () => resolve());
-    b.bundle().pipe(outFile);
+    b.bundle().pipe(exorcist(mapFile)).pipe(outFile);
   });
   console.log(`browserify ${path.relative(baseDir, ungitjsFile)}`);
 
@@ -102,12 +104,20 @@ const baseDir = path.join(__dirname, '..');
 
 async function lessFile(source, destination) {
   const input = await fs.readFile(source);
-  const output = await less.render(input.toString(), { filename: source });
+  const output = await less.render(input.toString(), {
+    filename: source,
+    sourceMap: {
+      outputSourceFiles: true,
+      sourceMapURL: `${path.basename(destination)}.map`,
+    },
+  });
   await fs.writeFile(destination, output.css);
+  await fs.writeFile(`${destination}.map`, output.map);
   console.log(`less ${path.relative(baseDir, destination)}`);
 }
 
 async function browserifyFile(source, destination) {
+  const mapDestination = `${destination}.map`;
   await new Promise((resolve) => {
     const b = browserify(source, {
       bundleExternal: false,
@@ -115,7 +125,7 @@ async function browserifyFile(source, destination) {
     });
     const outFile = fsSync.createWriteStream(destination);
     outFile.on('close', () => resolve());
-    b.bundle().pipe(outFile);
+    b.bundle().pipe(exorcist(mapDestination)).pipe(outFile);
   });
   console.log(`browserify ${path.relative(baseDir, destination)}`);
 }

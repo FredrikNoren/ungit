@@ -9,7 +9,9 @@ public/js/
 
 # Ignore compiled files
 components/**/*.bundle.js
+components/**/*.bundle.js.map
 components/**/*.css
+components/**/*.css.map
 
 # Ignore potential files
 .vscode/
