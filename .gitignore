@@ -4,6 +4,8 @@ build/
 coverage/
 dist/
 node_modules/
+public/css/
+public/js/
 
 # Ignore compiled files
 components/**/*.bundle.js

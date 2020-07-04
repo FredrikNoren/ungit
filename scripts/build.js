@@ -1,12 +1,17 @@
 const fsSync = require('fs');
 const fs = fsSync.promises;
 const path = require('path');
-const less = require('less');
+
 const browserify = require('browserify');
+const less = require('less');
+const mkdirp = require('mkdirp');
 
 const baseDir = path.join(__dirname, '..');
 
 (async () => {
+  await mkdirp(path.join(baseDir, 'public', 'css'));
+  await mkdirp(path.join(baseDir, 'public', 'js'));
+
   const dir = await fs.readdir('components', { withFileTypes: true });
   const components = dir
     .filter((component) => component.isDirectory())
