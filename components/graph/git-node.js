@@ -175,7 +175,7 @@ class GitNodeViewModel extends Animateable {
   showRefSearchForm(obj, event) {
     this.refSearchFormVisible(true);
 
-    const textBox = event.currentTarget.nextElementSibling.firstElementChild; // this may not be the best idea...
+    const textBox = event.currentTarget.parentElement.querySelector('input[type="search"]');
     const $textBox = $(textBox);
 
     if (!$textBox.autocomplete('instance')) {
