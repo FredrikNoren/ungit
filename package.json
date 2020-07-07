@@ -15,7 +15,7 @@
     "format": "npm run lint -- --fix",
     "build": "node ./scripts/build.js",
     "watch": "nodemon -C --exec \"npm run build\" -e js,less -w public/source -w public/less -w components/ -i \"*.bundle.js\"",
-    "bumpdependencies": "ncu --upgrade",
+    "bumpdependencies": "ncu --upgrade --reject bootstrap",
     "electronpackage": "node ./scripts/electronpackage.js",
     "electronzip": "node ./scripts/electronzip.js",
     "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
