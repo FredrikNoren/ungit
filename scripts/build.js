@@ -89,14 +89,24 @@ const baseDir = path.join(__dirname, '..');
   );
 
   // copy
-  console.log('copy');
+  console.log('copy bootstrap fonts');
+  await Promise.all(
+    [
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.eot',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.svg',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.ttf',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.woff',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.woff2',
+    ].map(async (file) => {
+      await copyToFolder(file, 'public/fonts');
+    })
+  );
+
+  console.log('copy raven');
   await Promise.all(
     ['node_modules/raven-js/dist/raven.min.js', 'node_modules/raven-js/dist/raven.min.js.map'].map(
       async (file) => {
-        const source = path.join(baseDir, file);
-        const destination = path.join(baseDir, 'public/js', path.basename(source));
-        await fs.copyFile(source, destination);
-        console.log(`copy ${path.relative(baseDir, destination)}`);
+        await copyToFolder(file, 'public/js');
       }
     )
   );
@@ -128,4 +138,10 @@ async function browserifyFile(source, destination) {
     b.bundle().pipe(exorcist(mapDestination)).pipe(outFile);
   });
   console.log(`browserify ${path.relative(baseDir, destination)}`);
+}
+async function copyToFolder(source, destination) {
+  source = path.join(baseDir, source);
+  destination = path.join(baseDir, destination, path.basename(source));
+  await fs.copyFile(source, destination);
+  console.log(`copy ${path.relative(baseDir, destination)}`);
 }
