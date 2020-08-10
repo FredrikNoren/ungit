@@ -187,7 +187,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('[data-ta-action="revert"]');
     await environment.click('[data-ta-action="revert"]');
     await environment.waitForElementVisible(
-      '[data-ta-node-title="Revert \\"Merge branch \'testbranch\'\\""]'
+      '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"]'
     );
   });
 
