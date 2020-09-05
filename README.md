@@ -60,7 +60,7 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 ```
 
 
-Github SSH Authorization
+SSH Authorization
 -----------------
 Ungit does run git commands in background and authentication will be asked continously when working with private repos.  Easiest way to prevent this is to set up ssh authorization and cache it.
 
