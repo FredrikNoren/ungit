@@ -249,7 +249,7 @@ class Environment {
     return this.page.waitForSelector(selector, { hidden: true });
   }
   wait(duration) {
-    return this.page.waitFor(duration);
+    return this.page.waitForTimeout(duration);
   }
 
   type(text) {

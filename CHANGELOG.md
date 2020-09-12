@@ -5,6 +5,10 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.10...master)
 
+### Changed
+- Use page.waitForTimeout API in tests [#1422](https://github.com/FredrikNoren/ungit/pull/1422)
+- Bump Dependencies [#1417](https://github.com/FredrikNoren/ungit/pull/1417)
+
 ## [1.5.10](https://github.com/FredrikNoren/ungit/compare/v1.5.9...v1.5.10)
 
 ### Fixed
