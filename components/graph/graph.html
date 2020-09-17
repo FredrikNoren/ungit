@@ -23,6 +23,7 @@
           data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
               html: displayHtml(true),
               click: selected,
+              event: { dblclick: checkout },
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-local': isLocal }"
         >
         </span>
@@ -36,6 +37,7 @@
           data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
               html: displayHtml(true),
               click: selected,
+              event: { dblclick: checkout },
               dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }"
         >
         </span>
