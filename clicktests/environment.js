@@ -265,14 +265,14 @@ class Environment {
     return this.page.keyboard.press(key);
   }
 
-  async click(selector) {
+  async click(selector, clickCount) {
     let elementHandle = await this.waitForElementVisible(selector);
     try {
-      await elementHandle.click();
+      await elementHandle.click({ clickCount: clickCount });
     } catch (err1) {
       elementHandle = await this.waitForElementVisible(selector);
       try {
-        await elementHandle.click(); // try click a second time to reduce test flakiness
+        await elementHandle.click({ clickCount: clickCount }); // try click a second time to reduce test flakiness
       } catch (err2) {
         winston.error(`Failed to click element: ${selector}`);
         throw err2;
