@@ -1,12 +1,18 @@
 const fsSync = require('fs');
 const fs = fsSync.promises;
 const path = require('path');
-const less = require('less');
+
 const browserify = require('browserify');
+const exorcist = require('exorcist');
+const less = require('less');
+const mkdirp = require('mkdirp');
 
 const baseDir = path.join(__dirname, '..');
 
 (async () => {
+  await mkdirp(path.join(baseDir, 'public', 'css'));
+  await mkdirp(path.join(baseDir, 'public', 'js'));
+
   const dir = await fs.readdir('components', { withFileTypes: true });
   const components = dir
     .filter((component) => component.isDirectory())
@@ -57,10 +63,11 @@ const baseDir = path.join(__dirname, '..');
   b.require('@primer/octicons', { expose: 'octicons' });
   b.require('signals', { expose: 'signals' });
   const ungitjsFile = path.join(baseDir, 'public/js/ungit.js');
+  const mapFile = path.join(baseDir, 'public/js/ungit.js.map');
   await new Promise((resolve) => {
     const outFile = fsSync.createWriteStream(ungitjsFile);
     outFile.on('close', () => resolve());
-    b.bundle().pipe(outFile);
+    b.bundle().pipe(exorcist(mapFile)).pipe(outFile);
   });
   console.log(`browserify ${path.relative(baseDir, ungitjsFile)}`);
 
@@ -82,14 +89,24 @@ const baseDir = path.join(__dirname, '..');
   );
 
   // copy
-  console.log('copy');
+  console.log('copy bootstrap fonts');
+  await Promise.all(
+    [
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.eot',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.svg',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.ttf',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.woff',
+      'node_modules/bootstrap/fonts/glyphicons-halflings-regular.woff2',
+    ].map(async (file) => {
+      await copyToFolder(file, 'public/fonts');
+    })
+  );
+
+  console.log('copy raven');
   await Promise.all(
     ['node_modules/raven-js/dist/raven.min.js', 'node_modules/raven-js/dist/raven.min.js.map'].map(
       async (file) => {
-        const source = path.join(baseDir, file);
-        const destination = path.join(baseDir, 'public/js', path.basename(source));
-        await fs.copyFile(source, destination);
-        console.log(`copy ${path.relative(baseDir, destination)}`);
+        await copyToFolder(file, 'public/js');
       }
     )
   );
@@ -97,12 +114,20 @@ const baseDir = path.join(__dirname, '..');
 
 async function lessFile(source, destination) {
   const input = await fs.readFile(source);
-  const output = await less.render(input.toString(), { filename: source });
+  const output = await less.render(input.toString(), {
+    filename: source,
+    sourceMap: {
+      outputSourceFiles: true,
+      sourceMapURL: `${path.basename(destination)}.map`,
+    },
+  });
   await fs.writeFile(destination, output.css);
+  await fs.writeFile(`${destination}.map`, output.map);
   console.log(`less ${path.relative(baseDir, destination)}`);
 }
 
 async function browserifyFile(source, destination) {
+  const mapDestination = `${destination}.map`;
   await new Promise((resolve) => {
     const b = browserify(source, {
       bundleExternal: false,
@@ -110,7 +135,13 @@ async function browserifyFile(source, destination) {
     });
     const outFile = fsSync.createWriteStream(destination);
     outFile.on('close', () => resolve());
-    b.bundle().pipe(outFile);
+    b.bundle().pipe(exorcist(mapDestination)).pipe(outFile);
   });
   console.log(`browserify ${path.relative(baseDir, destination)}`);
+}
+async function copyToFolder(source, destination) {
+  source = path.join(baseDir, source);
+  destination = path.join(baseDir, destination, path.basename(source));
+  await fs.copyFile(source, destination);
+  console.log(`copy ${path.relative(baseDir, destination)}`);
 }

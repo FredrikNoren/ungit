@@ -27,6 +27,7 @@ class BranchesViewModel {
       this.updateRefs();
       return value;
     };
+    this.shouldAutoFetch = ungit.config.autoFetch;
     this.isShowRemote.subscribe(setLocalStorageAndUpdate.bind(null, showRemote));
     this.isShowBranch.subscribe(setLocalStorageAndUpdate.bind(null, showBranch));
     this.isShowTag.subscribe(setLocalStorageAndUpdate.bind(null, showTag));
@@ -44,7 +45,7 @@ class BranchesViewModel {
     ko.renderTemplate('branches', this, {}, parentElement);
   }
   clickFetch() {
-    this.updateRefs();
+    this.updateRefs(true);
   }
   onProgramEvent(event) {
     if (
@@ -56,7 +57,9 @@ class BranchesViewModel {
       this.updateRefsDebounced();
     }
   }
-  updateRefs() {
+  updateRefs(forceRemoteFetch) {
+    forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
+
     const currentBranchProm = this.server
       .getPromise('/branches', { path: this.repoPath() })
       .then((branches) =>
@@ -72,7 +75,7 @@ class BranchesViewModel {
 
     // refreshes tags branches and remote branches
     const refsProm = this.server
-      .getPromise('/refs', { path: this.repoPath() })
+      .getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch })
       .then((refs) => {
         const version = Date.now();
         const sorted = refs

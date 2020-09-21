@@ -3,16 +3,47 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.7...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.10...master)
+
+### Added
+- Doubleclick to checkout [#190](https://github.com/FredrikNoren/ungit/issues/190)
+
+### Changed
+- Use page.waitForTimeout API in tests [#1422](https://github.com/FredrikNoren/ungit/pull/1422)
+- Bump Dependencies [#1417](https://github.com/FredrikNoren/ungit/pull/1417)
+
+## [1.5.10](https://github.com/FredrikNoren/ungit/compare/v1.5.9...v1.5.10)
+
+### Fixed
+- Add copyright to electron executable [#1411](https://github.com/FredrikNoren/ungit/issues/1411)
+
+### Changed
+- Generate and extract source maps [#1394](https://github.com/FredrikNoren/ungit/pull/1394)
+- Import Bootstrap from npm and upgrade to latest 3.x [#1395](https://github.com/FredrikNoren/ungit/pull/1395)
+- Bump Dependencies upgrading from electron 9.x to 10.x [#1392](https://github.com/FredrikNoren/ungit/pull/1392), [#1406](https://github.com/FredrikNoren/ungit/pull/1406)
+
+## [1.5.9](https://github.com/FredrikNoren/ungit/compare/v1.5.8...v1.5.9)
+
+### Fixed
+- Fix git ignore settings [#1393](https://github.com/FredrikNoren/ungit/pull/1393)
+
+## [1.5.8](https://github.com/FredrikNoren/ungit/compare/v1.5.7...v1.5.8)
 
 ### Fixed
 - Clear git-promise timeout when git command was successful [#1357](https://github.com/FredrikNoren/ungit/pull/1357)
+- When autoFetch=false don't make remote repo calls automatically [#1381](https://github.com/FredrikNoren/ungit/pull/1381)
+- Prevent commit message <textarea> from resizing horizontally [#1390](https://github.com/FredrikNoren/ungit/pull/1390)
+- Diff out is not properly escaping [#1387](https://github.com/FredrikNoren/ungit/issues/1387)
 
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
+- Prettify code with prettier [#1316](https://github.com/FredrikNoren/ungit/pull/1316)
+- Switch from JSHint to ESLint [#1360](https://github.com/FredrikNoren/ungit/pull/1360)
+- Bump Dependencies [#1355](https://github.com/FredrikNoren/ungit/pull/1355), [#1385](https://github.com/FredrikNoren/ungit/pull/1385)
 
 ### Removed
 - Remove bluebird dependency [#1350](https://github.com/FredrikNoren/ungit/pull/1350)
+- Remove grunt [#895](https://github.com/FredrikNoren/ungit/issues/895)
 
 ## [1.5.7](https://github.com/FredrikNoren/ungit/compare/v1.5.6...v1.5.7)
 

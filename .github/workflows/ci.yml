@@ -58,10 +58,19 @@ jobs:
       - run: npm test
 
       # publish artifacts
+      - run: npm pack
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
       - run: npm run electronpackage -- --all
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
       - run: npm run electronzip
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+
+      - name: Upload npm pack
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ungit
+          path: ungit-*.tgz
 
       - name: Upload ungit-darwin-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
