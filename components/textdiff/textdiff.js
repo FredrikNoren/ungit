@@ -170,13 +170,20 @@ class TextDiffViewModel {
       // which is reason why manually updating the html content and refreshing kobinding to have it render...
       if (this.patchLineList) {
         html = html.replace(
-          /<span class="d2h-code-line-[a-z]+">(\+|-)<\/span>/g,
-          (match, capture) => {
+          /<td class="(d2h-(?:del|ins)[^"]*)">([\s\S]*?)<\/td>/g,
+          (match, tdClass, content) => {
             if (this.patchLineList()[index] === undefined) {
               this.patchLineList()[index] = true;
             }
-
-            return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+            content = content.replace(
+              /<span class="d2h-code-line-[a-z]+">(\+|-)<\/span>/g,
+              (match, capture) => {
+                return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+              }
+            );
+            return `<td class="${tdClass}" ${
+              this.editState() === 'patched' ? 'style="cursor:pointer"' : ''
+            } data-bind="click: toggleCheckboxFromRowClick">${content}</td>`;
           }
         );
       }
@@ -201,7 +208,7 @@ class TextDiffViewModel {
     }
     return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
       isActive ? 'checked' : ''
-    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index})"></input></div>`;
+    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index}), clickBubble: false"></input></div>`;
   }
 
   togglePatchLine(index) {
@@ -218,5 +225,10 @@ class TextDiffViewModel {
     }
 
     return true;
+  }
+
+  toggleCheckboxFromRowClick(c, e) {
+    if (this.editState() === 'patched')
+      jQuery(e.currentTarget).find('input[type=checkbox]').click();
   }
 }
