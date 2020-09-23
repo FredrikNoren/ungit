@@ -229,6 +229,6 @@ class TextDiffViewModel {
 
   toggleCheckboxFromRowClick(c, e) {
     if (this.editState() === 'patched')
-      jQuery(e.currentTarget).find('input[type=checkbox]').click();
+      e.currentTarget.querySelector('input[type=checkbox]').click();
   }
 }
