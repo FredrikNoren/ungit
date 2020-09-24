@@ -22,6 +22,10 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ### Changed
 - Bump Dependencies [#1427](https://github.com/FredrikNoren/ungit/pull/1427)
 
+### Added
+- Allow toggling patch checkbox by clicking on lines [#1429](https://github.com/FredrikNoren/ungit/pull/1429)
+
+
 ## [1.5.11](https://github.com/FredrikNoren/ungit/compare/v1.5.10...v1.5.11)
 
 ### Added
