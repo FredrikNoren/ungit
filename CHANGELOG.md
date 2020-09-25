@@ -3,14 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.10...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.11...master)
+
+## [1.5.11](https://github.com/FredrikNoren/ungit/compare/v1.5.10...v1.5.11)
 
 ### Added
 - Doubleclick to checkout [#190](https://github.com/FredrikNoren/ungit/issues/190)
 
 ### Changed
 - Use page.waitForTimeout API in tests [#1422](https://github.com/FredrikNoren/ungit/pull/1422)
-- Bump Dependencies [#1417](https://github.com/FredrikNoren/ungit/pull/1417)
+- Bump Dependencies [#1417](https://github.com/FredrikNoren/ungit/pull/1417), [#1423](https://github.com/FredrikNoren/ungit/pull/1423)
 
 ## [1.5.10](https://github.com/FredrikNoren/ungit/compare/v1.5.9...v1.5.10)
 
