@@ -204,9 +204,7 @@ class TextDiffViewModel {
     if (isActive) {
       this.numberOfSelectedPatchLines++;
     }
-    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
-      isActive ? 'checked' : ''
-    } type="checkbox" data-bind="visible: editState() === 'patched', checked: patchLineList()[${index}]"></input></div>`;
+    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input type="checkbox" data-bind="visible: editState() === 'patched', checked: patchLineList()[${index}]"></input></div>`;
   }
 
   togglePatchLine(index) {
