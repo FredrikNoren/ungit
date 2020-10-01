@@ -181,7 +181,7 @@ class TextDiffViewModel {
                 return this.getPatchCheckBox(capture, index, this.patchLineList()[index]);
               }
             );
-            return `<td class="${tdClass}" data-bind="click: togglePatchLine.bind($data, ${index++}), css: { patched: editState() === 'patched' }">${content}</td>`;
+            return `<td class="${tdClass}" data-bind="click: (editState() === 'patched') ? togglePatchLine.bind($data, ${index++}) : null, css: { patched: editState() === 'patched' }">${content}</td>`;
           }
         );
       }
