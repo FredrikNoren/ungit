@@ -178,7 +178,8 @@ class TextDiffViewModel {
             content = content.replace(
               /<span class="d2h-code-line-[a-z]+">(\+|-)<\/span>/g,
               (match, capture) => {
-                return this.getPatchCheckBox(capture, index, this.patchLineList()[index]);
+                if (this.patchLineList()[index]) this.numberOfSelectedPatchLines++;
+                return this.getPatchCheckBox(capture, index);
               }
             );
             return `<td class="${tdClass}" data-bind="click: (editState() === 'patched') ? togglePatchLine.bind($data, ${index++}) : null, css: { patched: editState() === 'patched' }">${content}</td>`;
@@ -200,10 +201,7 @@ class TextDiffViewModel {
     this.render();
   }
 
-  getPatchCheckBox(symbol, index, isActive) {
-    if (isActive) {
-      this.numberOfSelectedPatchLines++;
-    }
+  getPatchCheckBox(symbol, index) {
     return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input type="checkbox" data-bind="visible: editState() === 'patched', checked: patchLineList()[${index}]"></input></div>`;
   }
 
