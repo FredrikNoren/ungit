@@ -202,6 +202,9 @@ class TextDiffViewModel {
   }
 
   togglePatchLine(index) {
+    // Selecting text, not toggling the line's patch status
+    if (window.getSelection().toString().length !== 0) return true;
+
     this.patchLineList()[index] = !this.patchLineList()[index];
 
     if (this.patchLineList().filter(Boolean).length === 0) {
