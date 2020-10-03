@@ -161,6 +161,7 @@ class TextDiffViewModel {
         drawFileList: false,
       });
 
+      const rerender = this.patchLineList && !this.patchLineList().length;
       let index = 0;
 
       // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
@@ -182,7 +183,7 @@ class TextDiffViewModel {
         );
       }
 
-      if (html !== this.htmlSrc) {
+      if (html !== this.htmlSrc || rerender) {
         // diff has changed since last we displayed and need refresh
         this.htmlSrc = html;
         this.isParsed(false);
