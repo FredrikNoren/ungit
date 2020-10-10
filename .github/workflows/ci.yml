@@ -43,7 +43,7 @@ jobs:
         if: matrix.os == 'macos-latest' && matrix.node-version == '*'
       # windows dependencies
       # https://github.community/t5/GitHub-Actions/TEMP-is-broken-on-Windows/td-p/30432
-      - run: echo "::set-env name=TEMP::C:\Users\runneradmin\AppData\Local\Temp"
+      - run: echo "TEMP=$env:USERPROFILE\AppData\Local\Temp" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
       - run: choco upgrade git
         if: matrix.os == 'windows-latest' && matrix.node-version == '*'
