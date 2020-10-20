@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.11...master)
 
+### Fixed
+- branches - can't re-enable disabled groups [#1434](https://github.com/FredrikNoren/ungit/issues/1434)
+
 ## [1.5.11](https://github.com/FredrikNoren/ungit/compare/v1.5.10...v1.5.11)
 
 ### Added
