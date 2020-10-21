@@ -61,13 +61,13 @@ before_deploy:
   - npm run electronzip
 deploy:
   provider: releases
-  api_key: ${GITHUB_TOKEN}
+  token: ${GITHUB_TOKEN}
   name: ${TRAVIS_TAG}
   file_glob: true
   file: dist/*.zip
   overwrite: true
   skip_cleanup: true
-  body: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
+  release_notes: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
   on:
     tags: true
     condition: $TRAVIS_OS_NAME = "linux" && $TRAVIS_NODE_VERSION = "10"
