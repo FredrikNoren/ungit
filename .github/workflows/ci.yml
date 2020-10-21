@@ -71,6 +71,7 @@ jobs:
         with:
           name: ungit
           path: ungit-*.tgz
+          retention-days: 7
 
       - name: Upload ungit-darwin-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -78,6 +79,7 @@ jobs:
         with:
           name: ungit-darwin-x64
           path: dist/ungit-darwin-x64.zip
+          retention-days: 7
 
       - name: Upload ungit-linux-arm64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -85,6 +87,7 @@ jobs:
         with:
           name: ungit-linux-arm64
           path: dist/ungit-linux-arm64.zip
+          retention-days: 7
 
       - name: Upload ungit-linux-armv7l
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -92,6 +95,7 @@ jobs:
         with:
           name: ungit-linux-armv7l
           path: dist/ungit-linux-armv7l.zip
+          retention-days: 7
 
       - name: Upload ungit-linux-ia32
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -99,6 +103,7 @@ jobs:
         with:
           name: ungit-linux-ia32
           path: dist/ungit-linux-ia32.zip
+          retention-days: 7
 
       - name: Upload ungit-linux-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -106,6 +111,7 @@ jobs:
         with:
           name: ungit-linux-x64
           path: dist/ungit-linux-x64.zip
+          retention-days: 7
 
       - name: Upload ungit-mas-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -113,6 +119,7 @@ jobs:
         with:
           name: ungit-mas-x64
           path: dist/ungit-mas-x64.zip
+          retention-days: 7
 
       - name: Upload ungit-win32-arm64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -120,6 +127,7 @@ jobs:
         with:
           name: ungit-win32-arm64
           path: dist/ungit-win32-arm64.zip
+          retention-days: 7
 
       - name: Upload ungit-win32-ia32
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -127,6 +135,7 @@ jobs:
         with:
           name: ungit-win32-ia32
           path: dist/ungit-win32-ia32.zip
+          retention-days: 7
 
       - name: Upload ungit-win32-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
@@ -134,3 +143,4 @@ jobs:
         with:
           name: ungit-win32-x64
           path: dist/ungit-win32-x64.zip
+          retention-days: 7

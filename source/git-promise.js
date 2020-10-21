@@ -8,6 +8,7 @@ const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
+const gitEmptyReproSha256 = '6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321'; // https://stackoverflow.com/q/9765453
 const gitConfigArguments = [
   '-c',
   'color.ui=false',
@@ -364,7 +365,12 @@ git.binaryFileContent = (repoPath, filename, version, outPipe) => {
 git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
   if (sha1) {
     return git(['rev-list', '--max-parents=0', sha1], repoPath).then((initialCommitSha1) => {
-      const prevSha1 = sha1 == initialCommitSha1.trim() ? gitEmptyReproSha1 : `${sha1}^`;
+      const prevSha1 =
+        sha1 == initialCommitSha1.trim()
+          ? sha1.length == 64
+            ? gitEmptyReproSha256
+            : gitEmptyReproSha1
+          : `${sha1}^`;
       if (oldFilename && oldFilename !== filename) {
         return git(
           [
