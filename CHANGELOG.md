@@ -7,6 +7,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Fixed
 - branches - can't re-enable disabled groups [#1434](https://github.com/FredrikNoren/ungit/issues/1434)
+- Support git 2.29 sha256 [#1436](https://github.com/FredrikNoren/ungit/pull/1436)
 
 ## [1.5.11](https://github.com/FredrikNoren/ungit/compare/v1.5.10...v1.5.11)
 
