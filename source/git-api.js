@@ -41,7 +41,7 @@ exports.registerApi = (env) => {
           .catch(() => {})
           .then(() => {
             socket.watcher = [];
-            return watchPath(socket, '.', { recursive: true });
+            return watchPath(socket, '.', { recursive: isMac || isWindows });
           })
           .then(() => {
             if (!isMac && !isWindows) {

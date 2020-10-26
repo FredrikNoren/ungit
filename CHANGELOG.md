@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.12...master)
 
+### Fixed
+- Unhandled rejection ERR_FEATURE_NOT_AVAILABLE_ON_PLATFORM (recursive watch) [#1389](https://github.com/FredrikNoren/ungit/issues/1389)
+
 ## [1.5.12](https://github.com/FredrikNoren/ungit/compare/v1.5.11...v1.5.12)
 
 ### Fixed
