@@ -5,6 +5,7 @@ os:
 language: node_js
 node_js:
   - node
+  - '14'
   - '12'
   - '10'
 branches:
@@ -17,6 +18,8 @@ env:
     - GIT_VERSION=default
 jobs:
   exclude:
+    - node_js: '14'
+      env: GIT_VERSION=edge
     - node_js: '12'
       env: GIT_VERSION=edge
     - node_js: '10'
@@ -66,7 +69,7 @@ deploy:
   file_glob: true
   file: dist/*.zip
   overwrite: true
-  skip_cleanup: true
+  edge: true
   release_notes: "[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${TRAVIS_TAG//[v\\.]})"
   on:
     tags: true

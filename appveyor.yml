@@ -3,6 +3,7 @@ skip_branch_with_pr: true
 environment:
   matrix:
     - nodejs_version: '' # latest
+    - nodejs_version: '14'
     - nodejs_version: '12'
     - nodejs_version: '10'
 
