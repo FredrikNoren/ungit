@@ -3,10 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.12...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.13...master)
+
+## [1.5.13](https://github.com/FredrikNoren/ungit/compare/v1.5.12...v1.5.13)
 
 ### Fixed
 - Unhandled rejection ERR_FEATURE_NOT_AVAILABLE_ON_PLATFORM (recursive watch) [#1389](https://github.com/FredrikNoren/ungit/issues/1389)
+
+### Changed
+- Bump Dependencies [#1438](https://github.com/FredrikNoren/ungit/pull/1438)
 
 ## [1.5.12](https://github.com/FredrikNoren/ungit/compare/v1.5.11...v1.5.12)
 
