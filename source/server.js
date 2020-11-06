@@ -232,7 +232,7 @@ app.use(serveStatic(__dirname + '/../public'));
 const socketIO = require('socket.io');
 const socketsById = {};
 let socketIdCounter = 0;
-const io = socketIO.listen(server, {
+const io = socketIO(server, {
   path: config.rootPath + '/socket.io',
   logger: {
     debug: winston.debug.bind(winston),
@@ -241,7 +241,7 @@ const io = socketIO.listen(server, {
     warn: winston.warn.bind(winston),
   },
 });
-io.sockets.on('connection', (socket) => {
+io.on('connection', (socket) => {
   const socketId = socketIdCounter++;
   socketsById[socketId] = socket;
   socket.socketId = socketId;
