@@ -5,6 +5,10 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.13...master)
 
+### Changed
+- Update socket.io to version 3.0.0 [#1443](https://github.com/FredrikNoren/ungit/pull/1443)
+- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442)
+
 ## [1.5.13](https://github.com/FredrikNoren/ungit/compare/v1.5.12...v1.5.13)
 
 ### Fixed
