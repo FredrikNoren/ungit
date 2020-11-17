@@ -7,7 +7,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Changed
 - Update socket.io to version 3.0.0 [#1443](https://github.com/FredrikNoren/ungit/pull/1443)
-- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442)
+- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442), [#1444](https://github.com/FredrikNoren/ungit/pull/1444)
 
 ## [1.5.13](https://github.com/FredrikNoren/ungit/compare/v1.5.12...v1.5.13)
 

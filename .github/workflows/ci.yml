@@ -73,6 +73,14 @@ jobs:
           path: ungit-*.tgz
           retention-days: 7
 
+      - name: Upload ungit-darwin-arm64
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ungit-darwin-arm64
+          path: dist/ungit-darwin-arm64.zip
+          retention-days: 7
+
       - name: Upload ungit-darwin-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
         uses: actions/upload-artifact@v2
@@ -111,14 +119,6 @@ jobs:
         with:
           name: ungit-linux-x64
           path: dist/ungit-linux-x64.zip
-          retention-days: 7
-
-      - name: Upload ungit-mas-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
-        uses: actions/upload-artifact@v2
-        with:
-          name: ungit-mas-x64
-          path: dist/ungit-mas-x64.zip
           retention-days: 7
 
       - name: Upload ungit-win32-arm64
