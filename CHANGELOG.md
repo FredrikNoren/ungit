@@ -3,11 +3,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.13...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.14...master)
+
+## [1.5.14](https://github.com/FredrikNoren/ungit/compare/v1.5.13...v1.5.14)
 
 ### Changed
 - Update socket.io to version 3.0.0 [#1443](https://github.com/FredrikNoren/ungit/pull/1443)
-- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442), [#1444](https://github.com/FredrikNoren/ungit/pull/1444)
+- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442), [#1444](https://github.com/FredrikNoren/ungit/pull/1444), [#1448](https://github.com/FredrikNoren/ungit/pull/1448), [#1449](https://github.com/FredrikNoren/ungit/pull/1449)
 
 ## [1.5.13](https://github.com/FredrikNoren/ungit/compare/v1.5.12...v1.5.13)
 
