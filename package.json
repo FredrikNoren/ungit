@@ -75,7 +75,7 @@
     "dedent": "~0.7.0",
     "electron": "~11.0.3",
     "electron-packager": "~15.2.0",
-    "eslint": "~7.14.0",
+    "eslint": "~7.15.0",
     "eslint-config-prettier": "~6.15.0",
     "eslint-plugin-mocha": "~8.0.0",
     "eslint-plugin-node": "~11.1.0",
