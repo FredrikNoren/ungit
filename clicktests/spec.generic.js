@@ -14,11 +14,6 @@ const changeTestFile = async (filename, repoPath) => {
     path: repoPath,
   });
 };
-const checkout = async (branch) => {
-  await environment.click(`.branch[data-ta-name="${branch}"]`);
-  await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
-  await environment.waitForElementVisible(`.ref.branch[data-ta-name="${branch}"].current`);
-};
 const amendCommit = async () => {
   try {
     await environment.page.waitForSelector('.amend-button', { visible: true, timeout: 2000 });
@@ -156,8 +151,10 @@ describe('[GENERIC]', () => {
     environment.waitForElementVisible('.commit');
   });
 
-  it('Checkout a branch', () => {
-    return checkout('testbranch');
+  it('Checkout testbranch with action', async () => {
+    await environment.click('.branch[data-ta-name="testbranch"]');
+    await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
+    await environment.waitForElementVisible('.ref.branch[data-ta-name="testbranch"].current');
   });
 
   it('Create another commit', async () => {
@@ -169,8 +166,9 @@ describe('[GENERIC]', () => {
     return environment.refAction('testbranch', true, 'rebase');
   });
 
-  it('Checkout master again', () => {
-    return checkout('master');
+  it('Checkout master with double click', async () => {
+    await environment.click('.branch[data-ta-name="master"]', 2);
+    await environment.waitForElementVisible('.ref.branch[data-ta-name="master"].current');
   });
 
   it('Create yet another commit', async () => {

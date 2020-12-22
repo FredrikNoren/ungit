@@ -3,7 +3,37 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.10...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.13...master)
+
+### Changed
+- Update socket.io to version 3.0.0 [#1443](https://github.com/FredrikNoren/ungit/pull/1443)
+- Bump Dependencies [#1442](https://github.com/FredrikNoren/ungit/pull/1442), [#1444](https://github.com/FredrikNoren/ungit/pull/1444)
+
+## [1.5.13](https://github.com/FredrikNoren/ungit/compare/v1.5.12...v1.5.13)
+
+### Fixed
+- Unhandled rejection ERR_FEATURE_NOT_AVAILABLE_ON_PLATFORM (recursive watch) [#1389](https://github.com/FredrikNoren/ungit/issues/1389)
+
+### Changed
+- Bump Dependencies [#1438](https://github.com/FredrikNoren/ungit/pull/1438)
+
+## [1.5.12](https://github.com/FredrikNoren/ungit/compare/v1.5.11...v1.5.12)
+
+### Fixed
+- branches - can't re-enable disabled groups [#1434](https://github.com/FredrikNoren/ungit/issues/1434)
+- Support git 2.29 sha256 [#1436](https://github.com/FredrikNoren/ungit/pull/1436)
+
+### Changed
+- Bump Dependencies [#1427](https://github.com/FredrikNoren/ungit/pull/1427)
+
+## [1.5.11](https://github.com/FredrikNoren/ungit/compare/v1.5.10...v1.5.11)
+
+### Added
+- Doubleclick to checkout [#190](https://github.com/FredrikNoren/ungit/issues/190)
+
+### Changed
+- Use page.waitForTimeout API in tests [#1422](https://github.com/FredrikNoren/ungit/pull/1422)
+- Bump Dependencies [#1417](https://github.com/FredrikNoren/ungit/pull/1417), [#1423](https://github.com/FredrikNoren/ungit/pull/1423)
 
 ## [1.5.10](https://github.com/FredrikNoren/ungit/compare/v1.5.9...v1.5.10)
 
