@@ -11,7 +11,7 @@ electronPackager({
   all: process.argv.includes('--all'),
   asar: true,
   overwrite: true,
-  appCopyright: 'Copyright (c) 2013-2020 Fredrik Norén',
+  appCopyright: 'Copyright (c) 2013-2021 Fredrik Norén',
   ignore: [
     /^\/(?:[^/]+?\/)*(?:\..+|.+\.less)$/, // dot-files and less files anywhere
     /^\/(?:\..+|assets|clicktests|coverage|dist|scripts|test)\//, // folders in root
