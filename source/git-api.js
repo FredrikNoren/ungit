@@ -70,7 +70,8 @@ exports.registerApi = (env) => {
         return mkdirp(pathToWatch);
       })
       .then(() => {
-        const watcher = fs.watch(pathToWatch, options || {}, (event, filename) => {
+        const watcher = watch(pathToWatch, options || {});
+        watcher.on('change', (event, filename) => {
           if (event === 'rename' || !filename) return;
           const filePath = path.join(subfolderPath, filename);
           winston.debug(`File change: ${filePath}`);
@@ -395,7 +396,7 @@ exports.registerApi = (env) => {
         if (err.stderr && err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) {
           return { limit: limit, skip: skip, nodes: [] };
         } else if (
-          /fatal: your current branch \'.+\' does not have any commits yet.*/.test(err.stderr)
+          /fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr)
         ) {
           return { limit: limit, skip: skip, nodes: [] };
         } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {

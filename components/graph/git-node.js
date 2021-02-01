@@ -116,43 +116,7 @@ class GitNodeViewModel extends Animateable {
       new GraphActions.Squash(this.graph, this),
     ];
 
-    this.render = _.debounce(
-      () => {
-        this.refSearchFormVisible(false);
-        if (!this.isInited) return;
-        if (this.ancestorOfHEAD()) {
-          this.r(30);
-          this.cx(610);
-
-          if (!this.aboveNode) {
-            this.cy(120);
-          } else if (this.aboveNode.ancestorOfHEAD()) {
-            this.cy(this.aboveNode.cy() + 120);
-          } else {
-            this.cy(this.aboveNode.cy() + 60);
-          }
-        } else {
-          this.r(15);
-          this.cx(610 + 90 * this.branchOrder());
-          this.cy(this.aboveNode && !isNaN(this.aboveNode.cy()) ? this.aboveNode.cy() + 60 : 120);
-        }
-
-        if (this.aboveNode && this.aboveNode.selected()) {
-          this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
-        }
-
-        this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
-        if (!this.hasBeenRenderedBefore) {
-          // push this nodes into the graph's node list to be rendered if first time.
-          // if been pushed before, no need to add to nodes.
-          this.hasBeenRenderedBefore = true;
-          graph.nodes.push(this);
-        }
-        this.animate();
-      },
-      500,
-      { leading: true }
-    );
+    this.render = _.debounce(this.render.bind(this), 50, { trailing: true });
   }
 
   getGraphAttr() {
@@ -164,9 +128,38 @@ class GitNodeViewModel extends Animateable {
     this.element().setAttribute('y', val[1] - 30);
   }
 
-  setParent(parent) {
-    this.aboveNode = parent;
-    if (parent) parent.belowNode = this;
+  render() {
+    this.refSearchFormVisible(false);
+    if (!this.isInited) return;
+    if (this.ancestorOfHEAD()) {
+      this.r(30);
+      this.cx(610);
+
+      if (!this.aboveNode) {
+        this.cy(120);
+      } else if (this.aboveNode.ancestorOfHEAD()) {
+        this.cy(this.aboveNode.cy() + 120);
+      } else {
+        this.cy(this.aboveNode.cy() + 60);
+      }
+    } else {
+      this.r(15);
+      this.cx(610 + 90 * this.branchOrder());
+      this.cy(this.aboveNode && !isNaN(this.aboveNode.cy()) ? this.aboveNode.cy() + 60 : 120);
+    }
+
+    if (this.aboveNode && this.aboveNode.selected()) {
+      this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
+    }
+
+    this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+    if (!this.hasBeenRenderedBefore) {
+      // push this nodes into the graph's node list to be rendered if first time.
+      // if been pushed before, no need to add to nodes.
+      this.hasBeenRenderedBefore = true;
+      this.graph.nodes.push(this);
+    }
+    this.animate();
   }
 
   setData(logEntry) {
