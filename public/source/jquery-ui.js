@@ -1,4 +1,4 @@
-/**
+/*
  * Import the autocomplete widget and its dependencies.
  * The current order of the imports is required.
  */
