@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.15...master)
 
+### Added
+- Add clipboard button on commit [#1462](https://github.com/FredrikNoren/ungit/pull/1462)
+
 ## [1.5.15](https://github.com/FredrikNoren/ungit/compare/v1.5.14...v1.5.15)
 
 ### Changed
