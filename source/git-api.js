@@ -270,7 +270,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/status`,
     ensureAuthenticated,
     ensurePathExists,
-    jw((req) => gitPromise.status(req.query.path, null))
+    jw((req) => req.repo.status())
   );
 
   app.post(

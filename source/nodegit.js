@@ -179,6 +179,51 @@ class NGWrap {
   rootPath() {
     return this.r.isBare() ? this.r.path().slice(0, -1) : this.r.workdir().slice(0, -1);
   }
+
+  async status() {
+    const { r } = this;
+    const branch = await r.getCurrentBranch();
+    const index = await r.index();
+    const inCherry = r.isCherrypicking();
+    const inMerge = r.isMerging();
+    const inRebase = r.isRebasing();
+    const inConflict = index.hasConflicts();
+    /** @type {Record<string, FileStatus>} */
+    const files = {};
+    for (const f of await r.getStatusExt()) {
+      const fileName = f.path();
+      let oldFileName;
+      if (!f.isNew()) {
+        const diff = f.indexToWorkdir() || f.headToIndex();
+        oldFileName = diff.oldFile().path();
+      } else {
+        oldFileName = fileName;
+      }
+      const displayName = f.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
+      files[fileName] = {
+        fileName,
+        oldFileName,
+        displayName,
+        staged: f.inIndex(),
+        removed: f.isDeleted(),
+        isNew: f.isNew(),
+        conflict: f.isConflicted(),
+        renamed: f.isRenamed(),
+        type: fileType(fileName),
+      };
+    }
+
+    /** @type {GitStatus} */
+    const out = {
+      branch: branch && branch.shorthand(),
+      inCherry,
+      inMerge,
+      inRebase,
+      inConflict,
+      files,
+    };
+    return out;
+  }
 }
 
 const repoPs = {};
