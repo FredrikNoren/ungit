@@ -43,7 +43,7 @@ const nodegitErrors = {
   '-35': 'GIT_EAPPLYFAIL', // Patch application failed
 };
 const normalizeError = (err) => {
-  console.error('normalizing', err, new Error().stack);
+  console.error('normalizing', err);
   if (!err.errorCode && err.errno) err.errorCode = nodegitErrors[err.errno];
   throw err;
 };
@@ -98,81 +98,112 @@ const getFileStats = async (c) => {
   });
 };
 
-const addStash = async (repo, message) => {
-  const signature = await repo.defaultSignature();
-  return nodegit.Stash.save(repo, signature, message, nodegit.Stash.FLAGS.INCLUDE_UNTRACKED).catch(
-    normalizeError
-  );
-};
-
-const deleteStash = async (repo, index) => nodegit.Stash.drop(repo, index).catch(normalizeError);
-
-const applyStash = async (repo, index) => nodegit.Stash.apply(repo, index).catch(normalizeError);
-
-const popStash = async (repo, oid) => {
-  if (!oid) return;
-  let index;
-  await nodegit.Stash.foreach(repo, (i, _msg, stashOid) => {
-    if (stashOid.equal(oid)) index = i;
-  }).catch(normalizeError);
-  if (index != null) {
-    await nodegit.Stash.pop(repo, index, {
-      flags: nodegit.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX,
-    }).catch(normalizeError);
+class NGWrap {
+  constructor(ngRepo) {
+    /** @type {nodegit.Repository} */
+    this.r = ngRepo;
   }
-};
 
-const getTags = async (repo) => nodegit.Tag.list(repo).catch(normalizeError);
+  async addStash(message) {
+    const signature = await this.r.defaultSignature();
+    return nodegit.Stash.save(
+      this.r,
+      signature,
+      message,
+      nodegit.Stash.FLAGS.INCLUDE_UNTRACKED
+    ).catch(normalizeError);
+  }
 
-const deleteTag = async (repo, name) => nodegit.Tag.delete(repo, name).catch(normalizeError);
+  async deleteStash(index) {
+    return nodegit.Stash.drop(this.r, index).catch(normalizeError);
+  }
 
-const getRemotes = async (repo) => nodegit.Remote.list(repo).catch(normalizeError);
+  async applyStash(index) {
+    return nodegit.Stash.apply(this.r, index).catch(normalizeError);
+  }
 
-const addRemote = async (repo, name, url) =>
-  nodegit.Remote.create(repo, name, url).catch(normalizeError);
+  async popStash(oid) {
+    if (!oid) return;
+    let index;
+    await nodegit.Stash.foreach(this.r, (i, _msg, stashOid) => {
+      if (stashOid.equal(oid)) index = i;
+    }).catch(normalizeError);
+    if (index != null) {
+      await nodegit.Stash.pop(this.r, index, {
+        flags: nodegit.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX,
+      }).catch(normalizeError);
+    }
+  }
 
-const deleteRemote = async (repo, name) => nodegit.Remote.delete(repo, name).catch(normalizeError);
+  async getTags() {
+    return nodegit.Tag.list(this.r).catch(normalizeError);
+  }
 
-const getStashes = async (repo) => {
-  const oids = [];
-  await nodegit.Stash.foreach(repo, (index, message, oid) => {
-    oids.push(oid);
-  }).catch(normalizeError);
-  const stashes = await Promise.all(oids.map((oid) => repo.getCommit(oid)));
-  return Promise.all(
-    stashes.map(async (stash, index) => ({
-      ...formatCommit(stash),
-      reflogId: `${index}`,
-      reflogName: `stash@{${index}}`,
-      fileLineDiffs: await getFileStats(stash),
-    }))
-  );
-};
+  async deleteTag(name) {
+    return nodegit.Tag.delete(this.r, name).catch(normalizeError);
+  }
+
+  async getRemotes() {
+    return nodegit.Remote.list(this.r).catch(normalizeError);
+  }
+
+  async addRemote(name, url) {
+    return nodegit.Remote.create(this.r, name, url).catch(normalizeError);
+  }
+
+  async deleteRemote(name) {
+    return nodegit.Remote.delete(this.r, name).catch(normalizeError);
+  }
+
+  async getStashes() {
+    const oids = [];
+    await nodegit.Stash.foreach(this.r, (index, message, oid) => {
+      oids.push(oid);
+    }).catch(normalizeError);
+    const stashes = await Promise.all(oids.map((oid) => this.r.getCommit(oid)));
+    return Promise.all(
+      stashes.map(async (stash, index) => ({
+        ...formatCommit(stash),
+        reflogId: `${index}`,
+        reflogName: `stash@{${index}}`,
+        fileLineDiffs: await getFileStats(stash),
+      }))
+    );
+  }
+
+  rootPath() {
+    return this.r.isBare() ? this.r.path().slice(0, -1) : this.r.workdir().slice(0, -1);
+  }
+}
 
 const repoPs = {};
 /**
  * Memoize nodegit opened repos.
  *
  * @param {string} path  The path to the repository.
- * @returns {Promise<nodegit.Repository>}
+ * @returns {Promise<NGWrap>}
  */
-const getRepo = (path) => {
+const getRepo = async (path) => {
   if (!repoPs[path]) {
-    repoPs[path] = nodegit.Repository.open(path).catch((err) => {
-      repoPs[path] = false;
-      normalizeError(err);
-    });
+    repoPs[path] =
+      /** @type {Promise<NGWrap>} */
+      (
+        nodegit.Repository.open(path)
+          .then((repo) => new NGWrap(repo))
+          .catch((err) => {
+            repoPs[path] = null;
+            normalizeError(err);
+          })
+      );
   }
   return repoPs[path];
 };
 
-const rootPath = (repo) => (repo.isBare() ? repo.path().slice(0, -1) : repo.workdir().slice(0, -1));
-
-/** @returns {Promise<gitParser.QuickStatus>} */
+/** @returns {Promise<QuickStatus>} */
 const quickStatus = async (path) => {
   try {
     const repo = await getRepo(path);
-    return { gitRootPath: rootPath(repo), type: repo.isBare() ? 'bare' : 'inited' };
+    return { gitRootPath: repo.rootPath(), type: repo.r.isBare() ? 'bare' : 'inited' };
   } catch (err) {
     if (err.errno !== -3) throw err;
     if (/failed to resolve/.test(err.message)) return { gitRootPath: path, type: 'no-such-path' };
@@ -198,20 +229,7 @@ const initGit = (path, isBare) =>
   nodegit.Repository.init(path, isBare ? 1 : 0).catch(normalizeError);
 
 module.exports = {
-  addRemote,
-  addStash,
-  applyStash,
-  deleteRemote,
-  deleteStash,
-  deleteTag,
-  formatCommit,
-  getFileStats,
-  getRemotes,
   getRepo,
-  getStashes,
-  getTags,
   initGit,
-  popStash,
-  rootPath,
   quickStatus,
 };

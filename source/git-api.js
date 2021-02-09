@@ -11,21 +11,8 @@ const fs = require('fs').promises;
 const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
-const {
-  addRemote,
-  addStash,
-  applyStash,
-  deleteRemote,
-  deleteStash,
-  deleteTag,
-  getRemotes,
-  getRepo,
-  getStashes,
-  getTags,
-  initGit,
-  popStash,
-  quickStatus,
-} = require('./nodegit');
+// eslint-disable-next-line no-unused-vars
+const { getRepo, initGit, quickStatus, NGWrap } = require('./nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
@@ -225,12 +212,17 @@ exports.registerApi = (env) => {
       });
   };
 
+  /** @typedef {import('express').Request & { repo: NGWrap; query: { path?: string } }} Req */
+  /** @typedef {import('express').Response} Res */
+
+  /** @type {(fn: (req: Req, res: Res) => void) => (req: Req, res: Res) => Promise<void>} */
   const w = (fn) => (req, res) =>
     new Promise((resolve) => resolve(fn(req, res))).catch((err) => {
       logger.warn('Responding with ERROR: ', err);
       res.status(500).json(err);
     });
 
+  /** @type {(fn: (req: Req, res: Res) => any) => (req: Req, res: Res) => Promise<void>} */
   const jw = (fn) => (req, res) =>
     jsonResultOrFailProm(res, new Promise((resolve) => resolve(fn(req, res))));
 
@@ -257,20 +249,22 @@ exports.registerApi = (env) => {
     }
   };
 
+  /** @param {NGWrap} repo */
   const autoStash = async (repo, fn) => {
     if (config.autoStashAndPop) {
-      const oid = await addStash(repo, 'Ungit: automatic stash').catch((err) => {
+      const oid = await repo.addStash('Ungit: automatic stash').catch((err) => {
         // Nothing to save
         if (err.errno === -3) return;
         throw err;
       });
       const out = await fn();
-      await popStash(repo, oid);
+      await repo.popStash(oid);
       return out;
     } else {
       return fn();
     }
   };
+  // app.all('*', (q, r, n) => console.log(q.method, q.path, q.query, q.body) || n());
 
   app.get(
     `${exports.pathPrefix}/status`,
@@ -644,7 +638,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/tags`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => getTags(req.repo))
+    jw(async (req) => req.repo.getTags())
   );
 
   app.get(
@@ -696,7 +690,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     jw(async (req) =>
-      deleteTag(req.repo, req.query.name).finally(() => emitGitDirectoryChanged(req.query.path))
+      req.repo.deleteTag(req.query.name).finally(() => emitGitDirectoryChanged(req.query.path))
     )
   );
 
@@ -757,7 +751,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     jw(async (req) => {
-      const foo = await getRemotes(req.repo);
+      const foo = await req.repo.getRemotes();
       console.log({ foo });
       return foo;
     })
@@ -776,14 +770,14 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => addRemote(req.repo, req.params.name, req.body.url))
+    jw(async (req) => req.repo.addRemote(req.params.name, req.body.url))
   );
 
   app.delete(
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => deleteRemote(req.repo, req.params.name))
+    jw(async (req) => req.repo.deleteRemote(req.params.name))
   );
 
   app.post(`${exports.pathPrefix}/merge`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -978,7 +972,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/stashes`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => getStashes(req.repo))
+    jw(async (req) => req.repo.getStashes())
   );
 
   app.post(
@@ -987,7 +981,7 @@ exports.registerApi = (env) => {
     ensurePathExists,
     jw(async (req) => {
       const { path: repoPath, message = '' } = req.body;
-      const oid = await addStash(req.repo, message);
+      const oid = await req.repo.addStash(message);
       await emitGitDirectoryChanged(repoPath);
       await emitWorkingTreeChanged(repoPath);
       return oid;
@@ -1005,9 +999,9 @@ exports.registerApi = (env) => {
       if (isNaN(index) || index < 0) throw new Error(`Invalid index ${id}`);
       try {
         if (apply === 'true') {
-          await applyStash(req.repo, index);
+          await req.repo.applyStash(index);
         } else {
-          await deleteStash(req.repo, index);
+          await req.repo.deleteStash(index);
         }
       } finally {
         await emitGitDirectoryChanged(repoPath);
