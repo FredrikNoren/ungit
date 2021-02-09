@@ -12,18 +12,19 @@ const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
 const {
+  addRemote,
+  addStash,
+  applyStash,
+  deleteRemote,
+  deleteStash,
+  deleteTag,
+  getRemotes,
+  getRepo,
+  getStashes,
+  getTags,
   initGit,
   popStash,
-  addStash,
-  getTags,
-  getRemotes,
-  deleteTag,
-  addRemote,
-  deleteRemote,
   quickStatus,
-  getStashes,
-  applyStash,
-  deleteStash,
 } = require('./nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
@@ -165,12 +166,14 @@ exports.registerApi = (env) => {
     socket.watcher && socket.watcher.close();
   };
 
-  const ensurePathExists = (req, res, next) => {
-    fs.access(req.query.path || req.body.path)
-      .then(() => next())
-      .catch(() => {
-        res.status(400).json({ error: `'No such path: ${path}`, errorCode: 'no-such-path' });
-      });
+  const ensurePathExists = async (req, res, next) => {
+    try {
+      const path = req.query.path || req.body.path;
+      req.repo = await getRepo(path);
+      next();
+    } catch (err) {
+      res.status(400).json({ error: err.message, errorCode: err.errorCode || 'no-such-path' });
+    }
   };
 
   const ensureValidSocketId = (req, res, next) => {
@@ -254,15 +257,15 @@ exports.registerApi = (env) => {
     }
   };
 
-  const autoStash = async (repoPath, fn) => {
+  const autoStash = async (repo, fn) => {
     if (config.autoStashAndPop) {
-      const oid = await addStash(repoPath, 'Ungit: automatic stash').catch((err) => {
+      const oid = await addStash(repo, 'Ungit: automatic stash').catch((err) => {
         // Nothing to save
         if (err.errno === -3) return;
         throw err;
       });
       const out = await fn();
-      await popStash(repoPath, oid);
+      await popStash(repo, oid);
       return out;
     } else {
       return fn();
@@ -279,7 +282,6 @@ exports.registerApi = (env) => {
   app.post(
     `${exports.pathPrefix}/init`,
     ensureAuthenticated,
-    ensurePathExists,
     jw((req) => initGit(req.body.path, req.body.bare))
   );
 
@@ -368,7 +370,7 @@ exports.registerApi = (env) => {
     ensurePathExists,
     jw(async (req) => {
       const repoPath = req.body.path;
-      await autoStash(repoPath, () =>
+      await autoStash(req.repo, () =>
         gitPromise(['reset', `--${req.body.mode}`, req.body.to], repoPath)
       );
       await emitGitDirectoryChanged(repoPath);
@@ -466,6 +468,8 @@ exports.registerApi = (env) => {
     ensurePathExists,
     jw((req) => {
       const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
+      // TODO if skip is 0, return all references (max 20 most recent) and 100 commits of current + 10 of each reference
+      // TODO ask for more not via skip but via oid
       const skip = getNumber(req.query.skip, 0);
       return gitPromise
         .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
@@ -481,15 +485,15 @@ exports.registerApi = (env) => {
     })
   );
 
-  app.get(
-    `${exports.pathPrefix}/show`,
-    ensureAuthenticated,
-    jw((req) =>
-      gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(
-        gitParser.parseGitLog
-      )
-    )
-  );
+  // app.get(
+  //   `${exports.pathPrefix}/show`,
+  //   ensureAuthenticated,
+  //   jw((req) =>
+  //     gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(
+  //       gitParser.parseGitLog
+  //     )
+  //   )
+  // );
 
   app.get(
     `${exports.pathPrefix}/head`,
@@ -640,7 +644,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/tags`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => getTags(req.query.path))
+    jw(async (req) => getTags(req.repo))
   );
 
   app.get(
@@ -692,9 +696,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     jw(async (req) =>
-      deleteTag(req.query.path, req.query.name).finally(() =>
-        emitGitDirectoryChanged(req.query.path)
-      )
+      deleteTag(req.repo, req.query.name).finally(() => emitGitDirectoryChanged(req.query.path))
     )
   );
 
@@ -726,7 +728,7 @@ exports.registerApi = (env) => {
         : ['checkout', req.body.name.trim()];
       const repoPath = req.body.path;
       try {
-        return await autoStash(repoPath, () => gitPromise(arg, repoPath));
+        return await autoStash(req.repo, () => gitPromise(arg, repoPath));
       } finally {
         await emitGitDirectoryChanged(repoPath);
         await emitWorkingTreeChanged(repoPath);
@@ -740,7 +742,7 @@ exports.registerApi = (env) => {
     ensurePathExists,
     jw(async (req) => {
       const repoPath = req.body.path;
-      await autoStash(repoPath, () => gitPromise(['cherry-pick', req.body.name.trim()], repoPath));
+      await autoStash(req.repo, () => gitPromise(['cherry-pick', req.body.name.trim()], repoPath));
       await emitGitDirectoryChanged(repoPath);
       await emitWorkingTreeChanged(repoPath);
     })
@@ -754,7 +756,11 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/remotes`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => getRemotes(req.query.path))
+    jw(async (req) => {
+      const foo = await getRemotes(req.repo);
+      console.log({ foo });
+      return foo;
+    })
   );
 
   app.get(
@@ -770,14 +776,14 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => addRemote(req.body.path, req.params.name, req.body.url))
+    jw(async (req) => addRemote(req.repo, req.params.name, req.body.url))
   );
 
   app.delete(
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => deleteRemote(req.body.path, req.params.name))
+    jw(async (req) => deleteRemote(req.repo, req.params.name))
   );
 
   app.post(`${exports.pathPrefix}/merge`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -887,24 +893,12 @@ exports.registerApi = (env) => {
   app.get(
     `${exports.pathPrefix}/baserepopath`,
     ensureAuthenticated,
-    ensurePathExists,
-    (req, res) => {
+    jw(async (req) => {
       const currentPath = path.resolve(path.join(req.query.path, '..'));
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['rev-parse', '--show-toplevel'], currentPath)
-          .then((baseRepoPath) => {
-            return { path: path.resolve(baseRepoPath.trim()) };
-          })
-          .catch((e) => {
-            if (e.errorCode === 'not-a-repository' || e.errorCode === 'must-be-in-working-tree') {
-              // not a repository or a bare repository
-              return {};
-            }
-            throw e;
-          })
-      );
-    }
+      const stat = await quickStatus(currentPath);
+      if (stat.type === 'no-such-path') return {};
+      return { path: stat.gitRootPath };
+    })
   );
 
   app.get(`${exports.pathPrefix}/submodules`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -984,7 +978,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/stashes`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => getStashes(req.query.path))
+    jw(async (req) => getStashes(req.repo))
   );
 
   app.post(
@@ -993,7 +987,7 @@ exports.registerApi = (env) => {
     ensurePathExists,
     jw(async (req) => {
       const { path: repoPath, message = '' } = req.body;
-      const oid = await addStash(repoPath, message);
+      const oid = await addStash(req.repo, message);
       await emitGitDirectoryChanged(repoPath);
       await emitWorkingTreeChanged(repoPath);
       return oid;
@@ -1011,9 +1005,9 @@ exports.registerApi = (env) => {
       if (isNaN(index) || index < 0) throw new Error(`Invalid index ${id}`);
       try {
         if (apply === 'true') {
-          await applyStash(repoPath, index);
+          await applyStash(req.repo, index);
         } else {
-          await deleteStash(repoPath, index);
+          await deleteStash(req.repo, index);
         }
       } finally {
         await emitGitDirectoryChanged(repoPath);

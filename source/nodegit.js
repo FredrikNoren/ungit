@@ -6,7 +6,7 @@ const fileType = require('./utils/file-type.js');
 // from libgit2/include/git2/errors.h
 const nodegitErrors = {
   '-1': 'GIT_ERROR', // Generic error
-  '-3': 'GIT_ENOTFOUND', // Requested object could not be found
+  '-3': 'no-such-path', // was 'GIT_ENOTFOUND', // Requested object could not be found
   '-4': 'GIT_EEXISTS', // Object exists preventing operation
   '-5': 'GIT_EAMBIGUOUS', // More than one object matches
   '-6': 'GIT_EBUFS', // Output buffer too short to hold data
@@ -43,26 +43,9 @@ const nodegitErrors = {
   '-35': 'GIT_EAPPLYFAIL', // Patch application failed
 };
 const normalizeError = (err) => {
-  console.error('normalizing', err);
+  console.error('normalizing', err, new Error().stack);
   if (!err.errorCode && err.errno) err.errorCode = nodegitErrors[err.errno];
   throw err;
-};
-
-const repoPs = {};
-/**
- * Memoize nodegit opened repos.
- *
- * @param {string} path  The path to the repository.
- * @returns {Promise<nodegit.Repository>}
- */
-const getRepo = (path) => {
-  if (!repoPs[path]) {
-    repoPs[path] = nodegit.Repository.open(path).catch((err) => {
-      repoPs[path] = false;
-      normalizeError(err);
-    });
-  }
-  return repoPs[path];
 };
 
 const splitMail = (signature) => {
@@ -115,23 +98,19 @@ const getFileStats = async (c) => {
   });
 };
 
-const addStash = async (path, message) => {
-  const repo = await getRepo(path);
+const addStash = async (repo, message) => {
   const signature = await repo.defaultSignature();
   return nodegit.Stash.save(repo, signature, message, nodegit.Stash.FLAGS.INCLUDE_UNTRACKED).catch(
     normalizeError
   );
 };
 
-const deleteStash = async (path, index) =>
-  nodegit.Stash.drop(await getRepo(path), index).catch(normalizeError);
+const deleteStash = async (repo, index) => nodegit.Stash.drop(repo, index).catch(normalizeError);
 
-const applyStash = async (path, index) =>
-  nodegit.Stash.apply(await getRepo(path), index).catch(normalizeError);
+const applyStash = async (repo, index) => nodegit.Stash.apply(repo, index).catch(normalizeError);
 
-const popStash = async (path, oid) => {
+const popStash = async (repo, oid) => {
   if (!oid) return;
-  const repo = await getRepo(path);
   let index;
   await nodegit.Stash.foreach(repo, (i, _msg, stashOid) => {
     if (stashOid.equal(oid)) index = i;
@@ -143,33 +122,57 @@ const popStash = async (path, oid) => {
   }
 };
 
-const initGit = (path, isBare) =>
-  // nodegit requires a number https://github.com/nodegit/nodegit/issues/538
-  nodegit.Repository.init(path, isBare ? 1 : 0).catch(normalizeError);
+const getTags = async (repo) => nodegit.Tag.list(repo).catch(normalizeError);
 
-const getTags = async (path) => nodegit.Tag.list(await getRepo(path)).catch(normalizeError);
+const deleteTag = async (repo, name) => nodegit.Tag.delete(repo, name).catch(normalizeError);
 
-const deleteTag = async (path, name) =>
-  nodegit.Tag.delete(await getRepo(path), name).catch(normalizeError);
+const getRemotes = async (repo) => nodegit.Remote.list(repo).catch(normalizeError);
 
-const getRemotes = async (path) => nodegit.Remote.list(await getRepo(path)).catch(normalizeError);
+const addRemote = async (repo, name, url) =>
+  nodegit.Remote.create(repo, name, url).catch(normalizeError);
 
-const addRemote = async (path, name, url) =>
-  nodegit.Remote.create(await getRepo(path), name, url).catch(normalizeError);
+const deleteRemote = async (repo, name) => nodegit.Remote.delete(repo, name).catch(normalizeError);
 
-const deleteRemote = async (path, name) =>
-  nodegit.Remote.delete(await getRepo(path), name).catch(normalizeError);
+const getStashes = async (repo) => {
+  const oids = [];
+  await nodegit.Stash.foreach(repo, (index, message, oid) => {
+    oids.push(oid);
+  }).catch(normalizeError);
+  const stashes = await Promise.all(oids.map((oid) => repo.getCommit(oid)));
+  return Promise.all(
+    stashes.map(async (stash, index) => ({
+      ...formatCommit(stash),
+      reflogId: `${index}`,
+      reflogName: `stash@{${index}}`,
+      fileLineDiffs: await getFileStats(stash),
+    }))
+  );
+};
+
+const repoPs = {};
+/**
+ * Memoize nodegit opened repos.
+ *
+ * @param {string} path  The path to the repository.
+ * @returns {Promise<nodegit.Repository>}
+ */
+const getRepo = (path) => {
+  if (!repoPs[path]) {
+    repoPs[path] = nodegit.Repository.open(path).catch((err) => {
+      repoPs[path] = false;
+      normalizeError(err);
+    });
+  }
+  return repoPs[path];
+};
+
+const rootPath = (repo) => (repo.isBare() ? repo.path().slice(0, -1) : repo.workdir().slice(0, -1));
 
 /** @returns {Promise<gitParser.QuickStatus>} */
 const quickStatus = async (path) => {
   try {
     const repo = await getRepo(path);
-    return repo.isBare()
-      ? { gitRootPath: repo.path().slice(0, -1), type: 'bare' }
-      : {
-          gitRootPath: repo.workdir().slice(0, -1),
-          type: 'inited',
-        };
+    return { gitRootPath: rootPath(repo), type: repo.isBare() ? 'bare' : 'inited' };
   } catch (err) {
     if (err.errno !== -3) throw err;
     if (/failed to resolve/.test(err.message)) return { gitRootPath: path, type: 'no-such-path' };
@@ -190,22 +193,9 @@ const quickStatus = async (path) => {
   }
 };
 
-const getStashes = async (path) => {
-  const repo = await getRepo(path);
-  const oids = [];
-  await nodegit.Stash.foreach(repo, (index, message, oid) => {
-    oids.push(oid);
-  }).catch(normalizeError);
-  const stashes = await Promise.all(oids.map((oid) => repo.getCommit(oid)));
-  return Promise.all(
-    stashes.map(async (stash, index) => ({
-      ...formatCommit(stash),
-      reflogId: `${index}`,
-      reflogName: `stash@{${index}}`,
-      fileLineDiffs: await getFileStats(stash),
-    }))
-  );
-};
+const initGit = (path, isBare) =>
+  // nodegit requires a number https://github.com/nodegit/nodegit/issues/538
+  nodegit.Repository.init(path, isBare ? 1 : 0).catch(normalizeError);
 
 module.exports = {
   addRemote,
@@ -217,9 +207,11 @@ module.exports = {
   formatCommit,
   getFileStats,
   getRemotes,
+  getRepo,
   getStashes,
   getTags,
   initGit,
   popStash,
+  rootPath,
   quickStatus,
 };
