@@ -50,20 +50,25 @@ const normalizeError = (err) => {
 
 const splitMail = (signature) => {
   if (!signature) return [];
-  const match = /^([^<])*<?([^>]*)>?$/.exec(signature);
+  const match = /^([^<]*)<?([^>]*)>?$/.exec(signature);
   return match ? [match[1].trim(), match[2].trim()] : [];
 };
 
-const formatCommit = /** @type {nodegit.Commit} */ (c) => {
+/**
+ * @param {nodegit.Commit} c
+ * @param {nodegit.Oid}    hId
+ */
+const formatCommit = (c, hId) => {
   const [authorName, authorEmail] = splitMail(c.author().toString());
   const [committerName, committerEmail] = splitMail(c.author().toString());
   /** @type {Commit} */
   const out = {
     sha1: c.sha(),
     parents: c.parents().map(String),
-    refs: [], // TODO cached refs on client, don't include here
-    isHead: false, // TODO cached refs on client, don't include here
+    refs: hId && hId.equal(c.id()) ? ['HEAD'] : [], // TODO cached refs on client, don't include here
     message: c.message(),
+    // TODO find out how to extract from rawHeader()
+    authorDate: c.date().toJSON(),
     commitDate: c.date().toJSON(),
     authorName,
     authorEmail,
@@ -74,28 +79,39 @@ const formatCommit = /** @type {nodegit.Commit} */ (c) => {
 };
 
 /** @param {nodegit.Commit} c */
-const getFileStats = async (c) => {
-  const diffList = await c.getDiff();
-  // Each diff has the entire patch set for some reason
-  const patches = await (diffList[0] && diffList[0].patches());
-  if (!(patches && patches.length)) return [];
+const getFileStats = async (c, isStash) => {
+  const out = { additions: 0, deletions: 0, fileLineDiffs: [] };
+  const diffs = await c.getDiff();
+  // One diff per parent
+  for (const diff of diffs) {
+    const stat = await diff.getStats();
+    // Stashes have 0-change diffs with the whole repo as a patch
+    if (stat.filesChanged() === 0) continue;
+    out.additions += stat.insertions();
+    out.deletions += stat.deletions();
 
-  return patches.map((patch) => {
-    const stats = patch.lineStats();
-    const oldFileName = patch.oldFile().path();
-    const displayName = patch.newFile().path();
-    /** @type {FileStatus} */
-    const status = {
-      additions: stats.total_additions,
-      deletions: stats.total_deletions,
-      fileName: displayName,
-      oldFileName,
-      displayName,
-      // TODO figure out how to get this
-      type: fileType(displayName),
-    };
-    return status;
-  });
+    const patches = await diff.patches();
+    // TODO probably need to aggregate by file path
+    out.fileLineDiffs.push(
+      ...patches.map((p) => {
+        const fileName = p.isDeleted() ? p.oldFile().path() : p.newFile().path();
+        const oldFileName = p.isAdded() ? fileName : p.oldFile().path();
+        const displayName = p.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
+        const { total_additions, total_deletions } = p.lineStats();
+        /** @type{DiffStat} */
+        const fileStat = {
+          oldFileName,
+          fileName,
+          displayName,
+          additions: total_additions,
+          deletions: total_deletions,
+          type: fileType(fileName || oldFileName),
+        };
+        return fileStat;
+      })
+    );
+  }
+  return out;
 };
 
 class NGWrap {
@@ -166,12 +182,13 @@ class NGWrap {
       oids.push(oid);
     }).catch(normalizeError);
     const stashes = await Promise.all(oids.map((oid) => this.r.getCommit(oid)));
+    /** @type {Commit[]} */
     return Promise.all(
       stashes.map(async (stash, index) => ({
+        ...(await getFileStats(stash)),
         ...formatCommit(stash),
         reflogId: `${index}`,
         reflogName: `stash@{${index}}`,
-        fileLineDiffs: await getFileStats(stash),
       }))
     );
   }
@@ -214,7 +231,7 @@ class NGWrap {
     }
 
     /** @type {GitStatus} */
-    const out = {
+    return {
       branch: branch && branch.shorthand(),
       inCherry,
       inMerge,
@@ -222,7 +239,27 @@ class NGWrap {
       inConflict,
       files,
     };
-    return out;
+  }
+
+  // TODO accept SHAs to walk
+  async log(limit = 500, skip) {
+    const walker = this.r.createRevWalk();
+    walker.sorting(nodegit.Revwalk.SORT.TIME);
+    const head = await this.r.getHeadCommit();
+    if (skip) await walker.fastWalk(skip).catch(normalizeError);
+    else {
+      if (head) walker.push(head.id());
+      walker.pushGlob('*');
+    }
+    const commits = await walker.getCommits(limit).catch(normalizeError);
+    // TODO detect head client-side
+    const headId = head && head.id();
+    // TODO only keep formatCommit, the stats are for a details call
+    /** @type {Commit[]} */
+    const result = await Promise.all(
+      commits.map(async (c) => ({ ...(await getFileStats(c)), ...formatCommit(c, headId) }))
+    );
+    return result;
   }
 }
 
@@ -279,6 +316,7 @@ const initGit = (path, isBare) =>
   nodegit.Repository.init(path, isBare ? 1 : 0).catch(normalizeError);
 
 module.exports = {
+  NGWrap,
   getRepo,
   initGit,
   quickStatus,

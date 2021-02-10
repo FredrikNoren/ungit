@@ -98,8 +98,8 @@ class TextDiffViewModel {
 
   getDiffArguments() {
     return {
-      file: this.filename,
-      oldFile: this.oldFilename,
+      file: this.filename || '',
+      oldFile: this.oldFilename || '',
       path: this.repoPath(),
       sha1: this.sha1 ? this.sha1 : '',
       whiteSpace: this.whiteSpace.value(),
@@ -115,7 +115,7 @@ class TextDiffViewModel {
     return this.server
       .getPromise('/diff', this.getDiffArguments())
       .then((diffs) => {
-        if (typeof diffs !== 'string') {
+        if (!diffs || typeof diffs !== 'string') {
           // Invalid value means there is no changes, show dummy diff without any changes
           diffs = `diff --git a/${this.filename} b/${this.filename}
                   index aaaaaaaa..bbbbbbbb 111111

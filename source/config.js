@@ -131,7 +131,7 @@ const defaultConfig = {
   maxActiveBranchSearchIteration: -1,
 
   // number of nodes to load for each git.log call
-  numberOfNodesPerLoad: 25,
+  numberOfNodesPerLoad: 100,
 
   // Specifies a custom git merge tool to use when resolving conflicts. Your git configuration must be set up to use this!
   // A true value will use the default tool while a string value will use the tool of that specified name.

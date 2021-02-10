@@ -373,16 +373,10 @@ exports.registerApi = (env) => {
   );
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const isIgnoreWhiteSpace = req.query.whiteSpace === 'true' ? true : false;
+    const { path, file, oldFile, sha1, whiteSpace } = req.query;
     jsonResultOrFailProm(
       res,
-      gitPromise.diffFile(
-        req.query.path,
-        req.query.file,
-        req.query.oldFile,
-        req.query.sha1,
-        isIgnoreWhiteSpace
-      )
+      gitPromise.diffFile(path, file || oldFile, oldFile || file, sha1, whiteSpace === 'true')
     );
   });
 
@@ -460,22 +454,13 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/gitlog`,
     ensureAuthenticated,
     ensurePathExists,
-    jw((req) => {
+    jw(async (req) => {
       const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
       // TODO if skip is 0, return all references (max 20 most recent) and 100 commits of current + 10 of each reference
       // TODO ask for more not via skip but via oid
       const skip = getNumber(req.query.skip, 0);
-      return gitPromise
-        .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
-        .catch((err) => {
-          if (
-            err.errorCode === 'no-head' ||
-            err.errorCode === 'no-commits' ||
-            err.errorCode === 'not-a-repository'
-          )
-            return { limit: limit, skip: skip, nodes: [] };
-          throw err;
-        });
+      const nodes = await req.repo.log(limit, skip, config.maxActiveBranchSearchIteration);
+      return { limit, skip, nodes, isHeadExist: true };
     })
   );
 
