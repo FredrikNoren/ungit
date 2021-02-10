@@ -109,7 +109,7 @@ class StagingViewModel {
     this.loadAnyway = false;
     this.isDiagOpen = false;
     this.mutedTime = null;
-    this.discardAllIcon = octicons.trashcan.toSVG({ height: 15 });
+    this.discardAllIcon = octicons.trash.toSVG({ height: 15 });
     this.stashIcon = octicons.pin.toSVG({ height: 15 });
     this.discardIcon = octicons.x.toSVG({ height: 18 });
     this.ignoreIcon = octicons.skip.toSVG({ height: 18 });

@@ -81,7 +81,7 @@ class Move extends ActionBase {
 
 class Reset extends ActionBase {
   constructor(graph, node) {
-    super(graph, 'Reset', 'reset', octicons.trashcan.toSVG({ height: 18 }));
+    super(graph, 'Reset', 'reset', octicons.trash.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
       if (this.isRunning()) return true;
