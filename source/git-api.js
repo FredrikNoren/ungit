@@ -209,14 +209,20 @@ exports.registerApi = (env) => {
       return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }
   };
-  const jsonResultOrFailProm = (res, promise) =>
-    // TODO shouldn't this be a boolean instead of an object?
-    promise
-      .then((o) => res.json(o == null ? {} : o))
+  const jsonResultOrFailProm = (res, promise) => {
+    const now = Date.now();
+    return promise
+      .then((o) => {
+        const elapsed = Date.now() - now;
+        res.header('X-elapsed', elapsed);
+        // TODO shouldn't this be a boolean instead of an object?
+        return res.json(o == null ? {} : o);
+      })
       .catch((err) => {
         logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
+  };
 
   const w = (fn) => (req, res) =>
     new Promise((resolve) => resolve(fn(req, res))).catch((err) => {
