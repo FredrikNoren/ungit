@@ -60,6 +60,7 @@ class TextDiffViewModel {
   constructor(args) {
     this.filename = args.filename;
     this.oldFilename = args.oldFilename;
+    this.patchNum = args.patchNum;
     this.repoPath = args.repoPath;
     this.server = args.server;
     this.sha1 = args.sha1;
@@ -97,11 +98,17 @@ class TextDiffViewModel {
   }
 
   getDiffArguments() {
+    if (this.sha1)
+      return {
+        path: this.repoPath(),
+        sha1: this.sha1,
+        patchNum: this.patchNum,
+        whiteSpace: this.whiteSpace.value(),
+      };
     return {
       file: this.filename || '',
       oldFile: this.oldFilename || '',
       path: this.repoPath(),
-      sha1: this.sha1 ? this.sha1 : '',
       whiteSpace: this.whiteSpace.value(),
     };
   }

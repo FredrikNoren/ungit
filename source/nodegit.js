@@ -78,40 +78,38 @@ const formatCommit = (c, hId) => {
   return out;
 };
 
+// TODO whitespace
 /** @param {nodegit.Commit} c */
 const getFileStats = async (c, isStash) => {
-  const out = { additions: 0, deletions: 0, fileLineDiffs: [] };
   const diffs = await c.getDiff();
-  // One diff per parent
-  for (const diff of diffs) {
-    const stat = await diff.getStats();
-    // Stashes have 0-change diffs with the whole repo as a patch
-    if (stat.filesChanged() === 0) continue;
-    out.additions += +stat.insertions();
-    out.deletions += +stat.deletions();
+  // One diff per parent, we only diff against parent 0
+  // TODO figure out stash diffs: staged vs unstaged vs new
+  const diff = diffs[0];
+  // Find renames, compact diff
+  await diff.findSimilar({ flags: nodegit.Diff.FIND.RENAMES });
+  const stat = await diff.getStats();
+  const additions = stat.insertions();
+  const deletions = stat.deletions();
 
-    const patches = await diff.patches();
-    // TODO probably need to aggregate by file path
-    out.fileLineDiffs.push(
-      ...patches.map((p) => {
-        const fileName = p.isDeleted() ? p.oldFile().path() : p.newFile().path();
-        const oldFileName = p.isAdded() ? fileName : p.oldFile().path();
-        const displayName = p.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
-        const { total_additions, total_deletions } = p.lineStats();
-        /** @type {DiffStat} */
-        const fileStat = {
-          oldFileName,
-          fileName,
-          displayName,
-          additions: total_additions,
-          deletions: total_deletions,
-          type: fileType(fileName || oldFileName),
-        };
-        return fileStat;
-      })
-    );
-  }
-  return out;
+  const patches = await diff.patches();
+  /** @type {DiffStat[]} */
+  const fileLineDiffs = patches.map((p, patchNum) => {
+    const fileName = p.isDeleted() ? p.oldFile().path() : p.newFile().path();
+    const oldFileName = p.isAdded() ? fileName : p.oldFile().path();
+    const displayName = p.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
+    const { total_additions, total_deletions } = p.lineStats();
+
+    return {
+      oldFileName, // TODO only when renamed or deleted
+      fileName, // TODO not if deleted
+      displayName, // TODO client-side
+      patchNum,
+      additions: total_additions,
+      deletions: total_deletions,
+      type: fileType(fileName || oldFileName),
+    };
+  });
+  return { additions, deletions, fileLineDiffs };
 };
 
 class NGWrap {
@@ -333,6 +331,34 @@ class NGWrap {
       else out.push(ref);
     }
     return out;
+  }
+
+  // TODO if no hash compare worktree/index+stashed
+  // TODO vs other hash
+  // TODO whitespace
+  // TODO limit and cursor{hunk,line}
+  // TODO caching
+  async diffFile({ sha1, patchNum, ignoreWhiteSpace }) {
+    let diff;
+    if (sha1) {
+      const c = await this.r.getCommit(sha1).catch(normalizeError);
+      const diffs = await c.getDiff();
+      diff = diffs[0];
+      await diff.findSimilar({ flags: nodegit.Diff.FIND.RENAMES });
+    } else {
+      throw 'not implemented yet';
+    }
+    const patch = (await diff.patches())[patchNum];
+    const text = [`diff --git a/${patch.oldFile().path()} b/${patch.newFile().path()}`];
+    if (!patch) throw new Error(`No patch ${patchNum}`);
+    for (const hunk of await patch.hunks()) {
+      const lines = await hunk.lines();
+      text.push(
+        hunk.header().trim(),
+        ...lines.map((line) => `${String.fromCharCode(line.origin())}${line.content()}`)
+      );
+    }
+    return text.join('\n');
   }
 }
 
