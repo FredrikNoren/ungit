@@ -105,13 +105,18 @@ class NGWrap {
   }
 
   async addStash(message) {
-    const signature = await this.r.defaultSignature();
-    return nodegit.Stash.save(
+    /** @type {Hash} */
+    const oid = await nodegit.Stash.save(
       this.r,
-      signature,
+      await this.r.defaultSignature(),
       message,
       nodegit.Stash.FLAGS.INCLUDE_UNTRACKED
-    ).catch(normalizeError);
+    ).catch((err) => {
+      // no changes
+      if (err.errno === -3) return null;
+      normalizeError(err);
+    });
+    return oid;
   }
 
   async deleteStash(index) {
