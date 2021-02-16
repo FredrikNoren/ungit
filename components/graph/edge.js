@@ -38,6 +38,7 @@ class EdgeViewModel extends Animateable {
 
   setGraphAttr(val) {
     this.element().setAttribute('d', `M${val.slice(0, 4).join(',')}L${val.slice(4, 8).join(',')}`);
+    this.element().setAttribute('stroke', this.nodeA.color());
   }
 
   edgeMouseOver() {
