@@ -30,7 +30,6 @@ class RepositoryViewModel {
       this.server.watchRepository(value);
     });
     this.server.watchRepository(this.repoPath());
-    this.showLog = this.isBareDir ? ko.observable(true) : this.staging.isStageValid;
     this.parentModulePath = ko.observable();
     this.parentModuleLink = ko.observable();
     this.isSubmodule = ko.computed(() => this.parentModulePath() && this.parentModuleLink());
