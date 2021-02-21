@@ -43,6 +43,9 @@
             ></span>
             |
             <span data-bind="text: sha1.substr(0, 8)"></span>
+            <!-- ko if: navigator.clipboard && (selected() || nodeIsMousehover()) -->
+            <button class="btn btn-default btn-xs" type="button" data-bind="click: copyHash"><span class="glyphicon glyphicon-copy"></span></button>
+            <!-- /ko -->
           </div>
         </div>
       </div>
