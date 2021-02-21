@@ -10,6 +10,13 @@ const addressGitWithoutPortWithoutUsernameRegexp = /([^:]*):([^.]*)(\.git)?$/;
 const addressHttpsRegexp = /https:\/\/([^/]*)\/([^.]*)(\.git)?$/;
 const addressUnixLocalRegexp = /.*\/([^/]+)/;
 
+/**
+ * Show slashes in path parameter.
+ *
+ * @param {string} path
+ */
+exports.encodePath = (path) => encodeURIComponent(path).replace(/%2F/g, '/');
+
 exports.parseAddress = (remote) => {
   let match = addressWindowsLocalRegexp.exec(remote);
   if (match) {
