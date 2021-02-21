@@ -1,6 +1,7 @@
 const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
+const { encodePath } = require('ungit-address-parser');
 
 components.register('imagediff', (args) => new ImageDiffViewModel(args));
 
@@ -17,7 +18,7 @@ class ImageDiffViewModel {
       if (this.isRemoved()) return 'removed';
       return 'changed';
     });
-    const gitDiffURL = `${ungit.config.rootPath}/api/diff/image?path=${encodeURIComponent(
+    const gitDiffURL = `${ungit.config.rootPath}/api/diff/image?path=${encodePath(
       this.repoPath()
     )}`;
     this.oldImageSrc =

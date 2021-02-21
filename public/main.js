@@ -4,6 +4,7 @@ var child_process = require('child_process');
 var path = require('path');
 // eslint-disable-next-line no-unused-vars -- Imported for side effects
 var winston = require('../source/utils/winston');
+const { encodePath } = require('../source/address-parser');
 var config = require('../source/config');
 var BugTracker = require('../source/bugtracker');
 var bugtracker = new BugTracker('electron');
@@ -24,9 +25,9 @@ function openUngitBrowser(pathToNavigateTo) {
 function launch(callback) {
   var url = config.urlBase + ':' + config.port;
   if (config.forcedLaunchPath === undefined) {
-    url += '/#/repository?path=' + encodeURIComponent(process.cwd());
+    url += '/#/repository?path=' + encodePath(process.cwd());
   } else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') {
-    url += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+    url += '/#/repository?path=' + encodePath(config.forcedLaunchPath);
   }
 
   if (config.launchCommand) {

@@ -7,6 +7,10 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Added
 - Add clipboard button on commit [#1462](https://github.com/FredrikNoren/ungit/pull/1462)
+- Encode URI paths with slashes [#1378](https://github.com/FredrikNoren/ungit/pull/1378)
+
+### Changed
+- Bump Dependencies [#1456](https://github.com/FredrikNoren/ungit/pull/1456)
 
 ## [1.5.15](https://github.com/FredrikNoren/ungit/compare/v1.5.14...v1.5.15)
 

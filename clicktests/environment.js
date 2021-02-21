@@ -7,6 +7,7 @@ const request = require('superagent');
 const mkdirp = require('mkdirp');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
+const { encodePath } = require('../source/address-parser');
 const portrange = 45032;
 
 module.exports = (config) => new Environment(config);
@@ -237,7 +238,7 @@ class Environment {
   }
 
   async openUngit(tempDirPath) {
-    await this.goto(`${this.getRootUrl()}/#/repository?path=${encodeURIComponent(tempDirPath)}`);
+    await this.goto(`${this.getRootUrl()}/#/repository?path=${encodePath(tempDirPath)}`);
     await this.waitForElementVisible('.repository-actions');
     await this.wait(1000);
   }
