@@ -27,7 +27,7 @@ class RepositoryViewModel {
       repoPath: this.repoPath,
     });
     this.repoPath.subscribe((value) => {
-      this.sever.watchRepository(value);
+      this.server.watchRepository(value);
     });
     this.server.watchRepository(this.repoPath());
     this.showLog = this.isBareDir ? ko.observable(true) : this.staging.isStageValid;
@@ -71,7 +71,7 @@ class RepositoryViewModel {
       .then((baseRepoPath) => {
         if (baseRepoPath.path) {
           return this.server
-            .getProimse('/submodules', { path: baseRepoPath.path })
+            .getPromise('/submodules', { path: baseRepoPath.path })
             .then((submodules) => {
               if (Array.isArray(submodules)) {
                 const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
