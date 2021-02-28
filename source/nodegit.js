@@ -399,16 +399,14 @@ class NGWrap {
     const patches = await diff.patches();
     /** @type {DiffStat[]} */
     const fileLineDiffs = patches.map((p, idx) => {
-      const fileName = p.isDeleted() ? p.oldFile().path() : p.newFile().path();
-      const oldFileName = p.isAdded() ? fileName : p.oldFile().path();
-      const displayName = p.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
+      const fileName = p.isDeleted() ? undefined : p.newFile().path();
+      const oldFileName = p.isAdded() ? undefined : p.oldFile().path();
       const { total_additions, total_deletions } = p.lineStats();
 
       return {
         idx,
-        oldFileName, // TODO only when renamed or deleted
-        fileName, // TODO not if deleted
-        displayName, // TODO client-side
+        oldFileName,
+        fileName,
         additions: total_additions,
         deletions: total_deletions,
         type: fileType(fileName || oldFileName),

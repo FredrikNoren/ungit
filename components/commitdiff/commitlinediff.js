@@ -6,16 +6,30 @@ class CommitLineDiff {
   constructor(args, fileLineDiff) {
     this.added = ko.observable(fileLineDiff.additions);
     this.removed = ko.observable(fileLineDiff.deletions);
+
+    // TODO remove
     this.fileName = ko.observable(fileLineDiff.fileName);
     this.oldFileName = ko.observable(fileLineDiff.oldFileName);
-    this.displayName = ko.observable(fileLineDiff.displayName);
-    this.fileType = fileLineDiff.type;
+    this.sha1 = args.sha1;
+
     this.diffKey = args.diffKey;
-    this.idx = fileLineDiff.idx;
+    const { fileName, oldFileName, displayName, idx } = fileLineDiff;
+    this.idx = idx;
+    this.displayName = ko.observable(
+      displayName ||
+        (fileName
+          ? oldFileName
+            ? oldFileName !== fileName
+              ? `${oldFileName} → ${fileName}`
+              : fileName
+            : `[new] ${fileName}`
+          : `[del] ${oldFileName}`)
+    );
+    this.fileType = fileLineDiff.type;
+
     this.isShowingDiffs = ko.observable(false);
     this.repoPath = args.repoPath;
     this.server = args.server;
-    this.sha1 = args.sha1;
     this.textDiffType = args.textDiffType;
     this.wordWrap = args.wordWrap;
     this.whiteSpace = args.whiteSpace;

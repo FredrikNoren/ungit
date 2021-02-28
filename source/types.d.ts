@@ -4,9 +4,9 @@ type FileName = string;
 type DiffStat = {
   additions: number | null;
   deletions: number | null;
-  fileName: string;
-  oldFileName: string;
-  displayName: string;
+  fileName?: string;
+  oldFileName?: string;
+  displayName?: string;
   type: string;
 };
 type Commit = {
