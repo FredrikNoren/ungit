@@ -114,6 +114,7 @@ class TextDiffViewModel {
 
   invalidateDiff() {
     this.diffJson = null;
+    this.diffKey = null;
     if (this.isShowingDiffs()) this.render();
   }
 
@@ -131,6 +132,10 @@ class TextDiffViewModel {
         this.diffJson = diff2html.parse(diffs);
       })
       .catch((err) => {
+        if (err.errorCode === 'invalid-diff') {
+          this.invalidateDiff();
+          return;
+        }
         // The file existed before but has been removed, but we're trying to get a diff for it
         // Most likely it will just disappear with the next refresh of the staging area
         // so we just ignore the error here

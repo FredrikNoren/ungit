@@ -48,6 +48,13 @@ const normalizeError = (err) => {
   throw err;
 };
 
+class UserError extends Error {
+  constructor(code, message) {
+    super(message || code);
+    this.errorCode = code;
+  }
+}
+
 const splitMail = (signature) => {
   if (!signature) return [];
   const match = /^([^<]*)<?([^>]*)>?$/.exec(signature);
@@ -332,11 +339,11 @@ class NGWrap {
     } else {
       if (oid) {
         commit = await this.r.getCommit(oid);
-        if (!commit) throw new Error(`No commit ${oid}`);
+        if (!commit) throw new UserError('unknown-commit', `No commit ${oid}`);
       } else {
         oid = commit.id();
       }
-      if (!commit) throw new Error('need commit or oid');
+      if (!commit) throw new UserError('no-commit-given', 'need commit or oid');
 
       newTree = await commit.getTree();
 
@@ -345,7 +352,7 @@ class NGWrap {
       }
       if (oldOid) {
         const oC = await this.r.getCommit(oldOid);
-        if (!oC) throw new Error(`No commit oldOid ${oid}`);
+        if (!oC) throw new UserError('unknown-commit', `No commit oldOid ${oid}`);
         oldTree = await oC.getTree();
       }
     }
@@ -406,7 +413,7 @@ class NGWrap {
   async diffFile({ diffKey, idx }) {
     const diff = await this.getDiff({ diffKey });
     const patch = (await diff.patches())[idx];
-    if (!patch) throw new Error(`Invalid idx ${idx} for diffKey ${diffKey}`);
+    if (!patch) throw new UserError('invalid-diff', `Invalid idx ${idx} for diffKey ${diffKey}`);
 
     const text = [`diff --git a/${patch.oldFile().path()} b/${patch.newFile().path()}`];
     for (const hunk of await patch.hunks()) {
@@ -443,7 +450,15 @@ const getRepo = async (path) => {
   return repoPs[path];
 };
 
-/** @returns {Promise<QuickStatus>} */
+/**
+ * Clear memoized repo.
+ *
+ * @param {string} path  The path to the repository.
+ */
+const uncacheRepo = async (path) => {
+  delete repoPs[path];
+};
+
 const quickStatus = async (path) => {
   try {
     const repo = await getRepo(path);
@@ -475,6 +490,7 @@ const initGit = (path, isBare) =>
 module.exports = {
   NGWrap,
   getRepo,
+  uncacheRepo,
   initGit,
   quickStatus,
 };

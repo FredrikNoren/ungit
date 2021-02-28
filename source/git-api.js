@@ -12,7 +12,7 @@ const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
 // eslint-disable-next-line no-unused-vars
-const { getRepo, initGit, quickStatus, NGWrap } = require('./nodegit');
+const { getRepo, initGit, quickStatus, uncacheRepo, NGWrap } = require('./nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
@@ -179,6 +179,7 @@ exports.registerApi = (env) => {
 
   const emitWorkingTreeChanged = _.debounce(
     (repoPath) => {
+      if (repoPath) uncacheRepo(repoPath);
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
         logger.info('emitting working-tree-changed to sockets, manually triggered');
@@ -189,6 +190,7 @@ exports.registerApi = (env) => {
   );
   const emitGitDirectoryChanged = _.debounce(
     (repoPath) => {
+      if (repoPath) uncacheRepo(repoPath);
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
         logger.info('emitting git-directory-changed to sockets, manually triggered');
