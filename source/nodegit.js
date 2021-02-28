@@ -90,6 +90,7 @@ class NGWrap {
     /** @type {nodegit.Repository} */
     this.r = ngRepo;
     // TODO use nodecache for expiration
+    /** @type {Record<string, nodegit.Diff>} */
     this._diffCache = {};
   }
 
@@ -213,6 +214,8 @@ class NGWrap {
       inRebase,
       inConflict,
       files,
+      index: await this.getChanges({ oid: 'index' }),
+      worktree: await this.getChanges({ oid: 'worktree' }),
     };
   }
 
@@ -319,12 +322,13 @@ class NGWrap {
    * }} DiffArgs
    * @param {DiffArgs} args
    */
-  async getDiff({ diffKey, commit, oid, oldOid }) {
+  async getDiff({ diffKey, commit, oid, oldOid, ignoreWhiteSpace }) {
     if (diffKey) {
-      if (this._diffCache[diffKey]) return this._diffCache[diffKey];
-      const s = diffKey.split('/');
+      if (this._diffCache[diffKey]) return { diffKey, diff: this._diffCache[diffKey] };
+      const s = diffKey.split('.');
       oid = s[0];
       oldOid = s[1];
+      ignoreWhiteSpace = s[2] === 'w';
       if (oldOid === 'null') oldOid = null;
     }
     let newTree, oldTree;
@@ -357,15 +361,23 @@ class NGWrap {
       }
     }
 
+    const flags = ignoreWhiteSpace ? nodegit.Diff.OPTION.IGNORE_WHITESPACE : 0;
     const diff = toIndex
-      ? await nodegit.Diff.treeToIndex(this.r, oldTree)
+      ? await nodegit.Diff.treeToIndex(this.r, oldTree, null, { flags })
       : toWorkTree
-      ? await nodegit.Diff.treeToWorkdir(this.r, oldTree)
-      : await nodegit.Diff.treeToTree(this.r, oldTree, newTree);
+      ? await nodegit.Diff.treeToWorkdir(this.r, oldTree, {
+          flags:
+            flags |
+            nodegit.Diff.OPTION.INCLUDE_UNTRACKED |
+            nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
+        })
+      : await nodegit.Diff.treeToTree(this.r, oldTree, newTree, { flags });
     // Find renames, compact diff
-    await diff.findSimilar({ flags: nodegit.Diff.FIND.RENAMES });
+    await diff.findSimilar({
+      flags: nodegit.Diff.FIND.RENAMES | nodegit.Diff.FIND.FOR_UNTRACKED,
+    });
 
-    diffKey = `${oid}/${oldOid}`;
+    diffKey = `${oid}.${oldOid}.${ignoreWhiteSpace ? 'w' : ''}`;
     this._diffCache[diffKey] = diff;
 
     return { diffKey, diff };
@@ -411,7 +423,7 @@ class NGWrap {
   // TODO limit and cursor{hunk,line}
   /** @param {{ diffKey: string; idx: number }} arg */
   async diffFile({ diffKey, idx }) {
-    const diff = await this.getDiff({ diffKey });
+    const { diff } = await this.getDiff({ diffKey });
     const patch = (await diff.patches())[idx];
     if (!patch) throw new UserError('invalid-diff', `Invalid idx ${idx} for diffKey ${diffKey}`);
 
