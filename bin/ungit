@@ -92,7 +92,7 @@ server.on('error', (e) => {
     console.log('Ungit server already running');
     navigate();
   } else {
-    console.error('Failed to run server: ', e)
-    process.exit(1)
+    console.error('Failed to run server: ', e);
+    process.exit(1);
   }
 });
