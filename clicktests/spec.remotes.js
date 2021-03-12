@@ -3,6 +3,7 @@ const environment = require('./environment')();
 const mkdirp = require('mkdirp');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
+const { encodePath } = require('../source/address-parser');
 const testRepoPaths = [];
 
 describe('[REMOTES]', () => {
@@ -62,7 +63,7 @@ describe('[REMOTES]', () => {
   // ----------- CLONING -------------
   it('navigate to empty folder path', async () => {
     await environment.goto(
-      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[2])}`
+      `${environment.getRootUrl()}/#/repository?path=${encodePath(testRepoPaths[2])}`
     );
     await environment.waitForElementVisible('.uninited');
   });

@@ -6,6 +6,7 @@
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",
+    "inspect": "node --inspect ./source/server.js",
     "test": "npm run unittest && npm run clicktest",
     "unittest": "mocha --config .mochatest.json",
     "clicktest": "mocha --config .mochaclicktest.json",

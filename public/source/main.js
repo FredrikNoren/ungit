@@ -12,6 +12,7 @@ var programEvents = require('ungit-program-events');
 var navigation = require('ungit-navigation');
 var storage = require('ungit-storage');
 var adBlocker = require('just-detect-adblock');
+var { encodePath } = require('ungit-address-parser');
 
 // Request animation frame polyfill and init tooltips
 (function () {
@@ -91,7 +92,7 @@ ko.bindingHandlers.autocomplete = {
       } else if (event.keyCode === 13) {
         // enter key is struck, navigate to the path
         event.preventDefault();
-        navigation.browseTo(`repository?path=${encodeURIComponent(value)}`);
+        navigation.browseTo(`repository?path=${encodePath(value)}`);
       } else if (value === '' && storage.getItem('repositories')) {
         // if path is emptied out, show save path options
         const folderNames = JSON.parse(storage.getItem('repositories')).map((value) => {

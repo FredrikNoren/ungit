@@ -8,6 +8,7 @@ const config = require('../source/config');
 const open = require('open');
 const path = require('path');
 const child_process = require('child_process');
+const { encodePath } = require('../source/address-parser');
 
 const BugTracker = require('../source/bugtracker');
 const bugtracker = new BugTracker('launcher');
@@ -35,9 +36,9 @@ const openUngitBrowser = (pathToNavigateTo) => {
 const navigate = () => {
   let url = config.urlBase + ':' + config.port;
   if (config.forcedLaunchPath === undefined) {
-    url += '/#/repository?path=' + encodeURIComponent(process.cwd());
+    url += '/#/repository?path=' + encodePath(process.cwd());
   } else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') {
-    url += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
+    url += '/#/repository?path=' + encodePath(config.forcedLaunchPath);
   }
 
   if (config.launchCommand) {
@@ -90,5 +91,8 @@ server.on('error', (e) => {
   if (e.code == 'EADDRINUSE') {
     console.log('Ungit server already running');
     navigate();
+  } else {
+    console.error('Failed to run server: ', e);
+    process.exit(1);
   }
 });

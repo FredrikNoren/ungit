@@ -3,6 +3,7 @@ const environment = require('./environment')();
 const mkdirp = require('mkdirp');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
+const { encodePath } = require('../source/address-parser');
 const testRepoPaths = [];
 
 describe('[SCREENS]', () => {
@@ -19,7 +20,7 @@ describe('[SCREENS]', () => {
     testRepoPaths.push(await environment.createTempFolder());
 
     await environment.goto(
-      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(testRepoPaths[0])}`
+      `${environment.getRootUrl()}/#/repository?path=${encodePath(testRepoPaths[0])}`
     );
     await environment.waitForElementVisible('.uninited');
   });
@@ -65,7 +66,7 @@ describe('[SCREENS]', () => {
     await mkdirp(specialRepoPath);
 
     await environment.goto(
-      `${environment.getRootUrl()}/#/repository?path=${encodeURIComponent(specialRepoPath)}`
+      `${environment.getRootUrl()}/#/repository?path=${encodePath(specialRepoPath)}`
     );
 
     await environment.waitForElementVisible('.uninited');
