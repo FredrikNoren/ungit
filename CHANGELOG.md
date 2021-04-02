@@ -3,14 +3,19 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.15...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.16...master)
+
+## [1.5.16](https://github.com/FredrikNoren/ungit/compare/v1.5.15...v1.5.16)
 
 ### Added
 - Add clipboard button on commit [#1462](https://github.com/FredrikNoren/ungit/pull/1462)
 - Encode URI paths with slashes [#1378](https://github.com/FredrikNoren/ungit/pull/1378)
 
 ### Changed
-- Bump Dependencies [#1456](https://github.com/FredrikNoren/ungit/pull/1456)
+- Bump Dependencies [#1456](https://github.com/FredrikNoren/ungit/pull/1456), [#1464](https://github.com/FredrikNoren/ungit/pull/1464)
+- Bump elliptic from 6.5.3 to 6.5.4 [#1468](https://github.com/FredrikNoren/ungit/pull/1468)
+- Bump y18n from 4.0.0 to 4.0.1 [#1471](https://github.com/FredrikNoren/ungit/pull/1471)
+- git 2.3x changes break unittests [#1472](https://github.com/FredrikNoren/ungit/issue/1472)
 
 ## [1.5.15](https://github.com/FredrikNoren/ungit/compare/v1.5.14...v1.5.15)
 
