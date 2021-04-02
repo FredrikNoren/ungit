@@ -7,6 +7,7 @@
   "rules": {
     "mocha/no-mocha-arrows": "off",
     "mocha/no-identical-title": "off",
-    "mocha/no-setup-in-describe": "off" // Off for now
+    "mocha/no-setup-in-describe": "off", // Off for now
+    "mocha/no-skipped-tests": "off"
   }
 }
