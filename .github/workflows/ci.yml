@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['10', '12', '14', '15']
+        node-version: ['12', '14', '16']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 #    env:
@@ -59,14 +59,14 @@ jobs:
 
       # publish artifacts
       - run: npm pack
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
       - run: npm run electronpackage -- --all
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
       - run: npm run electronzip
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
 
       - name: Upload npm pack
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit
@@ -74,7 +74,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-darwin-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-darwin-arm64
@@ -82,7 +82,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-darwin-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-darwin-x64
@@ -90,7 +90,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-linux-arm64
@@ -98,7 +98,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-armv7l
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-linux-armv7l
@@ -106,7 +106,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-linux-ia32
@@ -114,7 +114,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-linux-x64
@@ -122,7 +122,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-win32-arm64
@@ -130,7 +130,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-win32-ia32
@@ -138,7 +138,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '10'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12'
         uses: actions/upload-artifact@v2
         with:
           name: ungit-win32-x64
