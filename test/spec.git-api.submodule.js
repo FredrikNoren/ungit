@@ -92,7 +92,8 @@ describe('git-api submodule', function () {
     return common.post(req, '/testing/createfile', { file: path.join(testDirMain, testFile) });
   });
 
-  it("submodule should show up in status when it's dirty", () => {
+  // see https://github.com/FredrikNoren/ungit/issues/1472
+  it.skip("submodule should show up in status when it's dirty", () => {
     return common.get(req, '/status', { path: testDirMain }).then((res) => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[submodulePath]).to.eql({
@@ -111,7 +112,8 @@ describe('git-api submodule', function () {
     });
   });
 
-  it('diff on submodule should work', () => {
+  // see https://github.com/FredrikNoren/ungit/issues/1472
+  it.skip('diff on submodule should work', () => {
     return common.get(req, '/diff', { path: testDirMain, file: submodulePath }).then((res) => {
       expect(res.indexOf('-Subproject commit')).to.be.above(-1);
       expect(res.indexOf('+Subproject commit')).to.be.above(-1);

@@ -17,6 +17,15 @@ let gitConfig;
 
 const req = request(app);
 
+const commitMessage = 'test';
+const testFile = 'somefile';
+const testFile2 = 'my test.txt';
+const testSubDir = 'sub';
+const testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
+const commitMessage3 = 'commit3';
+const commitMessage4 = 'Removed some file';
+const testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
+
 describe('git-api', () => {
   before('creating test dir should work', () => {
     return common.post(req, '/testing/createtempdir').then((res) => {
@@ -95,7 +104,7 @@ describe('git-api', () => {
       .end(done);
   });
 
-  const testFile = 'somefile';
+  // testFile
 
   it('log should be empty before first commit', () => {
     return common.get(req, '/gitlog', { path: testDir }).then((res) => {
@@ -144,7 +153,7 @@ describe('git-api', () => {
     });
   });
 
-  const commitMessage = 'test';
+  // commitMessage
 
   it('commit should fail without commit message', (done) => {
     req
@@ -230,7 +239,7 @@ describe('git-api', () => {
       .then((res) => expect(res.nodes.length).to.be(1));
   });
 
-  const testFile2 = 'my test.txt';
+  // testFile2
 
   it('creating a multi word test file should work', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) });
@@ -265,7 +274,7 @@ describe('git-api', () => {
       .end(done);
   });
 
-  const testSubDir = 'sub';
+  // testSubDir
 
   it('creating test sub dir should work', () => {
     return common.post(req, '/createdir', { dir: path.join(testDir, testSubDir) });
@@ -277,7 +286,7 @@ describe('git-api', () => {
     });
   });
 
-  const testFile3 = path.join(testSubDir, 'testy.txt').replace('\\', '/');
+  // testFile3
 
   it('creating a test file in sub dir should work', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile3) });
@@ -302,7 +311,7 @@ describe('git-api', () => {
     });
   });
 
-  const commitMessage3 = 'commit3';
+  // commitMessage3
 
   it('commit should succeed with file in sub dir', () => {
     return common.post(req, '/commit', {
@@ -352,7 +361,7 @@ describe('git-api', () => {
     });
   });
 
-  const commitMessage4 = 'Removed some file';
+  // commitMessage4
 
   it('commit on removed file should work', () => {
     return common.post(req, '/commit', {
@@ -368,7 +377,7 @@ describe('git-api', () => {
       .then((res) => expect(Object.keys(res.files).length).to.be(0));
   });
 
-  const testFile4 = path.join(testSubDir, 'renamed.txt').replace(/\\/, '/');
+  // testFile4
 
   it('renaming a file should work', () => {
     return common.post(req, '/testing/git', {

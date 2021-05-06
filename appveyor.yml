@@ -3,16 +3,21 @@ skip_branch_with_pr: true
 environment:
   matrix:
     - nodejs_version: '' # latest
+    - nodejs_version: '16'
     - nodejs_version: '14'
     - nodejs_version: '12'
-    - nodejs_version: '10'
 
 branches:
   only:
     - master
 
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: |
+      try {
+        Install-Product node $env:nodejs_version
+      } catch {
+        Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version)
+      }
   - node --version
   - npm --version
   - npm ci
