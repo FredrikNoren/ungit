@@ -177,13 +177,14 @@ class RefViewModel extends Selectable {
     let url = this.isTag ? '/tags' : '/branches';
     if (this.isRemote) url = `/remote${url}`;
 
-    return (isClientOnly
-      ? Promise.resolve()
-      : this.server.delPromise(url, {
-          path: this.graph.repoPath(),
-          remote: this.isRemote ? this.remote : null,
-          name: this.refName,
-        })
+    return (
+      isClientOnly
+        ? Promise.resolve()
+        : this.server.delPromise(url, {
+            path: this.graph.repoPath(),
+            remote: this.isRemote ? this.remote : null,
+            name: this.refName,
+          })
     )
       .then(() => {
         if (this.node()) this.node().removeRef(this);

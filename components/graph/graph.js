@@ -119,9 +119,8 @@ class GraphViewModel {
         this.skip(parseInt(log.skip));
         return log.nodes || [];
       })
-      .then((
-        nodes // create and/or calculate nodes
-      ) =>
+      .then((nodes) =>
+        // create and/or calculate nodes
         this.computeNode(
           nodes.map((logEntry) => {
             return this.getNode(logEntry.sha1, logEntry); // convert to node object
