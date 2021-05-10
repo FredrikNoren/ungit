@@ -242,23 +242,10 @@ describe('git-api: test patch api', () => {
     const testFileSize = 30;
     const linesToChange = [12, 13, 14, 15, 16, 17, 18, 19];
     const contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
-    const patchLineList = getPatchLineList(linesToChange.length * 2, [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-    ]);
+    const patchLineList = getPatchLineList(
+      linesToChange.length * 2,
+      [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16]
+    );
 
     return testPatch(req, testDir, testFileName, contentsToPatch, [
       { name: testFileName, patchLineList: patchLineList },
@@ -274,26 +261,10 @@ describe('git-api: test patch api', () => {
     const testFileSize = 30;
     const linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     const contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
-    const patchLineList = getPatchLineList(linesToChange.length * 2, [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-    ]);
+    const patchLineList = getPatchLineList(
+      linesToChange.length * 2,
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    );
 
     return testPatch(req, testDir, testFileName, contentsToPatch, [
       { name: testFileName, patchLineList: patchLineList },
@@ -305,20 +276,10 @@ describe('git-api: test patch api', () => {
     const testFileSize = 30;
     const linesToChange = [2, 3, 4, 12, 13, 14, 22, 23, 24];
     const contentsToPatch = getContentsToPatch(testFileSize, linesToChange);
-    const patchLineList = getPatchLineList(linesToChange.length * 2, [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-    ]);
+    const patchLineList = getPatchLineList(
+      linesToChange.length * 2,
+      [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17]
+    );
 
     return testPatch(req, testDir, testFileName, contentsToPatch, [
       { name: testFileName, patchLineList: patchLineList },

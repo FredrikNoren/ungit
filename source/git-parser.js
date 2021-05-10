@@ -44,7 +44,8 @@ exports.parseGitStatus = (text, args) => {
   };
 };
 
-const fileChangeRegex = /(?<additions>[\d-]+)\t(?<deletions>[\d-]+)\t((?<fileName>[^\x00]+?)\x00|\x00(?<oldFileName>[^\x00]+?)\x00(?<newFileName>[^\x00]+?)\x00)/g;
+const fileChangeRegex =
+  /(?<additions>[\d-]+)\t(?<deletions>[\d-]+)\t((?<fileName>[^\x00]+?)\x00|\x00(?<oldFileName>[^\x00]+?)\x00(?<newFileName>[^\x00]+?)\x00)/g;
 
 exports.parseGitStatusNumstat = (text) => {
   const result = {};
