@@ -389,7 +389,6 @@ describe('git-parser parseGitLog', () => {
     expect(res[1].message).to.eql('b');
     expect(res[2].message).to.eql('a');
     expect(res[3].message).to.eql('Initial commit');
-
   });
   it('parses reflog commits without email', () => {
     const gitLog = dedent(`
