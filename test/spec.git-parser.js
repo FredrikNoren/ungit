@@ -386,9 +386,9 @@ describe('git-parser parseGitLog', () => {
     const res = gitParser.parseGitLog(gitLog);
     expect(res.length).to.eql(4);
     expect(res[0].message).to.eql("Merge branch 'a' into dev");
-    expect(res[1].message).to.eql("b");
-    expect(res[2].message).to.eql("a");
-    expect(res[3].message).to.eql("Initial commit");
+    expect(res[1].message).to.eql('b');
+    expect(res[2].message).to.eql('a');
+    expect(res[3].message).to.eql('Initial commit');
 
   });
   it('parses reflog commits without email', () => {
