@@ -162,7 +162,7 @@ exports.parseGitLog = (data) => {
       parser = parseFileChanges;
       return;
     }
-    if (rows[index + 1] && rows[index + 1].indexOf('\x00commit ') == 0) {
+    if (rows[index + 1] && /^\u0000+commit/.test(rows[index + 1])) {
       parser = parseCommitLine;
       return;
     }

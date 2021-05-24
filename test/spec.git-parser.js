@@ -351,6 +351,45 @@ describe('git-parser parseGitLog', () => {
       sha1: '621a04f931ea9007ac826c04a1a02832e20aa470',
     });
   });
+  it('parses multiple commits in a row multiple nul separators', () => {
+    const gitLog = dedent(`
+      commit ad4c559f05796e78095a51679324cefd9afca879 47185090d5096033db0d5c0bbf883d9295ca084e b360295026ae6afac3525b89145aa22d61e818ff (HEAD -> refs/heads/dev)
+      Merge: 4718509 b360295
+      Author:     Ungit Commiter <ungit.commiter@example.com>
+      AuthorDate: Sat May 22 22:21:04 2021 +0200
+      Commit:     Ungit Commiter <ungit.commiter@example.com>
+      CommitDate: Sat May 22 22:21:04 2021 +0200
+
+          Merge branch 'a' into dev
+      \x00\x00commit 7d7a4d7d9fc625aff46a0ff4d7e95f86d01d25c7 47185090d5096033db0d5c0bbf883d9295ca084e (refs/heads/b)
+      Author:     Ungit Commiter <ungit.commiter@example.com>
+      AuthorDate: Sat May 22 22:20:28 2021 +0200
+      Commit:     Ungit Commiter <ungit.commiter@example.com>
+      CommitDate: Sat May 22 22:20:28 2021 +0200
+
+          b
+      \x00commit b360295026ae6afac3525b89145aa22d61e818ff 47185090d5096033db0d5c0bbf883d9295ca084e (refs/heads/a)
+      Author:     Ungit Commiter <ungit.commiter@example.com>
+      AuthorDate: Sat May 22 22:20:23 2021 +0200
+      Commit:     Ungit Commiter <ungit.commiter@example.com>
+      CommitDate: Sat May 22 22:20:23 2021 +0200
+
+          a
+      \x00commit 47185090d5096033db0d5c0bbf883d9295ca084e (refs/heads/master)
+      Author:     Ungit Commiter <ungit.commiter@example.com>
+      AuthorDate: Sat May 22 22:19:31 2021 +0200
+      Commit:     Ungit Commiter <ungit.commiter@example.com>
+      CommitDate: Sat May 22 22:19:31 2021 +0200
+
+          Initial commit`);
+
+    const res = gitParser.parseGitLog(gitLog);
+    expect(res.length).to.eql(4);
+    expect(res[0].message).to.eql("Merge branch 'a' into dev");
+    expect(res[1].message).to.eql('b');
+    expect(res[2].message).to.eql('a');
+    expect(res[3].message).to.eql('Initial commit');
+  });
   it('parses reflog commits without email', () => {
     const gitLog = dedent(`
       commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)
