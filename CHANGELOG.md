@@ -3,7 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.17...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.18...master)
+
+## [1.5.18](https://github.com/FredrikNoren/ungit/compare/v1.5.17...v1.5.18)
+
+### Fixes
+- simple git flow breaks ungit [#1460](https://github.com/FredrikNoren/ungit/issues/1460)
+
+### Changed
+- Bump Dependencies [#1479](https://github.com/FredrikNoren/ungit/pull/1479)
 
 ## [1.5.17](https://github.com/FredrikNoren/ungit/compare/v1.5.16...v1.5.17)
 
