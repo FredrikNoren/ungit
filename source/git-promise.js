@@ -57,13 +57,13 @@ const gitExecutorProm = (args, retryCount) => {
         let stderr = '';
         const env = JSON.parse(JSON.stringify(process.env));
         env['LC_ALL'] = 'C';
-        const procOpts = {
+        const gitProcess = child_process.spawn(gitBin, args.commands, {
           cwd: args.repoPath,
           maxBuffer: 1024 * 1024 * 100,
-          detached: false,
+          detached: true, // Make sure we don't present a TTY to git
           env: env,
-        };
-        const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
+          stdio: [args.inPipe || 'ignore', args.outPipe || 'pipe', 'pipe'],
+        });
         let timeoutTimer = setTimeout(() => {
           if (!timeoutTimer) return;
           timeoutTimer = null;
@@ -73,18 +73,10 @@ const gitExecutorProm = (args, retryCount) => {
           gitProcess.kill('SIGINT');
         }, args.timeout);
 
-        if (args.outPipe) {
-          gitProcess.stdout.pipe(args.outPipe);
-        } else {
+        if (!args.outPipe) {
           gitProcess.stdout.on('data', (data) => (stdout += data.toString()));
         }
-        if (args.inPipe) {
-          gitProcess.stdin.end(args.inPipe);
-        }
         gitProcess.stderr.on('data', (data) => (stderr += data.toString()));
-        gitProcess.on('error', (error) => {
-          rejectedError = error;
-        });
 
         gitProcess.on('close', (code) => {
           if (!timeoutTimer) return;
