@@ -22,6 +22,8 @@ class PathViewModel {
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
     this.showDirectoryCreatedAlert = ko.observable(false);
+    this.showGitInitSuggestion = ko.observable(true);
+    this.repos = ko.observableArray();
     this.cloneDestinationImplicit = ko.computed(() => {
       const defaultText = 'destination folder';
       if (!this.cloneUrl()) return defaultText;
@@ -63,7 +65,7 @@ class PathViewModel {
         }
         return null;
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }
   initRepository() {
     return this.server
