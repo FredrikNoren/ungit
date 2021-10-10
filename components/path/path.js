@@ -53,7 +53,24 @@ class PathViewModel {
     });
     this.cloneDestination = ko.observable();
     this.repository = ko.observable();
+    this.expandIcon = ko.observable();
     this.isRecursiveSubmodule = ko.observable(true);
+    this.isShowCreateRepo = ko.observable(true);
+    this.updateShowCreateRepoMetadata();
+  }
+
+  toggleShowCreateRepo() {
+    this.isShowCreateRepo(!this.isShowCreateRepo());
+
+    this.updateShowCreateRepoMetadata();
+  }
+
+  updateShowCreateRepoMetadata() {
+    if (this.isShowCreateRepo()) {
+      this.expandIcon(octicons['chevron-right'].toSVG({ height: 28 }));
+    } else {
+      this.expandIcon(octicons['chevron-down'].toSVG({ height: 35 }));
+    }
   }
 
   updateNode(parentElement) {
