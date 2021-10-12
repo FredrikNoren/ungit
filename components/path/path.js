@@ -5,6 +5,9 @@ const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
 const { encodePath } = require('ungit-address-parser');
 const octicons = require('octicons');
+const storage = require('ungit-storage');
+
+const showCreateRepoKey = 'isShowCreateRepo';
 
 components.register('path', (args) => {
   return new PathViewModel(args.server, args.path);
@@ -39,7 +42,6 @@ class PathViewModel {
         .split('/')
         .filter((s) => s)
         .slice(-1)[0] || '/';
-
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
     this.showDirectoryCreatedAlert = ko.observable(false);
@@ -55,13 +57,15 @@ class PathViewModel {
     this.repository = ko.observable();
     this.expandIcon = ko.observable();
     this.isRecursiveSubmodule = ko.observable(true);
-    this.isShowCreateRepo = ko.observable(true);
+    this.showCreateRepoKey = `${showCreateRepoKey}-${this.repoPath}`;
+    const storageValue = storage.getItem(this.showCreateRepoKey);
+    this.isShowCreateRepo = ko.observable((storageValue && storageValue === 'false') ? false : true);
     this.updateShowCreateRepoMetadata();
   }
 
   toggleShowCreateRepo() {
     this.isShowCreateRepo(!this.isShowCreateRepo());
-
+    storage.setItem(this.showCreateRepoKey, this.isShowCreateRepo() ? 'true' : 'false');
     this.updateShowCreateRepoMetadata();
   }
 

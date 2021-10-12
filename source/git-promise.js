@@ -6,6 +6,7 @@ const winston = require('winston');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
+const pLimit = require('p-limit')(config.maxConcurrentGitOperations);
 const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitEmptyReproSha256 = '6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321'; // https://stackoverflow.com/q/9765453
@@ -19,7 +20,6 @@ const gitConfigArguments = [
   '-c',
   'core.editor=:',
 ];
-const gitSem = require('locks').createSemaphore(config.maxConcurrentGitOperations);
 const gitOptionalLocks = config.isGitOptionalLocks ? '--no-optional-locks' : '';
 const gitBin = (() => {
   if (config.gitBinPath) {
@@ -27,14 +27,6 @@ const gitBin = (() => {
   }
   return 'git';
 })();
-
-// only allows ${config.maxConcurrentGitOperations} count of parallel git operations
-const rateLimiter = () =>
-  new Promise((resolve) => {
-    gitSem.wait(() => {
-      resolve();
-    });
-  });
 
 const isRetryableError = (err) => {
   const errMsg = (err || {}).error || '';
@@ -47,83 +39,75 @@ const isRetryableError = (err) => {
 };
 
 const gitExecutorProm = (args, retryCount) => {
-  return rateLimiter()
-    .then(() => {
-      return new Promise((resolve, reject) => {
-        if (config.logGitCommands)
-          winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
-        let rejectedError = null;
-        let stdout = '';
-        let stderr = '';
-        const env = JSON.parse(JSON.stringify(process.env));
-        env['LC_ALL'] = 'C';
-        const procOpts = {
-          cwd: args.repoPath,
-          maxBuffer: 1024 * 1024 * 100,
-          detached: false,
-          env: env,
-        };
-        const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
-        let timeoutTimer = setTimeout(() => {
-          if (!timeoutTimer) return;
-          timeoutTimer = null;
+  let timeoutTimer;
+  return pLimit(() => {
+    return new Promise((resolve, reject) => {
+      if (config.logGitCommands)
+        winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
+      let rejectedError = null;
+      let stdout = '';
+      let stderr = '';
+      const env = JSON.parse(JSON.stringify(process.env));
+      env['LC_ALL'] = 'C';
+      const procOpts = {
+        cwd: args.repoPath,
+        maxBuffer: 1024 * 1024 * 100,
+        detached: false,
+        env: env,
+      };
+      const gitProcess = child_process.spawn(gitBin, args.commands, procOpts);
+      timeoutTimer = setTimeout(() => {
+        if (!timeoutTimer) return;
+        timeoutTimer = null;
 
-          winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
-          gitSem.signal();
-          gitProcess.kill('SIGINT');
-        }, args.timeout);
+        winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
+        gitProcess.kill('SIGINT');
+      }, args.timeout);
 
-        if (args.outPipe) {
-          gitProcess.stdout.pipe(args.outPipe);
-        } else {
-          gitProcess.stdout.on('data', (data) => (stdout += data.toString()));
-        }
-        if (args.inPipe) {
-          gitProcess.stdin.end(args.inPipe);
-        }
-        gitProcess.stderr.on('data', (data) => (stderr += data.toString()));
-        gitProcess.on('error', (error) => {
-          rejectedError = error;
-        });
-
-        gitProcess.on('close', (code) => {
-          if (!timeoutTimer) return;
-          clearTimeout(timeoutTimer);
-          timeoutTimer = null;
-
-          if (config.logGitCommands)
-            winston.info(
-              `git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(
-                0,
-                400
-              )}\n${stdout.slice(0, 400)}`
-            );
-          if (args.outPipe) args.outPipe.end();
-          gitSem.signal();
-
-          if (rejectedError) {
-            reject(rejectedError);
-          } else if (code === 0 || (code === 1 && args.allowError)) {
-            resolve(stdout);
-          } else {
-            reject(getGitError(args, stderr, stdout));
-          }
-        });
-      });
-    })
-    .catch((err) => {
-      if (retryCount > 0 && isRetryableError(err)) {
-        return new Promise((resolve) => {
-          winston.warn(
-            'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
-          );
-          // sleep random amount between 250 ~ 750 ms
-          setTimeout(resolve, Math.floor(Math.random() * 500 + 250));
-        }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+      if (args.outPipe) {
+        gitProcess.stdout.pipe(args.outPipe);
       } else {
-        throw err;
+        gitProcess.stdout.on('data', (data) => (stdout += data.toString()));
       }
+      if (args.inPipe) {
+        gitProcess.stdin.end(args.inPipe);
+      }
+      gitProcess.stderr.on('data', (data) => (stderr += data.toString()));
+      gitProcess.on('error', (error) => rejectedError = error);
+
+      gitProcess.on('close', (code) => {
+        if (config.logGitCommands)
+          winston.info(
+            `git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(
+              0,
+              400
+            )}\n${stdout.slice(0, 400)}`
+          );
+        if (rejectedError) {
+          reject(rejectedError);
+        } else if (code === 0 || (code === 1 && args.allowError)) {
+          resolve(stdout);
+        } else {
+          reject(getGitError(args, stderr, stdout));
+        }
+      });
     });
+  }).catch((err) => {
+    if (retryCount > 0 && isRetryableError(err)) {
+      return new Promise((resolve) => {
+        winston.warn(
+          'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
+        );
+        // sleep random amount between 250 ~ 750 ms
+        setTimeout(resolve, Math.floor(Math.random() * 500 + 250));
+      }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+    } else {
+      throw err;
+    }
+  }).finally(() => {
+    if (args.outPipe) args.outPipe.end();
+    if (timeoutTimer) clearTimeout(timeoutTimer);
+  });
 };
 
 /**
@@ -235,8 +219,8 @@ git.status = (repoPath, file) => {
     // 1: numStatsUnstaged
     config.isEnableNumStat
       ? git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', file || ''], repoPath).then(
-          gitParser.parseGitStatusNumstat
-        )
+        gitParser.parseGitStatusNumstat
+      )
       : {},
     // 2: status
     git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', file || ''], repoPath)
@@ -587,8 +571,9 @@ git.revParse = (repoPath) => {
         }
         return { type: 'uninited', gitRootPath: rootPath };
       });
-    })
-    .catch((err) => ({ type: 'uninited', gitRootPath: path.normalize(repoPath) }));
+    }).catch((err) => {
+      return ({ type: 'uninited', gitRootPath: path.normalize(repoPath) })
+    });
 };
 
 git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {
