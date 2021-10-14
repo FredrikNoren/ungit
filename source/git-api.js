@@ -38,7 +38,7 @@ exports.registerApi = (env) => {
 
         fs.readFile(path.join(socket.watcherPath, '.gitignore'))
           .then((ignoreContent) => (socket.ignore = ignore().add(ignoreContent.toString())))
-          .catch(() => { })
+          .catch(() => {})
           .then(() => {
             socket.watcher = [];
             return watchPath(socket, '.', { recursive: isMac || isWindows });
@@ -285,7 +285,7 @@ exports.registerApi = (env) => {
           'push',
           req.body.remote,
           (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-          (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
+            (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
           req.body.force ? '-f' : '',
         ]),
         repoPath: req.body.path,
@@ -610,7 +610,7 @@ exports.registerApi = (env) => {
         `:refs/tags/${req.query.name.trim()}`,
       ]);
       const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-        .catch(() => { }) // might have already deleted, so ignoring error
+        .catch(() => {}) // might have already deleted, so ignoring error
         .then(() => gitPromise(commands, req.query.path));
 
       jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
@@ -879,25 +879,33 @@ exports.registerApi = (env) => {
       .access(req.query.path)
       .then(() => {
         return gitPromise.revParse(req.query.path);
-      }).then(revParseRes => {
+      })
+      .then((revParseRes) => {
         if (revParseRes.type !== 'uninited') {
           return revParseRes;
         }
 
         // for uninited directory, let's check if it's any immediate directories are
         // git repository so we can display them.
-        return fs.readdir(req.query.path)
-          .then(filePaths => {
-            return Promise.all(filePaths
-              .filter(filePath => !filePath.startsWith('.'))
-              .map(filePath => gitPromise.revParse(path.join(req.query.path, filePath))));
-          }).then(pathRevParses => {
+        return fs
+          .readdir(req.query.path)
+          .then((filePaths) => {
+            return Promise.all(
+              filePaths
+                .filter((filePath) => !filePath.startsWith('.'))
+                .map((filePath) => gitPromise.revParse(path.join(req.query.path, filePath)))
+            );
+          })
+          .then((pathRevParses) => {
             revParseRes.subRepos = pathRevParses
-              .filter(pathRevParse => pathRevParse.type === 'inited' || pathRevParse.type === 'bare')
-              .map(pathRevParse => pathRevParse.gitRootPath);
+              .filter(
+                (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'
+              )
+              .map((pathRevParse) => pathRevParse.gitRootPath);
             return revParseRes;
           });
-      }).catch((e) => {
+      })
+      .catch((e) => {
         return { type: 'no-such-path', gitRootPath: req.query.path };
       });
     jsonResultOrFailProm(res, task);

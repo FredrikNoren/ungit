@@ -73,7 +73,7 @@ const gitExecutorProm = (args, retryCount) => {
         gitProcess.stdin.end(args.inPipe);
       }
       gitProcess.stderr.on('data', (data) => (stderr += data.toString()));
-      gitProcess.on('error', (error) => rejectedError = error);
+      gitProcess.on('error', (error) => (rejectedError = error));
 
       gitProcess.on('close', (code) => {
         if (config.logGitCommands)
@@ -92,22 +92,24 @@ const gitExecutorProm = (args, retryCount) => {
         }
       });
     });
-  }).catch((err) => {
-    if (retryCount > 0 && isRetryableError(err)) {
-      return new Promise((resolve) => {
-        winston.warn(
-          'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
-        );
-        // sleep random amount between 250 ~ 750 ms
-        setTimeout(resolve, Math.floor(Math.random() * 500 + 250));
-      }).then(gitExecutorProm.bind(null, args, retryCount - 1));
-    } else {
-      throw err;
-    }
-  }).finally(() => {
-    if (args.outPipe) args.outPipe.end();
-    if (timeoutTimer) clearTimeout(timeoutTimer);
-  });
+  })
+    .catch((err) => {
+      if (retryCount > 0 && isRetryableError(err)) {
+        return new Promise((resolve) => {
+          winston.warn(
+            'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
+          );
+          // sleep random amount between 250 ~ 750 ms
+          setTimeout(resolve, Math.floor(Math.random() * 500 + 250));
+        }).then(gitExecutorProm.bind(null, args, retryCount - 1));
+      } else {
+        throw err;
+      }
+    })
+    .finally(() => {
+      if (args.outPipe) args.outPipe.end();
+      if (timeoutTimer) clearTimeout(timeoutTimer);
+    });
 };
 
 /**
@@ -219,8 +221,8 @@ git.status = (repoPath, file) => {
     // 1: numStatsUnstaged
     config.isEnableNumStat
       ? git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', file || ''], repoPath).then(
-        gitParser.parseGitStatusNumstat
-      )
+          gitParser.parseGitStatusNumstat
+        )
       : {},
     // 2: status
     git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', file || ''], repoPath)
@@ -571,8 +573,9 @@ git.revParse = (repoPath) => {
         }
         return { type: 'uninited', gitRootPath: rootPath };
       });
-    }).catch((err) => {
-      return ({ type: 'uninited', gitRootPath: path.normalize(repoPath) })
+    })
+    .catch((err) => {
+      return { type: 'uninited', gitRootPath: path.normalize(repoPath) };
     });
 };
 

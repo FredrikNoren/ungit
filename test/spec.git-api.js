@@ -70,22 +70,31 @@ describe('git-api', () => {
     let testDirWithSubRepos;
     let subRepo1, subRepo2;
 
-    return common.post(req, '/testing/createtempdir').then((res) => {
-      expect(res.path).to.be.ok();
-      return fs.realpath(res.path).then((dir) => {
-        testDirWithSubRepos = dir;
+    return common
+      .post(req, '/testing/createtempdir')
+      .then((res) => {
+        expect(res.path).to.be.ok();
+        return fs.realpath(res.path).then((dir) => {
+          testDirWithSubRepos = dir;
+        });
+      })
+      .then(() => {
+        subRepo1 = path.join(testDirWithSubRepos, 'repo1');
+        return fs.mkdir(subRepo1).then(() => common.post(req, '/init', { path: subRepo1 }));
+      })
+      .then(() => {
+        subRepo2 = path.join(testDirWithSubRepos, 'repo2');
+        return fs.mkdir(subRepo2).then(() => common.post(req, '/init', { path: subRepo2 }));
+      })
+      .then(() => {
+        return common.get(req, '/quickstatus', { path: testDirWithSubRepos }).then((res) =>
+          expect(res).to.eql({
+            type: 'uninited',
+            subRepos: [subRepo1, subRepo2],
+            gitRootPath: testDirWithSubRepos,
+          })
+        );
       });
-    }).then(() => {
-      subRepo1 = path.join(testDirWithSubRepos, 'repo1');
-      return fs.mkdir(subRepo1).then(() => common.post(req, '/init', { path: subRepo1 }));
-    }).then(() => {
-      subRepo2 = path.join(testDirWithSubRepos, 'repo2');
-      return fs.mkdir(subRepo2).then(() => common.post(req, '/init', { path: subRepo2 }));
-    }).then(() => {
-      return common
-        .get(req, '/quickstatus', { path: testDirWithSubRepos })
-        .then((res) => expect(res).to.eql({ type: 'uninited', subRepos: [subRepo1, subRepo2], gitRootPath: testDirWithSubRepos }));
-    });
   });
 
   it('status should fail in non-existing directory', () => {

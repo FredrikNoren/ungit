@@ -59,7 +59,7 @@ class PathViewModel {
     this.isRecursiveSubmodule = ko.observable(true);
     this.showCreateRepoKey = `${showCreateRepoKey}-${this.repoPath}`;
     const storageValue = storage.getItem(this.showCreateRepoKey);
-    this.isShowCreateRepo = ko.observable((storageValue && storageValue === 'false') ? false : true);
+    this.isShowCreateRepo = ko.observable(storageValue && storageValue === 'false' ? false : true);
     this.updateShowCreateRepoMetadata();
   }
 
@@ -102,14 +102,16 @@ class PathViewModel {
           }
         } else if (status.type == 'uninited' || status.type == 'no-such-path') {
           if (status.subRepos && status.subRepos.length > 0) {
-            this.subRepos(status.subRepos.map(subRepo => new SubRepositoryViewModel(this.server, subRepo)));
+            this.subRepos(
+              status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
+            );
           }
           this.status(status.type);
           this.repository(null);
         }
         return null;
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }
   initRepository() {
     return this.server
