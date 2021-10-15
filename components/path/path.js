@@ -57,7 +57,7 @@ class PathViewModel {
     this.repository = ko.observable();
     this.expandIcon = ko.observable();
     this.isRecursiveSubmodule = ko.observable(true);
-    this.showCreateRepoKey = `${showCreateRepoKey}-${this.repoPath}`;
+    this.showCreateRepoKey = `${showCreateRepoKey}-${this.repoPath()}`;
     const storageValue = storage.getItem(this.showCreateRepoKey);
     this.isShowCreateRepo = ko.observable(storageValue && storageValue === 'false' ? false : true);
     this.updateShowCreateRepoMetadata();
