@@ -3,10 +3,34 @@ const components = require('ungit-components');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
+const { encodePath } = require('ungit-address-parser');
+const octicons = require('octicons');
+const storage = require('ungit-storage');
+
+const showCreateRepoKey = 'isShowCreateRepo';
 
 components.register('path', (args) => {
   return new PathViewModel(args.server, args.path);
 });
+
+class SubRepositoryViewModel {
+  constructor(server, path) {
+    this.path = path;
+    this.title = path;
+    this.link = `${ungit.config.rootPath}/#/repository?path=${encodePath(path)}`;
+    this.arrowIcon = octicons['arrow-right'].toSVG({ height: 24 });
+    this.remote = ko.observable('...');
+
+    server
+      .getPromise(`/remotes/origin?path=${encodePath(this.path)}`)
+      .then((remote) => {
+        this.remote(remote.address.replace(/\/\/.*?@/, '//***@'));
+      })
+      .catch((err) => {
+        this.remote('');
+      });
+  }
+}
 
 class PathViewModel {
   constructor(server, path) {
@@ -18,10 +42,10 @@ class PathViewModel {
         .split('/')
         .filter((s) => s)
         .slice(-1)[0] || '/';
-
     this.status = ko.observable('loading');
     this.cloneUrl = ko.observable();
     this.showDirectoryCreatedAlert = ko.observable(false);
+    this.subRepos = ko.observableArray();
     this.cloneDestinationImplicit = ko.computed(() => {
       const defaultText = 'destination folder';
       if (!this.cloneUrl()) return defaultText;
@@ -31,7 +55,26 @@ class PathViewModel {
     });
     this.cloneDestination = ko.observable();
     this.repository = ko.observable();
+    this.expandIcon = ko.observable();
     this.isRecursiveSubmodule = ko.observable(true);
+    this.showCreateRepoKey = `${showCreateRepoKey}-${this.repoPath()}`;
+    const storageValue = storage.getItem(this.showCreateRepoKey);
+    this.isShowCreateRepo = ko.observable(storageValue && storageValue === 'false' ? false : true);
+    this.updateShowCreateRepoMetadata();
+  }
+
+  toggleShowCreateRepo() {
+    this.isShowCreateRepo(!this.isShowCreateRepo());
+    storage.setItem(this.showCreateRepoKey, this.isShowCreateRepo() ? 'true' : 'false');
+    this.updateShowCreateRepoMetadata();
+  }
+
+  updateShowCreateRepoMetadata() {
+    if (this.isShowCreateRepo()) {
+      this.expandIcon(octicons['chevron-right'].toSVG({ height: 28 }));
+    } else {
+      this.expandIcon(octicons['chevron-down'].toSVG({ height: 35 }));
+    }
   }
 
   updateNode(parentElement) {
@@ -58,6 +101,11 @@ class PathViewModel {
             this.repository(components.create('repository', { server: this.server, path: this }));
           }
         } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+          if (status.subRepos && status.subRepos.length > 0) {
+            this.subRepos(
+              status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
+            );
+          }
           this.status(status.type);
           this.repository(null);
         }

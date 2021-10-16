@@ -880,7 +880,32 @@ exports.registerApi = (env) => {
       .then(() => {
         return gitPromise.revParse(req.query.path);
       })
-      .catch(() => {
+      .then((revParseRes) => {
+        if (revParseRes.type !== 'uninited') {
+          return revParseRes;
+        }
+
+        // for uninited directory, let's check if it's any immediate directories are
+        // git repository so we can display them.
+        return fs
+          .readdir(req.query.path)
+          .then((filePaths) => {
+            return Promise.all(
+              filePaths
+                .filter((filePath) => !filePath.startsWith('.'))
+                .map((filePath) => gitPromise.revParse(path.join(req.query.path, filePath)))
+            );
+          })
+          .then((pathRevParses) => {
+            revParseRes.subRepos = pathRevParses
+              .filter(
+                (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'
+              )
+              .map((pathRevParse) => pathRevParse.gitRootPath);
+            return revParseRes;
+          });
+      })
+      .catch((e) => {
         return { type: 'no-such-path', gitRootPath: req.query.path };
       });
     jsonResultOrFailProm(res, task);
