@@ -6,7 +6,6 @@ const winston = require('winston');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
-const pLimit = require('p-limit')(config.maxConcurrentGitOperations);
 const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitEmptyReproSha256 = '6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321'; // https://stackoverflow.com/q/9765453
@@ -37,6 +36,18 @@ const isRetryableError = (err) => {
   if (errMsg.indexOf('index file open failed: Permission denied') > -1) return true;
   return false;
 };
+
+let pLimit = (fn) => {
+  try {
+    return Promise.resolve(fn());
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+// eslint-disable-next-line node/no-unsupported-features/es-syntax
+import('p-limit').then((limit) => {
+  pLimit = limit.default(config.maxConcurrentGitOperations);
+});
 
 const gitExecutorProm = (args, retryCount) => {
   let timeoutTimer;
