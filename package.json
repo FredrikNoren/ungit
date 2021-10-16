@@ -55,7 +55,7 @@
     "nprogress": "~0.2.0",
     "open": "~8.3.0",
     "passport": "~0.5.0",
-    "p-limit": "^4.0.0",
+    "p-limit": "~4.0.0",
     "passport-local": "~1.0.0",
     "raven-js": "~3.27.2",
     "rc": "~1.2.8",
