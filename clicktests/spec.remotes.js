@@ -95,9 +95,8 @@ describe('[REMOTES]', () => {
   it('Check for fetching remote branches for the branch list', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('.options input');
-    await environment.wait(1000);
     try {
-      await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 2000 });
+      await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 3000 });
     } catch (err) {
       await environment.click('.options input');
       await environment.waitForElementVisible('li .octicon-globe');

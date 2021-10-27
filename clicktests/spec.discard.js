@@ -3,6 +3,7 @@ const muteGraceTimeDuration = 3000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
   await env.waitForElementVisible('.files .file .btn-default');
+  await env.wait(1000);
   await env.click('.files button.discard');
 
   if (dialogButtonToClick === 'yes') {
@@ -73,7 +74,6 @@ describe('[DISCARD - withWarn]', () => {
   it('Should be possible to discard a created file and disable warn for awhile', async () => {
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
     await createAndDiscard(environment, testRepoPaths[0]);
-    await environment.wait(2000);
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });

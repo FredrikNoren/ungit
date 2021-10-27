@@ -243,8 +243,8 @@ class Environment {
     await this.wait(1000);
   }
 
-  waitForElementVisible(selector) {
-    return this.page.waitForSelector(selector, { visible: true });
+  waitForElementVisible(selector, timeout) {
+    return this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
   }
   waitForElementHidden(selector) {
     return this.page.waitForSelector(selector, { hidden: true });
@@ -270,14 +270,9 @@ class Environment {
     let elementHandle = await this.waitForElementVisible(selector);
     try {
       await elementHandle.click({ clickCount: clickCount });
-    } catch (err1) {
-      elementHandle = await this.waitForElementVisible(selector);
-      try {
-        await elementHandle.click({ clickCount: clickCount }); // try click a second time to reduce test flakiness
-      } catch (err2) {
-        winston.error(`Failed to click element: ${selector}`);
-        throw err2;
-      }
+    } catch (err) {
+      winston.error(`Failed to click element: ${selector}`);
+      throw err;
     }
   }
 
