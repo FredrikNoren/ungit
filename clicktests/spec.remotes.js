@@ -95,6 +95,7 @@ describe('[REMOTES]', () => {
   it('Check for fetching remote branches for the branch list', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('.options input');
+    await environment.wait(1000);
     try {
       await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 3000 });
     } catch (err) {
@@ -106,6 +107,7 @@ describe('[REMOTES]', () => {
   it('checkout remote branches with matching local branch at wrong place', async () => {
     await environment.moveRef('branchinclone', 'Init Commit 1');
     await environment.click('.branch .dropdown-toggle');
+    await environment.wait(1000);
     await environment.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]');
     await environment.waitForElementVisible('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });

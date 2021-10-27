@@ -15,6 +15,7 @@ describe('[BRANCHES]', () => {
 
   it('add a commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.wait(1000);
     await environment.commit('commit-1');
   });
 
