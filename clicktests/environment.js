@@ -286,6 +286,7 @@ class Environment {
 
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
+    await this.wait(500);
     await this.insert('.ref-icons.new-ref.editing input', name);
     await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
     await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
