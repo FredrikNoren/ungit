@@ -318,6 +318,7 @@ class Environment {
 
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
+    await this.wait(500);
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );

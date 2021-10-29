@@ -142,6 +142,8 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('.files .file .additions');
     await environment.waitForElementVisible('.files .file .deletions');
 
+    await environment.wait(500);
+
     await environment.click('.files button.discard');
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
