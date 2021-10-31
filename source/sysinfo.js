@@ -1,7 +1,7 @@
 const getMac = require('getmac').default;
 const md5 = require('blueimp-md5');
 const semver = require('semver');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const config = require('./config');
 
 exports.getUngitLatestVersion = () => {
@@ -16,7 +16,7 @@ exports.getUserHash = () => {
   try {
     addr = getMac();
   } catch (err) {
-    winston.error('attempt to get mac addr failed, using fake mac.', err);
+    logger.error('attempt to get mac addr failed, using fake mac.', err);
     addr = 'abcde';
   }
   return md5(addr);

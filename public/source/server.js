@@ -4,8 +4,8 @@ var rootPath = (ungit.config && ungit.config.rootPath) || '';
 var nprogress;
 if (ungit.config.isDisableProgressBar) {
   nprogress = {
-    start: () => {},
-    done: () => {},
+    start: () => { },
+    done: () => { },
   };
 } else {
   nprogress = require('nprogress');
@@ -31,7 +31,7 @@ Server.prototype.initSocket = function () {
   this.socket.on('connect_error', function (err) {
     self._isConnected(function (connected) {
       if (connected) throw err;
-      else self._onDisconnect();
+      else self._onDisconnect(err);
     });
   });
   this.socket.on('disconnect', function () {
@@ -99,9 +99,11 @@ Server.prototype._isConnected = function (callback) {
     callback(!err && res);
   });
 };
-Server.prototype._onDisconnect = function () {
+Server.prototype._onDisconnect = function (err) {
   if (!this.isUnloading) {
-    programEvents.dispatch({ event: 'disconnected' });
+    const stacktrace = Error().stack;
+    console.warn('disconnecting...', err, stacktrace);
+    programEvents.dispatch({ event: 'disconnected', stacktrace: stacktrace, error: err });
   }
 };
 Server.prototype._getCredentials = function (callback, args) {
@@ -135,7 +137,7 @@ Server.prototype.queryPromise = function (method, path, body) {
             if (connected) {
               reject({ errorCode: 'cross-domain-error', error: error });
             } else {
-              self._onDisconnect();
+              self._onDisconnect(error);
               resolve();
             }
           });
@@ -178,6 +180,8 @@ Server.prototype.putPromise = function (url, arg) {
 };
 
 Server.prototype.unhandledRejection = function (err) {
+  const stacktrace = Error().stack;
+
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res && err.res.body && err.res.body.isGitError) {
     programEvents.dispatch({
@@ -188,12 +192,13 @@ Server.prototype.unhandledRejection = function (err) {
         stdout: err.res.body.stdout,
         stderr: err.res.body.stderr,
         repoPath: err.res.body.workingDirectory,
+        stacktrace: stacktrace,
       },
     });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error('Unhandled Promise ERROR: ', err);
-    programEvents.dispatch({ event: 'git-crash-error' });
+    console.error('Unhandled Promise ERROR: ', err, stacktrace);
+    programEvents.dispatch({ event: 'git-crash-error', error: err, stacktrace: stacktrace });
     Raven.captureException(err);
   }
 };

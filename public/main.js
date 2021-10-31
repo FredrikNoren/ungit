@@ -3,7 +3,6 @@ var startLaunchTime = Date.now();
 var child_process = require('child_process');
 var path = require('path');
 // eslint-disable-next-line no-unused-vars -- Imported for side effects
-var winston = require('../source/utils/winston');
 const { encodePath } = require('../source/address-parser');
 var config = require('../source/config');
 var BugTracker = require('../source/bugtracker');

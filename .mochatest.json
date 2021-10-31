@@ -1,6 +1,6 @@
 {
   "spec": "test/spec.*.js",
-  "file": "./source/utils/winston.js",
+  "file": "./source/utils/logger.js",
   "timeout": 5000,
   "exit": true
 }

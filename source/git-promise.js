@@ -2,7 +2,7 @@ const child_process = require('child_process');
 const gitParser = require('./git-parser');
 const path = require('path');
 const config = require('./config');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
@@ -54,7 +54,7 @@ const gitExecutorProm = (args, retryCount) => {
   return pLimit(() => {
     return new Promise((resolve, reject) => {
       if (config.logGitCommands)
-        winston.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
+        logger.info(`git executing: ${args.repoPath} ${args.commands.join(' ')}`);
       let rejectedError = null;
       let stdout = '';
       let stderr = '';
@@ -71,7 +71,7 @@ const gitExecutorProm = (args, retryCount) => {
         if (!timeoutTimer) return;
         timeoutTimer = null;
 
-        winston.warn(`command timedout: ${args.commands.join(' ')}\n`);
+        logger.warn(`command timedout: ${args.commands.join(' ')}\n`);
         gitProcess.kill('SIGINT');
       }, args.timeout);
 
@@ -88,7 +88,7 @@ const gitExecutorProm = (args, retryCount) => {
 
       gitProcess.on('close', (code) => {
         if (config.logGitCommands)
-          winston.info(
+          logger.info(
             `git result (first 400 bytes): ${args.commands.join(' ')}\n${stderr.slice(
               0,
               400
@@ -107,7 +107,7 @@ const gitExecutorProm = (args, retryCount) => {
     .catch((err) => {
       if (retryCount > 0 && isRetryableError(err)) {
         return new Promise((resolve) => {
-          winston.warn(
+          logger.warn(
             'retrying git commands after lock acquired fail. (If persists, lower "maxConcurrentGitOperations")'
           );
           // sleep random amount between 250 ~ 750 ms
@@ -232,8 +232,8 @@ git.status = (repoPath, file) => {
     // 1: numStatsUnstaged
     config.isEnableNumStat
       ? git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', file || ''], repoPath).then(
-          gitParser.parseGitStatusNumstat
-        )
+        gitParser.parseGitStatusNumstat
+      )
       : {},
     // 2: status
     git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', file || ''], repoPath)

@@ -1,5 +1,5 @@
 'use strict';
-const winston = require('../source/utils/winston');
+const logger = require('../source/utils/logger');
 const child_process = require('child_process');
 const puppeteer = require('puppeteer');
 const net = require('net');
@@ -67,8 +67,6 @@ class Environment {
     this.config.headless = this.config.headless === undefined ? true : this.config.headless;
     this.config.viewWidth = 1920;
     this.config.viewHeight = 1080;
-    this.config.showServerOutput =
-      this.config.showServerOutput === undefined ? true : this.config.showServerOutput;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
     this.shuttinDown = false;
   }
@@ -110,13 +108,13 @@ class Environment {
       await this.getPort();
       await this.startServer();
     } catch (err) {
-      winston.error(err);
+      logger.error(err);
       throw new Error('Cannot confirm ungit start!!\n' + err);
     }
   }
 
   startServer() {
-    winston.info('Starting ungit server...', this.config.serverStartupOptions);
+    logger.info('Starting ungit server...', this.config.serverStartupOptions);
 
     this.hasStarted = false;
     const options = [
@@ -140,10 +138,10 @@ class Environment {
     return new Promise((resolve, reject) => {
       ungitServer.stdout.on('data', (stdout) => {
         const stdoutStr = stdout.toString();
-        if (this.config.showServerOutput) winston.verbose(prependLines('[server] ', stdoutStr));
+        logger.debug(prependLines('[server] ', stdoutStr));
 
         if (stdoutStr.indexOf('Ungit server already running') >= 0) {
-          winston.info('server-already-running');
+          logger.info('server-already-running');
         }
 
         if (stdoutStr.indexOf('## Ungit started ##') >= 0) {
@@ -151,21 +149,21 @@ class Environment {
             reject(new Error('Ungit started twice, probably crashed.'));
           } else {
             this.hasStarted = true;
-            winston.info('Ungit server started.');
+            logger.info('Ungit server started.');
             resolve();
           }
         }
       });
       ungitServer.stderr.on('data', (stderr) => {
         const stderrStr = stderr.toString();
-        winston.error(prependLines('[server ERROR] ', stderrStr));
+        logger.error(prependLines('[server ERROR] ', stderrStr));
         if (stderrStr.indexOf('EADDRINUSE') > -1) {
-          winston.info('retrying with different port');
+          logger.info('retrying with different port');
           ungitServer.kill('SIGINT');
           reject(new Error('EADDRINUSE'));
         }
       });
-      ungitServer.on('exit', () => winston.info('UNGIT SERVER EXITED'));
+      ungitServer.on('exit', () => logger.info('UNGIT SERVER EXITED'));
     });
   }
 
@@ -221,7 +219,7 @@ class Environment {
       await rimraf(options.path);
       await mkdirp(options.path);
     } else {
-      winston.info('Creating temp folder');
+      logger.info('Creating temp folder');
       options.path = await this.createTempFolder();
     }
     await this.backgroundAction('POST', '/api/init', options);
@@ -255,7 +253,7 @@ class Environment {
   // browser helpers
 
   async goto(url) {
-    winston.info('Go to page: ' + url);
+    logger.info('Go to page: ' + url);
 
     if (!this.page) {
       const pages = await this.browser.pages();
@@ -265,9 +263,9 @@ class Environment {
         const text = `[ui ${message.type()}] ${new Date().toISOString()}  - ${message.text()}}`;
 
         if (message.type() === 'error' && !this.shuttinDown) {
-          winston.error(text);
+          logger.error(text);
         } else {
-          winston.info(text);
+          logger.info(text);
         }
       });
     }
@@ -314,7 +312,7 @@ class Environment {
         await this.wait(500);
       }
     }
-    winston.error(`Failed to click element: "${selector}"`);
+    logger.error(`Failed to click element: "${selector}"`);
     throw new Error('Failed to click');
   }
 

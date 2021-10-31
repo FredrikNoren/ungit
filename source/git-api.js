@@ -1,7 +1,7 @@
 const path = require('path');
 const temp = require('temp');
 const gitParser = require('./git-parser');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const os = require('os');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
@@ -61,12 +61,12 @@ exports.registerApi = (env) => {
 
   const watchPath = (socket, subfolderPath, options) => {
     const pathToWatch = path.join(socket.watcherPath, subfolderPath);
-    winston.info(`Start watching ${pathToWatch}`);
+    logger.info(`Start watching ${pathToWatch}`);
     return fs
       .access(pathToWatch)
       .catch(() => {
         // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
-        winston.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
+        logger.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
         return mkdirp(pathToWatch);
       })
       .then(() => {
@@ -74,15 +74,15 @@ exports.registerApi = (env) => {
         watcher.on('change', (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
-          winston.debug(`File change: ${filePath}`);
+          logger.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
-            winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
+            logger.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
             emitGitDirectoryChanged(socket.watcherPath);
             emitWorkingTreeChanged(socket.watcherPath);
           }
         });
         watcher.on('error', (err) => {
-          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
+          logger.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
         });
         socket.watcher.push(watcher);
       });
@@ -92,7 +92,7 @@ exports.registerApi = (env) => {
     socket.leave(socket.watcherPath);
     socket.ignore = undefined;
     (socket.watcher || []).forEach((watcher) => watcher.close());
-    winston.info(`Stop watching ${socket.watcherPath}`);
+    logger.info(`Stop watching ${socket.watcherPath}`);
   };
 
   // The .git dir changes on for instance 'git status', so we
@@ -141,7 +141,7 @@ exports.registerApi = (env) => {
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
-        winston.info('emitting working-tree-changed to sockets, manually triggered');
+        logger.info('emitting working-tree-changed to sockets, manually triggered');
       }
     },
     500,
@@ -151,7 +151,7 @@ exports.registerApi = (env) => {
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
-        winston.info('emitting git-directory-changed to sockets, manually triggered');
+        logger.info('emitting git-directory-changed to sockets, manually triggered');
       }
     },
     500,
@@ -179,7 +179,7 @@ exports.registerApi = (env) => {
         res.json(result || {});
       })
       .catch((err) => {
-        winston.warn('Responding with ERROR: ', JSON.stringify(err));
+        logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
@@ -450,7 +450,7 @@ exports.registerApi = (env) => {
                 commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
                 repoPath: req.query.path,
                 timeout: tenMinTimeoutMs,
-              }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
+              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
             });
           }, Promise.resolve());
         })
@@ -761,7 +761,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      winston.info('resolve conflicts');
+      logger.info('resolve conflicts');
       jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files)).then(
         emitWorkingTreeChanged.bind(null, req.body.path)
       );
@@ -952,7 +952,7 @@ exports.registerApi = (env) => {
     // this endpoint can only be invoked from localhost, since the credentials-helper is always
     // on the same machine that we're running ungit on
     if (req.ip != '127.0.0.1' && req.ip != '::ffff:127.0.0.1') {
-      winston.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
+      logger.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
@@ -961,7 +961,7 @@ exports.registerApi = (env) => {
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
-      winston.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
+      logger.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
       res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', (data) => res.json(data));
@@ -1012,17 +1012,21 @@ exports.registerApi = (env) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
       fs.writeFile(req.body.file, content)
         .then(() => res.json({}))
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
       fs.writeFile(req.body.file, content)
         .then(() => res.json({}))
-        .then(emitWorkingTreeChanged.bind(null, req.body.path));
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path))
+        .then(emitGitDirectoryChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
       fs.writeFile(req.body.file, 'png', { encoding: 'binary' })
         .then(() => res.json({}))
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
@@ -1033,16 +1037,17 @@ exports.registerApi = (env) => {
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
       fs.unlink(req.body.file)
         .then(() => res.json({}))
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.path)).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.path))
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
-        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+        logger.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });
     });

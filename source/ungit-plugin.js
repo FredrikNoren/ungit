@@ -2,7 +2,7 @@ const fsSync = require('fs');
 const fs = fsSync.promises;
 const path = require('path');
 const express = require('express');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const config = require('./config');
 
 const assureArray = (obj) => {
@@ -40,7 +40,7 @@ class UngitPlugin {
   }
 
   compile() {
-    winston.info(`Compiling plugin ${this.path}`);
+    logger.info(`Compiling plugin ${this.path}`);
     const exports = this.manifest.exports || {};
 
     return Promise.resolve()

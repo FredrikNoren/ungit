@@ -138,6 +138,7 @@ describe('[GENERIC]', () => {
     await environment.wait(500);
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.wait(500);
     await environment.insert('.staging input.form-control', 'My commit message');
     await environment.click('.commit-btn');
     await environment.waitForElementHidden('.files .file .btn-default');

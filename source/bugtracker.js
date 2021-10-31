@@ -1,6 +1,6 @@
 'use strict';
 
-const winston = require('winston');
+const logger = require('./utils/logger');
 const sysinfo = require('./sysinfo');
 const config = require('./config');
 const raven = require('raven-js');
@@ -16,7 +16,7 @@ class BugTracker {
     this.appVersion = 'unknown';
     this.userHash = sysinfo.getUserHash();
     this.appVersion = config.ungitDevVersion;
-    winston.info(`BugTracker set version: ${this.appVersion}`);
+    logger.info(`BugTracker set version: ${this.appVersion}`);
   }
   notify(exception, clientName) {
     if (!config.bugtracking) return;

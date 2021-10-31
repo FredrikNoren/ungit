@@ -56,12 +56,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => {},
+            results: () => { },
           },
         })
         .data('ui-autocomplete')._renderItem = function (ul, item) {
-        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-      };
+          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+        };
     };
 
     const handleKeyEvent = (event) => {
@@ -160,11 +160,11 @@ exports.start = function () {
   server = new Server();
   appContainer = new AppContainerViewModel();
   app = components.create('app', { appContainer: appContainer, server: server });
-  programEvents.add(function (event) {
+  programEvents.add(async (event) => {
     if (event.event == 'disconnected' || event.event == 'git-crash-error') {
-      console.error(`ungit crash: ${event.event}`, event.error);
+      console.error(`ungit crash: ${event.event}`, event.error, event.stacktrace);
       const err =
-        event.event == 'disconnected' && adBlocker.isDetected() ? 'adblocker' : event.event;
+        event.event == 'disconnected' && await adBlocker.detectAnyAdblocker() ? 'adblocker' : event.event;
       appContainer.content(components.create('crash', err));
       windowTitle.crash = true;
       windowTitle.update();

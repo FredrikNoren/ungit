@@ -3,7 +3,6 @@
 const startLaunchTime = Date.now();
 
 // eslint-disable-next-line no-unused-vars -- Imported for side effects
-const winston = require('../source/utils/winston');
 const config = require('../source/config');
 const open = require('open');
 const path = require('path');
