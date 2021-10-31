@@ -268,6 +268,7 @@ class Environment {
 
   async click(selector, clickCount) {
     let elementHandle = await this.waitForElementVisible(selector);
+    await this.wait(250);
     try {
       await elementHandle.click({ clickCount: clickCount });
     } catch (err) {
