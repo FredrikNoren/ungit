@@ -267,9 +267,9 @@ class Environment {
   }
 
   async click(selector, clickCount) {
-    let elementHandle = await this.waitForElementVisible(selector);
+    const elementHandle = await this.waitForElementVisible(selector);
     try {
-      await elementHandle.click({ clickCount: clickCount });
+      await elementHandle.click({ delay: 100, clickCount: clickCount });
       await this.wait(250);
     } catch (err) {
       winston.error(`Failed to click element: ${selector}`);
@@ -320,7 +320,7 @@ class Environment {
 
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
-    await this.wait(500);
+    await this.wait(1000);
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );

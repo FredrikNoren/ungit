@@ -201,7 +201,7 @@ describe('[GENERIC]', () => {
     await environment.wait(500);
     await environment.createBranch('movebranch');
     await environment.waitForElementVisible('[data-ta-name="movebranch"]');
-    await environment.wait(250);
+    await environment.wait(500);
     await environment.moveRef('movebranch', 'Init');
   });
 
