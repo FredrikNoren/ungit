@@ -268,9 +268,9 @@ class Environment {
 
   async click(selector, clickCount) {
     let elementHandle = await this.waitForElementVisible(selector);
-    await this.wait(250);
     try {
       await elementHandle.click({ clickCount: clickCount });
+      await this.wait(250);
     } catch (err) {
       winston.error(`Failed to click element: ${selector}`);
       throw err;
