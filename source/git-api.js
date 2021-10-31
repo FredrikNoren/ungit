@@ -38,7 +38,7 @@ exports.registerApi = (env) => {
 
         fs.readFile(path.join(socket.watcherPath, '.gitignore'))
           .then((ignoreContent) => (socket.ignore = ignore().add(ignoreContent.toString())))
-          .catch(() => {})
+          .catch(() => { })
           .then(() => {
             socket.watcher = [];
             return watchPath(socket, '.', { recursive: isMac || isWindows });
@@ -285,7 +285,7 @@ exports.registerApi = (env) => {
           'push',
           req.body.remote,
           (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-            (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
+          (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
           req.body.force ? '-f' : '',
         ]),
         repoPath: req.body.path,
@@ -610,7 +610,7 @@ exports.registerApi = (env) => {
         `:refs/tags/${req.query.name.trim()}`,
       ]);
       const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-        .catch(() => {}) // might have already deleted, so ignoring error
+        .catch(() => { }) // might have already deleted, so ignoring error
         .then(() => gitPromise(commands, req.query.path));
 
       jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));

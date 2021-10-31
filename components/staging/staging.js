@@ -278,6 +278,7 @@ class StagingViewModel {
       })
       .then(() => {
         this.resetMessages();
+        programEvents.dispatch({ event: 'branch-updated' });
       })
       .catch((e) => this.server.unhandledRejection(e));
   }

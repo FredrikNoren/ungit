@@ -12,6 +12,44 @@ const portrange = 45032;
 
 module.exports = (config) => new Environment(config);
 
+/**
+ * Code adopted from
+ * https://github.com/puppeteer/puppeteer/issues/4356#issuecomment-487330171
+ */
+/** Internal method to determine if an elementHandle is visible on the page. */
+const _isVisible = async (page, elementHandle) => await page.evaluate((el) => {
+  if (!el || el.offsetParent === null) {
+    return false;
+  }
+
+  const style = window.getComputedStyle(el);
+  return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+}, elementHandle);
+
+/**
+ * Checks if an element with selector exists in DOM and is visible.
+ * @param {*} page
+ * @param {*} selector CSS Selector.
+ * @param {*} timeout amount of time to wait for existence and visible.
+ */
+const waitForVisible = async (page, selector, timeout = 25) => {
+  const startTime = new Date();
+  await page.waitForSelector(selector, { timeout: timeout });
+  // Keep looking for the first visible element matching selector until timeout
+  while (true) {
+    const els = await page.$$(selector);
+    for (const el of els) {
+      if (await _isVisible(page, el)) {
+        return el;
+      }
+    }
+    if (new Date() - startTime > timeout) {
+      throw new Error(`Timeout after ${timeout}ms`);
+    }
+    page.waitForTimeout(50);
+  }
+};
+
 const prependLines = (pre, text) => {
   return text
     .split('\n')
@@ -244,10 +282,10 @@ class Environment {
   }
 
   waitForElementVisible(selector, timeout) {
-    return this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
+    return waitForVisible(this.page, selector, timeout || 6000);
   }
-  waitForElementHidden(selector) {
-    return this.page.waitForSelector(selector, { hidden: true });
+  waitForElementHidden(selector, timeout) {
+    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000 });
   }
   wait(duration) {
     return this.page.waitForTimeout(duration);
@@ -267,21 +305,24 @@ class Environment {
   }
 
   async click(selector, clickCount) {
-    const elementHandle = await this.waitForElementVisible(selector);
-    try {
-      await elementHandle.click({ delay: 100, clickCount: clickCount });
-      await this.wait(250);
-    } catch (err) {
-      winston.error(`Failed to click element: ${selector}`);
-      throw err;
+    for (let i = 0; i < 5; i++) {
+      try {
+        const elementHandle = await this.waitForElementVisible(selector);
+        return await elementHandle.click({ clickCount: clickCount });
+      } catch (e) {
+        console.warn(`puppeteer\'s click for "${selector}"" is not ready...`, e);
+        await this.wait(500);
+      }
     }
+    winston.error(`Failed to click element: "${selector}"`);
+    throw new Error('Failed to click');
   }
 
   async commit(commitMessage) {
     await this.waitForElementVisible('.files .file .btn-default');
     await this.insert('.staging input.form-control', commitMessage);
     await this.click('.commit-btn');
-    await this.waitForElementHidden('.files .file .btn-default');
+    await this.waitForElementHidden('.files .file .btn-default', 10000);
     await this.wait(1000);
   }
 
@@ -305,11 +346,12 @@ class Environment {
         visible: true,
         timeout: 2000,
       });
+      await this.wait(500);
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
     }
-    await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
+    await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`, 6000);
   }
 
   async refAction(ref, local, action) {
@@ -317,7 +359,7 @@ class Environment {
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
   }
-
+  // <button class="btn btn-default btn-primary" type="button" data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: click" data-ta-action="yes">Yes</button>
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
     await this.wait(1000);

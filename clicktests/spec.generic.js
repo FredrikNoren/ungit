@@ -103,9 +103,11 @@ describe('[GENERIC]', () => {
   it('Should be possible to discard a created file and ensure patching is not available for new file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.wait(500);
     await environment.click('.files button');
     await environment.waitForElementHidden('[data-ta-container="patch-file"]');
     await environment.click('.files button.discard');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
@@ -118,6 +120,7 @@ describe('[GENERIC]', () => {
     await environment.createBranch('willbedeleted');
     await environment.click('.branch[data-ta-name="willbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
@@ -126,11 +129,13 @@ describe('[GENERIC]', () => {
     await environment.createTag('tagwillbedeleted');
     await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
   it('Commit changes to a file', async () => {
+    await environment.wait(500);
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.insert('.staging input.form-control', 'My commit message');
@@ -139,13 +144,13 @@ describe('[GENERIC]', () => {
   });
 
   it('Show stats for changed file and discard it', async () => {
+    await environment.wait(500);
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .additions');
     await environment.waitForElementVisible('.files .file .deletions');
-
     await environment.wait(500);
-
     await environment.click('.files button.discard');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
