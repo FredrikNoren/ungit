@@ -4,8 +4,8 @@ var rootPath = (ungit.config && ungit.config.rootPath) || '';
 var nprogress;
 if (ungit.config.isDisableProgressBar) {
   nprogress = {
-    start: () => { },
-    done: () => { },
+    start: () => {},
+    done: () => {},
   };
 } else {
   nprogress = require('nprogress');

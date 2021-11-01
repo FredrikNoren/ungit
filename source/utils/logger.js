@@ -1,4 +1,5 @@
 const winston = require('winston');
+const path = require('path');
 const config = require('../config');
 
 const transports = [new winston.transports.Console()];
@@ -29,7 +30,7 @@ const logger = winston.createLogger({
       return `${info.timestamp} - ${info.level}: ${info.message}`;
     })
   ),
-  transports: transports
+  transports: transports,
 });
 
 module.exports = logger;

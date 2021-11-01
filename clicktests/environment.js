@@ -17,14 +17,17 @@ module.exports = (config) => new Environment(config);
  * https://github.com/puppeteer/puppeteer/issues/4356#issuecomment-487330171
  */
 /** Internal method to determine if an elementHandle is visible on the page. */
-const _isVisible = async (page, elementHandle) => await page.evaluate((el) => {
-  if (!el || el.offsetParent === null) {
-    return false;
-  }
+const _isVisible = async (page, elementHandle) =>
+  await page.evaluate((el) => {
+    if (!el || el.offsetParent === null) {
+      return false;
+    }
 
-  const style = window.getComputedStyle(el);
-  return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-}, elementHandle);
+    const style = window.getComputedStyle(el);
+    return (
+      style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
+    );
+  }, elementHandle);
 
 /**
  * Checks if an element with selector exists in DOM and is visible.
@@ -36,7 +39,7 @@ const waitForVisible = async (page, selector, timeout = 25) => {
   const startTime = new Date();
   await page.waitForSelector(selector, { timeout: timeout });
   // Keep looking for the first visible element matching selector until timeout
-  while (true) {
+  for (;;) {
     const els = await page.$$(selector);
     for (const el of els) {
       if (await _isVisible(page, el)) {
@@ -280,10 +283,12 @@ class Environment {
   }
 
   waitForElementVisible(selector, timeout) {
-    return waitForVisible(this.page, selector, timeout || 6000);
+    logger.debug(`Waiting for visible: "${selector}"`);
+    return waitForVisible(this.page, selector, timeout || 10000);
   }
   waitForElementHidden(selector, timeout) {
-    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000 });
+    logger.debug(`Waiting for hidden: "${selector}"`);
+    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 10000 });
   }
   wait(duration) {
     return this.page.waitForTimeout(duration);
@@ -303,14 +308,12 @@ class Environment {
   }
 
   async click(selector, clickCount) {
-    for (let i = 0; i < 5; i++) {
-      try {
-        const elementHandle = await this.waitForElementVisible(selector);
-        return await elementHandle.click({ clickCount: clickCount });
-      } catch (e) {
-        console.warn(`puppeteer\'s click for "${selector}"" is not ready...`, e);
-        await this.wait(500);
-      }
+    try {
+      const elementHandle = await this.waitForElementVisible(selector);
+      return await elementHandle.click({ clickCount: clickCount });
+    } catch (e) {
+      console.warn(`puppeteer's click for "${selector}"" is not ready...`, e);
+      await this.wait(500);
     }
     logger.error(`Failed to click element: "${selector}"`);
     throw new Error('Failed to click');
@@ -349,7 +352,7 @@ class Environment {
     } catch (err) {
       /* ignore */
     }
-    await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`, 6000);
+    await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
   }
 
   async refAction(ref, local, action) {

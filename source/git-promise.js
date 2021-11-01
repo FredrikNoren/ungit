@@ -232,8 +232,8 @@ git.status = (repoPath, file) => {
     // 1: numStatsUnstaged
     config.isEnableNumStat
       ? git([gitOptionalLocks, 'diff', '--numstat', '-z', '--', file || ''], repoPath).then(
-        gitParser.parseGitStatusNumstat
-      )
+          gitParser.parseGitStatusNumstat
+        )
       : {},
     // 2: status
     git([gitOptionalLocks, 'status', '-s', '-b', '-u', '-z', file || ''], repoPath)

@@ -82,7 +82,7 @@ if (config.allowedIPs) {
         .status(403)
         .send(
           '<h3>This host is not authorized to connect</h3>' +
-          '<p>You are trying to connect to an Ungit instance from an unauthorized host.</p>'
+            '<p>You are trying to connect to an Ungit instance from an unauthorized host.</p>'
         );
       logger.warn(`Host trying but not authorized to connect: ${ip}`);
     }
@@ -104,7 +104,9 @@ if (config.autoShutdownTimeout) {
   const refreshAutoShutdownTimeout = () => {
     if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
     autoShutdownTimeout = setTimeout(() => {
-      logger.info(`Shutting down ungit due to inactivity. (autoShutdownTimeout is set to ${config.autoShutdownTimeout} ms`);
+      logger.info(
+        `Shutting down ungit due to inactivity. (autoShutdownTimeout is set to ${config.autoShutdownTimeout} ms`
+      );
       process.exit(0);
     }, config.autoShutdownTimeout);
   };

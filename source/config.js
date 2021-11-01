@@ -9,7 +9,7 @@ const child_process = require('child_process');
 const process = require('process');
 const semver = require('semver');
 
-const isTestRun = process.argv.filter(arg => arg.indexOf('mocha') >= 0).length >= 0;
+const isTestRun = process.argv.filter((arg) => arg.indexOf('mocha') >= 0).length > 0;
 
 const defaultConfig = {
   // The port ungit is exposed on.

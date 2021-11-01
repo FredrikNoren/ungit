@@ -17,7 +17,7 @@ const testForBranchMove = async (branch, command) => {
       const newLoc = document.querySelector(branch).getBoundingClientRect();
       return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
     },
-    {},
+    { timeout: 6000 },
     branch,
     JSON.parse(branchTagLoc)
   );
@@ -62,17 +62,17 @@ describe('[COMMANDS]', () => {
 
   it('test branch delete from command line', async () => {
     await gitCommand({ command: ['branch', '-D', 'gitCommandBranch'], path: testRepoPaths[0] });
-    await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]');
+    await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]', 10000);
   });
 
   it('test tag create from command line', async () => {
     await gitCommand({ command: ['tag', 'tag1'], path: testRepoPaths[0] });
-    await environment.waitForElementVisible('[data-ta-name="tag1"]');
+    await environment.waitForElementVisible('[data-ta-name="tag1"]', 10000);
   });
 
   it('test tag delete from command line', async () => {
     await gitCommand({ command: ['tag', '-d', 'tag1'], path: testRepoPaths[0] });
-    await environment.waitForElementHidden('[data-ta-name="tag1"]');
+    await environment.waitForElementHidden('[data-ta-name="tag1"]', 10000);
   });
 
   it('test reset from command line', () => {
