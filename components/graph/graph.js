@@ -109,6 +109,7 @@ class GraphViewModel {
   }
 
   loadNodesFromApi() {
+    ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
 
     return this.server
@@ -149,6 +150,7 @@ class GraphViewModel {
         if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
           this.scrolledToEnd();
         }
+        ungit.logger.debug('graph.loadNodesFromApi() finished');
       });
   }
 

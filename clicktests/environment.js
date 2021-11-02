@@ -284,11 +284,11 @@ class Environment {
 
   waitForElementVisible(selector, timeout) {
     logger.debug(`Waiting for visible: "${selector}"`);
-    return waitForVisible(this.page, selector, timeout || 10000);
+    return waitForVisible(this.page, selector, timeout || 6000);
   }
   waitForElementHidden(selector, timeout) {
     logger.debug(`Waiting for hidden: "${selector}"`);
-    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 10000 });
+    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000 });
   }
   wait(duration) {
     return this.page.waitForTimeout(duration);
@@ -308,15 +308,11 @@ class Environment {
   }
 
   async click(selector, clickCount) {
-    try {
-      const elementHandle = await this.waitForElementVisible(selector);
-      return await elementHandle.click({ clickCount: clickCount });
-    } catch (e) {
-      console.warn(`puppeteer's click for "${selector}"" is not ready...`, e);
-      await this.wait(500);
-    }
-    logger.error(`Failed to click element: "${selector}"`);
-    throw new Error('Failed to click');
+    await this.waitForElementVisible(selector);
+    await this.wait(500);
+    return await this.waitForElementVisible(selector).then((elementHandle) =>
+      elementHandle.click({ clickCount: clickCount })
+    );
   }
 
   async commit(commitMessage) {

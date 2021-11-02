@@ -131,6 +131,7 @@ class StagingViewModel {
   }
 
   refreshContent() {
+    ungit.logger.debug('staging.refreshContent() triggered');
     return Promise.all([
       this.server
         .getPromise('/head', { path: this.repoPath(), limit: 1 })
@@ -169,6 +170,7 @@ class StagingViewModel {
                 }
               });
           } else {
+            ungit.logger.debug('staging.refreshContent() status', status);
             this.loadStatus(status);
           }
         })
@@ -177,7 +179,7 @@ class StagingViewModel {
             this.server.unhandledRejection(err);
           }
         }),
-    ]);
+    ]).finally(() => ungit.logger.debug('staging.refreshContent() finished'));
   }
 
   loadStatus(status) {

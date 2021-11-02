@@ -87,6 +87,7 @@ class PathViewModel {
     if (this.repository()) this.repository().updateAnimationFrame(deltaT);
   }
   updateStatus() {
+    ungit.logger.debug('path.updateStatus() triggered');
     return this.server
       .getPromise('/quickstatus', { path: this.repoPath() })
       .then((status) => {
@@ -111,7 +112,8 @@ class PathViewModel {
         }
         return null;
       })
-      .catch((err) => {});
+      .catch((err) => ungit.logger.debug('path.updateStatus() errored', err))
+      .finally(() => ungit.logger.debug('path.updateStatus() finished'));
   }
   initRepository() {
     return this.server

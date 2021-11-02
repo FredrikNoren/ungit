@@ -82,6 +82,7 @@ class StashViewModel {
   }
 
   refresh() {
+    ungit.logger.debug('stash.refresh() triggered');
     this.server
       .getPromise('/stashes', { path: this.repoPath() })
       .then((stashes) => {
@@ -98,7 +99,8 @@ class StashViewModel {
       })
       .catch((err) => {
         if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
-      });
+      })
+      .finally(() => ungit.logger.debug('stash.refresh() finished'));
   }
 
   toggleShowStash() {

@@ -55,6 +55,7 @@ class RemotesViewModel {
 
   fetch(options) {
     if (this.isFetching || !this.currentRemote()) return;
+    ungit.logger.debug('remotes.fetch() triggered');
 
     this.isFetching = true;
     const tagPromise = options.tags
@@ -114,6 +115,7 @@ class RemotesViewModel {
       })
       .finally(() => {
         this.isFetching = false;
+        ungit.logger.debug('remotes.fetch() finished');
       });
   }
 

@@ -57,6 +57,7 @@ class BranchesViewModel {
     }
   }
   updateRefs(forceRemoteFetch) {
+    ungit.logger.debug('branch.updateRefs() triggered');
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
 
     const currentBranchProm = this.server
@@ -117,7 +118,9 @@ class BranchesViewModel {
       })
       .catch((e) => this.server.unhandledRejection(e));
 
-    return Promise.all([currentBranchProm, refsProm]);
+    return Promise.all([currentBranchProm, refsProm]).finally(() =>
+      ungit.logger.debug('branch.updateRefs() finished')
+    );
   }
 
   branchRemove(branch) {

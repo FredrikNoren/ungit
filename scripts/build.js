@@ -62,6 +62,7 @@ const baseDir = path.join(__dirname, '..');
   b.require('moment', { expose: 'moment' });
   b.require('@primer/octicons', { expose: 'octicons' });
   b.require('signals', { expose: 'signals' });
+  b.require('winston', { expose: 'winston' });
   const ungitjsFile = path.join(baseDir, 'public/js/ungit.js');
   const mapFile = path.join(baseDir, 'public/js/ungit.js.map');
   await new Promise((resolve) => {

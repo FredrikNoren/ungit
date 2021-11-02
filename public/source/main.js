@@ -6,6 +6,23 @@ var dndPageScroll = require('dnd-page-scroll');
 require('./bootstrap');
 require('./jquery-ui');
 require('./knockout-bindings');
+const winston = require('winston');
+ungit.logger = winston.createLogger({
+  level: ungit.config.logLevel || 'error',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.colorize(),
+    winston.format.printf((info) => {
+      const splat = info[Symbol.for('splat')];
+      if (splat) {
+        const splatStr = splat.map((arg) => JSON.stringify(arg)).join('\n');
+        return `${info.timestamp} - ${info.level}: ${info.message} ${splatStr}`;
+      }
+      return `${info.timestamp} - ${info.level}: ${info.message}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+});
 var components = require('ungit-components');
 var Server = require('./server');
 var programEvents = require('ungit-program-events');
