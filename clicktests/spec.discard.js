@@ -80,6 +80,7 @@ describe('[DISCARD - withWarn]', () => {
 
   it('Should be possible to discard a created file and disable warn for awhile', async function () {
     this.timeout(12000);
+    environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
     environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0]);

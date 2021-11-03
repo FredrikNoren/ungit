@@ -39,7 +39,9 @@ const waitForVisible = async (page, selector, timeout = 25) => {
   const startTime = new Date();
   await page.waitForSelector(selector, { timeout: timeout });
   // Keep looking for the first visible element matching selector until timeout
+  /* eslint-disable */
   for (; ;) {
+    /* eslint-enable */
     const els = await page.$$(selector);
     for (const el of els) {
       if (await _isVisible(page, el)) {
@@ -101,7 +103,7 @@ class Environment {
   async init() {
     try {
       this.browser = await puppeteer.launch({
-        headless: false, //this.config.headless,
+        headless: this.config.headless,
         defaultViewport: {
           width: this.config.viewWidth,
           height: this.config.viewHeight,
