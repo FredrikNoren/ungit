@@ -1,9 +1,14 @@
 'use strict';
+
+const logger = require('../source/utils/logger');
+
 const muteGraceTimeDuration = 3000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
+  logger.info(`creating "${testRepoPath}" with "${dialogButtonToClick}"`);
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
   await env.waitForElementVisible('.files .file .btn-default');
-  await env.wait(1000);
+
+  logger.info('click discard button');
   await env.click('.files button.discard');
 
   if (dialogButtonToClick === 'yes') {
@@ -16,8 +21,10 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
     await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
   }
 
+  logger.info('waiting for the button to disappear');
+
   if (dialogButtonToClick !== 'no') {
-    await env.waitForElementHidden('.files .file .btn-default');
+    await env.waitForElementHidden('.files .file .btn-default', 100000);
   } else {
     await env.waitForElementVisible('.files .file .btn-default');
   }
@@ -71,9 +78,12 @@ describe('[DISCARD - withWarn]', () => {
     return createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 
-  it('Should be possible to discard a created file and disable warn for awhile', async () => {
+  it('Should be possible to discard a created file and disable warn for awhile', async function () {
+    this.timeout(12000);
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
+    environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0]);
+    environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });

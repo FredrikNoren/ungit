@@ -39,7 +39,7 @@ const waitForVisible = async (page, selector, timeout = 25) => {
   const startTime = new Date();
   await page.waitForSelector(selector, { timeout: timeout });
   // Keep looking for the first visible element matching selector until timeout
-  for (;;) {
+  for (; ;) {
     const els = await page.$$(selector);
     for (const el of els) {
       if (await _isVisible(page, el)) {
@@ -101,7 +101,7 @@ class Environment {
   async init() {
     try {
       this.browser = await puppeteer.launch({
-        headless: this.config.headless,
+        headless: false, //this.config.headless,
         defaultViewport: {
           width: this.config.viewWidth,
           height: this.config.viewHeight,
@@ -308,11 +308,16 @@ class Environment {
   }
 
   async click(selector, clickCount) {
+    logger.info(`clicking "${selector}"`);
     await this.waitForElementVisible(selector);
-    await this.wait(500);
-    return await this.waitForElementVisible(selector).then((elementHandle) =>
-      elementHandle.click({ clickCount: clickCount })
-    );
+    const elementHandle = await this.waitForElementVisible(selector);
+
+    try {
+      await elementHandle.click({ clickCount: clickCount });
+    } catch (err) {
+      logger.error('error while clicking', elementHandle, err);
+      throw err;
+    }
   }
 
   async commit(commitMessage) {

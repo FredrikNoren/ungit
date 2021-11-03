@@ -33,10 +33,8 @@ describe('[BRANCHES]', () => {
     await environment.waitForElementHidden('[data-ta-name="search-4"]');
   });
 
-  it('search for the hidden branch', async function () {
-    // to handle `git-directory-changed` event, which refreshes git nodes and closes search box,
-    // add few retries
-    this.retries(3);
+  it('search for the hidden branch', async () => {
+    await environment.wait(1000); // sleep to avoid `git-directory-changed` event, which refreshes git nodes and closes search box
     await environment.click('.showSearchForm');
 
     await environment.type('-4');
@@ -44,7 +42,7 @@ describe('[BRANCHES]', () => {
     await environment.press('ArrowDown');
     await environment.press('Enter');
 
-    await environment.waitForElementVisible('[data-ta-name="search-4"]');
+    await environment.waitForElementVisible('[data-ta-name="search-4"]', 10000);
   });
 
   it('updateBranches button without branches', async () => {
