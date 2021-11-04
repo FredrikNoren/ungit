@@ -372,4 +372,10 @@ class Environment {
     );
     await this._verifyRefAction('move');
   }
+
+  async moveMouse() {
+    const x = Math.floor(Math.random() * 100) * 10;
+    const y = Math.floor(Math.random() * 100) * 100;
+    await this.page.mouse.move(x, y);
+  }
 }
