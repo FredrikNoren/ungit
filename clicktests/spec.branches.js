@@ -38,8 +38,10 @@ describe('[BRANCHES]', () => {
     await environment.click('.showSearchForm');
 
     await environment.type('-4');
+    await environment.waitForElementVisible('.branch-search');
     await environment.wait(500);
     await environment.press('ArrowDown');
+    await environment.wait(500);
     await environment.press('Enter');
 
     await environment.waitForElementVisible('[data-ta-name="search-4"]', 10000);
