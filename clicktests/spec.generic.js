@@ -145,8 +145,9 @@ describe('[GENERIC]', () => {
   });
 
   it('Show stats for changed file and discard it', async () => {
-    await environment.wait(500);
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.triggerProgramEvents();
+    await environment.wait(1000);
     await environment.waitForElementVisible('.files .file .additions');
     await environment.waitForElementVisible('.files .file .deletions');
     await environment.wait(500);
@@ -204,10 +205,9 @@ describe('[GENERIC]', () => {
   });
 
   it('Should be possible to move a branch', async () => {
-    await environment.wait(500);
     await environment.createBranch('movebranch');
+    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('[data-ta-name="movebranch"]');
-    await environment.wait(500);
     await environment.moveRef('movebranch', 'Init');
   });
 

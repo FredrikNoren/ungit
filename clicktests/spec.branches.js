@@ -34,7 +34,8 @@ describe('[BRANCHES]', () => {
   });
 
   it('search for the hidden branch', async () => {
-    await environment.wait(1000); // sleep to avoid `git-directory-changed` event, which refreshes git nodes and closes search box
+    await environment.stopProgramEventPropagation();
+    await environment.wait(1000);
     await environment.click('.showSearchForm');
 
     await environment.type('-4');
@@ -45,6 +46,7 @@ describe('[BRANCHES]', () => {
     await environment.press('Enter');
 
     await environment.waitForElementVisible('[data-ta-name="search-4"]', 10000);
+    await environment.startProgramEventPropagation();
   });
 
   it('updateBranches button without branches', async () => {
@@ -121,6 +123,8 @@ describe('[BRANCHES]', () => {
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
     await environment.click('.modal-dialog .btn-primary');
+    await environment.triggerProgramEvents();
+    await environment.wait(1000);
     await environment.waitForElementHidden('.staging .files .file');
   });
 

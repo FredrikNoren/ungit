@@ -312,12 +312,11 @@ class Environment {
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
     await this.waitForElementVisible(selector);
-    const elementHandle = await this.waitForElementVisible(selector);
 
     try {
-      await elementHandle.click({ clickCount: clickCount });
+      await this.page.click(selector, { clickCount: clickCount });
     } catch (err) {
-      logger.error('error while clicking', elementHandle, err);
+      logger.error('error while clicking', err);
       throw err;
     }
   }
@@ -373,9 +372,30 @@ class Environment {
     await this._verifyRefAction('move');
   }
 
-  async moveMouse() {
-    const x = Math.floor(Math.random() * 100) * 10;
-    const y = Math.floor(Math.random() * 100) * 100;
-    await this.page.mouse.move(x, y);
+  // Stop program event propagation.
+  // Besure to remember to reenable, otherwise subsquent tests may fail.
+  // Also, many of the events are debounced so may have to wait few seconds
+  // after to completely prevent event propagations.
+  stopProgramEventPropagation() {
+    return this.page.evaluate((_) => {
+      ungit._bindings = ungit.programEvents._bindings;
+      ungit.programEvents._bindings = [];
+    });
+  }
+
+  // Start program event propagtion.
+  startProgramEventPropagation() {
+    return this.page.evaluate((_) => {
+      ungit.programEvents._bindings = ungit._bindings;
+    });
+  }
+
+  // Explicitly trigger two program events.
+  // Usually these events are triggered by mouse movements, or api calls
+  // and etc.  This function is to help mimic those movements.
+  triggerProgramEvents() {
+    return this.page.evaluate((_) => {
+      ungit.programEvents.dispatch({ event: 'working-tree-changed' });
+    });
   }
 }
