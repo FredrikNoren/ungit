@@ -248,11 +248,13 @@ class Environment {
     await this.createCommits(config, limit, x + 1);
   }
 
-  createTestFile(filename, repoPath) {
-    return this.backgroundAction('POST', '/api/testing/createfile', {
+  async createTestFile(filename, repoPath) {
+    await this.backgroundAction('POST', '/api/testing/createfile', {
       file: filename,
       path: repoPath,
     });
+    await this.wait(500);
+    await env.triggerProgramEvents();
   }
 
   // browser helpers
@@ -322,6 +324,7 @@ class Environment {
   }
 
   async commit(commitMessage) {
+    await this.triggerProgramEvents();
     await this.waitForElementVisible('.files .file .btn-default');
     await this.insert('.staging input.form-control', commitMessage);
     await this.click('.commit-btn');

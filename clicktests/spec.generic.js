@@ -22,6 +22,7 @@ const amendCommit = async () => {
     await environment.click('.amend-link');
   }
   await environment.click('.commit-btn');
+  await env.triggerProgramEvents();
   await environment.waitForElementHidden('.files .file .btn-default');
 };
 
@@ -54,9 +55,7 @@ describe('[GENERIC]', () => {
   it('Should be possible to amend a file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
-    await environment.wait(500);
     await amendCommit();
-    await environment.wait(500);
     await environment.waitForElementVisible('.commit');
   });
 
@@ -67,12 +66,11 @@ describe('[GENERIC]', () => {
   });
 
   it('Should be able to add a new file to .gitignore', async () => {
-    await environment.wait(500);
     await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
-    await environment.wait(1000);
+    await environment.wait(500);
     await environment.click('.files button.ignore');
-    await environment.wait(1000);
+    await environment.wait(500);
     await environment.click('.files button.ignore');
     await environment.waitForElementHidden('.files .file .btn-default');
   });

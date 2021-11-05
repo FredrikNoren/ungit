@@ -23,8 +23,9 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
 
   logger.info('waiting for the button to disappear');
 
+  await env.triggerProgramEvents();
   if (dialogButtonToClick !== 'no') {
-    await env.waitForElementHidden('.files .file .btn-default', 100000);
+    await env.waitForElementHidden('.files .file .btn-default');
   } else {
     await env.waitForElementVisible('.files .file .btn-default');
   }

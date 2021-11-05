@@ -15,7 +15,6 @@ describe('[BRANCHES]', () => {
 
   it('add a commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
-    await environment.wait(1000);
     await environment.commit('commit-1');
   });
 
@@ -65,7 +64,6 @@ describe('[BRANCHES]', () => {
 
   it('add second branch', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
-    await environment.wait(500);
     await environment.commit('commit-2');
 
     await environment.createBranch('branch-2');
