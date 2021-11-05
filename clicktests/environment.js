@@ -253,8 +253,6 @@ class Environment {
       file: filename,
       path: repoPath,
     });
-    await this.wait(500);
-    await this.triggerProgramEvents();
   }
 
   // browser helpers

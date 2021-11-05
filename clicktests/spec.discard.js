@@ -6,6 +6,7 @@ const muteGraceTimeDuration = 3000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   logger.info(`creating "${testRepoPath}" with "${dialogButtonToClick}"`);
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
+  await env.triggerProgramEvents();
   await env.waitForElementVisible('.files .file .btn-default');
 
   logger.info('click discard button');

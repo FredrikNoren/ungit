@@ -114,6 +114,7 @@ describe('[REMOTES]', () => {
 
   it('Should be possible to commitnpush', async () => {
     await environment.createTestFile(`${testRepoPaths[2]}/commitnpush.txt`, testRepoPaths[2]);
+    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.insert('.staging input.form-control', 'Commit & Push');
     await environment.click('.commit-grp .dropdown-toggle');

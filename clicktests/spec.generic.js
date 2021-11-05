@@ -16,6 +16,7 @@ const changeTestFile = async (filename, repoPath) => {
 };
 const amendCommit = async () => {
   try {
+    await environment.triggerProgramEvents();
     await environment.page.waitForSelector('.amend-button', { visible: true, timeout: 2000 });
     await environment.click('.amend-button');
   } catch (err) {
@@ -54,6 +55,7 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to amend a file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
+    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('.files .file .btn-default');
     await amendCommit();
     await environment.waitForElementVisible('.commit');
@@ -66,12 +68,15 @@ describe('[GENERIC]', () => {
   });
 
   it('Should be able to add a new file to .gitignore', async () => {
+    await environment.wait(500);
     await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
+    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('.files .file .btn-default');
-    await environment.wait(500);
+    await environment.wait(1000);
     await environment.click('.files button.ignore');
-    await environment.wait(500);
+    await environment.wait(1000);
     await environment.click('.files button.ignore');
+    await environment.triggerProgramEvents();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 

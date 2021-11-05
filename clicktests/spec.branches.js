@@ -127,6 +127,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('test forward squash from different lineage', async () => {
+    await environment.triggerProgramEvents();
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-3"] .squash .dropmask');
     await environment.waitForElementVisible('.staging .files .file');
