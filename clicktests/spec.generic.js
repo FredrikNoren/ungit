@@ -22,7 +22,7 @@ const amendCommit = async () => {
     await environment.click('.amend-link');
   }
   await environment.click('.commit-btn');
-  await env.triggerProgramEvents();
+  await environment.triggerProgramEvents();
   await environment.waitForElementHidden('.files .file .btn-default');
 };
 

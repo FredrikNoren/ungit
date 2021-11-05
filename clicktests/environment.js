@@ -254,7 +254,7 @@ class Environment {
       path: repoPath,
     });
     await this.wait(500);
-    await env.triggerProgramEvents();
+    await this.triggerProgramEvents();
   }
 
   // browser helpers
