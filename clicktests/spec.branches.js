@@ -97,11 +97,13 @@ describe('[BRANCHES]', () => {
 
   it('cherrypick fail case', async () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
+    await environment.wait(500);
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
-
+    await environment.wait(500);
     await environment.click('.staging .btn-stg-abort');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back

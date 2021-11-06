@@ -11,6 +11,8 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
 
   logger.info('click discard button');
   await env.click('.files button.discard');
+  await env.triggerProgramEvents();
+  await env.wait(500);
 
   if (dialogButtonToClick === 'yes') {
     await env.click('.modal-dialog [data-ta-action="yes"]');
@@ -25,6 +27,7 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   logger.info('waiting for the button to disappear');
 
   await env.triggerProgramEvents();
+  await env.wait(500);
   if (dialogButtonToClick !== 'no') {
     await env.waitForElementHidden('.files .file .btn-default');
   } else {
@@ -84,7 +87,7 @@ describe('[DISCARD - withWarn]', () => {
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
     await environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0]);
-    await environment.wait(1000);
+    await environment.wait(1500);
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });
