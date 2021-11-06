@@ -2,7 +2,7 @@
 
 const logger = require('../source/utils/logger');
 
-const muteGraceTimeDuration = 3000;
+const muteGraceTimeDuration = 2000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   logger.info(`creating "${testRepoPath}" with "${dialogButtonToClick}"`);
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
@@ -82,10 +82,8 @@ describe('[DISCARD - withWarn]', () => {
 
   it('Should be possible to discard a created file and disable warn for awhile', async function () {
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
-    await environment.triggerProgramEvents();
     await environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
     await environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });

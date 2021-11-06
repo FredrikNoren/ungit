@@ -120,6 +120,7 @@ describe('[BRANCHES]', () => {
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.triggerProgramEvents();
     await environment.wait(1000);
