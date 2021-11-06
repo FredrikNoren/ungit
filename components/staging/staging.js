@@ -494,7 +494,7 @@ class FileViewModel {
   }
 
   discardChanges() {
-    ungit.logger.debug("discard time since mute: ", new Date().getTime() - this.staging.mutedTime)
+    ungit.logger.debug('discard time since mute: ', new Date().getTime() - this.staging.mutedTime)
     if (
       ungit.config.disableDiscardWarning ||
       new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime
