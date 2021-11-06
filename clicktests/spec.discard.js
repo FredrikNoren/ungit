@@ -84,10 +84,14 @@ describe('[DISCARD - withWarn]', () => {
   });
 
   it('Should be possible to discard a created file and disable warn for awhile', async function () {
+    const start = new Date().getTime();
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
-    await environment.wait(1000);
     await createAndDiscard(environment, testRepoPaths[0]);
-    await environment.wait(1500);
+    const end = new Date().getTime();
+    const diff = 2500 - (end - start);
+    if (diff > 0) {
+      await environment.wait(diff);
+    }
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });
