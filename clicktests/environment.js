@@ -319,7 +319,6 @@ class Environment {
       logger.error('error while clicking', err);
       throw err;
     }
-    await this.page.waitForNavigation();
   }
 
   async commit(commitMessage) {
