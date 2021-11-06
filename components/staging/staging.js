@@ -496,7 +496,7 @@ class FileViewModel {
   discardChanges() {
     if (
       ungit.config.disableDiscardWarning ||
-      (new Date().getTime() - this.staging.mutedTime) < ungit.config.disableDiscardMuteTime
+      new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime
     ) {
       this.server
         .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })

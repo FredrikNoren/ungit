@@ -39,8 +39,8 @@ describe('[REMOTES]', () => {
     await environment.insert('.modal #Name', 'myremote');
     await environment.insert('.modal #Url', testRepoPaths[0]);
     await environment.click('.modal .modal-footer .btn-primary');
-
     await environment.click('.fetchButton .dropdown-toggle');
+    await environment.triggerProgramEvents();
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="myremote"]'
     );
