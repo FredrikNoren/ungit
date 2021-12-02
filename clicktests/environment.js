@@ -45,10 +45,10 @@ class Environment {
     return new Promise((resolve, reject) => {
       const server = net.createServer();
 
-      server.listen(tmpPortrange, () => {
+      server.listen({ port: tmpPortrange }, () => {
         server.once('close', () => {
           this.port = tmpPortrange;
-          this.rootUrl = `http://localhost:${this.port}${this.config.rootPath}`;
+          this.rootUrl = `http://127.0.0.1:${this.port}${this.config.rootPath}`;
           resolve();
         });
         server.close();
