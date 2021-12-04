@@ -10,7 +10,7 @@ const mergeTool = ungit.config.mergeTool;
 components.register(
   'staging',
   (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
-)
+);
 
 class StagingViewModel {
   constructor(server, repoPath, graph) {
@@ -494,7 +494,7 @@ class FileViewModel {
   }
 
   discardChanges() {
-    ungit.logger.debug('discard time since mute: ', new Date().getTime() - this.staging.mutedTime)
+    ungit.logger.debug('discard time since mute: ', new Date().getTime() - this.staging.mutedTime);
     if (
       ungit.config.disableDiscardWarning ||
       new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime

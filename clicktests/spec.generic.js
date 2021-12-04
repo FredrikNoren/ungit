@@ -193,6 +193,7 @@ describe('[GENERIC]', () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy3.txt`, testRepoPaths[0]);
     await environment.wait(500);
     await environment.commit('Branch commit');
+    await environment.wait(250);
   });
 
   it('Merge', () => {
