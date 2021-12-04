@@ -415,7 +415,7 @@ app.use((err, req, res, next) => {
 
 exports.started = new signals.Signal();
 
-server.listen(config.port, config.ungitBindIp, () => {
+server.listen({ port: config.port, host: config.ungitBindIp }, () => {
   logger.info('Listening on port ' + config.port);
   console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
   exports.started.dispatch();

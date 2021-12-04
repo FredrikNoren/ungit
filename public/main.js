@@ -55,7 +55,7 @@ function checkIfUngitIsRunning(callback) {
       callback(true);
     }
   });
-  server.listen(config.port, config.ungitBindIp, function () {
+  server.listen({ port: config.port, host: config.ungitBindIp }, function () {
     server.close(function () {
       callback(false);
     });
