@@ -10,7 +10,7 @@ const mergeTool = ungit.config.mergeTool;
 components.register(
   'staging',
   (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
-);
+)
 
 class StagingViewModel {
   constructor(server, repoPath, graph) {

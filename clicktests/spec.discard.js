@@ -89,7 +89,7 @@ describe('[DISCARD - withWarn]', () => {
     await createAndDiscard(environment, testRepoPaths[0]);
     // ensure, at least 2 seconds has passed since mute timestamp is stamped
     const end = new Date().getTime();
-    const diff = (muteGraceTimeDuration + 500) - (end - start);
+    const diff = muteGraceTimeDuration + 500 - (end - start);
     if (diff > 0) {
       await environment.wait(diff);
     }
