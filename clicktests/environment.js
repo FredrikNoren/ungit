@@ -360,13 +360,14 @@ class Environment {
 
   async refAction(ref, local, action) {
     await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
+    await this.wait(250);
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
   }
   // <button class="btn btn-default btn-primary" type="button" data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: click" data-ta-action="yes">Yes</button>
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
-    await this.wait(1000);
+    await this.wait(250);
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );
