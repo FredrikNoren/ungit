@@ -39,7 +39,7 @@ describe('[SUMBODULES]', () => {
     await environment.click('.submodule .dropdown-toggle');
     await environment.wait(250);
     await environment.click('[data-ta-clickable="subrepo-remove"]');
-    await environment.wait(250);
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('#nprogress');
   });

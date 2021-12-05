@@ -177,6 +177,7 @@ describe('[GENERIC]', () => {
   it('Create another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy2.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
+    await environment.wait(250);
   });
 
   it('Rebase', () => {
