@@ -360,7 +360,7 @@ class Environment {
 
   async refAction(ref, local, action) {
     await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
-    await this.wait(250);
+    await this.wait(500);
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
   }
