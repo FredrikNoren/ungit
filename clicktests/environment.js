@@ -8,6 +8,7 @@ const mkdirp = require('mkdirp');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
 const { encodePath } = require('../source/address-parser');
+const portfinder = require('portfinder');
 const portrange = 45032;
 
 module.exports = (config) => new Environment(config);
@@ -37,26 +38,6 @@ class Environment {
     return this.rootUrl;
   }
 
-  getPort() {
-    const tmpPortrange = portrange + Math.floor(Math.random() * 5000);
-
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-
-      server.listen({ port: tmpPortrange }, () => {
-        server.once('close', () => {
-          this.port = tmpPortrange;
-          this.rootUrl = `http://127.0.0.1:${this.port}${this.config.rootPath}`;
-          resolve();
-        });
-        server.close();
-      });
-      server.on('error', () => {
-        this.getPort().then(resolve);
-      });
-    });
-  }
-
   async init() {
     try {
       this.browser = await puppeteer.launch({
@@ -66,8 +47,6 @@ class Environment {
           height: this.config.viewHeight,
         },
       });
-
-      await this.getPort();
       await this.startServer();
     } catch (err) {
       logger.error(err);
@@ -75,8 +54,10 @@ class Environment {
     }
   }
 
-  startServer() {
-    logger.info('Starting ungit server...', this.config.serverStartupOptions);
+  async startServer() {
+    this.port = await portfinder.getPortPromise({ port: portrange });
+    this.rootUrl = `http://127.0.0.1:${this.port}${this.config.rootPath}`;
+    logger.info(`Starting ungit server:${this.port} with ${this.config.serverStartupOptions}`);
 
     this.hasStarted = false;
     const options = [

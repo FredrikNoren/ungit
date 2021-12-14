@@ -118,6 +118,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('test backward squash from own lineage', async () => {
+    await environment.wait(500);
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
     await environment.waitForElementVisible('.staging .files .file');
