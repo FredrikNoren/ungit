@@ -1,5 +1,6 @@
 const expect = require('expect.js');
 const path = require('path');
+const logger = require('../source/utils/logger');
 const restGit = require('../source/git-api');
 
 exports.makeRequest = (method, req, path, payload) => {
@@ -51,12 +52,11 @@ exports.post = this.makeRequest.bind(this, 'POST');
 exports.delete = this.makeRequest.bind(this, 'DELETE');
 exports.put = this.makeRequest.bind(this, 'PUT');
 
-exports.initRepo = (req, config) => {
+exports.initRepo = async (req, config) => {
   config = config || {};
-  return this.post(req, '/testing/createtempdir', config.path).then((res) => {
-    expect(res.path).to.be.ok();
-    return this.post(req, '/init', { path: res.path, bare: !!config.bare }).then(() => res.path);
-  });
+  const res = await this.post(req, '/testing/createtempdir', config.path);
+  expect(res.path).to.be.ok();
+  return this.post(req, '/init', { path: res.path, bare: !!config.bare }).then(() => res.path);
 };
 
 exports.createSmallRepo = (req) => {
