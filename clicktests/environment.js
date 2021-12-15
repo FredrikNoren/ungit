@@ -2,7 +2,6 @@
 const logger = require('../source/utils/logger');
 const child_process = require('child_process');
 const puppeteer = require('puppeteer');
-const net = require('net');
 const request = require('superagent');
 const mkdirp = require('mkdirp');
 const util = require('util');
@@ -224,7 +223,7 @@ class Environment {
 
   async waitForElementVisible(selector, timeout) {
     logger.debug(`Waiting for visible: "${selector}"`);
-    await this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
+    return await this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
   }
   waitForElementHidden(selector, timeout) {
     logger.debug(`Waiting for hidden: "${selector}"`);
@@ -249,10 +248,10 @@ class Environment {
 
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
-    await this.waitForElementVisible(selector);
 
     try {
-      await this.page.click(selector, { clickCount: clickCount });
+      const toClick = await this.waitForElementVisible(selector);
+      await toClick.click({ clickCount: clickCount });
     } catch (err) {
       logger.error('error while clicking', err);
       throw err;
