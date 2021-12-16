@@ -250,13 +250,17 @@ class Environment {
     logger.info(`clicking "${selector}"`);
 
     try {
-      await this.page.waitForNetworkIdle();
+      await this.waitForNetworkIdle();
       const toClick = await this.waitForElementVisible(selector);
       await toClick.click({ clickCount: clickCount });
     } catch (err) {
       logger.error('error while clicking', err);
       throw err;
     }
+  }
+
+  waitForNetworkIdle() {
+    return this.page.waitForNetworkIdle();
   }
 
   async commit(commitMessage) {

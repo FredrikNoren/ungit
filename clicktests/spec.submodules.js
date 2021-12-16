@@ -25,6 +25,7 @@ describe('[SUMBODULES]', () => {
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.click('.submodule .dropdown-toggle');
+    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'
     );

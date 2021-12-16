@@ -185,7 +185,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Checkout master with double click', async () => {
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.branch[data-ta-name="master"]', 2);
     await environment.waitForElementVisible('.ref.branch[data-ta-name="master"].current');
   });
