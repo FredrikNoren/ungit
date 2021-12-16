@@ -251,6 +251,7 @@ class Environment {
 
     try {
       const toClick = await this.waitForElementVisible(selector);
+      toClick.scrollIntoView();
       await toClick.click({ clickCount: clickCount });
     } catch (err) {
       logger.error('error while clicking', err);
