@@ -2,7 +2,7 @@
 
 const logger = require('../source/utils/logger');
 
-const muteGraceTimeDuration = 2000;
+const muteGraceTimeDuration = 5000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   logger.info(`creating "${testRepoPath}" with "${dialogButtonToClick}"`);
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
@@ -12,7 +12,6 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   logger.info('click discard button');
   await env.click('.files button.discard');
   await env.triggerProgramEvents();
-  await env.wait(500);
 
   if (dialogButtonToClick === 'yes') {
     await env.click('.modal-dialog [data-ta-action="yes"]');
