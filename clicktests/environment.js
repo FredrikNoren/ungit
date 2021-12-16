@@ -250,7 +250,7 @@ class Environment {
     logger.info(`clicking "${selector}"`);
 
     try {
-      await this.page.waitForNetworkIdle()
+      await this.page.waitForNetworkIdle();
       const toClick = await this.waitForElementVisible(selector);
       await toClick.click({ clickCount: clickCount });
     } catch (err) {
