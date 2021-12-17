@@ -106,12 +106,14 @@ describe('[GENERIC]', () => {
   it('Should be possible to discard a created file and ensure patching is not available for new file', async () => {
     await environment.waitForNetworkIdle();
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
+    await environment.triggerProgramEvents();
     await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.click('.files button');
     await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('[data-ta-container="patch-file"]');
     await environment.click('.files button.discard');
+    await environment.triggerProgramEvents();
     await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
