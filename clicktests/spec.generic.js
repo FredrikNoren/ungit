@@ -99,31 +99,35 @@ describe('[GENERIC]', () => {
 
   it('Test whitespace', async () => {
     await environment.click('.commit-whitespace');
-    await environment.waitForElementVisible('.commit-line-diffs');
+    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-clickable="node-clickable-0"]');
   });
 
   it('Should be possible to discard a created file and ensure patching is not available for new file', async () => {
+    await environment.waitForNetworkIdle();
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
+    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .btn-default');
-    await environment.wait(500);
     await environment.click('.files button');
+    await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('[data-ta-container="patch-file"]');
     await environment.click('.files button.discard');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
-  it('Should be possible to create a branch', () => {
-    return environment.createBranch('testbranch');
+  it('Should be possible to create a branch', async () => {
+    await environment.createBranch('testbranch');
+    await environment.waitForNetworkIdle();
   });
 
   it('Should be possible to create and destroy a branch', async () => {
     await environment.createBranch('willbedeleted');
     await environment.click('.branch[data-ta-name="willbedeleted"]');
+    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
