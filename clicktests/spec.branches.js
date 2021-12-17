@@ -16,6 +16,7 @@ describe('[BRANCHES]', () => {
   it('add a commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-1');
+    await environment.waitForNetworkIdle();
   });
 
   // < branch search test >
@@ -29,12 +30,12 @@ describe('[BRANCHES]', () => {
 
   it('add tag should make one of the branch disappear', async () => {
     await environment.createTag('tag-1');
+    await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('[data-ta-name="search-4"]');
   });
 
   it('search for the hidden branch', async () => {
     await environment.stopProgramEventPropagation();
-    await environment.wait(1000);
     await environment.click('.showSearchForm');
 
     await environment.type('-4');
@@ -65,6 +66,7 @@ describe('[BRANCHES]', () => {
   it('add second branch', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.commit('commit-2');
+    await environment.waitForNetworkIdle();
 
     await environment.createBranch('branch-2');
     await environment.createBranch('branch-3');
@@ -86,6 +88,7 @@ describe('[BRANCHES]', () => {
   it('add another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.commit('commit-3');
+    await environment.waitForNetworkIdle();
   });
 
   it('checkout cherypick base', async () => {
@@ -97,13 +100,13 @@ describe('[BRANCHES]', () => {
 
   it('cherrypick fail case', async () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.staging .btn-stg-abort');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back
@@ -114,19 +117,20 @@ describe('[BRANCHES]', () => {
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
+    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 
   it('test backward squash from own lineage', async () => {
-    await environment.wait(500);
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
+    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.triggerProgramEvents();
-    await environment.wait(1000);
+    await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('.staging .files .file');
   });
 

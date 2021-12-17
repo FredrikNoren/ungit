@@ -53,11 +53,11 @@ describe('[REMOTES]', () => {
 
   it('Remote delete check', async () => {
     await environment.click('.fetchButton .dropdown-toggle');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-clickable="myremote-remove"]');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
-    await environment.wait(500);
+    await environment.waitForNetworkIdle();
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.waitForElementHidden('[data-ta-clickable="myremote"]');
   });
@@ -84,6 +84,7 @@ describe('[REMOTES]', () => {
 
   it('Should be possible to create and push a branch', async () => {
     await environment.createBranch('branchinclone');
+    await environment.waitForNetworkIdle();
     await environment.refAction('branchinclone', true, 'push');
     await environment.waitForElementVisible('[data-ta-name="origin/branchinclone"]');
   });
@@ -97,7 +98,7 @@ describe('[REMOTES]', () => {
   it('Check for fetching remote branches for the branch list', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('.options input');
-    await environment.wait(1000);
+    await environment.waitForNetworkIdle();
     try {
       await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 3000 });
     } catch (err) {
@@ -109,7 +110,7 @@ describe('[REMOTES]', () => {
   it('checkout remote branches with matching local branch at wrong place', async () => {
     await environment.moveRef('branchinclone', 'Init Commit 1');
     await environment.click('.branch .dropdown-toggle');
-    await environment.wait(1000);
+    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]');
     await environment.waitForElementVisible('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
@@ -121,10 +122,10 @@ describe('[REMOTES]', () => {
     await environment.insert('.staging input.form-control', 'Commit & Push');
     await environment.wait(250);
     await environment.click('.commit-grp .dropdown-toggle');
-    await environment.wait(250);
+    await environment.waitForNetworkIdle();
     await environment.click('.commitnpush');
     await environment.waitForElementVisible('[data-ta-node-title="Commit & Push"]');
-    await environment.wait(250);
+    await environment.waitForNetworkIdle();
   });
 
   it('Should be possible to commitnpush with ff', async () => {

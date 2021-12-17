@@ -18,12 +18,14 @@ describe('[LOAD-AHEAD]', () => {
   it('Should be possible to create and commit 1', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-1');
+    await environment.waitForNetworkIdle();
     await environment.createBranch('branch-1');
   });
 
   it('Should be possible to create and commit 2', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-2');
+    await environment.waitForNetworkIdle();
   });
 
   it('Should be possible to create and commit 3', async () => {

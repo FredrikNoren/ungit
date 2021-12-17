@@ -218,7 +218,7 @@ class Environment {
   async openUngit(tempDirPath) {
     await this.goto(`${this.getRootUrl()}/#/repository?path=${encodePath(tempDirPath)}`);
     await this.waitForElementVisible('.repository-actions');
-    await this.wait(1000);
+    await this.waitForNetworkIdle();
   }
 
   async waitForElementVisible(selector, timeout) {
@@ -269,12 +269,11 @@ class Environment {
     await this.insert('.staging input.form-control', commitMessage);
     await this.click('.commit-btn');
     await this.waitForElementHidden('.files .file .btn-default', 10000);
-    await this.wait(1000);
   }
 
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
-    await this.wait(500);
+    await this.waitForNetworkIdle();
     await this.insert('.ref-icons.new-ref.editing input', name);
     await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
     await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
@@ -302,14 +301,14 @@ class Environment {
 
   async refAction(ref, local, action) {
     await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
-    await this.wait(500);
+    await this.waitForNetworkIdle();
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
   }
   // <button class="btn btn-default btn-primary" type="button" data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: click" data-ta-action="yes">Yes</button>
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
-    await this.wait(250);
+    await this.waitForNetworkIdle();
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );
