@@ -305,7 +305,6 @@ class Environment {
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
   }
-  // <button class="btn btn-default btn-primary" type="button" data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: click" data-ta-action="yes">Yes</button>
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
     await this.waitForNetworkIdle();
