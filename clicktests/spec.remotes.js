@@ -91,6 +91,7 @@ describe('[REMOTES]', () => {
 
   it('Should be possible to force push a branch', async () => {
     await environment.moveRef('branchinclone', 'Init Commit 0');
+    await environment.waitForNetworkIdle();
     await environment.refAction('branchinclone', true, 'push');
     await environment.waitForElementHidden('[data-ta-action="push"]:not([style*="display: none"])');
   });
