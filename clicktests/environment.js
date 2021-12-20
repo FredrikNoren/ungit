@@ -304,6 +304,7 @@ class Environment {
     await this.waitForNetworkIdle();
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
+    await this.triggerProgramEvents();
   }
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
