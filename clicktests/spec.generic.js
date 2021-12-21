@@ -129,6 +129,7 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a branch', async () => {
     await environment.createBranch('willbedeleted');
+    await environment.waitForNetworkIdle();
     await environment.click('.branch[data-ta-name="willbedeleted"]');
     await environment.waitForNetworkIdle();
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');

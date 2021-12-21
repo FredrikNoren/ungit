@@ -36,6 +36,7 @@ describe('[BRANCHES]', () => {
 
   it('search for the hidden branch', async () => {
     await environment.stopProgramEventPropagation();
+    await environment.waitForNetworkIdle();
     await environment.click('.showSearchForm');
 
     await environment.type('-4');
