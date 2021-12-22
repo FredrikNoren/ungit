@@ -82,7 +82,7 @@ describe('[DISCARD - withWarn]', () => {
     return createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 
-  it('Should be possible to discard a created file and disable warn for awhile', async function () {
+  it('Should be possible to discard a created file and disable warn for awhile', async () {
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
     const start = new Date().getTime(); // this is when the "mute" timestamp is stamped
     await createAndDiscard(environment, testRepoPaths[0]);

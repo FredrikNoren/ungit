@@ -55,7 +55,8 @@ exports.initRepo = async (req, config) => {
   config = config || {};
   const res = await this.post(req, '/testing/createtempdir', config.path);
   expect(res.path).to.be.ok();
-  return this.post(req, '/init', { path: res.path, bare: !!config.bare }).then(() => res.path);
+  await this.post(req, '/init', { path: res.path, bare: !!config.bare });
+  return res.path;
 };
 
 exports.createSmallRepo = (req) => {

@@ -4,7 +4,7 @@ const config = require('../config');
 
 const transports = [new winston.transports.Console()];
 if (config.logDirectory) {
-  console.log('Added  log file at ' + config.logLevel);
+  console.log('Added log file at ' + config.logLevel);
   transports.push(
     new winston.transports.File({
       filename: path.join(config.logDirectory, 'server.log'),
