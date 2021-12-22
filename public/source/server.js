@@ -180,8 +180,6 @@ Server.prototype.putPromise = function (url, arg) {
 };
 
 Server.prototype.unhandledRejection = function (err) {
-  const stacktrace = Error().stack;
-
   // Show a error screen for git errors (so that people have a chance to debug them)
   if (err.res && err.res.body && err.res.body.isGitError) {
     programEvents.dispatch({
@@ -192,13 +190,12 @@ Server.prototype.unhandledRejection = function (err) {
         stdout: err.res.body.stdout,
         stderr: err.res.body.stderr,
         repoPath: err.res.body.workingDirectory,
-        stacktrace: stacktrace,
       },
     });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error('Unhandled Promise ERROR: ', err, stacktrace);
-    programEvents.dispatch({ event: 'git-crash-error', error: err, stacktrace: stacktrace });
+    console.error('Unhandled Promise ERROR: ', err);
+    programEvents.dispatch({ event: 'git-crash-error', error: err });
     Raven.captureException(err);
   }
 };
