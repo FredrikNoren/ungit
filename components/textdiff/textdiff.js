@@ -179,7 +179,10 @@ class TextDiffViewModel {
       }
 
       if (ungit.config.diffTabSize) {
-        html = html.replace(/<span class="d2h-code-line-ctn">/g, `<span class="d2h-code-line-ctn" style="tab-size: ${ungit.config.diffTabSize};">`)
+        html = html.replace(
+          /<span class="d2h-code-line-ctn">/g,
+          `<span class="d2h-code-line-ctn" style="tab-size: ${ungit.config.diffTabSize};">`
+        );
       }
 
       if (html !== this.htmlSrc) {
