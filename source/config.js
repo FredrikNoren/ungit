@@ -141,6 +141,9 @@ const defaultConfig = {
   // Specify whether to Ignore or Show white space diff
   ignoreWhiteSpaceDiff: false,
 
+  // Specify tab size for diff
+  diffTabSize: null,
+
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
 
@@ -299,6 +302,7 @@ const argv = yargs
     'numRefsToShow',
     'Number of refs to show on git commit bubbles to limit too many refs to appear.'
   )
+  .describe('diffTabSize', 'Specify tab size for diff')
   .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
   .boolean('isForceGPGSign')
   .describe(
