@@ -250,7 +250,6 @@ class Environment {
     logger.info(`clicking "${selector}"`);
 
     try {
-      await this.waitForNetworkIdle();
       const toClick = await this.waitForElementVisible(selector);
       await toClick.click({ clickCount: clickCount });
     } catch (err) {
@@ -264,7 +263,6 @@ class Environment {
   }
 
   async commit(commitMessage) {
-    await this.triggerProgramEvents();
     await this.waitForElementVisible('.files .file .btn-default');
     await this.insert('.staging input.form-control', commitMessage);
     await this.click('.commit-btn');
@@ -273,7 +271,6 @@ class Environment {
 
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
-    await this.waitForNetworkIdle();
     await this.insert('.ref-icons.new-ref.editing input', name);
     await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
     await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
@@ -301,14 +298,11 @@ class Environment {
 
   async refAction(ref, local, action) {
     await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
-    await this.waitForNetworkIdle();
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this._verifyRefAction(action);
-    await this.triggerProgramEvents();
   }
   async moveRef(ref, targetNodeCommitTitle) {
     await this.click(`.branch[data-ta-name="${ref}"]`);
-    await this.waitForNetworkIdle();
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );

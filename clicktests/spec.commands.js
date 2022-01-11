@@ -37,14 +37,12 @@ describe('[COMMANDS]', () => {
   it('add a branch-1', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-1');
-    await environment.waitForNetworkIdle();
     await environment.createBranch('branch-1');
   });
 
   it('add a branch-2', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('commit-1');
-    await environment.waitForNetworkIdle();
     await environment.createBranch('branch-2');
   });
 

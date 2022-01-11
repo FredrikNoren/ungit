@@ -16,14 +16,12 @@ const changeTestFile = async (filename, repoPath) => {
 };
 const amendCommit = async () => {
   try {
-    await environment.triggerProgramEvents();
     await environment.page.waitForSelector('.amend-button', { visible: true, timeout: 2000 });
     await environment.click('.amend-button');
   } catch (err) {
     await environment.click('.amend-link');
   }
   await environment.click('.commit-btn');
-  await environment.triggerProgramEvents();
   await environment.waitForElementHidden('.files .file .btn-default');
 };
 
@@ -50,36 +48,27 @@ describe('[GENERIC]', () => {
   it('Should be possible to create and commit a file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.commit('Init');
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.commit');
   });
 
   it('Should be possible to amend a file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('.files .file .btn-default');
     await amendCommit();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.commit');
   });
 
   it('Should be possible to cancel amend a file', async () => {
     await environment.click('.amend-link');
     await environment.click('.btn-stg-cancel');
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.empty-commit-link');
   });
 
   it('Should be able to add a new file to .gitignore', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.click('.files button.ignore');
-    await environment.waitForNetworkIdle();
     await environment.click('.files button.ignore');
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
@@ -102,38 +91,27 @@ describe('[GENERIC]', () => {
 
   it('Test whitespace', async () => {
     await environment.click('.commit-whitespace');
-    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-clickable="node-clickable-0"]');
   });
 
   it('Should be possible to discard a created file and ensure patching is not available for new file', async () => {
-    await environment.waitForNetworkIdle();
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.click('.files button');
-    await environment.waitForNetworkIdle();
     await environment.waitForElementHidden('[data-ta-container="patch-file"]');
     await environment.click('.files button.discard');
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
   it('Should be possible to create a branch', async () => {
     await environment.createBranch('testbranch');
-    await environment.waitForNetworkIdle();
   });
 
   it('Should be possible to create and destroy a branch', async () => {
     await environment.createBranch('willbedeleted');
-    await environment.waitForNetworkIdle();
     await environment.click('.branch[data-ta-name="willbedeleted"]');
-    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
-    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
@@ -142,15 +120,12 @@ describe('[GENERIC]', () => {
     await environment.createTag('tagwillbedeleted');
     await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
-    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
   it('Commit changes to a file', async () => {
-    await environment.waitForNetworkIdle();
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.wait(500);
     await environment.insert('.staging input.form-control', 'My commit message');
@@ -160,12 +135,9 @@ describe('[GENERIC]', () => {
 
   it('Show stats for changed file and discard it', async () => {
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.files .file .additions');
     await environment.waitForElementVisible('.files .file .deletions');
     await environment.click('.files button.discard');
-    await environment.waitForNetworkIdle();
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
@@ -179,7 +151,6 @@ describe('[GENERIC]', () => {
 
   it('Checkout testbranch with action', async () => {
     await environment.click('.branch[data-ta-name="testbranch"]');
-    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
     await environment.waitForElementVisible('.ref.branch[data-ta-name="testbranch"].current');
   });
@@ -187,7 +158,6 @@ describe('[GENERIC]', () => {
   it('Create another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy2.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
-    await environment.waitForNetworkIdle();
   });
 
   it('Rebase', () => {
@@ -195,17 +165,13 @@ describe('[GENERIC]', () => {
   });
 
   it('Checkout master with double click', async () => {
-    await environment.waitForNetworkIdle();
     await environment.click('.branch[data-ta-name="master"]', 2);
-    await environment.triggerProgramEvents();
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.ref.branch[data-ta-name="master"].current');
   });
 
   it('Create yet another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy3.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
-    await environment.waitForNetworkIdle();
   });
 
   it('Merge', () => {
@@ -215,9 +181,7 @@ describe('[GENERIC]', () => {
   it('Revert merge', async () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
     await environment.waitForElementVisible('[data-ta-action="revert"]');
-    await environment.waitForNetworkIdle();
     await environment.click('[data-ta-action="revert"]');
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible(
       '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"]'
     );
@@ -225,7 +189,6 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to move a branch', async () => {
     await environment.createBranch('movebranch');
-    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('[data-ta-name="movebranch"]');
     await environment.moveRef('movebranch', 'Init');
   });

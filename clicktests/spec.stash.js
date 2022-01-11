@@ -15,12 +15,9 @@ describe('[STASH]', () => {
 
   it('Should be possible to stash a file', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
-    await environment.triggerProgramEvents();
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.click('.stash-all');
-    await environment.waitForNetworkIdle();
     await environment.click('.stash-toggle');
-    await environment.waitForNetworkIdle();
     await environment.waitForElementVisible('.stash .list-group-item');
   });
 
