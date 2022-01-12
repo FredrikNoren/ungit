@@ -7,6 +7,7 @@ const storage = require('ungit-storage');
 const showRemote = 'showRemote';
 const showBranch = 'showBranch';
 const showTag = 'showTag';
+const { isSamePayload } = require('../ComponentUtils');
 
 components.register('branches', (args) => {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
@@ -59,6 +60,7 @@ class BranchesViewModel {
   updateRefs(forceRemoteFetch) {
     ungit.logger.debug('branch.updateRefs() triggered');
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
+    ungit.logger.info(55555555222)
 
     const currentBranchProm = this.server
       .getPromise('/branches', { path: this.repoPath() })
@@ -73,10 +75,16 @@ class BranchesViewModel {
         this.current('~error');
       });
 
+    ungit.logger.info(55555555)
     // refreshes tags branches and remote branches
     const refsProm = this.server
       .getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch })
       .then((refs) => {
+        ungit.logger.info(3333, JSON.stringify(refs))
+        if (isSamePayload('refs', refs)) {
+          ungit.logger.info(11111)
+          return;
+        }
         const version = Date.now();
         const sorted = refs
           .map((r) => {

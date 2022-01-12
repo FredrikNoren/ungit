@@ -6,6 +6,7 @@ const components = require('ungit-components');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
 const EdgeViewModel = require('./edge');
+const { isSamePayload } = require('../ComponentUtils');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
 components.register('graph', (args) => new GraphViewModel(args.server, args.repoPath));
@@ -76,8 +77,8 @@ class GraphViewModel {
 
     this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
     this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
-    this.loadNodesFromApi();
-    this.updateBranches();
+    this.loadNodesFromApiThrottled();
+    this.updateBranchesThrottled();
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ height: 18 });
@@ -108,50 +109,44 @@ class GraphViewModel {
     return refViewModel;
   }
 
-  loadNodesFromApi() {
+  async loadNodesFromApi() {
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
+    const edges = [];
 
-    return this.server
-      .getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
-      .then((log) => {
-        // set new limit and skip
-        this.limit(parseInt(log.limit));
-        this.skip(parseInt(log.skip));
-        return log.nodes || [];
-      })
-      .then((nodes) =>
-        // create and/or calculate nodes
-        this.computeNode(
-          nodes.map((logEntry) => {
-            return this.getNode(logEntry.sha1, logEntry); // convert to node object
-          })
-        )
-      )
-      .then((nodes) => {
-        // create edges
-        const edges = [];
-        nodes.forEach((node) => {
-          node.parents().forEach((parentSha1) => {
-            edges.push(this.getEdge(node.sha1, parentSha1));
-          });
-          node.render();
+    try {
+      const log = await this.server.getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() });
+      if (isSamePayload('log', log)) {
+        return;
+      }
+      const nodes = this.computeNode(
+        (log.nodes || []).map((logEntry) => {
+          return this.getNode(logEntry.sha1, logEntry); // convert to node object
+        })
+      );
+
+      // create edges
+      nodes.forEach((node) => {
+        node.parents().forEach((parentSha1) => {
+          edges.push(this.getEdge(node.sha1, parentSha1));
         });
-
-        this.edges(edges);
-        this.nodes(nodes);
-        if (nodes.length > 0) {
-          this.graphHeight(nodes[nodes.length - 1].cy() + 80);
-        }
-        this.graphWidth(1000 + this.heighstBranchOrder * 90);
-      })
-      .catch((e) => this.server.unhandledRejection(e))
-      .finally(() => {
-        if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
-          this.scrolledToEnd();
-        }
-        ungit.logger.debug('graph.loadNodesFromApi() finished');
+        node.render();
       });
+
+      this.edges(edges);
+      this.nodes(nodes);
+      if (nodes.length > 0) {
+        this.graphHeight(nodes[nodes.length - 1].cy() + 80);
+      }
+      this.graphWidth(1000 + this.heighstBranchOrder * 90);
+    } catch (e) {
+      this.server.unhandledRejection(e)
+    } finally {
+      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
+        this.scrolledToEnd();
+      }
+      ungit.logger.debug('graph.loadNodesFromApi() finished');
+    }
   }
 
   traverseNodeLeftParents(node, callback) {
@@ -296,15 +291,18 @@ class GraphViewModel {
     });
   }
 
-  updateBranches() {
-    this.server
-      .getPromise('/checkout', { path: this.repoPath() })
-      .then((res) => {
-        this.checkedOutBranch(res);
-      })
-      .catch((err) => {
-        if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
-      });
+  async updateBranches() {
+    const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
+
+    if (isSamePayload('checkout', checkout)) {
+      return;
+    }
+
+    try {
+      this.checkedOutBranch(checkout)
+    } catch (err) {
+      if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
+    }
   }
 
   setRemoteTags(remoteTags) {

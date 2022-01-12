@@ -66,6 +66,8 @@
     "snapsvg": "~0.5.1",
     "socket.io": "~4.3.0",
     "temp": "~0.9.4",
+    "tsify": "^5.0.4",
+    "typescript": "^4.5.4",
     "winston": "~3.3.3",
     "yargs": "~17.2.1"
   },

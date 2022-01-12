@@ -6,6 +6,8 @@ const storage = require('ungit-storage');
 
 components.register('stash', (args) => new StashViewModel(args.server, args.repoPath));
 
+const { isSamePayload } = require('../ComponentUtils');
+
 class StashItemViewModel {
   constructor(stash, data) {
     this.stash = stash;
@@ -81,26 +83,30 @@ class StashViewModel {
       this.refresh();
   }
 
-  refresh() {
+  async refresh() {
     ungit.logger.debug('stash.refresh() triggered');
-    this.server
-      .getPromise('/stashes', { path: this.repoPath() })
-      .then((stashes) => {
-        let changed = this.stashedChanges().length != stashes.length;
-        if (!changed) {
-          changed = !this.stashedChanges().every((item1) =>
-            stashes.some((item2) => item1.sha1 == item2.sha1)
-          );
-        }
 
-        if (changed) {
-          this.stashedChanges(stashes.map((item) => new StashItemViewModel(this, item)));
-        }
-      })
-      .catch((err) => {
-        if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
-      })
-      .finally(() => ungit.logger.debug('stash.refresh() finished'));
+    try {
+      const stashes = await this.server.getPromise('/stashes', { path: this.repoPath() });
+      if (isSamePayload('stashes', stashes)) {
+        return;
+      }
+
+      let changed = this.stashedChanges().length != stashes.length;
+      if (!changed) {
+        changed = !this.stashedChanges().every((item1) =>
+          stashes.some((item2) => item1.sha1 == item2.sha1)
+        );
+      }
+
+      if (changed) {
+        this.stashedChanges(stashes.map((item) => new StashItemViewModel(this, item)));
+      }
+    } catch (err) {
+      if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
+    } finally {
+      ungit.logger.debug('stash.refresh() finished');
+    }
   }
 
   toggleShowStash() {

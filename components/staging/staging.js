@@ -6,6 +6,7 @@ const programEvents = require('ungit-program-events');
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
+const { isSamePayload } = require('../ComponentUtils');
 
 components.register(
   'staging',
@@ -130,56 +131,57 @@ class StagingViewModel {
     }
   }
 
-  refreshContent() {
+  async refreshContent() {
     ungit.logger.debug('staging.refreshContent() triggered');
-    return Promise.all([
-      this.server
-        .getPromise('/head', { path: this.repoPath(), limit: 1 })
-        .then((log) => {
-          if (log.length > 0) {
-            const array = log[0].message.split('\n');
-            this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
-          } else this.HEAD(null);
-        })
-        .catch((err) => {
-          if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-            this.server.unhandledRejection(err);
-          }
-        }),
-      this.server
-        .getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
-        .then((status) => {
-          if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
-            if (this.isDiagOpen) {
-              return;
+
+    try {
+      const headPromise = this.server.getPromise('/head', { path: this.repoPath(), limit: 1 });
+      const statusPromise = this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit });
+      const log = await headPromise;
+      if (log.length > 0) {
+        const array = log[0].message.split('\n');
+        this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
+      } else {
+        this.HEAD(null);
+      }
+
+      const status = await statusPromise;
+      if (isSamePayload('status', status)) {
+        return;
+      }
+
+      if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
+        if (this.isDiagOpen) {
+          return;
+        }
+        this.isDiagOpen = true;
+        return components
+          .create('toomanyfilesdialogviewmodel', {
+            title: 'Too many unstaged files',
+            details: 'It is recommended to use command line as ungit may be too slow.',
+          })
+          .show()
+          .closeThen((diag) => {
+            this.isDiagOpen = false;
+            if (diag.result()) {
+              this.loadAnyway = true;
+              this.loadStatus(status);
+            } else {
+              window.location.href = '/#/';
             }
-            this.isDiagOpen = true;
-            return components
-              .create('toomanyfilesdialogviewmodel', {
-                title: 'Too many unstaged files',
-                details: 'It is recommended to use command line as ungit may be too slow.',
-              })
-              .show()
-              .closeThen((diag) => {
-                this.isDiagOpen = false;
-                if (diag.result()) {
-                  this.loadAnyway = true;
-                  this.loadStatus(status);
-                } else {
-                  window.location.href = '/#/';
-                }
-              });
-          } else {
-            ungit.logger.debug('staging.refreshContent() status', status);
-            this.loadStatus(status);
-          }
-        })
-        .catch((err) => {
-          if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-            this.server.unhandledRejection(err);
-          }
-        }),
-    ]).finally(() => ungit.logger.debug('staging.refreshContent() finished'));
+          });
+      } else {
+        ungit.logger.debug('staging.refreshContent() status', status);
+        this.loadStatus(status);
+      }
+
+    } catch (err) {
+      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+        this.server.unhandledRejection(err);
+      }
+    } finally {
+      ungit.logger.debug('staging.refreshContent() finished');
+    }
   }
 
   loadStatus(status) {

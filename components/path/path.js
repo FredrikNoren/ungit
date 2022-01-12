@@ -1,17 +1,17 @@
-const ko = require('knockout');
 const components = require('ungit-components');
+components.register('path', (args) => {
+  return new PathViewModel(args.server, args.path);
+});
+
+const ko = require('knockout');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
 const { encodePath } = require('ungit-address-parser');
 const octicons = require('octicons');
 const storage = require('ungit-storage');
-
+const { isSamePayload } = require('../ComponentUtils');
 const showCreateRepoKey = 'isShowCreateRepo';
-
-components.register('path', (args) => {
-  return new PathViewModel(args.server, args.path);
-});
 
 class SubRepositoryViewModel {
   constructor(server, path) {
@@ -91,6 +91,10 @@ class PathViewModel {
     return this.server
       .getPromise('/quickstatus', { path: this.repoPath() })
       .then((status) => {
+        if (isSamePayload('quickstatus', status)) {
+          return;
+        }
+
         if (status.type == 'inited' || status.type == 'bare') {
           if (this.repoPath() !== status.gitRootPath) {
             this.repoPath(status.gitRootPath);

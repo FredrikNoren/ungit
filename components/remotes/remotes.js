@@ -60,9 +60,9 @@ class RemotesViewModel {
     this.isFetching = true;
     const tagPromise = options.tags
       ? this.server.getPromise('/remote/tags', {
-          path: this.repoPath(),
-          remote: this.currentRemote(),
-        })
+        path: this.repoPath(),
+        remote: this.currentRemote(),
+      })
       : null;
     const fetchPromise = options.nodes
       ? this.server.postPromise('/fetch', { path: this.repoPath(), remote: this.currentRemote() })
@@ -123,6 +123,8 @@ class RemotesViewModel {
     return this.server
       .getPromise('/remotes', { path: this.repoPath() })
       .then((remotes) => {
+
+
         remotes = remotes.map((remote) => ({
           name: remote,
           changeRemote: () => {

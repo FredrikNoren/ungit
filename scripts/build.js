@@ -6,6 +6,7 @@ const browserify = require('browserify');
 const exorcist = require('exorcist');
 const less = require('less');
 const mkdirp = require('mkdirp');
+const tsify = require('tsify');
 
 const baseDir = path.join(__dirname, '..');
 
@@ -133,7 +134,8 @@ async function browserifyFile(source, destination) {
     const b = browserify(source, {
       bundleExternal: false,
       debug: true,
-    });
+    }).plugin(tsify, { noImplicitAny: true });
+
     const outFile = fsSync.createWriteStream(destination);
     outFile.on('close', () => resolve());
     b.bundle().pipe(exorcist(mapDestination)).pipe(outFile);
