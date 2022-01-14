@@ -144,7 +144,11 @@ class RemotesViewModel {
         }
       })
       .catch((err) => {
-        if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
+        if (err.errorCode != 'not-a-repository') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('updateRemotes failed', err)
+        }
       });
   }
 

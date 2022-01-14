@@ -181,10 +181,10 @@ class RefViewModel extends Selectable {
       isClientOnly
         ? Promise.resolve()
         : this.server.delPromise(url, {
-            path: this.graph.repoPath(),
-            remote: this.isRemote ? this.remote : null,
-            name: this.refName,
-          })
+          path: this.graph.repoPath(),
+          remote: this.isRemote ? this.remote : null,
+          name: this.refName,
+        })
     )
       .then(() => {
         if (this.node()) this.node().removeRef(this);
@@ -273,7 +273,11 @@ class RefViewModel extends Selectable {
         this.graph.HEADref().node(this.node());
       })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('checkout failed', err)
+        }
       });
   }
 }

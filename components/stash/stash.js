@@ -102,7 +102,11 @@ class StashViewModel {
         this.stashedChanges(stashes.map((item) => new StashItemViewModel(this, item)));
       }
     } catch (err) {
-      if (err.errorCode != 'no-such-path') this.server.unhandledRejection(err);
+      if (err.errorCode != 'no-such-path') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.warn('refresh failed: ', err);
+      }
     } finally {
       ungit.logger.debug('stash.refresh() finished');
     }

@@ -175,9 +175,10 @@ class StagingViewModel {
       }
 
     } catch (err) {
-      ungit.logger.error('error during staging refresh: ', err);
       if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
         this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.error('error during staging refresh: ', err);
       }
     } finally {
       ungit.logger.debug('staging.refreshContent() finished');

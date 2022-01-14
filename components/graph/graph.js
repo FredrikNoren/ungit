@@ -301,7 +301,11 @@ class GraphViewModel {
     try {
       this.checkedOutBranch(checkout)
     } catch (err) {
-      if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
+      if (err.errorCode != 'not-a-repository') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.warn('updateBranches failed', err)
+      }
     }
   }
 

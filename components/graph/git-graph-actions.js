@@ -155,7 +155,11 @@ class Rebase extends ActionBase {
     return this.server
       .postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('rebase failed', err)
+        }
       });
   }
 }
@@ -189,7 +193,11 @@ class Merge extends ActionBase {
         with: this.graph.currentActionContext().localRefName,
       })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('merge failed', err)
+        }
       });
   }
 }
@@ -301,7 +309,11 @@ class CherryPick extends ActionBase {
     return this.server
       .postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('cherrypick failed', err)
+        }
       });
   }
 }
