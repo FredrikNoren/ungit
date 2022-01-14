@@ -1,7 +1,7 @@
 const path = require('path');
 const temp = require('temp');
 const gitParser = require('./git-parser');
-const logger = require('./utils/logger');
+const winston = require('winston');
 const os = require('os');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
@@ -38,7 +38,7 @@ exports.registerApi = (env) => {
 
         fs.readFile(path.join(socket.watcherPath, '.gitignore'))
           .then((ignoreContent) => (socket.ignore = ignore().add(ignoreContent.toString())))
-          .catch(() => {})
+          .catch(() => { })
           .then(() => {
             socket.watcher = [];
             return watchPath(socket, '.', { recursive: isMac || isWindows });
@@ -61,12 +61,12 @@ exports.registerApi = (env) => {
 
   const watchPath = (socket, subfolderPath, options) => {
     const pathToWatch = path.join(socket.watcherPath, subfolderPath);
-    logger.info(`Start watching ${pathToWatch}`);
+    winston.info(`Start watching ${pathToWatch}`);
     return fs
       .access(pathToWatch)
       .catch(() => {
         // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
-        logger.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
+        winston.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
         return mkdirp(pathToWatch);
       })
       .then(() => {
@@ -74,15 +74,14 @@ exports.registerApi = (env) => {
         watcher.on('change', (event, filename) => {
           if (!filename) return;
           const filePath = path.join(subfolderPath, filename);
-          logger.debug(`File change: ${filePath}`);
+          winston.debug(`File change: ${filePath}`);
           if (isFileWatched(filePath, socket.ignore)) {
-            logger.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
-            emitGitDirectoryChanged(socket.watcherPath);
+            winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
             emitWorkingTreeChanged(socket.watcherPath);
           }
         });
         watcher.on('error', (err) => {
-          logger.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
+          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
         });
         socket.watcher.push(watcher);
       });
@@ -92,7 +91,7 @@ exports.registerApi = (env) => {
     socket.leave(socket.watcherPath);
     socket.ignore = undefined;
     (socket.watcher || []).forEach((watcher) => watcher.close());
-    logger.info(`Stop watching ${socket.watcherPath}`);
+    winston.info(`Stop watching ${socket.watcherPath}`);
   };
 
   // The .git dir changes on for instance 'git status', so we
@@ -141,17 +140,7 @@ exports.registerApi = (env) => {
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
-        logger.info('emitting working-tree-changed to sockets, manually triggered');
-      }
-    },
-    500,
-    { maxWait: 2000 }
-  );
-  const emitGitDirectoryChanged = _.debounce(
-    (repoPath) => {
-      if (io && repoPath) {
-        io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
-        logger.info('emitting git-directory-changed to sockets, manually triggered');
+        winston.info('emitting working-tree-changed to sockets, manually triggered');
       }
     },
     500,
@@ -179,7 +168,7 @@ exports.registerApi = (env) => {
         res.json(result || {});
       })
       .catch((err) => {
-        logger.warn('Responding with ERROR: ', JSON.stringify(err));
+        winston.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
@@ -244,7 +233,7 @@ exports.registerApi = (env) => {
         return { path: path.resolve(req.body.path, req.body.destinationDir) };
       });
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -268,7 +257,7 @@ exports.registerApi = (env) => {
         timeout: tenMinTimeoutMs,
       });
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -285,14 +274,14 @@ exports.registerApi = (env) => {
           'push',
           req.body.remote,
           (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-            (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
+          (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
           req.body.force ? '-f' : '',
         ]),
         repoPath: req.body.path,
         timeout: tenMinTimeoutMs,
       });
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -301,7 +290,6 @@ exports.registerApi = (env) => {
       res,
       autoStashExecuteAndPop(['reset', `--${req.body.mode}`, req.body.to], req.body.path)
     )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -370,7 +358,6 @@ exports.registerApi = (env) => {
         req.body.files
       )
     )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -383,7 +370,6 @@ exports.registerApi = (env) => {
       }
     });
     jsonResultOrFailProm(res, task)
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -450,7 +436,7 @@ exports.registerApi = (env) => {
                 commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
                 repoPath: req.query.path,
                 timeout: tenMinTimeoutMs,
-              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
+              }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
             });
           }, Promise.resolve());
         })
@@ -506,7 +492,7 @@ exports.registerApi = (env) => {
     ];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitGitDirectoryChanged.bind(null, req.body.path)
+      emitWorkingTreeChanged.bind(null, req.body.path)
     );
   });
 
@@ -518,7 +504,7 @@ exports.registerApi = (env) => {
       jsonResultOrFailProm(
         res,
         gitPromise(['branch', '-D', req.query.name.trim()], req.query.path)
-      ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
+      ).finally(emitWorkingTreeChanged.bind(null, req.query.path));
     }
   );
 
@@ -539,7 +525,7 @@ exports.registerApi = (env) => {
         }
       });
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
+      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.query.path));
     }
   );
 
@@ -588,7 +574,7 @@ exports.registerApi = (env) => {
     ];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitGitDirectoryChanged.bind(null, req.body.path)
+      emitWorkingTreeChanged.bind(null, req.body.path)
     );
   });
 
@@ -596,7 +582,7 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-    ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    ).finally(emitWorkingTreeChanged.bind(null, req.query.path));
   });
 
   app.delete(
@@ -610,10 +596,10 @@ exports.registerApi = (env) => {
         `:refs/tags/${req.query.name.trim()}`,
       ]);
       const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-        .catch(() => {}) // might have already deleted, so ignoring error
+        .catch(() => { }) // might have already deleted, so ignoring error
         .then(() => gitPromise(commands, req.query.path));
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
+      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.query.path));
     }
   );
 
@@ -623,7 +609,6 @@ exports.registerApi = (env) => {
       : ['checkout', req.body.name.trim()];
 
     jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
       .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -636,7 +621,6 @@ exports.registerApi = (env) => {
         res,
         autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path)
       )
-        .then(emitGitDirectoryChanged.bind(null, req.body.path))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -687,7 +671,6 @@ exports.registerApi = (env) => {
       res,
       gitPromise(['merge', config.noFFMerge ? '--no-ff' : '', req.body.with.trim()], req.body.path)
     )
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -703,7 +686,6 @@ exports.registerApi = (env) => {
       };
 
       jsonResultOrFailProm(res, gitPromise(args))
-        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
         .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -714,7 +696,6 @@ exports.registerApi = (env) => {
     ensurePathExists,
     (req, res) => {
       jsonResultOrFailProm(res, gitPromise(['merge', '--abort'], req.body.path))
-        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
         .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -724,13 +705,11 @@ exports.registerApi = (env) => {
       res,
       gitPromise(['merge', '--squash', req.body.target.trim()], req.body.path)
     )
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(`${exports.pathPrefix}/rebase`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(res, gitPromise(['rebase', req.body.onto.trim()], req.body.path))
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -740,7 +719,6 @@ exports.registerApi = (env) => {
     ensurePathExists,
     (req, res) => {
       jsonResultOrFailProm(res, gitPromise(['rebase', '--continue'], req.body.path))
-        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
         .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -751,7 +729,6 @@ exports.registerApi = (env) => {
     ensurePathExists,
     (req, res) => {
       jsonResultOrFailProm(res, gitPromise(['rebase', '--abort'], req.body.path))
-        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
         .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -761,7 +738,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      logger.info('resolve conflicts');
+      winston.info('resolve conflicts');
       jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files)).then(
         emitWorkingTreeChanged.bind(null, req.body.path)
       );
@@ -849,7 +826,6 @@ exports.registerApi = (env) => {
           req.body.path
         )
       )
-        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
         .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
@@ -924,7 +900,6 @@ exports.registerApi = (env) => {
       res,
       gitPromise(['stash', 'save', '--include-untracked', req.body.message || ''], req.body.path)
     )
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
@@ -938,7 +913,6 @@ exports.registerApi = (env) => {
         res,
         gitPromise(['stash', type, `stash@{${req.params.id}}`], req.query.path)
       )
-        .finally(emitGitDirectoryChanged.bind(null, req.query.path))
         .finally(emitWorkingTreeChanged.bind(null, req.query.path));
     }
   );
@@ -952,7 +926,7 @@ exports.registerApi = (env) => {
     // this endpoint can only be invoked from localhost, since the credentials-helper is always
     // on the same machine that we're running ungit on
     if (req.ip != '127.0.0.1' && req.ip != '::ffff:127.0.0.1') {
-      logger.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
+      winston.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
@@ -961,7 +935,7 @@ exports.registerApi = (env) => {
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
-      logger.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
+      winston.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
       res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', (data) => res.json(data));
@@ -1000,7 +974,7 @@ exports.registerApi = (env) => {
     }
     fs.writeFile(path.join(req.body.path, '.gitignore'), req.body.data)
       .then(() => res.status(200).json({}))
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path))
       .catch((e) => res.status(500).json(e));
   });
 
@@ -1042,7 +1016,7 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
-        logger.info('Cleaned up: ' + JSON.stringify(cleaned));
+        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });
     });

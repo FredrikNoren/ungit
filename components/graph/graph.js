@@ -269,7 +269,7 @@ class GraphViewModel {
   }
 
   onProgramEvent(event) {
-    if (event.event == 'git-directory-changed') {
+    if (event.event == 'working-tree-changed') {
       this.loadNodesFromApiThrottled();
       this.updateBranchesThrottled();
     } else if (event.event == 'request-app-content-refresh') {

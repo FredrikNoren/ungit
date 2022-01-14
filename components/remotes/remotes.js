@@ -42,13 +42,9 @@ class RemotesViewModel {
     if (
       event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
-      event.event === 'request-fetch-tags' ||
-      event.event === 'git-directory-changed'
+      event.event === 'request-fetch-tags'
     ) {
-      if (
-        (event.event != 'working-tree-changed' && event.event != 'git-directory-changed') ||
-        this.shouldAutoFetch
-      )
+      if (event.event != 'working-tree-changed' || this.shouldAutoFetch)
         this.fetchDebounced();
     }
   }

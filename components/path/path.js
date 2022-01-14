@@ -1,8 +1,4 @@
 const components = require('ungit-components');
-components.register('path', (args) => {
-  return new PathViewModel(args.server, args.path);
-});
-
 const ko = require('knockout');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
@@ -12,6 +8,10 @@ const octicons = require('octicons');
 const storage = require('ungit-storage');
 const { isSamePayload } = require('../ComponentUtils');
 const showCreateRepoKey = 'isShowCreateRepo';
+
+components.register('path', (args) => {
+  return new PathViewModel(args.server, args.path);
+});
 
 class SubRepositoryViewModel {
   constructor(server, path) {

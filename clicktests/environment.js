@@ -221,9 +221,9 @@ class Environment {
     await this.waitForNetworkIdle();
   }
 
-  async waitForElementVisible(selector, timeout) {
+  waitForElementVisible(selector, timeout) {
     logger.debug(`Waiting for visible: "${selector}"`);
-    return await this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
+    return this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
   }
   waitForElementHidden(selector, timeout) {
     logger.debug(`Waiting for hidden: "${selector}"`);

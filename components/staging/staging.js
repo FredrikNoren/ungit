@@ -124,8 +124,7 @@ class StagingViewModel {
     if (event.event == 'request-app-content-refresh') {
       this.refreshContent();
       this.invalidateFilesDiffs();
-    }
-    if (event.event == 'working-tree-changed') {
+    } else if (event.event == 'working-tree-changed') {
       this.refreshContentThrottled();
       this.invalidateFilesDiffsThrottled();
     }
@@ -176,6 +175,7 @@ class StagingViewModel {
       }
 
     } catch (err) {
+      ungit.logger.error('error during staging refresh: ', err);
       if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
         this.server.unhandledRejection(err);
       }

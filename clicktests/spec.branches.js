@@ -39,6 +39,7 @@ describe('[BRANCHES]', () => {
     await environment.type('-4');
     await environment.waitForElementVisible('.branch-search');
     await environment.wait(500);
+    await environment.page.waitForFunction('document.querySelectorAll(".ui-menu-item-wrapper").length > 0 && document.querySelectorAll(".ui-menu-item-wrapper")[0].text.trim() === "search-4"');
     await environment.press('ArrowDown');
     await environment.wait(500);
     await environment.press('Enter');

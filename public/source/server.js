@@ -4,8 +4,8 @@ var rootPath = (ungit.config && ungit.config.rootPath) || '';
 var nprogress;
 if (ungit.config.isDisableProgressBar) {
   nprogress = {
-    start: () => {},
-    done: () => {},
+    start: () => { },
+    done: () => { },
   };
 } else {
   nprogress = require('nprogress');
@@ -43,9 +43,6 @@ Server.prototype.initSocket = function () {
   });
   this.socket.on('working-tree-changed', function () {
     programEvents.dispatch({ event: 'working-tree-changed' });
-  });
-  this.socket.on('git-directory-changed', function () {
-    programEvents.dispatch({ event: 'git-directory-changed' });
   });
   this.socket.on('request-credentials', function (args) {
     self._getCredentials(function (credentials) {
@@ -194,7 +191,7 @@ Server.prototype.unhandledRejection = function (err) {
     });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error('Unhandled Promise ERROR: ', err);
+    console.error('Unhandled Promise ERROR: ', err, JSON.stringify(err));
     programEvents.dispatch({ event: 'git-crash-error', error: err });
     Raven.captureException(err);
   }

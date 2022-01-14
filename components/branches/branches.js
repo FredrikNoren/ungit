@@ -35,7 +35,7 @@ class BranchesViewModel {
     this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
     this.branchIcon = octicons['git-branch'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
-    this.updateRefsDebounced = _.debounce(this.updateRefs, 500);
+    this.updateRefsDebounced = _.throttle(this.updateRefs, 500);
   }
 
   checkoutBranch(branch) {
@@ -51,8 +51,7 @@ class BranchesViewModel {
     if (
       event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
-      event.event === 'branch-updated' ||
-      event.event === 'git-directory-changed'
+      event.event === 'branch-updated'
     ) {
       this.updateRefsDebounced();
     }
@@ -60,7 +59,6 @@ class BranchesViewModel {
   updateRefs(forceRemoteFetch) {
     ungit.logger.debug('branch.updateRefs() triggered');
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
-    ungit.logger.info(55555555222)
 
     const currentBranchProm = this.server
       .getPromise('/branches', { path: this.repoPath() })
@@ -75,14 +73,11 @@ class BranchesViewModel {
         this.current('~error');
       });
 
-    ungit.logger.info(55555555)
     // refreshes tags branches and remote branches
     const refsProm = this.server
       .getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch })
       .then((refs) => {
-        ungit.logger.info(3333, JSON.stringify(refs))
         if (isSamePayload('refs', refs)) {
-          ungit.logger.info(11111)
           return;
         }
         const version = Date.now();
@@ -124,7 +119,9 @@ class BranchesViewModel {
           }
         });
       })
-      .catch((e) => this.server.unhandledRejection(e));
+      .catch((e) => {
+        ungit.logger.error('error during branch update: ', e);
+      });
 
     return Promise.all([currentBranchProm, refsProm]).finally(() =>
       ungit.logger.debug('branch.updateRefs() finished')
