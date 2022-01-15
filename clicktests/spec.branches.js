@@ -34,11 +34,11 @@ describe('[BRANCHES]', () => {
 
   it('search for the hidden branch', async () => {
     await environment.stopProgramEventPropagation();
+    await environment.waitForNetworkIdle();
     await environment.click('.showSearchForm');
-
+    await environment.wait(500);
     await environment.type('-4');
     await environment.waitForElementVisible('.branch-search');
-    await environment.wait(500);
     await environment.page.waitForFunction('document.querySelectorAll(".ui-menu-item-wrapper").length > 0 && document.querySelectorAll(".ui-menu-item-wrapper")[0].text.trim() === "search-4"');
     await environment.press('ArrowDown');
     await environment.wait(500);
@@ -100,7 +100,7 @@ describe('[BRANCHES]', () => {
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
-    await environment.click('.staging .btn-stg-abort');
+    await environment.click('.staging .btn-stg-abort')
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back
@@ -115,6 +115,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('test backward squash from own lineage', async () => {
+    await environment.waitForBranch('branch-1');
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
     await environment.waitForElementVisible('.staging .files .file');

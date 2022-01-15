@@ -223,11 +223,11 @@ class Environment {
 
   waitForElementVisible(selector, timeout) {
     logger.debug(`Waiting for visible: "${selector}"`);
-    return this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000 });
+    return this.page.waitForSelector(selector, { visible: true, timeout: timeout || 6000000 });
   }
   waitForElementHidden(selector, timeout) {
     logger.debug(`Waiting for hidden: "${selector}"`);
-    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000 });
+    return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000000 });
   }
   wait(duration) {
     return this.page.waitForTimeout(duration);
@@ -249,17 +249,25 @@ class Environment {
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
 
-    try {
-      const toClick = await this.waitForElementVisible(selector);
-      await toClick.click({ clickCount: clickCount });
-    } catch (err) {
-      logger.error('error while clicking', err);
-      throw err;
+    while (true) {
+      try {
+        const toClick = await this.waitForElementVisible(selector);
+        await toClick.click({ clickCount: clickCount });
+        break;
+      } catch (err) {
+        logger.error('error while clicking', err);
+        throw err;
+      }
     }
   }
 
   waitForNetworkIdle() {
     return this.page.waitForNetworkIdle();
+  }
+
+  waitForBranch(branchName) {
+    const currentBranch = 'document.querySelector(".ref.branch.current")';
+    return this.page.waitForFunction(`${currentBranch} && ${currentBranch}.innerText && ${currentBranch}.innerText.trim() === "${branchName}"`);
   }
 
   async commit(commitMessage) {
