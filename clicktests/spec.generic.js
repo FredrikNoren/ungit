@@ -67,7 +67,13 @@ describe('[GENERIC]', () => {
   it('Should be able to add a new file to .gitignore', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
+    await environment.page.waitForFunction(
+      'document.querySelectorAll(".files .file .btn-default").length === 1'
+    );
     await environment.click('.files button.ignore');
+    await environment.page.waitForFunction(
+      'document.querySelector(".name.btn.btn-default").innerText.trim() === ".gitignore"'
+    );
     await environment.click('.files button.ignore');
     await environment.waitForElementHidden('.files .file .btn-default');
   });

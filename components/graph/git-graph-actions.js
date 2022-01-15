@@ -158,7 +158,7 @@ class Rebase extends ActionBase {
         if (err.errorCode != 'merge-failed') {
           this.server.unhandledRejection(err);
         } else {
-          ungit.logger.warn('rebase failed', err)
+          ungit.logger.warn('rebase failed', err);
         }
       });
   }
@@ -196,7 +196,7 @@ class Merge extends ActionBase {
         if (err.errorCode != 'merge-failed') {
           this.server.unhandledRejection(err);
         } else {
-          ungit.logger.warn('merge failed', err)
+          ungit.logger.warn('merge failed', err);
         }
       });
   }
@@ -312,7 +312,7 @@ class CherryPick extends ActionBase {
         if (err.errorCode != 'merge-failed') {
           this.server.unhandledRejection(err);
         } else {
-          ungit.logger.warn('cherrypick failed', err)
+          ungit.logger.warn('cherrypick failed', err);
         }
       });
   }

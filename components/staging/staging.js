@@ -135,7 +135,10 @@ class StagingViewModel {
 
     try {
       const headPromise = this.server.getPromise('/head', { path: this.repoPath(), limit: 1 });
-      const statusPromise = this.server.getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit });
+      const statusPromise = this.server.getPromise('/status', {
+        path: this.repoPath(),
+        fileLimit: filesToDisplayLimit,
+      });
       const log = await headPromise;
       if (log.length > 0) {
         const array = log[0].message.split('\n');
@@ -173,7 +176,6 @@ class StagingViewModel {
         ungit.logger.debug('staging.refreshContent() status', status);
         this.loadStatus(status);
       }
-
     } catch (err) {
       if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
         this.server.unhandledRejection(err);

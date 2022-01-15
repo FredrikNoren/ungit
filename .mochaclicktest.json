@@ -1,5 +1,5 @@
 {
-  "spec": "clicktests/spec.*.js",
+  "spec": "clicktests/spec.generic.js",
   "file": "./source/utils/logger.js",
   "timeout": 35000,
   "bail": true,

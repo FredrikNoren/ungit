@@ -73,12 +73,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => { },
+            results: () => {},
           },
         })
         .data('ui-autocomplete')._renderItem = function (ul, item) {
-          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-        };
+        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+      };
     };
 
     const handleKeyEvent = (event) => {
@@ -178,7 +178,7 @@ exports.start = function () {
   appContainer = new AppContainerViewModel();
   app = components.create('app', { appContainer: appContainer, server: server });
   programEvents.add(async (event) => {
-    ungit.logger.info(`received event: ${event.event}`)
+    ungit.logger.info(`received event: ${event.event}`);
     if (event.event == 'disconnected' || event.event == 'git-crash-error') {
       console.error(`ungit crash: ${event.event}`, event.error, event.stacktrace);
       const err =

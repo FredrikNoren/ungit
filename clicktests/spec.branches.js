@@ -39,7 +39,9 @@ describe('[BRANCHES]', () => {
     await environment.wait(500);
     await environment.type('-4');
     await environment.waitForElementVisible('.branch-search');
-    await environment.page.waitForFunction('document.querySelectorAll(".ui-menu-item-wrapper").length > 0 && document.querySelectorAll(".ui-menu-item-wrapper")[0].text.trim() === "search-4"');
+    await environment.page.waitForFunction(
+      'document.querySelectorAll(".ui-menu-item-wrapper").length > 0 && document.querySelectorAll(".ui-menu-item-wrapper")[0].text.trim() === "search-4"'
+    );
     await environment.press('ArrowDown');
     await environment.wait(500);
     await environment.press('Enter');
@@ -100,7 +102,7 @@ describe('[BRANCHES]', () => {
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
-    await environment.click('.staging .btn-stg-abort')
+    await environment.click('.staging .btn-stg-abort');
     await environment.click('.modal-dialog .btn-primary');
 
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back

@@ -115,7 +115,11 @@ class GraphViewModel {
     const edges = [];
 
     try {
-      const log = await this.server.getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() });
+      const log = await this.server.getPromise('/gitlog', {
+        path: this.repoPath(),
+        limit: this.limit(),
+        skip: this.skip(),
+      });
       if (isSamePayload('log', log)) {
         return;
       }
@@ -140,7 +144,7 @@ class GraphViewModel {
       }
       this.graphWidth(1000 + this.heighstBranchOrder * 90);
     } catch (e) {
-      this.server.unhandledRejection(e)
+      this.server.unhandledRejection(e);
     } finally {
       if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
         this.scrolledToEnd();
@@ -299,12 +303,12 @@ class GraphViewModel {
     }
 
     try {
-      this.checkedOutBranch(checkout)
+      this.checkedOutBranch(checkout);
     } catch (err) {
       if (err.errorCode != 'not-a-repository') {
         this.server.unhandledRejection(err);
       } else {
-        ungit.logger.warn('updateBranches failed', err)
+        ungit.logger.warn('updateBranches failed', err);
       }
     }
   }

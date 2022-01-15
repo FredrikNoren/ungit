@@ -44,8 +44,7 @@ class RemotesViewModel {
       event.event === 'request-app-content-refresh' ||
       event.event === 'request-fetch-tags'
     ) {
-      if (event.event != 'working-tree-changed' || this.shouldAutoFetch)
-        this.fetchDebounced();
+      if (event.event != 'working-tree-changed' || this.shouldAutoFetch) this.fetchDebounced();
     }
   }
 
@@ -56,9 +55,9 @@ class RemotesViewModel {
     this.isFetching = true;
     const tagPromise = options.tags
       ? this.server.getPromise('/remote/tags', {
-        path: this.repoPath(),
-        remote: this.currentRemote(),
-      })
+          path: this.repoPath(),
+          remote: this.currentRemote(),
+        })
       : null;
     const fetchPromise = options.nodes
       ? this.server.postPromise('/fetch', { path: this.repoPath(), remote: this.currentRemote() })
@@ -119,8 +118,6 @@ class RemotesViewModel {
     return this.server
       .getPromise('/remotes', { path: this.repoPath() })
       .then((remotes) => {
-
-
         remotes = remotes.map((remote) => ({
           name: remote,
           changeRemote: () => {
@@ -147,7 +144,7 @@ class RemotesViewModel {
         if (err.errorCode != 'not-a-repository') {
           this.server.unhandledRejection(err);
         } else {
-          ungit.logger.warn('updateRemotes failed', err)
+          ungit.logger.warn('updateRemotes failed', err);
         }
       });
   }

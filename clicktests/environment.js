@@ -26,7 +26,7 @@ class Environment {
     this.config = config || {};
     this.config.rootPath = typeof this.config.rootPath === 'string' ? this.config.rootPath : '';
     this.config.serverTimeout = this.config.serverTimeout || 35000;
-    this.config.headless = this.config.headless === undefined ? true : this.config.headless;
+    this.config.headless = false; //this.config.headless === undefined ? true : this.config.headless;
     this.config.viewWidth = 1920;
     this.config.viewHeight = 1080;
     this.config.serverStartupOptions = this.config.serverStartupOptions || [];
@@ -249,7 +249,7 @@ class Environment {
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
 
-    while (true) {
+    for (;;) {
       try {
         const toClick = await this.waitForElementVisible(selector);
         await toClick.click({ clickCount: clickCount });
@@ -267,7 +267,9 @@ class Environment {
 
   waitForBranch(branchName) {
     const currentBranch = 'document.querySelector(".ref.branch.current")';
-    return this.page.waitForFunction(`${currentBranch} && ${currentBranch}.innerText && ${currentBranch}.innerText.trim() === "${branchName}"`);
+    return this.page.waitForFunction(
+      `${currentBranch} && ${currentBranch}.innerText && ${currentBranch}.innerText.trim() === "${branchName}"`
+    );
   }
 
   async commit(commitMessage) {
