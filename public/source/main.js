@@ -73,12 +73,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => {},
+            results: () => { },
           },
         })
         .data('ui-autocomplete')._renderItem = function (ul, item) {
-        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-      };
+          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+        };
     };
 
     const handleKeyEvent = (event) => {
@@ -195,7 +195,11 @@ exports.start = function () {
     }
 
     if (app.onProgramEvent) {
-      app.onProgramEvent(event);
+      try {
+        app.onProgramEvent(event);
+      } catch (e) {
+        ungit.logger.error(`failed to process onProgramEvent ${e}`);
+      }
     }
   });
   if (ungit.config.authentication) {

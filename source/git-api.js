@@ -38,7 +38,7 @@ exports.registerApi = (env) => {
 
         fs.readFile(path.join(socket.watcherPath, '.gitignore'))
           .then((ignoreContent) => (socket.ignore = ignore().add(ignoreContent.toString())))
-          .catch(() => {})
+          .catch(() => { })
           .then(() => {
             socket.watcher = [];
             return watchPath(socket, '.', { recursive: isMac || isWindows });
@@ -144,7 +144,7 @@ exports.registerApi = (env) => {
       }
     },
     500,
-    { maxWait: 2000 }
+    { leading: false, maxWait: 1000, trailing: true }
   );
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
@@ -274,7 +274,7 @@ exports.registerApi = (env) => {
           'push',
           req.body.remote,
           (req.body.refSpec ? req.body.refSpec : 'HEAD') +
-            (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
+          (req.body.remoteBranch ? `:${req.body.remoteBranch}` : ''),
           req.body.force ? '-f' : '',
         ]),
         repoPath: req.body.path,
@@ -593,7 +593,7 @@ exports.registerApi = (env) => {
         `:refs/tags/${req.query.name.trim()}`,
       ]);
       const task = gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-        .catch(() => {}) // might have already deleted, so ignoring error
+        .catch(() => { }) // might have already deleted, so ignoring error
         .then(() => gitPromise(commands, req.query.path));
 
       jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.query.path));
@@ -981,29 +981,24 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
-      fs.writeFile(req.body.file, content)
-        .then(() => res.json({}))
+      jsonResultOrFailProm(res, fs.writeFile(req.body.file, content))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
-      fs.writeFile(req.body.file, content)
-        .then(() => res.json({}))
+      jsonResultOrFailProm(res, fs.writeFile(req.body.file, content))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png', { encoding: 'binary' })
-        .then(() => res.json({}))
+      jsonResultOrFailProm(res, fs.writeFile(req.body.file, 'png', { encoding: 'binary' }))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
-      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' })
-        .then(() => res.json({}))
+      jsonResultOrFailProm(res, fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' }))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
-      fs.unlink(req.body.file)
-        .then(() => res.json({}))
+      jsonResultOrFailProm(res, fs.unlink(req.body.file))
         .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
@@ -1013,6 +1008,11 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
+        if (err) {
+          ungit.logger.error(`error while cleanup ${err}`);
+          res.status(500).json(err);
+          return;
+        }
         logger.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });
