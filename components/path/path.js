@@ -127,11 +127,17 @@ class PathViewModel {
         this.updateStatus();
       });
   }
-  onProgramEvent(event) {
-    if (event.event == 'working-tree-changed') this.updateStatus();
-    else if (event.event == 'request-app-content-refresh') this.updateStatus();
+  async onProgramEvent(event) {
+    const promises = [];
+    if (event.event == 'working-tree-changed' || event.event == 'request-app-content-refresh') {
+      promises.push(this.updateStatus());
+    }
 
-    if (this.repository()) this.repository().onProgramEvent(event);
+    if (this.repository()) {
+      promises.push(this.repository().onProgramEvent(event));
+    }
+
+    await Promise.all(promises);
   }
   cloneRepository() {
     this.status('cloning');

@@ -35,7 +35,6 @@ class BranchesViewModel {
     this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
     this.branchIcon = octicons['git-branch'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
-    this.updateRefsDebounced = _.throttle(this.updateRefs, 500);
   }
 
   checkoutBranch(branch) {
@@ -47,85 +46,81 @@ class BranchesViewModel {
   clickFetch() {
     this.updateRefs(true);
   }
-  onProgramEvent(event) {
+  async onProgramEvent(event) {
     if (
       event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
       event.event === 'branch-updated'
     ) {
-      this.updateRefsDebounced();
+      await this.updateRefs();
     }
   }
-  updateRefs(forceRemoteFetch) {
-    ungit.logger.debug('branch.updateRefs() triggered');
+  async updateRefs(forceRemoteFetch) {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
 
-    const currentBranchProm = this.server
-      .getPromise('/branches', { path: this.repoPath() })
-      .then((branches) =>
-        branches.forEach((b) => {
-          if (b.current) {
-            this.current(b.name);
+    const branchesProm = this.server.getPromise('/branches', { path: this.repoPath() });
+    const refsProm = this.server.getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch });
+
+    try {
+      // set current branch
+      (await branchesProm).forEach(b => {
+        if (b.current) {
+          this.current(b.name);
+        }
+      });
+    } catch (e) {
+      this.current('~error');
+      ungit.logger.warn('error while setting current branch', e);
+    }
+
+    try {
+      // update branches and tags references.
+      const refs = await refsProm
+      if (isSamePayload('refs', refs)) {
+        return;
+      }
+
+      const version = Date.now();
+      const sorted = refs
+        .map((r) => {
+          const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
+          ref.node(this.graph.getNode(r.sha1));
+          ref.version = version;
+          return ref;
+        })
+        .sort((a, b) => {
+          if (a.current() || b.current()) {
+            return a.current() ? -1 : 1;
+          } else if (a.isRemoteBranch === b.isRemoteBranch) {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name > b.name) {
+              return 1;
+            }
+            return 0;
+          } else {
+            return a.isRemoteBranch ? 1 : -1;
           }
         })
-      )
-      .catch((err) => {
-        this.current('~error');
-      });
-
-    // refreshes tags branches and remote branches
-    const refsProm = this.server
-      .getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch })
-      .then((refs) => {
-        if (isSamePayload('refs', refs)) {
-          return;
-        }
-        const version = Date.now();
-        const sorted = refs
-          .map((r) => {
-            const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
-            ref.node(this.graph.getNode(r.sha1));
-            ref.version = version;
-            return ref;
-          })
-          .sort((a, b) => {
-            if (a.current() || b.current()) {
-              return a.current() ? -1 : 1;
-            } else if (a.isRemoteBranch === b.isRemoteBranch) {
-              if (a.name < b.name) {
-                return -1;
-              }
-              if (a.name > b.name) {
-                return 1;
-              }
-              return 0;
-            } else {
-              return a.isRemoteBranch ? 1 : -1;
-            }
-          })
-          .filter((ref) => {
-            if (ref.localRefName == 'refs/stash') return false;
-            if (ref.localRefName.endsWith('/HEAD')) return false;
-            if (!this.isShowRemote() && ref.isRemote) return false;
-            if (!this.isShowBranch() && ref.isBranch) return false;
-            if (!this.isShowTag() && ref.isTag) return false;
-            return true;
-          });
-        this.branchesAndLocalTags(sorted);
-        this.graph.refs().forEach((ref) => {
-          // ref was removed from another source
-          if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
-            ref.remove(true);
-          }
+        .filter((ref) => {
+          if (ref.localRefName == 'refs/stash') return false;
+          if (ref.localRefName.endsWith('/HEAD')) return false;
+          if (!this.isShowRemote() && ref.isRemote) return false;
+          if (!this.isShowBranch() && ref.isBranch) return false;
+          if (!this.isShowTag() && ref.isTag) return false;
+          return true;
         });
-      })
-      .catch((e) => {
-        ungit.logger.error('error during branch update: ', e);
+      this.branchesAndLocalTags(sorted);
+      this.graph.refs().forEach((ref) => {
+        // ref was removed from another source
+        if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
+          ref.remove(true);
+        }
       });
-
-    return Promise.all([currentBranchProm, refsProm]).finally(() =>
-      ungit.logger.debug('branch.updateRefs() finished')
-    );
+    } catch (e) {
+      ungit.logger.error('error during branch update: ', e);
+    }
   }
 
   branchRemove(branch) {

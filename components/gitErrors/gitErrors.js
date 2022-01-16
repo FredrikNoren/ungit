@@ -17,7 +17,7 @@ class GitErrorsViewModel {
     ko.renderTemplate('gitErrors', this, {}, parentElement);
   }
 
-  onProgramEvent(event) {
+  async onProgramEvent(event) {
     if (event.event == 'git-error') this._handleGitError(event);
   }
 

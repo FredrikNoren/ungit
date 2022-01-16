@@ -16,24 +16,23 @@ class SubmodulesViewModel {
     this.linkIcon = octicons['link-external'].toSVG({ height: 18 });
   }
 
-  onProgramEvent(event) {
-    if (event.event == 'submodule-fetch') this.fetchSubmodules();
+  async onProgramEvent(event) {
+    if (event.event == 'submodule-fetch') await this.fetchSubmodules();
   }
 
-  updateNode(parentElement) {
+  updateNode() {
     this.fetchSubmodules().then((submoduleViewModel) => {
-      ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
+      ko.renderTemplate('submodules', submoduleViewModel, {}, this);
     });
   }
 
-  fetchSubmodules() {
-    return this.server
-      .getPromise('/submodules', { path: this.repoPath() })
-      .then((submodules) => {
-        this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
-        return this;
-      })
-      .catch((e) => this.server.unhandledRejection(e));
+  async fetchSubmodules() {
+    const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
+    try {
+      this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+    } catch (e) {
+      this.server.unhandledRejection(e);
+    }
   }
 
   updateSubmodules() {

@@ -100,10 +100,12 @@ class StagingViewModel {
       else return 'glyphicon-check';
     });
 
-    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, {
+    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 500, {
+      leading: false,
       trailing: true,
     });
-    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, {
+    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 500, {
+      leading: false,
       trailing: true,
     });
     this.refreshContentThrottled();
@@ -120,13 +122,10 @@ class StagingViewModel {
     ko.renderTemplate('staging', this, {}, parentElement);
   }
 
-  onProgramEvent(event) {
-    if (event.event == 'request-app-content-refresh') {
-      this.refreshContent();
+  async onProgramEvent(event) {
+    if (event.event == 'request-app-content-refresh' || event.event === 'working-tree-changed') {
+      await this.refreshContent();
       this.invalidateFilesDiffs();
-    } else if (event.event == 'working-tree-changed') {
-      this.refreshContentThrottled();
-      this.invalidateFilesDiffsThrottled();
     }
   }
 

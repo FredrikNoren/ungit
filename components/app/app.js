@@ -93,13 +93,23 @@ class AppViewModel {
     if (this.content() && this.content().updateAnimationFrame)
       this.content().updateAnimationFrame(deltaT);
   }
-  onProgramEvent(event) {
-    if (event.event == 'request-credentials') this._handleCredentialsRequested(event);
-    else if (event.event == 'request-show-dialog') this.showDialog(event.dialog);
-    else if (event.event == 'request-remember-repo') this._handleRequestRememberRepo(event);
+  async onProgramEvent(event) {
+    if (event.event == 'request-credentials') {
+      this._handleCredentialsRequested(event);
+    } else if (event.event == 'request-show-dialog') {
+      this.showDialog(event.dialog);
+    } else if (event.event == 'request-remember-repo') {
+      this._handleRequestRememberRepo(event);
+    }
 
-    if (this.content() && this.content().onProgramEvent) this.content().onProgramEvent(event);
-    if (this.header && this.header.onProgramEvent) this.header.onProgramEvent(event);
+    const contentEventHandler = this.content() && this.content().onProgramEvent
+      ? this.content().onProgramEvent(event)
+      : Promise.resolve();
+    const headerEventHandler = this.header && this.header.onProgramEvent
+      ? this.header.onProgramEvent(event)
+      : Promise.resolve();
+
+    await Promise.all([contentEventHandler, headerEventHandler]);
   }
   _handleRequestRememberRepo(event) {
     const repoPath = event.repoPath;

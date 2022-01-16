@@ -75,10 +75,8 @@ class GraphViewModel {
       }
     });
 
-    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
-    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
-    this.loadNodesFromApiThrottled();
-    this.updateBranchesThrottled();
+    this.loadNodesFromApi();
+    this.updateBranches();
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ height: 18 });
@@ -272,12 +270,11 @@ class GraphViewModel {
     if (event.target.nodeName === 'INPUT') return true;
   }
 
-  onProgramEvent(event) {
+  async onProgramEvent(event) {
     if (event.event == 'working-tree-changed') {
-      this.loadNodesFromApiThrottled();
-      this.updateBranchesThrottled();
+      await Promise.all([this.loadNodesFromApi(), this.updateBranches()]);
     } else if (event.event == 'request-app-content-refresh') {
-      this.loadNodesFromApiThrottled();
+      await this.loadNodesFromApi();
     } else if (event.event == 'remote-tags-update') {
       this.setRemoteTags(event.tags);
     } else if (event.event == 'current-remote-changed') {

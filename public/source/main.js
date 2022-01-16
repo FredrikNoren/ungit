@@ -173,6 +173,24 @@ AppContainerViewModel.prototype.templateChooser = function (data) {
 
 var app, appContainer, server;
 
+const throttledEventTrigger = _.throttle(async (event) => {
+  if (ungit.__eventProcessingProm) {
+    ungit.logger.debug('programEvent process rescheduled');
+    return throttledEventTrigger(event);
+  }
+  try {
+    ungit.logger.debug('programEvent process triggered');
+    ungit.__eventProcessingProm = app.onProgramEvent(event);
+    await ungit.__eventProcessingProm;
+    ungit.__eventProcessedTime = Date.now();
+  } catch (e) {
+    ungit.logger.error(`failed to process onProgramEvent`, e, e.stack, e.stacktrace);
+  } finally {
+    ungit.__eventProcessingProm = undefined;
+    ungit.logger.debug('programEvent process finished');
+  }
+}, 500, { leading: false, trailing: true });
+
 exports.start = function () {
   server = new Server();
   appContainer = new AppContainerViewModel();
@@ -194,13 +212,7 @@ exports.start = function () {
       windowTitle.update();
     }
 
-    if (app.onProgramEvent) {
-      try {
-        app.onProgramEvent(event);
-      } catch (e) {
-        ungit.logger.error(`failed to process onProgramEvent ${e}`);
-      }
-    }
+    throttledEventTrigger(event);
   });
   if (ungit.config.authentication) {
     var authenticationScreen = components.create('login', { server: server });

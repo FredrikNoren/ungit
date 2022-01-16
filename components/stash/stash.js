@@ -74,9 +74,9 @@ class StashViewModel {
     if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
   }
 
-  onProgramEvent(event) {
+  async onProgramEvent(event) {
     if (event.event == 'request-app-content-refresh' || event.event == 'working-tree-changed')
-      this.refresh();
+      await this.refresh();
   }
 
   async refresh() {
