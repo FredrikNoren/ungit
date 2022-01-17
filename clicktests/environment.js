@@ -324,15 +324,14 @@ class Environment {
   // after to completely prevent event propagations.
   stopProgramEventPropagation() {
     return this.page.evaluate((_) => {
-      ungit._bindings = ungit.programEvents._bindings;
-      ungit.programEvents._bindings = [];
+      ungit.programEvents.active = false;
     });
   }
 
   // Start program event propagtion.
   startProgramEventPropagation() {
     return this.page.evaluate((_) => {
-      ungit.programEvents._bindings = ungit._bindings;
+      ungit.programEvents.active = true;
     });
   }
 
@@ -341,7 +340,33 @@ class Environment {
   // and etc.  This function is to help mimic those movements.
   triggerProgramEvents() {
     return this.page.evaluate((_) => {
+      const isActive = ungit.programEvents.active;
+      if (!isActive) {
+        ungit.programEvents.active = true;
+      }
       ungit.programEvents.dispatch({ event: 'working-tree-changed' });
+      if (!isActive) {
+        ungit.programEvents.active = false;
+      }
     });
+  }
+
+  // ensure UI refresh is triggered with the latest information at the time of the call.
+  async ensureRefresh() {
+    logger.info('ensure refresh...');
+    // ensure no event processing is running.
+    await this.page.waitForFunction(() => ungit.__eventProcessingProm === undefined);
+
+    // capture latest processing time.
+    const lastEventProcessedTime = await this.page.evaluate(() => ungit.__eventProcessedTime) || 0;
+
+    // trigger program events.
+    await this.triggerProgramEvents();
+
+    // wait for triggered program event to be processed.
+    await this.page.waitForFunction((lastEventProcessedTime) => {
+      return ungit.__eventProcessedTime > lastEventProcessedTime
+    }, {}, lastEventProcessedTime)
+    logger.info('finished refreshing...');
   }
 }

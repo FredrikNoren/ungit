@@ -88,6 +88,7 @@ describe('[BRANCHES]', () => {
   it('add another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.commit('commit-3');
+    await environment.ensureRefresh();
   });
 
   it('checkout cherypick base', async () => {
@@ -104,8 +105,7 @@ describe('[BRANCHES]', () => {
     );
     await environment.click('.staging .btn-stg-abort');
     await environment.click('.modal-dialog .btn-primary');
-
-    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]'); // wait for nodes to come back
+    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]', 99999999);
   });
 
   it('cherrypick success case', async () => {
@@ -113,6 +113,7 @@ describe('[BRANCHES]', () => {
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 
@@ -129,6 +130,7 @@ describe('[BRANCHES]', () => {
   it('test forward squash from different lineage', async () => {
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-3"] .squash .dropmask');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
   });
 
