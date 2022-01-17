@@ -34,12 +34,8 @@ exports.registerApi = (env) => {
         stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.watcherPath = path.normalize(data.path);
         socket.join(socket.watcherPath); // join room for this path
-        const ignoreContent = await fs
-          .readFile(path.join(socket.watcherPath, '.gitignore'))
-          .catch(() => '');
-        socket.ignore = ignore().add(ignoreContent.toString());
 
-        const watcher = await watchRepo(socket.watcherPath, socket.ignore);
+        const watcher = await watchRepo(socket.watcherPath);
         watcher.on(
           'workdir',
           _.throttle((changedPath) => {
@@ -92,6 +88,16 @@ exports.registerApi = (env) => {
     }
   }
 
+  const readIgnore = async (pathToWatch) => {
+    winston.debug(`Parsing .gitignore for ${pathToWatch}`);
+    const out = ignore();
+    // For Windows/Mac that can't skip
+    out.add('.git/');
+    const ignoreContent = await fs.readFile(path.join(pathToWatch, '.gitignore')).catch(() => null);
+    if (ignoreContent) out.add(ignoreContent.toString());
+    return out;
+  };
+
   // TODO move to nodegit
   const watchRepo = async (pathToWatch, ignore) => {
     winston.info(`Start watching ${pathToWatch}`);
@@ -100,16 +106,21 @@ exports.registerApi = (env) => {
     let refsPath;
     if ((await fs.access(repoPath).catch(() => false)) === undefined) {
       // Looks like a repo, let's watch workdir
-      // For Windows/Mac that can't skip
-      ignore.add('.git/');
+      let gitIgnore = await readIgnore(pathToWatch);
       await watcher.addWorkdir(pathToWatch, {
         recursive: true,
         filter: (changedPath, skip) => {
           const filePath = path.relative(pathToWatch, changedPath);
+          if (filePath === '.gitignore') {
+            readIgnore(pathToWatch).then(
+              (ign) => (gitIgnore = ign),
+              (err) => winston.error(`Could not parse .gitignore for`, pathToWatch, err)
+            );
+          }
           if (filePath === '.git') return skip;
           // We add / to test for directories, we can't have a file named like a directory
           // and otherwise directory `foo` won't match ignore `foo/`
-          if (ignore.ignores(filePath) || ignore.ignores(`${filePath}/`)) {
+          if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
             // TODO https://github.com/kaelzhang/node-ignore/issues/78
             // optimization: assume these are permanent skips
             if (/(node_modules|build|dist|cache|coverage)/.test(filePath)) return skip;
