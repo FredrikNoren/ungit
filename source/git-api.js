@@ -91,8 +91,6 @@ exports.registerApi = (env) => {
   const readIgnore = async (pathToWatch) => {
     winston.debug(`Parsing .gitignore for ${pathToWatch}`);
     const out = ignore();
-    // For Windows/Mac that can't skip
-    out.add('.git/');
     const ignoreContent = await fs.readFile(path.join(pathToWatch, '.gitignore')).catch(() => null);
     if (ignoreContent) out.add(ignoreContent.toString());
     return out;
@@ -103,7 +101,6 @@ exports.registerApi = (env) => {
     winston.info(`Start watching ${pathToWatch}`);
     const watcher = new RepoWatcher();
     let repoPath = path.join(pathToWatch, '.git');
-    let refsPath;
     if ((await fs.access(repoPath).catch(() => false)) === undefined) {
       // Looks like a repo, let's watch workdir
       let gitIgnore = await readIgnore(pathToWatch);
@@ -118,7 +115,8 @@ exports.registerApi = (env) => {
               (err) => winston.error(`Could not parse .gitignore for`, pathToWatch, err)
             );
           }
-          if (filePath === '.git') return skip;
+          // We monitor the repo separately
+          if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return skip;
           // We add / to test for directories, we can't have a file named like a directory
           // and otherwise directory `foo` won't match ignore `foo/`
           if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
@@ -134,9 +132,11 @@ exports.registerApi = (env) => {
       // Could be bare
       repoPath = pathToWatch;
     }
-    refsPath = path.join(repoPath, 'refs');
     // Here we watch the git state
-    await watcher.addGit(refsPath, { recursive: true, filter: (f) => !f.endsWith('.lock') });
+    await watcher.addGit(path.join(repoPath, 'refs'), {
+      recursive: true,
+      filter: (f) => !f.endsWith('.lock'),
+    });
     await watcher.addGit(path.join(repoPath, 'HEAD'));
     await watcher.addGit(path.join(repoPath, 'index'));
 
