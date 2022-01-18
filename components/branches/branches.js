@@ -48,7 +48,6 @@ class BranchesViewModel {
   }
   onProgramEvent(event) {
     if (
-      event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
       event.event === 'branch-updated' ||
       event.event === 'git-directory-changed'

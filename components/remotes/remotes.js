@@ -40,7 +40,6 @@ class RemotesViewModel {
 
   onProgramEvent(event) {
     if (
-      event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
       event.event === 'request-fetch-tags' ||
       event.event === 'git-directory-changed'
