@@ -111,6 +111,7 @@ exports.registerApi = (env) => {
         recursive: true,
         filter: (changedPath, skip) => {
           const filePath = path.relative(pathToWatch, changedPath);
+          if (!filePath) return false;
           if (filePath === '.gitignore') {
             readIgnore(pathToWatch).then(
               (ign) => (gitIgnore = ign),
