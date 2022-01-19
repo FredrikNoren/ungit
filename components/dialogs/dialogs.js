@@ -32,7 +32,7 @@ class DialogViewModel {
   }
 
   closeThen(thenFunc) {
-    this.closePromise = this.closePromise.then(thenFunc);
+    this.closePromise = this.closePromise.then(thenFunc.bind(null, this));
     return this;
   }
 
