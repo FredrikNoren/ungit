@@ -498,11 +498,10 @@ class FileViewModel {
   }
 
   discardChanges() {
-    ungit.logger.debug('discard time since mute: ', new Date().getTime() - this.staging.mutedTime);
-    if (
-      ungit.config.disableDiscardWarning ||
-      new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime
-    ) {
+    const timeSinceLastMute = new Date().getTime() - this.staging.mutedTime;
+    const isMuteWarning = timeSinceLastMute < ungit.config.disableDiscardMuteTime;
+    ungit.logger.debug(`discard time since mute: ${timeSinceLastMute}, isMuteWarning: ${isMuteWarning}`);
+    if (ungit.config.disableDiscardWarning || isMuteWarning) {
       this.server
         .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
         .catch((e) => this.server.unhandledRejection(e));

@@ -5,5 +5,5 @@ module.exports = programEvents;
 ungit.programEvents = programEvents;
 
 programEvents.add(function (event) {
-  console.log('Event:', event);
+  console.log('Event:', event.event);
 });
