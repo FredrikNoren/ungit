@@ -1009,7 +1009,7 @@ exports.registerApi = (env) => {
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
         if (err) {
-          ungit.logger.error(`error while cleanup ${err}`);
+          logger.error(`error while cleanup ${err}`);
           res.status(500).json(err);
           return;
         }

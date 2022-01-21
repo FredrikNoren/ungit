@@ -6,15 +6,16 @@ const programEvents = require('ungit-program-events');
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
-const { isSamePayload } = require('../ComponentUtils');
+const { ComponentRoot } = require('../ComponentRoot');
 
 components.register(
   'staging',
   (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
 );
 
-class StagingViewModel {
+class StagingViewModel extends ComponentRoot {
   constructor(server, repoPath, graph) {
+    super();
     this.server = server;
     this.repoPath = repoPath;
     this.graph = graph;
@@ -147,7 +148,7 @@ class StagingViewModel {
       }
 
       const status = await statusPromise;
-      if (isSamePayload('status', status)) {
+      if (this.isSamePayload(status)) {
         return;
       }
 

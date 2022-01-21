@@ -7,14 +7,15 @@ const storage = require('ungit-storage');
 const showRemote = 'showRemote';
 const showBranch = 'showBranch';
 const showTag = 'showTag';
-const { isSamePayload } = require('../ComponentUtils');
+const { ComponentRoot } = require('../ComponentRoot');
 
 components.register('branches', (args) => {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
 });
 
-class BranchesViewModel {
+class BranchesViewModel extends ComponentRoot {
   constructor(server, graph, repoPath) {
+    super();
     this.repoPath = repoPath;
     this.server = server;
     this.branchesAndLocalTags = ko.observableArray();
@@ -76,7 +77,7 @@ class BranchesViewModel {
     try {
       // update branches and tags references.
       const refs = await refsProm
-      if (isSamePayload('refs', refs)) {
+      if (this.isSamePayload(refs)) {
         return;
       }
 

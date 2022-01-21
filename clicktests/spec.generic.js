@@ -13,6 +13,7 @@ const changeTestFile = async (filename, repoPath) => {
     file: filename,
     path: repoPath,
   });
+  await environment.ensureRefresh();
 };
 const amendCommit = async () => {
   try {
@@ -21,7 +22,9 @@ const amendCommit = async () => {
   } catch (err) {
     await environment.click('.amend-link');
   }
+  await environment.ensureRefresh();
   await environment.click('.commit-btn');
+  await environment.ensureRefresh();
   await environment.waitForElementHidden('.files .file .btn-default');
 };
 
@@ -119,6 +122,7 @@ describe('[GENERIC]', () => {
     await environment.click('.branch[data-ta-name="willbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.click('.modal-dialog .btn-primary');
+    await environment.ensureRefresh();
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
 
@@ -127,15 +131,16 @@ describe('[GENERIC]', () => {
     await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.click('.modal-dialog .btn-primary');
+    await environment.ensureRefresh();
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
   it('Commit changes to a file', async () => {
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
-    await environment.wait(500);
     await environment.insert('.staging input.form-control', 'My commit message');
     await environment.click('.commit-btn');
+    await environment.ensureRefresh();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
@@ -145,6 +150,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('.files .file .deletions');
     await environment.click('.files button.discard');
     await environment.click('.modal-dialog .btn-primary');
+    await environment.ensureRefresh();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
@@ -158,6 +164,7 @@ describe('[GENERIC]', () => {
   it('Checkout testbranch with action', async () => {
     await environment.click('.branch[data-ta-name="testbranch"]');
     await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('.ref.branch[data-ta-name="testbranch"].current');
   });
 
@@ -186,8 +193,8 @@ describe('[GENERIC]', () => {
 
   it('Revert merge', async () => {
     await environment.click('[data-ta-clickable="node-clickable-0"]');
-    await environment.waitForElementVisible('[data-ta-action="revert"]');
     await environment.click('[data-ta-action="revert"]');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible(
       '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"]'
     );
@@ -195,7 +202,6 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to move a branch', async () => {
     await environment.createBranch('movebranch');
-    await environment.waitForElementVisible('[data-ta-name="movebranch"]');
     await environment.moveRef('movebranch', 'Init');
   });
 

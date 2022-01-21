@@ -94,11 +94,11 @@ class AppViewModel {
       this.content().updateAnimationFrame(deltaT);
   }
   async onProgramEvent(event) {
-    if (event.event == 'request-credentials') {
+    if (event.event === 'request-credentials') {
       this._handleCredentialsRequested(event);
-    } else if (event.event == 'request-show-dialog') {
+    } else if (event.event === 'request-show-dialog') {
       this.showDialog(event.dialog);
-    } else if (event.event == 'request-remember-repo') {
+    } else if (event.event === 'request-remember-repo') {
       this._handleRequestRememberRepo(event);
     }
 

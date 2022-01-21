@@ -6,13 +6,14 @@ const components = require('ungit-components');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
 const EdgeViewModel = require('./edge');
-const { isSamePayload } = require('../ComponentUtils');
+const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
 components.register('graph', (args) => new GraphViewModel(args.server, args.repoPath));
 
-class GraphViewModel {
+class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
+    super();
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
     this.limit = ko.observable(numberOfNodesPerLoad);
@@ -118,7 +119,7 @@ class GraphViewModel {
         limit: this.limit(),
         skip: this.skip(),
       });
-      if (isSamePayload('log', log)) {
+      if (this.isSamePayload(log)) {
         return;
       }
       const nodes = this.computeNode(
@@ -294,10 +295,6 @@ class GraphViewModel {
 
   async updateBranches() {
     const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
-
-    if (isSamePayload('checkout', checkout)) {
-      return;
-    }
 
     try {
       this.checkedOutBranch(checkout);

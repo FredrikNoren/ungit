@@ -6,7 +6,7 @@ const programEvents = require('ungit-program-events');
 const { encodePath } = require('ungit-address-parser');
 const octicons = require('octicons');
 const storage = require('ungit-storage');
-const { isSamePayload } = require('../ComponentUtils');
+const { ComponentRoot } = require('../ComponentRoot');
 const showCreateRepoKey = 'isShowCreateRepo';
 
 components.register('path', (args) => {
@@ -32,8 +32,9 @@ class SubRepositoryViewModel {
   }
 }
 
-class PathViewModel {
+class PathViewModel extends ComponentRoot {
   constructor(server, path) {
+    super();
     this.server = server;
     this.repoPath = ko.observable(path);
     this.dirName =
@@ -86,46 +87,44 @@ class PathViewModel {
   updateAnimationFrame(deltaT) {
     if (this.repository()) this.repository().updateAnimationFrame(deltaT);
   }
-  updateStatus() {
+  async updateStatus() {
     ungit.logger.debug('path.updateStatus() triggered');
-    return this.server
-      .getPromise('/quickstatus', { path: this.repoPath() })
-      .then((status) => {
-        if (isSamePayload('quickstatus', status)) {
-          return;
-        }
+    const status = await this.server.getPromise('/quickstatus', { path: this.repoPath() });
+    try {
+      if (this.isSamePayload(status)) {
+        return;
+      }
 
-        if (status.type == 'inited' || status.type == 'bare') {
-          if (this.repoPath() !== status.gitRootPath) {
-            this.repoPath(status.gitRootPath);
-            programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
-            programEvents.dispatch({ event: 'working-tree-changed' });
-          }
-          this.status(status.type);
-          if (!this.repository()) {
-            this.repository(components.create('repository', { server: this.server, path: this }));
-          }
-        } else if (status.type == 'uninited' || status.type == 'no-such-path') {
-          if (status.subRepos && status.subRepos.length > 0) {
-            this.subRepos(
-              status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
-            );
-          }
-          this.status(status.type);
-          this.repository(null);
+      if (status.type == 'inited' || status.type == 'bare') {
+        if (this.repoPath() !== status.gitRootPath) {
+          this.repoPath(status.gitRootPath);
+          programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
+          programEvents.dispatch({ event: 'working-tree-changed' });
         }
-        return null;
-      })
-      .catch((err) => ungit.logger.debug('path.updateStatus() errored', err))
-      .finally(() => ungit.logger.debug('path.updateStatus() finished'));
+        this.status(status.type);
+        if (!this.repository()) {
+          this.repository(components.create('repository', { server: this.server, path: this }));
+        }
+      } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+        if (status.subRepos && status.subRepos.length > 0) {
+          this.subRepos(
+            status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
+          );
+        }
+        this.status(status.type);
+        this.repository(null);
+      }
+    } catch (err) {
+      ungit.logger.debug('path.updateStatus() errored', err)
+    } finally {
+      ungit.logger.debug('path.updateStatus() finished')
+    }
   }
   initRepository() {
     return this.server
       .postPromise('/init', { path: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
-      .finally((res) => {
-        this.updateStatus();
-      });
+      .finally(() => this.updateStatus());
   }
   async onProgramEvent(event) {
     const promises = [];

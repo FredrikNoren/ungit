@@ -3,10 +3,9 @@ const octicons = require('octicons');
 const moment = require('moment');
 const components = require('ungit-components');
 const storage = require('ungit-storage');
+const { ComponentRoot } = require('../ComponentRoot');
 
 components.register('stash', (args) => new StashViewModel(args.server, args.repoPath));
-
-const { isSamePayload } = require('../ComponentUtils');
 
 class StashItemViewModel {
   constructor(stash, data) {
@@ -58,8 +57,9 @@ class StashItemViewModel {
   }
 }
 
-class StashViewModel {
+class StashViewModel extends ComponentRoot {
   constructor(server, repoPath) {
+    super();
     this.server = server;
     this.repoPath = repoPath;
     this.stashedChanges = ko.observable([]);
@@ -84,7 +84,7 @@ class StashViewModel {
 
     try {
       const stashes = await this.server.getPromise('/stashes', { path: this.repoPath() });
-      if (isSamePayload('stashes', stashes)) {
+      if (this.isSamePayload(stashes)) {
         return;
       }
 
