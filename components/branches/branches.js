@@ -30,9 +30,18 @@ class BranchesViewModel extends ComponentRoot {
       return value;
     };
     this.shouldAutoFetch = ungit.config.autoFetch;
-    this.isShowRemote.subscribe(setLocalStorageAndUpdate.bind(null, showRemote));
-    this.isShowBranch.subscribe(setLocalStorageAndUpdate.bind(null, showBranch));
-    this.isShowTag.subscribe(setLocalStorageAndUpdate.bind(null, showTag));
+    this.isShowRemote.subscribe(() => {
+      this.clearApiCache();
+      setLocalStorageAndUpdate(showRemote);
+    });
+    this.isShowBranch.subscribe(() => {
+      this.clearApiCache();
+      setLocalStorageAndUpdate(showBranch);
+    });
+    this.isShowTag.subscribe(() => {
+      this.clearApiCache();
+      setLocalStorageAndUpdate(showTag);
+    });
     this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
     this.branchIcon = octicons['git-branch'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });

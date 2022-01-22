@@ -16,4 +16,8 @@ export class ComponentRoot {
     this._apiCache = jsonString
     return false;
   }
+
+  clearApiCache() {
+    this._apiCache = undefined
+  }
 }

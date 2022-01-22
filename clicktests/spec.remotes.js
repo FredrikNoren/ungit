@@ -81,8 +81,6 @@ describe('[REMOTES]', () => {
     await environment.click('.fetchButton .btn-main');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('#nprogress');
-
-    console.log(111, testRepoPaths[2])
   });
 
   it('Should be possible to create and push a branch', async () => {
@@ -100,18 +98,18 @@ describe('[REMOTES]', () => {
   it('Check for fetching remote branches for the branch list', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('.options input');
-    try {
-      await environment.page.waitForSelector('li .octicon-globe', { visible: true, timeout: 3000 });
-    } catch (err) {
-      await environment.click('.options input');
-      await environment.waitForElementVisible('li .octicon-globe');
-    }
+
+    await environment.ensureRefresh();
+
+    await environment.click('.options input');
+    await environment.waitForElementVisible('li .octicon-globe');
   });
 
   it('checkout remote branches with matching local branch at wrong place', async () => {
     await environment.moveRef('branchinclone', 'Init Commit 1');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
 
