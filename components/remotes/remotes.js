@@ -95,7 +95,7 @@ class RemotesViewModel {
       });
     } finally {
       ungit.logger.debug('remotes.fetch() finished');
-    };
+    }
   }
 
   updateRemotes() {

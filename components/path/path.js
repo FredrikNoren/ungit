@@ -115,9 +115,9 @@ class PathViewModel extends ComponentRoot {
         this.repository(null);
       }
     } catch (err) {
-      ungit.logger.debug('path.updateStatus() errored', err)
+      ungit.logger.debug('path.updateStatus() errored', err);
     } finally {
-      ungit.logger.debug('path.updateStatus() finished')
+      ungit.logger.debug('path.updateStatus() finished');
     }
   }
   initRepository() {

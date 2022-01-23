@@ -73,12 +73,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => { },
+            results: () => {},
           },
         })
         .data('ui-autocomplete')._renderItem = function (ul, item) {
-          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-        };
+        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+      };
     };
 
     const handleKeyEvent = (event) => {
@@ -175,29 +175,35 @@ var app, appContainer, server;
 
 let eventArgMap = {};
 
-const throttledEventTrigger = _.throttle(async () => {
-  if (ungit.__eventProcessingProm) {
-    ungit.logger.debug('programEvent process rescheduled');
-    return throttledEventTrigger();
-  }
+const throttledEventTrigger = _.throttle(
+  async () => {
+    if (ungit.__eventProcessingProm) {
+      ungit.logger.debug('programEvent process rescheduled');
+      return throttledEventTrigger();
+    }
 
-  const eventsToProcess = Object.values(eventArgMap);
-  eventArgMap = {};
-  try {
-    ungit.logger.debug('programEvent process triggered');
+    const eventsToProcess = Object.values(eventArgMap);
+    eventArgMap = {};
+    try {
+      ungit.logger.debug('programEvent process triggered');
 
-    ungit.__eventProcessingProm = Promise.all(eventsToProcess.map(async (event) => {
-      return app.onProgramEvent(event)
-    }));
-    await ungit.__eventProcessingProm;
-    ungit.__eventProcessedTime = Date.now();
-  } catch (e) {
-    ungit.logger.error(`failed to process onProgramEvent`, e, e.stacktrace);
-  } finally {
-    ungit.__eventProcessingProm = undefined;
-    ungit.logger.debug('programEvent process finished');
-  }
-}, 500, { leading: false, trailing: true });
+      ungit.__eventProcessingProm = Promise.all(
+        eventsToProcess.map(async (event) => {
+          return app.onProgramEvent(event);
+        })
+      );
+      await ungit.__eventProcessingProm;
+      ungit.__eventProcessedTime = Date.now();
+    } catch (e) {
+      ungit.logger.error('failed to process onProgramEvent', e, e.stacktrace);
+    } finally {
+      ungit.__eventProcessingProm = undefined;
+      ungit.logger.debug('programEvent process finished');
+    }
+  },
+  500,
+  { leading: false, trailing: true }
+);
 
 exports.start = function () {
   server = new Server();

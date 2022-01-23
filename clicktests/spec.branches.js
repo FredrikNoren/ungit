@@ -94,6 +94,7 @@ describe('[BRANCHES]', () => {
   it('checkout cherypick base', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-name="branch-1"].current');
     await environment.waitForElementHidden('#nprogress');
   });
@@ -105,7 +106,7 @@ describe('[BRANCHES]', () => {
     );
     await environment.click('.staging .btn-stg-abort');
     await environment.click('.modal-dialog .btn-primary');
-    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]', 99999999);
+    await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]');
   });
 
   it('cherrypick success case', async () => {

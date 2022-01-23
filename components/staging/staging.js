@@ -501,7 +501,9 @@ class FileViewModel {
   discardChanges() {
     const timeSinceLastMute = new Date().getTime() - this.staging.mutedTime;
     const isMuteWarning = timeSinceLastMute < ungit.config.disableDiscardMuteTime;
-    ungit.logger.debug(`discard time since mute: ${timeSinceLastMute}, isMuteWarning: ${isMuteWarning}`);
+    ungit.logger.debug(
+      `discard time since mute: ${timeSinceLastMute}, isMuteWarning: ${isMuteWarning}`
+    );
     if (ungit.config.disableDiscardWarning || isMuteWarning) {
       this.server
         .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })

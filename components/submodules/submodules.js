@@ -30,7 +30,7 @@ class SubmodulesViewModel {
     try {
       const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
       this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
-      return this
+      return this;
     } catch (e) {
       ungit.logger.error('error during fetchSubmodules', e);
     }

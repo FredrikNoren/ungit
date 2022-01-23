@@ -363,15 +363,20 @@ class Environment {
     await this.page.waitForFunction(() => ungit.__eventProcessingProm === undefined);
 
     // capture latest processing time.
-    const lastEventProcessedTime = await this.page.evaluate(() => ungit.__eventProcessedTime) || 0;
+    const lastEventProcessedTime =
+      (await this.page.evaluate(() => ungit.__eventProcessedTime)) || 0;
 
     // trigger program events.
     await this.triggerProgramEvents();
 
     // wait for triggered program event to be processed.
-    await this.page.waitForFunction((lastEventProcessedTime) => {
-      return ungit.__eventProcessedTime > lastEventProcessedTime
-    }, {}, lastEventProcessedTime)
+    await this.page.waitForFunction(
+      (lastEventProcessedTime) => {
+        return ungit.__eventProcessedTime > lastEventProcessedTime;
+      },
+      {},
+      lastEventProcessedTime
+    );
     logger.info('finished refreshing...');
   }
 }

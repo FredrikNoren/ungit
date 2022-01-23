@@ -102,12 +102,14 @@ class AppViewModel {
       this._handleRequestRememberRepo(event);
     }
 
-    const contentEventHandler = this.content() && this.content().onProgramEvent
-      ? this.content().onProgramEvent(event)
-      : Promise.resolve();
-    const headerEventHandler = this.header && this.header.onProgramEvent
-      ? this.header.onProgramEvent(event)
-      : Promise.resolve();
+    const contentEventHandler =
+      this.content() && this.content().onProgramEvent
+        ? this.content().onProgramEvent(event)
+        : Promise.resolve();
+    const headerEventHandler =
+      this.header && this.header.onProgramEvent
+        ? this.header.onProgramEvent(event)
+        : Promise.resolve();
 
     await Promise.all([contentEventHandler, headerEventHandler]);
   }

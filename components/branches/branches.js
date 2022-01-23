@@ -1,5 +1,4 @@
 const ko = require('knockout');
-const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
@@ -69,11 +68,14 @@ class BranchesViewModel extends ComponentRoot {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
 
     const branchesProm = this.server.getPromise('/branches', { path: this.repoPath() });
-    const refsProm = this.server.getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch });
+    const refsProm = this.server.getPromise('/refs', {
+      path: this.repoPath(),
+      remoteFetch: forceRemoteFetch,
+    });
 
     try {
       // set current branch
-      (await branchesProm).forEach(b => {
+      (await branchesProm).forEach((b) => {
         if (b.current) {
           this.current(b.name);
         }
@@ -85,7 +87,7 @@ class BranchesViewModel extends ComponentRoot {
 
     try {
       // update branches and tags references.
-      const refs = await refsProm
+      const refs = await refsProm;
       if (this.isSamePayload(refs)) {
         return;
       }
