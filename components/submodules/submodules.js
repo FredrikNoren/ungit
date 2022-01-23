@@ -20,18 +20,19 @@ class SubmodulesViewModel {
     if (event.event == 'submodule-fetch') await this.fetchSubmodules();
   }
 
-  updateNode() {
+  updateNode(parentElement) {
     this.fetchSubmodules().then((submoduleViewModel) => {
-      ko.renderTemplate('submodules', submoduleViewModel, {}, this);
+      ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
     });
   }
 
   async fetchSubmodules() {
-    const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
     try {
+      const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
       this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      return this
     } catch (e) {
-      this.server.unhandledRejection(e);
+      ungit.logger.error('error during fetchSubmodules', e);
     }
   }
 
