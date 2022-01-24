@@ -36,20 +36,14 @@ exports.registerApi = (env) => {
         socket.join(socket.watcherPath); // join room for this path
 
         const watcher = await watchRepo(socket.watcherPath);
-        watcher.on(
-          'workdir',
-          _.throttle((changedPath) => {
-            winston.info(`${changedPath} triggered workdir refresh for ${socket.watcherPath}`);
-            emitWorkingTreeChanged(socket.watcherPath);
-          }, 200)
-        );
-        watcher.on(
-          'git',
-          _.throttle((changedPath) => {
-            winston.info(`${changedPath} triggered git refresh for ${socket.watcherPath}`);
-            emitGitDirectoryChanged(socket.watcherPath);
-          }, 200)
-        );
+        watcher.on('workdir', (changedPath) => {
+          winston.info(`${changedPath} triggered workdir refresh for ${socket.watcherPath}`);
+          emitWorkingTreeChanged(socket.watcherPath);
+        });
+        watcher.on('git', (changedPath) => {
+          winston.info(`${changedPath} triggered git refresh for ${socket.watcherPath}`);
+          emitGitDirectoryChanged(socket.watcherPath);
+        });
         watcher.on('error', (err) => {
           winston.warn(`Error watching ${socket.watcherPath}: `, JSON.stringify(err));
         });
@@ -97,7 +91,7 @@ exports.registerApi = (env) => {
   };
 
   // TODO move to nodegit
-  const watchRepo = async (pathToWatch, ignore) => {
+  const watchRepo = async (pathToWatch) => {
     winston.info(`Start watching ${pathToWatch}`);
     const watcher = new RepoWatcher();
     let repoPath = path.join(pathToWatch, '.git');
