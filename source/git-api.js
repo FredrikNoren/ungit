@@ -106,7 +106,7 @@ exports.registerApi = (env) => {
           if (filePath === '.gitignore') {
             readIgnore(pathToWatch).then(
               (ign) => (gitIgnore = ign),
-              (err) => winston.error(`Could not parse .gitignore for`, pathToWatch, err)
+              (err) => winston.error('Could not parse .gitignore for', pathToWatch, err)
             );
           }
           // We monitor the repo separately
@@ -116,7 +116,7 @@ exports.registerApi = (env) => {
           if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
             // TODO https://github.com/kaelzhang/node-ignore/issues/78
             // optimization: assume these are permanent skips
-            if (/(node_modules|build|dist|cache|coverage)/.test(filePath)) return skip;
+            if (filePath.includes('node_modules')) return skip;
             return false;
           }
           return true;
