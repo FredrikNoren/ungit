@@ -124,7 +124,7 @@ class StagingViewModel {
       this.refreshContent();
       this.invalidateFilesDiffs();
     }
-    if (event.event == 'working-tree-changed') {
+    if (event.event == 'working-tree-changed' || event.event === 'git-directory-changed') {
       this.refreshContentThrottled();
       this.invalidateFilesDiffsThrottled();
     }

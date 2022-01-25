@@ -111,20 +111,6 @@ ko.bindingHandlers.autocomplete = {
   },
 };
 
-// Used to catch when a user was tabbed away and re-visits the page.
-// If fs.watch worked better on Windows (i.e. on subdirectories) we wouldn't need this
-(function detectReActivity() {
-  var lastMoved = Date.now();
-  document.addEventListener('mousemove', function () {
-    // If the user didn't move for 3 sec and then moved again, it's likely it's a tab-back
-    if (Date.now() - lastMoved > 3000) {
-      console.log('Fire change event due to re-activity');
-      programEvents.dispatch({ event: 'working-tree-changed' });
-    }
-    lastMoved = Date.now();
-  });
-})();
-
 function WindowTitle() {
   this.path = 'ungit';
   this.crash = false;
