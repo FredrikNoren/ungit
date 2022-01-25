@@ -1,7 +1,6 @@
 const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
 const storage = require('ungit-storage');
 const showRemote = 'showRemote';
 const showBranch = 'showBranch';

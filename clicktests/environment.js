@@ -190,6 +190,7 @@ class Environment {
       file: filename,
       path: repoPath,
     });
+    await this.ensureRefresh();
   }
 
   // browser helpers
