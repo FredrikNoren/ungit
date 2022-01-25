@@ -182,6 +182,7 @@ class Environment {
       message: `Init Commit ${x}`,
       files: [{ name: `testy${x}` }],
     });
+    // `createCommits()` is used at create repo `this.page` may not be inited
     await this.createCommits(config, limit, x + 1);
   }
 
@@ -190,7 +191,9 @@ class Environment {
       file: filename,
       path: repoPath,
     });
-    await this.ensureRefresh();
+    if (this.page) {
+      await this.ensureRefresh();
+    }
   }
 
   // browser helpers
