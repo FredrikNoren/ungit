@@ -148,15 +148,7 @@ class BranchesViewModel extends ComponentRoot {
       .show()
       .closeThen((diag) => {
         if (!diag.result()) return;
-        const url = `${branch.isRemote ? '/remote' : ''}/branches`;
-        return this.server
-          .delPromise(url, {
-            path: this.graph.repoPath(),
-            remote: branch.isRemote ? branch.remote : null,
-            name: branch.refName,
-          })
-          .then(() => programEvents.dispatch({ event: 'working-tree-changed' }))
-          .catch((e) => this.server.unhandledRejection(e));
+        return branch.remove();
       });
   }
 }

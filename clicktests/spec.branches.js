@@ -122,9 +122,11 @@ describe('[BRANCHES]', () => {
     await environment.waitForBranch('branch-1');
     await environment.click('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
+    await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
     await environment.click('.modal-dialog .btn-primary');
+    await environment.ensureRefresh();
     await environment.waitForElementHidden('.staging .files .file');
   });
 

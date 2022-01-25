@@ -163,7 +163,7 @@ class GraphViewModel extends ComponentRoot {
   computeNode(nodes) {
     nodes = nodes || this.nodes();
 
-    this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
+    this.markNodesIdeologicalBranches(this.refs());
 
     const updateTimeStamp = moment().valueOf();
     if (this.HEAD()) {
@@ -218,7 +218,7 @@ class GraphViewModel extends ComponentRoot {
     return edge;
   }
 
-  markNodesIdeologicalBranches(refs, nodes, nodesById) {
+  markNodesIdeologicalBranches(refs) {
     refs = refs.filter((r) => !!r.node());
     refs = refs.sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;
