@@ -18,6 +18,7 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
     await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
   }
   if (dialogButtonToClick !== 'no') {
+    await env.ensureRefresh();
     await env.waitForElementHidden('.files .file .btn-default');
   } else {
     await env.waitForElementVisible('.files .file .btn-default');

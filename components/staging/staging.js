@@ -173,7 +173,6 @@ class StagingViewModel extends ComponentRoot {
             }
           });
       } else {
-        ungit.logger.debug('staging.refreshContent() status', status);
         this.loadStatus(status);
       }
     } catch (err) {

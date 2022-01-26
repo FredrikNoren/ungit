@@ -31,7 +31,7 @@ describe('[SUMBODULES]', () => {
 
   it('Submodule update', async () => {
     await environment.click('.fetchButton .update-submodule');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit._isSubmoduleUpdating === false')
   });
 
   it('Submodule delete check', async () => {

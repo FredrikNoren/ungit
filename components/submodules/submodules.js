@@ -7,10 +7,10 @@ components.register('submodules', (args) => new SubmodulesViewModel(args.server,
 
 class SubmodulesViewModel {
   constructor(server, repoPath) {
+    ungit._isSubmoduleUpdating = false;
     this.repoPath = repoPath;
     this.server = server;
     this.submodules = ko.observableArray();
-    this.isUpdating = false;
     this.submodulesIcon = octicons['file-submodule'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
     this.linkIcon = octicons['link-external'].toSVG({ height: 18 });
@@ -37,13 +37,13 @@ class SubmodulesViewModel {
   }
 
   updateSubmodules() {
-    if (this.isUpdating) return;
-    this.isUpdating = true;
+    if (ungit._isSubmoduleUpdating) return;
+    ungit._isSubmoduleUpdating = true;
     return this.server
       .postPromise('/submodules/update', { path: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
-        this.isUpdating = false;
+        ungit._isSubmoduleUpdating = false;
       });
   }
 
@@ -53,7 +53,7 @@ class SubmodulesViewModel {
       .show()
       .closeThen((diag) => {
         if (!diag.isSubmitted()) return;
-        this.isUpdating = true;
+        ungit._isSubmoduleUpdating = true;
         this.server
           .postPromise('/submodules/add', {
             path: this.repoPath(),
@@ -65,7 +65,7 @@ class SubmodulesViewModel {
           })
           .catch((e) => this.server.unhandledRejection(e))
           .finally(() => {
-            this.isUpdating = false;
+            ungit._isSubmoduleUpdating = false;
           });
       });
   }
