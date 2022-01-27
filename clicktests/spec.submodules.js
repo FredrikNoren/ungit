@@ -22,6 +22,7 @@ describe('[SUMBODULES]', () => {
 
     await environment.insert('.modal #Path', 'subrepo');
     await environment.insert('.modal #Url', testRepoPaths[0]);
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.click('.submodule .dropdown-toggle');
     await environment.waitForElementVisible(
@@ -31,12 +32,13 @@ describe('[SUMBODULES]', () => {
 
   it('Submodule update', async () => {
     await environment.click('.fetchButton .update-submodule');
-    await environment.page.waitForFunction('ungit._isSubmoduleUpdating === false')
+    await environment.page.waitForFunction('ungit._isSubmoduleUpdating === false');
   });
 
   it('Submodule delete check', async () => {
     await environment.click('.submodule .dropdown-toggle');
     await environment.click('[data-ta-clickable="subrepo-remove"]');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('#nprogress');
   });

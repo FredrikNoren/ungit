@@ -7,7 +7,7 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   await env.waitForElementVisible('.files .file .btn-default');
 
   await env.click('.files button.discard');
-
+  await env.wait(500);
   if (dialogButtonToClick === 'yes') {
     await env.click('.modal-dialog [data-ta-action="yes"]');
   } else if (dialogButtonToClick === 'mute') {

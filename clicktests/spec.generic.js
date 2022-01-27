@@ -109,6 +109,7 @@ describe('[GENERIC]', () => {
     await environment.click('.files button');
     await environment.waitForElementHidden('[data-ta-container="patch-file"]');
     await environment.click('.files button.discard');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
@@ -121,6 +122,7 @@ describe('[GENERIC]', () => {
     await environment.createBranch('willbedeleted');
     await environment.click('.branch[data-ta-name="willbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
@@ -130,6 +132,7 @@ describe('[GENERIC]', () => {
     await environment.createTag('tagwillbedeleted');
     await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
@@ -149,6 +152,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('.files .file .additions');
     await environment.waitForElementVisible('.files .file .deletions');
     await environment.click('.files button.discard');
+    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.files .file .btn-default');
