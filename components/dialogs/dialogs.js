@@ -164,6 +164,7 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
         primary: true,
         taId: 'yes',
         click() {
+          console.log('>>>2 yes clicked')
           self.result(true);
           self.close();
         },
@@ -173,6 +174,7 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
         primary: false,
         taId: 'mute',
         click() {
+          console.log('>>>4 no clicked')
           self.result('mute');
           self.close();
         },
@@ -182,6 +184,7 @@ class YesNoMuteDialogViewModel extends PromptDialogViewModel {
         primary: false,
         taId: 'no',
         click() {
+          console.log('>>>3 no clicked')
           self.result(false);
           self.close();
         },
