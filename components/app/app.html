@@ -1,4 +1,5 @@
-<!-- ko component: header --><!-- /ko -->
+<!-- ko component: header -->
+<!-- /ko -->
 
 <div class="app">
   <div class="container" data-bind="shown: shown">
@@ -36,5 +37,11 @@
 </div>
 
 <!-- ko if: dialog -->
-<!-- ko template: { name: templateChooser, data: dialog } --><!-- /ko -->
+<!-- ko template: { name: templateChooser, data: dialog } -->
+<!-- /ko -->
+<!-- /ko -->
+
+<!-- ko if: modal -->
+<!-- ko template: { name: templateChooser, data: modal } -->
+<!-- /ko -->
 <!-- /ko -->

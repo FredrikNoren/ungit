@@ -1,5 +1,6 @@
 var components = {};
 module.exports = components;
+ungit.components = components;
 
 components.registered = {};
 

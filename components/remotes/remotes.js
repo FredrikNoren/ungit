@@ -39,8 +39,14 @@ class RemotesViewModel {
   async onProgramEvent(event) {
     if (event.event === 'request-app-content-refresh' || event.event === 'request-fetch-tags') {
       await this.fetch({ tags: true });
-    } else if (event.evnet === 'working-tree-changed' && this.shouldAutoFetch) {
+    } else if (event.event === 'working-tree-changed' && this.shouldAutoFetch) {
       await this.fetch({ tags: true });
+    } else if (event.event === 'modal-close-dialog' && !modal && !event.submit) {
+      await this.server.postPromise(`/remotes/${encodeURIComponent(event.modal.name())}`, {
+        path: this.repoPath(),
+        url: event.modal.url(),
+      });
+      await this.updateRemotes();
     }
   }
 
@@ -134,22 +140,8 @@ class RemotesViewModel {
   }
 
   showAddRemoteDialog() {
-    components
-      .create('addremotedialog')
-      .show()
-      .closeThen((diag) => {
-        if (diag.isSubmitted()) {
-          return this.server
-            .postPromise(`/remotes/${encodeURIComponent(diag.name())}`, {
-              path: this.repoPath(),
-              url: diag.url(),
-            })
-            .then(() => {
-              this.updateRemotes();
-            })
-            .catch((e) => this.server.unhandledRejection(e));
-        }
-      });
+    const modal = components.create('addremotemodal');
+    programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
   }
 
   remoteRemove(remote) {

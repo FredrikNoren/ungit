@@ -1,0 +1,8 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "formModal": "formModal.html"
+    },
+    "javascript": "modals.bundle.js"
+  }
+}

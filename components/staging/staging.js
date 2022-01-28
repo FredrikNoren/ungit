@@ -515,7 +515,6 @@ class FileViewModel {
         })
         .show()
         .closeThen((diag) => {
-          console.log('>>>>1', diag.result(), diag.constructor.name);
           if (diag.result()) {
             this.server
               .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })

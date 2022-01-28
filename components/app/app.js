@@ -2,6 +2,7 @@ const ko = require('knockout');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const storage = require('ungit-storage');
+const $ = require('jquery');
 
 components.register('app', (args) => {
   return new AppViewModel(args.appContainer, args.server);
@@ -16,6 +17,7 @@ class AppViewModel {
       this.header = components.create('header', { app: this });
     }
     this.dialog = ko.observable(null);
+    this.modal = ko.observable(null);
     this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
     this.repoList.subscribe((newValue) => {
       storage.setItem('repositories', JSON.stringify(newValue));
@@ -100,6 +102,11 @@ class AppViewModel {
       this.showDialog(event.dialog);
     } else if (event.event === 'request-remember-repo') {
       this._handleRequestRememberRepo(event);
+    } else if (event.event === 'modal-show-dialog') {
+      this.showModal(event.modal);
+    } else if (event.event === 'modal-close-dialog') {
+      $('.modal.fade').modal('hide');
+      this.modal(undefined);
     }
 
     const contentEventHandler =
@@ -135,6 +142,23 @@ class AppViewModel {
           });
         });
     }
+  }
+  showModal(modal) {
+    if (this.modal()) {
+      ungit.logger.warn('dialog is alaready open.', this.modal());
+      return;
+    }
+    this.modal(modal);
+
+    // when dom is ready, open the modal
+    const checkExists = setInterval(() => {
+      const modalDom = $('.modal.fade');
+      if (modalDom.length) {
+        clearInterval(checkExists);
+        modalDom.modal();
+      }
+    }, 200);
+    checkExists();
   }
   showDialog(dialog) {
     this.dialog(

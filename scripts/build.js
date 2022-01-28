@@ -80,14 +80,20 @@ const baseDir = path.join(__dirname, '..');
       try {
         await fs.access(source);
       } catch (e) {
-        console.warn(
-          `${source} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
-        );
         return;
       }
       const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
       return browserifyFile(source, destination);
-    })
+    }).concat(components.map(async (component) => {
+      const source = path.join(baseDir, `components/${component}/${component}.ts`);
+      try {
+        await fs.access(source);
+      } catch (e) {
+        return;
+      }
+      const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
+      return browserifyFile(source, destination);
+    }))
   );
 
   // copy
