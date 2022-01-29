@@ -41,7 +41,11 @@ class RemotesViewModel {
       await this.fetch({ tags: true });
     } else if (event.event === 'working-tree-changed' && this.shouldAutoFetch) {
       await this.fetch({ tags: true });
-    } else if (event.event === 'modal-close-dialog' && !modal && !event.submit) {
+    } else if (
+      event.submit &&
+      event.event === 'modal-close-dialog' &&
+      event.modal.taModalName === 'add-remote'
+    ) {
       await this.server.postPromise(`/remotes/${encodeURIComponent(event.modal.name())}`, {
         path: this.repoPath(),
         url: event.modal.url(),

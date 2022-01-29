@@ -17,7 +17,20 @@ class SubmodulesViewModel {
   }
 
   async onProgramEvent(event) {
-    if (event.event == 'submodule-fetch') await this.fetchSubmodules();
+    if (event.event == 'submodule-fetch') {
+      await this.fetchSubmodules();
+    } else if (
+      event.submit &&
+      event.event === 'modal-close-dialog' &&
+      event.modal.taModalName === 'add-submodule'
+    ) {
+      await this.server.delPromise('/submodules', {
+        path: this.repoPath(),
+        submoduleUrl: event.modal.url(),
+        submodulePath: event.modal.path(),
+      });
+      programEvents.dispatch({ event: 'submodule-fetch' });
+    }
   }
 
   updateNode(parentElement) {
@@ -48,26 +61,8 @@ class SubmodulesViewModel {
   }
 
   showAddSubmoduleDialog() {
-    components
-      .create('addsubmoduledialog')
-      .show()
-      .closeThen((diag) => {
-        if (!diag.isSubmitted()) return;
-        ungit._isSubmoduleUpdating = true;
-        this.server
-          .postPromise('/submodules/add', {
-            path: this.repoPath(),
-            submoduleUrl: diag.url(),
-            submodulePath: diag.path(),
-          })
-          .then(() => {
-            programEvents.dispatch({ event: 'submodule-fetch' });
-          })
-          .catch((e) => this.server.unhandledRejection(e))
-          .finally(() => {
-            ungit._isSubmoduleUpdating = false;
-          });
-      });
+    const modal = components.create('addsubmodulemodal');
+    programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
   }
 
   submoduleLinkClick(submodule) {

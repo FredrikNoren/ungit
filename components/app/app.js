@@ -107,6 +107,14 @@ class AppViewModel {
     } else if (event.event === 'modal-close-dialog') {
       $('.modal.fade').modal('hide');
       this.modal(undefined);
+
+      if (event.modal.taModalName === 'credentials-dialog') {
+        programEvents.dispatch({
+          event: 'request-credentials-response',
+          username: event.modal.username(),
+          password: event.modal.password(),
+        });
+      }
     }
 
     const contentEventHandler =
@@ -130,17 +138,8 @@ class AppViewModel {
     // This happens for instance when we fetch nodes and remote tags at the same time
     if (!this._isShowingCredentialsDialog) {
       this._isShowingCredentialsDialog = true;
-      components
-        .create('credentialsdialog', { remote: event.remote })
-        .show()
-        .closeThen((diag) => {
-          this._isShowingCredentialsDialog = false;
-          programEvents.dispatch({
-            event: 'request-credentials-response',
-            username: diag.username(),
-            password: diag.password(),
-          });
-        });
+      const modal = components.create('credentialsmodal', { remote: event.remote });
+      programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
     }
   }
   showModal(modal) {
