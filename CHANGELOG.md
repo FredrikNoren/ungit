@@ -3,7 +3,19 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.18...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.19...master)
+
+## [1.5.19](https://github.com/FredrikNoren/ungit/compare/v1.5.18...v1.5.19)
+
+### Added
+- Add Tab Size Configuration [#1499](https://github.com/FredrikNoren/ungit/pull/1499)
+- Types: add support for VSCode IntelliSense [#1466](https://github.com/FredrikNoren/ungit/pull/1466)
+
+### Changed
+- Directory view [#1491](https://github.com/FredrikNoren/ungit/pull/1491)
+- Node watch [#1465](https://github.com/FredrikNoren/ungit/pull/1465)
+- Bump cached-path-relative from 1.0.2 to 1.1.0 [#1501](https://github.com/FredrikNoren/ungit/pull/1501)
+- Bump Dependencies [#1483](https://github.com/FredrikNoren/ungit/pull/1483), [#1487](https://github.com/FredrikNoren/ungit/pull/1487), [#1492](https://github.com/FredrikNoren/ungit/pull/1492), [#1494](https://github.com/FredrikNoren/ungit/pull/1494)
 
 ## [1.5.18](https://github.com/FredrikNoren/ungit/compare/v1.5.17...v1.5.18)
 
