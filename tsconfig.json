@@ -1,10 +1,8 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
     "checkJs": true,

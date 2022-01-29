@@ -39,21 +39,20 @@ class OurCache extends NodeCache {
    * Register a function to cache it's result. If same key exists, key is deregistered and
    * registered again.
    *
-   * @param {ttl}      [ttl=0]            - Ttl in seconds to be used for the cached result of
-   *                                      function. Default is `0`.
-   * @param {string}   [key=md5 of func]  - Key to retrieve cached function result. Default is `md5
-   *                                      of func`.
-   * @param {function} [func]             - Function to be executed to get the result.
+   * @param {function} [func]           - Function to be executed to get the result.
+   * @param {string}   [key=md5(func)]  - Key to retrieve cached function result. Default is
+   *                                    `md5(func)`.
+   * @param {number}   [ttl=0]          - Ttl in seconds to be used for the cached result of
+   *                                    function. Default is `0`.
    * @returns {string} - Key to retrieve cached function result.
    */
-  registerFunc(...args) {
-    const func = args.pop();
-    const key = args.pop() || md5(func);
-    const ttl = args.pop() || this.options.stdTTL;
-
+  registerFunc(func, key, ttl) {
     if (typeof func !== 'function') {
       throw new Error('no function was passed in.');
     }
+
+    key = key || md5(func);
+    ttl = ttl || this.options.stdTTL;
 
     if (isNaN(ttl) || ttl < 0) {
       throw new Error('ttl value is not valid.');
