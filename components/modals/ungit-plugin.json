@@ -1,7 +1,8 @@
 {
   "exports": {
     "knockoutTemplates": {
-      "formModal": "formModal.html"
+      "formModal": "formModal.html",
+      "promptModal": "promptModal.html"
     },
     "javascript": "modals.bundle.js"
   }

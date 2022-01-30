@@ -208,6 +208,7 @@ const throttledEventTrigger = _.throttle(
 exports.start = function () {
   server = new Server();
   appContainer = new AppContainerViewModel();
+  ungit.server = server;
   app = components.create('app', { appContainer: appContainer, server: server });
   programEvents.add(async (event) => {
     ungit.logger.info(`received event: ${event.event}`);
