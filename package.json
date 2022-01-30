@@ -17,8 +17,7 @@
     "watch": "nodemon -C --exec \"npm run build\" -e js,less -w public/source -w public/less -w components/ -i \"*.bundle.js\"",
     "bumpdependencies": "ncu --upgrade --reject bootstrap",
     "electronpackage": "node ./scripts/electronpackage.js",
-    "electronzip": "node ./scripts/electronzip.js",
-    "travisnpmpublish": "node ./scripts/travisnpmpublish.js"
+    "electronzip": "node ./scripts/electronzip.js"
   },
   "repository": {
     "type": "git",
