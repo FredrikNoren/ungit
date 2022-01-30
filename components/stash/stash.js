@@ -37,19 +37,16 @@ class StashItemViewModel {
   }
 
   drop() {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure you want to drop the stash?',
-        details: 'This operation cannot be undone.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) {
-          this.server
-            .delPromise(`/stashes/${this.id}`, { path: this.stash.repoPath() })
-            .catch((e) => this.server.unhandledRejection(e));
-        }
-      });
+    components.showModal('yesnomodal', {
+      title: 'Are you sure you want to drop the stash?',
+      details: 'This operation cannot be undone.',
+      closeFunc: (isYes) => {
+        if (!isYes) return;
+        this.server
+          .delPromise(`/stashes/${this.id}`, { path: this.stash.repoPath() })
+          .catch((e) => this.server.unhandledRejection(e));
+      },
+    });
   }
 
   toggleShowCommitDiffs() {

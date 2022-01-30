@@ -111,20 +111,26 @@ class Reset extends ActionBase {
   perform() {
     const context = this.graph.currentActionContext();
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
-    return components
-      .create('yesnodialog', {
+    return new Promise((resolve, reject) => {
+      components.showModal('yesnomodal', {
         title: 'Are you sure?',
         details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (!diag.result()) return;
-        return this.server
-          .postPromise('/reset', { path: this.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
-          .then(() => {
-            context.node(remoteRef.node());
-          });
-      }).closePromise;
+        closeFunc: (isYes) => {
+          if (!isYes) return;
+          return this.server
+            .postPromise('/reset', {
+              path: this.graph.repoPath(),
+              to: remoteRef.name,
+              mode: 'hard',
+            })
+            .then(() => {
+              context.node(remoteRef.node());
+              resolve();
+            })
+            .catch(reject);
+        },
+      });
+    });
   }
 }
 
@@ -285,12 +291,15 @@ class Delete extends ActionBase {
     }
     details = `Deleting ${details} branch or tag cannot be undone with ungit.`;
 
-    return components
-      .create('yesnodialog', { title: 'Are you sure?', details: details })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) return context.remove();
-      }).closePromise;
+    return new Promise((resolve, reject) => {
+      components.showModal('yesnomodal', {
+        title: 'Are you sure?',
+        details: details,
+        closeFunc: (isYes) => {
+          if (isYes) context.remove().then(resolve).catch(reject);
+        },
+      });
+    });
   }
 }
 

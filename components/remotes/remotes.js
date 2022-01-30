@@ -41,15 +41,7 @@ class RemotesViewModel {
       await this.fetch({ tags: true });
     } else if (event.event === 'working-tree-changed' && this.shouldAutoFetch) {
       await this.fetch({ tags: true });
-    } else if (
-      event.submit &&
-      event.event === 'modal-close-dialog' &&
-      event.modal.taModalName === 'add-remote'
-    ) {
-      await this.server.postPromise(`/remotes/${encodeURIComponent(event.modal.name())}`, {
-        path: this.repoPath(),
-        url: event.modal.url(),
-      });
+    } else if (event.event === 'update-remote') {
       await this.updateRemotes();
     }
   }
@@ -144,26 +136,23 @@ class RemotesViewModel {
   }
 
   showAddRemoteDialog() {
-    const modal = components.create('addremotemodal');
-    programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
+    components.showModal('addremotemodal', { path: this.repoPath() });
   }
 
   remoteRemove(remote) {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure?',
-        details: `Deleting ${remote.name} remote cannot be undone with ungit.`,
-      })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) {
-          return this.server
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: `Deleting ${remote.name} remote cannot be undone with ungit.`,
+      closeFunc: (isYes) => {
+        if (isYes) {
+          this.server
             .delPromise(`/remotes/${remote.name}`, { path: this.repoPath() })
             .then(() => {
               this.updateRemotes();
             })
             .catch((e) => this.server.unhandledRejection(e));
         }
-      });
+      },
+    });
   }
 }

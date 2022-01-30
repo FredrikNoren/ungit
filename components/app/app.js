@@ -1,6 +1,5 @@
 const ko = require('knockout');
 const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
 const storage = require('ungit-storage');
 const $ = require('jquery');
 
@@ -107,14 +106,6 @@ class AppViewModel {
     } else if (event.event === 'modal-close-dialog') {
       $('.modal.fade').modal('hide');
       this.modal(undefined);
-
-      if (event.modal.taModalName === 'credentials-dialog') {
-        programEvents.dispatch({
-          event: 'request-credentials-response',
-          username: event.modal.username(),
-          password: event.modal.password(),
-        });
-      }
     }
 
     const contentEventHandler =
@@ -138,19 +129,15 @@ class AppViewModel {
     // This happens for instance when we fetch nodes and remote tags at the same time
     if (!this._isShowingCredentialsDialog) {
       this._isShowingCredentialsDialog = true;
-      const modal = components.create('credentialsmodal', { remote: event.remote });
-      programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
+      components.showModal('credentialsmodal', { remote: event.remote });
     }
   }
   showModal(modal) {
-    if (this.modal()) {
-      ungit.logger.warn('dialog is alaready open.', this.modal());
-      return;
-    }
     this.modal(modal);
 
     // when dom is ready, open the modal
-    const checkExists = setInterval(() => {
+    let checkExists;
+    checkExists = setInterval(() => {
       const modalDom = $('.modal.fade');
       if (modalDom.length) {
         clearInterval(checkExists);

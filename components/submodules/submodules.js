@@ -19,17 +19,8 @@ class SubmodulesViewModel {
   async onProgramEvent(event) {
     if (event.event == 'submodule-fetch') {
       await this.fetchSubmodules();
-    } else if (
-      event.submit &&
-      event.event === 'modal-close-dialog' &&
-      event.modal.taModalName === 'add-submodule'
-    ) {
-      await this.server.delPromise('/submodules', {
-        path: this.repoPath(),
-        submoduleUrl: event.modal.url(),
-        submodulePath: event.modal.path(),
-      });
-      programEvents.dispatch({ event: 'submodule-fetch' });
+    } else if (event.event === 'submodule-updated') {
+      this._isSubmoduleUpdating = false;
     }
   }
 
@@ -61,8 +52,7 @@ class SubmodulesViewModel {
   }
 
   showAddSubmoduleDialog() {
-    const modal = components.create('addsubmodulemodal');
-    programEvents.dispatch({ event: 'modal-show-dialog', modal: modal });
+    components.showModal('addsubmodulemodal', { path: this.repoPath() });
   }
 
   submoduleLinkClick(submodule) {
@@ -74,14 +64,11 @@ class SubmodulesViewModel {
   }
 
   submoduleRemove(submodule) {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure?',
-        details: `Deleting ${submodule.name} submodule cannot be undone with ungit.`,
-      })
-      .show()
-      .closeThen((diag) => {
-        if (!diag.result()) return;
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: `Deleting ${submodule.name} submodule cannot be undone with ungit.`,
+      closeFunc: (isYes) => {
+        if (!isYes) return;
         this.server
           .delPromise('/submodules', {
             path: this.repoPath(),
@@ -92,6 +79,7 @@ class SubmodulesViewModel {
             programEvents.dispatch({ event: 'submodule-fetch' });
           })
           .catch((e) => this.server.unhandledRejection(e));
-      });
+      },
+    });
   }
 }

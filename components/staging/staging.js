@@ -157,21 +157,19 @@ class StagingViewModel extends ComponentRoot {
           return;
         }
         this.isDiagOpen = true;
-        return components
-          .create('toomanyfilesdialogviewmodel', {
-            title: 'Too many unstaged files',
-            details: 'It is recommended to use command line as ungit may be too slow.',
-          })
-          .show()
-          .closeThen((diag) => {
+        components.showModal('toomanyfilesmodal', {
+          title: 'Too many unstaged files',
+          details: 'It is recommended to use command line as ungit may be too slow.',
+          closeFunc: (isYes) => {
             this.isDiagOpen = false;
-            if (diag.result()) {
+            if (isYes) {
+              window.location.href = '/#/';
+            } else {
               this.loadAnyway = true;
               this.loadStatus(status);
-            } else {
-              window.location.href = '/#/';
             }
-          });
+          },
+        });
       } else {
         this.loadStatus(status);
       }
@@ -316,20 +314,18 @@ class StagingViewModel extends ComponentRoot {
       })
       .catch((err) => {
         if (err.errorCode == 'non-fast-forward') {
-          return components
-            .create('yesnodialog', {
-              title: 'Force push?',
-              details: "The remote branch can't be fast-forwarded.",
-            })
-            .show()
-            .closeThen((diag) => {
-              if (!diag.result()) return false;
-              return this.server.postPromise('/push', {
+          components.showModal('yesnomodal', {
+            title: 'Force push?',
+            details: "The remote branch can't be fast-forwarded.",
+            closeFunc: (isYes) => {
+              if (!isYes) return;
+              this.server.postPromise('/push', {
                 path: this.repoPath(),
                 remote: this.graph.currentRemote(),
                 force: true,
               });
-            }).closePromise;
+            },
+          });
         } else {
           this.server.unhandledRejection(err);
         }
@@ -358,19 +354,16 @@ class StagingViewModel extends ComponentRoot {
   }
 
   discardAllChanges() {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure you want to discard all changes?',
-        details: 'This operation cannot be undone.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) {
-          this.server
-            .postPromise('/discardchanges', { path: this.repoPath(), all: true })
-            .catch((e) => this.server.unhandledRejection(e));
-        }
-      });
+    components.showModal('yesnomodal', {
+      title: 'Are you sure you want to discard all changes?',
+      details: 'This operation cannot be undone.',
+      closeFunc: (isYes) => {
+        if (!isYes) return;
+        this.server
+          .postPromise('/discardchanges', { path: this.repoPath(), all: true })
+          .catch((e) => this.server.unhandledRejection(e));
+      },
+    });
   }
 
   stashAll() {
@@ -508,20 +501,20 @@ class FileViewModel {
         .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
         .catch((e) => this.server.unhandledRejection(e));
     } else {
-      components
-        .create('yesnomutedialog', {
-          title: 'Are you sure you want to discard these changes?',
-          details: 'This operation cannot be undone.',
-        })
-        .show()
-        .closeThen((diag) => {
-          if (diag.result()) {
+      components.showModal('yesnomutemodal', {
+        title: 'Are you sure you want to discard these changes?',
+        details: 'This operation cannot be undone.',
+        closeFunc: (isYes, isMute) => {
+          if (isYes) {
             this.server
               .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
               .catch((e) => this.server.unhandledRejection(e));
           }
-          if (diag.result() === 'mute') this.staging.mutedTime = new Date().getTime();
-        });
+          if (isMute) {
+            this.staging.mutedTime = new Date().getTime();
+          }
+        },
+      });
     }
   }
 

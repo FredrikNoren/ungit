@@ -139,15 +139,13 @@ class BranchesViewModel extends ComponentRoot {
     if (branch.isRemoteBranch) {
       details = `<code style='font-size: 100%'>REMOTE</code> ${details}`;
     }
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure?',
-        details: 'Deleting ' + details + ' branch cannot be undone with ungit.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (!diag.result()) return;
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: 'Deleting ' + details + ' branch cannot be undone with ungit.',
+      closeFunc: (isYes) => {
+        if (!isYes) return;
         return branch.remove();
-      });
+      },
+    });
   }
 }
