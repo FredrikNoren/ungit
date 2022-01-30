@@ -11,8 +11,13 @@ module.exports = async ({ github, context, core, exec }) => {
   await fs.writeFile('package.json', `${JSON.stringify(packageJson, null, 2)}\n`);
   await fs.writeFile('.npmrc', '//registry.npmjs.org/:_authToken=' + process.env.NPM_TOKEN);
   core.info(`Publish ${packageJson.version} to npm`);
-  if ((await exec.exec('npm publish')) != 0) {
-    core.info('npm publish failed.');
+  try {
+    if ((await exec.exec('npm publish')) != 0) {
+      core.info('npm publish failed.');
+      return;
+    }
+  } catch (e) {
+    core.info(`npm publish failed: ${e}`);
     return;
   }
   core.info(`Creating release ${tag}`);
