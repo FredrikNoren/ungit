@@ -127,15 +127,15 @@ const gitExecutorProm = (args, retryCount) => {
  * Returns a promise that executes git command with given arguments.
  *
  * @function
- * @param {Object | Array} commands    - An object that represents all parameters or first parameter
- *                                     only, which is an array of commands.
- * @param {string}         repoPath    - path to the git repository.
- * @param {boolean=}       allowError  - true if return code of 1 is acceptable as some cases errors
- *                                     are acceptable.
- * @param {any=}           outPipe     - if this argument exists, stdout is piped to this object.
- * @param {any=}           inPipe      - if this argument exists, data is piped to stdin process on
- *                                     start.
- * @param {number=}        timeout     - execution timeout, default is 2 mins.
+ * @param {Object | string[]} commands    - An object that represents all parameters or first
+ *                                        parameter only, which is an array of commands.
+ * @param {string}            repoPath    - path to the git repository.
+ * @param {boolean=}          allowError  - true if return code of 1 is acceptable as some cases
+ *                                        errors are acceptable.
+ * @param {WritableStream=}   outPipe     - if this argument exists, stdout is piped to this object.
+ * @param {ReadableStream=}   inPipe      - if this argument exists, data is piped to stdin process
+ *                                        on start.
+ * @param {number=}           timeout     - execution timeout, default is 2 mins.
  * @returns {promise} Execution promise.
  * @example
  *
