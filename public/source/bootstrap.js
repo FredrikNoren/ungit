@@ -1,4 +1,4 @@
-/**
+/*
  * Import the Bootstrap components individually.
  */
 
