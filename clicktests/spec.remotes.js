@@ -56,7 +56,6 @@ describe('[REMOTES]', () => {
   it('Remote delete check', async () => {
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.click('[data-ta-clickable="myremote-remove"]');
-    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.click('.fetchButton .dropdown-toggle');

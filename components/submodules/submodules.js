@@ -19,8 +19,6 @@ class SubmodulesViewModel {
   async onProgramEvent(event) {
     if (event.event == 'submodule-fetch') {
       await this.fetchSubmodules();
-    } else if (event.event === 'submodule-updated') {
-      this._isSubmoduleUpdating = false;
     }
   }
 

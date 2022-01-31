@@ -36,14 +36,12 @@ describe('[BRANCHES]', () => {
     await environment.stopProgramEventPropagation();
     await environment.waitForNetworkIdle();
     await environment.click('.showSearchForm');
-    await environment.wait(500);
     await environment.type('-4');
     await environment.waitForElementVisible('.branch-search');
     await environment.page.waitForFunction(
       'document.querySelectorAll(".ui-menu-item-wrapper").length > 0 && document.querySelectorAll(".ui-menu-item-wrapper")[0].text.trim() === "search-4"'
     );
     await environment.press('ArrowDown');
-    await environment.wait(500);
     await environment.press('Enter');
 
     await environment.waitForElementVisible('[data-ta-name="search-4"]', 10000);
@@ -81,7 +79,6 @@ describe('[BRANCHES]', () => {
   it('Delete a branch via selection', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="refs/heads/branch-3-remove"]');
-    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('#nprogress');
   });
@@ -106,7 +103,6 @@ describe('[BRANCHES]', () => {
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
     await environment.click('.staging .btn-stg-abort');
-    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]');
   });
@@ -127,7 +123,6 @@ describe('[BRANCHES]', () => {
     await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
-    await environment.wait(500);
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.staging .files .file');

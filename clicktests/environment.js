@@ -254,7 +254,7 @@ class Environment {
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3000; i++) {
       try {
         const toClick = await this.waitForElementVisible(selector);
         await toClick.click({ clickCount: clickCount });
@@ -304,12 +304,12 @@ class Environment {
         visible: true,
         timeout: 2000,
       });
-      await this.wait(500);
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
     }
     await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
+    await this.ensureRefresh();
   }
 
   async refAction(ref, local, action) {

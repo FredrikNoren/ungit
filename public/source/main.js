@@ -195,7 +195,7 @@ const throttledEventTrigger = _.throttle(
       await ungit.__eventProcessingProm;
       ungit.__eventProcessedTime = Date.now();
     } catch (e) {
-      ungit.logger.error('failed to process onProgramEvent', e, e.stacktrace);
+      ungit.logger.error('failed to process onProgramEvent', e, e.stack);
     } finally {
       ungit.__eventProcessingProm = undefined;
       ungit.logger.debug('programEvent process finished');
@@ -229,6 +229,9 @@ exports.start = function () {
 
     eventArgMap[JSON.stringify(event)] = event;
     throttledEventTrigger();
+    if (event.event === 'modal-show-dialog' || event === 'modal-close-dialog') {
+      throttledEventTrigger.flush();
+    }
   });
   if (ungit.config.authentication) {
     var authenticationScreen = components.create('login', { server: server });
