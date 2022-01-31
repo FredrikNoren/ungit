@@ -6,8 +6,8 @@ ungit.components.register(
   'credentialsmodal',
   (args: any) => new CredentialsModalViewModel(args.remote)
 );
-ungit.components.register('addremotemodal', (arg: any) => new AddRemoteModalViewModel(arg.repoPath));
-ungit.components.register('addsubmodulemodal', (arg: any) => new AddSubmoduleModalViewModel(arg.repoPath));
+ungit.components.register('addremotemodal', (arg: any) => new AddRemoteModalViewModel(arg.path));
+ungit.components.register('addsubmodulemodal', (arg: any) => new AddSubmoduleModalViewModel(arg.path));
 
 /**
  * Form receives collection of user inputs, i.e. username, password and etc.
@@ -56,12 +56,15 @@ class AddRemoteModalViewModel extends FormModalViewModel {
 
   async submit() {
     super.submit();
-    const name = this.items[0].value();
-    await ungit.server.postPromise(`/remotes/${encodeURIComponent(name)}`, {
-      path: this.repoPath,
-      url: this.items[1].value(),
-    });
-    ungit.programEvents.dispatch({ event: 'update-remote' });
+    try {
+      await ungit.server.postPromise(`/remotes/${encodeURIComponent(this.items[0].value())}`, {
+        path: this.repoPath,
+        url: this.items[1].value(),
+      });
+      ungit.programEvents.dispatch({ event: 'update-remote' });
+    } catch(e) {
+      ungit.server.unhandledRejection(e);
+    }
   }
 }
 
@@ -75,13 +78,19 @@ class AddSubmoduleModalViewModel extends FormModalViewModel {
   }
 
   async submit() {
+    ungit._isSubmoduleUpdating = true;
     super.submit();
-    await ungit.server.postPromise('/submodules/add', {
-      path: this.repoPath,
-      submodulePath: this.items[0].value(),
-      submoduleUrl: this.items[1].value(),
-    });
-    ungit.programEvents.dispatch({ event: 'submodule-updated' });
-    ungit.programEvents.dispatch({ event: 'submodule-fetch' });
+    try{
+      await ungit.server.postPromise('/submodules/add', {
+        path: this.repoPath,
+        submodulePath: this.items[0].value(),
+        submoduleUrl: this.items[1].value(),
+      });
+      ungit.programEvents.dispatch({ event: 'submodule-fetch' });
+    } catch(e) {
+      ungit.server.unhandledRejection(e);
+    } finally {
+      ungit._isSubmoduleUpdating = false;
+    }
   }
 }

@@ -136,15 +136,13 @@ class AppViewModel {
     this.modal(modal);
 
     // when dom is ready, open the modal
-    let checkExists;
-    checkExists = setInterval(() => {
+    const checkExists = setInterval(() => {
       const modalDom = $('.modal.fade');
       if (modalDom.length) {
         clearInterval(checkExists);
         modalDom.modal();
       }
     }, 200);
-    checkExists();
   }
   showDialog(dialog) {
     this.dialog(
