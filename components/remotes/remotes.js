@@ -37,8 +37,7 @@ class RemotesViewModel {
   }
 
   async onProgramEvent(event) {
-    if (event.event === 'request-app-content-refresh' || 
-      event.event === 'request-fetch-tags') {
+    if (event.event === 'request-app-content-refresh' || event.event === 'request-fetch-tags') {
       await this.fetch({ tags: true });
     } else if (event.event === 'git-directory-changed' && this.shouldAutoFetch) {
       await this.fetch({ tags: true });

@@ -124,9 +124,11 @@ class StagingViewModel extends ComponentRoot {
   }
 
   async onProgramEvent(event) {
-    if (event.event == 'request-app-content-refresh' || 
-    event.event === 'working-tree-changed' ||
-    event.event === 'git-directory-changed') {
+    if (
+      event.event == 'request-app-content-refresh' ||
+      event.event === 'working-tree-changed' ||
+      event.event === 'git-directory-changed'
+    ) {
       await this.refreshContent();
       this.invalidateFilesDiffs();
     }

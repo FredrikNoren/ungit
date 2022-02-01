@@ -57,7 +57,8 @@ class BranchesViewModel extends ComponentRoot {
   async onProgramEvent(event) {
     if (
       event.event === 'request-app-content-refresh' ||
-      event.event === 'branch-updated'
+      event.event === 'branch-updated' ||
+      event.event === 'git-directory-changed'
     ) {
       await this.updateRefs();
     }

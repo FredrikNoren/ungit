@@ -13,5 +13,17 @@
     "no-unused-vars": ["error", { "args": "none" }],
     "prefer-const": "warn",
     "quotes": ["warn", "single", { "avoidEscape": true }]
-  }
+  },
+  "globals": {
+    "ungit": "readonly"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.js"],
+      "env": { "browser": true, "es6": true, "node": true },
+      "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+      "globals": {},
+      "parser": "@babel/eslint-parser",
+    }
+  ]
 }
