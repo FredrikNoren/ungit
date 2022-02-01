@@ -28,8 +28,8 @@ public/vendor/
 .mochatest.json
 .prettierignore
 .prettierrc
-.travis.yml
 appveyor.yml
+tsconfig.json
 
 # Ignore docs
 CONTRIBUTING.md
