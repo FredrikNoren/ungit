@@ -56,7 +56,6 @@ class BranchesViewModel extends ComponentRoot {
   }
   async onProgramEvent(event) {
     if (
-      event.event === 'working-tree-changed' ||
       event.event === 'request-app-content-refresh' ||
       event.event === 'branch-updated'
     ) {

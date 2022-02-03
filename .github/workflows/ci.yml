@@ -146,3 +146,13 @@ jobs:
           name: ungit-win32-x64
           path: dist/ungit-win32-x64.zip
           retention-days: 7
+
+      - name: npm publish
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '12' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
+        uses: actions/github-script@v5
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          script: |
+            const script = require('./scripts/npmpublish.js')
+            await script({github, context, core, exec})

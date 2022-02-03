@@ -1,7 +1,7 @@
 ungit
 ======
 [![NPM version](https://badge.fury.io/js/ungit.svg)](https://badge.fury.io/js/ungit)
-[![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)
+[![CI](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml/badge.svg)](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 The easiest way to use git. On any platform. Anywhere.
@@ -87,8 +87,6 @@ If you have your own merge tool that you would like to use, such as Kaleidoscope
 Auto Refresh
 ------------
 Ungit will watch git directory recursively upon page view and automatically refresh contents on git operations or changes on files that are not configured to be ignored in `.gitignore`.
-
-One caveat is that node's [`fs.watch()`](https://nodejs.org/docs/latest/api/fs.html#fs_fs_watch_filename_options_listener) with `recursive: true` option is only available in Mac and Windows.  For non Mac and Windows machines, git operations will be automatically refreshed but file changes may require manual refreshes as `fs.watch()` is unable to detect changes within nested directory hierarchy.
 
 Text Editor Integrations
 -------------------

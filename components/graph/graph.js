@@ -339,7 +339,7 @@ class GraphViewModel extends ComponentRoot {
 
   checkHeadMove(toNode) {
     if (this.HEAD() === toNode) {
-      this.HEADref.node(toNode);
+      this.HEADref().node(toNode);
     }
   }
 }

@@ -241,7 +241,7 @@ class Push extends ActionBase {
         .createRemoteRef()
         .then(() => {
           if (this.graph.HEAD().name == ref.name) {
-            this.grah.HEADref().node(ref.node());
+            this.graph.HEADref().node(ref.node());
           }
         })
         .finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
