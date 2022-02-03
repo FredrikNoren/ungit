@@ -123,7 +123,7 @@ describe('[BRANCHES]', () => {
     await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
-    await environment.click('.modal-dialog .btn-primary');
+    await environment.click('.modal-dialog .btn-primary [data-bind="click: submit"]');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.staging .files .file');
   });
