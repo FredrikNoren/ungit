@@ -3,9 +3,11 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
+    "skipLibCheck": true,
+    "module": "commonjs",
     // Check JS files too
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     // Used for temp builds
     "outDir": "build",
     "paths": {
@@ -19,5 +21,5 @@
       "ungit-storage": ["./public/source/storage"]
     }
   },
-  "exclude": ["node_modules", "build", "coverage", "public/js", "**/*.min.js", "**/*.bundle.js"]
+  "exclude": ["node_modules", "build", "coverage", "public/js", "**/*.min.js", "**/*.bundle.js", "clicktests", "test"]
 }

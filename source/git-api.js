@@ -177,9 +177,8 @@ exports.registerApi = (env) => {
       }
     },
     500,
-    { leading: false, maxWait: 1000, trailing: true }
+    { maxWait: 1000 }
   );
-
   const emitGitDirectoryChanged = _.debounce(
     (repoPath) => {
       if (io && repoPath) {
@@ -188,7 +187,7 @@ exports.registerApi = (env) => {
       }
     },
     500,
-    { leading: false, maxWait: 1000, trailing: true }
+    { maxWait: 1000 }
   );
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
@@ -277,7 +276,7 @@ exports.registerApi = (env) => {
         return { path: path.resolve(req.body.path, req.body.destinationDir) };
       });
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
     }
   );
 
@@ -301,7 +300,7 @@ exports.registerApi = (env) => {
         timeout: tenMinTimeoutMs,
       });
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
     }
   );
 
@@ -325,7 +324,7 @@ exports.registerApi = (env) => {
         timeout: tenMinTimeoutMs,
       });
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
     }
   );
 
@@ -333,7 +332,9 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       autoStashExecuteAndPop(['reset', `--${req.body.mode}`, req.body.to], req.body.path)
-    ).then(emitWorkingTreeChanged.bind(null, req.body.path));
+    )
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -400,7 +401,9 @@ exports.registerApi = (env) => {
         req.body.message,
         req.body.files
       )
-    ).then(emitWorkingTreeChanged.bind(null, req.body.path));
+    )
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(`${exports.pathPrefix}/revert`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -411,7 +414,9 @@ exports.registerApi = (env) => {
         throw e;
       }
     });
-    jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+    jsonResultOrFailProm(res, task)
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -533,7 +538,7 @@ exports.registerApi = (env) => {
     ];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitWorkingTreeChanged.bind(null, req.body.path)
+      emitGitDirectoryChanged.bind(null, req.body.path)
     );
   });
 
@@ -545,7 +550,7 @@ exports.registerApi = (env) => {
       jsonResultOrFailProm(
         res,
         gitPromise(['branch', '-D', req.query.name.trim()], req.query.path)
-      ).finally(emitWorkingTreeChanged.bind(null, req.query.path));
+      ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
     }
   );
 
@@ -566,7 +571,7 @@ exports.registerApi = (env) => {
         }
       });
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.query.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
     }
   );
 
@@ -615,7 +620,7 @@ exports.registerApi = (env) => {
     ];
 
     jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitWorkingTreeChanged.bind(null, req.body.path)
+      emitGitDirectoryChanged.bind(null, req.body.path)
     );
   });
 
@@ -623,7 +628,7 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-    ).finally(emitWorkingTreeChanged.bind(null, req.query.path));
+    ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
   });
 
   app.delete(
@@ -640,7 +645,7 @@ exports.registerApi = (env) => {
         .catch(() => {}) // might have already deleted, so ignoring error
         .then(() => gitPromise(commands, req.query.path));
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.query.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
     }
   );
 
@@ -649,9 +654,9 @@ exports.registerApi = (env) => {
       ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
       : ['checkout', req.body.name.trim()];
 
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path)).then(
-      emitWorkingTreeChanged.bind(null, req.body.path)
-    );
+    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
+      .then(emitGitDirectoryChanged.bind(null, req.body.path))
+      .then(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(
@@ -662,7 +667,9 @@ exports.registerApi = (env) => {
       jsonResultOrFailProm(
         res,
         autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path)
-      ).then(emitWorkingTreeChanged.bind(null, req.body.path));
+      )
+        .then(emitGitDirectoryChanged.bind(null, req.body.path))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -711,7 +718,9 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       gitPromise(['merge', config.noFFMerge ? '--no-ff' : '', req.body.with.trim()], req.body.path)
-    ).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+    )
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(
@@ -725,9 +734,9 @@ exports.registerApi = (env) => {
         inPipe: req.body.message,
       };
 
-      jsonResultOrFailProm(res, gitPromise(args)).finally(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      jsonResultOrFailProm(res, gitPromise(args))
+        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -736,9 +745,9 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(['merge', '--abort'], req.body.path)).finally(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      jsonResultOrFailProm(res, gitPromise(['merge', '--abort'], req.body.path))
+        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -746,13 +755,15 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       gitPromise(['merge', '--squash', req.body.target.trim()], req.body.path)
-    ).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+    )
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(`${exports.pathPrefix}/rebase`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise(['rebase', req.body.onto.trim()], req.body.path)).finally(
-      emitWorkingTreeChanged.bind(null, req.body.path)
-    );
+    jsonResultOrFailProm(res, gitPromise(['rebase', req.body.onto.trim()], req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.post(
@@ -760,9 +771,9 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(['rebase', '--continue'], req.body.path)).finally(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      jsonResultOrFailProm(res, gitPromise(['rebase', '--continue'], req.body.path))
+        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -771,9 +782,9 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(['rebase', '--abort'], req.body.path)).finally(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      jsonResultOrFailProm(res, gitPromise(['rebase', '--abort'], req.body.path))
+        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -869,7 +880,9 @@ exports.registerApi = (env) => {
           ['submodule', 'add', req.body.submoduleUrl.trim(), req.body.submodulePath.trim()],
           req.body.path
         )
-      ).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      )
+        .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.body.path));
     }
   );
 
@@ -942,7 +955,9 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(
       res,
       gitPromise(['stash', 'save', '--include-untracked', req.body.message || ''], req.body.path)
-    ).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+    )
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
+      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
   app.delete(
@@ -954,7 +969,9 @@ exports.registerApi = (env) => {
       jsonResultOrFailProm(
         res,
         gitPromise(['stash', type, `stash@{${req.params.id}}`], req.query.path)
-      ).finally(emitWorkingTreeChanged.bind(null, req.query.path));
+      )
+        .finally(emitGitDirectoryChanged.bind(null, req.query.path))
+        .finally(emitWorkingTreeChanged.bind(null, req.query.path));
     }
   );
 
@@ -1015,7 +1032,7 @@ exports.registerApi = (env) => {
     }
     fs.writeFile(path.join(req.body.path, '.gitignore'), req.body.data)
       .then(() => res.status(200).json({}))
-      .finally(emitWorkingTreeChanged.bind(null, req.body.path))
+      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
       .catch((e) => res.status(500).json(e));
   });
 
@@ -1025,30 +1042,30 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/createfile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
-      jsonResultOrFailProm(res, fs.writeFile(req.body.file, content)).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      fs.writeFile(req.body.file, content)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changefile`, ensureAuthenticated, (req, res) => {
       const content = req.body.content ? req.body.content : `test content\n${Math.random()}\n`;
-      jsonResultOrFailProm(res, fs.writeFile(req.body.file, content)).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      fs.writeFile(req.body.file, content)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/createimagefile`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, fs.writeFile(req.body.file, 'png', { encoding: 'binary' })).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      fs.writeFile(req.body.file, 'png', { encoding: 'binary' })
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/changeimagefile`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' })).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      fs.writeFile(req.body.file, 'png ~~', { encoding: 'binary' })
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/removefile`, ensureAuthenticated, (req, res) => {
-      jsonResultOrFailProm(res, fs.unlink(req.body.file)).then(
-        emitWorkingTreeChanged.bind(null, req.body.path)
-      );
+      fs.unlink(req.body.file)
+        .then(() => res.json({}))
+        .then(emitWorkingTreeChanged.bind(null, req.body.path));
     });
     app.post(`${exports.pathPrefix}/testing/git`, ensureAuthenticated, (req, res) => {
       jsonResultOrFailProm(res, gitPromise(req.body.command, req.body.path)).then(
@@ -1057,11 +1074,6 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
-        if (err) {
-          logger.error(`error while cleanup ${err}`);
-          res.status(500).json(err);
-          return;
-        }
         logger.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });

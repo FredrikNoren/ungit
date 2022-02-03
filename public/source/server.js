@@ -44,6 +44,9 @@ Server.prototype.initSocket = function () {
   this.socket.on('working-tree-changed', function () {
     programEvents.dispatch({ event: 'working-tree-changed' });
   });
+  this.socket.on('git-directory-changed', function () {
+    programEvents.dispatch({ event: 'git-directory-changed' });
+  });
   this.socket.on('request-credentials', function (args) {
     self._getCredentials(function (credentials) {
       self.socket.emit('credentials', credentials);
