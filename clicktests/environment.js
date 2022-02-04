@@ -299,7 +299,6 @@ class Environment {
 
   async _verifyRefAction(action) {
     try {
-      await this.ensureClickEventIsBound('.modal-dialog .btn-primary');
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
@@ -378,18 +377,5 @@ class Environment {
       lastEventProcessedTime
     );
     logger.info('finished refreshing...');
-  }
-
-  async ensureClickEventIsBound(selector) {
-    while (true) {
-      const client = await this.page.target().createCDPSession()
-      const { result } = await client.send('Runtime.evaluate', { expression: `document.querySelector('${selector}')` })
-      const { listeners } = await client.send('DOMDebugger.getEventListeners', { objectId: result.objectId })
-
-      if (listeners.filter(l => l.type === 'click').length > 0) {
-        return;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    }
   }
 }

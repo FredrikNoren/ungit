@@ -142,8 +142,7 @@ async function browserifyFile(source, destination) {
     const b = browserify(source, {
       bundleExternal: false,
       debug: true,
-    }).plugin(tsify, {
-    });
+    }).plugin(tsify, {});
 
     const outFile = fsSync.createWriteStream(destination);
     outFile.on('close', () => resolve());

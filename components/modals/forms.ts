@@ -24,6 +24,7 @@ class FormModalViewModel extends ModalViewModel {
   }
 
   submit() {
+    console.log('>>>>12', this.constructor.name)
     this.close();
   }
 }
@@ -62,7 +63,7 @@ class AddRemoteModalViewModel extends FormModalViewModel {
         url: this.items[1].value(),
       });
       ungit.programEvents.dispatch({ event: 'update-remote' });
-    } catch(e) {
+    } catch (e) {
       ungit.server.unhandledRejection(e);
     }
   }
@@ -80,14 +81,14 @@ class AddSubmoduleModalViewModel extends FormModalViewModel {
   async submit() {
     ungit._isSubmoduleUpdating = true;
     super.submit();
-    try{
+    try {
       await ungit.server.postPromise('/submodules/add', {
         path: this.repoPath,
         submodulePath: this.items[0].value(),
         submoduleUrl: this.items[1].value(),
       });
       ungit.programEvents.dispatch({ event: 'submodule-fetch' });
-    } catch(e) {
+    } catch (e) {
       ungit.server.unhandledRejection(e);
     } finally {
       ungit._isSubmoduleUpdating = false;

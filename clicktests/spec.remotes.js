@@ -56,7 +56,6 @@ describe('[REMOTES]', () => {
   it('Remote delete check', async () => {
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.click('[data-ta-clickable="myremote-remove"]');
-    await environment.ensureClickEventIsBound('.modal-dialog .btn-primary');
     await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.click('.fetchButton .dropdown-toggle');
@@ -129,7 +128,6 @@ describe('[REMOTES]', () => {
     await environment.insert('.staging input.form-control', 'Commit & Push with ff');
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
-    await environment.ensureClickEventIsBound('.modal-dialog .btn-primary');
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementVisible('[data-ta-node-title="Commit & Push with ff"]');
   });

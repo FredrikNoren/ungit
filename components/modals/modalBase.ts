@@ -10,6 +10,7 @@ export class ModalViewModel {
   }
 
   close() {
+    console.log('>>>>11', this.constructor.name);
     ungit.programEvents.dispatch({ event: 'modal-close-dialog', modal: this });
   }
 }
