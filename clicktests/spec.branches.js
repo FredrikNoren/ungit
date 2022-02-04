@@ -79,6 +79,7 @@ describe('[BRANCHES]', () => {
   it('Delete a branch via selection', async () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="refs/heads/branch-3-remove"]');
+    await environment.ensureClickEventIsBound('.modal-dialog .btn-primary');
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementHidden('#nprogress');
   });
@@ -103,6 +104,7 @@ describe('[BRANCHES]', () => {
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
     await environment.click('.staging .btn-stg-abort');
+    await environment.ensureClickEventIsBound('.modal-dialog .btn-primary');
     await environment.click('.modal-dialog .btn-primary');
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]');
   });
@@ -123,7 +125,8 @@ describe('[BRANCHES]', () => {
     await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
-    await environment.click('.modal-dialog .btn-primary [data-bind="click: submit"]');
+    await environment.ensureClickEventIsBound('.modal-dialog .btn-primary');
+    await environment.click('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.staging .files .file');
   });

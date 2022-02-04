@@ -203,9 +203,8 @@ class Environment {
 
     if (!this.page) {
       const pages = await this.browser.pages();
-      const page = (this.page = pages[0]);
-
-      page.on('console', (message) => {
+      this.page = pages[0];
+      this.page.on('console', (message) => {
         const text = `[ui ${message.type()}] ${message.text()}`;
 
         if (message.type() === 'error' && !this.shuttinDown) {
@@ -254,7 +253,7 @@ class Environment {
   async click(selector, clickCount) {
     logger.info(`clicking "${selector}"`);
 
-    for (let i = 0; i < 3000; i++) {
+    for (let i = 0; i < 3; i++) {
       try {
         const toClick = await this.waitForElementVisible(selector);
         await toClick.click({ clickCount: clickCount });
@@ -300,10 +299,7 @@ class Environment {
 
   async _verifyRefAction(action) {
     try {
-      await this.page.waitForSelector('.modal-dialog .btn-primary', {
-        visible: true,
-        timeout: 2000,
-      });
+      await this.ensureClickEventIsBound('.modal-dialog .btn-primary');
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
@@ -382,5 +378,18 @@ class Environment {
       lastEventProcessedTime
     );
     logger.info('finished refreshing...');
+  }
+
+  async ensureClickEventIsBound(selector) {
+    while (true) {
+      const client = await this.page.target().createCDPSession()
+      const { result } = await client.send('Runtime.evaluate', { expression: `document.querySelector('${selector}')` })
+      const { listeners } = await client.send('DOMDebugger.getEventListeners', { objectId: result.objectId })
+
+      if (listeners.filter(l => l.type === 'click').length > 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
   }
 }

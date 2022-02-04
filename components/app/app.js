@@ -15,7 +15,6 @@ class AppViewModel {
     if (window.location.search.indexOf('noheader=true') < 0) {
       this.header = components.create('header', { app: this });
     }
-    this.dialog = ko.observable(null);
     this.modal = ko.observable(null);
     this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
     this.repoList.subscribe((newValue) => {
@@ -97,8 +96,6 @@ class AppViewModel {
   async onProgramEvent(event) {
     if (event.event === 'request-credentials') {
       this._handleCredentialsRequested(event);
-    } else if (event.event === 'request-show-dialog') {
-      this.showDialog(event.dialog);
     } else if (event.event === 'request-remember-repo') {
       this._handleRequestRememberRepo(event);
     } else if (event.event === 'modal-show-dialog') {
@@ -143,14 +140,6 @@ class AppViewModel {
         modalDom.modal();
       }
     }, 200);
-  }
-  showDialog(dialog) {
-    this.dialog(
-      dialog.closeThen(() => {
-        this.dialog(null);
-        return dialog;
-      })
-    );
   }
   gitSetUserConfig(bugTracking) {
     this.server.getPromise('/userconfig').then((userConfig) => {
