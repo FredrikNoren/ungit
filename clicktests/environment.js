@@ -256,7 +256,7 @@ class Environment {
     for (let i = 0; i < 3; i++) {
       try {
         const toClick = await this.waitForElementVisible(selector);
-        await toClick.click({ clickCount: clickCount });
+        await toClick.click({ delay: 100, clickCount: clickCount });
         break;
       } catch (err) {
         logger.error('error while clicking', err);
@@ -299,6 +299,10 @@ class Environment {
 
   async _verifyRefAction(action) {
     try {
+      await this.page.waitForSelector('.modal-dialog .btn-primary', {
+        visible: true,
+        timeout: 2000,
+      });
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
