@@ -8,11 +8,11 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
 
   await env.click('.files button.discard');
   if (dialogButtonToClick === 'yes') {
-    await env.click('.modal-dialog [data-ta-action="yes"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="yes"]');
   } else if (dialogButtonToClick === 'mute') {
-    await env.click('.modal-dialog [data-ta-action="mute"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="mute"]');
   } else if (dialogButtonToClick === 'no') {
-    await env.click('.modal-dialog [data-ta-action="no"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="no"]');
   } else {
     await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
   }

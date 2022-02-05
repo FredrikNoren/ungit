@@ -302,7 +302,7 @@ class Environment {
       await this.page.waitForSelector('.modal-dialog .btn-primary', {
         visible: true,
         timeout: 2000,
-      });
+      }); // not all ref actions opens dialog, this line may throw exception.
       await this.click('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
@@ -381,5 +381,10 @@ class Environment {
       lastEventProcessedTime
     );
     logger.info('finished refreshing...');
+  }
+
+  async awaitAndClick(selector, time = 1000) {
+    await this.wait(time);
+    await this.click(selector);
   }
 }
