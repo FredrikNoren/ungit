@@ -82,7 +82,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Test showing commit diff between two commits', async () => {
-    await environment.click('[data-ta-clickable="node-clickable-0"]');
+    await environment.clickOnNode('[data-ta-clickable="node-clickable-0"]');
     await environment.waitForElementVisible('.diff-wrapper');
     await environment.click('.commit-diff-filename');
     await environment.waitForElementVisible('.commit-line-diffs');
@@ -119,7 +119,7 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a branch', async () => {
     await environment.createBranch('willbedeleted');
-    await environment.click('.branch[data-ta-name="willbedeleted"]');
+    await environment.clickOnNode('.branch[data-ta-name="willbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
@@ -128,7 +128,7 @@ describe('[GENERIC]', () => {
 
   it('Should be possible to create and destroy a tag', async () => {
     await environment.createTag('tagwillbedeleted');
-    await environment.click('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
+    await environment.clickOnNode('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
     await environment.ensureRefresh();
@@ -162,7 +162,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Checkout testbranch with action', async () => {
-    await environment.click('.branch[data-ta-name="testbranch"]');
+    await environment.clickOnNode('.branch[data-ta-name="testbranch"]');
     await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
     await environment.ensureRefresh();
     await environment.waitForElementVisible('.ref.branch[data-ta-name="testbranch"].current');
@@ -192,7 +192,7 @@ describe('[GENERIC]', () => {
   });
 
   it('Revert merge', async () => {
-    await environment.click('[data-ta-clickable="node-clickable-0"]');
+    await environment.clickOnNode('[data-ta-clickable="node-clickable-0"]');
     await environment.click('[data-ta-action="revert"]');
     await environment.ensureRefresh();
     await environment.waitForElementVisible(

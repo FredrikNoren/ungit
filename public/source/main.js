@@ -196,6 +196,7 @@ exports.start = function () {
   appContainer = new AppContainerViewModel();
   ungit.server = server;
   app = components.create('app', { appContainer: appContainer, server: server });
+  ungit.__app = app;
   programEvents.add(async (event) => {
     ungit.logger.info(`received event: ${event.event}`);
     if (event.event == 'disconnected' || event.event == 'git-crash-error') {

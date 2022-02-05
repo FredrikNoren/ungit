@@ -32,7 +32,6 @@ class PromptModalViewModel extends ModalViewModel {
   }
 
   close(isYes: boolean = undefined, isMute: boolean = undefined) {
-    console.log('>>>>14', isYes, isMute)
     this.closeFunc(isYes, isMute);
     super.close();
   }

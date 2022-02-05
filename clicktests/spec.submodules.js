@@ -23,6 +23,7 @@ describe('[SUMBODULES]', () => {
     await environment.insert('.modal #Path', 'subrepo');
     await environment.insert('.modal #Url', testRepoPaths[0]);
     await environment.awaitAndClick('.modal-dialog .btn-primary');
+    await environment.ensureRefresh();
     await environment.click('.submodule .dropdown-toggle');
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'
@@ -30,14 +31,28 @@ describe('[SUMBODULES]', () => {
   });
 
   it('Submodule update', async () => {
+    await environment.page.on('response', (response) => {
+      if (response.url().endsWith('/submodules/update') && response.request().method() === 'POST') {
+        environment.page.evaluate(() => {
+          ungit.__submoduleUpdateResponded = true;
+        });
+      }
+    });
     await environment.click('.fetchButton .update-submodule');
-    await environment.page.waitForFunction('ungit._isSubmoduleUpdating === false');
+    await environment.page.waitForFunction('ungit.__submoduleUpdateResponded');
   });
 
   it('Submodule delete check', async () => {
+    await environment.page.on('response', (response) => {
+      if (response.url().indexOf('/submodules?') > -1 && response.request().method() === 'DELETE') {
+        environment.page.evaluate(() => {
+          ungit.__submoduleDeleteResponed = true;
+        });
+      }
+    });
     await environment.click('.submodule .dropdown-toggle');
     await environment.click('[data-ta-clickable="subrepo-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__submoduleDeleteResponed');
   });
 });

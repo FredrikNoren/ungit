@@ -98,7 +98,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('cherrypick fail case', async () => {
-    await environment.click('[data-ta-clickable="node-clickable-0"]');
+    await environment.clickOnNode('[data-ta-clickable="node-clickable-0"]');
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
@@ -108,7 +108,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('cherrypick success case', async () => {
-    await environment.click('[data-ta-clickable="node-clickable-1"]');
+    await environment.clickOnNode('[data-ta-clickable="node-clickable-1"]');
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
@@ -118,9 +118,8 @@ describe('[BRANCHES]', () => {
 
   it('test backward squash from own lineage', async () => {
     await environment.waitForBranch('branch-1');
-    await environment.click('.ref.branch.current');
+    await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
-    await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
@@ -129,7 +128,7 @@ describe('[BRANCHES]', () => {
   });
 
   it('test forward squash from different lineage', async () => {
-    await environment.click('.ref.branch.current');
+    await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-3"] .squash .dropmask');
     await environment.ensureRefresh();
     await environment.waitForElementVisible('.staging .files .file');

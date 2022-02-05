@@ -7,7 +7,6 @@ components.register('submodules', (args) => new SubmodulesViewModel(args.server,
 
 class SubmodulesViewModel {
   constructor(server, repoPath) {
-    ungit._isSubmoduleUpdating = false;
     this.repoPath = repoPath;
     this.server = server;
     this.submodules = ko.observableArray();
@@ -39,14 +38,9 @@ class SubmodulesViewModel {
   }
 
   updateSubmodules() {
-    if (ungit._isSubmoduleUpdating) return;
-    ungit._isSubmoduleUpdating = true;
     return this.server
       .postPromise('/submodules/update', { path: this.repoPath() })
-      .catch((e) => this.server.unhandledRejection(e))
-      .finally(() => {
-        ungit._isSubmoduleUpdating = false;
-      });
+      .catch((e) => this.server.unhandledRejection(e));
   }
 
   showAddSubmoduleDialog() {

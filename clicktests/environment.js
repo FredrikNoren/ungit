@@ -303,7 +303,7 @@ class Environment {
         visible: true,
         timeout: 2000,
       }); // not all ref actions opens dialog, this line may throw exception.
-      await this.click('.modal-dialog .btn-primary');
+      await this.awaitAndClick('.modal-dialog .btn-primary');
     } catch (err) {
       /* ignore */
     }
@@ -312,13 +312,13 @@ class Environment {
   }
 
   async refAction(ref, local, action) {
-    await this.click(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
+    await this.clickOnNode(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
     await this.ensureRefresh();
     await this._verifyRefAction(action);
   }
   async moveRef(ref, targetNodeCommitTitle) {
-    await this.click(`.branch[data-ta-name="${ref}"]`);
+    await this.clickOnNode(`.branch[data-ta-name="${ref}"]`);
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );
@@ -386,5 +386,28 @@ class Environment {
   async awaitAndClick(selector, time = 1000) {
     await this.wait(time);
     await this.click(selector);
+  }
+
+  async clickOnNode(nodeSelector) {
+    await this.click(nodeSelector);
+    await this.page.waitForFunction(() => {
+      const app = ungit.__app;
+      if (!app) {
+        return;
+      }
+      const path = app.content();
+      if (!path || path.constructor.name !== 'PathViewModel') {
+        return;
+      }
+      const repository = path.repository();
+      if (!repository) {
+        return;
+      }
+      const graph = repository.graph;
+      if (!graph) {
+        return;
+      }
+      return graph.currentActionContext();
+    });
   }
 }

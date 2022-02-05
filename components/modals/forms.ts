@@ -24,7 +24,6 @@ class FormModalViewModel extends ModalViewModel {
   }
 
   submit() {
-    console.log('>>>>12', this.constructor.name)
     this.close();
   }
 }
@@ -79,7 +78,6 @@ class AddSubmoduleModalViewModel extends FormModalViewModel {
   }
 
   async submit() {
-    ungit._isSubmoduleUpdating = true;
     super.submit();
     try {
       await ungit.server.postPromise('/submodules/add', {
@@ -90,8 +88,6 @@ class AddSubmoduleModalViewModel extends FormModalViewModel {
       ungit.programEvents.dispatch({ event: 'submodule-fetch' });
     } catch (e) {
       ungit.server.unhandledRejection(e);
-    } finally {
-      ungit._isSubmoduleUpdating = false;
     }
   }
 }
