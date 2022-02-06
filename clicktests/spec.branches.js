@@ -49,8 +49,11 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button without branches', async () => {
+    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchesGetResponded');
+    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded');
     await environment.click('.btn-group.branch .btn-main');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__branchesGetResponded');
+    await environment.page.waitForFunction('ungit.__refsGetResponded');
   });
 
   it('add a branch', () => {
@@ -58,8 +61,11 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button with one branch', async () => {
+    await environment.page.evaluate('ungit.__branchesGetResponded = undefined');
+    await environment.page.evaluate('ungit.__refsGetResponded = undefined');
     await environment.click('.btn-group.branch .btn-main');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__branchesGetResponded');
+    await environment.page.waitForFunction('ungit.__refsGetResponded');
   });
 
   it('add second branch', async () => {
@@ -77,10 +83,11 @@ describe('[BRANCHES]', () => {
   });
 
   it('Delete a branch via selection', async () => {
+    await environment.setApiListener('/branches?', 'DELETE', 'ungit.__branchDeleteResponed');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="refs/heads/branch-3-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__branchDeleteResponed');
   });
 
   it('add another commit', async () => {
@@ -89,29 +96,34 @@ describe('[BRANCHES]', () => {
     await environment.ensureRefresh();
   });
 
-  it('checkout cherypick base', async () => {
+  it('checkout cherrypick base', async () => {
+    await environment.setApiListener('/checkout', 'POST', 'ungit.__checkoutPostResponded');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]');
+    await environment.page.waitForFunction('ungit.__checkoutPostResponded');
     await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-name="branch-1"].current');
-    await environment.waitForElementHidden('#nprogress');
   });
 
   it('cherrypick fail case', async () => {
+    await environment.wait(1000);
     await environment.clickOnNode('[data-ta-clickable="node-clickable-0"]');
-    await environment.click(
+    await environment.awaitAndClick(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
     await environment.click('.staging .btn-stg-abort');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]');
+    await environment.ensureRefresh();
   });
 
   it('cherrypick success case', async () => {
+    await environment.setApiListener('/cherrypick', 'POST', 'ungit.__cherrypickPostResponed');
     await environment.clickOnNode('[data-ta-clickable="node-clickable-1"]');
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
+    await environment.page.waitForFunction('ungit.__cherrypickPostResponed');
     await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });

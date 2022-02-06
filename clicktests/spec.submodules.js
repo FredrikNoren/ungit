@@ -31,25 +31,17 @@ describe('[SUMBODULES]', () => {
   });
 
   it('Submodule update', async () => {
-    await environment.page.on('response', (response) => {
-      if (response.url().endsWith('/submodules/update') && response.request().method() === 'POST') {
-        environment.page.evaluate(() => {
-          ungit.__submoduleUpdateResponded = true;
-        });
-      }
-    });
+    await environment.setApiListener(
+      '/submodules/update',
+      'POST',
+      'ungit.__submoduleUpdateResponded'
+    );
     await environment.click('.fetchButton .update-submodule');
     await environment.page.waitForFunction('ungit.__submoduleUpdateResponded');
   });
 
   it('Submodule delete check', async () => {
-    await environment.page.on('response', (response) => {
-      if (response.url().indexOf('/submodules?') > -1 && response.request().method() === 'DELETE') {
-        environment.page.evaluate(() => {
-          ungit.__submoduleDeleteResponed = true;
-        });
-      }
-    });
+    await environment.setApiListener('/submodules?', 'DELETE', 'ungit.__submoduleDeleteResponed');
     await environment.click('.submodule .dropdown-toggle');
     await environment.click('[data-ta-clickable="subrepo-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');

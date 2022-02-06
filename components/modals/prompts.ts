@@ -31,7 +31,7 @@ class PromptModalViewModel extends ModalViewModel {
     this.closeFunc = closeFunc;
   }
 
-  close(isYes: boolean = undefined, isMute: boolean = undefined) {
+  close(isYes: boolean = false, isMute: boolean = false) {
     this.closeFunc(isYes, isMute);
     super.close();
   }
@@ -45,7 +45,7 @@ class PromptModalViewModel extends ModalViewModel {
   }
 
   closeNo() {
-    this.close(false);
+    this.close();
   }
 }
 

@@ -14,7 +14,10 @@ describe('[BARE]', () => {
   });
 
   it('update branches button without branches', async () => {
+    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchGetResponed');
+    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponed');
     await environment.click('.btn-group.branch .btn-main');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__branchGetResponed');
+    await environment.page.waitForFunction('ungit.__refsGetResponed');
   });
 });

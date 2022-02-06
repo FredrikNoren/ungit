@@ -9,8 +9,8 @@
       </div>
       <div class="modal-footer">
         <!-- ko foreach: promptOptions -->
-        <button class="btn btn-default" type="button"
-          data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: close"></button>
+        <button type="button"
+          data-bind="css: { 'btn-primary': primary }, attr: { 'data-ta-action': taId }, text: label, click: close, class: 'btn btn-default'"></button>
         <!-- /ko -->
       </div>
     </div>

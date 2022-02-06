@@ -40,7 +40,7 @@ describe('[REMOTES]', () => {
 
     await environment.insert('.modal #Name', 'myremote');
     await environment.insert('.modal #Url', testRepoPaths[0]);
-    await environment.click('.modal .modal-footer .btn-primary');
+    await environment.awaitAndClick('.modal .modal-footer .btn-primary');
     await environment.ensureRefresh();
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.waitForElementVisible(
@@ -49,8 +49,9 @@ describe('[REMOTES]', () => {
   });
 
   it('Fetch from newly added remote', async () => {
+    await environment.setApiListener('/remote/tags?', 'GET', 'ungit.__remoteGetResponded');
     await environment.click('.fetchButton .btn-main');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.waitForFunction('ungit.__remoteGetResponded');
   });
 
   it('Remote delete check', async () => {
@@ -78,9 +79,10 @@ describe('[REMOTES]', () => {
   });
 
   it('Should be possible to fetch', async () => {
+    await environment.page.evaluate('ungit.__remoteGetResponded = undefined');
     await environment.click('.fetchButton .btn-main');
     await environment.ensureRefresh();
-    await environment.waitForElementHidden('#nprogress');
+    await environment.page.evaluate('ungit.__remoteGetResponded');
   });
 
   it('Should be possible to create and push a branch', async () => {

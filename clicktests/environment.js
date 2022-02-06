@@ -410,4 +410,12 @@ class Environment {
       return graph.currentActionContext();
     });
   }
+
+  async setApiListener(apiPart, method, globalVarName) {
+    await this.page.on('response', (response) => {
+      if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
+        this.page.evaluate(`${globalVarName} = true`);
+      }
+    });
+  }
 }
