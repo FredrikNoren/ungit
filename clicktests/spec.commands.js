@@ -61,20 +61,23 @@ describe('[COMMANDS]', () => {
   });
 
   it('test branch delete from command line', async () => {
+    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchGetResponded');
     await gitCommand({ command: ['branch', '-D', 'gitCommandBranch'], path: testRepoPaths[0] });
-    await environment.ensureRefresh();
+    await environment.page.waitForFunction('ungit.__branchGetResponded');
     await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]', 10000);
   });
 
   it('test tag create from command line', async () => {
+    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded');
     await gitCommand({ command: ['tag', 'tag1'], path: testRepoPaths[0] });
-    await environment.ensureRefresh();
+    await environment.page.waitForFunction('ungit.__refsGetResponded');
     await environment.waitForElementVisible('[data-ta-name="tag1"]', 10000);
   });
 
   it('test tag delete from command line', async () => {
+    await environment.page.evaluate('ungit.__refsGetResponded = undefined');
     await gitCommand({ command: ['tag', '-d', 'tag1'], path: testRepoPaths[0] });
-    await environment.ensureRefresh();
+    await environment.page.waitForFunction('ungit.__refsGetResponded');
     await environment.waitForElementHidden('[data-ta-name="tag1"]', 10000);
   });
 
