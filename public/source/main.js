@@ -73,12 +73,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => { },
+            results: () => {},
           },
         })
         .data('ui-autocomplete')._renderItem = (ul, item) => {
-          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-        };
+        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+      };
     };
 
     const handleKeyEvent = (event) => {

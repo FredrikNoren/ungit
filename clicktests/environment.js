@@ -377,20 +377,9 @@ class Environment {
     await this.triggerProgramEvents();
 
     // wait for triggered program event to be processed.
-    await this.page.waitForFunction((lastEventProcessedTime) => {
-      if (ungit.__eventProcessedTime <= lastEventProcessedTime) {
-        return false;
-      }
-      if (Object.values(ungit.__eventArgMap).length > 0) {
-        return false;
-      }
-      if (!!ungit.__eventProcessingProm) {
-        return false;
-      }
-      return true;
-    }, {
-      polling: 250
-    }, lastEventProcessedTime)
+    await this.page.waitForFunction(`ungit.__eventProcessedTime > ${lastEventProcessedTime}`, {
+      polling: 250,
+    });
     logger.info('finished refreshing...');
   }
 
