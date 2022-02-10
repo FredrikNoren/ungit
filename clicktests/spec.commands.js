@@ -1,6 +1,7 @@
 'use strict';
 const environment = require('./environment')();
 const testRepoPaths = [];
+const _ = require('lodash');
 
 const gitCommand = (options) => {
   return environment.backgroundAction('POST', '/api/testing/git', options);
@@ -61,23 +62,44 @@ describe('[COMMANDS]', () => {
   });
 
   it('test branch delete from command line', async () => {
-    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchGetResponded');
+    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchGetResponded', (body) => {
+      return _.isEqual(body, [
+        { name: 'branch-1' },
+        { name: 'branch-2' },
+        { name: 'master', current: true },
+      ]);
+    });
     await gitCommand({ command: ['branch', '-D', 'gitCommandBranch'], path: testRepoPaths[0] });
     await environment.page.waitForFunction('ungit.__branchGetResponded');
     await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]', 10000);
   });
 
   it('test tag create from command line', async () => {
-    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded');
+    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded', (body) => {
+      body.forEach((ref) => delete ref.sha1);
+      return _.isEqual(body, [
+        { name: 'refs/heads/branch-1' },
+        { name: 'refs/heads/branch-2' },
+        { name: 'refs/heads/master' },
+        { name: 'refs/tags/tag1' },
+      ]);
+    });
     await gitCommand({ command: ['tag', 'tag1'], path: testRepoPaths[0] });
     await environment.page.waitForFunction('ungit.__refsGetResponded');
     await environment.waitForElementVisible('[data-ta-name="tag1"]', 10000);
   });
 
   it('test tag delete from command line', async () => {
-    await environment.page.evaluate('ungit.__refsGetResponded = undefined');
+    await environment.setApiListener('/refs?', 'GET', 'ungit.__deletedRefsGetResponded', (body) => {
+      body.forEach((ref) => delete ref.sha1);
+      return _.isEqual(body, [
+        { name: 'refs/heads/branch-1' },
+        { name: 'refs/heads/branch-2' },
+        { name: 'refs/heads/master' },
+      ]);
+    });
     await gitCommand({ command: ['tag', '-d', 'tag1'], path: testRepoPaths[0] });
-    await environment.page.waitForFunction('ungit.__refsGetResponded');
+    await environment.page.waitForFunction('ungit.__deletedRefsGetResponded');
     await environment.waitForElementHidden('[data-ta-name="tag1"]', 10000);
   });
 

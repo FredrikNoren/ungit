@@ -358,6 +358,7 @@ class Environment {
         ungit.programEvents.active = true;
       }
       ungit.programEvents.dispatch({ event: 'working-tree-changed' });
+      ungit.programEvents.dispatch({ event: 'git-directory-changed' });
       if (!isActive) {
         ungit.programEvents.active = false;
       }
@@ -415,10 +416,13 @@ class Environment {
 
   // If an api call matches `apiPart` and `method` is called, set the `globalVarName`
   // to true. Use for detect if an API call was made and responded.
-  setApiListener(apiPart, method, globalVarName) {
-    this.page.on('response', (response) => {
+  setApiListener(apiPart, method, globalVarName, bodyMatcher = () => true) {
+    this.page.on('response', async (response) => {
       if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
-        this.page.evaluate(`${globalVarName} = true`);
+        if (bodyMatcher(await response.json())) {
+          // reponse body matcher is matched, set the value to true
+          this.page.evaluate(`${globalVarName} = true`);
+        }
       }
     });
   }

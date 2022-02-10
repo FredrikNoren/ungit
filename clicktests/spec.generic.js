@@ -185,6 +185,7 @@ describe('[GENERIC]', () => {
   it('Create yet another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy3.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
+    await environment.ensureRefresh();
   });
 
   it('Merge', () => {
