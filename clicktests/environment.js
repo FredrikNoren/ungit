@@ -260,6 +260,7 @@ class Environment {
     for (let i = 0; i < 3; i++) {
       try {
         const toClick = await this.waitForElementVisible(selector);
+        await this.wait(200);
         await toClick.click({ delay: 100, clickCount: clickCount });
         break;
       } catch (err) {

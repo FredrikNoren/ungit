@@ -112,7 +112,7 @@ describe('[BRANCHES]', () => {
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
     await environment.click('.staging .btn-stg-abort');
-    await environment.awaitAndClick('.modal-dialog .btn-primary');
+    await environment.awaitAndClick('.modal-dialog .btn-primary', 2000);
     await environment.waitForElementVisible('[data-ta-clickable="node-clickable-0"]');
     await environment.ensureRefresh();
   });
@@ -135,7 +135,7 @@ describe('[BRANCHES]', () => {
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
-    await environment.awaitAndClick('.modal-dialog .btn-primary');
+    await environment.awaitAndClick('.modal-dialog .btn-primary', 2000);
     await environment.ensureRefresh();
     await environment.waitForElementHidden('.staging .files .file');
   });
