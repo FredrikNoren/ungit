@@ -73,12 +73,12 @@ ko.bindingHandlers.autocomplete = {
           minLength: 0,
           messages: {
             noResults: '',
-            results: () => {},
+            results: () => { },
           },
         })
         .data('ui-autocomplete')._renderItem = (ul, item) => {
-        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-      };
+          return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
+        };
     };
 
     const handleKeyEvent = (event) => {
@@ -159,7 +159,8 @@ AppContainerViewModel.prototype.templateChooser = function (data) {
 
 var app, appContainer, server;
 
-let eventArgMap = {};
+ungit.__eventArgMap = {};
+ungit.__eventProcessedTime = 0;
 
 const throttledEventTrigger = _.throttle(
   async () => {
@@ -168,8 +169,8 @@ const throttledEventTrigger = _.throttle(
       return throttledEventTrigger();
     }
 
-    const eventsToProcess = Object.values(eventArgMap);
-    eventArgMap = {};
+    const eventsToProcess = Object.values(ungit.__eventArgMap);
+    ungit.__eventArgMap = {};
     try {
       ungit.logger.debug('programEvent process triggered');
 
@@ -214,7 +215,7 @@ exports.start = function () {
       windowTitle.update();
     }
 
-    eventArgMap[JSON.stringify(event)] = event;
+    ungit.__eventArgMap[JSON.stringify(event)] = event;
     throttledEventTrigger();
     if (event.event === 'modal-show-dialog' || event === 'modal-close-dialog') {
       throttledEventTrigger.flush();
