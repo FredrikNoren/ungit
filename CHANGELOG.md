@@ -105,6 +105,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Changed
 - Migrate clicktests from nightmare to puppeteer [#1336](https://github.com/FredrikNoren/ungit/pull/1336)
+- Change warning message to be grammatically correct [#1383](https://github.com/FredrikNoren/ungit/pull/1383)
 - Prettify code with prettier [#1316](https://github.com/FredrikNoren/ungit/pull/1316)
 - Switch from JSHint to ESLint [#1360](https://github.com/FredrikNoren/ungit/pull/1360)
 - Bump Dependencies [#1355](https://github.com/FredrikNoren/ungit/pull/1355), [#1385](https://github.com/FredrikNoren/ungit/pull/1385)
