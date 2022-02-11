@@ -358,7 +358,6 @@ class Environment {
         ungit.programEvents.active = true;
       }
       ungit.programEvents.dispatch({ event: 'working-tree-changed' });
-      ungit.programEvents.dispatch({ event: 'git-directory-changed' });
       if (!isActive) {
         ungit.programEvents.active = false;
       }

@@ -272,7 +272,7 @@ class GraphViewModel extends ComponentRoot {
   }
 
   async onProgramEvent(event) {
-    if (event.event == 'git-directory-changed') {
+    if (event.event == 'git-directory-changed' || event.event === 'working-tree-changed') {
       await Promise.all([this.loadNodesFromApi(), this.updateBranches()]);
     } else if (event.event == 'request-app-content-refresh') {
       await this.loadNodesFromApi();

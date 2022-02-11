@@ -220,11 +220,11 @@ describe('[BRANCHES]', () => {
       }
     );
     await environment.ensureRefresh();
+    await environment.page.waitForFunction('ungit.__cherrypickSuccessGitlogGetResponded');
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 
   it('test backward squash from own lineage', async () => {
-    await environment.wait(1000);
     await environment.waitForBranch('branch-1');
     await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
