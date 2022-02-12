@@ -415,14 +415,17 @@ class Environment {
 
   // If an api call matches `apiPart` and `method` is called, set the `globalVarName`
   // to true. Use for detect if an API call was made and responded.
-  setApiListener(apiPart, method, globalVarName, bodyMatcher = () => true) {
+  setApiListener(apiPart, method, bodyMatcher = () => true) {
+    const randomVariable = `ungit._${Math.floor(Math.random() * 500000)}`;
+    this.page.evaluate(`${randomVariable} = undefined`);
     this.page.on('response', async (response) => {
       if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
         if (bodyMatcher(await response.json())) {
           // reponse body matcher is matched, set the value to true
-          this.page.evaluate(`${globalVarName} = true`);
+          this.page.evaluate(`${randomVariable} = true`);
         }
       }
     });
+    return this.page.waitForFunction(randomVariable);
   }
 }

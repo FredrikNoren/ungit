@@ -50,10 +50,9 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button without branches', async () => {
-    await environment.setApiListener(
+    const branchesResponse = environment.setApiListener(
       '/branches?',
       'GET',
-      'ungit.__branchesGetResponded',
       (body) => {
         return _.isEqual(body, [
           { name: 'master', current: true },
@@ -64,7 +63,7 @@ describe('[BRANCHES]', () => {
         ]);
       }
     );
-    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded', (body) => {
+    const refsResponse = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
         {
@@ -88,8 +87,8 @@ describe('[BRANCHES]', () => {
       ]);
     });
     await environment.click('.btn-group.branch .btn-main');
-    await environment.page.waitForFunction('ungit.__branchesGetResponded');
-    await environment.page.waitForFunction('ungit.__refsGetResponded');
+    await branchesResponse;
+    await refsResponse;
   });
 
   it('add a branch', () => {
@@ -97,10 +96,9 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button with one branch', async () => {
-    await environment.setApiListener(
+    const branchesResponse = environment.setApiListener(
       '/branches?',
       'GET',
-      'ungit.__branchesAddGetResponded',
       (body) => {
         return _.isEqual(body, [
           { name: 'branch-1' },
@@ -112,7 +110,7 @@ describe('[BRANCHES]', () => {
         ]);
       }
     );
-    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsAddGetResponded', (body) => {
+    const refsResponse = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
         { name: 'refs/heads/branch-1' },
@@ -137,8 +135,8 @@ describe('[BRANCHES]', () => {
       ]);
     });
     await environment.click('.btn-group.branch .btn-main');
-    await environment.page.waitForFunction('ungit.__branchesAddGetResponded');
-    await environment.page.waitForFunction('ungit.__refsAddGetResponded');
+    await branchesResponse;
+    await refsResponse;
   });
 
   it('add second branch', async () => {
@@ -156,11 +154,11 @@ describe('[BRANCHES]', () => {
   });
 
   it('Delete a branch via selection', async () => {
-    await environment.setApiListener('/branches?', 'DELETE', 'ungit.__branchDeleteResponed');
+    const branchDeleteResponse = environment.setApiListener('/branches?', 'DELETE');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="refs/heads/branch-3-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.page.waitForFunction('ungit.__branchDeleteResponed');
+    await branchDeleteResponse;
   });
 
   it('add another commit', async () => {
@@ -170,10 +168,10 @@ describe('[BRANCHES]', () => {
   });
 
   it('checkout cherrypick base', async () => {
-    await environment.setApiListener('/checkout', 'POST', 'ungit.__checkoutPostResponded');
+    const checkoutResponse = environment.setApiListener('/checkout', 'POST');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]');
-    await environment.page.waitForFunction('ungit.__checkoutPostResponded');
+    await checkoutResponse;
     await environment.ensureRefresh();
     await environment.waitForElementVisible('[data-ta-name="branch-1"].current');
   });
@@ -186,10 +184,9 @@ describe('[BRANCHES]', () => {
     );
     await environment.click('.staging .btn-stg-abort');
     await environment.awaitAndClick('.modal-dialog .btn-primary', 2000);
-    environment.setApiListener(
+    const gitlogResponse = environment.setApiListener(
       '/gitlog',
       'GET',
-      'ungit.__cherrypickAbortGitlogGetResponded',
       (body) => {
         return _.isEqual(
           body.nodes.map((node) => node.message),
@@ -198,20 +195,19 @@ describe('[BRANCHES]', () => {
       }
     );
     await environment.ensureRefresh();
-    await environment.page.waitForFunction('ungit.__cherrypickAbortGitlogGetResponded');
+    await gitlogResponse;
   });
 
   it('cherrypick success case', async () => {
-    environment.setApiListener('/cherrypick', 'POST', 'ungit.__cherrypickPostResponed');
+    const cherrypickPostResponed = environment.setApiListener('/cherrypick', 'POST');
     await environment.clickOnNode('[data-ta-clickable="node-clickable-1"]');
     await environment.click(
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
-    await environment.page.waitForFunction('ungit.__cherrypickPostResponed');
-    environment.setApiListener(
+    await cherrypickPostResponed;
+    const cherrypickGitlogResponse = environment.setApiListener(
       '/gitlog',
       'GET',
-      'ungit.__cherrypickSuccessGitlogGetResponded',
       (body) => {
         return _.isEqual(
           body.nodes.map((node) => node.message),
@@ -220,7 +216,7 @@ describe('[BRANCHES]', () => {
       }
     );
     await environment.ensureRefresh();
-    await environment.page.waitForFunction('ungit.__cherrypickSuccessGitlogGetResponded');
+    await cherrypickGitlogResponse;
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
 

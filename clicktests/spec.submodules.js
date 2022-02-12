@@ -31,20 +31,19 @@ describe('[SUMBODULES]', () => {
   });
 
   it('Submodule update', async () => {
-    await environment.setApiListener(
+    const submoduleResponseProm = environment.setApiListener(
       '/submodules/update',
       'POST',
-      'ungit.__submoduleUpdateResponded'
     );
     await environment.click('.fetchButton .update-submodule');
-    await environment.page.waitForFunction('ungit.__submoduleUpdateResponded');
+    await submoduleResponseProm;
   });
 
   it('Submodule delete check', async () => {
-    await environment.setApiListener('/submodules?', 'DELETE', 'ungit.__submoduleDeleteResponed');
+    const submoduleDeleteResponseProm = environment.setApiListener('/submodules?', 'DELETE');
     await environment.click('.submodule .dropdown-toggle');
     await environment.click('[data-ta-clickable="subrepo-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.page.waitForFunction('ungit.__submoduleDeleteResponed');
+    await submoduleDeleteResponseProm;
   });
 });

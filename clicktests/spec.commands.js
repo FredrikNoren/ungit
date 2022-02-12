@@ -62,7 +62,7 @@ describe('[COMMANDS]', () => {
   });
 
   it('test branch delete from command line', async () => {
-    await environment.setApiListener('/branches?', 'GET', 'ungit.__branchGetResponded', (body) => {
+    const brachesResponseProm = environment.setApiListener('/branches?', 'GET', (body) => {
       return _.isEqual(body, [
         { name: 'branch-1' },
         { name: 'branch-2' },
@@ -70,12 +70,12 @@ describe('[COMMANDS]', () => {
       ]);
     });
     await gitCommand({ command: ['branch', '-D', 'gitCommandBranch'], path: testRepoPaths[0] });
-    await environment.page.waitForFunction('ungit.__branchGetResponded');
+    await brachesResponseProm;
     await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]', 10000);
   });
 
   it('test tag create from command line', async () => {
-    await environment.setApiListener('/refs?', 'GET', 'ungit.__refsGetResponded', (body) => {
+    const refsResponseProm = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
         { name: 'refs/heads/branch-1' },
@@ -85,12 +85,12 @@ describe('[COMMANDS]', () => {
       ]);
     });
     await gitCommand({ command: ['tag', 'tag1'], path: testRepoPaths[0] });
-    await environment.page.waitForFunction('ungit.__refsGetResponded');
+    await refsResponseProm;
     await environment.waitForElementVisible('[data-ta-name="tag1"]', 10000);
   });
 
   it('test tag delete from command line', async () => {
-    await environment.setApiListener('/refs?', 'GET', 'ungit.__deletedRefsGetResponded', (body) => {
+    const refDeleteResponseProm = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
         { name: 'refs/heads/branch-1' },
@@ -99,7 +99,7 @@ describe('[COMMANDS]', () => {
       ]);
     });
     await gitCommand({ command: ['tag', '-d', 'tag1'], path: testRepoPaths[0] });
-    await environment.page.waitForFunction('ungit.__deletedRefsGetResponded');
+    await refDeleteResponseProm;
     await environment.waitForElementHidden('[data-ta-name="tag1"]', 10000);
   });
 

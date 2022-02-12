@@ -49,9 +49,9 @@ describe('[REMOTES]', () => {
   });
 
   it('Fetch from newly added remote', async () => {
-    await environment.setApiListener('/remote/tags?', 'GET', 'ungit.__remoteGetResponded');
+    const remoteGetResponseProm = environment.setApiListener('/remote/tags?', 'GET');
     await environment.click('.fetchButton .btn-main');
-    await environment.page.waitForFunction('ungit.__remoteGetResponded');
+    await remoteGetResponseProm;
   });
 
   it('Remote delete check', async () => {
@@ -79,10 +79,9 @@ describe('[REMOTES]', () => {
   });
 
   it('Should be possible to fetch', async () => {
-    await environment.page.evaluate('ungit.__remoteGetResponded = undefined');
+    const remoteGetResponseProm = environment.setApiListener('/remote/tags?', 'GET');
     await environment.click('.fetchButton .btn-main');
-    await environment.ensureRefresh();
-    await environment.page.evaluate('ungit.__remoteGetResponded');
+    await remoteGetResponseProm;
   });
 
   it('Should be possible to create and push a branch', async () => {
