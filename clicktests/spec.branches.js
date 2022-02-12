@@ -205,6 +205,15 @@ describe('[BRANCHES]', () => {
   });
 
   it('test backward squash from own lineage', async () => {
+    environment.page.waitForFunction(() => {
+      const doms = document.querySelectorAll('.ref.branch')
+      doms.forEach(d => console.log('>>>>4123', d.getAttribute('data-ta-name'), d.classList.toString()))
+
+      const graph = ungit.__app.content().repository().graph
+      const target = graph.getRef('refs/heads/branch-1', false)
+      console.log('>>>>881', target.isHead, target.current(), target.isLocalBranch)
+      console.log('>>>>4123', graph.checkedOutBranch())
+    }, { polling: 500 })
     await environment.waitForBranch('branch-1');
     await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');
