@@ -31,10 +31,7 @@ describe('[SUMBODULES]', () => {
   });
 
   it('Submodule update', async () => {
-    const submoduleResponseProm = environment.setApiListener(
-      '/submodules/update',
-      'POST',
-    );
+    const submoduleResponseProm = environment.setApiListener('/submodules/update', 'POST');
     await environment.click('.fetchButton .update-submodule');
     await submoduleResponseProm;
   });

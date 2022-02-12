@@ -29,14 +29,15 @@ describe('[BRANCHES]', () => {
   });
 
   it('add tag should make one of the branch disappear', async () => {
+    const branchesResponse = environment.setApiListener('/tags', 'POST');
     await environment.createTag('tag-1');
+    await branchesResponse;
     await environment.waitForElementHidden('[data-ta-name="search-4"]');
   });
 
   it('search for the hidden branch', async () => {
-    await environment.stopProgramEventPropagation();
-    await environment.waitForNetworkIdle();
-    await environment.click('.showSearchForm');
+    await environment.awaitAndClick('.showSearchForm');
+    await environment.wait(500);
     await environment.type('-4');
     await environment.waitForElementVisible('.branch-search');
     await environment.page.waitForFunction(
@@ -46,23 +47,18 @@ describe('[BRANCHES]', () => {
     await environment.press('Enter');
 
     await environment.waitForElementVisible('[data-ta-name="search-4"]', 10000);
-    await environment.startProgramEventPropagation();
   });
 
   it('updateBranches button without branches', async () => {
-    const branchesResponse = environment.setApiListener(
-      '/branches?',
-      'GET',
-      (body) => {
-        return _.isEqual(body, [
-          { name: 'master', current: true },
-          { name: 'search-1' },
-          { name: 'search-2' },
-          { name: 'search-3' },
-          { name: 'search-4' },
-        ]);
-      }
-    );
+    const branchesResponse = environment.setApiListener('/branches?', 'GET', (body) => {
+      return _.isEqual(body, [
+        { name: 'master', current: true },
+        { name: 'search-1' },
+        { name: 'search-2' },
+        { name: 'search-3' },
+        { name: 'search-4' },
+      ]);
+    });
     const refsResponse = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
@@ -96,20 +92,16 @@ describe('[BRANCHES]', () => {
   });
 
   it('updateBranches button with one branch', async () => {
-    const branchesResponse = environment.setApiListener(
-      '/branches?',
-      'GET',
-      (body) => {
-        return _.isEqual(body, [
-          { name: 'branch-1' },
-          { name: 'master', current: true },
-          { name: 'search-1' },
-          { name: 'search-2' },
-          { name: 'search-3' },
-          { name: 'search-4' },
-        ]);
-      }
-    );
+    const branchesResponse = environment.setApiListener('/branches?', 'GET', (body) => {
+      return _.isEqual(body, [
+        { name: 'branch-1' },
+        { name: 'master', current: true },
+        { name: 'search-1' },
+        { name: 'search-2' },
+        { name: 'search-3' },
+        { name: 'search-4' },
+      ]);
+    });
     const refsResponse = environment.setApiListener('/refs?', 'GET', (body) => {
       body.forEach((ref) => delete ref.sha1);
       return _.isEqual(body, [
@@ -184,16 +176,12 @@ describe('[BRANCHES]', () => {
     );
     await environment.click('.staging .btn-stg-abort');
     await environment.awaitAndClick('.modal-dialog .btn-primary', 2000);
-    const gitlogResponse = environment.setApiListener(
-      '/gitlog',
-      'GET',
-      (body) => {
-        return _.isEqual(
-          body.nodes.map((node) => node.message),
-          ['commit-3', 'commit-2', 'commit-1']
-        );
-      }
-    );
+    const gitlogResponse = environment.setApiListener('/gitlog', 'GET', (body) => {
+      return _.isEqual(
+        body.nodes.map((node) => node.message),
+        ['commit-3', 'commit-2', 'commit-1']
+      );
+    });
     await environment.ensureRefresh();
     await gitlogResponse;
   });
@@ -205,16 +193,12 @@ describe('[BRANCHES]', () => {
       '[data-ta-action="cherry-pick"]:not([style*="display: none"]) .dropmask'
     );
     await cherrypickPostResponed;
-    const cherrypickGitlogResponse = environment.setApiListener(
-      '/gitlog',
-      'GET',
-      (body) => {
-        return _.isEqual(
-          body.nodes.map((node) => node.message),
-          ['commit-2', 'commit-3', 'commit-2', 'commit-1']
-        );
-      }
-    );
+    const cherrypickGitlogResponse = environment.setApiListener('/gitlog', 'GET', (body) => {
+      return _.isEqual(
+        body.nodes.map((node) => node.message),
+        ['commit-2', 'commit-3', 'commit-2', 'commit-1']
+      );
+    });
     await environment.ensureRefresh();
     await cherrypickGitlogResponse;
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');

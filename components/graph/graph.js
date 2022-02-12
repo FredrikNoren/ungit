@@ -297,6 +297,7 @@ class GraphViewModel extends ComponentRoot {
     const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
 
     try {
+      ungit.logger.debug('setting checkedOutBranch', checkout);
       this.checkedOutBranch(checkout);
     } catch (err) {
       if (err.errorCode != 'not-a-repository') {

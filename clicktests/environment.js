@@ -426,6 +426,6 @@ class Environment {
         }
       }
     });
-    return this.page.waitForFunction(randomVariable);
+    return this.page.waitForFunction(`${randomVariable} === true`);
   }
 }
