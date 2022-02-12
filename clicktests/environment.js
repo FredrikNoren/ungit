@@ -410,7 +410,6 @@ class Environment {
       if (!graph) {
         return;
       }
-      console.log('>>>>183', graph.currentActionContext());
       return graph.currentActionContext();
     }, { polling: 500 });
   }
