@@ -212,8 +212,8 @@ describe('[BRANCHES]', () => {
       const graph = ungit.__app.content().repository().graph
       const target = graph.getRef('refs/heads/branch-1', false)
       console.log('>>>>881', target.isHead, target.current(), target.isLocalBranch)
-      console.log('>>>>4123', graph.checkedOutBranch())
-    }, { polling: 500 })
+      console.log('>>>>411113', graph.checkedOutBranch())
+    }, { polling: 1000 })
     await environment.waitForBranch('branch-1');
     await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-1"] .squash .dropmask');

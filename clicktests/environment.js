@@ -267,6 +267,7 @@ class Environment {
         logger.error('error while clicking', err);
       }
     }
+    logger.info(`clicked "${selector}`)
   }
 
   waitForNetworkIdle() {
@@ -409,8 +410,9 @@ class Environment {
       if (!graph) {
         return;
       }
+      console.log('>>>>183', graph.currentActionContext());
       return graph.currentActionContext();
-    });
+    }, { polling: 500 });
   }
 
   // If an api call matches `apiPart` and `method` is called, set the `globalVarName`
