@@ -7,8 +7,6 @@ class Selectable {
         return graph.currentActionContext() == this;
       },
       write(val) {
-        const valConstructorName = ((val || {}).constructor || {}).name;
-        const thisConstructorName = ((val || {}).constructor || {}).name;
         // val is this if we're called from a click ko binding
         if (val === this || val === true) {
           graph.currentActionContext(this);

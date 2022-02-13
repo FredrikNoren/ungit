@@ -267,7 +267,7 @@ class Environment {
         logger.error('error while clicking', err);
       }
     }
-    logger.info(`clicked "${selector}`)
+    logger.info(`clicked "${selector}`);
   }
 
   waitForNetworkIdle() {
@@ -393,25 +393,28 @@ class Environment {
   // After a click on `git-node` or `git-ref`, ensure `currentActionContext` is set
   async clickOnNode(nodeSelector) {
     await this.click(nodeSelector);
-    await this.page.waitForFunction(() => {
-      const app = ungit.__app;
-      if (!app) {
-        return;
-      }
-      const path = app.content();
-      if (!path || path.constructor.name !== 'PathViewModel') {
-        return;
-      }
-      const repository = path.repository();
-      if (!repository) {
-        return;
-      }
-      const graph = repository.graph;
-      if (!graph) {
-        return;
-      }
-      return graph.currentActionContext();
-    }, { polling: 500 });
+    await this.page.waitForFunction(
+      () => {
+        const app = ungit.__app;
+        if (!app) {
+          return;
+        }
+        const path = app.content();
+        if (!path || path.constructor.name !== 'PathViewModel') {
+          return;
+        }
+        const repository = path.repository();
+        if (!repository) {
+          return;
+        }
+        const graph = repository.graph;
+        if (!graph) {
+          return;
+        }
+        return graph.currentActionContext();
+      },
+      { polling: 500 }
+    );
   }
 
   // If an api call matches `apiPart` and `method` is called, set the `globalVarName`
