@@ -174,8 +174,8 @@ describe('[GENERIC]', () => {
     await environment.ensureRefresh();
   });
 
-  it('Rebase', () => {
-    return environment.refAction('testbranch', true, 'rebase');
+  it('Rebase', async () => {
+    await environment.rebaseRefAction('testbranch', true);
   });
 
   it('Checkout master with double click', async () => {
@@ -189,8 +189,8 @@ describe('[GENERIC]', () => {
     await environment.ensureRefresh();
   });
 
-  it('Merge', () => {
-    return environment.refAction('testbranch', true, 'merge');
+  it('Merge', async () => {
+    await environment.mergeRefAction('testbranch', true);
   });
 
   it('Revert merge', async () => {

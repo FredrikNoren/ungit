@@ -14,6 +14,7 @@ components.register('graph', (args) => new GraphViewModel(args.server, args.repo
 class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
     super();
+    this._isLoadNodesFromApiRunning = false;
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
     this.limit = ko.observable(numberOfNodesPerLoad);
@@ -109,6 +110,7 @@ class GraphViewModel extends ComponentRoot {
   }
 
   async loadNodesFromApi() {
+    this._isLoadNodesFromApiRunning = true;
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
     const edges = [];
@@ -148,6 +150,7 @@ class GraphViewModel extends ComponentRoot {
       if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
         this.scrolledToEnd();
       }
+      this._isLoadNodesFromApiRunning = false;
       ungit.logger.debug('graph.loadNodesFromApi() finished');
     }
   }

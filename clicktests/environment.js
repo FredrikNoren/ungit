@@ -191,9 +191,6 @@ class Environment {
       file: filename,
       path: repoPath,
     });
-    if (this.page) {
-      await this.ensureRefresh();
-    }
   }
 
   // browser helpers
@@ -284,16 +281,18 @@ class Environment {
   async commit(commitMessage) {
     await this.waitForElementVisible('.files .file .btn-default');
     await this.insert('.staging input.form-control', commitMessage);
+    const postCommitProm = this.setApiListener('/commit', 'POST');
     await this.click('.commit-btn');
-    await this.ensureRefresh();
+    await postCommitProm;
     await this.waitForElementHidden('.files .file .btn-default');
   }
 
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
     await this.insert('.ref-icons.new-ref.editing input', name);
+    const createRefProm = type === 'branch' ? this.setApiListener('/branches', 'POST') : this.setApiListener('/tags', 'POST')
     await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
-    await this.ensureRefresh();
+    await createRefProm;
     await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
   }
   createTag(name) {
@@ -314,22 +313,73 @@ class Environment {
       /* ignore */
     }
     await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
-    await this.ensureRefresh();
+    await this.ensureRedraw();
   }
 
-  async refAction(ref, local, action) {
+  async _refAction(ref, local, action, validateFunc) {
+    if (!this[`_${action}ResponseWatcher`]) {
+      this.page.on('response', async (response) => {
+        const url = response.url();
+        const method = response.request().method();
+
+        if (validateFunc(url, method)) {
+          this.page.evaluate(`ungit._${action}Response = true`);
+        }
+      });
+      this[`_${action}ResponseWatcher`] = true;
+    }
     await this.clickOnNode(`.branch[data-ta-name="${ref}"][data-ta-local="${local}"]`);
     await this.click(`[data-ta-action="${action}"]:not([style*="display: none"]) .dropmask`);
-    await this.ensureRefresh();
     await this._verifyRefAction(action);
+    await this.page.waitForFunction(`ungit._${action}Response`, { polling: 250 });
+    await this.page.evaluate(`ungit._${action}Response = undefined`);
   }
+
+  async pushRefAction(ref, local) {
+    await this._refAction(ref, local, 'push', (url, method) => {
+      if (method !== 'POST') {
+        return false;
+      }
+      if (url.indexOf('/push') === -1 && url.indexOf('/tags') === -1 && url.indexOf('/branches') === -1) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  async rebaseRefAction(ref, local) {
+    await this._refAction(ref, local, 'rebase', (url, method) => {
+      return method === 'POST' && url.indexOf('/rebase') >= -1;
+    });
+  }
+
+  async mergeRefAction(ref, local) {
+    await this._refAction(ref, local, 'merge', (url, method) => {
+      return method === 'POST' && url.indexOf('/merge') >= -1;
+    });
+  }
+
   async moveRef(ref, targetNodeCommitTitle) {
     await this.clickOnNode(`.branch[data-ta-name="${ref}"]`);
+    if (!this._isMoveResponseWatcherSet) {
+      this.page.on('response', async (response) => {
+        const url = response.url();
+        if (response.request().method() !== 'POST') {
+          return;
+        }
+        if (url.indexOf('/reset') === -1 && url.indexOf('/tags') === -1 && url.indexOf('/branches') === -1) {
+          return;
+        }
+        this.page.evaluate(`ungit._moveEventResponded = true`)
+      });
+      this._isMoveResponseWatcherSet = true;
+    }
     await this.click(
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );
-    await this.ensureRefresh();
     await this._verifyRefAction('move');
+    await this.page.waitForFunction(`ungit._moveEventResponded`);
+    await this.page.evaluate('ungit._moveEventResponded = undefined');
   }
 
   // Stop program event propagation.
@@ -363,6 +413,21 @@ class Environment {
         ungit.programEvents.active = false;
       }
     });
+  }
+
+  async ensureRedraw() {
+    if (!this._gitlogResposneWatcher) {
+      this.page.on('response', async (response) => {
+        if (response.url().indexOf('/gitlog') > 0 && response.request().method() === 'GET') {
+          this.page.evaluate('ungit._gitlogResponse = true');
+        }
+      });
+      this._gitlogResposneWatcher = true;
+    }
+    await this.page.evaluate(`ungit._gitlogResponse = undefined`);
+    await this.triggerProgramEvents();
+    await this.page.waitForFunction(`ungit._gitlogResponse`, { polling: 250 });
+    await this.page.waitForFunction(`ungit.__app.content().repository().graph._isLoadNodesFromApiRunning === false`, { polling: 250 });
   }
 
   // ensure UI refresh is triggered with the latest information at the time of the call.
@@ -421,7 +486,6 @@ class Environment {
   // to true. Use for detect if an API call was made and responded.
   setApiListener(apiPart, method, bodyMatcher = () => true) {
     const randomVariable = `ungit._${Math.floor(Math.random() * 500000)}`;
-    this.page.evaluate(`${randomVariable} = undefined`);
     this.page.on('response', async (response) => {
       if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
         if (bodyMatcher(await response.json())) {
@@ -429,7 +493,8 @@ class Environment {
           this.page.evaluate(`${randomVariable} = true`);
         }
       }
-    });
-    return this.page.waitForFunction(`${randomVariable} === true`);
+    }, { polling: 250 });
+    return this.page.waitForFunction(`${randomVariable} === true`)
+      .then(() => this.page.evaluate(`${randomVariable} = undefined`));
   }
 }

@@ -86,13 +86,13 @@ describe('[REMOTES]', () => {
 
   it('Should be possible to create and push a branch', async () => {
     await environment.createBranch('branchinclone');
-    await environment.refAction('branchinclone', true, 'push');
+    await environment.pushRefAction('branchinclone', true);
     await environment.waitForElementVisible('[data-ta-name="origin/branchinclone"]');
   });
 
   it('Should be possible to force push a branch', async () => {
     await environment.moveRef('branchinclone', 'Init Commit 0');
-    await environment.refAction('branchinclone', true, 'push');
+    await environment.pushRefAction('branchinclone', true);
     await environment.waitForElementHidden('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
