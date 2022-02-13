@@ -3,7 +3,7 @@
 const muteGraceTimeDuration = 5000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
-  await env.ensureRefresh();
+  await env.ensureRedraw();
   await env.waitForElementVisible('.files .file .btn-default');
 
   await env.click('.files button.discard');
@@ -17,7 +17,7 @@ const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
     await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
   }
   if (dialogButtonToClick !== 'no') {
-    await env.ensureRefresh();
+    await env.ensureRedraw();
     await env.waitForElementHidden('.files .file .btn-default');
   } else {
     await env.waitForElementVisible('.files .file .btn-default');

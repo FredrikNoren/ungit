@@ -23,7 +23,7 @@ describe('[SUMBODULES]', () => {
     await environment.insert('.modal #Path', 'subrepo');
     await environment.insert('.modal #Url', testRepoPaths[0]);
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.click('.submodule .dropdown-toggle');
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'

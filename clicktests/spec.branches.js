@@ -156,7 +156,7 @@ describe('[BRANCHES]', () => {
   it('add another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testfile2.txt`, testRepoPaths[0]);
     await environment.commit('commit-3');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
   });
 
   it('checkout cherrypick base', async () => {
@@ -164,7 +164,7 @@ describe('[BRANCHES]', () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/heads/branch-1"]');
     await checkoutResponse;
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible('[data-ta-name="branch-1"].current');
   });
 
@@ -182,7 +182,7 @@ describe('[BRANCHES]', () => {
         ['commit-3', 'commit-2', 'commit-1']
       );
     });
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await gitlogResponse;
   });
 
@@ -199,7 +199,7 @@ describe('[BRANCHES]', () => {
         ['commit-2', 'commit-3', 'commit-2', 'commit-1']
       );
     });
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await cherrypickGitlogResponse;
     await environment.waitForElementVisible('[data-ta-node-title="commit-2"] .ref.branch.current');
   });
@@ -212,14 +212,14 @@ describe('[BRANCHES]', () => {
     await environment.waitForElementVisible('.staging .files .file');
     await environment.click('.files button.discard');
     await environment.awaitAndClick('.modal-dialog .btn-primary', 2000);
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('.staging .files .file');
   });
 
   it('test forward squash from different lineage', async () => {
     await environment.clickOnNode('.ref.branch.current');
     await environment.click('[data-ta-node-title="commit-3"] .squash .dropmask');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible('.staging .files .file');
   });
 

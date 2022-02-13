@@ -13,7 +13,7 @@ const changeTestFile = async (filename, repoPath) => {
     file: filename,
     path: repoPath,
   });
-  await environment.ensureRefresh();
+  await environment.ensureRedraw();
 };
 const amendCommit = async () => {
   try {
@@ -22,9 +22,9 @@ const amendCommit = async () => {
   } catch (err) {
     await environment.click('.amend-link');
   }
-  await environment.ensureRefresh();
+  await environment.ensureRedraw();
   await environment.click('.commit-btn');
-  await environment.ensureRefresh();
+  await environment.ensureRedraw();
   await environment.waitForElementHidden('.files .file .btn-default');
 };
 
@@ -122,7 +122,7 @@ describe('[GENERIC]', () => {
     await environment.clickOnNode('.branch[data-ta-name="willbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('.branch[data-ta-name="willbedeleted"]');
   });
 
@@ -131,7 +131,7 @@ describe('[GENERIC]', () => {
     await environment.clickOnNode('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
     await environment.click('[data-ta-action="delete"]:not([style*="display: none"]) .dropmask');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('.graph .ref.tag[data-ta-name="tagwillbedeleted"]');
   });
 
@@ -140,7 +140,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.insert('.staging input.form-control', 'My commit message');
     await environment.click('.commit-btn');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
@@ -150,7 +150,7 @@ describe('[GENERIC]', () => {
     await environment.waitForElementVisible('.files .file .deletions');
     await environment.click('.files button.discard');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
@@ -164,14 +164,14 @@ describe('[GENERIC]', () => {
   it('Checkout testbranch with action', async () => {
     await environment.clickOnNode('.branch[data-ta-name="testbranch"]');
     await environment.click('[data-ta-action="checkout"]:not([style*="display: none"]) .dropmask');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible('.ref.branch[data-ta-name="testbranch"].current');
   });
 
   it('Create another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy2.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
   });
 
   it('Rebase', async () => {
@@ -186,7 +186,7 @@ describe('[GENERIC]', () => {
   it('Create yet another commit', async () => {
     await environment.createTestFile(`${testRepoPaths[0]}/testy3.txt`, testRepoPaths[0]);
     await environment.commit('Branch commit');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
   });
 
   it('Merge', async () => {
@@ -196,7 +196,7 @@ describe('[GENERIC]', () => {
   it('Revert merge', async () => {
     await environment.clickOnNode('[data-ta-clickable="node-clickable-0"]');
     await environment.click('[data-ta-action="revert"]');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible(
       '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"]'
     );

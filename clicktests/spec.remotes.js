@@ -23,14 +23,14 @@ describe('[REMOTES]', () => {
 
   it('Should not be possible to push without remote', async () => {
     await environment.click('.branch[data-ta-name="master"][data-ta-local="true"]');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementHidden('[data-ta-action="push"]:not([style*="display: none"])');
   });
 
   it('Should not be possible to commit & push without remote', async () => {
     await environment.click('.amend-link');
     await environment.click('.commit-grp .dropdown-toggle');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible('.commitnpush.disabled');
   });
 
@@ -41,7 +41,7 @@ describe('[REMOTES]', () => {
     await environment.insert('.modal #Name', 'myremote');
     await environment.insert('.modal #Url', testRepoPaths[0]);
     await environment.awaitAndClick('.modal .modal-footer .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="myremote"]'
@@ -58,7 +58,7 @@ describe('[REMOTES]', () => {
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.click('[data-ta-clickable="myremote-remove"]');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.click('.fetchButton .dropdown-toggle');
     await environment.waitForElementHidden('[data-ta-clickable="myremote"]');
   });
@@ -100,7 +100,7 @@ describe('[REMOTES]', () => {
     await environment.click('.branch .dropdown-toggle');
     await environment.click('.options input');
 
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
 
     await environment.click('.options input');
     await environment.waitForElementVisible('li .octicon-globe');
@@ -110,7 +110,7 @@ describe('[REMOTES]', () => {
     await environment.moveRef('branchinclone', 'Init Commit 1');
     await environment.click('.branch .dropdown-toggle');
     await environment.click('[data-ta-clickable="checkoutrefs/remotes/origin/branchinclone"]');
-    await environment.ensureRefresh();
+    await environment.ensureRedraw();
     await environment.waitForElementVisible('[data-ta-name="branchinclone"][data-ta-local="true"]');
   });
 

@@ -274,7 +274,8 @@ class Environment {
   waitForBranch(branchName) {
     const currentBranch = 'document.querySelector(".ref.branch.current")';
     return this.page.waitForFunction(
-      `${currentBranch} && ${currentBranch}.innerText && ${currentBranch}.innerText.trim() === "${branchName}"`
+      `${currentBranch} && ${currentBranch}.innerText && ${currentBranch}.innerText.trim() === "${branchName}"`,
+      { polling: 250 }
     );
   }
 
@@ -290,10 +291,14 @@ class Environment {
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
     await this.insert('.ref-icons.new-ref.editing input', name);
-    const createRefProm = type === 'branch' ? this.setApiListener('/branches', 'POST') : this.setApiListener('/tags', 'POST')
+    const createRefProm =
+      type === 'branch'
+        ? this.setApiListener('/branches', 'POST')
+        : this.setApiListener('/tags', 'POST');
     await this.click(`.new-ref ${type === 'branch' ? '.btn-primary' : '.btn-default'}`);
     await createRefProm;
     await this.waitForElementVisible(`.ref.${type}[data-ta-name="${name}"]`);
+    await this.ensureRedraw();
   }
   createTag(name) {
     return this._createRef('tag', name);
@@ -340,7 +345,11 @@ class Environment {
       if (method !== 'POST') {
         return false;
       }
-      if (url.indexOf('/push') === -1 && url.indexOf('/tags') === -1 && url.indexOf('/branches') === -1) {
+      if (
+        url.indexOf('/push') === -1 &&
+        url.indexOf('/tags') === -1 &&
+        url.indexOf('/branches') === -1
+      ) {
         return false;
       }
       return true;
@@ -367,10 +376,14 @@ class Environment {
         if (response.request().method() !== 'POST') {
           return;
         }
-        if (url.indexOf('/reset') === -1 && url.indexOf('/tags') === -1 && url.indexOf('/branches') === -1) {
+        if (
+          url.indexOf('/reset') === -1 &&
+          url.indexOf('/tags') === -1 &&
+          url.indexOf('/branches') === -1
+        ) {
           return;
         }
-        this.page.evaluate(`ungit._moveEventResponded = true`)
+        this.page.evaluate('ungit._moveEventResponded = true');
       });
       this._isMoveResponseWatcherSet = true;
     }
@@ -378,7 +391,7 @@ class Environment {
       `[data-ta-node-title="${targetNodeCommitTitle}"] [data-ta-action="move"]:not([style*="display: none"]) .dropmask`
     );
     await this._verifyRefAction('move');
-    await this.page.waitForFunction(`ungit._moveEventResponded`);
+    await this.page.waitForFunction('ungit._moveEventResponded', { polling: 250 });
     await this.page.evaluate('ungit._moveEventResponded = undefined');
   }
 
@@ -416,6 +429,7 @@ class Environment {
   }
 
   async ensureRedraw() {
+    logger.debug('ensureRedraw triggered');
     if (!this._gitlogResposneWatcher) {
       this.page.on('response', async (response) => {
         if (response.url().indexOf('/gitlog') > 0 && response.request().method() === 'GET') {
@@ -424,30 +438,14 @@ class Environment {
       });
       this._gitlogResposneWatcher = true;
     }
-    await this.page.evaluate(`ungit._gitlogResponse = undefined`);
+    await this.page.evaluate('ungit._gitlogResponse = undefined');
     await this.triggerProgramEvents();
-    await this.page.waitForFunction(`ungit._gitlogResponse`, { polling: 250 });
-    await this.page.waitForFunction(`ungit.__app.content().repository().graph._isLoadNodesFromApiRunning === false`, { polling: 250 });
-  }
-
-  // ensure UI refresh is triggered with the latest information at the time of the call.
-  async ensureRefresh() {
-    logger.info('ensure refresh...');
-    // ensure no event processing is running.
-    await this.page.waitForFunction(() => ungit.__eventProcessingProm === undefined);
-
-    // capture latest processing time.
-    const lastEventProcessedTime =
-      (await this.page.evaluate(() => ungit.__eventProcessedTime)) || 0;
-
-    // trigger program events.
-    await this.triggerProgramEvents();
-
-    // wait for triggered program event to be processed.
-    await this.page.waitForFunction(`ungit.__eventProcessedTime > ${lastEventProcessedTime}`, {
-      polling: 250,
-    });
-    logger.info('finished refreshing...');
+    await this.page.waitForFunction('ungit._gitlogResponse', { polling: 250 });
+    await this.page.waitForFunction(
+      'ungit.__app.content().repository().graph._isLoadNodesFromApiRunning === false',
+      { polling: 250 }
+    );
+    logger.debug('ensureRedraw finished');
   }
 
   async awaitAndClick(selector, time = 1000) {
@@ -457,7 +455,7 @@ class Environment {
 
   // After a click on `git-node` or `git-ref`, ensure `currentActionContext` is set
   async clickOnNode(nodeSelector) {
-    await this.click(nodeSelector);
+    await this.awaitAndClick(nodeSelector);
     await this.page.waitForFunction(
       () => {
         const app = ungit.__app;
@@ -478,23 +476,29 @@ class Environment {
         }
         return graph.currentActionContext();
       },
-      { polling: 500 }
+      { polling: 250 }
     );
+    logger.debug(`clickOnNode ${nodeSelector} finished`);
   }
 
   // If an api call matches `apiPart` and `method` is called, set the `globalVarName`
   // to true. Use for detect if an API call was made and responded.
   setApiListener(apiPart, method, bodyMatcher = () => true) {
     const randomVariable = `ungit._${Math.floor(Math.random() * 500000)}`;
-    this.page.on('response', async (response) => {
-      if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
-        if (bodyMatcher(await response.json())) {
-          // reponse body matcher is matched, set the value to true
-          this.page.evaluate(`${randomVariable} = true`);
+    this.page.on(
+      'response',
+      async (response) => {
+        if (response.url().indexOf(apiPart) > -1 && response.request().method() === method) {
+          if (bodyMatcher(await response.json())) {
+            // reponse body matcher is matched, set the value to true
+            this.page.evaluate(`${randomVariable} = true`);
+          }
         }
-      }
-    }, { polling: 250 });
-    return this.page.waitForFunction(`${randomVariable} === true`)
+      },
+      { polling: 250 }
+    );
+    return this.page
+      .waitForFunction(`${randomVariable} === true`, { polling: 250 })
       .then(() => this.page.evaluate(`${randomVariable} = undefined`));
   }
 }
