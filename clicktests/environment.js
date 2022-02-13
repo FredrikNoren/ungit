@@ -223,7 +223,7 @@ class Environment {
   async openUngit(tempDirPath) {
     await this.goto(`${this.getRootUrl()}/#/repository?path=${encodePath(tempDirPath)}`);
     await this.waitForElementVisible('.repository-actions');
-    await this.waitForNetworkIdle();
+    await this.page.waitForNetworkIdle();
   }
 
   waitForElementVisible(selector, timeout) {
@@ -265,10 +265,6 @@ class Environment {
       }
     }
     logger.info(`clicked "${selector}`);
-  }
-
-  waitForNetworkIdle() {
-    return this.page.waitForNetworkIdle();
   }
 
   waitForBranch(branchName) {
@@ -393,23 +389,6 @@ class Environment {
     await this._verifyRefAction('move');
     await this.page.waitForFunction('ungit._moveEventResponded', { polling: 250 });
     await this.page.evaluate('ungit._moveEventResponded = undefined');
-  }
-
-  // Stop program event propagation.
-  // Besure to remember to reenable, otherwise subsquent tests may fail.
-  // Also, many of the events are debounced so may have to wait few seconds
-  // after to completely prevent event propagations.
-  stopProgramEventPropagation() {
-    return this.page.evaluate((_) => {
-      ungit.programEvents.active = false;
-    });
-  }
-
-  // Start program event propagtion.
-  startProgramEventPropagation() {
-    return this.page.evaluate((_) => {
-      ungit.programEvents.active = true;
-    });
   }
 
   // Explicitly trigger two program events.

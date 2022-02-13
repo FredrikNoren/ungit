@@ -71,12 +71,14 @@ describe('[GENERIC]', () => {
     await environment.createTestFile(`${testRepoPaths[0]}/addMeToIgnore.txt`, testRepoPaths[0]);
     await environment.waitForElementVisible('.files .file .btn-default');
     await environment.page.waitForFunction(
-      'document.querySelectorAll(".files .file .btn-default").length === 1'
+      'document.querySelectorAll(".files .file .btn-default").length === 1',
+      { polling: 250 }
     );
     await environment.click('.files button.ignore');
     await environment.page.waitForFunction(
       'document.querySelector(".name.btn.btn-default").innerText.trim() === ".gitignore"'
-    );
+    ),
+      { polling: 250 };
     await environment.click('.files button.ignore');
     await environment.waitForElementHidden('.files .file .btn-default');
   });

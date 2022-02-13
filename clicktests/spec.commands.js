@@ -18,7 +18,7 @@ const testForBranchMove = async (branch, command) => {
       const newLoc = document.querySelector(branch).getBoundingClientRect();
       return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
     },
-    { timeout: 6000 },
+    { timeout: 6000, polling: 250 },
     branch,
     JSON.parse(branchTagLoc)
   );

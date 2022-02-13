@@ -24,15 +24,15 @@ describe('[SUMBODULES]', () => {
     await environment.insert('.modal #Url', testRepoPaths[0]);
     await environment.awaitAndClick('.modal-dialog .btn-primary');
     await environment.ensureRedraw();
+  });
+
+  it('Submodule update', async () => {
     await environment.click('.submodule .dropdown-toggle');
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'
     );
-  });
-
-  it('Submodule update', async () => {
     const submoduleResponseProm = environment.setApiListener('/submodules/update', 'POST');
-    await environment.click('.fetchButton .update-submodule');
+    await environment.awaitAndClick('.fetchButton .update-submodule');
     await submoduleResponseProm;
   });
 
