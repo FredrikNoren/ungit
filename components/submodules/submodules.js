@@ -2,32 +2,37 @@ const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const { ComponentRoot } = require('../ComponentRoot');
+const _ = require('lodash');
 
 components.register('submodules', (args) => new SubmodulesViewModel(args.server, args.repoPath));
 
-class SubmodulesViewModel {
+class SubmodulesViewModel extends ComponentRoot {
   constructor(server, repoPath) {
+    super();
     this.repoPath = repoPath;
     this.server = server;
+    this.fetchSubmodules = _.debounce(this._fetchSubmodules, 250, this.defaultDebounceOption);
     this.submodules = ko.observableArray();
     this.submodulesIcon = octicons['file-submodule'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
     this.linkIcon = octicons['link-external'].toSVG({ height: 18 });
   }
 
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (event.event == 'submodule-fetch') {
-      await this.fetchSubmodules();
+      this.fetchSubmodules();
     }
   }
 
   updateNode(parentElement) {
-    this.fetchSubmodules().then((submoduleViewModel) => {
+    this.fetchSubmodules();
+    this.fetchSubmodules.flush().then((submoduleViewModel) => {
       ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
     });
   }
 
-  async fetchSubmodules() {
+  async _fetchSubmodules() {
     try {
       const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
       this.submodules(submodules && Array.isArray(submodules) ? submodules : []);

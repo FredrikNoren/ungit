@@ -4,6 +4,7 @@ const moment = require('moment');
 const components = require('ungit-components');
 const storage = require('ungit-storage');
 const { ComponentRoot } = require('../ComponentRoot');
+const _ = require('lodash');
 
 components.register('stash', (args) => new StashViewModel(args.server, args.repoPath));
 
@@ -59,6 +60,7 @@ class StashViewModel extends ComponentRoot {
     super();
     this.server = server;
     this.repoPath = repoPath;
+    this.refresh = _.debounce(this._refresh, 250, this.defaultDebounceOption);
     this.stashedChanges = ko.observable([]);
     this.isShow = ko.observable(storage.getItem('showStash') === 'true');
     this.visible = ko.computed(() => this.stashedChanges().length > 0 && this.isShow());
@@ -71,12 +73,13 @@ class StashViewModel extends ComponentRoot {
     if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
   }
 
-  async onProgramEvent(event) {
-    if (event.event == 'request-app-content-refresh' || event.event == 'git-directory-changed')
-      await this.refresh();
+  onProgramEvent(event) {
+    if (event.event == 'request-app-content-refresh' || event.event == 'git-directory-changed') {
+      this.refresh();
+    }
   }
 
-  async refresh() {
+  async _refresh() {
     ungit.logger.debug('stash.refresh() triggered');
 
     try {

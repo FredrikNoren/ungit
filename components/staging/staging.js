@@ -18,6 +18,7 @@ class StagingViewModel extends ComponentRoot {
     super();
     this.server = server;
     this.repoPath = repoPath;
+    this.refreshContent = _.debounce(this._refreshContent, 250, this.defaultDebounceOption);
     this.graph = graph;
     this.filesByPath = {};
     this.files = ko.observableArray();
@@ -123,18 +124,18 @@ class StagingViewModel extends ComponentRoot {
     ko.renderTemplate('staging', this, {}, parentElement);
   }
 
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (
       event.event == 'request-app-content-refresh' ||
       event.event === 'working-tree-changed' ||
       event.event === 'git-directory-changed'
     ) {
-      await this.refreshContent();
+      this.refreshContent();
       this.invalidateFilesDiffs();
     }
   }
 
-  async refreshContent() {
+  async _refreshContent() {
     ungit.logger.debug('staging.refreshContent() triggered');
 
     try {

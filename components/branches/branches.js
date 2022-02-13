@@ -6,6 +6,7 @@ const showRemote = 'showRemote';
 const showBranch = 'showBranch';
 const showTag = 'showTag';
 const { ComponentRoot } = require('../ComponentRoot');
+const _ = require('lodash');
 
 components.register('branches', (args) => {
   return new BranchesViewModel(args.server, args.graph, args.repoPath);
@@ -16,6 +17,7 @@ class BranchesViewModel extends ComponentRoot {
     super();
     this.repoPath = repoPath;
     this.server = server;
+    this.updateRefs = _.debounce(this._updateRefs, 250, this.defaultDebounceOption);
     this.branchesAndLocalTags = ko.observableArray();
     this.current = ko.observable();
     this.isShowRemote = ko.observable(storage.getItem(showRemote) != 'false');
@@ -54,16 +56,16 @@ class BranchesViewModel extends ComponentRoot {
   clickFetch() {
     this.updateRefs(true);
   }
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (
       event.event === 'request-app-content-refresh' ||
       event.event === 'branch-updated' ||
       event.event === 'git-directory-changed'
     ) {
-      await this.updateRefs();
+      this.updateRefs();
     }
   }
-  async updateRefs(forceRemoteFetch) {
+  async _updateRefs(forceRemoteFetch) {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
 
     const branchesProm = this.server.getPromise('/branches', { path: this.repoPath() });

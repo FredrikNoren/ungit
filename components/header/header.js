@@ -29,7 +29,7 @@ class HeaderViewModel {
     navigation.browseTo(`repository?path=${encodePath(this.path())}`);
   }
 
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (event.event == 'navigation-changed') {
       this.showBackButton(event.path != '');
       if (event.path == '') this.path('');
