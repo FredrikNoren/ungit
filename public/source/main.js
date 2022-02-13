@@ -159,39 +159,6 @@ AppContainerViewModel.prototype.templateChooser = function (data) {
 
 var app, appContainer, server;
 
-ungit.__eventArgMap = {};
-ungit.__eventProcessedTime = 0;
-
-const throttledEventTrigger = _.throttle(
-  async () => {
-    if (ungit.__eventProcessingProm) {
-      ungit.logger.debug('programEvent process rescheduled');
-      return throttledEventTrigger();
-    }
-
-    const eventsToProcess = Object.values(ungit.__eventArgMap);
-    ungit.__eventArgMap = {};
-    try {
-      ungit.logger.debug('programEvent process triggered');
-
-      ungit.__eventProcessingProm = Promise.all(
-        eventsToProcess.map(async (event) => {
-          return app.onProgramEvent(event);
-        })
-      );
-      await ungit.__eventProcessingProm;
-      ungit.__eventProcessedTime = Date.now();
-    } catch (e) {
-      ungit.logger.error('failed to process onProgramEvent', e, e.stack);
-    } finally {
-      ungit.__eventProcessingProm = undefined;
-      ungit.logger.debug('programEvent process finished');
-    }
-  },
-  500,
-  { leading: false, trailing: true }
-);
-
 exports.start = function () {
   server = new Server();
   appContainer = new AppContainerViewModel();
@@ -215,11 +182,7 @@ exports.start = function () {
       windowTitle.update();
     }
 
-    ungit.__eventArgMap[JSON.stringify(event)] = event;
-    throttledEventTrigger();
-    if (event.event === 'modal-show-dialog' || event === 'modal-close-dialog') {
-      throttledEventTrigger.flush();
-    }
+    app.onProgramEvent(event);
   });
   if (ungit.config.authentication) {
     var authenticationScreen = components.create('login', { server: server });

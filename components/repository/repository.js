@@ -47,18 +47,15 @@ class RepositoryViewModel {
     ko.renderTemplate('repository', this, {}, parentElement);
   }
 
-  async onProgramEvent(event) {
-    const promises = [];
-    if (this.gitErrors.onProgramEvent) promises.push(this.gitErrors.onProgramEvent(event));
-    if (this.graph.onProgramEvent) promises.push(this.graph.onProgramEvent(event));
-    if (this.staging.onProgramEvent) promises.push(this.staging.onProgramEvent(event));
-    if (this.stash.onProgramEvent) promises.push(this.stash.onProgramEvent(event));
-    if (this.remotes.onProgramEvent) promises.push(this.remotes.onProgramEvent(event));
-    if (this.submodules.onProgramEvent) promises.push(this.submodules.onProgramEvent(event));
-    if (this.branches.onProgramEvent) promises.push(this.branches.onProgramEvent(event));
+  onProgramEvent(event) {
+    if (this.gitErrors.onProgramEvent) this.gitErrors.onProgramEvent(event);
+    if (this.graph.onProgramEvent) this.graph.onProgramEvent(event);
+    if (this.staging.onProgramEvent) this.staging.onProgramEvent(event);
+    if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);
+    if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
+    if (this.submodules.onProgramEvent) this.submodules.onProgramEvent(event);
+    if (this.branches.onProgramEvent) this.branches.onProgramEvent(event);
     if (event.event == 'connected') this.server.watchRepository(this.repoPath());
-
-    await Promise.all(promises);
 
     // If we get a reconnect event it's usually because the server crashed and then restarted
     // or something like that, so we need to tell it to start watching the path again

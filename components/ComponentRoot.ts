@@ -2,6 +2,11 @@ declare var ungit: any;
 
 export class ComponentRoot {
   _apiCache: string;
+  defaultDebounceOption = {
+    maxWait: 1500,
+    leading: false,
+    trailing: true
+  }
 
   constructor() { }
 

@@ -15,6 +15,8 @@ class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
     super();
     this._isLoadNodesFromApiRunning = false;
+    this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
+    this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
     this.limit = ko.observable(numberOfNodesPerLoad);
@@ -109,7 +111,7 @@ class GraphViewModel extends ComponentRoot {
     return refViewModel;
   }
 
-  async loadNodesFromApi() {
+  async _loadNodesFromApi() {
     this._isLoadNodesFromApiRunning = true;
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
@@ -274,11 +276,12 @@ class GraphViewModel extends ComponentRoot {
     if (event.target.nodeName === 'INPUT') return true;
   }
 
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (event.event == 'git-directory-changed' || event.event === 'working-tree-changed') {
-      await Promise.all([this.loadNodesFromApi(), this.updateBranches()]);
+      this.loadNodesFromApi();
+      this.updateBranches();
     } else if (event.event == 'request-app-content-refresh') {
-      await this.loadNodesFromApi();
+      this.loadNodesFromApi();
     } else if (event.event == 'remote-tags-update') {
       this.setRemoteTags(event.tags);
     } else if (event.event == 'current-remote-changed') {
@@ -296,7 +299,7 @@ class GraphViewModel extends ComponentRoot {
     });
   }
 
-  async updateBranches() {
+  async _updateBranches() {
     const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
 
     try {

@@ -93,7 +93,7 @@ class AppViewModel {
     if (this.content() && this.content().updateAnimationFrame)
       this.content().updateAnimationFrame(deltaT);
   }
-  async onProgramEvent(event) {
+  onProgramEvent(event) {
     if (event.event === 'request-credentials') {
       this._handleCredentialsRequested(event);
     } else if (event.event === 'request-remember-repo') {
@@ -105,16 +105,12 @@ class AppViewModel {
       this.modal(undefined);
     }
 
-    const contentEventHandler =
-      this.content() && this.content().onProgramEvent
-        ? this.content().onProgramEvent(event)
-        : Promise.resolve();
-    const headerEventHandler =
-      this.header && this.header.onProgramEvent
-        ? this.header.onProgramEvent(event)
-        : Promise.resolve();
-
-    await Promise.all([contentEventHandler, headerEventHandler]);
+    if (this.content() && this.content().onProgramEvent) {
+      this.content().onProgramEvent(event);
+    }
+    if (this.header && this.header.onProgramEvent) {
+      this.header.onProgramEvent(event);
+    }
   }
   _handleRequestRememberRepo(event) {
     const repoPath = event.repoPath;
