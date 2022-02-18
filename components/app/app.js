@@ -134,6 +134,9 @@ class AppViewModel {
       if (modalDom.length) {
         clearInterval(checkExists);
         modalDom.modal();
+        modalDom.on('hidden.bs.modal', function () {
+          modal.close();
+        })
       }
     }, 200);
   }

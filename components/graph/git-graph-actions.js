@@ -115,19 +115,18 @@ class Reset extends ActionBase {
       components.showModal('yesnomodal', {
         title: 'Are you sure?',
         details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.',
-        closeFunc: (isYes) => {
-          if (!isYes) return;
-          return this.server
-            .postPromise('/reset', {
-              path: this.graph.repoPath(),
-              to: remoteRef.name,
-              mode: 'hard',
-            })
-            .then(() => {
-              context.node(remoteRef.node());
-              resolve();
-            })
-            .catch(reject);
+        closeFunc: async (isYes) => {
+          if (isYes) {
+            await this.server
+              .postPromise('/reset', {
+                path: this.graph.repoPath(),
+                to: remoteRef.name,
+                mode: 'hard',
+              }).then(resolve)
+              .catch(reject);
+            context.node(remoteRef.node());
+          }
+          this.isRunning(false);
         },
       });
     });
@@ -295,8 +294,11 @@ class Delete extends ActionBase {
       components.showModal('yesnomodal', {
         title: 'Are you sure?',
         details: details,
-        closeFunc: (isYes) => {
-          if (isYes) context.remove().then(resolve).catch(reject);
+        closeFunc: async (isYes) => {
+          if (isYes) {
+            await context.remove().then(resolve).catch(reject);
+          }
+          this.isRunning(false);
         },
       });
     });
