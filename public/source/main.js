@@ -184,6 +184,7 @@ exports.start = function () {
 
     app.onProgramEvent(event);
   });
+  console.log('>>>>982', ungit.config.authentication);
   if (ungit.config.authentication) {
     var authenticationScreen = components.create('login', { server: server });
     appContainer.content(authenticationScreen);
