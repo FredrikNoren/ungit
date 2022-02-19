@@ -122,7 +122,8 @@ class Reset extends ActionBase {
                 path: this.graph.repoPath(),
                 to: remoteRef.name,
                 mode: 'hard',
-              }).then(resolve)
+              })
+              .then(resolve)
               .catch(reject);
             context.node(remoteRef.node());
           }

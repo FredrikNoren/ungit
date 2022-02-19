@@ -60,7 +60,8 @@ class BranchesViewModel extends ComponentRoot {
     if (
       event.event === 'request-app-content-refresh' ||
       event.event === 'branch-updated' ||
-      event.event === 'git-directory-changed'
+      event.event === 'git-directory-changed' ||
+      event.event === 'current-remote-changed'
     ) {
       this.updateRefs();
     }

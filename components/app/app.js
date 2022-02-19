@@ -136,7 +136,7 @@ class AppViewModel {
         modalDom.modal();
         modalDom.on('hidden.bs.modal', function () {
           modal.close();
-        })
+        });
       }
     }, 200);
   }
