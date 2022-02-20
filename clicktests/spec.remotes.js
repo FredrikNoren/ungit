@@ -79,6 +79,7 @@ describe('[REMOTES]', () => {
   });
 
   it('Should be possible to fetch', async () => {
+    await environment.page.waitForFunction('ungit.__app.content().repository().remotes.currentRemote() === "origin"');
     const remoteGetResponseProm = environment.setApiListener('/remote/tags?', 'GET');
     await environment.click('.fetchButton .btn-main');
     await remoteGetResponseProm;
