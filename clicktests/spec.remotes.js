@@ -76,7 +76,7 @@ describe('[REMOTES]', () => {
     await environment.insert('#cloneToInput', testRepoPaths[2]);
     await environment.click('.uninited button[type="submit"]');
     await environment.waitForElementVisible('.repository-view');
-    await environment.wait(1000) // ensure click bindings are initialized
+    await environment.wait(1000); // ensure click bindings are initialized
   });
 
   it('Should be possible to fetch', async () => {
