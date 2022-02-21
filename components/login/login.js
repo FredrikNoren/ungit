@@ -15,7 +15,6 @@ class LoginViewModel {
     this.server
       .getPromise('/loggedin')
       .then((status) => {
-        console.log('>>>>4123', status.loggedIn);
         if (status.loggedIn) {
           this.loggedIn.dispatch();
           this.status('loggedIn');
