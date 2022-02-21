@@ -16,8 +16,6 @@ let gitConfig;
 const req = request(app);
 
 describe('git-api branching', function () {
-  this.timeout(8000);
-
   before(() => {
     return common
       .initRepo(req)

@@ -288,6 +288,7 @@ class Environment {
   async _createRef(type, name) {
     await this.click('.current ~ .new-ref button.showBranchingForm');
     await this.insert('.ref-icons.new-ref.editing input', name);
+    await this.wait(500);
     const createRefProm =
       type === 'branch'
         ? this.setApiListener('/branches', 'POST')

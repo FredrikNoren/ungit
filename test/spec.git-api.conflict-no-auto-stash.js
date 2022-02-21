@@ -14,7 +14,6 @@ restGit.registerApi({ app: app, config: { dev: true, autoStashAndPop: false } })
 let testDir;
 
 describe('git-api conflict checkout no auto stash', function () {
-  this.timeout(8000);
   const testBranch = 'testBranch';
   const testFile1 = 'testfile1.txt';
 
