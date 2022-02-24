@@ -938,6 +938,7 @@ exports.registerApi = (env) => {
           });
       })
       .catch((e) => {
+        logger.error('failed during /quickstatus', e);
         return { type: 'no-such-path', gitRootPath: req.query.path };
       });
     jsonResultOrFailProm(res, task);
