@@ -28,6 +28,7 @@ class GraphViewModel extends ComponentRoot {
     this.refs = ko.observableArray();
     this.nodesById = {};
     this.refsByRefName = {};
+    this.isActionRunning = ko.observable(false);
     this.checkedOutBranch = ko.observable();
     this.checkedOutRef = ko.computed(() =>
       this.checkedOutBranch() ? this.getRef(`refs/heads/${this.checkedOutBranch()}`) : null

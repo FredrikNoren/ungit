@@ -15,15 +15,12 @@ class ActionBase {
   constructor(graph, text, style, icon) {
     this.graph = graph;
     this.server = graph.server;
-    this.isRunning = ko.observable(false);
-    this.isHighlighted = ko.computed(
-      () => !graph.hoverGraphAction() || graph.hoverGraphAction() == this
-    );
     this.text = text;
     this.style = style;
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
-      if (!this.isHighlighted() || this.isRunning()) {
+      const isHighlighted = !this.graph.hoverGraphAction() || this.graph.hoverGraphAction() == this
+      if (!isHighlighted || this.graph.isActionRunning()) {
         return `${this.style} dimmed`;
       } else {
         return this.style;
@@ -32,13 +29,13 @@ class ActionBase {
   }
 
   doPerform() {
-    if (this.isRunning()) return;
+    if (this.graph.isActionRunning()) return;
     this.graph.hoverGraphAction(null);
-    this.isRunning(true);
+    this.graph.isActionRunning(true);
     return this.perform()
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
-        this.isRunning(false);
+        this.graph.isActionRunning(false);
       });
   }
 
@@ -66,7 +63,6 @@ class Move extends ActionBase {
     super(graph, 'Move', 'move', octicons['arrow-left'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().node() != this.node
@@ -84,7 +80,6 @@ class Reset extends ActionBase {
     super(graph, 'Reset', 'reset', octicons.trash.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       if (!(this.graph.currentActionContext() instanceof RefViewModel)) return false;
       const context = this.graph.currentActionContext();
       if (context.node() != this.node) return false;
@@ -127,7 +122,7 @@ class Reset extends ActionBase {
               .catch(reject);
             context.node(remoteRef.node());
           }
-          this.isRunning(false);
+          this.graph.isActionRunning(false);
         },
       });
     });
@@ -139,7 +134,6 @@ class Rebase extends ActionBase {
     super(graph, 'Rebase', 'rebase', octicons['repo-forked'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
         (!ungit.config.showRebaseAndMergeOnlyOnRefs || this.node.refs().length > 0) &&
@@ -175,7 +169,6 @@ class Merge extends ActionBase {
     super(graph, 'Merge', 'merge', octicons['git-merge'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       if (!this.graph.checkedOutRef() || !this.graph.checkedOutRef().node()) return false;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
@@ -213,7 +206,6 @@ class Push extends ActionBase {
     super(graph, 'Push', 'push', octicons['repo-push'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().node() == this.node &&
@@ -254,7 +246,6 @@ class Checkout extends ActionBase {
     super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       if (this.graph.currentActionContext() instanceof RefViewModel)
         return (
           this.graph.currentActionContext().node() == this.node &&
@@ -274,7 +265,6 @@ class Delete extends ActionBase {
     super(graph, 'Delete', 'delete', octicons.x.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().node() == this.node &&
@@ -299,7 +289,7 @@ class Delete extends ActionBase {
           if (isYes) {
             await context.remove().then(resolve).catch(reject);
           }
-          this.isRunning(false);
+          this.graph.isActionRunning(false);
         },
       });
     });
@@ -311,7 +301,6 @@ class CherryPick extends ActionBase {
     super(graph, 'Cherry pick', 'cherry-pick', octicons.cpu.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       const context = this.graph.currentActionContext();
       return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1;
     });
@@ -335,7 +324,6 @@ class Uncommit extends ActionBase {
     super(graph, 'Uncommit', 'uncommit', octicons.zap.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node && this.graph.HEAD() == this.node;
     });
   }
@@ -359,7 +347,6 @@ class Revert extends ActionBase {
     super(graph, 'Revert', 'revert', octicons.history.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node;
     });
   }
@@ -377,7 +364,6 @@ class Squash extends ActionBase {
     super(graph, 'Squash', 'squash', octicons.fold.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
         this.graph.currentActionContext() instanceof RefViewModel &&
         this.graph.currentActionContext().current() &&
