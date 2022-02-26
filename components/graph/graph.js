@@ -15,6 +15,7 @@ class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
     super();
     this._isLoadNodesFromApiRunning = false;
+    this._latestNodeVersion = undefined;
     this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
     this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
     this._markIdeologicalStamp = 0;
@@ -23,9 +24,10 @@ class GraphViewModel extends ComponentRoot {
     this.skip = ko.observable(0);
     this.server = server;
     this.currentRemote = ko.observable();
-    this.nodes = ko.observableArray();
-    this.edges = ko.observableArray();
-    this.refs = ko.observableArray();
+    this.nodes = ko.observableArray().extend({ rateLimit: 500 });
+    this.edges = ko.observableArray().extend({ rateLimit: 500 });
+    this.refs = ko.observableArray().extend({ rateLimit: 500 });
+    this.currentNodesById = {};
     this.nodesById = {};
     this.refsByRefName = {};
     this.isActionRunning = ko.observable(false);
@@ -92,10 +94,9 @@ class GraphViewModel extends ComponentRoot {
     ko.renderTemplate('graph', this, {}, parentElement);
   }
 
-  getNode(sha1, logEntry) {
+  getNode(sha1) {
     let nodeViewModel = this.nodesById[sha1];
     if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
-    if (logEntry) nodeViewModel.setData(logEntry);
     return nodeViewModel;
   }
 
@@ -114,6 +115,7 @@ class GraphViewModel extends ComponentRoot {
 
   async _loadNodesFromApi() {
     this._isLoadNodesFromApiRunning = true;
+    this._latestNodeVersion = Date.now();
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
     const edges = [];
@@ -129,7 +131,12 @@ class GraphViewModel extends ComponentRoot {
       }
       const nodes = this.computeNode(
         (log.nodes || []).map((logEntry) => {
-          return this.getNode(logEntry.sha1, logEntry); // convert to node object
+          const node = this.getNode(logEntry.sha1, logEntry); // convert to node object
+          if (!node.isInited) {
+            node.setData(logEntry);
+          }
+          node.version = this._latestNodeVersion;
+          return node;
         })
       );
 

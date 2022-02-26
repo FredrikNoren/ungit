@@ -11,6 +11,7 @@ const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2
 class GitNodeViewModel extends Animateable {
   constructor(graph, sha1) {
     super(graph);
+    this.version = undefined;
     this.graph = graph;
     this.sha1 = sha1;
     this.isInited = false;
@@ -348,7 +349,7 @@ class GitNodeViewModel extends Animateable {
   }
 
   isViewable() {
-    return this.graph.nodes().includes(this);
+    return this.graph.nodesById[this.sha1].version === this.graph._latestNodeVersion;
   }
 }
 
