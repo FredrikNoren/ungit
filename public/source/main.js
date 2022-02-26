@@ -6,6 +6,23 @@ var dndPageScroll = require('dnd-page-scroll');
 require('./bootstrap');
 require('./jquery-ui');
 require('./knockout-bindings');
+const winston = require('winston');
+ungit.logger = winston.createLogger({
+  level: ungit.config.logLevel || 'error',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.colorize(),
+    winston.format.printf((info) => {
+      const splat = info[Symbol.for('splat')];
+      if (splat) {
+        const splatStr = splat.map((arg) => JSON.stringify(arg)).join('\n');
+        return `${info.timestamp} - ${info.level}: ${info.message} ${splatStr}`;
+      }
+      return `${info.timestamp} - ${info.level}: ${info.message}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+});
 var components = require('ungit-components');
 var Server = require('./server');
 var programEvents = require('ungit-program-events');
@@ -59,7 +76,7 @@ ko.bindingHandlers.autocomplete = {
             results: () => {},
           },
         })
-        .data('ui-autocomplete')._renderItem = function (ul, item) {
+        .data('ui-autocomplete')._renderItem = (ul, item) => {
         return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
       };
     };
@@ -145,12 +162,17 @@ var app, appContainer, server;
 exports.start = function () {
   server = new Server();
   appContainer = new AppContainerViewModel();
+  ungit.server = server;
   app = components.create('app', { appContainer: appContainer, server: server });
-  programEvents.add(function (event) {
+  ungit.__app = app;
+  programEvents.add(async (event) => {
+    ungit.logger.info(`received event: ${event.event}`);
     if (event.event == 'disconnected' || event.event == 'git-crash-error') {
-      console.error(`ungit crash: ${event.event}`, event.error);
+      console.error(`ungit crash: ${event.event}`, event.error, event.stacktrace);
       const err =
-        event.event == 'disconnected' && adBlocker.isDetected() ? 'adblocker' : event.event;
+        event.event == 'disconnected' && (await adBlocker.detectAnyAdblocker())
+          ? 'adblocker'
+          : event.event;
       appContainer.content(components.create('crash', err));
       windowTitle.crash = true;
       windowTitle.update();
@@ -160,9 +182,7 @@ exports.start = function () {
       windowTitle.update();
     }
 
-    if (app.onProgramEvent) {
-      app.onProgramEvent(event);
-    }
+    app.onProgramEvent(event);
   });
   if (ungit.config.authentication) {
     var authenticationScreen = components.create('login', { server: server });

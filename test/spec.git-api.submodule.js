@@ -13,8 +13,6 @@ restGit.registerApi({ app: app, config: { dev: true } });
 const req = request(app);
 
 describe('git-api submodule', function () {
-  this.timeout(8000);
-
   let testDirMain, testDirSecondary;
 
   before(() => {

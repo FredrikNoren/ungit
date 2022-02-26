@@ -1,6 +1,7 @@
 'use strict';
 const environment = require('./environment')();
 const testRepoPaths = [];
+const _ = require('lodash');
 
 const gitCommand = (options) => {
   return environment.backgroundAction('POST', '/api/testing/git', options);
@@ -17,7 +18,7 @@ const testForBranchMove = async (branch, command) => {
       const newLoc = document.querySelector(branch).getBoundingClientRect();
       return newLoc.top !== oldLoc.top || newLoc.left !== oldLoc.left;
     },
-    {},
+    { timeout: 6000, polling: 250 },
     branch,
     JSON.parse(branchTagLoc)
   );
@@ -61,18 +62,45 @@ describe('[COMMANDS]', () => {
   });
 
   it('test branch delete from command line', async () => {
+    const brachesResponseProm = environment.setApiListener('/branches?', 'GET', (body) => {
+      return _.isEqual(body, [
+        { name: 'branch-1' },
+        { name: 'branch-2' },
+        { name: 'master', current: true },
+      ]);
+    });
     await gitCommand({ command: ['branch', '-D', 'gitCommandBranch'], path: testRepoPaths[0] });
-    await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]');
+    await brachesResponseProm;
+    await environment.waitForElementHidden('[data-ta-name="gitCommandBranch"]', 10000);
   });
 
   it('test tag create from command line', async () => {
+    const refsResponseProm = environment.setApiListener('/refs?', 'GET', (body) => {
+      body.forEach((ref) => delete ref.sha1);
+      return _.isEqual(body, [
+        { name: 'refs/heads/branch-1' },
+        { name: 'refs/heads/branch-2' },
+        { name: 'refs/heads/master' },
+        { name: 'refs/tags/tag1' },
+      ]);
+    });
     await gitCommand({ command: ['tag', 'tag1'], path: testRepoPaths[0] });
-    await environment.waitForElementVisible('[data-ta-name="tag1"]');
+    await refsResponseProm;
+    await environment.waitForElementVisible('[data-ta-name="tag1"]', 10000);
   });
 
   it('test tag delete from command line', async () => {
+    const refDeleteResponseProm = environment.setApiListener('/refs?', 'GET', (body) => {
+      body.forEach((ref) => delete ref.sha1);
+      return _.isEqual(body, [
+        { name: 'refs/heads/branch-1' },
+        { name: 'refs/heads/branch-2' },
+        { name: 'refs/heads/master' },
+      ]);
+    });
     await gitCommand({ command: ['tag', '-d', 'tag1'], path: testRepoPaths[0] });
-    await environment.waitForElementHidden('[data-ta-name="tag1"]');
+    await refDeleteResponseProm;
+    await environment.waitForElementHidden('[data-ta-name="tag1"]', 10000);
   });
 
   it('test reset from command line', () => {

@@ -127,7 +127,11 @@ class TextDiffViewModel {
         // The file existed before but has been removed, but we're trying to get a diff for it
         // Most likely it will just disappear with the next refresh of the staging area
         // so we just ignore the error here
-        if (err.errorCode != 'no-such-file') this.server.unhandledRejection(err);
+        if (err.errorCode != 'no-such-file') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('diff, no such file', err);
+        }
       });
   }
 

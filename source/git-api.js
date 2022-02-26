@@ -1,7 +1,7 @@
 const path = require('path');
 const temp = require('temp');
 const gitParser = require('./git-parser');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const os = require('os');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
@@ -37,15 +37,15 @@ exports.registerApi = (env) => {
 
         const watcher = await watchRepo(socket.watcherPath);
         watcher.on('workdir', (changedPath) => {
-          winston.info(`${changedPath} triggered workdir refresh for ${socket.watcherPath}`);
+          logger.info(`${changedPath} triggered workdir refresh for ${socket.watcherPath}`);
           emitWorkingTreeChanged(socket.watcherPath);
         });
         watcher.on('git', (changedPath) => {
-          winston.info(`${changedPath} triggered git refresh for ${socket.watcherPath}`);
+          logger.info(`${changedPath} triggered git refresh for ${socket.watcherPath}`);
           emitGitDirectoryChanged(socket.watcherPath);
         });
         watcher.on('error', (err) => {
-          winston.warn(`Error watching ${socket.watcherPath}: `, JSON.stringify(err));
+          logger.warn(`Error watching ${socket.watcherPath}: `, JSON.stringify(err));
         });
         socket.watcher = watcher;
       });
@@ -61,12 +61,12 @@ exports.registerApi = (env) => {
     }
     async watchItem(name, item, options = {}) {
       if ((await fs.access(item).catch(() => false)) === false) {
-        winston.debug(`[${this.watcherId}] path does not exist`, item);
+        logger.debug(`[${this.watcherId}] path does not exist`, item);
         return;
       }
       const watcher = watch(item, options);
       watcher.on('change', (_event, changedPath) => {
-        winston.silly(`[${this.watcherId}] ${name}`, changedPath);
+        logger.silly(`[${this.watcherId}] ${name}`, changedPath);
         this.emit(name, changedPath);
       });
       this.watchers.push(watcher);
@@ -83,7 +83,7 @@ exports.registerApi = (env) => {
   }
 
   const readIgnore = async (pathToWatch) => {
-    winston.debug(`Parsing .gitignore for ${pathToWatch}`);
+    logger.debug(`Parsing .gitignore for ${pathToWatch}`);
     const out = ignore();
     const ignoreContent = await fs.readFile(path.join(pathToWatch, '.gitignore')).catch(() => null);
     if (ignoreContent) out.add(ignoreContent.toString());
@@ -92,7 +92,7 @@ exports.registerApi = (env) => {
 
   // TODO move to nodegit
   const watchRepo = async (pathToWatch) => {
-    winston.info(`Start watching ${pathToWatch}`);
+    logger.info(`Start watching ${pathToWatch}`);
     const watcher = new RepoWatcher();
     let repoPath = path.join(pathToWatch, '.git');
     if ((await fs.access(repoPath).catch(() => false)) === undefined) {
@@ -106,7 +106,7 @@ exports.registerApi = (env) => {
           if (filePath === '.gitignore') {
             readIgnore(pathToWatch).then(
               (ign) => (gitIgnore = ign),
-              (err) => winston.error('Could not parse .gitignore for', pathToWatch, err)
+              (err) => logger.error('Could not parse .gitignore for', pathToWatch, err)
             );
           }
           // We monitor the repo separately
@@ -139,7 +139,7 @@ exports.registerApi = (env) => {
 
   const stopDirectoryWatch = (socket) => {
     if (!socket.watcherPath) return;
-    winston.info(`Stop watching ${socket.watcherPath}`);
+    logger.info(`Stop watching ${socket.watcherPath}`);
     socket.leave(socket.watcherPath);
     socket.watcherPath = undefined;
     socket.ignore = undefined;
@@ -173,21 +173,21 @@ exports.registerApi = (env) => {
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
-        winston.info('emitting working-tree-changed to sockets, manually triggered');
+        logger.info('emitting working-tree-changed to sockets, manually triggered');
       }
     },
     500,
-    { maxWait: 2000 }
+    { maxWait: 1000 }
   );
   const emitGitDirectoryChanged = _.debounce(
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
-        winston.info('emitting git-directory-changed to sockets, manually triggered');
+        logger.info('emitting git-directory-changed to sockets, manually triggered');
       }
     },
     500,
-    { maxWait: 2000 }
+    { maxWait: 1000 }
   );
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
@@ -211,7 +211,7 @@ exports.registerApi = (env) => {
         res.json(result || {});
       })
       .catch((err) => {
-        winston.warn('Responding with ERROR: ', JSON.stringify(err));
+        logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
@@ -482,7 +482,7 @@ exports.registerApi = (env) => {
                 commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
                 repoPath: req.query.path,
                 timeout: tenMinTimeoutMs,
-              }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
+              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
             });
           }, Promise.resolve());
         })
@@ -793,7 +793,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      winston.info('resolve conflicts');
+      logger.info('resolve conflicts');
       jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files)).then(
         emitWorkingTreeChanged.bind(null, req.body.path)
       );
@@ -938,6 +938,7 @@ exports.registerApi = (env) => {
           });
       })
       .catch((e) => {
+        logger.error('failed during /quickstatus', e);
         return { type: 'no-such-path', gitRootPath: req.query.path };
       });
     jsonResultOrFailProm(res, task);
@@ -984,7 +985,7 @@ exports.registerApi = (env) => {
     // this endpoint can only be invoked from localhost, since the credentials-helper is always
     // on the same machine that we're running ungit on
     if (req.ip != '127.0.0.1' && req.ip != '::ffff:127.0.0.1') {
-      winston.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
+      logger.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
@@ -993,7 +994,7 @@ exports.registerApi = (env) => {
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
-      winston.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
+      logger.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
       res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', (data) => res.json(data));
@@ -1074,7 +1075,7 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
-        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+        logger.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });
     });

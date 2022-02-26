@@ -1,21 +1,23 @@
 'use strict';
-const muteGraceTimeDuration = 3000;
+
+const muteGraceTimeDuration = 5000;
 const createAndDiscard = async (env, testRepoPath, dialogButtonToClick) => {
   await env.createTestFile(testRepoPath + '/testfile2.txt', testRepoPath);
+  await env.ensureRedraw();
   await env.waitForElementVisible('.files .file .btn-default');
-  await env.click('.files button.discard');
 
+  await env.click('.files button.discard');
   if (dialogButtonToClick === 'yes') {
-    await env.click('.modal-dialog [data-ta-action="yes"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="yes"]');
   } else if (dialogButtonToClick === 'mute') {
-    await env.click('.modal-dialog [data-ta-action="mute"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="mute"]');
   } else if (dialogButtonToClick === 'no') {
-    await env.click('.modal-dialog [data-ta-action="no"]');
+    await env.awaitAndClick('.modal-dialog [data-ta-action="no"]');
   } else {
     await env.waitForElementHidden('.modal-dialog [data-ta-action="yes"]');
   }
-
   if (dialogButtonToClick !== 'no') {
+    await env.ensureRedraw();
     await env.waitForElementHidden('.files .file .btn-default');
   } else {
     await env.waitForElementVisible('.files .file .btn-default');
@@ -72,8 +74,14 @@ describe('[DISCARD - withWarn]', () => {
 
   it('Should be possible to discard a created file and disable warn for awhile', async () => {
     await createAndDiscard(environment, testRepoPaths[0], 'mute');
+    const start = new Date().getTime(); // this is when the "mute" timestamp is stamped
     await createAndDiscard(environment, testRepoPaths[0]);
-    await environment.wait(2000);
+    // ensure, at least 2 seconds has passed since mute timestamp is stamped
+    const end = new Date().getTime();
+    const diff = muteGraceTimeDuration + 500 - (end - start);
+    if (diff > 0) {
+      await environment.wait(diff);
+    }
     await createAndDiscard(environment, testRepoPaths[0], 'yes');
   });
 });

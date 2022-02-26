@@ -5,9 +5,11 @@ const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const homedir = require('os').homedir();
-const winston = require('winston');
 const child_process = require('child_process');
+const process = require('process');
 const semver = require('semver');
+
+const isTestRun = process.argv.filter((arg) => arg.indexOf('mocha') >= 0).length > 0;
 
 const defaultConfig = {
   // The port ungit is exposed on.
@@ -339,7 +341,7 @@ if (!argvConfig.cliconfigonly) {
     delete rcConfig['config'];
     delete rcConfig['configs'];
   } catch (err) {
-    winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+    console.error(`Stop at reading ~/.ungitrc because ${err}`);
     process.exit(0);
   }
 }
@@ -381,7 +383,7 @@ try {
     child_process.execSync('git --version').toString()
   )[1];
 } catch (e) {
-  winston.error(
+  console.error(
     'Can\'t run "git --version". Is git installed and available in your path?',
     e.stderr
   );
@@ -406,3 +408,9 @@ if (module.exports.alwaysLoadActiveBranch) {
 }
 
 module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');
+
+if (isTestRun) {
+  console.warn('Running mocha test run, overriding few test variables...');
+  module.exports.logLevel = 'debug';
+  module.exports.dev = true;
+}

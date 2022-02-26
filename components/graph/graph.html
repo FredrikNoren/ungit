@@ -109,12 +109,12 @@
             data-placement="bottom"
             title="Search for a branch or tag"
           ></button>
-          <div class="form-inline" data-bind="visible: refSearchFormVisible()">
+          <div class="form-inline branch-search" data-bind="visible: refSearchFormVisible()">
             <input
               class="name form-control"
               type="search"
               aria-label="Filter branches and tags"
-              data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeydown'"
+              data-bind="hasfocus: refSearchFormVisible, valueUpdate: 'afterkeyup'"
             />
           </div>
         </span>

@@ -96,20 +96,18 @@ class RepositoryViewModel {
     return this.server
       .getPromise('/gitignore', { path: this.repoPath() })
       .then((res) => {
-        return components
-          .create('texteditdialog', {
-            title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
-            content: res.content,
-          })
-          .show()
-          .closeThen((diag) => {
-            if (diag.result()) {
-              return this.server.putPromise('/gitignore', {
+        return components.showModal('texteditmodal', {
+          title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
+          content: res.content,
+          closeFunc: (isYes) => {
+            if (isYes) {
+              this.server.putPromise('/gitignore', {
                 path: this.repoPath(),
-                data: diag.textAreaContent,
+                data: document.querySelector('.modal-body .text-area-content').value,
               });
             }
-          });
+          },
+        });
       })
       .catch((e) => {
         // Not a git error but we are going to treat like one

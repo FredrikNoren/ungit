@@ -88,7 +88,6 @@ describe('git-api discardchanges', () => {
   it('should be able to discard discard submodule changes', function () {
     const testFile = 'smalltestfile.txt';
     const submodulePath = 'subrepo';
-    this.timeout(5000);
 
     return common
       .createSmallRepo(req)

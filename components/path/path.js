@@ -1,12 +1,12 @@
-const ko = require('knockout');
 const components = require('ungit-components');
+const ko = require('knockout');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
 const { encodePath } = require('ungit-address-parser');
 const octicons = require('octicons');
 const storage = require('ungit-storage');
-
+const { ComponentRoot } = require('../ComponentRoot');
 const showCreateRepoKey = 'isShowCreateRepo';
 
 components.register('path', (args) => {
@@ -32,8 +32,9 @@ class SubRepositoryViewModel {
   }
 }
 
-class PathViewModel {
+class PathViewModel extends ComponentRoot {
   constructor(server, path) {
+    super();
     this.server = server;
     this.repoPath = ko.observable(path);
     this.dirName =
@@ -86,46 +87,56 @@ class PathViewModel {
   updateAnimationFrame(deltaT) {
     if (this.repository()) this.repository().updateAnimationFrame(deltaT);
   }
-  updateStatus() {
-    return this.server
-      .getPromise('/quickstatus', { path: this.repoPath() })
-      .then((status) => {
-        if (status.type == 'inited' || status.type == 'bare') {
-          if (this.repoPath() !== status.gitRootPath) {
-            this.repoPath(status.gitRootPath);
-            programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
-            programEvents.dispatch({ event: 'working-tree-changed' });
-          }
-          this.status(status.type);
-          if (!this.repository()) {
-            this.repository(components.create('repository', { server: this.server, path: this }));
-          }
-        } else if (status.type == 'uninited' || status.type == 'no-such-path') {
-          if (status.subRepos && status.subRepos.length > 0) {
-            this.subRepos(
-              status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
-            );
-          }
-          this.status(status.type);
-          this.repository(null);
+  async updateStatus() {
+    ungit.logger.debug('path.updateStatus() triggered');
+    const status = await this.server.getPromise('/quickstatus', { path: this.repoPath() });
+    try {
+      if (this.isSamePayload(status)) {
+        return;
+      }
+
+      if (status.type == 'inited' || status.type == 'bare') {
+        if (this.repoPath() !== status.gitRootPath) {
+          this.repoPath(status.gitRootPath);
+          programEvents.dispatch({ event: 'navigated-to-path', path: this.repoPath() });
+          programEvents.dispatch({ event: 'working-tree-changed' });
         }
-        return null;
-      })
-      .catch((err) => {});
+        this.status(status.type);
+        if (!this.repository()) {
+          this.repository(components.create('repository', { server: this.server, path: this }));
+        }
+      } else if (status.type == 'uninited' || status.type == 'no-such-path') {
+        if (status.subRepos && status.subRepos.length > 0) {
+          this.subRepos(
+            status.subRepos.map((subRepo) => new SubRepositoryViewModel(this.server, subRepo))
+          );
+        }
+        this.status(status.type);
+        this.repository(null);
+      }
+    } catch (err) {
+      ungit.logger.debug('path.updateStatus() errored', err);
+    } finally {
+      ungit.logger.debug('path.updateStatus() finished');
+    }
   }
   initRepository() {
     return this.server
       .postPromise('/init', { path: this.repoPath() })
       .catch((e) => this.server.unhandledRejection(e))
-      .finally((res) => {
-        this.updateStatus();
-      });
+      .finally(() => this.updateStatus());
   }
-  onProgramEvent(event) {
-    if (event.event == 'working-tree-changed') this.updateStatus();
-    else if (event.event == 'request-app-content-refresh') this.updateStatus();
+  async onProgramEvent(event) {
+    const promises = [];
+    if (event.event == 'working-tree-changed' || event.event == 'request-app-content-refresh') {
+      promises.push(this.updateStatus());
+    }
 
-    if (this.repository()) this.repository().onProgramEvent(event);
+    if (this.repository()) {
+      promises.push(this.repository().onProgramEvent(event));
+    }
+
+    await Promise.all(promises);
   }
   cloneRepository() {
     this.status('cloning');

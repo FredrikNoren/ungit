@@ -15,8 +15,6 @@ let testDir;
 const req = request(app);
 
 describe('git-api conflict rebase', function () {
-  this.timeout(8000);
-
   const testFile1 = 'testfile1.txt';
 
   before(() => {

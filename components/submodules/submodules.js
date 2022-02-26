@@ -2,72 +2,54 @@ const ko = require('knockout');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const { ComponentRoot } = require('../ComponentRoot');
+const _ = require('lodash');
 
 components.register('submodules', (args) => new SubmodulesViewModel(args.server, args.repoPath));
 
-class SubmodulesViewModel {
+class SubmodulesViewModel extends ComponentRoot {
   constructor(server, repoPath) {
+    super();
     this.repoPath = repoPath;
     this.server = server;
+    this.fetchSubmodules = _.debounce(this._fetchSubmodules, 250, this.defaultDebounceOption);
     this.submodules = ko.observableArray();
-    this.isUpdating = false;
     this.submodulesIcon = octicons['file-submodule'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
     this.linkIcon = octicons['link-external'].toSVG({ height: 18 });
   }
 
   onProgramEvent(event) {
-    if (event.event == 'submodule-fetch') this.fetchSubmodules();
+    if (event.event == 'submodule-fetch') {
+      this.fetchSubmodules();
+    }
   }
 
   updateNode(parentElement) {
-    this.fetchSubmodules().then((submoduleViewModel) => {
+    this.fetchSubmodules();
+    this.fetchSubmodules.flush().then((submoduleViewModel) => {
       ko.renderTemplate('submodules', submoduleViewModel, {}, parentElement);
     });
   }
 
-  fetchSubmodules() {
-    return this.server
-      .getPromise('/submodules', { path: this.repoPath() })
-      .then((submodules) => {
-        this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
-        return this;
-      })
-      .catch((e) => this.server.unhandledRejection(e));
+  async _fetchSubmodules() {
+    try {
+      const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
+      this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      return this;
+    } catch (e) {
+      ungit.logger.error('error during fetchSubmodules', e);
+    }
   }
 
   updateSubmodules() {
-    if (this.isUpdating) return;
-    this.isUpdating = true;
     return this.server
       .postPromise('/submodules/update', { path: this.repoPath() })
-      .catch((e) => this.server.unhandledRejection(e))
-      .finally(() => {
-        this.isUpdating = false;
-      });
+      .catch((e) => this.server.unhandledRejection(e));
   }
 
   showAddSubmoduleDialog() {
-    components
-      .create('addsubmoduledialog')
-      .show()
-      .closeThen((diag) => {
-        if (!diag.isSubmitted()) return;
-        this.isUpdating = true;
-        this.server
-          .postPromise('/submodules/add', {
-            path: this.repoPath(),
-            submoduleUrl: diag.url(),
-            submodulePath: diag.path(),
-          })
-          .then(() => {
-            programEvents.dispatch({ event: 'submodule-fetch' });
-          })
-          .catch((e) => this.server.unhandledRejection(e))
-          .finally(() => {
-            this.isUpdating = false;
-          });
-      });
+    components.showModal('addsubmodulemodal', { path: this.repoPath() });
   }
 
   submoduleLinkClick(submodule) {
@@ -79,14 +61,11 @@ class SubmodulesViewModel {
   }
 
   submoduleRemove(submodule) {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure?',
-        details: `Deleting ${submodule.name} submodule cannot be undone with ungit.`,
-      })
-      .show()
-      .closeThen((diag) => {
-        if (!diag.result()) return;
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: `Deleting ${submodule.name} submodule cannot be undone with ungit.`,
+      closeFunc: (isYes) => {
+        if (!isYes) return;
         this.server
           .delPromise('/submodules', {
             path: this.repoPath(),
@@ -97,6 +76,7 @@ class SubmodulesViewModel {
             programEvents.dispatch({ event: 'submodule-fetch' });
           })
           .catch((e) => this.server.unhandledRejection(e));
-      });
+      },
+    });
   }
 }

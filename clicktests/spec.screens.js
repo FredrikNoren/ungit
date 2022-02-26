@@ -33,6 +33,7 @@ describe('[SCREENS]', () => {
   it('Clicking logo should bring you to home screen', async () => {
     await environment.click('.navbar .backlink');
     await environment.waitForElementVisible('.home');
+    await environment.wait(1000);
   });
 
   it('Entering an invalid path and create directory in that location', async () => {
@@ -44,18 +45,21 @@ describe('[SCREENS]', () => {
     await environment.waitForElementVisible('.invalid-path');
     await environment.click('.invalid-path button');
     await environment.waitForElementVisible('.uninited button.btn-primary');
+    await environment.wait(1000);
   });
 
   it('Entering an invalid path should bring you to an error screen', async () => {
     await environment.insert('.navbar .path-input-form input', '/a/path/that/doesnt/exist');
     await environment.press('Enter');
     await environment.waitForElementVisible('.invalid-path');
+    await environment.wait(1000);
   });
 
   it('Entering a path to a repo should bring you to that repo', async () => {
     await environment.insert('.navbar .path-input-form input', testRepoPaths[0]);
     await environment.press('Enter');
     await environment.waitForElementVisible('.repository-view');
+    await environment.wait(1000);
   });
 
   // getting odd cross-domain-error.

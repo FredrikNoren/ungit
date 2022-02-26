@@ -121,17 +121,17 @@ class RefViewModel extends Selectable {
       }
 
       if (!rewindWarnOverride && this.node().date > toNode.date) {
-        promise = components
-          .create('yesnodialog', {
+        promise = new Promise((resolve, reject) => {
+          components.showModal('yesnomodal', {
             title: 'Are you sure?',
             details: 'This operation potentially going back in history.',
-          })
-          .show()
-          .closeThen((diag) => {
-            if (diag.result()) {
-              return this.server.postPromise(operation, args);
-            }
-          }).closePromise;
+            closeFunc: (isYes) => {
+              if (isYes) {
+                return this.server.postPromise(operation, args).then(resolve).catch(reject);
+              }
+            },
+          });
+        });
       } else {
         promise = this.server.postPromise(operation, args);
       }
@@ -144,17 +144,17 @@ class RefViewModel extends Selectable {
       };
       promise = this.server.postPromise('/push', pushReq).catch((err) => {
         if (err.errorCode === 'non-fast-forward') {
-          return components
-            .create('yesnodialog', {
+          return new Promise((resolve, reject) => {
+            components.showModal('yesnomodal', {
               title: 'Force push?',
               details: "The remote branch can't be fast-forwarded.",
-            })
-            .show()
-            .closeThen((diag) => {
-              if (!diag.result()) return false;
-              pushReq.force = true;
-              return this.server.postPromise('/push', pushReq);
-            }).closePromise;
+              closeFunc: (isYes) => {
+                if (!isYes) return resolve(false);
+                pushReq.force = true;
+                this.server.postPromise('/push', pushReq).then(resolve).catch(reject);
+              },
+            });
+          });
         } else {
           this.server.unhandledRejection(err);
         }
@@ -273,7 +273,11 @@ class RefViewModel extends Selectable {
         this.graph.HEADref().node(this.node());
       })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('checkout failed', err);
+        }
       });
   }
 }

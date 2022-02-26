@@ -152,28 +152,6 @@ ko.bindingHandlers.element = {
   $(window).resize(scrollToEndCheck);
 })();
 
-ko.bindingHandlers.modal = {
-  init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    $(element).modal();
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    $(element).on('hidden.bs.modal', function () {
-      // Fire next event to let bootstrap figure out everything with the dom intract
-      // (onclose will most likely result in the dom of the modal being removed)
-      setTimeout(function () {
-        value.onclose.call(viewModel);
-      }, 1);
-    });
-    // Normally we could just remove the dialog by removing it from the viewmodel
-    // so that knockout removes the corresponding dom, but since bootstrap also
-    // creates additional dom we need to use their method for hiding to make sure
-    // everything is cleaned up. Basically this method gives the viewModel a chance
-    // to close itself using the bootstrap method.
-    value.closer.call(viewModel, function () {
-      $(element).modal('hide');
-    });
-  },
-};
-
 // handle focus for this element and all children. only when this element or all of its chlidren have lost focus set the value to false.
 ko.bindingHandlers.hasfocus2 = {
   init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
