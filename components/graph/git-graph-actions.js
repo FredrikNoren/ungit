@@ -19,7 +19,7 @@ class ActionBase {
     this.style = style;
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
-      const isHighlighted = !this.graph.hoverGraphAction() || this.graph.hoverGraphAction() == this
+      const isHighlighted = !this.graph.hoverGraphAction() || this.graph.hoverGraphAction() == this;
       if (!isHighlighted || this.graph.isActionRunning()) {
         return `${this.style} dimmed`;
       } else {

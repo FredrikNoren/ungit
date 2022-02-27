@@ -1,34 +1,28 @@
 const ko = require('knockout');
 const _ = require('lodash');
-const moment = require('moment');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
-const EdgeViewModel = require('./edge');
 const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
+const { NodesViewModel } = require('./git-nodes');
 
 components.register('graph', (args) => new GraphViewModel(args.server, args.repoPath));
 
 class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
     super();
+    this.nodesViewModel = new NodesViewModel(this);
     this._isLoadNodesFromApiRunning = false;
-    this._latestNodeVersion = undefined;
     this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
     this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
-    this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
     this.limit = ko.observable(numberOfNodesPerLoad);
     this.skip = ko.observable(0);
     this.server = server;
     this.currentRemote = ko.observable();
-    this.nodes = ko.observableArray().extend({ rateLimit: 500 });
-    this.edges = ko.observableArray().extend({ rateLimit: 500 });
     this.refs = ko.observableArray().extend({ rateLimit: 500 });
-    this.currentNodesById = {};
-    this.nodesById = {};
     this.refsByRefName = {};
     this.isActionRunning = ko.observable(false);
     this.checkedOutBranch = ko.observable();
@@ -44,7 +38,6 @@ class GraphViewModel extends ComponentRoot {
     });
     this.showCommitNode = ko.observable(false);
     this.currentActionContext = ko.observable();
-    this.edgesById = {};
     this.scrolledToEnd = _.debounce(
       () => {
         this.limit(numberOfNodesPerLoad + this.limit());
@@ -94,12 +87,6 @@ class GraphViewModel extends ComponentRoot {
     ko.renderTemplate('graph', this, {}, parentElement);
   }
 
-  getNode(sha1) {
-    let nodeViewModel = this.nodesById[sha1];
-    if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
-    return nodeViewModel;
-  }
-
   getRef(ref, constructIfUnavailable) {
     if (constructIfUnavailable === undefined) constructIfUnavailable = true;
     let refViewModel = this.refsByRefName[ref];
@@ -115,10 +102,9 @@ class GraphViewModel extends ComponentRoot {
 
   async _loadNodesFromApi() {
     this._isLoadNodesFromApiRunning = true;
-    this._latestNodeVersion = Date.now();
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
-    const nodeSize = this.nodes().length;
-    const edges = [];
+    const nodes = this.nodesViewModel.nodes();
+    const nodeSize = nodes.length;
 
     try {
       const log = await this.server.getPromise('/gitlog', {
@@ -129,27 +115,9 @@ class GraphViewModel extends ComponentRoot {
       if (this.isSamePayload(log)) {
         return;
       }
-      const nodes = this.computeNode(
-        (log.nodes || []).map((logEntry) => {
-          const node = this.getNode(logEntry.sha1, logEntry); // convert to node object
-          if (!node.isInited) {
-            node.setData(logEntry);
-          }
-          node.version = this._latestNodeVersion;
-          return node;
-        })
-      );
 
-      // create edges
-      nodes.forEach((node) => {
-        node.parents().forEach((parentSha1) => {
-          edges.push(this.getEdge(node.sha1, parentSha1));
-        });
-        node.render();
-      });
+      this.nodesViewModel.processGitLog(log);
 
-      this.edges(edges);
-      this.nodes(nodes);
       if (nodes.length > 0) {
         this.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
@@ -157,114 +125,11 @@ class GraphViewModel extends ComponentRoot {
     } catch (e) {
       this.server.unhandledRejection(e);
     } finally {
-      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
+      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != nodes.length) {
         this.scrolledToEnd();
       }
       this._isLoadNodesFromApiRunning = false;
       ungit.logger.debug('graph.loadNodesFromApi() finished');
-    }
-  }
-
-  traverseNodeLeftParents(node, callback) {
-    callback(node);
-    const parent = this.nodesById[node.parents()[0]];
-    if (parent) {
-      this.traverseNodeLeftParents(parent, callback);
-    }
-  }
-
-  computeNode(nodes) {
-    nodes = nodes || this.nodes();
-
-    this.markNodesIdeologicalBranches(this.refs());
-
-    const updateTimeStamp = moment().valueOf();
-    if (this.HEAD()) {
-      this.traverseNodeLeftParents(this.HEAD(), (node) => {
-        node.ancestorOfHEADTimeStamp = updateTimeStamp;
-      });
-    }
-
-    // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
-    nodes = nodes.filter(
-      (node) =>
-        (node.ideologicalBranch() && !node.ideologicalBranch().isStash) ||
-        node.ancestorOfHEADTimeStamp == updateTimeStamp
-    );
-
-    let branchSlotCounter = this.HEAD() ? 1 : 0;
-
-    // Then iterate from the bottom to fix the orders of the branches
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      const node = nodes[i];
-      if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-      const ideologicalBranch = node.ideologicalBranch();
-
-      // First occurrence of the branch, find an empty slot for the branch
-      if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
-        ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
-        ideologicalBranch.branchOrder = branchSlotCounter++;
-      }
-
-      node.branchOrder(ideologicalBranch.branchOrder);
-    }
-
-    this.heighstBranchOrder = branchSlotCounter - 1;
-    let prevNode;
-    nodes.forEach((node) => {
-      node.ancestorOfHEAD(node.ancestorOfHEADTimeStamp == updateTimeStamp);
-      if (node.ancestorOfHEAD()) node.branchOrder(0);
-      node.aboveNode = prevNode;
-      if (prevNode) prevNode.belowNode = node;
-      prevNode = node;
-    });
-
-    return nodes;
-  }
-
-  getEdge(nodeAsha1, nodeBsha1) {
-    const id = `${nodeAsha1}-${nodeBsha1}`;
-    let edge = this.edgesById[id];
-    if (!edge) {
-      edge = this.edgesById[id] = new EdgeViewModel(this, nodeAsha1, nodeBsha1);
-    }
-    return edge;
-  }
-
-  markNodesIdeologicalBranches(refs) {
-    refs = refs.filter((r) => !!r.node());
-    refs = refs.sort((a, b) => {
-      if (a.isLocal && !b.isLocal) return -1;
-      if (b.isLocal && !a.isLocal) return 1;
-      if (a.isBranch && !b.isBranch) return -1;
-      if (b.isBranch && !a.isBranch) return 1;
-      if (a.isHEAD && !b.isHEAD) return 1;
-      if (!a.isHEAD && b.isHEAD) return -1;
-      if (a.isStash && !b.isStash) return 1;
-      if (b.isStash && !a.isStash) return -1;
-      if (a.node() && a.node().date && b.node() && b.node().date)
-        return a.node().date - b.node().date;
-      return a.refName < b.refName ? -1 : 1;
-    });
-    const stamp = this._markIdeologicalStamp++;
-    refs.forEach((ref) => {
-      this.traverseNodeParents(ref.node(), (node) => {
-        if (node.stamp == stamp) return false;
-        node.stamp = stamp;
-        node.ideologicalBranch(ref);
-        return true;
-      });
-    });
-  }
-
-  traverseNodeParents(node, callback) {
-    if (!callback(node)) return false;
-    for (let i = 0; i < node.parents().length; i++) {
-      // if parent, travers parent
-      const parent = this.nodesById[node.parents()[i]];
-      if (parent) {
-        this.traverseNodeParents(parent, callback);
-      }
     }
   }
 
@@ -295,14 +160,14 @@ class GraphViewModel extends ComponentRoot {
     } else if (event.event == 'current-remote-changed') {
       this.currentRemote(event.newRemote);
     } else if (event.event == 'graph-render') {
-      this.nodes().forEach((node) => {
+      this.nodesViewModel.nodes().forEach((node) => {
         node.render();
       });
     }
   }
 
   updateAnimationFrame(deltaT) {
-    this.nodes().forEach((node) => {
+    this.nodesViewModel.nodes().forEach((node) => {
       node.updateAnimationFrame(deltaT);
     });
   }
@@ -340,7 +205,7 @@ class GraphViewModel extends ComponentRoot {
     remoteTags.forEach((ref) => {
       if (!ref.name.includes('^{}')) {
         const name = `remote-tag: ${ref.remote}/${ref.name.split('/')[2]}`;
-        this.getRef(name).node(this.getNode(sha1Map[ref.name]));
+        this.getRef(name).node(this.nodesViewModel.getNode(sha1Map[ref.name]));
         this.getRef(name).version = version;
       }
     });
@@ -358,3 +223,5 @@ class GraphViewModel extends ComponentRoot {
     }
   }
 }
+
+module.exports = GraphViewModel;

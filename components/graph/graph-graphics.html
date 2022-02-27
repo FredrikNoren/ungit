@@ -73,7 +73,7 @@
     <!-- /ko -->
     <!-- /ko -->
 
-    <!-- ko foreach: edges -->
+    <!-- ko foreach: nodesViewModel.edges -->
     <path
       data-bind="element: element, event: { mouseover: edgeMouseOver, mouseout: edgeMouseOut }"
       stroke="#4A4A4A"
@@ -81,7 +81,7 @@
     />
     <!-- /ko -->
 
-    <!-- ko foreach: nodes -->
+    <!-- ko foreach: nodesViewModel.nodes -->
     <svg data-bind="element: element">
       <circle
         data-bind="attr: { r: r, fill: color, 'data-ta-clickable': 'node-clickable-' + $index() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected"

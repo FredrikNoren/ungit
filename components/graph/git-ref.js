@@ -102,7 +102,7 @@ class RefViewModel extends Selectable {
   moveTo(target, rewindWarnOverride) {
     let promise;
     if (this.isLocal) {
-      const toNode = this.graph.nodesById[target];
+      const toNode = this.graph.nodeViewModel.nodesById[target];
       const args = {
         path: this.graph.repoPath(),
         name: this.refName,
@@ -164,7 +164,7 @@ class RefViewModel extends Selectable {
     return promise
       .then((res) => {
         if (!res) return;
-        const targetNode = this.graph.getNode(target);
+        const targetNode = this.graph.nodesViewModel.getNode(target);
         if (this.graph.checkedOutBranch() == this.refName) {
           this.graph.HEADref().node(targetNode);
         }

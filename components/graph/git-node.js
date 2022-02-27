@@ -9,10 +9,11 @@ const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 class GitNodeViewModel extends Animateable {
-  constructor(graph, sha1) {
-    super(graph);
+  constructor(nodesViewModel, sha1) {
+    super(nodesViewModel.graph);
+    this.nodesViewModel = nodesViewModel;
+    this.ancestorOfHEADTimeStamp = undefined;
     this.version = undefined;
-    this.graph = graph;
     this.sha1 = sha1;
     this.isInited = false;
     this.title = ko.observable();
@@ -81,7 +82,7 @@ class GitNodeViewModel extends Animateable {
     this.selected.subscribe(() => {
       programEvents.dispatch({ event: 'graph-render' });
     });
-    this.showNewRefAction = ko.computed(() => !graph.currentActionContext());
+    this.showNewRefAction = ko.computed(() => !nodesViewModel.graph.currentActionContext());
     this.showRefSearch = ko.computed(
       () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
     );
@@ -102,17 +103,17 @@ class GitNodeViewModel extends Animateable {
     this.cy = ko.observable();
 
     this.dropareaGraphActions = [
-      new GraphActions.Move(this.graph, this),
-      new GraphActions.Rebase(this.graph, this),
-      new GraphActions.Merge(this.graph, this),
-      new GraphActions.Push(this.graph, this),
-      new GraphActions.Reset(this.graph, this),
-      new GraphActions.Checkout(this.graph, this),
-      new GraphActions.Delete(this.graph, this),
-      new GraphActions.CherryPick(this.graph, this),
-      new GraphActions.Uncommit(this.graph, this),
-      new GraphActions.Revert(this.graph, this),
-      new GraphActions.Squash(this.graph, this),
+      new GraphActions.Move(this.nodesViewModel.graph, this),
+      new GraphActions.Rebase(this.nodesViewModel.graph, this),
+      new GraphActions.Merge(this.nodesViewModel.graph, this),
+      new GraphActions.Push(this.nodesViewModel.graph, this),
+      new GraphActions.Reset(this.nodesViewModel.graph, this),
+      new GraphActions.Checkout(this.nodesViewModel.graph, this),
+      new GraphActions.Delete(this.nodesViewModel.graph, this),
+      new GraphActions.CherryPick(this.nodesViewModel.graph, this),
+      new GraphActions.Uncommit(this.nodesViewModel.graph, this),
+      new GraphActions.Revert(this.nodesViewModel.graph, this),
+      new GraphActions.Squash(this.nodesViewModel.graph, this),
     ];
   }
 
@@ -163,7 +164,7 @@ class GitNodeViewModel extends Animateable {
     this.signatureDate(logEntry.signatureDate);
 
     (logEntry.refs || []).forEach((ref) => {
-      this.graph.getRef(ref).node(this);
+      this.nodesViewModel.graph.getRef(ref).node(this);
     });
     this.isInited = true;
   }
@@ -212,22 +213,22 @@ class GitNodeViewModel extends Animateable {
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.graph.server
+    this.nodesViewModel.graph.server
       .postPromise('/branches', {
-        path: this.graph.repoPath(),
+        path: this.nodesViewModel.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
       .then(() => {
-        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
+        this.nodesViewModel.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.graph.server.postPromise('/checkout', {
-            path: this.graph.repoPath(),
+          return this.nodesViewModel.graph.server.postPromise('/checkout', {
+            path: this.nodesViewModel.graph.repoPath(),
             name: this.newBranchName(),
           });
         }
       })
-      .catch((e) => this.graph.server.unhandledRejection(e))
+      .catch((e) => this.nodesViewModel.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -237,14 +238,14 @@ class GitNodeViewModel extends Animateable {
 
   createTag() {
     if (!this.canCreateRef()) return;
-    this.graph.server
+    this.nodesViewModel.graph.server
       .postPromise('/tags', {
-        path: this.graph.repoPath(),
+        path: this.nodesViewModel.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
-      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
-      .catch((e) => this.graph.server.unhandledRejection(e))
+      .then(() => this.nodesViewModel.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
+      .catch((e) => this.nodesViewModel.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -258,7 +259,7 @@ class GitNodeViewModel extends Animateable {
       beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
     }
 
-    let prevSelected = this.graph.currentActionContext();
+    let prevSelected = this.nodesViewModel.graph.currentActionContext();
     if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected
       ? prevSelected.commitComponent.element().getBoundingClientRect()
@@ -317,7 +318,7 @@ class GitNodeViewModel extends Animateable {
     let thisNode = this;
     while (thisNode && !node.isAncestor(thisNode)) {
       path.push(thisNode);
-      thisNode = this.graph.nodesById[thisNode.parents()[0]];
+      thisNode = this.nodesViewModel.nodesById[thisNode.parents()[0]];
     }
     if (thisNode) path.push(thisNode);
     return path;
@@ -326,7 +327,7 @@ class GitNodeViewModel extends Animateable {
   isAncestor(node) {
     if (node == this) return true;
     for (const v in this.parents()) {
-      const n = this.graph.nodesById[this.parents()[v]];
+      const n = this.nodesViewModel.nodesById[this.parents()[v]];
       if (n && n.isAncestor(node)) return true;
     }
     return false;
@@ -349,7 +350,9 @@ class GitNodeViewModel extends Animateable {
   }
 
   isViewable() {
-    return this.graph.nodesById[this.sha1].version === this.graph._latestNodeVersion;
+    return (
+      this.nodesViewModel.nodesById[this.sha1].version === this.nodesViewModel._latestNodeVersion
+    );
   }
 }
 

@@ -8,9 +8,9 @@ components.register('commit', (args) => new CommitViewModel(args));
 
 class CommitViewModel {
   constructor(gitNode) {
-    this.repoPath = gitNode.graph.repoPath;
+    this.repoPath = gitNode.nodesViewModel.graph.repoPath;
     this.sha1 = gitNode.sha1;
-    this.server = gitNode.graph.server;
+    this.server = gitNode.nodesViewModel.graph.server;
     this.highlighted = gitNode.highlighted;
     this.nodeIsMousehover = gitNode.nodeIsMousehover;
     this.selected = gitNode.selected;
