@@ -1,8 +1,8 @@
-const ko = require('knockout');
+import * as ko from 'knockout';
 const Animateable = require('./animateable');
 
-class EdgeViewModel extends Animateable {
-  constructor(graph, nodeAsha1, nodeBsha1) {
+export class EdgeViewModel extends Animateable {
+  constructor(graph: any, nodeAsha1: string, nodeBsha1: string) {
     super(graph);
     this.nodeA = graph.nodesEdges.getNode(nodeAsha1);
     this.nodeB = graph.nodesEdges.getNode(nodeBsha1);
@@ -32,11 +32,11 @@ class EdgeViewModel extends Animateable {
       } else {
         return [0, 0, 0, 0, 0, 0, 0, 0];
       }
-    });
+    }).extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
     this.getGraphAttr.subscribe(this.animate.bind(this));
   }
 
-  setGraphAttr(val) {
+  setGraphAttr(val: number[]) {
     this.element().setAttribute('d', `M${val.slice(0, 4).join(',')}L${val.slice(4, 8).join(',')}`);
   }
 
@@ -58,5 +58,3 @@ class EdgeViewModel extends Animateable {
     }
   }
 }
-
-module.exports = EdgeViewModel;

@@ -2,16 +2,16 @@
 import * as ko from 'knockout';
 import * as moment from 'moment';
 const GitNodeViewModel = require('./git-node');
-const EdgeViewModel = require('./edge');
+import { EdgeViewModel } from './edge';
 
 export class NodesEdges {
   graph: any
   _latestNodeVersion = Date.now();
   _markIdeologicalStamp = 0
-  nodes = ko.observableArray<any>().extend({ rateLimit: 500 });
-  edges = ko.observableArray<any>().extend({ rateLimit: 500 });
+  nodes = ko.observableArray<any>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
+  edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   nodesById: Record<string, any> = {}
-  edgesById: Record<string, any> = {}
+  edgesById: Record<string, EdgeViewModel> = {}
   heighstBranchOrder = 0
 
   constructor(graph: any) {
