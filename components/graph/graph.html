@@ -2,7 +2,7 @@
   <!-- ko template: { name: 'graphGraphics' } -->
   <!-- /ko -->
 
-  <div data-bind="with: nodesViewModel">
+  <div data-bind="with: nodesEdges">
     <div class="nodes" data-bind="foreach: nodes">
       <div class="nodeContainer animation"
         data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">

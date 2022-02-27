@@ -98,7 +98,7 @@ class BranchesViewModel extends ComponentRoot {
       const sorted = refs
         .map((r) => {
           const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
-          ref.node(this.graph.nodesViewModel.getNode(r.sha1));
+          ref.node(this.graph.nodesEdges.getNode(r.sha1));
           ref.version = version;
           return ref;
         })

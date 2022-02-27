@@ -4,8 +4,8 @@ const Animateable = require('./animateable');
 class EdgeViewModel extends Animateable {
   constructor(graph, nodeAsha1, nodeBsha1) {
     super(graph);
-    this.nodeA = graph.nodesViewModel.getNode(nodeAsha1);
-    this.nodeB = graph.nodesViewModel.getNode(nodeBsha1);
+    this.nodeA = graph.nodesEdges.getNode(nodeAsha1);
+    this.nodeB = graph.nodesEdges.getNode(nodeBsha1);
     this.getGraphAttr = ko.computed(() => {
       if (this.nodeA.isViewable() && (!this.nodeB.isViewable() || !this.nodeB.isInited)) {
         return [

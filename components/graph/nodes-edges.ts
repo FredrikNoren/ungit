@@ -4,7 +4,7 @@ import * as moment from 'moment';
 const GitNodeViewModel = require('./git-node');
 const EdgeViewModel = require('./edge');
 
-export class NodesViewModel {
+export class NodesEdges {
   graph: any
   _latestNodeVersion = Date.now();
   _markIdeologicalStamp = 0

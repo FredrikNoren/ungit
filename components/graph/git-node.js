@@ -9,9 +9,9 @@ const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 class GitNodeViewModel extends Animateable {
-  constructor(nodesViewModel, sha1) {
-    super(nodesViewModel.graph);
-    this.nodesViewModel = nodesViewModel;
+  constructor(nodesEdges, sha1) {
+    super(nodesEdges.graph);
+    this.nodesEdges = nodesEdges;
     this.ancestorOfHEADTimeStamp = undefined;
     this.version = undefined;
     this.sha1 = sha1;
@@ -82,7 +82,7 @@ class GitNodeViewModel extends Animateable {
     this.selected.subscribe(() => {
       programEvents.dispatch({ event: 'graph-render' });
     });
-    this.showNewRefAction = ko.computed(() => !nodesViewModel.graph.currentActionContext());
+    this.showNewRefAction = ko.computed(() => !nodesEdges.graph.currentActionContext());
     this.showRefSearch = ko.computed(
       () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
     );
@@ -103,17 +103,17 @@ class GitNodeViewModel extends Animateable {
     this.cy = ko.observable();
 
     this.dropareaGraphActions = [
-      new GraphActions.Move(this.nodesViewModel.graph, this),
-      new GraphActions.Rebase(this.nodesViewModel.graph, this),
-      new GraphActions.Merge(this.nodesViewModel.graph, this),
-      new GraphActions.Push(this.nodesViewModel.graph, this),
-      new GraphActions.Reset(this.nodesViewModel.graph, this),
-      new GraphActions.Checkout(this.nodesViewModel.graph, this),
-      new GraphActions.Delete(this.nodesViewModel.graph, this),
-      new GraphActions.CherryPick(this.nodesViewModel.graph, this),
-      new GraphActions.Uncommit(this.nodesViewModel.graph, this),
-      new GraphActions.Revert(this.nodesViewModel.graph, this),
-      new GraphActions.Squash(this.nodesViewModel.graph, this),
+      new GraphActions.Move(this.nodesEdges.graph, this),
+      new GraphActions.Rebase(this.nodesEdges.graph, this),
+      new GraphActions.Merge(this.nodesEdges.graph, this),
+      new GraphActions.Push(this.nodesEdges.graph, this),
+      new GraphActions.Reset(this.nodesEdges.graph, this),
+      new GraphActions.Checkout(this.nodesEdges.graph, this),
+      new GraphActions.Delete(this.nodesEdges.graph, this),
+      new GraphActions.CherryPick(this.nodesEdges.graph, this),
+      new GraphActions.Uncommit(this.nodesEdges.graph, this),
+      new GraphActions.Revert(this.nodesEdges.graph, this),
+      new GraphActions.Squash(this.nodesEdges.graph, this),
     ];
   }
 
@@ -164,7 +164,7 @@ class GitNodeViewModel extends Animateable {
     this.signatureDate(logEntry.signatureDate);
 
     (logEntry.refs || []).forEach((ref) => {
-      this.nodesViewModel.graph.getRef(ref).node(this);
+      this.nodesEdges.graph.getRef(ref).node(this);
     });
     this.isInited = true;
   }
@@ -213,22 +213,22 @@ class GitNodeViewModel extends Animateable {
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.nodesViewModel.graph.server
+    this.nodesEdges.graph.server
       .postPromise('/branches', {
-        path: this.nodesViewModel.graph.repoPath(),
+        path: this.nodesEdges.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
       .then(() => {
-        this.nodesViewModel.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
+        this.nodesEdges.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.nodesViewModel.graph.server.postPromise('/checkout', {
-            path: this.nodesViewModel.graph.repoPath(),
+          return this.nodesEdges.graph.server.postPromise('/checkout', {
+            path: this.nodesEdges.graph.repoPath(),
             name: this.newBranchName(),
           });
         }
       })
-      .catch((e) => this.nodesViewModel.graph.server.unhandledRejection(e))
+      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -238,14 +238,14 @@ class GitNodeViewModel extends Animateable {
 
   createTag() {
     if (!this.canCreateRef()) return;
-    this.nodesViewModel.graph.server
+    this.nodesEdges.graph.server
       .postPromise('/tags', {
-        path: this.nodesViewModel.graph.repoPath(),
+        path: this.nodesEdges.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
-      .then(() => this.nodesViewModel.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
-      .catch((e) => this.nodesViewModel.graph.server.unhandledRejection(e))
+      .then(() => this.nodesEdges.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
+      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -259,7 +259,7 @@ class GitNodeViewModel extends Animateable {
       beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
     }
 
-    let prevSelected = this.nodesViewModel.graph.currentActionContext();
+    let prevSelected = this.nodesEdges.graph.currentActionContext();
     if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected
       ? prevSelected.commitComponent.element().getBoundingClientRect()
@@ -318,7 +318,7 @@ class GitNodeViewModel extends Animateable {
     let thisNode = this;
     while (thisNode && !node.isAncestor(thisNode)) {
       path.push(thisNode);
-      thisNode = this.nodesViewModel.nodesById[thisNode.parents()[0]];
+      thisNode = this.nodesEdges.nodesById[thisNode.parents()[0]];
     }
     if (thisNode) path.push(thisNode);
     return path;
@@ -327,7 +327,7 @@ class GitNodeViewModel extends Animateable {
   isAncestor(node) {
     if (node == this) return true;
     for (const v in this.parents()) {
-      const n = this.nodesViewModel.nodesById[this.parents()[v]];
+      const n = this.nodesEdges.nodesById[this.parents()[v]];
       if (n && n.isAncestor(node)) return true;
     }
     return false;
@@ -351,7 +351,7 @@ class GitNodeViewModel extends Animateable {
 
   isViewable() {
     return (
-      this.nodesViewModel.nodesById[this.sha1].version === this.nodesViewModel._latestNodeVersion
+      this.nodesEdges.nodesById[this.sha1].version === this.nodesEdges._latestNodeVersion
     );
   }
 }

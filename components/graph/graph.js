@@ -6,14 +6,14 @@ const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
 const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
-const { NodesViewModel } = require('./git-nodes');
+const { NodesEdges } = require('./nodes-edges');
 
 components.register('graph', (args) => new GraphViewModel(args.server, args.repoPath));
 
 class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
     super();
-    this.nodesViewModel = new NodesViewModel(this);
+    this.nodesEdges = new NodesEdges(this);
     this._isLoadNodesFromApiRunning = false;
     this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
     this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
@@ -103,7 +103,7 @@ class GraphViewModel extends ComponentRoot {
   async _loadNodesFromApi() {
     this._isLoadNodesFromApiRunning = true;
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
-    const nodes = this.nodesViewModel.nodes();
+    const nodes = this.nodesEdges.nodes();
     const nodeSize = nodes.length;
 
     try {
@@ -116,7 +116,7 @@ class GraphViewModel extends ComponentRoot {
         return;
       }
 
-      this.nodesViewModel.processGitLog(log);
+      this.nodesEdges.processGitLog(log);
 
       if (nodes.length > 0) {
         this.graphHeight(nodes[nodes.length - 1].cy() + 80);
@@ -160,14 +160,14 @@ class GraphViewModel extends ComponentRoot {
     } else if (event.event == 'current-remote-changed') {
       this.currentRemote(event.newRemote);
     } else if (event.event == 'graph-render') {
-      this.nodesViewModel.nodes().forEach((node) => {
+      this.nodesEdges.nodes().forEach((node) => {
         node.render();
       });
     }
   }
 
   updateAnimationFrame(deltaT) {
-    this.nodesViewModel.nodes().forEach((node) => {
+    this.nodesEdges.nodes().forEach((node) => {
       node.updateAnimationFrame(deltaT);
     });
   }
@@ -205,7 +205,7 @@ class GraphViewModel extends ComponentRoot {
     remoteTags.forEach((ref) => {
       if (!ref.name.includes('^{}')) {
         const name = `remote-tag: ${ref.remote}/${ref.name.split('/')[2]}`;
-        this.getRef(name).node(this.nodesViewModel.getNode(sha1Map[ref.name]));
+        this.getRef(name).node(this.nodesEdges.getNode(sha1Map[ref.name]));
         this.getRef(name).version = version;
       }
     });
