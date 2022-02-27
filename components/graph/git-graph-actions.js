@@ -3,13 +3,7 @@ const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const RefViewModel = require('./git-ref.js');
-const HoverActions = require('./hover-actions');
-
-const RebaseViewModel = HoverActions.RebaseViewModel;
-const MergeViewModel = HoverActions.MergeViewModel;
-const ResetViewModel = HoverActions.ResetViewModel;
-const PushViewModel = HoverActions.PushViewModel;
-const SquashViewModel = HoverActions.SquashViewModel;
+const { RebaseViewModel, MergeViewModel, ResetViewModel, PushViewModel, SquashViewModel } = require('./hover-actions');
 
 class ActionBase {
   constructor(graph, text, style, icon) {
