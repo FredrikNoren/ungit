@@ -102,7 +102,7 @@ class RefViewModel extends Selectable {
   moveTo(target, rewindWarnOverride) {
     let promise;
     if (this.isLocal) {
-      const toNode = this.graph.nodeViewModel.nodesById[target];
+      const toNode = this.graph.nodesEdges.nodesById[target];
       const args = {
         path: this.graph.repoPath(),
         name: this.refName,

@@ -56,7 +56,6 @@ class GraphViewModel extends ComponentRoot {
       true
     );
     this.commitOpacity = ko.observable(1.0);
-    this.heighstBranchOrder = 0;
     this.hoverGraphActionGraphic = ko.observable();
     this.hoverGraphActionGraphic.subscribe(
       (value) => {
@@ -121,7 +120,7 @@ class GraphViewModel extends ComponentRoot {
       if (nodes.length > 0) {
         this.graphHeight(nodes[nodes.length - 1].cy() + 80);
       }
-      this.graphWidth(1000 + this.heighstBranchOrder * 90);
+      this.graphWidth(1000 + this.nodesEdges.heighstBranchOrder * 90);
     } catch (e) {
       this.server.unhandledRejection(e);
     } finally {
@@ -163,6 +162,8 @@ class GraphViewModel extends ComponentRoot {
       this.nodesEdges.nodes().forEach((node) => {
         node.render();
       });
+    } else if (event.event === 'modal-close-dialog') {
+      this.isActionRunning(false);
     }
   }
 
