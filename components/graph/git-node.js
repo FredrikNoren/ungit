@@ -77,8 +77,6 @@ class GitNodeViewModel extends Animateable {
     this.isEdgeHighlighted = ko.observable(false);
     // for small empty black circle to highlight a node
     this.isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
-    // to show changed files and diff boxes on the left of node
-    this.highlighted = ko.computed(() => this.nodeIsMousehover() || this.selected());
     this.selected.subscribe(() => {
       programEvents.dispatch({ event: 'graph-render' });
     });
@@ -350,9 +348,7 @@ class GitNodeViewModel extends Animateable {
   }
 
   isViewable() {
-    return (
-      this.nodesEdges.nodesById[this.sha1].version === this.nodesEdges._latestNodeVersion
-    );
+    return this.nodesEdges.nodesById[this.sha1].version === this.nodesEdges._latestNodeVersion;
   }
 }
 

@@ -5,9 +5,10 @@
   <div class="nodes" data-bind="foreach: nodesEdges.nodes">
     <div class="nodeContainer animation"
       data-bind="style: { left: '0px', top: cy() + 'px' }, attr: { 'data-ta-node-title': title }">
-      <div class="commit-container animation"
-        data-bind="visible: commitContainerVisible, style: { left: cx() - 620 + 'px' }">
+      <div class="commit-container animation" data-bind="style: { left: cx() - 620 + 'px' }">
+        <!-- ko if: commitContainerVisible -->
         <!-- ko component: commitComponent -->
+        <!-- /ko -->
         <!-- /ko -->
       </div>
 
@@ -32,14 +33,16 @@
         <!-- /ko -->
 
         <!-- ko foreach: dropareaGraphActions -->
+        <!-- ko if: visible -->
         <span class="graphAction"
-          data-bind="css: cssClasses, visible: visible, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
+          data-bind="css: cssClasses, attr: { 'data-ta-action': style }, event: { mouseover: mouseover, mouseout: mouseout }">
           <span data-bind="html: icon"></span>
           <span data-bind="text: text"></span>
           <div class="dropmask" tabindex="0" role="button"
             data-bind="dropOver: visible, drop: doPerform, dragEnter: dragEnter, dragLeave: dragLeave, click: doPerform">
           </div>
         </span>
+        <!-- /ko -->
         <!-- /ko -->
 
         <!-- ko if: showNewRefAction -->
