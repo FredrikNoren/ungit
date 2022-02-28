@@ -22,7 +22,9 @@ class GraphViewModel extends ComponentRoot {
     this.skip = ko.observable(0);
     this.server = server;
     this.currentRemote = ko.observable();
-    this.refs = ko.observableArray().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
+    this.refs = ko
+      .observableArray()
+      .extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
     this.refsByRefName = {};
     this.isActionRunning = ko.observable(false);
     this.checkedOutBranch = ko.observable();
