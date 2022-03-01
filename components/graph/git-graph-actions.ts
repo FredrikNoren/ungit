@@ -1,12 +1,23 @@
-const ko = require('knockout');
+import * as ko from 'knockout';
 const octicons = require('octicons');
-const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
 const RefViewModel = require('./git-ref.js');
 const { RebaseViewModel, MergeViewModel, ResetViewModel, PushViewModel, SquashViewModel } = require('./hover-actions');
 
+declare var ungit: any;
+const components = ungit.components;
+const programEvents = ungit.programEvents;
+
 class ActionBase {
-  constructor(graph, text, style, icon) {
+  graph: any
+  server: any
+  text: string
+  style: string
+  icon: string
+  cssClasses: ko.Computed<string>
+  visible: ko.Computed<boolean>
+  node: any // git-node
+
+  constructor(graph: any, text: string, style: string, icon: string) {
     this.graph = graph;
     this.server = graph.server;
     this.text = text;
@@ -50,9 +61,13 @@ class ActionBase {
   mouseout() {
     this.graph.hoverGraphAction(null);
   }
+
+  perform(): Promise<unknown> {
+    return Promise.reject()
+  }
 }
 
-class Move extends ActionBase {
+export class Move extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Move', 'move', octicons['arrow-left'].toSVG({ height: 18 }));
     this.node = node;
@@ -69,7 +84,7 @@ class Move extends ActionBase {
   }
 }
 
-class Reset extends ActionBase {
+export class Reset extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Reset', 'reset', octicons.trash.toSVG({ height: 18 }));
     this.node = node;
@@ -123,7 +138,7 @@ class Reset extends ActionBase {
   }
 }
 
-class Rebase extends ActionBase {
+export class Rebase extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Rebase', 'rebase', octicons['repo-forked'].toSVG({ height: 18 }));
     this.node = node;
@@ -158,7 +173,7 @@ class Rebase extends ActionBase {
   }
 }
 
-class Merge extends ActionBase {
+export class Merge extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Merge', 'merge', octicons['git-merge'].toSVG({ height: 18 }));
     this.node = node;
@@ -195,7 +210,7 @@ class Merge extends ActionBase {
   }
 }
 
-class Push extends ActionBase {
+export class Push extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Push', 'push', octicons['repo-push'].toSVG({ height: 18 }));
     this.node = node;
@@ -235,7 +250,7 @@ class Push extends ActionBase {
   }
 }
 
-class Checkout extends ActionBase {
+export class Checkout extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ height: 18 }));
     this.node = node;
@@ -254,7 +269,7 @@ class Checkout extends ActionBase {
   }
 }
 
-class Delete extends ActionBase {
+export class Delete extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Delete', 'delete', octicons.x.toSVG({ height: 18 }));
     this.node = node;
@@ -290,7 +305,7 @@ class Delete extends ActionBase {
   }
 }
 
-class CherryPick extends ActionBase {
+export class CherryPick extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Cherry pick', 'cherry-pick', octicons.cpu.toSVG({ height: 18 }));
     this.node = node;
@@ -313,7 +328,7 @@ class CherryPick extends ActionBase {
   }
 }
 
-class Uncommit extends ActionBase {
+export class Uncommit extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Uncommit', 'uncommit', octicons.zap.toSVG({ height: 18 }));
     this.node = node;
@@ -336,7 +351,7 @@ class Uncommit extends ActionBase {
   }
 }
 
-class Revert extends ActionBase {
+export class Revert extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Revert', 'revert', octicons.history.toSVG({ height: 18 }));
     this.node = node;
@@ -353,7 +368,7 @@ class Revert extends ActionBase {
   }
 }
 
-class Squash extends ActionBase {
+export class Squash extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Squash', 'squash', octicons.fold.toSVG({ height: 18 }));
     this.node = node;
@@ -410,18 +425,3 @@ class Squash extends ActionBase {
     }
   }
 }
-
-const GraphActions = {
-  Move: Move,
-  Rebase: Rebase,
-  Merge: Merge,
-  Push: Push,
-  Reset: Reset,
-  Checkout: Checkout,
-  Delete: Delete,
-  CherryPick: CherryPick,
-  Uncommit: Uncommit,
-  Revert: Revert,
-  Squash: Squash,
-};
-module.exports = GraphActions;

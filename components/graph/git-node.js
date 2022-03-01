@@ -3,7 +3,19 @@ const ko = require('knockout');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const Animateable = require('./animateable');
-const GraphActions = require('./git-graph-actions');
+const {
+  Move,
+  Rebase,
+  Push,
+  Merge,
+  Reset,
+  Checkout,
+  Delete,
+  CherryPick,
+  Uncommit,
+  Revert,
+  Squash
+} = require('./git-graph-actions');
 
 const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
@@ -101,17 +113,17 @@ class GitNodeViewModel extends Animateable {
     this.cy = ko.observable();
 
     this.dropareaGraphActions = [
-      new GraphActions.Move(this.nodesEdges.graph, this),
-      new GraphActions.Rebase(this.nodesEdges.graph, this),
-      new GraphActions.Merge(this.nodesEdges.graph, this),
-      new GraphActions.Push(this.nodesEdges.graph, this),
-      new GraphActions.Reset(this.nodesEdges.graph, this),
-      new GraphActions.Checkout(this.nodesEdges.graph, this),
-      new GraphActions.Delete(this.nodesEdges.graph, this),
-      new GraphActions.CherryPick(this.nodesEdges.graph, this),
-      new GraphActions.Uncommit(this.nodesEdges.graph, this),
-      new GraphActions.Revert(this.nodesEdges.graph, this),
-      new GraphActions.Squash(this.nodesEdges.graph, this),
+      new Move(this.nodesEdges.graph, this),
+      new Rebase(this.nodesEdges.graph, this),
+      new Merge(this.nodesEdges.graph, this),
+      new Push(this.nodesEdges.graph, this),
+      new Reset(this.nodesEdges.graph, this),
+      new Checkout(this.nodesEdges.graph, this),
+      new Delete(this.nodesEdges.graph, this),
+      new CherryPick(this.nodesEdges.graph, this),
+      new Uncommit(this.nodesEdges.graph, this),
+      new Revert(this.nodesEdges.graph, this),
+      new Squash(this.nodesEdges.graph, this),
     ];
   }
 
@@ -251,11 +263,9 @@ class GitNodeViewModel extends Animateable {
   }
 
   toggleSelected() {
+    console.log('>>>>>9918283')
     const beforeThisCR = this.commitComponent.element().getBoundingClientRect();
-    let beforeBelowCR = null;
-    if (this.belowNode) {
-      beforeBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
-    }
+    const belowY = this.belowNode ? this.belowNode.cy() : undefined;
 
     let prevSelected = this.nodesEdges.graph.currentActionContext();
     if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
@@ -266,11 +276,11 @@ class GitNodeViewModel extends Animateable {
 
     // If we are deselecting
     if (!this.selected()) {
-      if (beforeThisCR.top < 0 && beforeBelowCR) {
+      if (beforeThisCR.top < 0 && belowY) {
         const afterBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
         // If the next node is showing, try to keep it in the screen (no jumping)
-        if (beforeBelowCR.top < window.innerHeight) {
-          window.scrollBy(0, afterBelowCR.top - beforeBelowCR.top);
+        if (belowY < window.innerHeight) {
+          window.scrollBy(0, afterBelowCR.top - belowY);
           // Otherwise just try to bring them to the middle of the screen
         } else {
           window.scrollBy(0, afterBelowCR.top - window.innerHeight / 2);
