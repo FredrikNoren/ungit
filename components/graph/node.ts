@@ -1,7 +1,9 @@
-const $ = require('jquery');
-const ko = require('knockout');
-const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
+import * as $ from 'jquery';
+import * as ko from 'knockout';
+import { NodesEdges } from './nodes-edges';
+
+declare const ungit: any;
+const components = ungit.components;
 const Animateable = require('./animateable');
 const {
   Move,
@@ -16,51 +18,82 @@ const {
   Revert,
   Squash
 } = require('./git-graph-actions');
-
-const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
+const maxBranchesToDisplay = Math.floor((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
-class GitNodeViewModel extends Animateable {
-  constructor(nodesEdges, sha1) {
-    super(nodesEdges.graph);
-    this.nodesEdges = nodesEdges;
-    this.ancestorOfHEADTimeStamp = undefined;
-    this.version = undefined;
-    this.sha1 = sha1;
-    this.isInited = false;
-    this.title = ko.observable();
-    this.parents = ko.observableArray();
-    this.commitTime = undefined; // commit time in string
-    this.date = undefined; // commit time in numeric format for sort
-    this.color = ko.observable();
-    this.ideologicalBranch = ko.observable();
-    this.remoteTags = ko.observableArray();
-    this.branchesAndLocalTags = ko.observableArray();
-    this.signatureDate = ko.observable();
-    this.signatureMade = ko.observable();
-    this.pgpVerifiedString = ko.computed(() => {
-      if (this.signatureMade()) {
-        return `PGP by: ${this.signatureMade()} at ${this.signatureDate()}`;
-      }
-    });
+export class NodeViewModel extends Animateable {
+  nodesEdges: NodesEdges
+  ancestorOfHEADTimeStamp: undefined | number = undefined;
+  version = undefined;
+  isInited = false;
+  nodeIsMousehover = ko.observable(false);
 
-    this.refs = ko.computed(() => {
-      const rs = this.branchesAndLocalTags().concat(this.remoteTags());
-      rs.sort((a, b) => {
-        if (b.current()) return 1;
-        if (a.current()) return -1;
-        if (a.isLocal && !b.isLocal) return -1;
-        if (!a.isLocal && b.isLocal) return 1;
-        return a.refName < b.refName ? -1 : 1;
-      });
-      return rs;
+  // git variables
+  sha1: string;
+  title = ko.observable<string>();
+  parents = ko.observableArray<string>();
+  commitTime: undefined | string = undefined; // commit time in string
+  date: undefined | number = undefined; // commit time in numeric format for sort
+  signatureDate = ko.observable<string>();
+  signatureMade = ko.observable<string>();
+  pgpVerifiedString = ko.computed(() => {
+    if (this.signatureMade()) {
+      return `PGP by: ${this.signatureMade()} at ${this.signatureDate()}`;
+    }
+  });
+
+  // branches
+  ideologicalBranch = ko.observable<any>(); // git-ref
+  remoteTags = ko.observableArray<any>(); // git-ref
+  branchesAndLocalTags = ko.observableArray<any>(); // git-ref
+  refs = ko.computed<any>(() => { // git-ref[]
+    const rs = this.branchesAndLocalTags().concat(this.remoteTags());
+    rs.sort((a, b) => {
+      if (b.current()) return 1;
+      if (a.current()) return -1;
+      if (a.isLocal && !b.isLocal) return -1;
+      if (!a.isLocal && b.isLocal) return 1;
+      return a.refName < b.refName ? -1 : 1;
     });
-    // These are split up like this because branches and local tags can be found in the git log,
-    // whereas remote tags needs to be fetched with another command (which is much slower)
-    this.branches = ko.observableArray();
-    this.branchesToDisplay = ko.observableArray();
-    this.tags = ko.observableArray();
-    this.tagsToDisplay = ko.observableArray();
+    return rs;
+  });
+  branches = ko.observableArray<any>(); // git-ref
+  branchesToDisplay = ko.observableArray<any>(); // git-ref
+  tags = ko.observableArray<any>(); // git-ref
+  tagsToDisplay = ko.observableArray<any>(); // git-ref
+
+  // graph variables
+  color = ko.observable<string>();
+  ancestorOfHEAD = ko.observable(false);
+  commitContainerVisible: ko.Computed<boolean>
+  isEdgeHighlighted = ko.observable(false);
+  isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
+  showNewRefAction: ko.Computed<boolean>
+  showRefSearch = ko.computed(
+    () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
+  );
+  newBranchName = ko.observable<string>();
+  newBranchNameHasFocus = ko.observable(true);
+  branchingFormVisible = ko.observable(false);
+  canCreateRef = ko.computed(
+    () =>
+      this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' ')
+  );
+  branchOrder = ko.observable<number>();
+  aboveNode: NodeViewModel = undefined;
+  belowNode: NodeViewModel = undefined;
+  refSearchFormVisible = ko.observable(false);
+  r: ko.Observable<number>
+  cx: ko.Observable<number>
+  cy: ko.Observable<number>
+  dropareaGraphActions: any[] // graph actions
+
+  commitComponent: any
+
+  constructor(nodesEdges: NodesEdges, sha1: string) {
+    super(nodesEdges.graph);
+    this.sha1 = sha1;
+    this.nodesEdges = nodesEdges;
     this.refs.subscribe((newValue) => {
       if (newValue) {
         this.branches(newValue.filter((r) => r.isBranch));
@@ -81,37 +114,9 @@ class GitNodeViewModel extends Animateable {
         this.tagsToDisplay.removeAll();
       }
     });
-    this.ancestorOfHEAD = ko.observable(false);
-    this.nodeIsMousehover = ko.observable(false);
-    this.commitContainerVisible = ko.computed(
-      () => this.ancestorOfHEAD() || this.nodeIsMousehover() || this.selected()
-    );
-    this.isEdgeHighlighted = ko.observable(false);
-    // for small empty black circle to highlight a node
-    this.isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
     this.selected.subscribe(() => {
-      programEvents.dispatch({ event: 'graph-render' });
+      ungit.programEvents.dispatch({ event: 'graph-render' });
     });
-    this.showNewRefAction = ko.computed(() => !nodesEdges.graph.currentActionContext());
-    this.showRefSearch = ko.computed(
-      () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
-    );
-    this.newBranchName = ko.observable();
-    this.newBranchNameHasFocus = ko.observable(true);
-    this.branchingFormVisible = ko.observable(false);
-    this.canCreateRef = ko.computed(
-      () =>
-        this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' ')
-    );
-    this.branchOrder = ko.observable();
-    this.aboveNode = undefined;
-    this.belowNode = undefined;
-    this.refSearchFormVisible = ko.observable(false);
-    this.commitComponent = components.create('commit', this);
-    this.r = ko.observable();
-    this.cx = ko.observable();
-    this.cy = ko.observable();
-
     this.dropareaGraphActions = [
       new Move(this.nodesEdges.graph, this),
       new Rebase(this.nodesEdges.graph, this),
@@ -125,6 +130,19 @@ class GitNodeViewModel extends Animateable {
       new Revert(this.nodesEdges.graph, this),
       new Squash(this.nodesEdges.graph, this),
     ];
+    this.commitComponent = components.create('commit', this);
+    this.r = ko.observable<number>();
+    this.cx = ko.observable<number>();
+    this.cy = ko.observable<number>();
+    this.commitContainerVisible = ko.computed(
+      () => {
+        return this.ancestorOfHEAD() || this.nodeIsMousehover() || this.selected();
+      }
+    );
+    this.showNewRefAction = ko.computed(() => {
+      return !this.nodesEdges.graph.currentActionContext();
+    });
+
   }
 
   getGraphAttr() {
@@ -188,7 +206,7 @@ class GitNodeViewModel extends Animateable {
     this.refSearchFormVisible(true);
 
     const textBox = event.currentTarget.parentElement.querySelector('input[type="search"]');
-    const $textBox = $(textBox);
+    const $textBox = <any>$(textBox);
 
     if (!$textBox.autocomplete('instance')) {
       const renderItem = (ul, item) => $(`<li><a>${item.displayHtml()}</a></li>`).appendTo(ul);
@@ -215,7 +233,7 @@ class GitNodeViewModel extends Animateable {
         },
       });
       $textBox.on('focus', (event) => {
-        $(event.target).autocomplete('search', event.target.value);
+        (<any>$(event.target)).autocomplete('search', event.target.value);
       });
       $textBox.autocomplete('search', '');
     }
@@ -242,7 +260,7 @@ class GitNodeViewModel extends Animateable {
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
-        programEvents.dispatch({ event: 'branch-updated' });
+        ungit.programEvents.dispatch({ event: 'branch-updated' });
       });
   }
 
@@ -263,12 +281,11 @@ class GitNodeViewModel extends Animateable {
   }
 
   toggleSelected() {
-    console.log('>>>>>9918283')
     const beforeThisCR = this.commitComponent.element().getBoundingClientRect();
     const belowY = this.belowNode ? this.belowNode.cy() : undefined;
 
     let prevSelected = this.nodesEdges.graph.currentActionContext();
-    if (!(prevSelected instanceof GitNodeViewModel)) prevSelected = null;
+    if (!(prevSelected instanceof NodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected
       ? prevSelected.commitComponent.element().getBoundingClientRect()
       : null;
@@ -323,7 +340,7 @@ class GitNodeViewModel extends Animateable {
 
   getPathToCommonAncestor(node) {
     const path = [];
-    let thisNode = this;
+    let thisNode: NodeViewModel = this;
     while (thisNode && !node.isAncestor(thisNode)) {
       path.push(thisNode);
       thisNode = this.nodesEdges.nodesById[thisNode.parents()[0]];
@@ -361,5 +378,3 @@ class GitNodeViewModel extends Animateable {
     return this.nodesEdges.nodesById[this.sha1].version === this.nodesEdges._latestNodeVersion;
   }
 }
-
-module.exports = GitNodeViewModel;

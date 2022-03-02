@@ -2,7 +2,7 @@ const ko = require('knockout');
 const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
-const GitNodeViewModel = require('./git-node');
+const { NodeViewModel } = require('./node');
 const GitRefViewModel = require('./git-ref');
 const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
@@ -138,7 +138,7 @@ class GraphViewModel extends ComponentRoot {
     // If the clicked element is bound to the current action context,
     // then let's not deselect it.
     if (ko.dataFor(event.target) === this.currentActionContext()) return;
-    if (this.currentActionContext() && this.currentActionContext() instanceof GitNodeViewModel) {
+    if (this.currentActionContext() && this.currentActionContext() instanceof NodeViewModel) {
       this.currentActionContext().toggleSelected();
     } else {
       this.currentActionContext(null);

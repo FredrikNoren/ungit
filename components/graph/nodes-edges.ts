@@ -1,7 +1,7 @@
 
 import * as ko from 'knockout';
 import * as moment from 'moment';
-const GitNodeViewModel = require('./git-node');
+import { NodeViewModel } from './node';
 import { EdgeViewModel } from './edge';
 
 export class NodesEdges {
@@ -10,7 +10,7 @@ export class NodesEdges {
   _markIdeologicalStamp = 0
   nodes = ko.observableArray<any>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
-  nodesById: Record<string, any> = {}
+  nodesById: Record<string, NodeViewModel> = {}
   edgesById: Record<string, EdgeViewModel> = {}
   heighstBranchOrder = 0
 
@@ -45,9 +45,10 @@ export class NodesEdges {
   }
 
   getNode(sha1: string): any {
-    let nodeViewModel = this.nodesById[sha1];
-    if (!nodeViewModel) nodeViewModel = this.nodesById[sha1] = new GitNodeViewModel(this, sha1);
-    return nodeViewModel;
+    if (!this.nodesById[sha1]) {
+      this.nodesById[sha1] = new NodeViewModel(this, sha1);
+    }
+    return this.nodesById[sha1];
   }
 
   _computeNode(nodes: any[] = this.nodes()) {
