@@ -3,7 +3,7 @@ const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const { NodeViewModel } = require('./node');
-const GitRefViewModel = require('./git-ref');
+const { RefViewModel } = require('./git-ref');
 const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 const { NodesEdges } = require('./nodes-edges');
@@ -92,7 +92,7 @@ class GraphViewModel extends ComponentRoot {
     if (constructIfUnavailable === undefined) constructIfUnavailable = true;
     let refViewModel = this.refsByRefName[ref];
     if (!refViewModel && constructIfUnavailable) {
-      refViewModel = this.refsByRefName[ref] = new GitRefViewModel(ref, this);
+      refViewModel = this.refsByRefName[ref] = new RefViewModel(ref, this);
       this.refs.push(refViewModel);
       if (refViewModel.name === 'HEAD') {
         this.HEADref(refViewModel);

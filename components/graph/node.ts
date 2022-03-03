@@ -1,11 +1,13 @@
 import * as $ from 'jquery';
 import * as ko from 'knockout';
 import { NodesEdges } from './nodes-edges';
+import { RefViewModel } from './git-ref';
 
 declare const ungit: any;
 const components = ungit.components;
 const Animateable = require('./animateable');
-const {
+import {
+  ActionBase,
   Move,
   Rebase,
   Push,
@@ -17,7 +19,7 @@ const {
   Uncommit,
   Revert,
   Squash
-} = require('./git-graph-actions');
+} from './git-graph-actions';
 const maxBranchesToDisplay = Math.floor((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
@@ -43,10 +45,10 @@ export class NodeViewModel extends Animateable {
   });
 
   // branches
-  ideologicalBranch = ko.observable<any>(); // git-ref
-  remoteTags = ko.observableArray<any>(); // git-ref
-  branchesAndLocalTags = ko.observableArray<any>(); // git-ref
-  refs = ko.computed<any>(() => { // git-ref[]
+  ideologicalBranch = ko.observable<RefViewModel>(); // git-ref
+  remoteTags = ko.observableArray<RefViewModel>(); // git-ref
+  branchesAndLocalTags = ko.observableArray<RefViewModel>(); // git-ref
+  refs = ko.computed<RefViewModel[]>(() => { // git-ref[]
     const rs = this.branchesAndLocalTags().concat(this.remoteTags());
     rs.sort((a, b) => {
       if (b.current()) return 1;
@@ -57,10 +59,10 @@ export class NodeViewModel extends Animateable {
     });
     return rs;
   });
-  branches = ko.observableArray<any>(); // git-ref
-  branchesToDisplay = ko.observableArray<any>(); // git-ref
-  tags = ko.observableArray<any>(); // git-ref
-  tagsToDisplay = ko.observableArray<any>(); // git-ref
+  branches = ko.observableArray<RefViewModel>(); // git-ref
+  branchesToDisplay = ko.observableArray<RefViewModel>(); // git-ref
+  tags = ko.observableArray<RefViewModel>(); // git-ref
+  tagsToDisplay = ko.observableArray<RefViewModel>(); // git-ref
 
   // graph variables
   color = ko.observable<string>();
@@ -86,7 +88,7 @@ export class NodeViewModel extends Animateable {
   r: ko.Observable<number>
   cx: ko.Observable<number>
   cy: ko.Observable<number>
-  dropareaGraphActions: any[] // graph actions
+  dropareaGraphActions: ActionBase[] // graph actions
 
   commitComponent: any
 

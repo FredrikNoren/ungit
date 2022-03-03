@@ -1,20 +1,51 @@
-const ko = require('knockout');
+import * as ko from 'knockout';
+import { NodeViewModel } from './node';
 const md5 = require('blueimp-md5');
 const octicons = require('octicons');
-const programEvents = require('ungit-program-events');
-const components = require('ungit-components');
 const Selectable = require('./selectable');
 
-class RefViewModel extends Selectable {
-  constructor(fullRefName, graph) {
+declare var ungit: any;
+const programEvents = ungit.programEvents;
+const components = ungit.components;
+
+export class RefViewModel extends Selectable {
+  graph: any
+  server: any
+
+  name: string
+  node: ko.Observable<NodeViewModel>
+  localRefName: string // origin/master or master
+  refName: string // master
+  remote: string
+  color: string
+  value: string
+
+  // flags
+  isRemoteTag: boolean
+  isLocalTag: boolean
+  isTag: boolean
+  isLocalHEAD: boolean
+  isRemoteHEAD: boolean
+  isLocalBranch: boolean
+  isRemoteBranch: boolean
+  isStash: boolean
+  isHEAD: boolean
+  isBranch: boolean
+  isRemote: boolean
+  isLocal: boolean
+  show: boolean
+
+  // observables
+  isDragging: ko.Observable<boolean>
+  current: ko.Computed<boolean>
+
+  constructor(fullRefName: string, graph: any) {
     super(graph);
     this.graph = graph;
     this.name = fullRefName;
-    this.node = ko.observable();
-    this.localRefName = this.name; // origin/master or master
-    this.refName = this.name; // master
-    this.isRemoteTag = this.name.indexOf('remote-tag: ') == 0;
-    this.isLocalTag = this.name.indexOf('tag: ') == 0;
+    this.node = ko.observable<NodeViewModel>();
+    this.isRemoteTag = this.name.indexOf('remote-tag: ') === 0;
+    this.isLocalTag = this.name.indexOf('tag: ') === 0;
     this.isTag = this.isLocalTag || this.isRemoteTag;
     const isRemoteBranchOrHEAD = this.name.indexOf('refs/remotes/') == 0;
     this.isLocalHEAD = this.name == 'HEAD';
@@ -40,7 +71,7 @@ class RefViewModel extends Selectable {
     if (this.isRemoteTag) {
       this.localRefName = this.name.slice('remote-tag: '.length);
     }
-    const splitedName = this.localRefName.split('/');
+    const splitedName = (this.localRefName || this.name).split('/');
     if (this.isRemote) {
       // get rid of the origin/ part of origin/branchname
       this.remote = splitedName[0];
@@ -67,21 +98,20 @@ class RefViewModel extends Selectable {
 
     // This optimization is for autocomplete display
     this.value = splitedName[splitedName.length - 1];
-    this.label = this.localRefName;
+  }
 
-    this.displayHtml = (largeCurrent) => {
-      const size = largeCurrent && this.current() ? 26 : 18;
-      let prefix = '';
-      if (this.isRemote) {
-        prefix = `<span>${octicons.globe.toSVG({ height: size })}</span> `;
-      }
-      if (this.isBranch) {
-        prefix += `<span>${octicons['git-branch'].toSVG({ height: size })}</span> `;
-      } else if (this.isTag) {
-        prefix += `<span>${octicons.tag.toSVG({ height: size })}</span> `;
-      }
-      return prefix + this.localRefName;
-    };
+  displayHtml(largeCurrent) {
+    const size = largeCurrent && this.current() ? 26 : 18;
+    let prefix = '';
+    if (this.isRemote) {
+      prefix = `<span>${octicons.globe.toSVG({ height: size })}</span> `;
+    }
+    if (this.isBranch) {
+      prefix += `<span>${octicons['git-branch'].toSVG({ height: size })}</span> `;
+    } else if (this.isTag) {
+      prefix += `<span>${octicons.tag.toSVG({ height: size })}</span> `;
+    }
+    return prefix + this.localRefName;
   }
 
   _colorFromHashOfString(string) {
@@ -91,7 +121,9 @@ class RefViewModel extends Selectable {
   dragStart() {
     this.graph.currentActionContext(this);
     this.isDragging(true);
-    if (document.activeElement) document.activeElement.blur();
+    if (document.activeElement) {
+      (document.activeElement as HTMLElement).blur();
+    }
   }
 
   dragEnd() {
@@ -141,6 +173,7 @@ class RefViewModel extends Selectable {
         remote: this.remote,
         refSpec: target,
         remoteBranch: this.refName,
+        force: false
       };
       promise = this.server.postPromise('/push', pushReq).catch((err) => {
         if (err.errorCode === 'non-fast-forward') {
@@ -181,10 +214,10 @@ class RefViewModel extends Selectable {
       isClientOnly
         ? Promise.resolve()
         : this.server.delPromise(url, {
-            path: this.graph.repoPath(),
-            remote: this.isRemote ? this.remote : null,
-            name: this.refName,
-          })
+          path: this.graph.repoPath(),
+          remote: this.isRemote ? this.remote : null,
+          name: this.refName,
+        })
     )
       .then(() => {
         if (this.node()) this.node().removeRef(this);
@@ -281,5 +314,3 @@ class RefViewModel extends Selectable {
       });
   }
 }
-
-module.exports = RefViewModel;

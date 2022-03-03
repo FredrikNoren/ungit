@@ -1,13 +1,14 @@
 import * as ko from 'knockout';
 const octicons = require('octicons');
-const RefViewModel = require('./git-ref.js');
+import { RefViewModel } from './git-ref';
+import { NodeViewModel } from './node';
 const { RebaseViewModel, MergeViewModel, ResetViewModel, PushViewModel, SquashViewModel } = require('./hover-actions');
 
 declare var ungit: any;
 const components = ungit.components;
 const programEvents = ungit.programEvents;
 
-class ActionBase {
+export class ActionBase {
   graph: any
   server: any
   text: string
@@ -15,7 +16,7 @@ class ActionBase {
   icon: string
   cssClasses: ko.Computed<string>
   visible: ko.Computed<boolean>
-  node: any // git-node
+  node: NodeViewModel // git-node
 
   constructor(graph: any, text: string, style: string, icon: string) {
     this.graph = graph;
