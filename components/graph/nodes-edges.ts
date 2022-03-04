@@ -1,20 +1,22 @@
 
 import * as ko from 'knockout';
 import * as moment from 'moment';
-import { NodeViewModel } from './node';
+import { AbstractNodesEdges } from './abstract-nodes-edges';
 import { EdgeViewModel } from './edge';
+import { NodeViewModel } from './node';
 
-export class NodesEdges {
+export class NodesEdges extends AbstractNodesEdges {
   graph: any
   _latestNodeVersion = Date.now();
   _markIdeologicalStamp = 0
-  nodes = ko.observableArray<any>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
+  nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   nodesById: Record<string, NodeViewModel> = {}
   edgesById: Record<string, EdgeViewModel> = {}
   heighstBranchOrder = 0
 
   constructor(graph: any) {
+    super()
     this.graph = graph
   }
 
@@ -124,7 +126,7 @@ export class NodesEdges {
     });
   }
 
-  _traverseNodeParents(node, callback) {
+  _traverseNodeParents(node: NodeViewModel, callback) {
     if (!callback(node)) return false;
     for (let i = 0; i < node.parents().length; i++) {
       // if parent, travers parent
@@ -135,7 +137,7 @@ export class NodesEdges {
     }
   }
 
-  _traverseNodeLeftParents(node, callback) {
+  _traverseNodeLeftParents(node: NodeViewModel, callback) {
     callback(node);
     const parent = this.nodesById[node.parents()[0]];
     if (parent) {
@@ -143,7 +145,7 @@ export class NodesEdges {
     }
   }
 
-  getEdge(nodeAsha1, nodeBsha1) {
+  getEdge(nodeAsha1: string, nodeBsha1: string) {
     const id = `${nodeAsha1}-${nodeBsha1}`;
     let edge = this.edgesById[id];
     if (!edge) {
@@ -152,4 +154,22 @@ export class NodesEdges {
     return edge;
   }
 
+  getPathToCommonAncestor(fromNode: NodeViewModel, targetNode: NodeViewModel) {
+    const path = [];
+    while (fromNode && !this.isAncestor(targetNode, fromNode)) {
+      path.push(fromNode);
+      fromNode = this.nodesById[fromNode.parents()[0]];
+    }
+    if (fromNode) path.push(fromNode);
+    return path;
+  }
+
+  isAncestor(fromNode: NodeViewModel, targetNode: NodeViewModel) {
+    if (fromNode === targetNode) return true;
+    for (const v in fromNode.parents()) {
+      const n = this.nodesById[fromNode.parents()[v]];
+      if (n && this.isAncestor(n, targetNode)) return true;
+    }
+    return false;
+  }
 }
