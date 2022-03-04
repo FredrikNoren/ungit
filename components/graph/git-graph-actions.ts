@@ -2,7 +2,13 @@ import * as ko from 'knockout';
 const octicons = require('octicons');
 import { RefViewModel } from './git-ref';
 import { NodeViewModel } from './node';
-const { RebaseViewModel, MergeViewModel, ResetViewModel, PushViewModel, SquashViewModel } = require('./hover-actions');
+import {
+  RebaseViewModel,
+  MergeViewModel,
+  ResetViewModel,
+  PushViewModel,
+  SquashViewModel
+} from './hover-actions';
 
 declare var ungit: any;
 const components = ungit.components;
@@ -109,7 +115,7 @@ export class Reset extends ActionBase {
     const context = this.graph.currentActionContext();
     if (!context) return null;
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
-    const nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
+    const nodes = this.graph.nodesEdges.getPathToCommonAncestor(context.node(), remoteRef.node()).slice(0, -1);
     return new ResetViewModel(nodes);
   }
 
@@ -157,7 +163,7 @@ export class Rebase extends ActionBase {
     let onto = this.graph.currentActionContext();
     if (!onto) return;
     if (onto instanceof RefViewModel) onto = onto.node();
-    const path = onto.getPathToCommonAncestor(this.node);
+    const path = this.graph.nodesEdges.getPathToCommonAncestor(onto, this.node);
     return new RebaseViewModel(this.node, path);
   }
 
@@ -387,7 +393,7 @@ export class Squash extends ActionBase {
     if (!onto) return;
     if (onto instanceof RefViewModel) onto = onto.node();
 
-    return new SquashViewModel(this.node, onto);
+    return new SquashViewModel(this.graph, this.node, onto);
   }
 
   perform() {
@@ -395,7 +401,7 @@ export class Squash extends ActionBase {
     if (!onto) return;
     if (onto instanceof RefViewModel) onto = onto.node();
     // remove last element as it would be a common ancestor.
-    const path = this.node.getPathToCommonAncestor(onto).slice(0, -1);
+    const path = this.graph.nodesEdges.getPathToCommonAncestor(this.node, onto).slice(0, -1);
 
     if (path.length > 0) {
       // squashing branched out lineage

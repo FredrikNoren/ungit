@@ -1,11 +1,10 @@
 
 import * as ko from 'knockout';
 import * as moment from 'moment';
-import { AbstractNodesEdges } from './abstract-nodes-edges';
-import { EdgeViewModel } from './edge';
 import { NodeViewModel } from './node';
+import { EdgeViewModel } from './edge';
 
-export class NodesEdges extends AbstractNodesEdges {
+export class NodesEdges {
   graph: any
   _latestNodeVersion = Date.now();
   _markIdeologicalStamp = 0
@@ -16,7 +15,6 @@ export class NodesEdges extends AbstractNodesEdges {
   heighstBranchOrder = 0
 
   constructor(graph: any) {
-    super()
     this.graph = graph
   }
 

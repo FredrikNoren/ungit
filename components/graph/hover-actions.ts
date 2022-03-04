@@ -132,14 +132,14 @@ export class PushViewModel extends HoverViewModel {
 }
 
 export class SquashViewModel extends HoverViewModel {
-  constructor(from, onto) {
+  constructor(graph: any, from, onto) {
     super();
-    let path = from.getPathToCommonAncestor(onto);
+    let path = graph.nodesEdges.getPathToCommonAncestor(from, onto);
 
     if (path.length == 0) {
       return;
     } else if (path.length == 1) {
-      path = onto.getPathToCommonAncestor(from);
+      path = graph.nodesEdges.getPathToCommonAncestor(onto, from);
     } else {
       this.nodes.push(new NodeModel(onto.cx(), onto.cy() - 120, 28, 'transparent'));
     }

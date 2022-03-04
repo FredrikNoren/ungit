@@ -1,13 +1,14 @@
+import * as $ from 'jquery';
 import * as ko from 'knockout';
-import { Animateable } from './animateable';
-import { ActionBase } from './action-base';
-import { AbstractRef } from './abstract-ref';
-import { AbstractNodesEdges } from './abstract-nodes-edges';
+import { NodesEdges } from './nodes-edges';
+import { RefViewModel } from './git-ref';
 
 declare const ungit: any;
 const components = ungit.components;
+const Animateable = require('./animateable');
 
 import {
+  ActionBase,
   Move,
   Rebase,
   Push,
@@ -24,7 +25,7 @@ const maxBranchesToDisplay = Math.floor((ungit.config.numRefsToShow / 5) * 3); /
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 export class NodeViewModel extends Animateable {
-  nodesEdges: AbstractNodesEdges
+  nodesEdges: NodesEdges
   ancestorOfHEADTimeStamp: undefined | number = undefined;
   version = undefined;
   isInited = false;
@@ -45,10 +46,10 @@ export class NodeViewModel extends Animateable {
   });
 
   // branches
-  ideologicalBranch = ko.observable<AbstractRef>(); // git-ref
-  remoteTags = ko.observableArray<AbstractRef>(); // git-ref
-  branchesAndLocalTags = ko.observableArray<AbstractRef>(); // git-ref
-  refs = ko.computed<AbstractRef[]>(() => { // git-ref[]
+  ideologicalBranch = ko.observable<RefViewModel>(); // git-ref
+  remoteTags = ko.observableArray<RefViewModel>(); // git-ref
+  branchesAndLocalTags = ko.observableArray<RefViewModel>(); // git-ref
+  refs = ko.computed<RefViewModel[]>(() => { // git-ref[]
     const rs = this.branchesAndLocalTags().concat(this.remoteTags());
     rs.sort((a, b) => {
       if (b.current()) return 1;
@@ -59,10 +60,10 @@ export class NodeViewModel extends Animateable {
     });
     return rs;
   });
-  branches = ko.observableArray<AbstractRef>(); // git-ref
-  branchesToDisplay = ko.observableArray<AbstractRef>(); // git-ref
-  tags = ko.observableArray<AbstractRef>(); // git-ref
-  tagsToDisplay = ko.observableArray<AbstractRef>(); // git-ref
+  branches = ko.observableArray<RefViewModel>(); // git-ref
+  branchesToDisplay = ko.observableArray<RefViewModel>(); // git-ref
+  tags = ko.observableArray<RefViewModel>(); // git-ref
+  tagsToDisplay = ko.observableArray<RefViewModel>(); // git-ref
 
   // graph variables
   color = ko.observable<string>();
@@ -88,14 +89,12 @@ export class NodeViewModel extends Animateable {
   r: ko.Observable<number>
   cx: ko.Observable<number>
   cy: ko.Observable<number>
-  getGraphAttr = ko.computed(() => {
-    return [this.cx(), this.cy()]
-  })
+  getGraphAttr: ko.Computed<number[]>
   dropareaGraphActions: ActionBase[] // graph actions
 
   commitComponent: any
 
-  constructor(nodesEdges: AbstractNodesEdges, sha1: string) {
+  constructor(nodesEdges: NodesEdges, sha1: string) {
     super(nodesEdges.graph);
     this.sha1 = sha1;
     this.nodesEdges = nodesEdges;
@@ -123,17 +122,17 @@ export class NodeViewModel extends Animateable {
       ungit.programEvents.dispatch({ event: 'graph-render' });
     });
     this.dropareaGraphActions = [
-      new Move(this.graph, this),
-      new Rebase(this.graph, this),
-      new Merge(this.graph, this),
-      new Push(this.graph, this),
-      new Reset(this.graph, this),
-      new Checkout(this.graph, this),
-      new Delete(this.graph, this),
-      new CherryPick(this.graph, this),
-      new Uncommit(this.graph, this),
-      new Revert(this.graph, this),
-      new Squash(this.graph, this),
+      new Move(this.nodesEdges.graph, this),
+      new Rebase(this.nodesEdges.graph, this),
+      new Merge(this.nodesEdges.graph, this),
+      new Push(this.nodesEdges.graph, this),
+      new Reset(this.nodesEdges.graph, this),
+      new Checkout(this.nodesEdges.graph, this),
+      new Delete(this.nodesEdges.graph, this),
+      new CherryPick(this.nodesEdges.graph, this),
+      new Uncommit(this.nodesEdges.graph, this),
+      new Revert(this.nodesEdges.graph, this),
+      new Squash(this.nodesEdges.graph, this),
     ];
     this.commitComponent = components.create('commit', this);
     this.r = ko.observable<number>();
@@ -145,9 +144,9 @@ export class NodeViewModel extends Animateable {
       }
     );
     this.showNewRefAction = ko.computed(() => {
-      return !this.graph.currentActionContext();
+      return !this.nodesEdges.graph.currentActionContext();
     });
-
+    this.getGraphAttr = ko.computed(() => [this.cx(), this.cy()]);
   }
 
 
@@ -194,7 +193,7 @@ export class NodeViewModel extends Animateable {
     this.signatureDate(logEntry.signatureDate);
 
     (logEntry.refs || []).forEach((ref) => {
-      this.graph.getRef(ref).node(this);
+      this.nodesEdges.graph.getRef(ref).node(this);
     });
     this.isInited = true;
   }
@@ -243,22 +242,22 @@ export class NodeViewModel extends Animateable {
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.graph.server
+    this.nodesEdges.graph.server
       .postPromise('/branches', {
-        path: this.graph.repoPath(),
+        path: this.nodesEdges.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
       .then(() => {
-        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
+        this.nodesEdges.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.graph.server.postPromise('/checkout', {
-            path: this.graph.repoPath(),
+          return this.nodesEdges.graph.server.postPromise('/checkout', {
+            path: this.nodesEdges.graph.repoPath(),
             name: this.newBranchName(),
           });
         }
       })
-      .catch((e) => this.graph.server.unhandledRejection(e))
+      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -268,14 +267,14 @@ export class NodeViewModel extends Animateable {
 
   createTag() {
     if (!this.canCreateRef()) return;
-    this.graph.server
+    this.nodesEdges.graph.server
       .postPromise('/tags', {
-        path: this.graph.repoPath(),
+        path: this.nodesEdges.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
-      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
-      .catch((e) => this.graph.server.unhandledRejection(e))
+      .then(() => this.nodesEdges.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
+      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -286,7 +285,7 @@ export class NodeViewModel extends Animateable {
     const beforeThisCR = this.commitComponent.element().getBoundingClientRect();
     const belowY = this.belowNode ? this.belowNode.cy() : undefined;
 
-    let prevSelected = this.graph.currentActionContext();
+    let prevSelected = this.nodesEdges.graph.currentActionContext();
     if (!(prevSelected instanceof NodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected
       ? prevSelected.commitComponent.element().getBoundingClientRect()

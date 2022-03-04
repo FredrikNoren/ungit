@@ -43,6 +43,7 @@ export class RefViewModel extends Selectable {
     super(graph);
     this.graph = graph;
     this.name = fullRefName;
+    this.localRefName = this.name;
     this.node = ko.observable<NodeViewModel>();
     this.isRemoteTag = this.name.indexOf('remote-tag: ') === 0;
     this.isLocalTag = this.name.indexOf('tag: ') === 0;
