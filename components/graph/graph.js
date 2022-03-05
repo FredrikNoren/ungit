@@ -225,6 +225,24 @@ class GraphViewModel extends ComponentRoot {
       this.HEADref().node(toNode);
     }
   }
+
+  isCurrentActionContextRef() {
+    return this.currentActionContext() instanceof RefViewModel;
+  }
+
+  isCurrentActionContextNode() {
+    return this.currentActionContext() instanceof NodeViewModel;
+  }
+
+  getCurrentActionContextNode() {
+    if (this.isCurrentActionContextRef()) {
+      return this.currentActionContext().node();
+    } else if (this.isCurrentActionContextNode()) {
+      return this.currentActionContext();
+    } else {
+      return undefined;
+    }
+  }
 }
 
 module.exports = GraphViewModel;

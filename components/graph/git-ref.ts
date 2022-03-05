@@ -1,8 +1,7 @@
 import * as ko from 'knockout';
-import { NodeViewModel } from './node';
+import { Selectable } from './selectable';
 const md5 = require('blueimp-md5');
 const octicons = require('octicons');
-const Selectable = require('./selectable');
 
 declare var ungit: any;
 const programEvents = ungit.programEvents;
@@ -13,7 +12,8 @@ export class RefViewModel extends Selectable {
   server: any
 
   name: string
-  node: ko.Observable<NodeViewModel>
+  // node is `NodeViewModel`. Keeping in any to avoid circular dependencies
+  node: ko.Observable<any>
   localRefName: string // origin/master or master
   refName: string // master
   remote: string
@@ -44,7 +44,7 @@ export class RefViewModel extends Selectable {
     this.graph = graph;
     this.name = fullRefName;
     this.localRefName = this.name;
-    this.node = ko.observable<NodeViewModel>();
+    this.node = ko.observable<any>();
     this.isRemoteTag = this.name.indexOf('remote-tag: ') === 0;
     this.isLocalTag = this.name.indexOf('tag: ') === 0;
     this.isTag = this.isLocalTag || this.isRemoteTag;

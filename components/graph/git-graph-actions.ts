@@ -1,7 +1,5 @@
 import * as ko from 'knockout';
-const octicons = require('octicons');
-import { RefViewModel } from './git-ref';
-import { NodeViewModel } from './node';
+import { AbstractNode } from './abstract-node';
 import {
   RebaseViewModel,
   MergeViewModel,
@@ -10,6 +8,7 @@ import {
   SquashViewModel
 } from './hover-actions';
 
+const octicons = require('octicons');
 declare var ungit: any;
 const components = ungit.components;
 const programEvents = ungit.programEvents;
@@ -22,7 +21,7 @@ export class ActionBase {
   icon: string
   cssClasses: ko.Computed<string>
   visible: ko.Computed<boolean>
-  node: NodeViewModel // git-node
+  node: AbstractNode // git-node
 
   constructor(graph: any, text: string, style: string, icon: string) {
     this.graph = graph;
@@ -80,8 +79,8 @@ export class Move extends ActionBase {
     this.node = node;
     this.visible = ko.computed(() => {
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
-        this.graph.currentActionContext().node() != this.node
+        this.graph.isCurrentActionContextRef() &&
+        this.graph.getCurrentActionContextNode() != this.node
       );
     });
   }
@@ -96,7 +95,7 @@ export class Reset extends ActionBase {
     super(graph, 'Reset', 'reset', octicons.trash.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (!(this.graph.currentActionContext() instanceof RefViewModel)) return false;
+      if (!this.graph.isCurrentActionContextRef()) return false;
       const context = this.graph.currentActionContext();
       if (context.node() != this.node) return false;
       const remoteRef = context.getRemoteRef(this.graph.currentRemote());
@@ -151,7 +150,7 @@ export class Rebase extends ActionBase {
     this.node = node;
     this.visible = ko.computed(() => {
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         (!ungit.config.showRebaseAndMergeOnlyOnRefs || this.node.refs().length > 0) &&
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node
@@ -160,9 +159,8 @@ export class Rebase extends ActionBase {
   }
 
   createHoverGraphic() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
     const path = this.graph.nodesEdges.getPathToCommonAncestor(onto, this.node);
     return new RebaseViewModel(this.node, path);
   }
@@ -187,7 +185,7 @@ export class Merge extends ActionBase {
     this.visible = ko.computed(() => {
       if (!this.graph.checkedOutRef() || !this.graph.checkedOutRef().node()) return false;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         !this.graph.currentActionContext().current() &&
         this.graph.checkedOutRef().node() == this.node
       );
@@ -195,9 +193,8 @@ export class Merge extends ActionBase {
   }
 
   createHoverGraphic() {
-    let node = this.graph.currentActionContext();
+    const node = this.graph.getCurrentActionContextNode();
     if (!node) return null;
-    if (node instanceof RefViewModel) node = node.node();
     return new MergeViewModel(this.graph, this.node, node);
   }
 
@@ -223,7 +220,7 @@ export class Push extends ActionBase {
     this.node = node;
     this.visible = ko.computed(() => {
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().node() == this.node &&
         this.graph.currentActionContext().canBePushed(this.graph.currentRemote())
       );
@@ -262,7 +259,7 @@ export class Checkout extends ActionBase {
     super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.graph.currentActionContext() instanceof RefViewModel)
+      if (this.graph.isCurrentActionContextRef())
         return (
           this.graph.currentActionContext().node() == this.node &&
           !this.graph.currentActionContext().current()
@@ -282,7 +279,7 @@ export class Delete extends ActionBase {
     this.node = node;
     this.visible = ko.computed(() => {
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().node() == this.node &&
         !this.graph.currentActionContext().current()
       );
@@ -381,7 +378,7 @@ export class Squash extends ActionBase {
     this.node = node;
     this.visible = ko.computed(() => {
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node
       );
@@ -389,17 +386,15 @@ export class Squash extends ActionBase {
   }
 
   createHoverGraphic() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
 
     return new SquashViewModel(this.graph, this.node, onto);
   }
 
   perform() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
     // remove last element as it would be a common ancestor.
     const path = this.graph.nodesEdges.getPathToCommonAncestor(this.node, onto).slice(0, -1);
 

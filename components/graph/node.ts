@@ -1,11 +1,10 @@
 import * as $ from 'jquery';
 import * as ko from 'knockout';
-import { NodesEdges } from './nodes-edges';
 import { RefViewModel } from './git-ref';
+import { AbstractNode } from './abstract-node';
 
 declare const ungit: any;
 const components = ungit.components;
-const Animateable = require('./animateable');
 
 import {
   ActionBase,
@@ -24,10 +23,8 @@ import {
 const maxBranchesToDisplay = Math.floor((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
-export class NodeViewModel extends Animateable {
-  nodesEdges: NodesEdges
+export class NodeViewModel extends AbstractNode {
   ancestorOfHEADTimeStamp: undefined | number = undefined;
-  version = undefined;
   isInited = false;
   nodeIsMousehover = ko.observable(false);
 
@@ -67,9 +64,7 @@ export class NodeViewModel extends Animateable {
 
   // graph variables
   color = ko.observable<string>();
-  ancestorOfHEAD = ko.observable(false);
   commitContainerVisible: ko.Computed<boolean>
-  isEdgeHighlighted = ko.observable(false);
   isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
   showNewRefAction: ko.Computed<boolean>
   showRefSearch = ko.computed(
@@ -83,21 +78,13 @@ export class NodeViewModel extends Animateable {
       this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' ')
   );
   branchOrder = ko.observable<number>();
-  aboveNode: NodeViewModel = undefined;
-  belowNode: NodeViewModel = undefined;
   refSearchFormVisible = ko.observable(false);
-  r: ko.Observable<number>
-  cx: ko.Observable<number>
-  cy: ko.Observable<number>
   getGraphAttr: ko.Computed<number[]>
   dropareaGraphActions: ActionBase[] // graph actions
 
-  commitComponent: any
-
-  constructor(nodesEdges: NodesEdges, sha1: string) {
-    super(nodesEdges.graph);
+  constructor(graph: any, sha1: string) {
+    super(graph);
     this.sha1 = sha1;
-    this.nodesEdges = nodesEdges;
     this.refs.subscribe((newValue) => {
       if (newValue) {
         this.branches(newValue.filter((r) => r.isBranch));
@@ -122,17 +109,17 @@ export class NodeViewModel extends Animateable {
       ungit.programEvents.dispatch({ event: 'graph-render' });
     });
     this.dropareaGraphActions = [
-      new Move(this.nodesEdges.graph, this),
-      new Rebase(this.nodesEdges.graph, this),
-      new Merge(this.nodesEdges.graph, this),
-      new Push(this.nodesEdges.graph, this),
-      new Reset(this.nodesEdges.graph, this),
-      new Checkout(this.nodesEdges.graph, this),
-      new Delete(this.nodesEdges.graph, this),
-      new CherryPick(this.nodesEdges.graph, this),
-      new Uncommit(this.nodesEdges.graph, this),
-      new Revert(this.nodesEdges.graph, this),
-      new Squash(this.nodesEdges.graph, this),
+      new Move(this.graph, this),
+      new Rebase(this.graph, this),
+      new Merge(this.graph, this),
+      new Push(this.graph, this),
+      new Reset(this.graph, this),
+      new Checkout(this.graph, this),
+      new Delete(this.graph, this),
+      new CherryPick(this.graph, this),
+      new Uncommit(this.graph, this),
+      new Revert(this.graph, this),
+      new Squash(this.graph, this),
     ];
     this.commitComponent = components.create('commit', this);
     this.r = ko.observable<number>();
@@ -144,7 +131,7 @@ export class NodeViewModel extends Animateable {
       }
     );
     this.showNewRefAction = ko.computed(() => {
-      return !this.nodesEdges.graph.currentActionContext();
+      return !this.graph.currentActionContext();
     });
     this.getGraphAttr = ko.computed(() => [this.cx(), this.cy()]);
   }
@@ -193,7 +180,7 @@ export class NodeViewModel extends Animateable {
     this.signatureDate(logEntry.signatureDate);
 
     (logEntry.refs || []).forEach((ref) => {
-      this.nodesEdges.graph.getRef(ref).node(this);
+      this.graph.getRef(ref).node(this);
     });
     this.isInited = true;
   }
@@ -242,22 +229,22 @@ export class NodeViewModel extends Animateable {
 
   createBranch() {
     if (!this.canCreateRef()) return;
-    this.nodesEdges.graph.server
+    this.graph.server
       .postPromise('/branches', {
-        path: this.nodesEdges.graph.repoPath(),
+        path: this.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
       .then(() => {
-        this.nodesEdges.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
+        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
-          return this.nodesEdges.graph.server.postPromise('/checkout', {
-            path: this.nodesEdges.graph.repoPath(),
+          return this.graph.server.postPromise('/checkout', {
+            path: this.graph.repoPath(),
             name: this.newBranchName(),
           });
         }
       })
-      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
+      .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -267,14 +254,14 @@ export class NodeViewModel extends Animateable {
 
   createTag() {
     if (!this.canCreateRef()) return;
-    this.nodesEdges.graph.server
+    this.graph.server
       .postPromise('/tags', {
-        path: this.nodesEdges.graph.repoPath(),
+        path: this.graph.repoPath(),
         name: this.newBranchName(),
         sha1: this.sha1,
       })
-      .then(() => this.nodesEdges.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
-      .catch((e) => this.nodesEdges.graph.server.unhandledRejection(e))
+      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
+      .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
         this.newBranchName('');
@@ -285,7 +272,7 @@ export class NodeViewModel extends Animateable {
     const beforeThisCR = this.commitComponent.element().getBoundingClientRect();
     const belowY = this.belowNode ? this.belowNode.cy() : undefined;
 
-    let prevSelected = this.nodesEdges.graph.currentActionContext();
+    let prevSelected = this.graph.currentActionContext();
     if (!(prevSelected instanceof NodeViewModel)) prevSelected = null;
     const prevSelectedCR = prevSelected
       ? prevSelected.commitComponent.element().getBoundingClientRect()
@@ -353,9 +340,5 @@ export class NodeViewModel extends Animateable {
 
   nodeMouseout() {
     this.nodeIsMousehover(false);
-  }
-
-  isViewable() {
-    return this.version === this.nodesEdges._latestNodeVersion;
   }
 }

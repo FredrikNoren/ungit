@@ -1,7 +1,10 @@
 import * as ko from 'knockout';
-const Animateable = require('./animateable');
+import { Animateable } from './animateable';
+import { AbstractNode } from './abstract-node';
 
 export class EdgeViewModel extends Animateable {
+  nodeA: AbstractNode
+  nodeB: AbstractNode
   constructor(graph: any, nodeAsha1: string, nodeBsha1: string) {
     super(graph);
     this.nodeA = graph.nodesEdges.getNode(nodeAsha1);

@@ -1,7 +1,14 @@
-var ko = require('knockout');
+import * as ko from 'knockout';
 
-class Selectable {
+export abstract class Selectable {
+  graph: any
+  selected: ko.Computed
+
   constructor(graph) {
+    this.graph = graph
+    if (!graph) {
+      throw Error('>>>> 8881823')
+    }
     this.selected = ko.computed({
       read() {
         return graph.currentActionContext() == this;
@@ -18,4 +25,3 @@ class Selectable {
     });
   }
 }
-module.exports = Selectable;

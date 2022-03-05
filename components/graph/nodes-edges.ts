@@ -6,7 +6,6 @@ import { EdgeViewModel } from './edge';
 
 export class NodesEdges {
   graph: any
-  _latestNodeVersion = Date.now();
   _markIdeologicalStamp = 0
   nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
@@ -19,6 +18,7 @@ export class NodesEdges {
   }
 
   processGitLog(log: any) {
+    this.graph._latestNodeVersion = Date.now();
     const edges = [];
 
     const nodes = this._computeNode(
@@ -27,7 +27,7 @@ export class NodesEdges {
         if (!node.isInited) {
           node.setData(logEntry);
         }
-        node.version = this._latestNodeVersion;
+        node.version = this.graph._latestNodeVersion;
         return node;
       })
     );
@@ -46,7 +46,7 @@ export class NodesEdges {
 
   getNode(sha1: string): any {
     if (!this.nodesById[sha1]) {
-      this.nodesById[sha1] = new NodeViewModel(this, sha1);
+      this.nodesById[sha1] = new NodeViewModel(this.graph, sha1);
     }
     return this.nodesById[sha1];
   }
