@@ -1,7 +1,7 @@
 
 import * as ko from 'knockout';
 import * as moment from 'moment';
-import { NodeViewModel } from './node';
+import { NodeViewModel } from './git-elements';
 import { EdgeViewModel } from './edge';
 
 export class NodesEdges {

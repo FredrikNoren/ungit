@@ -1,6 +1,6 @@
 import * as ko from 'knockout';
 import { Animateable } from './animateable';
-import { RefViewModel } from './git-ref';
+import { RefViewModel } from './git-elements';
 
 export abstract class AbstractNode extends Animateable {
   sha1: string
@@ -13,7 +13,6 @@ export abstract class AbstractNode extends Animateable {
   r: ko.Observable<number>
   cx: ko.Observable<number>
   cy: ko.Observable<number>
-
 
   commitComponent: any
   ancestorOfHEAD = ko.observable(false);
