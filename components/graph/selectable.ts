@@ -1,14 +1,12 @@
 import * as ko from 'knockout';
+import { AbstractGraph } from './abstract-graph';
 
 export abstract class Selectable {
-  graph: any
+  graph: AbstractGraph
   selected: ko.Computed
 
   constructor(graph) {
     this.graph = graph
-    if (!graph) {
-      throw Error('>>>> 8881823')
-    }
     this.selected = ko.computed({
       read() {
         return graph.currentActionContext() == this;

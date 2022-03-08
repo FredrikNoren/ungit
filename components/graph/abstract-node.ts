@@ -21,4 +21,11 @@ export abstract class AbstractNode extends Animateable {
   isViewable() {
     return this.version === this.graph._latestNodeVersion;
   }
+
+  getLeftToRightStrike(): string {
+    throw Error('Not yet implemented');
+  }
+  getRightToLeftStrike(): string {
+    throw Error('Not yet implemented');
+  }
 }

@@ -3,9 +3,10 @@ import * as ko from 'knockout';
 import * as moment from 'moment';
 import { NodeViewModel } from './git-elements';
 import { EdgeViewModel } from './edge';
+import { AbstractGraph } from './abstract-graph';
 
 export class NodesEdges {
-  graph: any
+  graph: AbstractGraph
   _markIdeologicalStamp = 0
   nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });

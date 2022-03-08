@@ -1,4 +1,7 @@
-class NodeModel {
+import { AbstractGraph } from "./abstract-graph"
+import { AbstractNode } from "./abstract-node"
+
+class NodeGraphModel {
   cx: number
   cy: number
   r: number
@@ -42,7 +45,7 @@ class EdgeModelXY extends EdgeModel {
 
 class HoverViewModel {
   bgEdges: EdgeModel[]
-  nodes: NodeModel[]
+  nodes: NodeGraphModel[]
   fgEdges: EdgeModel[]
 
   constructor() {
@@ -53,8 +56,8 @@ class HoverViewModel {
 }
 
 export class MergeViewModel extends HoverViewModel {
-  graph: any
-  constructor(graph, headNode, node) {
+  graph: AbstractGraph
+  constructor(graph: AbstractGraph, headNode: AbstractNode, node: AbstractNode) {
     super();
     this.graph = graph;
     this.bgEdges = [
@@ -62,7 +65,7 @@ export class MergeViewModel extends HoverViewModel {
       new EdgeModelXY(headNode.cx(), headNode.cy() - 110, node.cx(), node.cy()),
     ];
     this.nodes = [
-      new NodeModel(
+      new NodeGraphModel(
         headNode.cx(),
         headNode.cy() - 110,
         Math.max(headNode.r(), node.r()),
@@ -82,7 +85,7 @@ export class MergeViewModel extends HoverViewModel {
 }
 
 export class RebaseViewModel extends HoverViewModel {
-  constructor(onto, nodesThatWillMove) {
+  constructor(onto: AbstractNode, nodesThatWillMove: AbstractNode[]) {
     super();
     nodesThatWillMove = nodesThatWillMove.slice(0, -1);
 
@@ -91,7 +94,7 @@ export class RebaseViewModel extends HoverViewModel {
     this.bgEdges.push(new EdgeModelXY(onto.cx(), onto.cy(), onto.cx(), onto.cy() - 60));
     nodesThatWillMove.forEach((node, i) => {
       const cy = onto.cy() + -90 * (i + 1);
-      this.nodes.push(new NodeModel(onto.cx(), cy, 28, 'transparent'));
+      this.nodes.push(new NodeGraphModel(onto.cx(), cy, 28, 'transparent'));
       if (i + 1 < nodesThatWillMove.length) {
         this.bgEdges.push(new EdgeModelXY(onto.cx(), cy - 25, onto.cx(), cy - 65));
       }
@@ -100,9 +103,9 @@ export class RebaseViewModel extends HoverViewModel {
 }
 
 export class ResetViewModel extends HoverViewModel {
-  constructor(nodes) {
+  constructor(nodes: AbstractNode[]) {
     super();
-    nodes.forEach((node) => {
+    nodes.forEach((node: AbstractNode) => {
       this.fgEdges.push(
         new EdgeModel(node.getLeftToRightStrike(), 'rgb(255, 129, 31)', '8', '0, 0')
       );
@@ -114,7 +117,7 @@ export class ResetViewModel extends HoverViewModel {
 }
 
 export class PushViewModel extends HoverViewModel {
-  constructor(fromNode, toNode) {
+  constructor(fromNode: AbstractNode, toNode: AbstractNode) {
     super();
     this.fgEdges = [
       new EdgeModelXY(
@@ -132,7 +135,7 @@ export class PushViewModel extends HoverViewModel {
 }
 
 export class SquashViewModel extends HoverViewModel {
-  constructor(graph: any, from, onto) {
+  constructor(graph: AbstractGraph, from: AbstractNode, onto: AbstractNode) {
     super();
     let path = graph.nodesEdges.getPathToCommonAncestor(from, onto);
 
@@ -141,11 +144,11 @@ export class SquashViewModel extends HoverViewModel {
     } else if (path.length == 1) {
       path = graph.nodesEdges.getPathToCommonAncestor(onto, from);
     } else {
-      this.nodes.push(new NodeModel(onto.cx(), onto.cy() - 120, 28, 'transparent'));
+      this.nodes.push(new NodeGraphModel(onto.cx(), onto.cy() - 120, 28, 'transparent'));
     }
 
     path.slice(0, -1).forEach((node) => {
-      this.nodes.push(new NodeModel(node.cx(), node.cy(), node.r() + 2, 'rgba(100, 60, 222, 0.8)'));
+      this.nodes.push(new NodeGraphModel(node.cx(), node.cy(), node.r() + 2, 'rgba(100, 60, 222, 0.8)'));
     });
   }
 }
