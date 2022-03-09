@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import * as ko from 'knockout';
+import { AbstractGraph } from './abstract-graph';
 import { AbstractNode } from './abstract-node';
 
 declare const ungit: any;
@@ -36,7 +37,6 @@ export class NodeViewModel extends AbstractNode {
   title = ko.observable<string>();
   parents = ko.observableArray<string>();
   commitTime: undefined | string = undefined; // commit time in string
-  date: undefined | number = undefined; // commit time in numeric format for sort
   signatureDate = ko.observable<string>();
   signatureMade = ko.observable<string>();
   pgpVerifiedString = ko.computed(() => {
@@ -85,7 +85,7 @@ export class NodeViewModel extends AbstractNode {
   getGraphAttr: ko.Computed<number[]>
   dropareaGraphActions: ActionBase[] // graph actions
 
-  constructor(graph: any, sha1: string) {
+  constructor(graph: AbstractGraph, sha1: string) {
     super(graph);
     this.sha1 = sha1;
     this.refs.subscribe((newValue) => {
@@ -348,7 +348,6 @@ export class NodeViewModel extends AbstractNode {
 
 
 export class RefViewModel extends Selectable {
-  graph: any
   server: any
 
   name: string
@@ -379,7 +378,7 @@ export class RefViewModel extends Selectable {
   isDragging: ko.Observable<boolean>
   current: ko.Computed<boolean>
 
-  constructor(fullRefName: string, graph: any) {
+  constructor(fullRefName: string, graph: AbstractGraph) {
     super(graph);
     this.graph = graph;
     this.name = fullRefName;

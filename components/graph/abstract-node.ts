@@ -7,6 +7,7 @@ export abstract class AbstractNode extends Animateable {
   refs: ko.Computed<RefViewModel[]>
   version: number | undefined;
   isInited: boolean
+  date: undefined | number = undefined; // commit time in numeric format for sort
 
   aboveNode: AbstractNode = undefined;
   belowNode: AbstractNode = undefined;

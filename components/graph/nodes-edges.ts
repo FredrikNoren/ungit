@@ -4,17 +4,17 @@ import * as moment from 'moment';
 import { NodeViewModel } from './git-elements';
 import { EdgeViewModel } from './edge';
 import { AbstractGraph } from './abstract-graph';
+import { AbstractNodesEdges } from './abstract-nodes-edges';
 
-export class NodesEdges {
+export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
   _markIdeologicalStamp = 0
   nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
-  nodesById: Record<string, NodeViewModel> = {}
-  edgesById: Record<string, EdgeViewModel> = {}
   heighstBranchOrder = 0
 
   constructor(graph: any) {
+    super()
     this.graph = graph
   }
 
@@ -45,7 +45,7 @@ export class NodesEdges {
     this.edges(edges);
   }
 
-  getNode(sha1: string): any {
+  getNode(sha1: string): NodeViewModel {
     if (!this.nodesById[sha1]) {
       this.nodesById[sha1] = new NodeViewModel(this.graph, sha1);
     }
