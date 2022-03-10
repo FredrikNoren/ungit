@@ -183,7 +183,7 @@ export class NodeViewModel extends AbstractNode {
     this.signatureDate(logEntry.signatureDate);
 
     (logEntry.refs || []).forEach((ref) => {
-      this.graph.getRef(ref).node(this);
+      this.graph.getRef(ref, undefined).node(this);
     });
     this.isInited = true;
   }
@@ -234,15 +234,15 @@ export class NodeViewModel extends AbstractNode {
     if (!this.canCreateRef()) return;
     this.graph.server
       .postPromise('/branches', {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         name: this.newBranchName(),
         sha1: this.sha1,
       })
       .then(() => {
-        this.graph.getRef(`refs/heads/${this.newBranchName()}`).node(this);
+        this.graph.getRef(`refs/heads/${this.newBranchName()}`, undefined).node(this);
         if (ungit.config.autoCheckoutOnBranchCreate) {
           return this.graph.server.postPromise('/checkout', {
-            path: this.graph.repoPath(),
+            path: this.graph.repoPath,
             name: this.newBranchName(),
           });
         }
@@ -259,11 +259,11 @@ export class NodeViewModel extends AbstractNode {
     if (!this.canCreateRef()) return;
     this.graph.server
       .postPromise('/tags', {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         name: this.newBranchName(),
         sha1: this.sha1,
       })
-      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`).node(this))
+      .then(() => this.graph.getRef(`refs/tags/${this.newBranchName()}`, undefined).node(this))
       .catch((e) => this.graph.server.unhandledRejection(e))
       .finally(() => {
         this.branchingFormVisible(false);
@@ -475,7 +475,7 @@ export class RefViewModel extends Selectable {
     if (this.isLocal) {
       const toNode = this.graph.nodesEdges.nodesById[target];
       const args = {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         name: this.refName,
         sha1: target,
         force: true,
@@ -508,7 +508,7 @@ export class RefViewModel extends Selectable {
       }
     } else {
       const pushReq = {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         remote: this.remote,
         refSpec: target,
         remoteBranch: this.refName,
@@ -553,7 +553,7 @@ export class RefViewModel extends Selectable {
       isClientOnly
         ? Promise.resolve()
         : this.server.delPromise(url, {
-          path: this.graph.repoPath(),
+          path: this.graph.repoPath,
           remote: this.isRemote ? this.remote : null,
           name: this.refName,
         })
@@ -606,7 +606,7 @@ export class RefViewModel extends Selectable {
   createRemoteRef() {
     return this.server
       .postPromise('/push', {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         remote: this.graph.currentRemote(),
         refSpec: this.refName,
         remoteBranch: this.refName,
@@ -622,7 +622,7 @@ export class RefViewModel extends Selectable {
       .then(() => {
         if (isRemote && !isLocalCurrent) {
           return this.server.postPromise('/branches', {
-            path: this.graph.repoPath(),
+            path: this.graph.repoPath,
             name: this.refName,
             sha1: this.name,
             force: true,
@@ -630,12 +630,12 @@ export class RefViewModel extends Selectable {
         }
       })
       .then(() =>
-        this.server.postPromise('/checkout', { path: this.graph.repoPath(), name: this.refName })
+        this.server.postPromise('/checkout', { path: this.graph.repoPath, name: this.refName })
       )
       .then(() => {
         if (isRemote && isLocalCurrent) {
           return this.server.postPromise('/reset', {
-            path: this.graph.repoPath(),
+            path: this.graph.repoPath,
             to: this.name,
             mode: 'hard',
           });

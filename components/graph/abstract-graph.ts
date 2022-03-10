@@ -1,9 +1,10 @@
 import * as ko from 'knockout';
+import { ComponentRoot } from '../ComponentRoot';
 import { AbstractNodesEdges } from "./abstract-nodes-edges"
 
-export abstract class AbstractGraph {
+export abstract class AbstractGraph extends ComponentRoot {
   currentActionContext: ko.Observable<any> // Node | Ref | undefined
-  repoPath: ko.Observable<string>
+  repoPath: string
   server: any
   HEAD: ko.Computed<any> // Node | undefined
   HEADref: ko.Observable<any> // Ref | undefined
@@ -12,13 +13,9 @@ export abstract class AbstractGraph {
   checkedOutBranch: ko.Observable<string>
   currentRemote: ko.Observable<string>
   refsByRefName: Record<string, any> // Ref
+  commitOpacity: ko.Observable<number>
 
   nodesEdges: AbstractNodesEdges
 
-  commitOpacity(opacity: number) {
-    throw Error('Not yet implemented');
-  }
-  getRef(sha1: string, constructIfUnavailable: boolean | undefined = undefined): any { // Node
-    throw Error('Not yet implemented');
-  }
+  abstract getRef(sha1: string, constructIfUnavailable: boolean | undefined): any // Ref
 }

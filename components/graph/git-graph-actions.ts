@@ -129,7 +129,7 @@ export class Reset extends ActionBase {
           if (isYes) {
             await this.server
               .postPromise('/reset', {
-                path: this.graph.repoPath(),
+                path: this.graph.repoPath,
                 to: remoteRef.name,
                 mode: 'hard',
               })
@@ -167,7 +167,7 @@ export class Rebase extends ActionBase {
 
   perform() {
     return this.server
-      .postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
+      .postPromise('/rebase', { path: this.graph.repoPath, onto: this.node.sha1 })
       .catch((err) => {
         if (err.errorCode != 'merge-failed') {
           this.server.unhandledRejection(err);
@@ -201,7 +201,7 @@ export class Merge extends ActionBase {
   perform() {
     return this.server
       .postPromise('/merge', {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         with: this.graph.currentActionContext().localRefName,
       })
       .catch((err) => {
@@ -321,7 +321,7 @@ export class CherryPick extends ActionBase {
 
   perform() {
     return this.server
-      .postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
+      .postPromise('/cherrypick', { path: this.graph.repoPath, name: this.node.sha1 })
       .catch((err) => {
         if (err.errorCode != 'merge-failed') {
           this.server.unhandledRejection(err);
@@ -343,7 +343,7 @@ export class Uncommit extends ActionBase {
 
   perform() {
     return this.server
-      .postPromise('/reset', { path: this.graph.repoPath(), to: 'HEAD^', mode: 'mixed' })
+      .postPromise('/reset', { path: this.graph.repoPath, to: 'HEAD^', mode: 'mixed' })
       .then(() => {
         let targetNode = this.node.belowNode;
         while (targetNode && !targetNode.ancestorOfHEAD()) {
@@ -366,7 +366,7 @@ export class Revert extends ActionBase {
 
   perform() {
     return this.server.postPromise('/revert', {
-      path: this.graph.repoPath(),
+      path: this.graph.repoPath,
       commit: this.node.sha1,
     });
   }
@@ -407,7 +407,7 @@ export class Squash extends ActionBase {
       //  \           ->     \
       //   d  - <e>           d - <e>
       return this.server.postPromise('/squash', {
-        path: this.graph.repoPath(),
+        path: this.graph.repoPath,
         target: this.node.sha1,
       });
     } else {
@@ -422,7 +422,7 @@ export class Squash extends ActionBase {
         .currentActionContext()
         .moveTo(this.node.sha1, true)
         .then(() =>
-          this.server.postPromise('/squash', { path: this.graph.repoPath(), target: onto.sha1 })
+          this.server.postPromise('/squash', { path: this.graph.repoPath, target: onto.sha1 })
         );
     }
   }
