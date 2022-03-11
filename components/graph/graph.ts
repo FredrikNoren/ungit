@@ -18,8 +18,8 @@ class GraphViewModel extends AbstractGraph {
   loadNodesFromApi: () => Promise<any>
 
   currentActionContext = ko.observable();
-  HEAD = ko.computed(() => (this.HEADref() ? this.HEADref().node() : undefined));
   HEADref = ko.observable();
+  HEAD = ko.computed(() => (this.HEADref() ? this.HEADref().node() : undefined));
   checkedOutBranch: ko.Observable<string> = ko.observable()
   currentRemote: ko.Observable<string> = ko.observable();
   refsByRefName: Record<string, RefViewModel> = {};
@@ -30,7 +30,6 @@ class GraphViewModel extends AbstractGraph {
 
   limit = ko.observable(numberOfNodesPerLoad);
   skip = ko.observable(0);
-  showCommitNode = ko.observable(false);
   commitNodeColor = ko.computed(() => (this.HEAD() ? this.HEAD().color() : '#4A4A4A'));
   commitNodeEdge = ko.computed(() => {
     if (!this.HEAD() || !this.HEAD().cx() || !this.HEAD().cy()) return;
@@ -65,7 +64,7 @@ class GraphViewModel extends AbstractGraph {
     true
   );
 
-  constructor(server: any, repoPath: string) {
+  constructor(server: any, repoPath: ko.Observable<string>) {
     super();
     this.server = server;
     this.repoPath = repoPath;
@@ -122,7 +121,7 @@ class GraphViewModel extends AbstractGraph {
 
     try {
       const log = await this.server.getPromise('/gitlog', {
-        path: this.repoPath,
+        path: this.repoPath(),
         limit: this.limit(),
         skip: this.skip(),
       });
@@ -189,7 +188,7 @@ class GraphViewModel extends AbstractGraph {
   }
 
   async _updateBranches() {
-    const checkout = await this.server.getPromise('/checkout', { path: this.repoPath });
+    const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
 
     try {
       ungit.logger.debug('setting checkedOutBranch', checkout);
