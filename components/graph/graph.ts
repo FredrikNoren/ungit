@@ -74,7 +74,7 @@ class GraphViewModel extends AbstractGraph {
 
     this.refs = ko
       .observableArray()
-      .extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
+      .extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
 
 
     this.hoverGraphActionGraphic.subscribe(

@@ -350,6 +350,10 @@ export class NodeViewModel extends AbstractNode {
 export class RefViewModel extends Selectable {
   server: any
 
+  // used at nodes-edges
+  lastSlottedTimeStamp: number;
+  branchOrder: number;
+
   version: number
   name: string
   // node is `NodeViewModel`. Keeping in any to avoid circular dependencies

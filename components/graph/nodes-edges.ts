@@ -1,7 +1,7 @@
 
 import * as ko from 'knockout';
 import * as moment from 'moment';
-import { NodeViewModel } from './git-elements';
+import { NodeViewModel, RefViewModel } from './git-elements';
 import { EdgeViewModel } from './edge';
 import { AbstractGraph } from './abstract-graph';
 import { AbstractNodesEdges } from './abstract-nodes-edges';
@@ -9,9 +9,9 @@ import { AbstractNodesEdges } from './abstract-nodes-edges';
 export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
   _markIdeologicalStamp = 0
-  nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
-  edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
   heighstBranchOrder = 0
+  nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
+  edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
 
   constructor(graph: any) {
     super()
@@ -52,7 +52,7 @@ export class NodesEdges extends AbstractNodesEdges {
     return this.nodesById[sha1];
   }
 
-  _computeNode(nodes: any[] = this.nodes()) {
+  _computeNode(nodes: NodeViewModel[] = this.nodes()) {
     this._markNodesIdeologicalBranches(this.graph.refs());
 
     const updateTimeStamp = moment().valueOf();
@@ -78,7 +78,7 @@ export class NodesEdges extends AbstractNodesEdges {
       const ideologicalBranch = node.ideologicalBranch();
 
       // First occurrence of the branch, find an empty slot for the branch
-      if (ideologicalBranch.lastSlottedTimeStamp != updateTimeStamp) {
+      if (ideologicalBranch.lastSlottedTimeStamp !== updateTimeStamp) {
         ideologicalBranch.lastSlottedTimeStamp = updateTimeStamp;
         ideologicalBranch.branchOrder = branchSlotCounter++;
       }
@@ -99,7 +99,7 @@ export class NodesEdges extends AbstractNodesEdges {
     return nodes;
   }
 
-  _markNodesIdeologicalBranches(refs) {
+  _markNodesIdeologicalBranches(refs: RefViewModel[]) {
     refs = refs.filter((r) => !!r.node());
     refs = refs.sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;

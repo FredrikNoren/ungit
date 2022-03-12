@@ -35,7 +35,7 @@ export class EdgeViewModel extends Animateable {
       } else {
         return [0, 0, 0, 0, 0, 0, 0, 0];
       }
-    }).extend({ rateLimit: { timeout: 500, method: 'notifyWhenChangesStop' } });
+    }).extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
     this.getGraphAttr.subscribe(this.animate.bind(this));
   }
 
