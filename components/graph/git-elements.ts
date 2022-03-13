@@ -45,24 +45,32 @@ export class NodeViewModel extends AbstractNode {
     }
   });
 
-  // branches
-  ideologicalBranch = ko.observable<RefViewModel>(); // git-ref
-  remoteTags = ko.observableArray<RefViewModel>(); // git-ref
-  branchesAndLocalTags = ko.observableArray<RefViewModel>(); // git-ref
-  refs = ko.computed<RefViewModel[]>(() => { // git-ref[]
-    const rs = this.branchesAndLocalTags().concat(this.remoteTags());
-    rs.sort((a, b) => {
-      if (b.current()) return 1;
-      if (a.current()) return -1;
-      if (a.isLocal && !b.isLocal) return -1;
-      if (!a.isLocal && b.isLocal) return 1;
-      return a.refName < b.refName ? -1 : 1;
-    });
-    return rs;
+  // refs
+  ideologicalBranch = ko.observable<RefViewModel>();
+  branches = ko.computed(() => {
+    return this.refs().filter(ref => ref.isBranch);
   });
-  branches = ko.observableArray<RefViewModel>(); // git-ref
+  tags = ko.computed(() => {
+    return this.refs().filter(ref => ref.isTag);
+  });
+
+  // branches
+  // remoteTags = ko.observableArray<RefViewModel>(); // git-ref
+  // branchesAndLocalTags = ko.observableArray<RefViewModel>(); // git-ref
+  // refs = ko.computed<RefViewModel[]>(() => { // git-ref[]
+  //   const rs = this.branchesAndLocalTags().concat(this.remoteTags());
+  //   rs.sort((a, b) => {
+  //     if (b.current()) return 1;
+  //     if (a.current()) return -1;
+  //     if (a.isLocal && !b.isLocal) return -1;
+  //     if (!a.isLocal && b.isLocal) return 1;
+  //     return a.refName < b.refName ? -1 : 1;
+  //   });
+  //   return rs;
+  // });
+  // branches = ko.observableArray<RefViewModel>(); // git-ref
   branchesToDisplay = ko.observableArray<RefViewModel>(); // git-ref
-  tags = ko.observableArray<RefViewModel>(); // git-ref
+  // tags = ko.observableArray<RefViewModel>(); // git-ref
   tagsToDisplay = ko.observableArray<RefViewModel>(); // git-ref
 
   // graph variables
@@ -90,20 +98,16 @@ export class NodeViewModel extends AbstractNode {
     this.sha1 = sha1;
     this.refs.subscribe((newValue) => {
       if (newValue) {
-        this.branches(newValue.filter((r) => r.isBranch));
-        this.tags(newValue.filter((r) => r.isTag));
         this.branchesToDisplay(
-          this.branches.slice(
+          this.branches().slice(
             0,
             ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)
           )
         );
         this.tagsToDisplay(
-          this.tags.slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length)
+          this.tags().slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length)
         );
       } else {
-        this.branches.removeAll();
-        this.tags.removeAll();
         this.branchesToDisplay.removeAll();
         this.tagsToDisplay.removeAll();
       }
@@ -284,7 +288,7 @@ export class NodeViewModel extends AbstractNode {
 
     // If we are deselecting
     if (!this.selected()) {
-      if (beforeThisCR.top < 0 && belowY) {
+      if (beforeThisCR.top < 0 && belowY && this.belowNode.commitComponent.element()) {
         const afterBelowCR = this.belowNode.commitComponent.element().getBoundingClientRect();
         // If the next node is showing, try to keep it in the screen (no jumping)
         if (belowY < window.innerHeight) {
@@ -309,23 +313,15 @@ export class NodeViewModel extends AbstractNode {
     return false;
   }
 
-  removeRef(ref) {
-    if (ref.isRemoteTag) {
-      this.remoteTags.remove(ref);
-    } else {
-      this.branchesAndLocalTags.remove(ref);
-    }
+  removeRef(ref: RefViewModel) {
+    this.refs.remove(ref);
   }
 
-  pushRef(ref) {
-    if (ref.isRemoteTag && !this.remoteTags().includes(ref)) {
-      this.remoteTags.push(ref);
-    } else if (!this.branchesAndLocalTags().includes(ref)) {
-      this.branchesAndLocalTags.push(ref);
-    }
+  pushRef(ref: RefViewModel) {
+    this.refs.push(ref);
   }
 
-  updateAnimationFrame(deltaT) {
+  updateAnimationFrame(deltaT: number) {
     this.commitComponent.updateAnimationFrame(deltaT);
   }
 

@@ -4,7 +4,9 @@ import { RefViewModel } from './git-elements';
 
 export abstract class AbstractNode extends Animateable {
   sha1: string
-  refs: ko.Computed<RefViewModel[]>
+  refs = ko.observableArray<RefViewModel>().extend({
+    rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' }
+  });
   version: number | undefined;
   isInited: boolean
   date: undefined | number = undefined; // commit time in numeric format for sort
