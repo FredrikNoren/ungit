@@ -53,25 +53,20 @@ export class NodeViewModel extends AbstractNode {
   tags = ko.computed(() => {
     return this.refs().filter(ref => ref.isTag);
   });
+  refsToDisplayOverride = ko.observable<RefViewModel | undefined>(undefined);
+  refsToDisplay = ko.computed(() => {
+    const numberOfBranches = ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay);
+    const branchesToDisplay = this.branches().slice(0, numberOfBranches);
+    const numberOfTags = ungit.config.numRefsToShow - branchesToDisplay.length;
+    const tagsToDisplay = this.tags().slice(0, numberOfTags);
+    const refsToDisplay = branchesToDisplay.concat(tagsToDisplay);
 
-  // branches
-  // remoteTags = ko.observableArray<RefViewModel>(); // git-ref
-  // branchesAndLocalTags = ko.observableArray<RefViewModel>(); // git-ref
-  // refs = ko.computed<RefViewModel[]>(() => { // git-ref[]
-  //   const rs = this.branchesAndLocalTags().concat(this.remoteTags());
-  //   rs.sort((a, b) => {
-  //     if (b.current()) return 1;
-  //     if (a.current()) return -1;
-  //     if (a.isLocal && !b.isLocal) return -1;
-  //     if (!a.isLocal && b.isLocal) return 1;
-  //     return a.refName < b.refName ? -1 : 1;
-  //   });
-  //   return rs;
-  // });
-  // branches = ko.observableArray<RefViewModel>(); // git-ref
-  branchesToDisplay = ko.observableArray<RefViewModel>(); // git-ref
-  // tags = ko.observableArray<RefViewModel>(); // git-ref
-  tagsToDisplay = ko.observableArray<RefViewModel>(); // git-ref
+    if (this.refsToDisplayOverride()) {
+      refsToDisplay[refsToDisplay.length - 1] = this.refsToDisplayOverride();
+    }
+
+    return refsToDisplay
+  });
 
   // graph variables
   color = ko.observable<string>();
@@ -96,22 +91,6 @@ export class NodeViewModel extends AbstractNode {
   constructor(graph: AbstractGraph, sha1: string) {
     super(graph);
     this.sha1 = sha1;
-    this.refs.subscribe((newValue) => {
-      if (newValue) {
-        this.branchesToDisplay(
-          this.branches().slice(
-            0,
-            ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay)
-          )
-        );
-        this.tagsToDisplay(
-          this.tags().slice(0, ungit.config.numRefsToShow - this.branchesToDisplay().length)
-        );
-      } else {
-        this.branchesToDisplay.removeAll();
-        this.tagsToDisplay.removeAll();
-      }
-    });
     this.selected.subscribe(() => {
       ungit.programEvents.dispatch({ event: 'graph-render' });
     });
@@ -216,13 +195,9 @@ export class NodeViewModel extends AbstractNode {
         },
         select: (_event, ui) => {
           const ref = ui.item;
-          const ray = ref.isTag ? this.tagsToDisplay : this.branchesToDisplay;
-
-          // if ref is in display, remove it, else remove last in array.
-          ray.splice(ray.indexOf(ref), 1);
-          ray.unshift(ref);
-          this.refSearchFormVisible(false);
-
+          if (!this.refsToDisplay().includes(ref)) {
+            this.refsToDisplayOverride(ref);
+          }
           // Clear search input on selection
           return false;
         },

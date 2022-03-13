@@ -13,22 +13,13 @@
       </div>
 
       <div class="rightSideContainer" data-bind="style: { left: cx() + r() - 433 + 'px' }">
-        <!-- ko foreach: branchesToDisplay -->
+        <!-- ko foreach: refsToDisplay -->
         <span class="ref branch" draggable="true" tabIndex="-1"
-          data-bind="css: { current: current, remote: isRemoteBranch, dragging: isDragging, focused: selected },
+          data-bind="css: { current: current, dragging: isDragging, focused: selected, remote: isRemoteBranch, branch: isBranch, tag: isTag },
                 html: displayHtml(true),
                 click: selected,
                 event: { dblclick: checkout },
                 dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName, 'data-ta-local': isLocal }">
-        </span>
-        <!-- /ko -->
-
-        <!-- ko foreach: tagsToDisplay -->
-        <span class="ref tag" draggable="true" tabIndex="0" data-bind="css: { current: current, remote: isRemoteTag, dragging: isDragging, focused: selected },
-                html: displayHtml(true),
-                click: selected,
-                event: { dblclick: checkout },
-                dragStart: dragStart, dragEnd: dragEnd, attr: { 'data-ta-name': localRefName }">
         </span>
         <!-- /ko -->
 
