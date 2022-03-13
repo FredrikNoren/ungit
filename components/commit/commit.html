@@ -1,6 +1,6 @@
 <div
   class="commit"
-  data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }"
+  data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: (selected() || nodeIsMousehover()) }"
 >
   <div
     class="commit-box panel panel-default"

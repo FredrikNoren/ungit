@@ -2,6 +2,7 @@
 
 .commit {
   position: relative;
+  z-index: -1;
 
   &.highlighted {
     z-index: 2;
@@ -26,6 +27,12 @@
   }
 
   &.selected {
+    z-index: 5;
+
+    .panel {
+      background-color: #4b5766;
+    }
+
     .details {
       .diff-wrapper {
         margin-bottom: 5px;
