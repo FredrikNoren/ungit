@@ -47,12 +47,8 @@ export class NodeViewModel extends AbstractNode {
 
   // refs
   ideologicalBranch: RefViewModel | undefined = undefined;
-  branches = ko.computed(() => {
-    return this.refs().filter(ref => ref.isBranch);
-  });
-  tags = ko.computed(() => {
-    return this.refs().filter(ref => ref.isTag);
-  });
+  branches = ko.computed(() => this.refs().filter(ref => ref.isBranch));
+  tags = ko.computed(() => this.refs().filter(ref => ref.isTag));
   refsToDisplayOverride = ko.observable<RefViewModel | undefined>(undefined);
   refsToDisplay = ko.computed(() => {
     const numberOfBranches = ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay);

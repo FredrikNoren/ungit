@@ -9,8 +9,8 @@ import { AbstractNodesEdges } from './abstract-nodes-edges';
 export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
   heighstBranchOrder = 0
-  nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
-  edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
+  nodes = ko.observableArray<NodeViewModel>();
+  edges = ko.observableArray<EdgeViewModel>();
 
   constructor(graph: any) {
     super()
@@ -51,7 +51,7 @@ export class NodesEdges extends AbstractNodesEdges {
     return this.nodesById[sha1];
   }
 
-  _computeNode(nodes: NodeViewModel[] = this.nodes()) {
+  _computeNode(nodes: NodeViewModel[]) {
     this._markNodesIdeologicalBranches();
 
     const updateTimeStamp = moment().valueOf();
@@ -146,10 +146,12 @@ export class NodesEdges extends AbstractNodesEdges {
   }
 
   getEdge(nodeAsha1: string, nodeBsha1: string) {
-    const id = `${nodeAsha1}-${nodeBsha1}`;
+    const leftNode = nodeAsha1 < nodeBsha1 ? nodeAsha1 : nodeBsha1;
+    const rightNode = nodeAsha1 < nodeBsha1 ? nodeBsha1 : nodeAsha1;
+    const id = `${leftNode}-${rightNode}`;
     let edge = this.edgesById[id];
     if (!edge) {
-      edge = this.edgesById[id] = new EdgeViewModel(this.graph, nodeAsha1, nodeBsha1);
+      edge = this.edgesById[id] = new EdgeViewModel(this.graph, leftNode, rightNode);
     }
     return edge;
   }

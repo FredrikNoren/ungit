@@ -4,11 +4,6 @@ export abstract class AbstractNodesEdges {
   nodesById: Record<string, any> = {} // Node
   edgesById: Record<string, any> = {} // EdgeViewModel
 
-  getNode(sha1: string): any {
-    throw Error('Not yet implemented');
-  }
-
-  getPathToCommonAncestor(from: AbstractNode, to: AbstractNode): AbstractNode[] {
-    throw Error('Not yet implemented');
-  }
+  abstract getNode(sha1: string): any
+  abstract getPathToCommonAncestor(from: AbstractNode, to: AbstractNode): AbstractNode[]
 }

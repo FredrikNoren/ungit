@@ -25,10 +25,6 @@ export abstract class AbstractNode extends Animateable {
     return this.version === this.graph._latestNodeVersion;
   }
 
-  getLeftToRightStrike(): string {
-    throw Error('Not yet implemented');
-  }
-  getRightToLeftStrike(): string {
-    throw Error('Not yet implemented');
-  }
+  abstract getLeftToRightStrike(): string
+  abstract getRightToLeftStrike(): string
 }
