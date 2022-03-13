@@ -8,7 +8,6 @@ export abstract class AbstractGraph extends ComponentRoot {
   server: any
   HEAD: ko.Computed<any> // Node | undefined
   HEADref: ko.Observable<any> // Ref | undefined
-  refs: ko.ObservableArray<any> // Ref
   _latestNodeVersion: number
   checkedOutBranch: ko.Observable<string>
   currentRemote: ko.Observable<string>

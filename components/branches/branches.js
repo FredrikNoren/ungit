@@ -126,7 +126,7 @@ class BranchesViewModel extends ComponentRoot {
           return true;
         });
       this.branchesAndLocalTags(sorted);
-      this.graph.refs().forEach((ref) => {
+      Object.values(this.graph.refsByRefName).forEach((ref) => {
         // ref was removed from another source
         if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
           ref.remove(true);

@@ -72,11 +72,6 @@ class GraphViewModel extends AbstractGraph {
     this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
     this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
 
-    this.refs = ko
-      .observableArray()
-      .extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
-
-
     this.hoverGraphActionGraphic.subscribe(
       (value) => {
         if (value && value.destroy) value.destroy();
@@ -105,7 +100,6 @@ class GraphViewModel extends AbstractGraph {
     let refViewModel = this.refsByRefName[ref];
     if (!refViewModel && constructIfUnavailable) {
       refViewModel = this.refsByRefName[ref] = new RefViewModel(ref, this);
-      this.refs.push(refViewModel);
       if (refViewModel.name === 'HEAD') {
         this.HEADref(refViewModel);
       }
@@ -224,7 +218,7 @@ class GraphViewModel extends AbstractGraph {
         this.getRef(name).version = version;
       }
     });
-    this.refs().forEach((ref) => {
+    Object.values(this.refsByRefName).forEach((ref) => {
       // tag is removed from another source
       if (ref.isRemoteTag && (!ref.version || ref.version < version)) {
         ref.remove(true);
@@ -232,7 +226,7 @@ class GraphViewModel extends AbstractGraph {
     });
   }
 
-  checkHeadMove(toNode) {
+  checkHeadMove(toNode: NodeViewModel) {
     if (this.HEAD() === toNode) {
       this.HEADref().node(toNode);
     }

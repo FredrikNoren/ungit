@@ -8,7 +8,6 @@ import { AbstractNodesEdges } from './abstract-nodes-edges';
 
 export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
-  _markIdeologicalStamp = 0
   heighstBranchOrder = 0
   nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
   edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
@@ -53,7 +52,7 @@ export class NodesEdges extends AbstractNodesEdges {
   }
 
   _computeNode(nodes: NodeViewModel[] = this.nodes()) {
-    this._markNodesIdeologicalBranches(this.graph.refs());
+    this._markNodesIdeologicalBranches();
 
     const updateTimeStamp = moment().valueOf();
     if (this.graph.HEAD()) {
@@ -65,8 +64,8 @@ export class NodesEdges extends AbstractNodesEdges {
     // Filter out nodes which doesn't have a branch (staging and orphaned nodes)
     nodes = nodes.filter(
       (node) =>
-        (node.ideologicalBranch() && !node.ideologicalBranch().isStash) ||
-        node.ancestorOfHEADTimeStamp == updateTimeStamp
+        (node.ideologicalBranch && !node.ideologicalBranch.isStash) ||
+        node.ancestorOfHEADTimeStamp === updateTimeStamp
     );
 
     let branchSlotCounter = this.graph.HEAD() ? 1 : 0;
@@ -74,8 +73,8 @@ export class NodesEdges extends AbstractNodesEdges {
     // Then iterate from the bottom to fix the orders of the branches
     for (let i = nodes.length - 1; i >= 0; i--) {
       const node = nodes[i];
-      if (node.ancestorOfHEADTimeStamp == updateTimeStamp) continue;
-      const ideologicalBranch = node.ideologicalBranch();
+      if (node.ancestorOfHEADTimeStamp === updateTimeStamp) continue;
+      const ideologicalBranch = node.ideologicalBranch;
 
       // First occurrence of the branch, find an empty slot for the branch
       if (ideologicalBranch.lastSlottedTimeStamp !== updateTimeStamp) {
@@ -99,33 +98,35 @@ export class NodesEdges extends AbstractNodesEdges {
     return nodes;
   }
 
-  _markNodesIdeologicalBranches(refs: RefViewModel[]) {
-    refs = refs.filter((r) => !!r.node());
-    refs = refs.sort((a, b) => {
-      if (a.isLocal && !b.isLocal) return -1;
-      if (b.isLocal && !a.isLocal) return 1;
-      if (a.isBranch && !b.isBranch) return -1;
-      if (b.isBranch && !a.isBranch) return 1;
-      if (a.isHEAD && !b.isHEAD) return 1;
-      if (!a.isHEAD && b.isHEAD) return -1;
-      if (a.isStash && !b.isStash) return 1;
-      if (b.isStash && !a.isStash) return -1;
-      if (a.node() && a.node().date && b.node() && b.node().date)
-        return a.node().date - b.node().date;
-      return a.refName < b.refName ? -1 : 1;
-    });
-    const stamp = this._markIdeologicalStamp++;
-    refs.forEach((ref) => {
-      this._traverseNodeParents(ref.node(), (node) => {
-        if (node.stamp == stamp) return false;
-        node.stamp = stamp;
-        node.ideologicalBranch(ref);
-        return true;
+  _markNodesIdeologicalBranches() {
+    const processedNodes = new Set<NodeViewModel>();
+    Object.values(this.graph.refsByRefName)
+      .filter((r: RefViewModel) => !!r.node())
+      .sort((a: RefViewModel, b: RefViewModel) => {
+        if (a.isLocal && !b.isLocal) return -1;
+        if (b.isLocal && !a.isLocal) return 1;
+        if (a.isBranch && !b.isBranch) return -1;
+        if (b.isBranch && !a.isBranch) return 1;
+        if (a.isHEAD && !b.isHEAD) return 1;
+        if (!a.isHEAD && b.isHEAD) return -1;
+        if (a.isStash && !b.isStash) return 1;
+        if (b.isStash && !a.isStash) return -1;
+        if (a.node() && a.node().date && b.node() && b.node().date)
+          return a.node().date - b.node().date;
+        return a.refName < b.refName ? -1 : 1;
+      }).forEach((ref: RefViewModel) => {
+        this._traverseNodeParents(ref.node(), (node: NodeViewModel) => {
+          if (processedNodes.has(node)) {
+            return false;
+          }
+          processedNodes.add(node);
+          node.ideologicalBranch = ref;
+          return true;
+        });
       });
-    });
   }
 
-  _traverseNodeParents(node: NodeViewModel, callback) {
+  _traverseNodeParents(node: NodeViewModel, callback: (node: NodeViewModel) => boolean) {
     if (!callback(node)) return false;
     for (let i = 0; i < node.parents().length; i++) {
       // if parent, travers parent

@@ -46,7 +46,7 @@ export class NodeViewModel extends AbstractNode {
   });
 
   // refs
-  ideologicalBranch = ko.observable<RefViewModel>();
+  ideologicalBranch: RefViewModel | undefined = undefined;
   branches = ko.computed(() => {
     return this.refs().filter(ref => ref.isBranch);
   });
@@ -152,7 +152,7 @@ export class NodeViewModel extends AbstractNode {
       this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
     }
 
-    this.color(this.ideologicalBranch() ? this.ideologicalBranch().color : '#666');
+    this.color(this.ideologicalBranch ? this.ideologicalBranch.color : '#666');
     this.animate();
   }
 
@@ -535,8 +535,9 @@ export class RefViewModel extends Selectable {
         })
     )
       .then(() => {
-        if (this.node()) this.node().removeRef(this);
-        this.graph.refs.remove(this);
+        if (this.node()) {
+          this.node().removeRef(this);
+        }
         delete this.graph.refsByRefName[this.name];
       })
       .catch((e) => this.server.unhandledRejection(e))
