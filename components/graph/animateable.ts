@@ -19,9 +19,7 @@ export abstract class Animateable extends Selectable {
     });
   }
 
-  setGraphAttr(val: number[]) {
-    throw Error('Funciton is not overwritten');
-  }
+  abstract setGraphAttr(val: number[]): void
 
   animate(forceRefresh: boolean = false) {
     const currentGraph = this.getGraphAttr();

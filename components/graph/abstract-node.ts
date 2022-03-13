@@ -22,9 +22,15 @@ export abstract class AbstractNode extends Animateable {
   isEdgeHighlighted = ko.observable(false);
 
   isViewable() {
+    if (!this.cx() || !this.cy()) {
+      return false;
+    }
+    if (!this.isInited) {
+      return false;
+    }
     return this.version === this.graph._latestNodeVersion;
   }
 
-  abstract getLeftToRightStrike(): string
-  abstract getRightToLeftStrike(): string
+  abstract getLeftToRightStrike(): string;
+  abstract getRightToLeftStrike(): string;
 }

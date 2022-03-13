@@ -10,27 +10,27 @@ export class EdgeViewModel extends Animateable {
     this.nodeA = graph.nodesEdges.getNode(nodeAsha1);
     this.nodeB = graph.nodesEdges.getNode(nodeBsha1);
     this.getGraphAttr = ko.computed(() => {
-      if (this.nodeA.isViewable() && (!this.nodeB.isViewable() || !this.nodeB.isInited)) {
+      if (this.nodeA.isViewable() && this.nodeB.isViewable()) {
         return [
           this.nodeA.cx(),
           this.nodeA.cy(),
           this.nodeA.cx(),
           this.nodeA.cy(),
-          this.nodeA.cx(),
-          graph.graphHeight(),
-          this.nodeA.cx(),
-          graph.graphHeight(),
+          this.nodeB.cx(),
+          this.nodeB.cy(),
+          this.nodeB.cx(),
+          this.nodeB.cy(),
         ];
-      } else if (this.nodeB.isInited && this.nodeB.cx() && this.nodeB.cy()) {
+      } else if (this.nodeA.isViewable() && !this.nodeB.isViewable()) {
         return [
           this.nodeA.cx(),
           this.nodeA.cy(),
           this.nodeA.cx(),
           this.nodeA.cy(),
-          this.nodeB.cx(),
-          this.nodeB.cy(),
-          this.nodeB.cx(),
-          this.nodeB.cy(),
+          this.nodeA.cx(),
+          graph.graphHeight(),
+          this.nodeA.cx(),
+          graph.graphHeight(),
         ];
       } else {
         return [0, 0, 0, 0, 0, 0, 0, 0];
