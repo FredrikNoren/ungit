@@ -144,10 +144,6 @@ export class NodeViewModel extends AbstractNode {
       this.cy(this.aboveNode ? this.aboveNode.cy() + 60 : 120);
     }
 
-    if (this.aboveNode && this.aboveNode.selected()) {
-      this.cy(this.aboveNode.cy() + this.aboveNode.commitComponent.element().offsetHeight + 30);
-    }
-
     this.color(this.ideologicalBranch ? this.ideologicalBranch.color : '#666');
     this.animate();
   }
