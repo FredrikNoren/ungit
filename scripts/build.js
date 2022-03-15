@@ -75,7 +75,7 @@ const baseDir = path.join(__dirname, '..');
 
   console.log('browserify:components');
   for (let i = 0; i < components.length; i++) {
-    let component = components[i]
+    const component = components[i];
     const sourcePrefix = path.join(baseDir, `components/${component}/${component}`);
     const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
 
@@ -95,7 +95,9 @@ const baseDir = path.join(__dirname, '..');
       await browserifyFile(tsSource, destination);
       console.log(`${tsSource} compiled`);
     } catch (e) {
-      console.log(`${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`);
+      console.log(
+        `${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
+      );
     }
   }
 
