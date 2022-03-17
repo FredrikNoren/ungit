@@ -110,8 +110,7 @@ class GraphViewModel extends AbstractGraph {
   async _loadNodesFromApi() {
     this._isLoadNodesFromApiRunning = true;
     ungit.logger.debug('graph.loadNodesFromApi() triggered');
-    const nodes = this.nodesEdges.nodes();
-    const nodeSize = nodes.length;
+    const nodeSize = this.nodesEdges.nodes().length;
 
     try {
       const log = await this.server.getPromise('/gitlog', {
@@ -124,6 +123,7 @@ class GraphViewModel extends AbstractGraph {
       }
 
       this.nodesEdges.processGitLog(log);
+      const nodes = this.nodesEdges.nodes();
 
       if (nodes.length > 0) {
         this.graphHeight(nodes[nodes.length - 1].cy() + 80);
@@ -132,7 +132,7 @@ class GraphViewModel extends AbstractGraph {
     } catch (e) {
       this.server.unhandledRejection(e);
     } finally {
-      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != nodes.length) {
+      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodesEdges.nodes().length) {
         this.scrolledToEnd();
       }
       this._isLoadNodesFromApiRunning = false;
