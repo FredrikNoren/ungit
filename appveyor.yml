@@ -5,7 +5,6 @@ environment:
     - nodejs_version: '' # latest
     - nodejs_version: '16'
     - nodejs_version: '14'
-    - nodejs_version: '12'
 
 branches:
   only:
