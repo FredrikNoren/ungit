@@ -292,9 +292,10 @@ exports.registerApi = (env) => {
       const task = gitPromise({
         commands: credentialsOption(req.body.socketId, req.body.remote).concat([
           'fetch',
+          config.autoPruneOnFetch ? '--prune' : '',
+          '--',
           req.body.remote,
           req.body.ref ? req.body.ref : '',
-          config.autoPruneOnFetch ? '--prune' : '',
         ]),
         repoPath: req.body.path,
         timeout: tenMinTimeoutMs,
