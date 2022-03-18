@@ -3,7 +3,17 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.19...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.20...master)
+
+## [1.5.20](https://github.com/FredrikNoren/ungit/compare/v1.5.19...v1.5.20)
+
+### Fixes
+- Fix potential remote code exec [#1510](https://github.com/FredrikNoren/ungit/pull/1510)
+- Fix intermittent test failures [#1495](https://github.com/FredrikNoren/ungit/issues/1495)
+- lint: small bugs + jsdoc [#1504](https://github.com/FredrikNoren/ungit/pull/1504)
+
+### Changed
+- Bump Dependencies [#1503](https://github.com/FredrikNoren/ungit/pull/1503)
 
 ## [1.5.19](https://github.com/FredrikNoren/ungit/compare/v1.5.18...v1.5.19)
 
