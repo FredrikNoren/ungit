@@ -92,7 +92,9 @@ const baseDir = path.join(__dirname, '..');
         await fs.access(tsSource);
         return browserifyFile(tsSource, destination);
       } catch (e) {
-        `${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`;
+        console.warn(
+          `${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
+        );
         return;
       }
     })
