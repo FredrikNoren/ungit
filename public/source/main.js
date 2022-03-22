@@ -198,15 +198,6 @@ exports.start = function () {
     programEvents.dispatch({ event: 'raven-crash', error: err || event.event });
   });
 
-  var prevTimestamp = 0;
-  var updateAnimationFrame = function (timestamp) {
-    var delta = timestamp - prevTimestamp;
-    prevTimestamp = timestamp;
-    if (app.updateAnimationFrame) app.updateAnimationFrame(delta);
-    window.requestAnimationFrame(updateAnimationFrame);
-  };
-  window.requestAnimationFrame(updateAnimationFrame);
-
   ko.applyBindings(appContainer);
 
   // routing

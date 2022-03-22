@@ -175,12 +175,6 @@ class GraphViewModel extends AbstractGraph {
     }
   }
 
-  updateAnimationFrame(deltaT: number) {
-    this.nodesEdges.nodes().forEach((node) => {
-      node.updateAnimationFrame(deltaT);
-    });
-  }
-
   async _updateBranches() {
     const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
 

@@ -288,10 +288,6 @@ export class NodeViewModel extends AbstractNode {
     this.refs.push(ref);
   }
 
-  updateAnimationFrame(deltaT: number) {
-    this.commitComponent.updateAnimationFrame(deltaT);
-  }
-
   getRightToLeftStrike() {
     return `M ${this.cx() - 30} ${this.cy() - 30} L ${this.cx() + 30} ${this.cy() + 30}`;
   }

@@ -84,9 +84,6 @@ class PathViewModel extends ComponentRoot {
   shown() {
     this.updateStatus();
   }
-  updateAnimationFrame(deltaT) {
-    if (this.repository()) this.repository().updateAnimationFrame(deltaT);
-  }
   async updateStatus() {
     ungit.logger.debug('path.updateStatus() triggered');
     const status = await this.server.getPromise('/quickstatus', { path: this.repoPath() });

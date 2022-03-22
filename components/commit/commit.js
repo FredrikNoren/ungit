@@ -73,19 +73,6 @@ class CommitViewModel {
     );
   }
 
-  updateLastAuthorDateFromNow(deltaT) {
-    this.lastUpdatedAuthorDateFromNow = this.lastUpdatedAuthorDateFromNow || 0;
-    this.lastUpdatedAuthorDateFromNow += deltaT;
-    if (this.lastUpdatedAuthorDateFromNow > 60 * 1000) {
-      this.lastUpdatedAuthorDateFromNow = 0;
-      this.authorDateFromNow(this.authorDate().fromNow());
-    }
-  }
-
-  updateAnimationFrame(deltaT) {
-    this.updateLastAuthorDateFromNow(deltaT);
-  }
-
   stopClickPropagation(data, event) {
     event.stopImmediatePropagation();
   }
