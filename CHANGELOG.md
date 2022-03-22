@@ -5,6 +5,13 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.20...master)
 
+### Fixes
+- Speed optimizations at the graph component [#1508](https://github.com/FredrikNoren/ungit/pull/1508)
+
+### Changed
+- Graph component to typescript [#1508](https://github.com/FredrikNoren/ungit/pull/1508)
+
+
 ## [1.5.20](https://github.com/FredrikNoren/ungit/compare/v1.5.19...v1.5.20)
 
 ### Fixes
