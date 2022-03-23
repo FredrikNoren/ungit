@@ -10,7 +10,13 @@ export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
   heighstBranchOrder = 0
   nodes = ko.observableArray<NodeViewModel>();
+  viewableNodes = ko.computed(() => {
+    return this.nodes().filter(node => node.isViewable());
+  })
   edges = ko.observableArray<EdgeViewModel>();
+  viewableEdges = ko.computed(() => {
+    return this.edges().filter(edge => edge.isViewable());
+  })
 
   constructor(graph: any) {
     super()
@@ -170,7 +176,9 @@ export class NodesEdges extends AbstractNodesEdges {
     if (fromNode === targetNode) return true;
     for (const v in fromNode.parents()) {
       const n = this.nodesById[fromNode.parents()[v]];
-      if (n && this.isAncestor(n, targetNode)) return true;
+      if (n && this.isAncestor(n, targetNode)) {
+        return true;
+      }
     }
     return false;
   }

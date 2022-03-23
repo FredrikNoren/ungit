@@ -39,6 +39,10 @@ export class EdgeViewModel extends Animateable {
     this.getGraphAttr.subscribe(this.animate.bind(this));
   }
 
+  isViewable() {
+    return this.nodeA.isViewable() || this.nodeB.isViewable();
+  }
+
   setGraphAttr(val: number[]) {
     this.element().setAttribute('d', `M${val.slice(0, 4).join(',')}L${val.slice(4, 8).join(',')}`);
   }
