@@ -7,10 +7,14 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Fixes
 - Speed optimizations at the graph component [#1508](https://github.com/FredrikNoren/ungit/pull/1508)
+  - speed up logic for `NodeViewModel.isViewable()` logic by using a map instead of doing `array.include()`
+  - throttling ko observable change triggers.
+  - removed unnecessary observables.
+  - cleaned up how refs are calculated for NodeViewModel. `NodeViewModel.ref()` is no longer depends on `branchesAndLocalTags()` and `remoteTags()`.
 
 ### Changed
 - Graph component to typescript [#1508](https://github.com/FredrikNoren/ungit/pull/1508)
-
+- Disable node place adjustments when diff is opened [#1508](https://github.com/FredrikNoren/ungit/pull/1508)
 
 ## [1.5.20](https://github.com/FredrikNoren/ungit/compare/v1.5.19...v1.5.20)
 
