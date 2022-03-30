@@ -11,6 +11,8 @@ const fs = require('fs').promises;
 const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
+const crypto = require('crypto');
+const nodegit = require('nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
@@ -263,12 +265,17 @@ exports.registerApi = (env) => {
     jw((req) => gitPromise.status(req.query.path, null))
   );
 
-  app.post(`${exports.pathPrefix}/init`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(req.body.bare ? ['init', '--bare', '--shared'] : ['init'], req.body.path)
-    );
-  });
+  app.post(
+    `${exports.pathPrefix}/init`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => {
+      var path = req.body.path;
+      // nodegit requires a number https://github.com/nodegit/nodegit/issues/538
+      var is_bare = req.body.bare ? 1 : 0;
+      return nodegit.Repository.init(path, is_bare);
+    })
+  );
 
   app.post(
     `${exports.pathPrefix}/clone`,
@@ -617,8 +624,10 @@ exports.registerApi = (env) => {
   );
 
   app.get(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['tag', '-l'], req.query.path).then(gitParser.parseGitTags);
-    jsonResultOrFailProm(res, task);
+    let pathToRepo = req.query.path;
+    nodegit.Repository.open(pathToRepo).then(function (repo) {
+      jsonResultOrFailProm(res, nodegit.Tag.list(repo));
+    });
   });
 
   app.get(
@@ -666,10 +675,13 @@ exports.registerApi = (env) => {
   });
 
   app.delete(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-    ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
+    let pathToRepo = req.query.path;
+    let tagName = req.query.name.trim();
+    nodegit.Repository.open(pathToRepo).then(function (repo) {
+      jsonResultOrFailProm(res, nodegit.Tag.delete(repo, tagName)).finally(
+        emitGitDirectoryChanged.bind(null, req.query.path)
+      );
+    });
   });
 
   app.delete(
@@ -719,10 +731,10 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/remotes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['remote'], req.query.path).then(gitParser.parseGitRemotes)
-    );
+    let pathToRepo = req.query.path;
+    nodegit.Repository.open(pathToRepo).then(function (repo) {
+      jsonResultOrFailProm(res, nodegit.Remote.list(repo));
+    });
   });
 
   app.get(
@@ -739,10 +751,12 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['remote', 'add', req.params.name, req.body.url], req.body.path)
-      );
+      let name = req.params.name;
+      let url = req.body.url;
+      let pathToRepo = req.body.path;
+      nodegit.Repository.open(pathToRepo).then(function (repo) {
+        jsonResultOrFailProm(res, nodegit.Remote.create(repo, name, url));
+      });
     }
   );
 
@@ -751,7 +765,11 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(['remote', 'remove', req.params.name], req.query.path));
+      let name = req.params.name;
+      let pathToRepo = req.body.path;
+      nodegit.Repository.open(pathToRepo).then(function (repo) {
+        jsonResultOrFailProm(res, nodegit.Remote.delete(repo, name));
+      });
     }
   );
 

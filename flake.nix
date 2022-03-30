@@ -15,6 +15,8 @@
             bashInteractive
             python3
             nodejs-16_x
+            libkrb5
+            e2fsprogs
           ];
 
           # libgit2 needs these
