@@ -1,0 +1,62 @@
+type RefName = string;
+type Hash = string;
+type FileName = string;
+type DiffStat = {
+  additions: number | null;
+  deletions: number | null;
+  fileName: string;
+  oldFileName: string;
+  displayName: string;
+  type: string;
+};
+type Commit = {
+  sha1: Hash;
+  parents: Hash[];
+  refs: RefName[];
+  isHead?: boolean;
+  message: string;
+  authorName?: string;
+  authorEmail?: string;
+  committerName?: string;
+  committerEmail?: string;
+  authorDate?: string;
+  commitDate?: string;
+  reflogId?: string;
+  reflogName?: string;
+  reflogAuthorName?: string;
+  reflogAuthorEmail?: string;
+  signatureDate?: string;
+  signatureMade?: string;
+  fileLineDiffs?: DiffStat[];
+  additions?: number;
+  deletions?: number;
+};
+type FileStatus = {
+  fileName: string;
+  oldFileName: string;
+  displayName: string;
+  staged?: boolean;
+  removed?: boolean;
+  isNew?: boolean;
+  conflict?: boolean;
+  renamed?: boolean;
+  type: 'text' | 'image';
+  additions?: number;
+  deletions?: number;
+};
+type Ref = { name: RefName; current?: boolean; sha1?: Hash; remote?: string };
+type QuickStatus = {
+  gitRootPath: string;
+  type: 'inited' | 'uninited' | 'bare' | 'no-such-path';
+  subRepos?: string[];
+};
+type GitStatus = {
+  branch: string;
+  inCherry?: boolean;
+  inConflict?: boolean;
+  inMerge?: boolean;
+  inRebase?: boolean;
+  commitMessage?: string;
+  files: Record<FileName, FileStatus>;
+};
+type SubModule = { name: string; path?: string; url?: string; rawUrl?: string };

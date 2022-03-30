@@ -152,6 +152,7 @@ class StagingViewModel extends ComponentRoot {
         this.HEAD(null);
       }
 
+      /** @type {GitStatus} */
       const status = await statusPromise;
       if (this.isSamePayload(status)) {
         return;
@@ -189,7 +190,7 @@ class StagingViewModel extends ComponentRoot {
     }
   }
 
-  loadStatus(status) {
+  loadStatus(/** @type {GitStatus} */ status) {
     this.setFiles(status.files);
     this.inRebase(!!status.inRebase);
     this.inMerge(!!status.inMerge);
@@ -198,6 +199,7 @@ class StagingViewModel extends ComponentRoot {
     this.inCherry(!!status.inCherry && !!status.inConflict);
 
     if (this.inRebase()) {
+      // TODO allow changing commit messages in rebase
       this.commitMessageTitle('Rebase conflict');
       this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
     } else if (this.inMerge() || this.inCherry()) {
@@ -209,7 +211,7 @@ class StagingViewModel extends ComponentRoot {
     }
   }
 
-  setFiles(files) {
+  setFiles(/** @type {GitStatus['files']} */ files) {
     const newFiles = [];
     for (const fileStatus of Object.values(files)) {
       let fileViewModel = this.filesByPath[fileStatus.fileName];
@@ -475,8 +477,8 @@ class FileViewModel {
     this.conflict(state.conflict);
     this.renamed(state.renamed);
     this.fileType(state.type);
-    this.additions(state.additions != '-' ? `+${state.additions}` : '');
-    this.deletions(state.deletions != '-' ? `-${state.deletions}` : '');
+    this.additions(state.additions != null ? `+${state.additions}` : '');
+    this.deletions(state.deletions != null ? `-${state.deletions}` : '');
     if (this.diff()) {
       this.diff().invalidateDiff();
     } else {

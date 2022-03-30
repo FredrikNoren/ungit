@@ -128,16 +128,17 @@ const gitExecutorProm = (args, retryCount) => {
  * Returns a promise that executes git command with given arguments.
  *
  * @function
- * @param {Object | string[]} commands    - An object that represents all parameters or first
- *                                        parameter only, which is an array of commands.
- * @param {string}            repoPath    - path to the git repository.
- * @param {boolean=}          allowError  - true if return code of 1 is acceptable as some cases
- *                                        errors are acceptable.
- * @param {WritableStream=}   outPipe     - if this argument exists, stdout is piped to this object.
- * @param {ReadableStream=}   inPipe      - if this argument exists, data is piped to stdin process
- *                                        on start.
- * @param {number=}           timeout     - execution timeout, default is 2 mins.
- * @returns {promise} Execution promise.
+ * @param {Object | string[]} commands      - An object that represents all parameters or first
+ *                                          parameter only, which is an array of commands.
+ * @param {string}            [repoPath]    - Path to the git repository.
+ * @param {boolean}           [allowError]  - True if return code of 1 is acceptable as some cases
+ *                                          errors are acceptable.
+ * @param {WritableStream}    [outPipe]     - If this argument exists, stdout is piped to this
+ *                                          object.
+ * @param {ReadableStream}    [inPipe]      - If this argument exists, data is piped to stdin
+ *                                          process on start.
+ * @param {number}            [timeout]     - Execution timeout in ms, default is 2 mins.
+ * @returns {Promise<string>} Execution promise.
  * @example
  *
  *   getGitExecuteTask({ commands: ['show'], repoPath: '/tmp' });
@@ -309,7 +310,7 @@ git.status = (repoPath, file) => {
     Object.keys(status.files).forEach((filename) => {
       // git diff returns paths relative to git repo but git status does not
       const absoluteFilename = filename.replace(/\.\.\//g, '');
-      const stats = numstats[absoluteFilename] || { additions: '-', deletions: '-' };
+      const stats = numstats[absoluteFilename] || { additions: null, deletions: null };
       const fileObj = status.files[filename];
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
