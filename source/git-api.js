@@ -377,7 +377,8 @@ exports.registerApi = (env) => {
 
   app.get(`${exports.pathPrefix}/diff/image`, ensureAuthenticated, ensurePathExists, (req, res) => {
     res.type(path.extname(req.query.filename));
-    if (req.query.version !== 'current') {
+    // index, worktree, combined, current
+    if (req.query.version.length > 8) {
       gitPromise.binaryFileContent(req.query.path, req.query.filename, req.query.version, res);
     } else {
       res.sendFile(path.join(req.query.path, req.query.filename));

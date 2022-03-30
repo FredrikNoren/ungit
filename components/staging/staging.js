@@ -102,11 +102,11 @@ class StagingViewModel extends ComponentRoot {
       else return 'glyphicon-check';
     });
 
-    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 500, {
+    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 200, {
       leading: false,
       trailing: true,
     });
-    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 500, {
+    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 200, {
       leading: false,
       trailing: true,
     });
@@ -159,7 +159,7 @@ class StagingViewModel extends ComponentRoot {
         return;
       }
 
-      if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
+      if (status.worktree.fileLineDiffs.length > filesToDisplayLimit && !this.loadAnyway) {
         if (this.isDiagOpen) {
           return;
         }
@@ -192,7 +192,7 @@ class StagingViewModel extends ComponentRoot {
   }
 
   loadStatus(/** @type {GitStatus} */ status) {
-    this.setFiles(status.files);
+    this.setFiles(status.worktree);
     this.inRebase(!!status.inRebase);
     this.inMerge(!!status.inMerge);
     // There are time where '.git/CHERRY_PICK_HEAD' file is created and no files are in conflicts.
@@ -212,23 +212,22 @@ class StagingViewModel extends ComponentRoot {
     }
   }
 
-  setFiles(/** @type {GitStatus['files']} */ files) {
+  setFiles(/** @type {GitStatus['worktree']} */ worktree) {
     const newFiles = [];
-    for (const fileStatus of Object.values(files)) {
-      let fileViewModel = this.filesByPath[fileStatus.fileName];
+    for (const fileStatus of worktree.fileLineDiffs) {
+      const { fileName, oldFileName } = fileStatus;
+      const name = fileName ? `N${fileName}` : `O${oldFileName}`;
+      /** @type {FileViewModel} */
+      let fileViewModel = this.filesByPath[name];
       if (!fileViewModel) {
-        this.filesByPath[fileStatus.fileName] = fileViewModel = new FileViewModel(
+        this.filesByPath[name] = fileViewModel = new FileViewModel(
           this,
-          fileStatus.fileName,
-          fileStatus.oldFileName,
-          fileStatus.displayName
+          fileStatus,
+          worktree.diffKey
         );
       } else {
-        // this is mainly for patching and it may not fire due to the fact that
-        // '/commit' triggers working-tree-changed which triggers throttled refresh
-        fileViewModel.diff().invalidateDiff();
+        fileViewModel.updateFrom(fileStatus, worktree.diffKey);
       }
-      fileViewModel.setState(fileStatus);
       newFiles.push(fileViewModel);
     }
     this.files(newFiles);
@@ -403,35 +402,54 @@ class StagingViewModel extends ComponentRoot {
 }
 
 class FileViewModel {
-  constructor(staging, name, oldName, displayName) {
+  constructor(staging, /** @type {DiffStat} */ stat, diffKey) {
     this.staging = staging;
     this.server = staging.server;
+    this.idx = stat.idx;
+    this.diffKey = diffKey;
+    this.stat = ko.observable(stat);
     this.editState = ko.observable('staged'); // staged, patched and none
-    this.name = ko.observable(name);
-    this.oldName = ko.observable(oldName);
-    this.displayName = ko.observable(displayName);
-    this.isNew = ko.observable(false);
-    this.removed = ko.observable(false);
-    this.conflict = ko.observable(false);
-    this.renamed = ko.observable(false);
     this.isShowingDiffs = ko.observable(false);
-    this.additions = ko.observable('');
-    this.deletions = ko.observable('');
-    this.modified = ko.computed(() => {
+
+    this.name = ko.pureComputed(() => this.stat().fileName);
+    this.oldName = ko.pureComputed(() => this.stat().oldFileName);
+
+    this.displayName = ko.pureComputed(() =>
+      this.name()
+        ? this.oldName()
+          ? this.oldName() !== this.name()
+            ? `${this.oldName()} → ${this.name()}`
+            : this.name()
+          : `[new] ${this.name()}`
+        : `[del] ${this.oldName()}`
+    );
+    this.isNew = ko.pureComputed(() => !this.oldName());
+    this.removed = ko.pureComputed(() => !this.name());
+    this.conflict = ko.pureComputed(() => !!this.stat().hasConflict);
+    this.renamed = ko.pureComputed(
+      () => !!(this.name() && this.oldName() && this.name() !== this.oldName())
+    );
+    this.additions = ko.pureComputed(() =>
+      this.stat().additions ? `+${this.stat().additions}` : ''
+    );
+    this.deletions = ko.pureComputed(() =>
+      this.stat().deletions ? `-${this.stat().deletions}` : ''
+    );
+    this.modified = ko.pureComputed(() => {
       // only show modfied whe not removed, not conflicted, not new, not renamed
       // and length of additions and deletions is 0.
       return (
         !this.removed() &&
         !this.conflict() &&
         !this.isNew() &&
-        this.additions().length === 0 &&
-        this.deletions().length === 0
+        !this.additions() &&
+        !this.deletions()
       );
     });
-    this.fileType = ko.observable('text');
+    this.fileType = ko.pureComputed(() => this.stat().type);
     this.patchLineList = ko.observableArray();
-    this.diff = ko.observable();
-    this.isShowPatch = ko.computed(
+    this.diff = ko.observable(this.getSpecificDiff());
+    this.isShowPatch = ko.pureComputed(
       () =>
         // if not new file
         // and if not merging
@@ -455,12 +473,29 @@ class FileViewModel {
     });
   }
 
+  updateFrom(/** @type {DiffStat} */ stat, diffKey) {
+    this.idx = stat.idx;
+    this.diffKey = diffKey;
+    // this is mainly for patching and it may not fire due to the fact that
+    // '/commit' triggers working-tree-changed which triggers throttled refresh
+    this.diff().invalidateDiff();
+    this.stat(stat);
+  }
+
   getSpecificDiff() {
-    return components.create(!this.name() || `${this.fileType()}diff`, {
+    return components.create(`${this.fileType()}diff`, {
+      repoPath: this.staging.repoPath,
+
+      diffKey: this.diffKey,
+      idx: this.idx,
+
       filename: this.name(),
       oldFilename: this.oldName(),
-      displayFilename: this.displayName(),
-      repoPath: this.staging.repoPath,
+
+      isNew: this.isNew(),
+      removed: this.removed(),
+      conflict: this.conflict(),
+
       server: this.server,
       textDiffType: this.staging.textDiffType,
       whiteSpace: this.staging.whiteSpace,
@@ -469,24 +504,6 @@ class FileViewModel {
       editState: this.editState,
       wordWrap: this.staging.wordWrap,
     });
-  }
-
-  setState(state) {
-    this.displayName(state.displayName);
-    this.isNew(state.isNew);
-    this.removed(state.removed);
-    this.conflict(state.conflict);
-    this.renamed(state.renamed);
-    this.fileType(state.type);
-    this.additions(state.additions != null ? `+${state.additions}` : '');
-    this.deletions(state.deletions != null ? `-${state.deletions}` : '');
-    if (this.diff()) {
-      this.diff().invalidateDiff();
-    } else {
-      this.diff(this.getSpecificDiff());
-    }
-    if (this.diff().isNew) this.diff().isNew(state.isNew);
-    if (this.diff().isRemoved) this.diff().isRemoved(state.removed);
   }
 
   toggleStaged() {
@@ -506,7 +523,10 @@ class FileViewModel {
     );
     if (ungit.config.disableDiscardWarning || isMuteWarning) {
       this.server
-        .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
+        .postPromise('/discardchanges', {
+          path: this.staging.repoPath(),
+          file: this.name() || this.oldName(),
+        })
         .catch((e) => this.server.unhandledRejection(e));
     } else {
       components.showModal('yesnomutemodal', {
@@ -515,7 +535,10 @@ class FileViewModel {
         closeFunc: (isYes, isMute) => {
           if (isYes) {
             this.server
-              .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
+              .postPromise('/discardchanges', {
+                path: this.staging.repoPath(),
+                file: this.name() || this.oldName(),
+              })
               .catch((e) => this.server.unhandledRejection(e));
           }
           if (isMute) {
@@ -528,7 +551,10 @@ class FileViewModel {
 
   ignoreFile() {
     this.server
-      .postPromise('/ignorefile', { path: this.staging.repoPath(), file: this.name() })
+      .postPromise('/ignorefile', {
+        path: this.staging.repoPath(),
+        file: this.name() || this.oldName(),
+      })
       .catch((err) => {
         if (err.errorCode == 'file-already-git-ignored') {
           // The file was already in the .gitignore, so force an update of the staging area (to hopefully clear away this file)
@@ -541,7 +567,10 @@ class FileViewModel {
 
   resolveConflict() {
     this.server
-      .postPromise('/resolveconflicts', { path: this.staging.repoPath(), files: [this.name()] })
+      .postPromise('/resolveconflicts', {
+        path: this.staging.repoPath(),
+        files: [this.name() || this.oldName()],
+      })
       .catch((e) => this.server.unhandledRejection(e));
   }
 
@@ -549,7 +578,7 @@ class FileViewModel {
     this.server
       .postPromise('/launchmergetool', {
         path: this.staging.repoPath(),
-        file: this.name(),
+        file: this.name() || this.oldName(),
         tool: mergeTool,
       })
       .catch((e) => this.server.unhandledRejection(e));

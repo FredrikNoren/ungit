@@ -194,30 +194,6 @@ class NGWrap {
     const inMerge = r.isMerging();
     const inRebase = r.isRebasing();
     const inConflict = index.hasConflicts();
-    /** @type {Record<string, FileStatus>} */
-    const files = {};
-    for (const f of await r.getStatusExt()) {
-      const fileName = f.path();
-      let oldFileName;
-      if (!f.isNew()) {
-        const diff = f.indexToWorkdir() || f.headToIndex();
-        oldFileName = diff.oldFile().path();
-      } else {
-        oldFileName = fileName;
-      }
-      const displayName = f.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
-      files[fileName] = {
-        fileName,
-        oldFileName,
-        displayName,
-        staged: f.inIndex(),
-        removed: f.isDeleted(),
-        isNew: f.isNew(),
-        conflict: f.isConflicted(),
-        renamed: f.isRenamed(),
-        type: fileType(fileName),
-      };
-    }
 
     /** @type {GitStatus} */
     return {
@@ -226,9 +202,10 @@ class NGWrap {
       inMerge,
       inRebase,
       inConflict,
-      files,
-      index: await this.getChanges({ oid: 'index' }),
-      worktree: await this.getChanges({ oid: 'worktree' }),
+      // TODO show staged changes separately
+      // index: await this.getChanges({ oid: 'index' }),
+      // worktree: await this.getChanges({ oid: 'worktree' }),
+      worktree: await this.getChanges({ oid: 'combined' }),
     };
   }
 
@@ -339,6 +316,11 @@ class NGWrap {
     if (diffKey) {
       if (this._diffCache[diffKey]) return { diffKey, diff: this._diffCache[diffKey] };
       const s = diffKey.split('.');
+      if (s[3])
+        throw new UserError(
+          'invalid-diff',
+          'point-in-time diff is no longer available, recreate diff for correct indexes'
+        );
       oid = s[0];
       oldOid = s[1];
       ignoreWhiteSpace = s[2] === 'w';
@@ -347,12 +329,13 @@ class NGWrap {
     let newTree, oldTree;
     const toIndex = oid === 'index';
     const toWorkTree = oid === 'worktree';
-    if (toIndex || toWorkTree) {
+    const toBoth = oid === 'combined';
+    if (toIndex || toWorkTree || toBoth) {
       const head = await this.r.getHeadCommit();
       if (head) {
         oldTree = await head.getTree();
-      }
-      oldOid = `HEAD@${Date.now()}`;
+        oldOid = head.sha();
+      } else oldOid = null;
     } else {
       if (oid) {
         commit = await this.r.getCommit(oid);
@@ -384,6 +367,13 @@ class NGWrap {
             nodegit.Diff.OPTION.INCLUDE_UNTRACKED |
             nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
         })
+      : toBoth
+      ? await nodegit.Diff.treeToWorkdirWithIndex(this.r, oldTree, {
+          flags:
+            flags |
+            nodegit.Diff.OPTION.INCLUDE_UNTRACKED |
+            nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
+        })
       : await nodegit.Diff.treeToTree(this.r, oldTree, newTree, { flags });
     // Find renames, compact diff
     await diff.findSimilar({
@@ -391,6 +381,7 @@ class NGWrap {
     });
 
     diffKey = `${oid}.${oldOid}.${ignoreWhiteSpace ? 'w' : ''}`;
+    if (toIndex || toWorkTree || toBoth) diffKey += `.${Date.now()}`;
     this._diffCache[diffKey] = diff;
 
     return { diffKey, diff };
@@ -410,20 +401,22 @@ class NGWrap {
     const deletions = +stat.deletions();
 
     const patches = await diff.patches();
-    /** @type {DiffStat[]} */
+
     const fileLineDiffs = patches.map((p, idx) => {
       const fileName = p.isDeleted() ? undefined : p.newFile().path();
       const oldFileName = p.isAdded() ? undefined : p.oldFile().path();
+      const hasConflict = p.isConflicted() || undefined;
       const { total_additions, total_deletions } = p.lineStats();
 
-      return {
+      return /** @type {DiffStat} */ ({
         idx,
         oldFileName,
         fileName,
+        hasConflict,
         additions: total_additions,
         deletions: total_deletions,
         type: fileType(fileName || oldFileName),
-      };
+      });
     });
 
     return { additions, deletions, diffKey, fileLineDiffs };
@@ -448,12 +441,12 @@ class NGWrap {
   }
 }
 
+/** @type {Record<string, Promise<NGWrap>>} */
 const repoPs = {};
 /**
  * Memoize nodegit opened repos.
  *
  * @param {string} path  The path to the repository.
- * @returns {Promise<NGWrap>}
  */
 const getRepo = async (path) => {
   if (!repoPs[path]) {
@@ -483,7 +476,10 @@ const uncacheRepo = async (path) => {
 const quickStatus = async (path) => {
   try {
     const repo = await getRepo(path);
-    return { gitRootPath: repo.rootPath(), type: repo.r.isBare() ? 'bare' : 'inited' };
+    return /** @type {QuickStatus} */ ({
+      gitRootPath: repo.rootPath(),
+      type: repo.r.isBare() ? 'bare' : 'inited',
+    });
   } catch (err) {
     if (err.errno !== -3) throw err;
     if (/failed to resolve/.test(err.message)) return { gitRootPath: path, type: 'no-such-path' };

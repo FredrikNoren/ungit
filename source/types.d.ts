@@ -2,11 +2,12 @@ type RefName = string;
 type Hash = string;
 type FileName = string;
 type DiffStat = {
+  idx: number;
   additions: number | null;
   deletions: number | null;
+  hasConflict?: boolean;
   fileName?: string;
   oldFileName?: string;
-  displayName?: string;
   type: string;
 };
 type Commit = {
@@ -35,9 +36,8 @@ type Commit = {
   newFiles?: { sha1: string; fileLineDiffs: DiffStat[] };
 };
 type FileStatus = {
-  fileName: string;
-  oldFileName: string;
-  displayName: string;
+  fileName?: string;
+  oldFileName?: string;
   staged?: boolean;
   removed?: boolean;
   isNew?: boolean;
@@ -60,6 +60,11 @@ type GitStatus = {
   inMerge?: boolean;
   inRebase?: boolean;
   commitMessage?: string;
-  files: Record<FileName, FileStatus>;
+  worktree: {
+    fileLineDiffs?: DiffStat[];
+    additions?: number;
+    deletions?: number;
+    diffKey?: string;
+  };
 };
 type SubModule = { name: string; path?: string; url?: string; rawUrl?: string };
