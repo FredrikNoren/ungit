@@ -144,9 +144,10 @@ class StagingViewModel extends ComponentRoot {
         path: this.repoPath(),
         fileLimit: filesToDisplayLimit,
       });
-      const log = await headPromise;
-      if (log.length > 0) {
-        const array = log[0].message.split('\n');
+      const head = await headPromise;
+      if (head) {
+        const array = head.message.split('\n');
+        // TODO handle single newline after title
         this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
       } else {
         this.HEAD(null);

@@ -480,14 +480,17 @@ exports.registerApi = (env) => {
         ['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'],
         req.query.path
       )
-        .then(gitParser.parseGitLog)
+        .then((text) => {
+          const out = gitParser.parseGitLog(text);
+          return out[0];
+        })
         .catch((err) => {
           if (
             err.errorCode === 'no-head' ||
             err.errorCode === 'no-commits' ||
             err.errorCode === 'not-a-repository'
           )
-            return [];
+            return false;
           throw err;
         })
     )

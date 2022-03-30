@@ -146,8 +146,7 @@ describe('git-api', () => {
 
   it('head should be empty before first commit', () => {
     return common.get(req, '/head', { path: testDir }).then((res) => {
-      expect(res).to.be.a('array');
-      expect(res.length).to.be(0);
+      expect(res).to.equal(false);
     });
   });
 
@@ -216,11 +215,9 @@ describe('git-api', () => {
 
   it('head should show latest commit', () => {
     return common.get(req, '/head', { path: testDir }).then((res) => {
-      expect(res).to.be.a('array');
-      expect(res.length).to.be(1);
-      expect(res[0].message.indexOf(commitMessage)).to.be(0);
-      expect(res[0].authorName).to.be(gitConfig['user.name']);
-      expect(res[0].authorEmail).to.be(gitConfig['user.email']);
+      expect(res.message.indexOf(commitMessage)).to.be(0);
+      expect(res.authorName).to.be(gitConfig['user.name']);
+      expect(res.authorEmail).to.be(gitConfig['user.email']);
     });
   });
 
