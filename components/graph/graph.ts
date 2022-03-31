@@ -80,9 +80,10 @@ class GraphViewModel extends AbstractGraph {
       'beforeChange'
     );
     this.hoverGraphAction.subscribe((value) => {
-      if (value && value.createHoverGraphic) {
-        this.hoverGraphActionGraphic(value.createHoverGraphic());
-      } else {
+      const hoverGraphic = value.createHoverGraphic();
+      if (value && value.createHoverGraphic && this.hoverGraphActionGraphic() !== hoverGraphic) {
+        this.hoverGraphActionGraphic(hoverGraphic);
+      } else if (this.hoverGraphActionGraphic() !== null) {
         this.hoverGraphActionGraphic(null);
       }
     });
@@ -146,7 +147,7 @@ class GraphViewModel extends AbstractGraph {
     if (ko.dataFor(event.target) === this.currentActionContext()) return;
     if (this.currentActionContext() && this.currentActionContext() instanceof NodeViewModel) {
       this.currentActionContext().toggleSelected();
-    } else {
+    } else if (this.currentActionContext() !== null) {
       this.currentActionContext(null);
     }
     // If the click was on an input element, then let's allow the default action to proceed.

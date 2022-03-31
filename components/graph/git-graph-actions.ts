@@ -52,20 +52,30 @@ export class ActionBase {
 
   dragEnter() {
     if (!this.visible()) return;
-    this.graph.hoverGraphAction(this);
+    if (this.graph.hoverGraphAction() !== this) {
+      this.graph.hoverGraphAction(this);
+    }
   }
 
   dragLeave() {
     if (!this.visible()) return;
-    this.graph.hoverGraphAction(null);
+    if (this.graph.hoverGraphAction() !== null) {
+      this.graph.hoverGraphAction(null);
+    }
   }
 
   mouseover() {
-    this.graph.hoverGraphAction(this);
+    if (!this.visible()) return;
+    if (this.graph.hoverGraphAction() !== this) {
+      this.graph.hoverGraphAction(this);
+    }
   }
 
   mouseout() {
-    this.graph.hoverGraphAction(null);
+    if (!this.visible()) return;
+    if (this.graph.hoverGraphAction() !== null) {
+      this.graph.hoverGraphAction(null);
+    }
   }
 
   perform(): Promise<unknown> {
