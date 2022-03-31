@@ -1,0 +1,47 @@
+name: Bump Dependencies
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  bump:
+    if: github.repository == 'FredrikNoren/ungit'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - run: npm ci
+      - run: |
+          body="$(npm run bumpdependencies)"
+          echo "$body"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo "::set-output name=body::$body"
+        id: bumpdependencies
+      - run: npm install
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          commit-message: Bump Dependencies
+          title: Bump Dependencies
+          body: |
+            ```
+            ${{ steps.bumpdependencies.outputs.body }}
+            ```
+          labels: dependencies
+          branch: bumpdependencies

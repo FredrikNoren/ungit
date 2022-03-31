@@ -1,0 +1,7 @@
+{
+  "endOfLine": "lf",
+  "jsdocUseInlineCommentForASingleTagBlock": true,
+  "plugins": ["./node_modules/@homer0/prettier-plugin-jsdoc"],
+  "printWidth": 100,
+  "singleQuote": true
+}

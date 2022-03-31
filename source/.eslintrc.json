@@ -1,0 +1,13 @@
+{
+  "extends": ["../.eslintrc.json", "plugin:node/recommended"],
+  "plugins": ["node"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "parser": "babel-eslint",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-control-regex": "off", // Control characters are used to split git messages
+    "no-process-exit": "off"
+  }
+}

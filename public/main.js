@@ -1,87 +1,153 @@
 var startLaunchTime = Date.now();
-var config = require('../src/config');
-var path = require('path');
+
 var child_process = require('child_process');
-var BugTracker = require('../src/bugtracker');
-var bugtracker = new BugTracker('launcher');
-var usageStatistics = require('../src/usage-statistics');
+var path = require('path');
+// eslint-disable-next-line no-unused-vars -- Imported for side effects
+const { encodePath } = require('../source/address-parser');
+var config = require('../source/config');
+var BugTracker = require('../source/bugtracker');
+var bugtracker = new BugTracker('electron');
 
-const Bluebird = require('bluebird');
-var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');  // Module to create native browser window.
+var { app, dialog, shell, BrowserWindow, Menu } = require('electron');
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function (err) {
   console.error(err.stack.toString());
-  Bluebird.all([
-    new Bluebird((resolve) => { bugtracker.notify.bind(bugtracker, err, 'ungit-launcher'); resolve(); }),
-    new Bluebird((resolve) => { usageStatistics.addEvent.bind(usageStatistics, 'launcher-exception'); resolve(); })
-  ]).then(() => { app.quit(); });
+  bugtracker.notify(err, 'ungit-launcher');
+  app.quit();
 });
 
+function openUngitBrowser(pathToNavigateTo) {
+  console.log(`Navigate to ${pathToNavigateTo}`);
+  mainWindow.loadURL(pathToNavigateTo);
+}
+
 function launch(callback) {
-  var currentUrl = config.urlBase + ':' + config.port;
-  if (config.forcedLaunchPath === undefined) currentUrl += '/#/repository?path=' + encodeURIComponent(process.cwd());
-  else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') currentUrl += '/#/repository?path=' + encodeURIComponent(config.forcedLaunchPath);
-  console.log('Browse to ' + currentUrl);
-  if (config.launchBrowser && !config.launchCommand) {
-    mainWindow.loadUrl(currentUrl);
-  } else if (config.launchCommand) {
-    var command = config.launchCommand.replace(/%U/g, currentUrl);
+  var url = config.urlBase + ':' + config.port;
+  if (config.forcedLaunchPath === undefined) {
+    url += '/#/repository?path=' + encodePath(process.cwd());
+  } else if (config.forcedLaunchPath !== null && config.forcedLaunchPath !== '') {
+    url += '/#/repository?path=' + encodePath(config.forcedLaunchPath);
+  }
+
+  if (config.launchCommand) {
+    var command = config.launchCommand.replace(/%U/g, url);
     console.log('Running custom launch command: ' + command);
-    child_process.exec(command, function(err, stdout, stderr) {
+    child_process.exec(command, function (err, stdout, stderr) {
       if (err) {
         callback(err);
         return;
       }
-      if (config.launchBrowser)
-        mainWindow.loadUrl(currentUrl);
+      if (config.launchBrowser) {
+        openUngitBrowser(url);
+      }
     });
+  } else if (config.launchBrowser) {
+    openUngitBrowser(url);
   }
 }
 
 function checkIfUngitIsRunning(callback) {
   // Fastest way to find out if a port is used or not/i.e. if ungit is running
   var net = require('net');
-  var server = net.createServer(function(c) { });
-  server.listen(config.port, function(err) {
-    server.close(function() {
-      callback(null, false);
-    });
-  });
+  var server = net.createServer();
   server.on('error', function (e) {
     if (e.code == 'EADDRINUSE') {
-      callback(null, true);
+      callback(true);
     }
+  });
+  server.listen({ port: config.port, host: config.ungitBindIp }, function () {
+    server.close(function () {
+      callback(false);
+    });
   });
 }
 
 var mainWindow = null;
 
-app.on('window-all-closed', function() {
-    app.quit();
+var appPath = app.getAppPath();
+if (!appPath.endsWith('.asar')) {
+  appPath = path.resolve(appPath, '..');
+}
+
+var menuTemplate = [
+  {
+    label: 'File',
+    submenu: [{ role: 'quit' }],
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'delete' },
+      { type: 'separator' },
+      { role: 'selectAll' },
+    ],
+  },
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: async () => {
+          await shell.openExternal('https://github.com/FredrikNoren/ungit');
+        },
+      },
+    ],
+  },
+];
+
+app.on('window-all-closed', function () {
+  app.quit();
 });
 
-app.on('ready', function() {
-  checkIfUngitIsRunning(function(err1, ungitRunning) {
+app.on('ready', function () {
+  checkIfUngitIsRunning(function (ungitRunning) {
     if (ungitRunning) {
-      console.log('Ungit instance is already running');
+      dialog.showMessageBoxSync({
+        type: 'error',
+        title: 'Ungit',
+        message: 'Ungit instance is already running',
+      });
       app.quit();
-    }
-    else {
-      var server = require('../src/server');
-      server.started.add(function() {
-        launch(function(err) {
+    } else {
+      var server = require('../source/server');
+      server.started.add(function () {
+        launch(function (err) {
           if (err) console.log(err);
-        })
+        });
 
-        var launchTime = (Date.now() - startLaunchTime);
+        var launchTime = Date.now() - startLaunchTime;
         console.log('Took ' + launchTime + 'ms to start server.');
-        usageStatistics.addEvent('server-start', { launchTimeMs: launchTime });
       });
 
-      mainWindow = new BrowserWindow({width: 1366, height: 768});
+      Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
-      mainWindow.on('closed', function() {
+      mainWindow = new BrowserWindow({
+        width: 1366,
+        height: 768,
+        icon: path.join(appPath, 'public/images/icon.png'),
+      });
+
+      mainWindow.on('closed', function () {
         mainWindow = null;
       });
     }

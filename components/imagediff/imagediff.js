@@ -1,36 +1,46 @@
+const ko = require('knockout');
+const octicons = require('octicons');
+const components = require('ungit-components');
+const { encodePath } = require('ungit-address-parser');
 
-var ko = require('knockout');
-var components = require('ungit-components');
-var Promise = require('bluebird');
+components.register('imagediff', (args) => new ImageDiffViewModel(args));
 
-components.register('imagediff', function(args) {
-  return new ImageDiffViewModel(args);
-});
+class ImageDiffViewModel {
+  constructor(args) {
+    this.filename = args.filename;
+    this.oldFilename = args.oldFilename;
+    this.repoPath = args.repoPath;
+    this.isNew = ko.observable(false);
+    this.isRemoved = ko.observable(false);
+    this.sha1 = args.sha1;
+    this.state = ko.computed(() => {
+      if (this.isNew()) return 'new';
+      if (this.isRemoved()) return 'removed';
+      return 'changed';
+    });
+    const gitDiffURL = `${ungit.config.rootPath}/api/diff/image?path=${encodePath(
+      this.repoPath()
+    )}`;
+    this.oldImageSrc =
+      gitDiffURL + `&filename=${this.oldFilename}&version=${this.sha1 ? this.sha1 + '^' : 'HEAD'}`;
+    this.newImageSrc =
+      gitDiffURL + `&filename=${this.filename}&version=${this.sha1 ? this.sha1 : 'current'}`;
+    this.isShowingDiffs = args.isShowingDiffs;
+    this.rightArrowIcon = octicons['arrow-right'].toSVG({ height: 100 });
+    this.downArrowIcon = octicons['arrow-down'].toSVG({ height: 100 });
+  }
 
-var ImageDiffViewModel = function(args) {
-  var self = this;
-  this.filename = args.filename;
-  this.repoPath = args.repoPath;
-  this.isNew = ko.observable(false);
-  this.isRemoved = ko.observable(false);
-  this.sha1 = args.sha1;
-  this.state = ko.computed(function() {
-    if (self.isNew()) return 'new';
-    if (self.isRemoved()) return 'removed';
-    return 'changed';
-  });
-  var gitDiffURL = ungit.config.rootPath + '/api/diff/image?path=' + encodeURIComponent(self.repoPath()) + '&filename=' + self.filename + '&version=';
-  this.oldImageSrc = gitDiffURL + (self.sha1 ? self.sha1 + '^': 'HEAD');
-  this.newImageSrc = gitDiffURL + (self.sha1 ? self.sha1: 'current');
-  this.isShowingDiffs = args.isShowingDiffs;
-}
-ImageDiffViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('imagediff', this, {}, parentElement);
-}
-ImageDiffViewModel.prototype.invalidateDiff = function() {}
-ImageDiffViewModel.prototype.newImageError = function() {
-  this.isRemoved(true);
-}
-ImageDiffViewModel.prototype.oldImageError = function() {
-  this.isNew(true);
+  updateNode(parentElement) {
+    ko.renderTemplate('imagediff', this, {}, parentElement);
+  }
+
+  invalidateDiff() {}
+
+  newImageError() {
+    this.isRemoved(true);
+  }
+
+  oldImageError() {
+    this.isNew(true);
+  }
 }

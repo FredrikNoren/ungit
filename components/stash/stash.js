@@ -1,89 +1,116 @@
+const ko = require('knockout');
+const octicons = require('octicons');
+const moment = require('moment');
+const components = require('ungit-components');
+const storage = require('ungit-storage');
+const { ComponentRoot } = require('../ComponentRoot');
+const _ = require('lodash');
 
-var ko = require('knockout');
-var moment = require('moment');
-var components = require('ungit-components');
-var storage = require('ungit-storage');
+components.register('stash', (args) => new StashViewModel(args.server, args.repoPath));
 
-components.register('stash', function(args) {
-  return new StashViewModel(args.server, args.repoPath);
-});
+class StashItemViewModel {
+  constructor(stash, data) {
+    this.stash = stash;
+    this.server = stash.server;
+    this.id = data.reflogId;
+    this.sha1 = data.sha1;
+    this.title = `${data.reflogName} ${moment(new Date(data.commitDate)).fromNow()}`;
+    this.message = data.message;
+    this.showCommitDiff = ko.observable(false);
 
-function StashItemViewModel(stash, data) {
-  this.stash = stash;
-  this.server = stash.server;
-  this.id = data.reflogId;
-  this.sha1 = data.sha1;
-  this.title = data.reflogName + ' ' + moment(new Date(data.commitDate)).fromNow();
-  this.message = data.message;
-  this.showCommitDiff = ko.observable(false);
+    this.commitDiff = ko.observable(
+      components.create('commitDiff', {
+        fileLineDiffs: data.fileLineDiffs.slice(),
+        sha1: this.sha1,
+        repoPath: stash.repoPath,
+        server: stash.server,
+        showDiffButtons: ko.observable(true),
+      })
+    );
+    this.dropIcon = octicons.x.toSVG({ height: 18 });
+    this.applyIcon = octicons.pencil.toSVG({ height: 20 });
+  }
 
-  this.commitDiff = ko.observable(components.create('commitDiff', {
-    fileLineDiffs: data.fileLineDiffs.slice(),
-    sha1: this.sha1,
-    repoPath: stash.repoPath,
-    server: stash.server
-  }));
-}
-StashItemViewModel.prototype.apply = function() {
-  var self = this;
-  this.server.delPromise('/stashes/' + this.id, { path: this.stash.repoPath(), apply: true })
-    .catch((e) => this.server.unhandledRejection(e));
-}
-StashItemViewModel.prototype.drop = function() {
-  var self = this;
-  components.create('yesnodialog', { title: 'Are you sure you want to drop the stash?', details: 'This operation cannot be undone.'})
-    .show()
-    .closeThen(function(diag) {
-      if (diag.result()) {
-          self.server.delPromise('/stashes/' + self.id, { path: self.stash.repoPath() })
-            .catch((e) => this.server.unhandledRejection(e));
-      }
-  });
-}
-StashItemViewModel.prototype.toggleShowCommitDiffs = function() {
-  this.showCommitDiff(!this.showCommitDiff());
-}
+  apply() {
+    this.server
+      .delPromise(`/stashes/${this.id}`, { path: this.stash.repoPath(), apply: true })
+      .catch((e) => this.server.unhandledRejection(e));
+  }
 
-function StashViewModel(server, repoPath) {
-  var self = this;
-  this.server = server;
-  this.repoPath = repoPath;
-  this.stashedChanges = ko.observable([]);
-  this.isShow = ko.observable(storage.getItem('showStash') === 'true');
-  this.visible = ko.computed(function() { return self.stashedChanges().length > 0 && self.isShow(); });
-  this.refresh();
+  drop() {
+    components.showModal('yesnomodal', {
+      title: 'Are you sure you want to drop the stash?',
+      details: 'This operation cannot be undone.',
+      closeFunc: (isYes) => {
+        if (!isYes) return;
+        this.server
+          .delPromise(`/stashes/${this.id}`, { path: this.stash.repoPath() })
+          .catch((e) => this.server.unhandledRejection(e));
+      },
+    });
+  }
+
+  toggleShowCommitDiffs() {
+    this.showCommitDiff(!this.showCommitDiff());
+  }
 }
 
-StashViewModel.prototype.updateNode = function(parentElement) {
-  if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
-}
-StashViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event == 'request-app-content-refresh' ||
-    event.event == 'working-tree-changed' ||
-    event.event == 'git-directory-changed')
+class StashViewModel extends ComponentRoot {
+  constructor(server, repoPath) {
+    super();
+    this.server = server;
+    this.repoPath = repoPath;
+    this.refresh = _.debounce(this._refresh, 250, this.defaultDebounceOption);
+    this.stashedChanges = ko.observable([]);
+    this.isShow = ko.observable(storage.getItem('showStash') === 'true');
+    this.visible = ko.computed(() => this.stashedChanges().length > 0 && this.isShow());
+    this.expandIcon = octicons['chevron-right'].toSVG({ height: 18 });
+    this.expandedIcon = octicons['chevron-down'].toSVG({ height: 22 });
     this.refresh();
-}
-StashViewModel.prototype.refresh = function() {
-  var self = this;
-  this.server.getPromise('/stashes', { path: this.repoPath() })
-    .then(function(stashes) {
-      var changed = self.stashedChanges().length != stashes.length;
+  }
+
+  updateNode(parentElement) {
+    if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
+  }
+
+  onProgramEvent(event) {
+    if (event.event == 'request-app-content-refresh' || event.event == 'git-directory-changed') {
+      this.refresh();
+    }
+  }
+
+  async _refresh() {
+    ungit.logger.debug('stash.refresh() triggered');
+
+    try {
+      const stashes = await this.server.getPromise('/stashes', { path: this.repoPath() });
+      if (this.isSamePayload(stashes)) {
+        return;
+      }
+
+      let changed = this.stashedChanges().length != stashes.length;
       if (!changed) {
-        changed = !self.stashedChanges().every(function(item1) {
-          return stashes.some(function(item2) {
-            return item1.sha1 == item2.sha1;
-          });
-        });
+        changed = !this.stashedChanges().every((item1) =>
+          stashes.some((item2) => item1.sha1 == item2.sha1)
+        );
       }
 
       if (changed) {
-        self.stashedChanges(stashes.map(function(item) { return new StashItemViewModel(self, item); }));
+        this.stashedChanges(stashes.map((item) => new StashItemViewModel(this, item)));
       }
-    }).catch(function(err) {
-      if (err.errorCode != 'no-such-path') self.server.unhandledRejection(err);
-    })
-}
-StashViewModel.prototype.toggleShowStash = function() {
-  this.isShow(!this.isShow());
-  storage.setItem('showStash', this.isShow());
+    } catch (err) {
+      if (err.errorCode != 'no-such-path') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.warn('refresh failed: ', err);
+      }
+    } finally {
+      ungit.logger.debug('stash.refresh() finished');
+    }
+  }
+
+  toggleShowStash() {
+    this.isShow(!this.isShow());
+    storage.setItem('showStash', this.isShow());
+  }
 }

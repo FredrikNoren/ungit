@@ -1,74 +1,81 @@
+const ko = require('knockout');
+const _ = require('lodash');
+const octicons = require('octicons');
+const components = require('ungit-components');
+const programEvents = require('ungit-program-events');
 
-var ko = require('knockout');
-var _ = require('lodash');
-var components = require('ungit-components');
-var programEvents = require('ungit-program-events');
-var Promise = require('bluebird');
+components.register('remotes', (args) => new RemotesViewModel(args.server, args.repoPath));
 
-components.register('remotes', function(args) {
-  return new RemotesViewModel(args.server, args.repoPath);
-});
+class RemotesViewModel {
+  constructor(server, repoPath) {
+    this.repoPath = repoPath;
+    this.server = server;
+    this.remotes = ko.observable([]);
+    this.currentRemote = ko.observable(null);
+    this.currentRemote.subscribe((value) => {
+      programEvents.dispatch({ event: 'current-remote-changed', newRemote: value });
+    });
+    this.fetchLabel = ko.computed(() => {
+      if (this.currentRemote()) return `Fetch from ${this.currentRemote()}`;
+      else return 'No remotes specified';
+    });
+    this.remotesIcon = octicons.download.toSVG({ height: 18 });
+    this.closeIcon = octicons.x.toSVG({ height: 18 });
 
-function RemotesViewModel(server, repoPath) {
-  var self = this;
-  this.repoPath = repoPath;
-  this.server = server;
-  this.remotes = ko.observable([]);
-  this.currentRemote = ko.observable(null);
-  this.currentRemote.subscribe(function(value) {
-    programEvents.dispatch({ event: 'current-remote-changed', newRemote: value });
-  });
-  this.fetchLabel = ko.computed(function() {
-    if (self.currentRemote()) return 'Fetch from ' + self.currentRemote();
-    else return 'No remotes specified';
-  })
+    this.fetchEnabled = ko.computed(() => this.remotes().length > 0);
 
-  this.fetchEnabled = ko.computed(function() {
-    return self.remotes().length > 0;
-  });
-
-  this.shouldAutoFetch = ungit.config.autoFetch;
-  this.updateRemotes();
-  this.isFetching = false;
-  this.fetchDebounced = _.debounce(() => this.fetch({ tags: true }), 500);
-}
-RemotesViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('remotes', this, {}, parentElement);
-}
-RemotesViewModel.prototype.clickFetch = function() { this.fetch({ nodes: true, tags: true }); }
-RemotesViewModel.prototype.onProgramEvent = function(event) {
-  if (event.event === 'working-tree-changed' || event.event === 'request-app-content-refresh' ||
-    event.event === 'request-fetch-tags' || event.event === 'git-directory-changed') {
-    this.fetchDebounced();
+    this.shouldAutoFetch = ungit.config.autoFetch;
+    this.updateRemotes();
   }
-}
-RemotesViewModel.prototype.fetch = function(options) {
-  if (this.isFetching || !this.currentRemote()) return;
-  var self = this;
 
-  this.isFetching = true;
-  var tagPromise = options.tags ? self.server.getPromise('/remote/tags', { path: self.repoPath(), remote: self.currentRemote() }) : null;
-  var fetchPromise = options.nodes ? self.server.postPromise('/fetch', { path: self.repoPath(), remote: self.currentRemote() }) : null;
-  return Promise.props({tag: tagPromise, fetch: fetchPromise})
-    .then((result) => {
-      if (options.tags) {
-        programEvents.dispatch({ event: 'remote-tags-update', tags: result.tag });
-      }
+  updateNode(parentElement) {
+    ko.renderTemplate('remotes', this, {}, parentElement);
+  }
+
+  clickFetch() {
+    this.fetch({ nodes: true, tags: true });
+  }
+
+  async onProgramEvent(event) {
+    if (event.event === 'request-app-content-refresh' || event.event === 'request-fetch-tags') {
+      await this.fetch({ tags: true });
+    } else if (event.event === 'git-directory-changed' && this.shouldAutoFetch) {
+      await this.fetch({ tags: true });
+    } else if (event.event === 'update-remote') {
+      await this.updateRemotes();
+    }
+  }
+
+  async fetch(options) {
+    if (!this.currentRemote() || !options.tags) return;
+    ungit.logger.debug('remotes.fetch() triggered');
+
+    try {
+      const tagPromise = this.server.getPromise('/remote/tags', {
+        path: this.repoPath(),
+        remote: this.currentRemote(),
+      });
+      programEvents.dispatch({ event: 'remote-tags-update', tags: await tagPromise });
       if (!this.server.isInternetConnected) {
         this.server.isInternetConnected = true;
       }
-    }).catch((err) => {
-      let errorMessage, stdout, stderr;
+    } catch (err) {
+      let errorMessage;
+      let stdout;
+      let stderr;
       try {
         errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
         stdout = err.res.body.stdout;
         stderr = err.res.body.stderr;
-      } catch (e) { errorMessage = ''; }
+      } catch (e) {
+        errorMessage = '';
+      }
 
-      if (errorMessage.indexOf('Could not resolve host') > -1) {
+      if (errorMessage.includes('Could not resolve host')) {
         if (this.server.isInternetConnected) {
           this.server.isInternetConnected = false;
-          errorMessage = `Could not resolve host.  This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.`;
+          errorMessage =
+            'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
           stdout = '';
           stderr = '';
         } else {
@@ -77,67 +84,75 @@ RemotesViewModel.prototype.fetch = function(options) {
         }
       }
 
-      programEvents.dispatch({ event: 'git-error', data: {
-        isWarning: true,
-        command: err.res.body.command,
-        error: err.res.body.error,
-        stdout: stdout,
-        stderr: stderr,
-        repoPath: err.res.body.workingDirectory
-      } });
-    }).finally(() => { this.isFetching = false; });
-}
+      programEvents.dispatch({
+        event: 'git-error',
+        data: {
+          isWarning: true,
+          command: err.res.body.command,
+          error: err.res.body.error,
+          stdout,
+          stderr,
+          repoPath: err.res.body.workingDirectory,
+        },
+      });
+    } finally {
+      ungit.logger.debug('remotes.fetch() finished');
+    }
+  }
 
-RemotesViewModel.prototype.updateRemotes = function() {
-  var self = this;
-
-  return this.server.getPromise('/remotes', { path: this.repoPath() })
-    .then(function(remotes) {
-      remotes = remotes.map(function(remote) {
-        return {
+  updateRemotes() {
+    return this.server
+      .getPromise('/remotes', { path: this.repoPath() })
+      .then((remotes) => {
+        remotes = remotes.map((remote) => ({
           name: remote,
-          changeRemote: function() { self.currentRemote(remote) }
+          changeRemote: () => {
+            this.currentRemote(remote);
+          },
+        }));
+        this.remotes(remotes);
+        if (!this.currentRemote() && remotes.length > 0) {
+          if (_.find(remotes, { name: 'origin' })) {
+            // default to origin if it exists
+            this.currentRemote('origin');
+          } else {
+            // otherwise take the first one
+            this.currentRemote(remotes[0].name);
+          }
+
+          if (this.shouldAutoFetch) {
+            this.shouldAutoFetch = false;
+            return this.fetch({ nodes: true, tags: true });
+          }
+        }
+      })
+      .catch((err) => {
+        if (err.errorCode != 'not-a-repository') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('updateRemotes failed', err);
         }
       });
-      self.remotes(remotes);
-      if (!self.currentRemote() && remotes.length > 0) {
-        if (_.find(remotes, { 'name': 'origin' })) {// default to origin if it exists
-          self.currentRemote('origin');
-        } else {// otherwise take the first one
-          self.currentRemote(remotes[0].name);
-        }
+  }
 
-        if (self.shouldAutoFetch) {
-          self.shouldAutoFetch = false;
-          return self.fetch({ nodes: true, tags: true });
-        }
-      }
-    }).catch(function(err) {
-      if (err.errorCode != 'not-a-repository') self.server.unhandledRejection(err);
-    });
-}
-RemotesViewModel.prototype.showAddRemoteDialog = function() {
-  var self = this;
-  components.create('addremotedialog')
-    .show()
-    .closeThen(function(diag) {
-      if(diag.isSubmitted()) {
-        return self.server.postPromise('/remotes/' + encodeURIComponent(diag.name()), { path: self.repoPath(), url: diag.url() })
-          .then(function() { self.updateRemotes(); })
-          .catch((e) => this.server.unhandledRejection(e));
-      }
-    });
-}
+  showAddRemoteDialog() {
+    components.showModal('addremotemodal', { path: this.repoPath() });
+  }
 
-RemotesViewModel.prototype.remoteRemove = function(remote) {
-  var self = this;
-  components.create('yesnodialog', { title: 'Are you sure?', details: 'Deleting ' + remote.name + ' remote cannot be undone with ungit.'})
-    .show()
-    .closeThen(function(diag) {
-      if (diag.result()) {
-        return self.server.delPromise('/remotes/' + remote.name, { path: self.repoPath() })
-          .then(() => { self.updateRemotes(); })
-          .catch((e) => this.server.unhandledRejection(e));
-      }
+  remoteRemove(remote) {
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: `Deleting ${remote.name} remote cannot be undone with ungit.`,
+      closeFunc: (isYes) => {
+        if (isYes) {
+          this.server
+            .delPromise(`/remotes/${remote.name}`, { path: this.repoPath() })
+            .then(() => {
+              this.updateRemotes();
+            })
+            .catch((e) => this.server.unhandledRejection(e));
+        }
+      },
     });
+  }
 }

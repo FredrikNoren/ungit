@@ -1,7 +1,6 @@
 const expect = require('expect.js');
 const path = require('path');
-const restGit = require('../src/git-api');
-const Bluebird = require('bluebird');
+const restGit = require('../source/git-api');
 
 exports.makeRequest = (method, req, path, payload) => {
   let r;
@@ -14,34 +13,37 @@ exports.makeRequest = (method, req, path, payload) => {
   } else if (method === 'PUT') {
     r = req.put(`${restGit.pathPrefix}${path}`);
   } else {
-    throw new Error({message: `invalid method of ${method}`});
+    throw new Error({ message: `invalid method of ${method}` });
   }
 
   if (payload) {
     payload.socketId = 'ignore';
     if (method === 'POST' || method === 'PUT') {
-      r.send(payload)
+      r.send(payload);
     } else {
       r.query(payload);
     }
   }
 
-  return new Bluebird((resolve, reject) => {
-    r.expect('Content-Type', method === 'PNG' ? 'image/png' : /json/)
-      .end((err, res) => {
-        if (err) {
-          console.log(`failed path: ${path}`);
-          console.dir(err);
-          console.dir(res ? res.body : "");
-          reject(err)
-        } else {
-          let data = (res || {}).body;
-          try { data = JSON.parse(data); } catch(ex) {}
-          resolve(data);
+  return new Promise((resolve, reject) => {
+    r.expect('Content-Type', method === 'PNG' ? 'image/png' : /json/).end((err, res) => {
+      if (err) {
+        console.log(`failed path: ${path}`);
+        console.dir(err);
+        console.dir(res ? res.body : '');
+        reject(err);
+      } else {
+        let data = (res || {}).body;
+        try {
+          data = JSON.parse(data);
+        } catch (ex) {
+          /* Ignore error */
         }
-      });
+        resolve(data);
+      }
+    });
   });
-}
+};
 
 exports.get = this.makeRequest.bind(this, 'GET');
 exports.getPng = this.makeRequest.bind(this, 'PNG');
@@ -49,32 +51,21 @@ exports.post = this.makeRequest.bind(this, 'POST');
 exports.delete = this.makeRequest.bind(this, 'DELETE');
 exports.put = this.makeRequest.bind(this, 'PUT');
 
-exports.initRepo = (req, config) => {
+exports.initRepo = async (req, config) => {
   config = config || {};
-  return this.post(req, '/testing/createtempdir', config.path)
-    .then(res => {
-      expect(res.path).to.be.ok();
-      return this.post(req, '/init', { path: res.path, bare: !!config.bare })
-        .then(() => res.path);
-    });
-}
+  const res = await this.post(req, '/testing/createtempdir', config.path);
+  expect(res.path).to.be.ok();
+  await this.post(req, '/init', { path: res.path, bare: !!config.bare });
+  return res.path;
+};
 
 exports.createSmallRepo = (req) => {
-  return this.initRepo(req)
-    .then((dir) => {
-      const testFile = 'smalltestfile.txt';
-      return this.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
-        .then(() => this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] }))
-        .then(() => dir)
-    });
-}
-
-// Used by ko tests, which doesn't really require dom manipulation, but does require these things to be defined.
-exports.initDummyBrowserEnvironment = () => {
-  window = {};
-  document = {
-    createElement: () => { return { getElementsByTagName: () => [] } },
-    createComment: () => { return {} }
-  };
-  navigator = {};
-}
+  return this.initRepo(req).then((dir) => {
+    const testFile = 'smalltestfile.txt';
+    return this.post(req, '/testing/createfile', { file: path.join(dir, testFile) })
+      .then(() =>
+        this.post(req, '/commit', { path: dir, message: 'Init', files: [{ name: testFile }] })
+      )
+      .then(() => dir);
+  });
+};

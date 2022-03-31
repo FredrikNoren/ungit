@@ -1,0 +1,12 @@
+{
+  "extends": ["../.eslintrc.json", "plugin:mocha/recommended"],
+  "plugins": ["mocha"],
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "mocha/no-mocha-arrows": "off",
+    "mocha/no-identical-title": "off",
+    "mocha/no-skipped-tests": "off"
+  }
+}

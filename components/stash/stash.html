@@ -1,17 +1,29 @@
-<div class="stash-toggle stash-toggle-text" data-bind="click: toggleShowStash, visible: !isShow()" >
-  <span class="glyphicon glyphicon-chevron-up"></span>
+<div class="stash-toggle stash-toggle-text" data-bind="click: toggleShowStash, visible: !isShow()">
+  <span class="expand-icon" data-bind="html: expandIcon"></span>
   Stash (<span data-bind="text: stashedChanges().length"></span>)
 </div>
 <div class="panel panel-default stash" data-bind="visible: visible">
   <div class="panel-body">
     <h4 class="stash-toggle-text" data-bind="click: toggleShowStash">
-      <span class="glyphicon glyphicon-chevron-down"></span>
+      <span class="expand-icon" data-bind="html: expandedIcon"></span>
       Stashed changes (<span data-bind="text: stashedChanges().length"></span>)
     </h4>
     <div class="list-group" data-bind="foreach: stashedChanges">
       <div class="list-group-item">
-        <a href="#" class="stash-apply glyphicon glyphicon-pencil glyphicon-circled pull-left" data-bind="click: apply" data-toggle="tooltip" title="Apply this stash"></a>
-        <a href="#" class="toggle-show-commit-diffs" data-bind="click: toggleShowCommitDiffs" data-toggle="tooltip" title="Show stash diff">
+        <a
+          href="#"
+          class="stash-apply octicon-circled"
+          data-bind="html: applyIcon, click: apply"
+          data-toggle="tooltip"
+          title="Apply this stash"
+        ></a>
+        <a
+          href="#"
+          class="toggle-show-commit-diffs"
+          data-bind="click: toggleShowCommitDiffs"
+          data-toggle="tooltip"
+          title="Show stash diff"
+        >
           <h4 class="list-group-item-heading" data-bind="text: title"></h4>
           <p class="list-group-item-text" data-bind="text: message"></p>
         </a>
@@ -20,7 +32,13 @@
           <div class="diff-inner" data-bind="component: commitDiff"></div>
         </div>
         <!-- /ko -->
-        <button type="button" class="btn btn-default list-item-remove" data-bind="click: drop" data-toggle="tooltip" data-placement="top" title="Drop this stash">&#x2716;</button>
+        <button
+          type="button"
+          class="btn btn-default list-item-remove"
+          data-bind="html: dropIcon, click: drop"
+          data-toggle="tooltip"
+          title="Drop this stash"
+        ></button>
       </div>
     </div>
   </div>

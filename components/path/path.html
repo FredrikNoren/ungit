@@ -1,43 +1,54 @@
-
 <div class="path" data-bind="shown: shown">
-
   <!-- ko if: status() == 'uninited' -->
-  <div class="uninited">
-    <div class="container">
-      <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
-        Directory '<span data-bind="text: dirName"></span>' created
+  <div class="uninited container">
+    <div class="alert alert-info" data-bind="visible: showDirectoryCreatedAlert">
+      Directory "<span data-bind="text: dirName"></span>" created.
+    </div>
+
+    <div class="row create-repo-container panel">
+      <h1>"<span data-bind="text: dirName"></span>" is not a git repository</h1>
+      <p>There is no git repository at the selected path.</p>
+      <div class="create-repo-toggle" data-bind="click: toggleShowCreateRepo">
+        <span class="expand-icon" data-bind="html: expandIcon"></span>
       </div>
-      <h1>'<span data-bind="text: dirName"></span>' is not a repository</h1>
-      <p>There is no repository at the selected path.</p>
-      <div class="row">
+
+      <div data-bind="visible: isShowCreateRepo">
         <div class="col-lg-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Create a new repository</div>
+            <div class="panel-heading">
+              Create a new git repository in "<span data-bind="text: dirName"></span>"
+            </div>
             <div class="panel-body">
-              <button class="btn btn-primary btn-lg" data-bind='click: initRepository'>
-                Make '<span data-bind="text: dirName"></span>' a repository
+              <button class="btn btn-primary btn-lg" data-bind="click: initRepository">
+                Create Repository
               </button>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Clone a repository into a subfolder of '<span data-bind="text: dirName"></span>'</div>
+            <div class="panel-heading">
+              Clone a git repository into a subfolder of "<span data-bind="text: dirName"></span>"
+            </div>
             <div class="panel-body">
               <form data-bind="submit: cloneRepository">
                 <div class="form-group">
                   <label for="cloneFromInput">Clone from</label>
-                  <input class="form-control" type="text" id="cloneFromInput" placeholder="url" data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'">
+                  <input class="form-control" id="cloneFromInput" type="text" placeholder="URL"
+                    data-bind="value: cloneUrl, valueUpdate: 'afterkeydown'" required />
                 </div>
                 <div class="form-group">
-                  <label for="cloneToInput">to</label>
-                  <input class="form-control" type="text" id="cloneToInput" data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }">
+                  <label for="cloneToInput">into</label>
+                  <input class="form-control" id="cloneToInput" type="text"
+                    data-bind="value: cloneDestination, attr: { placeholder: cloneDestinationImplicit }" />
                 </div>
-                <div class="form-group" style="display: flex;">
-                  <label style="width: 230px; padding-top: 11px;">is recurse submodule?</label>
-                  <input class="form-control" type="checkbox" data-bind="checked: isRecursiveSubmodule, attr: { placeholder: cloneDestinationImplicit }">
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" data-bind="checked: isRecursiveSubmodule" />
+                    Recurse submodules
+                  </label>
                 </div>
-                <input type="submit" class="btn btn-primary btn-lg" value="Clone repository">
+                <button class="btn btn-primary btn-lg" type="submit">Clone Repository</button>
               </form>
             </div>
           </div>
@@ -45,21 +56,28 @@
       </div>
     </div>
 
+    <div class="list-group" data-bind="foreach: subRepos">
+      <a class="list-group-item repository" data-bind="attr: { href: link }">
+        <span class="arrow-icon octicon-circled pull-left" data-bind="html: arrowIcon"></span>
+        <h4 class="list-group-item-heading" data-bind="text: title"></h4>
+        <p class="list-group-item-text" data-bind="text: remote"></p>
+      </a>
+    </div>
   </div>
   <!-- /ko -->
 
   <!-- ko if: status() == 'no-such-path' -->
-  <div class="invalid-path" data-bind="visible: status() == 'no-such-path'">
-    <h2>Invalid path</h2>
-    <p>"<span data-bind="text: repoPath"></span>" doesn&#39;t seem to be a valid path.</p>
+  <div class="invalid-path container">
+    <h1>Invalid path</h1>
+    <p>"<span data-bind="text: repoPath"></span>" doesn't seem to be a valid path.</p>
     <div class="create-dir">
-      <button class="btn btn-primary btn-lg" data-bind="click: createDir">Create directory</button>
+      <button class="btn btn-primary btn-lg" data-bind="click: createDir">Create Directory</button>
     </div>
   </div>
   <!-- /ko -->
 
   <!-- ko if: repository -->
-  <!-- ko component: repository --><!-- /ko -->
+  <!-- ko component: repository -->
   <!-- /ko -->
-
+  <!-- /ko -->
 </div>

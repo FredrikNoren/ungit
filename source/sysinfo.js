@@ -1,54 +1,32 @@
-const getmac = require('getmac');
+const getMac = require('getmac').default;
 const md5 = require('blueimp-md5');
 const semver = require('semver');
-const npm = require('npm');
-const RegClient = require('npm-registry-client');
+const logger = require('./utils/logger');
 const config = require('./config');
-const Bluebird = require('bluebird');
-const winston = require('winston');
-
-const noop = () => {}
 
 exports.getUngitLatestVersion = () => {
-  return new Bluebird((resolve, reject) => {
-    npm.load({}, (err, config) => {
-      if (err) return reject(err);
-      config.log = { error: noop, warn: noop, info: noop,
-               verbose: noop, silly: noop, http: noop,
-               pause: noop, resume: noop };
-      resolve(new RegClient(config));
-    });
-  }).then((client) => {
-    return new Bluebird((resolve, reject) => {
-      client.get('https://registry.npmjs.org/ungit', { timeout: 1000 }, (err, data, raw, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          const versions = Object.keys(data.versions);
-          resolve(versions[versions.length - 1]);
-        }
-      });
-    });
+  // eslint-disable-next-line node/no-unsupported-features/es-syntax
+  return import('latest-version').then((latestVersion) => {
+    return latestVersion.default('ungit');
   });
-}
+};
 
 exports.getUserHash = () => {
-  return new Bluebird((resolve) => {
-    getmac.getMac((err, addr) => {
-      if (err) {
-        winston.error("attempt to get mac addr failed, using fake mac.", err);
-        addr = "abcde";
-      }
-      resolve(md5(addr));
-    });
-  });
-}
+  let addr;
+  try {
+    addr = getMac();
+  } catch (err) {
+    logger.error('attempt to get mac addr failed, using fake mac.', err);
+    addr = 'abcde';
+  }
+  return md5(addr);
+};
 
 exports.getGitVersionInfo = () => {
   const result = {
     requiredVersion: '>=1.8.x',
     version: 'unkown',
-    satisfied: false
+    satisfied: false,
   };
 
   if (!config.gitVersion) {
@@ -61,5 +39,5 @@ exports.getGitVersionInfo = () => {
     }
   }
 
-  return Bluebird.resolve(result);
-}
+  return result;
+};

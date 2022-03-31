@@ -1,231 +1,223 @@
+const ko = require('knockout');
+const components = require('ungit-components');
+const diff2html = require('diff2html');
+const sideBySideDiff = 'sidebysidediff';
+const textDiff = 'textdiff';
 
-var ko = require('knockout');
-var components = require('ungit-components');
-var diff2html = require('diff2html').Diff2Html;
-var programEvents = require('ungit-program-events');
-var Promise = require("bluebird");
+components.register('textdiff', (args) => new TextDiffViewModel(args));
+components.register('textdiff.type', () => new Type());
+components.register('textdiff.wordwrap', () => new WordWrap());
+components.register('textdiff.whitespace', () => new WhiteSpace());
 
-components.register('textdiff', function (args) {
-  return new TextDiffViewModel(args);
-});
+const loadLimit = 100;
 
-components.register('textdiff.type', function () {
-  return new Type();
-});
+class WordWrap {
+  constructor() {
+    this.value = ko.observable(false);
 
-components.register('textdiff.wordwrap', function () {
-  return new WordWrap();
-});
-
-components.register('textdiff.whitespace', function () {
-  return new WhiteSpace();
-});
-
-var loadLimit = 100;
-
-var WordWrap = function () {
-  var self = this;
-
-  this.text = ko.observable("No Wrap");
-  this.value = ko.observable(false);
-  this.value.subscribe(function (value) {
-    self.text(value ? "Word Wrap" : "No Wrap");
-  });
-  this.toggle = function () {
-    self.value(!self.value());
+    this.toggle = () => {
+      this.value(!this.value());
+    };
+    this.text = ko.computed(() => (this.value() ? 'Wrap Lines' : 'No Wrap'));
+    this.isActive = ko.computed(() => this.value());
   }
-  this.isActive = ko.computed(function () { return !!self.value(); });
 }
 
-var Type = function () {
-  var self = this;
-  var sideBySideDiff = 'sidebysidediff'
-  var textDiff = 'textdiff'
-
-  this.text = ko.observable("Default");
-
-  if (!!ungit.config.diffType && ungit.config.diffType !== 'textdiff' && ungit.config.diffType !== 'sidebysidediff') {
-    ungit.config.diffType = 'textdiff';
-    console.log('Config "diffType" must be either "textdiff" or "sidebysidediff".');
-  }
-
-  this.value = ko.observable(ungit.config.diffType || textDiff);
-  this.value.subscribe(function (value) {
-    self.text(value === textDiff ? "Default" : "Side By Side");
-    programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-  });
-  this.toggle = function () {
-    self.value(self.value() === textDiff ? sideBySideDiff : textDiff);
-  }
-  this.isActive = ko.computed(function () {
-    return self.value() === 'textdiff';
-  });
-}
-
-var WhiteSpace = function () {
-  var self = this;
-
-  this.text = ko.observable("Showing White Space diff");
-  this.value = ko.observable(false);
-  this.value.subscribe(function (value) {
-    self.text(value ? "Ignoring White Space diff" : "Showing White Space diff");
-    programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-  });
-  this.toggle = function () {
-    self.value(!self.value());
-  }
-  this.isActive = ko.computed(function () { return !self.value(); });
-}
-
-var TextDiffViewModel = function (args) {
-  var self = this;
-  this.filename = args.filename;
-  this.repoPath = args.repoPath;
-  this.server = args.server;
-  this.sha1 = args.sha1;
-  this.loadMoreCount = ko.observable(0);
-  this.diffJson = null;
-  this.loadCount = loadLimit;
-  this.textDiffType = args.textDiffType;
-  this.whiteSpace = args.whiteSpace;
-  this.isShowingDiffs = args.isShowingDiffs;
-  this.editState = args.editState;
-  this.wordWrap = args.wordWrap;
-  this.patchLineList = args.patchLineList;
-  this.numberOfSelectedPatchLines = 0;
-  this.htmlSrc = undefined;
-  this.isParsed = ko.observable(false);
-
-  programEvents.add(function (event) {
-    if (event.event === "invalidate-diff-and-render" || event.event === "working-tree-changed") {
-      self.invalidateDiff();
-      if (self.isShowingDiffs()) self.render();
+class Type {
+  constructor() {
+    if (
+      !!ungit.config.diffType &&
+      ungit.config.diffType !== textDiff &&
+      ungit.config.diffType !== sideBySideDiff
+    ) {
+      ungit.config.diffType = textDiff;
+      console.log('Config "diffType" must be either "textdiff" or "sidebysidediff".');
     }
-  });
 
-  this.isShowingDiffs.subscribe(function (newValue) {
-    if (newValue) self.render();
-  });
+    this.value = ko.observable(ungit.config.diffType || textDiff);
 
-  if (this.isShowingDiffs()) { this.render(); }
-}
-TextDiffViewModel.prototype.updateNode = function (parentElement) {
-  ko.renderTemplate('textdiff', this, {}, parentElement);
-}
-TextDiffViewModel.prototype.getDiffArguments = function () {
-  return {
-    file: this.filename,
-    path: this.repoPath(),
-    sha1: this.sha1 ? this.sha1 : '',
-    whiteSpace: this.whiteSpace.value()
-  };
+    this.toggle = () => {
+      this.value(this.value() === textDiff ? sideBySideDiff : textDiff);
+    };
+    this.text = ko.computed(() => (this.value() === textDiff ? 'Inline' : 'Side By Side'));
+    this.isActive = ko.computed(() => this.value() === sideBySideDiff);
+  }
 }
 
-TextDiffViewModel.prototype.invalidateDiff = function () {
-  this.diffJson = null;
+class WhiteSpace {
+  constructor() {
+    this.value = ko.observable(ungit.config.ignoreWhiteSpaceDiff);
+
+    this.toggle = () => {
+      this.value(!this.value());
+    };
+    this.text = ko.computed(() => (this.value() ? 'Show Whitespace' : 'Hide Whitespace'));
+    this.isActive = ko.computed(() => this.value());
+  }
 }
 
-TextDiffViewModel.prototype.getDiffJson = function () {
-  var self = this;
-  return self.server.getPromise('/diff', self.getDiffArguments()).then(function (diffs) {
-    if (typeof diffs !== 'string') {
-      // Invalid value means there is no changes, show dummy diff withotu any changes
-      diffs = `diff --git a/${this.filename} b/${this.filename}
-                index aaaaaaaa..bbbbbbbb 111111
-                --- a/${this.filename}
-                +++ b/${this.filename}`;
+class TextDiffViewModel {
+  constructor(args) {
+    this.filename = args.filename;
+    this.oldFilename = args.oldFilename;
+    this.repoPath = args.repoPath;
+    this.server = args.server;
+    this.sha1 = args.sha1;
+    this.hasMore = ko.observable(false);
+    this.diffJson = null;
+    this.loadCount = loadLimit;
+    this.textDiffType = args.textDiffType;
+    this.whiteSpace = args.whiteSpace;
+    this.isShowingDiffs = args.isShowingDiffs;
+    this.editState = args.editState;
+    this.wordWrap = args.wordWrap;
+    this.patchLineList = args.patchLineList;
+    this.numberOfSelectedPatchLines = 0;
+    this.htmlSrc = undefined;
+    this.isParsed = ko.observable(false);
+
+    this.isShowingDiffs.subscribe((newValue) => {
+      if (newValue) this.render();
+    });
+    this.textDiffType.value.subscribe(() => {
+      if (this.isShowingDiffs()) this.render();
+    });
+    this.whiteSpace.value.subscribe(() => {
+      if (this.isShowingDiffs()) this.invalidateDiff();
+    });
+
+    if (this.isShowingDiffs()) {
+      this.render();
     }
-    self.diffJson = diff2html.getJsonFromDiff(diffs);
-  }).catch(function (err) {
-    // The file existed before but has been removed, but we're trying to get a diff for it
-    // Most likely it will just disappear with the next refresh of the staging area
-    // so we just ignore the error here
-    if (err.errorCode != 'no-such-file') self.server.unhandledRejection(err);
-  });
-}
+  }
 
-TextDiffViewModel.prototype.render = function (isInvalidate) {
-  var self = this;
-  return Promise.resolve().then(function () {
-    if (!self.diffJson || isInvalidate) {
-      return self.getDiffJson();
-    }
-  }).then(function () {
-    if (!self.diffJson || self.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
-    var lineCount = 0;
+  updateNode(parentElement) {
+    ko.renderTemplate('textdiff', this, {}, parentElement);
+  }
 
-    if (!self.diffJson[0].isTrimmed) {
-      self.diffJson[0].blocks = self.diffJson[0].blocks.reduce(function (blocks, block) {
-        var length = block.lines.length;
-        if (lineCount < self.loadCount) {
-          block.lines = block.lines.slice(0, self.loadCount - lineCount);
+  getDiffArguments() {
+    return {
+      file: this.filename,
+      oldFile: this.oldFilename,
+      path: this.repoPath(),
+      sha1: this.sha1 ? this.sha1 : '',
+      whiteSpace: this.whiteSpace.value(),
+    };
+  }
+
+  invalidateDiff() {
+    this.diffJson = null;
+    if (this.isShowingDiffs()) this.render();
+  }
+
+  getDiffJson() {
+    return this.server
+      .getPromise('/diff', this.getDiffArguments())
+      .then((diffs) => {
+        if (typeof diffs !== 'string') {
+          // Invalid value means there is no changes, show dummy diff without any changes
+          diffs = `diff --git a/${this.filename} b/${this.filename}
+                  index aaaaaaaa..bbbbbbbb 111111
+                  --- a/${this.filename}
+                  +++ b/${this.filename}`;
+        }
+        this.diffJson = diff2html.parse(diffs);
+      })
+      .catch((err) => {
+        // The file existed before but has been removed, but we're trying to get a diff for it
+        // Most likely it will just disappear with the next refresh of the staging area
+        // so we just ignore the error here
+        if (err.errorCode != 'no-such-file') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('diff, no such file', err);
+        }
+      });
+  }
+
+  render() {
+    return (!this.diffJson ? this.getDiffJson() : Promise.resolve()).then(() => {
+      if (!this.diffJson || this.diffJson.length == 0) return; // check if diffs are available (binary files do not support them)
+
+      if (!this.diffJson[0].allBlocks) {
+        this.diffJson[0].allBlocks = this.diffJson[0].blocks;
+      }
+
+      const currentLoadCount = Math.max(this.loadCount, loadLimit);
+      let lineCount = 0;
+      let loadCount = 0;
+      this.diffJson[0].blocks = this.diffJson[0].allBlocks.reduce((blocks, block) => {
+        const length = block.lines.length;
+        const remaining = currentLoadCount - lineCount;
+        if (remaining > 0) {
+          loadCount += length;
           blocks.push(block);
         }
         lineCount += length;
         return blocks;
       }, []);
-    }
-    self.diffJson[0].isTrimmed = true;
 
-    self.loadMoreCount(Math.min(loadLimit, Math.max(0, lineCount - self.loadCount)));
+      this.loadCount = loadCount;
+      this.hasMore(lineCount > loadCount);
 
-    var html;
-
-    if (self.textDiffType.value() === 'sidebysidediff') {
-      html = diff2html.getPrettySideBySideHtmlFromJson(self.diffJson);
-    } else {
-      html = diff2html.getPrettyHtmlFromJson(self.diffJson);
-    }
-
-    self.numberOfSelectedPatchLines = 0;
-    var index = 0;
-
-    // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
-    // data bind at getPatchCheckBox that is rendered with "html" binding.
-    // which is reason why manually updating the html content and refreshing kobinding to have it render...
-    if (self.patchLineList) {
-      html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|\-)/g, function (match, capture) {
-        if (self.patchLineList()[index] === undefined) {
-          self.patchLineList()[index] = true;
-        }
-
-        return self.getPatchCheckBox(capture, index, self.patchLineList()[index++]);
+      let html = diff2html.html(this.diffJson, {
+        outputFormat:
+          this.textDiffType.value() === sideBySideDiff ? 'side-by-side' : 'line-by-line',
+        drawFileList: false,
       });
+
+      this.numberOfSelectedPatchLines = 0;
+      let index = 0;
+
+      // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
+      // data bind at getPatchCheckBox that is rendered with "html" binding.
+      // which is reason why manually updating the html content and refreshing kobinding to have it render...
+      if (this.patchLineList) {
+        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, (match, capture) => {
+          if (this.patchLineList()[index] === undefined) {
+            this.patchLineList()[index] = true;
+          }
+
+          return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
+        });
+      }
+
+      if (html !== this.htmlSrc) {
+        // diff has changed since last we displayed and need refresh
+        this.htmlSrc = html;
+        this.isParsed(false);
+        this.isParsed(true);
+      }
+    });
+  }
+
+  loadMore() {
+    this.loadCount += loadLimit;
+    this.render();
+  }
+
+  getPatchCheckBox(symbol, index, isActive) {
+    if (isActive) {
+      this.numberOfSelectedPatchLines++;
+    }
+    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
+      isActive ? 'checked' : ''
+    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index})"></input></div>`;
+  }
+
+  togglePatchLine(index) {
+    this.patchLineList()[index] = !this.patchLineList()[index];
+
+    if (this.patchLineList()[index]) {
+      this.numberOfSelectedPatchLines++;
+    } else {
+      this.numberOfSelectedPatchLines--;
     }
 
-    if (html !== self.htmlSrc) {
-      // diff has changed since last we displayed and need refresh
-      self.htmlSrc = html;
-      self.isParsed(false);
-      self.isParsed(true);
+    if (this.numberOfSelectedPatchLines === 0) {
+      this.editState('none');
     }
-  });
-};
 
-TextDiffViewModel.prototype.loadMore = function () {
-  this.loadCount += this.loadMoreCount();
-  programEvents.dispatch({ event: 'invalidate-diff-and-render' });
-}
-
-TextDiffViewModel.prototype.getPatchCheckBox = function (symbol, index, isActive) {
-  if (isActive) {
-    this.numberOfSelectedPatchLines++;
+    return true;
   }
-  return '<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== \'patched\'">' + symbol + '</span><input ' + (isActive ? 'checked' : '') + ' type="checkbox" data-bind="visible: editState() === \'patched\', click: togglePatchLine.bind($data, ' + index + ')"></input>';
-}
-
-TextDiffViewModel.prototype.togglePatchLine = function (index) {
-  this.patchLineList()[index] = !this.patchLineList()[index];
-
-  if (this.patchLineList()[index]) {
-    this.numberOfSelectedPatchLines++;
-  } else {
-    this.numberOfSelectedPatchLines--;
-  }
-
-  if (this.numberOfSelectedPatchLines === 0) {
-    this.editState('none');
-  }
-
-  return true;
 }

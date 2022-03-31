@@ -2,7 +2,7 @@ const expect = require('expect.js');
 const request = require('supertest');
 const express = require('express');
 const path = require('path');
-const restGit = require('../src/git-api');
+const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
 
 const app = express();
@@ -16,22 +16,32 @@ let gitConfig;
 const req = request(app);
 
 describe('git-api branching', function () {
-  this.timeout(8000);
-
   before(() => {
-    return common.initRepo(req)
-      .then((res) => { testDir = res; })
+    return common
+      .initRepo(req)
+      .then((res) => {
+        testDir = res;
+      })
       .then(() => common.get(req, '/gitconfig', { path: testDir }))
-      .then((res) => { gitConfig = res; });
+      .then((res) => {
+        gitConfig = res;
+      });
   });
   after(() => common.post(req, '/testing/cleanup'));
 
   const commitMessage = 'Commit 1';
-  const testFile1 = "testfile1.txt";
+  const testFile1 = 'testfile1.txt';
 
   it('should be possible to commit to master', () => {
-    return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
-      .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage, files: [{ name: testFile1 }] }))
+    return common
+      .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
+      .then(() =>
+        common.post(req, '/commit', {
+          path: testDir,
+          message: commitMessage,
+          files: [{ name: testFile1 }],
+        })
+      );
   });
 
   it('listing branches should work', () => {
@@ -63,7 +73,7 @@ describe('git-api branching', function () {
   });
 
   it('listing branches should show the new branch as current', () => {
-    return common.get(req, '/branches', { path: testDir }).then(res => {
+    return common.get(req, '/branches', { path: testDir }).then((res) => {
       expect(res.length).to.be(2);
       expect(res[0].name).to.be('master');
       expect(res[0].current).to.be(undefined);
@@ -73,24 +83,32 @@ describe('git-api branching', function () {
   });
 
   it('get branch should show the new branch as current', () => {
-    return common.get(req, '/checkout', { path: testDir })
-      .then(res => expect(res).to.be(testBranch));
+    return common
+      .get(req, '/checkout', { path: testDir })
+      .then((res) => expect(res).to.be(testBranch));
   });
 
   const commitMessage3 = 'Commit 3';
-  const testFile2 = "testfile2.txt";
+  const testFile2 = 'testfile2.txt';
 
   it('should be possible to commit to the branch', () => {
-    return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile2) })
-      .then(() => common.post(req, '/commit', { path: testDir, message: commitMessage3, files: [ {name: testFile2} ] }));
+    return common
+      .post(req, '/testing/createfile', { file: path.join(testDir, testFile2) })
+      .then(() =>
+        common.post(req, '/commit', {
+          path: testDir,
+          message: commitMessage3,
+          files: [{ name: testFile2 }],
+        })
+      );
   });
 
   it('log should show both branches and all commits', () => {
-    return common.get(req, '/gitlog', { path: testDir }).then(res => {
+    return common.get(req, '/gitlog', { path: testDir }).then((res) => {
       expect(res.skip).to.be(0);
       expect(res.limit).to.be(25);
 
-      const nodes = res.nodes
+      const nodes = res.nodes;
       expect(nodes).to.be.a('array');
       expect(nodes.length).to.be(2);
       const objs = {};
@@ -133,10 +151,12 @@ describe('git-api branching', function () {
   });
 
   it('status should list the changed file', () => {
-    return common.get(req, '/status', { path: testDir }).then(res => {
+    return common.get(req, '/status', { path: testDir }).then((res) => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile1]).to.eql({
         displayName: testFile1,
+        fileName: testFile1,
+        oldFileName: testFile1,
         isNew: false,
         staged: false,
         removed: false,
@@ -144,19 +164,17 @@ describe('git-api branching', function () {
         renamed: false,
         type: 'text',
         additions: '1',
-        deletions: '1'
+        deletions: '1',
       });
     });
   });
-
 
   it('should be possible to create a tag', () => {
     return common.post(req, '/tags', { path: testDir, name: 'v1.0' });
   });
 
   it('should be possible to list tag', () => {
-    return common.get(req, '/tags', { path: testDir })
-      .then(res => expect(res.length).to.be(1));
+    return common.get(req, '/tags', { path: testDir }).then((res) => expect(res.length).to.be(1));
   });
 
   it('should be possible to delete a tag', () => {
@@ -164,8 +182,7 @@ describe('git-api branching', function () {
   });
 
   it('tag should be removed', () => {
-    return common.get(req, '/tags', { path: testDir })
-      .then(res => expect(res.length).to.be(0));
+    return common.get(req, '/tags', { path: testDir }).then((res) => expect(res.length).to.be(0));
   });
 
   it('should be possible to delete a branch', () => {
@@ -173,7 +190,8 @@ describe('git-api branching', function () {
   });
 
   it('branch should be removed', () => {
-    return common.get(req, '/branches', { path: testDir })
-      .then(res => expect(res.length).to.be(1));
+    return common
+      .get(req, '/branches', { path: testDir })
+      .then((res) => expect(res.length).to.be(1));
   });
 });

@@ -1,0 +1,17 @@
+{
+  "extends": "../../.eslintrc.json",
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "node": false
+  },
+  "globals": {
+    "io": "readonly",
+    "jQuery": "writable",
+    "Raven": "readonly",
+    "ungit": "readonly"
+  },
+  "rules": {
+    "no-prototype-builtins": "off"
+  }
+}

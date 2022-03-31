@@ -1,58 +1,117 @@
-
-<svg class="graphLog" xmlns="http://www.w3.org/2000/svg" version="1.1" data-bind="attr: { width: graphWidth, height: graphHeight }">
+<svg
+  class="graphLog"
+  xmlns="http://www.w3.org/2000/svg"
+  version="1.1"
+  data-bind="attr: { width: graphWidth, height: graphHeight }"
+>
   <defs>
-    <marker id="rebaseArrowEnd"
-      viewBox="0 0 10 10" refX="0" refY="5"
+    <marker
+      id="rebaseArrowEnd"
+      viewBox="0 0 10 10"
+      refX="0"
+      refY="5"
       markerUnits="strokeWidth"
-      markerWidth="4" markerHeight="3"
-      orient="auto">
+      markerWidth="4"
+      markerHeight="3"
+      orient="auto"
+    >
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#22252E" />
     </marker>
-    <marker id="pushArrowEnd"
-      viewBox="0 0 10 10" refX="0" refY="5"
+    <marker
+      id="pushArrowEnd"
+      viewBox="0 0 10 10"
+      refX="0"
+      refY="5"
       markerUnits="strokeWidth"
-      markerWidth="4" markerHeight="3"
-      orient="auto">
+      markerWidth="4"
+      markerHeight="3"
+      orient="auto"
+    >
       <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(61, 139, 255)" />
     </marker>
   </defs>
   <g>
     <!-- ko if: commitNodeEdge -->
-      <g class="load-ahead-button" data-bind="attr: { opacity: commitOpacity, visible: commitNodeEdge}, click: loadAhead">
-        <path data-bind="attr: { d: commitNodeEdge }", stroke="#4A4A4A" stroke-width="8" stroke-dasharray="10, 5" />
-        <circle data-bind="attr: { stroke: commitNodeColor }" cx="610" cy="35" r="30" data-bind="attr: { stroke: '#4A4A4A' }"  stroke-dasharray="10, 7" stroke-width="10" fill="transparent"/>
-        <!-- ko if: skip() > 0 -->
-          <circle class="loadAhead" data-bind="attr: { fill: commitNodeColor }" cx="610" cy="35" r="15" />
-        <!-- /ko -->
-      </g>
+    <g
+      class="load-ahead-button"
+      data-bind="attr: { opacity: commitOpacity, visible: commitNodeEdge}, click: loadAhead"
+    >
+      <path
+        data-bind="attr: { d: commitNodeEdge }"
+        ,
+        stroke="#4A4A4A"
+        stroke-width="8"
+        stroke-dasharray="10, 5"
+      />
+      <circle
+        data-bind="attr: { stroke: commitNodeColor }"
+        cx="610"
+        cy="35"
+        r="30"
+        data-bind="attr: { stroke: '#4A4A4A' }"
+        stroke-dasharray="10, 7"
+        stroke-width="10"
+        fill="transparent"
+      />
+      <!-- ko if: skip() > 0 -->
+      <circle
+        class="loadAhead"
+        data-bind="attr: { fill: commitNodeColor }"
+        cx="610"
+        cy="35"
+        r="15"
+      />
+      <!-- /ko -->
+    </g>
     <!-- /ko -->
 
     <!-- ko with: hoverGraphActionGraphic -->
-      <!-- ko foreach: bgEdges -->
-        <path data-bind="attr: { d: d, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray, 'marker-end': markerEnd }" />
-      <!-- /ko -->
+    <!-- ko foreach: bgEdges -->
+    <path
+      data-bind="attr: { d: d, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray, 'marker-end': markerEnd }"
+    />
+    <!-- /ko -->
     <!-- /ko -->
 
     <!-- ko foreach: edges -->
-      <path data-bind="element: element, event: { mouseover: edgeMouseOver, mouseout: edgeMouseOut }" stroke="#4A4A4A" stroke-width="8" />
+    <path
+      data-bind="element: element, event: { mouseover: edgeMouseOver, mouseout: edgeMouseOut }"
+      stroke="#4A4A4A"
+      stroke-width="8"
+    />
     <!-- /ko -->
 
     <!-- ko foreach: nodes -->
-      <svg data-bind="element: element" >
-        <circle data-bind="attr: { r: r, fill: color, 'data-ta-clickable': 'node-clickable-' + $index() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected" cx="30" cy="30" />
-        <!-- ko if: isNodeAccented -->
-          <circle data-bind=" attr: { r: r() - 4 }, click: toggleSelected" stroke="#252833" stroke-width="4" fill="transparent" cx="30" cy="30" />
-        <!-- /ko -->
-      </svg>
+    <svg data-bind="element: element">
+      <circle
+        data-bind="attr: { r: r, fill: color, 'data-ta-clickable': 'node-clickable-' + $index() }, event: { mouseover: nodeMouseover, mouseout: nodeMouseout }, click: toggleSelected"
+        cx="30"
+        cy="30"
+      />
+      <!-- ko if: isNodeAccented -->
+      <circle
+        data-bind=" attr: { r: r() - 4 }, click: toggleSelected"
+        stroke="#252833"
+        stroke-width="4"
+        fill="transparent"
+        cx="30"
+        cy="30"
+      />
+      <!-- /ko -->
+    </svg>
     <!-- /ko -->
 
     <!-- ko with: hoverGraphActionGraphic -->
-      <!-- ko foreach: nodes -->
-        <circle data-bind="attr: { cx: cx, cy: cy, r: r, fill: fill, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray }" />
-      <!-- /ko -->
-      <!-- ko foreach: fgEdges -->
-        <path data-bind="attr: { d: d, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray, 'marker-end': markerEnd }" />
-      <!-- /ko -->
+    <!-- ko foreach: nodes -->
+    <circle
+      data-bind="attr: { cx: cx, cy: cy, r: r, fill: fill, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray }"
+    />
+    <!-- /ko -->
+    <!-- ko foreach: fgEdges -->
+    <path
+      data-bind="attr: { d: d, stroke: stroke, 'stroke-width': strokeWidth, 'stroke-dasharray': strokeDasharray, 'marker-end': markerEnd }"
+    />
+    <!-- /ko -->
     <!-- /ko -->
   </g>
 </svg>

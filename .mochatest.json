@@ -1,0 +1,6 @@
+{
+  "spec": "test/spec.*.js",
+  "file": "./source/utils/logger.js",
+  "timeout": 12000,
+  "exit": true
+}

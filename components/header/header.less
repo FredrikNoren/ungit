@@ -1,3 +1,5 @@
+@import 'public/less/variables.less';
+
 .navbarPadder {
   height: 81px;
 }
@@ -5,61 +7,66 @@
 .navbar {
   padding-top: 13px;
   z-index: 5;
-  box-shadow: 0px 15px 15px #252833;
+  box-shadow: 0 15px 15px #252833;
   height: 81px;
 
   .backlink {
-    margin-left: 9px;
+    margin-left: 10px;
     margin-top: 7px;
     position: absolute;
     color: #686868;
+
     &:hover {
       text-decoration: none;
       color: #a5a5a5;
     }
-    .glyphicon-arrow-left {
+
+    .back-icon {
       -webkit-transition: opacity 0.5s ease-in-out;
       -moz-transition: opacity 0.5s ease-in-out;
       transition: opacity 0.5s ease-in-out;
       opacity: 0;
-      &.glyph-shown {
+
+      &.back-icon-shown {
         opacity: 1;
       }
     }
   }
+
   .form-container {
     margin-left: 180px;
-    margin-right: 62px;
+    margin-right: 72px;
+
     .path-input-form {
       width: 100%;
       position: relative;
+
       .form-control {
         font-size: 1.7em;
         width: 100%;
       }
+
       .add-to-repolist {
         position: absolute;
         right: 4px;
         top: 6px;
         background: transparent;
-        border: 0px;
+        border: 0;
         opacity: 0.3;
+
         &:hover {
           opacity: 0.8;
         }
       }
     }
   }
-  .arrowUp {
-    position: absolute;
-    bottom: 0px;
+
+  .arrow {
+    bottom: 0;
     left: 300px;
-    height: 0px;
-    width: 0px;
-    border-bottom: 15px solid #242832;
-    border-right: 15px solid transparent;
-    border-left: 15px solid transparent;
+    border-bottom-color: @body-bg;
   }
+
   .version-and-license {
     position: absolute;
     right: 10px;
@@ -67,6 +74,7 @@
     font-size: 12px;
   }
 }
+
 .toolbar {
   position: absolute;
   right: 10px;
@@ -74,8 +82,10 @@
 }
 
 .headerLogo {
-  width: 15%;
+  width: 100px;
+  height: auto;
 }
+
 .version {
   padding-left: 140px;
 }

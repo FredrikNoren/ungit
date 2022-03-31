@@ -1,0 +1,27 @@
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" data-bind="text: title"></h4>
+      </div>
+      <!-- Autocomplete is off here because of https://github.com/FredrikNoren/ungit/issues/363 -->
+      <form class="form-horizontal" data-bind="submit: submit" autocomplete="off">
+        <div class="modal-body" data-bind="foreach: items">
+          <div class="form-group">
+            <label data-bind="text: name, attr: { for: name }" class="col-lg-2 control-label"></label>
+            <div class="col-lg-10">
+              <input class="form-control"
+                data-bind="value: value, attr: { id: name, type: type, autofocus: autoFocus }" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" data-bind="click: submit, class: 'btn btn-primary'">Submit</button>
+          <button type="button" data-bind="click: close, visible: showCancel, class: 'btn btn-default'">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

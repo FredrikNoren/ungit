@@ -1,0 +1,11 @@
+{
+  "extends": "../.eslintrc.json",
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "node": false
+  },
+  "globals": {
+    "ungit": "readonly"
+  }
+}

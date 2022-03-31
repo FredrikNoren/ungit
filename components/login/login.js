@@ -1,46 +1,47 @@
+const ko = require('knockout');
+const components = require('ungit-components');
+const signals = require('signals');
 
-var ko = require('knockout');
-var components = require('ungit-components');
-var signals = require('signals');
+components.register('login', (args) => new LoginViewModel(args.server));
 
-components.register('login', function(args) {
-  return new LoginViewModel(args.server);
-});
+class LoginViewModel {
+  constructor(server) {
+    this.server = server;
+    this.loggedIn = new signals.Signal();
+    this.status = ko.observable('loading');
+    this.username = ko.observable();
+    this.password = ko.observable();
+    this.loginError = ko.observable();
+    this.server
+      .getPromise('/loggedin')
+      .then((status) => {
+        if (status.loggedIn) {
+          this.loggedIn.dispatch();
+          this.status('loggedIn');
+        } else {
+          this.status('login');
+        }
+      })
+      .catch((err) => {});
+  }
 
+  updateNode(parentElement) {
+    ko.renderTemplate('login', this, {}, parentElement);
+  }
 
-
-
-var LoginViewModel = function(server) {
-  var self = this;
-  this.server = server;
-  this.loggedIn = new signals.Signal();
-  this.status = ko.observable('loading');
-  this.username = ko.observable();
-  this.password = ko.observable();
-  this.loginError = ko.observable();
-  this.server.getPromise('/loggedin')
-    .then(function(status) {
-      if (status.loggedIn) {
-        self.loggedIn.dispatch();
-        self.status('loggedIn');
-      } else {
-        self.status('login');
-      }
-    }).catch(function(err) { });
-}
-LoginViewModel.prototype.updateNode = function(parentElement) {
-  ko.renderTemplate('login', this, {}, parentElement);
-}
-LoginViewModel.prototype.login = function() {
-  var self = this;
-  this.server.postPromise('/login', { username: this.username(), password: this.password() }).then(function(res) {
-    self.loggedIn.dispatch();
-    self.status('loggedIn');
-  }).catch(function(err) {
-    if (err.res.body.error) {
-      self.loginError(err.res.body.error);
-    } else {
-      self.server.unhandledRejection(err);
-    }
-  });
+  login() {
+    this.server
+      .postPromise('/login', { username: this.username(), password: this.password() })
+      .then((res) => {
+        this.loggedIn.dispatch();
+        this.status('loggedIn');
+      })
+      .catch((err) => {
+        if (err.res.body.error) {
+          this.loginError(err.res.body.error);
+        } else {
+          this.server.unhandledRejection(err);
+        }
+      });
+  }
 }

@@ -1,9 +1,9 @@
+const signals = require('signals');
 
-var signals = require('signals');
-
-var programEvents = new signals.Signal();
+const programEvents = new signals.Signal();
 module.exports = programEvents;
+ungit.programEvents = programEvents;
 
-programEvents.add(function(event) {
-  console.log('Event:', event);
+programEvents.add(function (event) {
+  console.log('Event:', event.event);
 });

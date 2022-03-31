@@ -1,27 +1,34 @@
 <!-- ko if: isShowingDiffs -->
 <!-- ko if: state() == 'new' -->
 <div class="imageDiff img-added">
-<img data-bind="attr: { src: newImageSrc }" class="img-responsive">
+  <img data-bind="attr: { src: newImageSrc }" class="img-responsive" />
 </div>
 <!-- /ko -->
 <!-- ko if: state() == 'removed' -->
 <div class="imageDiff img-removed">
-<img data-bind="attr: { src: oldImageSrc }" class="img-responsive img-removed">
+  <img data-bind="attr: { src: oldImageSrc }" class="img-responsive" />
 </div>
 <!-- /ko -->
 <!-- ko if: state() == 'changed' -->
 <div class="imageDiff">
-<div class="row">
-  <div class="col-lg-5">
-    <img data-bind="event: {error: oldImageError }, attr: { src: oldImageSrc }" class="img-responsive">
+  <div class="row">
+    <div class="col-lg-5">
+      <img
+        data-bind="event: {error: oldImageError }, attr: { src: oldImageSrc }"
+        class="img-responsive"
+      />
+    </div>
+    <div class="col-lg-2">
+      <span class="visible-lg" data-bind="html: rightArrowIcon"></span>
+      <span class="hidden-lg" data-bind="html: downArrowIcon"></span>
+    </div>
+    <div class="col-lg-5">
+      <img
+        data-bind="event: {error: newImageError }, attr: { src: newImageSrc }"
+        class="img-responsive"
+      />
+    </div>
   </div>
-  <div class="col-lg-2">
-    <span class="glyphicon glyphicon-arrow-right"></span>
-  </div>
-  <div class="col-lg-5">
-    <img data-bind="event: {error: newImageError }, attr: { src: newImageSrc }" class="img-responsive">
-  </div>
-</div>
 </div>
 <!-- /ko -->
 <!-- /ko -->

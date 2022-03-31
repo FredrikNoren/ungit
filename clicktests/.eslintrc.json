@@ -1,0 +1,15 @@
+{
+  "extends": ["../.eslintrc.json", "plugin:mocha/recommended"],
+  "plugins": ["mocha"],
+  "env": {
+    "browser": true,
+    "mocha": true
+  },
+  "globals": {
+    "ungit": "readonly"
+  },
+  "rules": {
+    "mocha/no-mocha-arrows": "off",
+    "mocha/no-setup-in-describe": "off" // Off for now
+  }
+}

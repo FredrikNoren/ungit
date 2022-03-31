@@ -1,10 +1,9 @@
-
-@import "public/less/variables.less";
+@import 'public/less/variables.less';
 
 .staging {
-  background: #2B3844;
-  box-shadow: 0px -1px 15px #252833;
-  color: #B8A5A5;
+  background: #2b3844;
+  box-shadow: 0 -1px 15px #252833;
+  color: #b8a5a5;
   z-index: 5;
   position: relative;
 
@@ -14,44 +13,37 @@
     }
   }
 
-  .arrowDown {
-    position: absolute;
-    left: (@log-width-small + 45px);
-    bottom: 0px;
-    .arrow {
-      height: 0px;
-      width: 0px;
-      border-top: 15px solid #2B3844;
-      border-right: 15px solid transparent;
-      border-left: 15px solid transparent;
-    }
+  textarea.commit-body {
+    resize: vertical;
   }
 
-  .btn-load-more {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  .arrow {
+    border-top-color: #2b3844;
+    left: (@log-width-small + 45px);
+    bottom: -30px;
+  }
+
+  .commitnpush.disabled {
+    pointer-events: none;
+    opacity: 0.5;
   }
 
   .file-area {
     position: relative;
-
-    .commands {
-      width: 100%;
-    }
   }
 
   .validationError {
     display: none;
-    color: #D6542D;
+    color: #d6542d;
     padding: 0.25em;
   }
+
   &:hover .validationError {
     display: inline-block;
   }
 
   .diffContainer {
-    margin-top: 0px;
+    margin-top: 0;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
   }
@@ -64,8 +56,10 @@
     padding-left: 5px;
     padding-right: 5px;
     cursor: pointer;
+
+    &:focus,
     &:hover {
-      background: #000;
+      background: #000000;
       color: rgba(255, 255, 255, 0.9);
     }
   }
@@ -79,23 +73,11 @@
     padding-right: 5px;
     cursor: pointer;
     font-weight: bold;
-    &:hover {
-      background: #55f;
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
 
-  .ignore + .tooltip {
-    .tooltip-inner {
-      background: #55f;
+    &:focus,
+    &:hover {
+      background: #5555ff;
       color: rgba(255, 255, 255, 0.9);
-    }
-    .tooltip-arrow {
-      bottom: 0;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px 5px 0;
-      border-top-color: #55f;
     }
   }
 
@@ -108,120 +90,138 @@
     padding-right: 5px;
     cursor: pointer;
     font-weight: bold;
+
+    &:focus,
     &:hover {
       background: #279124;
       color: rgba(255, 255, 255, 0.9);
     }
   }
-  .patch + .tooltip {
-    .tooltip-inner {
-      background: #279124;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    .tooltip-arrow {
-      bottom: 0;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px 5px 0;
-      border-top-color: #279124;
-    }
+
+  .d2h-code-line-prefix input[type='checkbox'] {
+    margin: 0;
+    margin-right: -6px;
+    vertical-align: sub;
   }
 
   .files {
     position: relative;
+
     .file {
+      padding: 0.3em;
+
       &.showingDiffs {
         .name {
           background: rgba(255, 255, 255, 0.1);
-          color: #000;
-          border-bottom-left-radius: 0px;
-          border-bottom-right-radius: 0px;
+          color: #000000;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
         }
       }
+
+      .checkmark {
+        span {
+          top: 5px;
+        }
+      }
+
       .name {
         background: transparent;
         font-size: 1.3em;
         cursor: pointer;
         padding: 3px;
-        border: 0px;
+        border: 0;
         border-radius: 3px;
         color: rgba(255, 255, 255, 0.8);
       }
-      padding: 0.3em;
 
-      .new, .deleted, .conflict, .markresolved, .launchmergetool {
+      .new,
+      .deleted,
+      .conflict,
+      .markresolved,
+      .launchmergetool {
         padding: 3px;
         padding-left: 5px;
         padding-right: 5px;
       }
-      .new, .additions {
+
+      .new,
+      .additions {
         color: #949494;
         vertical-align: middle;
       }
-      .deleted, .deletions {
-        color: #7B7B7B;
+
+      .deleted,
+      .deletions {
+        color: #7b7b7b;
         vertical-align: middle;
       }
+
       .conflict {
-        color: #DB12C0;
+        color: #db12c0;
+
         .explanation {
           display: none;
         }
+
         &:hover {
           .explanation {
             display: inline;
           }
+
           .temporary {
             display: none;
           }
         }
       }
+
       .markresolved {
-        color: #DB12C0;
+        color: #db12c0;
         cursor: pointer;
+
         .explanation {
           display: none;
         }
+
         &:hover {
-          background: #A445ED;
-          color: #000;
+          background: #a445ed;
+          color: #000000;
           border-radius: 3px;
+
           .explanation {
             display: inline;
           }
         }
       }
+
       .launchmergetool {
-        color: #DB55FF;
+        color: #db55ff;
         cursor: pointer;
+
         .explanation {
           display: none;
         }
+
         &:hover {
-          background: #A477FF;
-          color: #000;
+          background: #a477ff;
+          color: #000000;
           border-radius: 3px;
+
           .explanation {
             display: inline;
           }
         }
       }
     }
-  }
-  .btn-group {
-    margin-right: 10px
   }
 }
 
 @media (min-width: @screen-md-min) {
   .staging {
-    .arrowDown {
+    .arrow {
       left: (@log-width-large + 45px);
     }
   }
-}
-
-@media (min-width: @screen-lg-min) {
 }
 
 .commit-message-title-counter {
@@ -229,16 +229,23 @@
   position: absolute;
 }
 
+.amend-button {
+  padding: 0;
+
+  &:active,
+  &:focus,
+  &:hover {
+    text-decoration: none;
+  }
+}
 
 .checkmark {
-  color: #fff;
+  color: #ffffff;
   display: inline-block;
   opacity: 0.3;
   cursor: pointer;
+
   &.checked {
     opacity: 0.8;
-  }
-  span {
-    top: 5px;
   }
 }

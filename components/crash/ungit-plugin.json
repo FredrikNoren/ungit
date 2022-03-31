@@ -3,6 +3,7 @@
     "knockoutTemplates": {
       "crash": "crash.html"
     },
-    "javascript": "crash.bundle.js"
+    "javascript": "crash.bundle.js",
+    "css": "crash.css"
   }
 }

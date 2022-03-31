@@ -1,136 +1,125 @@
-// Styles.less
-// This file contains styling that's only used in this app
+@import 'variables.less';
+@import 'bootstrap.less';
+@import (less) '../../node_modules/nprogress/nprogress.css';
+@import (less) '../../node_modules/jquery-ui/themes/base/core.css';
+@import (less) '../../node_modules/diff2html/bundles/css/diff2html.min.css';
+@import (less) '../../node_modules/@primer/octicons/build/build.css';
+@import (less) '../vendor/css/animate.css';
+@import 'd2h.less';
 
-@import "generic.less";
-
-
-// -- Application specific layout ----
-// Needed to properly layout this specific page regardless of the specific bootstrap configuration/styling
-
-.glyphicon-circled {
-	margin-right: 18px;
-	border: 5px solid #686868;
-	border-radius: 100%;
-	padding-bottom: 7px;
-	padding-top: 6px;
-	padding-right: 20px;
-	padding-left: 7px;
+// Font face declarations
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url('../fonts/OpenSans.woff') format('woff');
 }
 
-.repository-actions {
-	position: absolute;
-	margin-top: 20px;
-	right: 0px;
-	z-index: 30;
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Source Code Pro Medium'), local('SourceCodePro-Medium'),
+    url('../fonts/SourceCodePro-Medium.woff') format('woff');
 }
 
-.crash {
-	margin-top: 20px;
+// Custom Scrollbar for Webkit
+::-webkit-scrollbar {
+  width: 15px;
 }
 
-// -- Application specific styling ----
-.btn-load-more {
-	padding-top: 10px;
-	padding-bottom: 10px;
-	.btn {
-		margin-right: auto;
-		margin-left: auto;
-		display: table;
-	}
+::-webkit-scrollbar-track {
+  background-color: #2b3844;
 }
 
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-button {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: black;
+}
+
+// Matching jQuery-UI autocomplete style to bootstrap dropdown
 .ui-autocomplete {
-	background: rgba(200, 210, 230, 1);
-	box-shadow: 13px 13px 0px rgba(0, 0, 0, 0.2);
-	border-radius: 5px;
-	margin-top: 3px;
-	position: absolute;
-	display: block;
-	left: 0px;
-	top: 0px;
-	z-index: 100;
-	list-style: none;
-	padding-left: 0px;
-	margin-left: 0px;
-	padding: 3px;
-	.ui-menu-item {
-		list-style-type: none;
-		a {
-			padding: 2px;
-			padding-left: 4px;
-			border-radius: 3px;
-			display: block;
-			color: rgba(0, 0, 0, 0.6);
-			cursor: pointer;
-			text-decoration: none;
-			&.ui-state-focus, &.ui-state-active {
-				background: rgba(11, 26, 51, 1);
-				color: #fff;
-			}
-		}
-	}
-}
+  .ui-menu-item-wrapper {
+    cursor: pointer;
 
-.app-top-margin {
-	margin-top: 15px
-}
-
-.list-link {
-	float: right;
-  display: inline;
-	margin-top: -23px;
-}
-
-.dropdown-menu {
-  max-height: 500px;
-  height: auto;
-  overflow-y: scroll;
-  min-width: 205px;
-  width: auto;
-  .option {
-    padding-left: 20px;
-    font-size: 120%;
-    color: black;
-  }
-  .dropdown-divider {
-    height: 0;
-    margin: .5rem 0;
-    overflow: hidden;
-    border-top: 1px solid #e9ecef;
-  }
-  li {
-    a {
-      padding-right: 30px;
-      &.list-url {
-        padding: 0px 4px 0px 4px;
-        margin-right: 30px;
-      }
-
-      &.list-remove {
-        padding: 0px 4px 0px 4px;
-        margin-right: 10px;
-      }
+    &.ui-state-active {
+      color: @dropdown-link-hover-color;
+      background-color: @dropdown-link-hover-bg;
+      border: none;
+      margin: 0;
     }
   }
 }
 
-.remote-icon {
-	background: url('../plugins/graph/images/remoteIcon.png');
-	width: 12px;
-	height: 10px;
-	display: inline-block;
+//New shared styles
+.list-group-item .list-item-remove {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: transparent;
+  border: none;
+  opacity: 0.3;
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
-.branch-icon {
-	background: url('../plugins/graph/images/branchIcon.png');
-	width: 9px;
-	height: 10px;
-	display: inline-block;
+div.list-group-item {
+  &:hover {
+    background: @list-group-hover-bg;
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
 }
 
-.tag-icon {
-	background: url('../plugins/graph/images/tagIcon.png');
-	width: 5px;
-	height: 10px;
-	display: inline-block;
+.arrow {
+  position: absolute;
+  height: 0;
+  width: 0;
+  border: 15px solid transparent;
+}
+
+.octicon-circled {
+  margin-right: 15px;
+  border: 5px solid #686868;
+  border-radius: 100%;
+  display: inline-block;
+  height: 36px;
+  width: 36px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.dropdown-menu {
+  .linked-remove {
+    padding-right: 40px;
+  }
+
+  .linked-url {
+    padding-right: 60px;
+  }
+
+  .list-link {
+    float: right;
+    margin-top: -23px;
+    padding: 0 4px;
+  }
+
+  .list-url {
+    margin-right: 30px;
+  }
+
+  .list-remove {
+    margin-right: 10px;
+  }
 }
