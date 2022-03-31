@@ -74,31 +74,27 @@ const baseDir = path.join(__dirname, '..');
   console.log(`browserify ${path.relative(baseDir, ungitjsFile)}`);
 
   console.log('browserify:components');
-  await Promise.all(
-    components.map(async (component) => {
-      const sourcePrefix = path.join(baseDir, `components/${component}/${component}`);
-      const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
+  for (const component of components) {
+    const sourcePrefix = path.join(baseDir, `components/${component}/${component}`);
+    console.log(`browserify:components:${component}`);
+    const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
 
-      const jsSource = `${sourcePrefix}.js`;
-      try {
-        await fs.access(jsSource);
-        return browserifyFile(jsSource, destination);
-      } catch (_) {
-        // ignore error here as .ts will be tried.
-      }
-
+    const jsSource = `${sourcePrefix}.js`;
+    try {
+      await fs.access(jsSource);
+      await browserifyFile(jsSource, destination);
+    } catch (_) {
       const tsSource = `${sourcePrefix}.ts`;
       try {
         await fs.access(tsSource);
-        return browserifyFile(tsSource, destination);
+        await browserifyFile(tsSource, destination);
       } catch (e) {
         console.warn(
           `${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
         );
-        return;
       }
-    })
-  );
+    }
+  }
 
   // copy
   console.log('copy bootstrap fonts');
