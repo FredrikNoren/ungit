@@ -17,4 +17,5 @@ export abstract class AbstractGraph extends ComponentRoot {
   nodesEdges: AbstractNodesEdges
 
   abstract getRef(sha1: string, constructIfUnavailable: boolean | undefined): any // Ref
+  abstract isBigRepo(): boolean
 }

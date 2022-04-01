@@ -51,28 +51,36 @@ export class ActionBase {
   }
 
   dragEnter() {
-    if (!this.visible()) return;
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     if (this.graph.hoverGraphAction() !== this) {
       this.graph.hoverGraphAction(this);
     }
   }
 
   dragLeave() {
-    if (!this.visible()) return;
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     if (this.graph.hoverGraphAction() !== null) {
       this.graph.hoverGraphAction(null);
     }
   }
 
   mouseover() {
-    if (!this.visible()) return;
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     if (this.graph.hoverGraphAction() !== this) {
       this.graph.hoverGraphAction(this);
     }
   }
 
   mouseout() {
-    if (!this.visible()) return;
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     if (this.graph.hoverGraphAction() !== null) {
       this.graph.hoverGraphAction(null);
     }

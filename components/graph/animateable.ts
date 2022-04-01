@@ -28,7 +28,7 @@ export abstract class Animateable extends Selectable {
       (forceRefresh || JSON.stringify(currentGraph) !== JSON.stringify(this.previousGraph))
     ) {
       // dom is valid and force refresh is requested or dom moved, redraw
-      if (ungit.config.isAnimate) {
+      if (ungit.config.isAnimate && !this.graph.isBigRepo()) {
         const now = Date.now();
         (window as any).mina(
           this.previousGraph || currentGraph,

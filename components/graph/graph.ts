@@ -42,7 +42,7 @@ class GraphViewModel extends AbstractGraph {
   searchIcon = octicons.search.toSVG({ height: 18 });
   plusIcon = octicons.plus.toSVG({ height: 18 });
 
-  checkedOutRef = ko.computed(() =>
+  checkedOutRef: ko.Computed<RefViewModel | null> = ko.computed(() =>
     this.checkedOutBranch() ? this.getRef(`refs/heads/${this.checkedOutBranch()}`) : null
   );
 
@@ -243,6 +243,16 @@ class GraphViewModel extends AbstractGraph {
     } else {
       return undefined;
     }
+  }
+
+  /**
+   * Returns true if we are working with big repo and disable certain features
+   * for performance purposes.
+   * 
+   * @returns boolean
+   */
+  isBigRepo(): boolean {
+    return Object.keys(this.refsByRefName).length > 1000;
   }
 }
 
