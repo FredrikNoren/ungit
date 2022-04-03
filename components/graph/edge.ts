@@ -9,7 +9,7 @@ export class EdgeViewModel extends Animateable {
     super(graph);
     this.nodeA = graph.nodesEdges.getNode(nodeAsha1);
     this.nodeB = graph.nodesEdges.getNode(nodeBsha1);
-    this.getGraphAttr = ko.computed(() => {
+    this.getGraphAttr = ko.pureComputed(() => {
       if (this.nodeA.isViewable() && this.nodeB.isViewable()) {
         return [
           this.nodeA.cx(),

@@ -7,7 +7,7 @@ export abstract class Selectable {
 
   constructor(graph) {
     this.graph = graph
-    this.selected = ko.computed({
+    this.selected = ko.pureComputed({
       read() {
         return graph.currentActionContext() == this;
       },

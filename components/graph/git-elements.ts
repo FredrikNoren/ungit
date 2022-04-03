@@ -39,7 +39,7 @@ export class NodeViewModel extends AbstractNode {
   commitTime: undefined | string = undefined; // commit time in string
   signatureDate = ko.observable<string>();
   signatureMade = ko.observable<string>();
-  pgpVerifiedString = ko.computed(() => {
+  pgpVerifiedString = ko.pureComputed(() => {
     if (this.signatureMade()) {
       return `PGP by: ${this.signatureMade()} at ${this.signatureDate()}`;
     }
@@ -47,10 +47,10 @@ export class NodeViewModel extends AbstractNode {
 
   // refs
   ideologicalBranch: RefViewModel | undefined = undefined;
-  branches = ko.computed(() => this.refs().filter(ref => ref.isBranch));
-  tags = ko.computed(() => this.refs().filter(ref => ref.isTag));
+  branches = ko.pureComputed(() => this.refs().filter(ref => ref.isBranch));
+  tags = ko.pureComputed(() => this.refs().filter(ref => ref.isTag));
   refsToDisplayOverride = ko.observable<RefViewModel | undefined>(undefined);
-  refsToDisplay = ko.computed(() => {
+  refsToDisplay = ko.pureComputed(() => {
     const numberOfBranches = ungit.config.numRefsToShow - Math.min(this.tags().length, maxTagsToDisplay);
     const branchesToDisplay = this.branches().slice(0, numberOfBranches);
     const numberOfTags = ungit.config.numRefsToShow - branchesToDisplay.length;
@@ -67,22 +67,22 @@ export class NodeViewModel extends AbstractNode {
   // graph variables
   color = ko.observable<string>();
   commitContainerVisible: ko.Computed<boolean>
-  isNodeAccented = ko.computed(() => this.selected() || this.isEdgeHighlighted());
+  isNodeAccented = ko.pureComputed(() => this.selected() || this.isEdgeHighlighted());
   showNewRefAction: ko.Computed<boolean>
-  showRefSearch = ko.computed(
+  showRefSearch = ko.pureComputed(
     () => this.branches().length + this.tags().length > ungit.config.numRefsToShow
   );
   newBranchName = ko.observable<string>();
   newBranchNameHasFocus = ko.observable(true);
   branchingFormVisible = ko.observable(false);
-  canCreateRef = ko.computed(
+  canCreateRef = ko.pureComputed(
     () =>
       this.newBranchName() && this.newBranchName().trim() && !this.newBranchName().includes(' ')
   );
   branchOrder = ko.observable<number>();
   refSearchFormVisible = ko.observable(false);
   getGraphAttr: ko.Computed<number[]>
-  dropareaGraphActions: ActionBase[] // graph actions
+  dropareaGraphActions: ko.Computed<ActionBase[]>
 
   constructor(graph: AbstractGraph, sha1: string) {
     super(graph);
@@ -90,32 +90,39 @@ export class NodeViewModel extends AbstractNode {
     this.selected.subscribe(() => {
       ungit.programEvents.dispatch({ event: 'graph-render' });
     });
-    this.dropareaGraphActions = [
-      new Move(this.graph, this),
-      new Rebase(this.graph, this),
-      new Merge(this.graph, this),
-      new Push(this.graph, this),
-      new Reset(this.graph, this),
-      new Checkout(this.graph, this),
-      new Delete(this.graph, this),
-      new CherryPick(this.graph, this),
-      new Uncommit(this.graph, this),
-      new Revert(this.graph, this),
-      new Squash(this.graph, this),
-    ];
+    this.dropareaGraphActions = ko.pureComputed(() => {
+      if (this.isViewable()) {
+        return [
+          new Move(this.graph, this),
+          new Rebase(this.graph, this),
+          new Merge(this.graph, this),
+          new Push(this.graph, this),
+          new Reset(this.graph, this),
+          new Checkout(this.graph, this),
+          new Delete(this.graph, this),
+          new CherryPick(this.graph, this),
+          new Uncommit(this.graph, this),
+          new Revert(this.graph, this),
+          new Squash(this.graph, this),
+        ];
+      } else {
+        return []
+      }
+    }).extend({ rateLimit: { timeout: 250, method: "notifyWhenChangesStop" } });
+
     this.commitComponent = components.create('commit', this);
     this.r = ko.observable<number>();
     this.cx = ko.observable<number>();
     this.cy = ko.observable<number>();
-    this.commitContainerVisible = ko.computed(
+    this.commitContainerVisible = ko.pureComputed(
       () => {
         return this.ancestorOfHEAD() || this.nodeIsMousehover() || this.selected();
       }
     );
-    this.showNewRefAction = ko.computed(() => {
+    this.showNewRefAction = ko.pureComputed(() => {
       return !this.graph.currentActionContext();
     });
-    this.getGraphAttr = ko.computed(() => [this.cx(), this.cy()]);
+    this.getGraphAttr = ko.pureComputed(() => [this.cx(), this.cy()]);
   }
 
 
@@ -383,7 +390,7 @@ export class RefViewModel extends Selectable {
     this.show = true;
     this.server = this.graph.server;
     this.isDragging = ko.observable(false);
-    this.current = ko.computed(
+    this.current = ko.pureComputed(
       () => this.isLocalBranch && this.graph.checkedOutBranch() == this.refName
     );
     this.color = this._colorFromHashOfString(this.name);
@@ -422,6 +429,7 @@ export class RefViewModel extends Selectable {
   }
 
   dragStart() {
+    ungit._perf.dd.push(5);
     this.graph.currentActionContext(this);
     this.isDragging(true);
     if (document.activeElement) {
@@ -430,6 +438,7 @@ export class RefViewModel extends Selectable {
   }
 
   dragEnd() {
+    ungit._perf.ee.push(6);
     this.graph.currentActionContext(null);
     this.isDragging(false);
   }
