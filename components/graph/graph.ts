@@ -80,6 +80,9 @@ class GraphViewModel extends AbstractGraph {
       'beforeChange'
     );
     this.hoverGraphAction.subscribe((value) => {
+      if (!value) {
+        return;
+      }
       const hoverGraphic = value.createHoverGraphic();
       if (value && value.createHoverGraphic && this.hoverGraphActionGraphic() !== hoverGraphic) {
         this.hoverGraphActionGraphic(hoverGraphic);
