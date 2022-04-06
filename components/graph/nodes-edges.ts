@@ -9,11 +9,11 @@ import { AbstractNodesEdges } from './abstract-nodes-edges';
 export class NodesEdges extends AbstractNodesEdges {
   graph: AbstractGraph
   heighstBranchOrder = 0
-  nodes = ko.observableArray<NodeViewModel>();
+  nodes = ko.observableArray<NodeViewModel>().extend({ rateLimit: { timeout: 250, method: "notifyAtFixedRate" } });
   viewableNodes = ko.computed(() => {
     return this.nodes().filter(node => node.isViewable());
   })
-  edges = ko.observableArray<EdgeViewModel>();
+  edges = ko.observableArray<EdgeViewModel>().extend({ rateLimit: { timeout: 250, method: "notifyAtFixedRate" } });
   viewableEdges = ko.computed(() => {
     return this.edges().filter(edge => edge.isViewable());
   })
