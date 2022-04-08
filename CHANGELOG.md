@@ -11,6 +11,11 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
   - throttling ko observable change triggers.
   - removed unnecessary observables.
   - cleaned up how refs are calculated for NodeViewModel. `NodeViewModel.ref()` is no longer depends on `branchesAndLocalTags()` and `remoteTags()`.
+  - introduced `graph.isBigRepo()` to disable some of the features
+    - `branches.js`'s branch sorting 
+    - animations
+    - hover graphice ovrlay
+  - `graph.dropareaGraphActions` to be computed
 
 ### Changed
 - Graph component to typescript [#1508](https://github.com/FredrikNoren/ungit/pull/1508)

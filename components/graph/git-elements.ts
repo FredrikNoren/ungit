@@ -429,7 +429,6 @@ export class RefViewModel extends Selectable {
   }
 
   dragStart() {
-    ungit._perf.dd.push(5);
     this.graph.currentActionContext(this);
     this.isDragging(true);
     if (document.activeElement) {
@@ -438,7 +437,6 @@ export class RefViewModel extends Selectable {
   }
 
   dragEnd() {
-    ungit._perf.ee.push(6);
     this.graph.currentActionContext(null);
     this.isDragging(false);
   }
