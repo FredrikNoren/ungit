@@ -89,10 +89,6 @@ class AppViewModel {
       })
       .catch((e) => this.server.unhandledRejection(e));
   }
-  updateAnimationFrame(deltaT) {
-    if (this.content() && this.content().updateAnimationFrame)
-      this.content().updateAnimationFrame(deltaT);
-  }
   onProgramEvent(event) {
     if (event.event === 'request-credentials') {
       this._handleCredentialsRequested(event);

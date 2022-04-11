@@ -18,7 +18,9 @@ class BranchesViewModel extends ComponentRoot {
     this.repoPath = repoPath;
     this.server = server;
     this.updateRefs = _.debounce(this._updateRefs, 250, this.defaultDebounceOption);
-    this.branchesAndLocalTags = ko.observableArray();
+    this.branchesAndLocalTags = ko
+      .observableArray()
+      .extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
     this.current = ko.observable();
     this.isShowRemote = ko.observable(storage.getItem(showRemote) != 'false');
     this.isShowBranch = ko.observable(storage.getItem(showBranch) != 'false');
@@ -94,15 +96,29 @@ class BranchesViewModel extends ComponentRoot {
         return;
       }
 
+      const refsByRefNameCopy = { ...this.graph.refsByRefName };
+
       const version = Date.now();
-      const sorted = refs
+      const refViewModels = refs
         .map((r) => {
-          const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
-          ref.node(this.graph.getNode(r.sha1));
+          const refName = r.name.replace('refs/tags', 'tag: refs/tags');
+          const ref = this.graph.getRef(refName);
+          ref.node(this.graph.nodesEdges.getNode(r.sha1));
           ref.version = version;
+          delete refsByRefNameCopy[refName];
           return ref;
         })
-        .sort((a, b) => {
+        .filter((ref) => {
+          if (ref.localRefName == 'refs/stash') return false;
+          if (ref.localRefName.endsWith('/HEAD')) return false;
+          if (!this.isShowRemote() && ref.isRemote) return false;
+          if (!this.isShowBranch() && ref.isBranch) return false;
+          if (!this.isShowTag() && ref.isTag) return false;
+          return true;
+        });
+
+      if (!this.graph.isBigRepo()) {
+        refViewModels.sort((a, b) => {
           if (a.current() || b.current()) {
             return a.current() ? -1 : 1;
           } else if (a.isRemoteBranch === b.isRemoteBranch) {
@@ -116,17 +132,11 @@ class BranchesViewModel extends ComponentRoot {
           } else {
             return a.isRemoteBranch ? 1 : -1;
           }
-        })
-        .filter((ref) => {
-          if (ref.localRefName == 'refs/stash') return false;
-          if (ref.localRefName.endsWith('/HEAD')) return false;
-          if (!this.isShowRemote() && ref.isRemote) return false;
-          if (!this.isShowBranch() && ref.isBranch) return false;
-          if (!this.isShowTag() && ref.isTag) return false;
-          return true;
         });
-      this.branchesAndLocalTags(sorted);
-      this.graph.refs().forEach((ref) => {
+      }
+
+      this.branchesAndLocalTags(refViewModels);
+      Object.values(refsByRefNameCopy).forEach((ref) => {
         // ref was removed from another source
         if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
           ref.remove(true);

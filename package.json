@@ -73,6 +73,7 @@
   },
   "devDependencies": {
     "@homer0/prettier-plugin-jsdoc": "^5.0.0",
+    "@types/jquery": "^3.5.14",
     "archiver": "~5.3.0",
     "browserify": "~17.0.0",
     "dedent": "~0.7.0",

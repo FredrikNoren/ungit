@@ -6,7 +6,9 @@ components.register('commitDiff', (args) => new CommitDiff(args));
 
 class CommitDiff {
   constructor(args) {
-    this.commitLineDiffs = ko.observableArray();
+    this.commitLineDiffs = ko
+      .observableArray()
+      .extend({ rateLimit: { timeout: 250, method: 'notifyWhenChangesStop' } });
     this.sha1 = args.sha1;
 
     this.showDiffButtons = args.showDiffButtons;

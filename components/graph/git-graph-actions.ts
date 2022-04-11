@@ -1,29 +1,37 @@
-const ko = require('knockout');
+import * as ko from 'knockout';
+import { AbstractNode } from './abstract-node';
+import {
+  RebaseViewModel,
+  MergeViewModel,
+  ResetViewModel,
+  PushViewModel,
+  SquashViewModel
+} from './hover-actions';
+
 const octicons = require('octicons');
-const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
-const RefViewModel = require('./git-ref.js');
-const HoverActions = require('./hover-actions');
+declare var ungit: any;
+const components = ungit.components;
+const programEvents = ungit.programEvents;
 
-const RebaseViewModel = HoverActions.RebaseViewModel;
-const MergeViewModel = HoverActions.MergeViewModel;
-const ResetViewModel = HoverActions.ResetViewModel;
-const PushViewModel = HoverActions.PushViewModel;
-const SquashViewModel = HoverActions.SquashViewModel;
+export class ActionBase {
+  graph: any
+  server: any
+  text: string
+  style: string
+  icon: string
+  cssClasses: ko.Computed<string>
+  visible: ko.Computed<boolean>
+  node: AbstractNode // git-node
 
-class ActionBase {
-  constructor(graph, text, style, icon) {
+  constructor(graph: any, text: string, style: string, icon: string) {
     this.graph = graph;
     this.server = graph.server;
-    this.isRunning = ko.observable(false);
-    this.isHighlighted = ko.computed(
-      () => !graph.hoverGraphAction() || graph.hoverGraphAction() == this
-    );
     this.text = text;
     this.style = style;
     this.icon = icon;
     this.cssClasses = ko.computed(() => {
-      if (!this.isHighlighted() || this.isRunning()) {
+      const isHighlighted = !this.graph.hoverGraphAction() || this.graph.hoverGraphAction() == this;
+      if (!isHighlighted || this.graph.isActionRunning()) {
         return `${this.style} dimmed`;
       } else {
         return this.style;
@@ -32,44 +40,51 @@ class ActionBase {
   }
 
   doPerform() {
-    if (this.isRunning()) return;
+    if (this.graph.isActionRunning()) return;
     this.graph.hoverGraphAction(null);
-    this.isRunning(true);
+    this.graph.isActionRunning(true);
     return this.perform()
       .catch((e) => this.server.unhandledRejection(e))
       .finally(() => {
-        this.isRunning(false);
+        this.graph.isActionRunning(false);
       });
   }
 
   dragEnter() {
-    if (!this.visible()) return;
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     this.graph.hoverGraphAction(this);
   }
 
   dragLeave() {
-    if (!this.visible()) return;
     this.graph.hoverGraphAction(null);
   }
 
   mouseover() {
+    if (!this.visible() || this.graph.isBigRepo()) {
+      return;
+    }
     this.graph.hoverGraphAction(this);
   }
 
   mouseout() {
     this.graph.hoverGraphAction(null);
   }
+
+  perform(): Promise<unknown> {
+    return Promise.reject()
+  }
 }
 
-class Move extends ActionBase {
+export class Move extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Move', 'move', octicons['arrow-left'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
-        this.graph.currentActionContext().node() != this.node
+        this.graph.isCurrentActionContextRef() &&
+        this.graph.getCurrentActionContextNode() != this.node
       );
     });
   }
@@ -79,13 +94,12 @@ class Move extends ActionBase {
   }
 }
 
-class Reset extends ActionBase {
+export class Reset extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Reset', 'reset', octicons.trash.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
-      if (!(this.graph.currentActionContext() instanceof RefViewModel)) return false;
+      if (!this.graph.isCurrentActionContextRef()) return false;
       const context = this.graph.currentActionContext();
       if (context.node() != this.node) return false;
       const remoteRef = context.getRemoteRef(this.graph.currentRemote());
@@ -104,7 +118,7 @@ class Reset extends ActionBase {
     const context = this.graph.currentActionContext();
     if (!context) return null;
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
-    const nodes = context.node().getPathToCommonAncestor(remoteRef.node()).slice(0, -1);
+    const nodes = this.graph.nodesEdges.getPathToCommonAncestor(context.node(), remoteRef.node()).slice(0, -1);
     return new ResetViewModel(nodes);
   }
 
@@ -127,21 +141,20 @@ class Reset extends ActionBase {
               .catch(reject);
             context.node(remoteRef.node());
           }
-          this.isRunning(false);
+          this.graph.isActionRunning(false);
         },
       });
     });
   }
 }
 
-class Rebase extends ActionBase {
+export class Rebase extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Rebase', 'rebase', octicons['repo-forked'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         (!ungit.config.showRebaseAndMergeOnlyOnRefs || this.node.refs().length > 0) &&
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node
@@ -150,10 +163,9 @@ class Rebase extends ActionBase {
   }
 
   createHoverGraphic() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
-    const path = onto.getPathToCommonAncestor(this.node);
+    const path = this.graph.nodesEdges.getPathToCommonAncestor(onto, this.node);
     return new RebaseViewModel(this.node, path);
   }
 
@@ -170,15 +182,14 @@ class Rebase extends ActionBase {
   }
 }
 
-class Merge extends ActionBase {
+export class Merge extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Merge', 'merge', octicons['git-merge'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       if (!this.graph.checkedOutRef() || !this.graph.checkedOutRef().node()) return false;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         !this.graph.currentActionContext().current() &&
         this.graph.checkedOutRef().node() == this.node
       );
@@ -186,9 +197,8 @@ class Merge extends ActionBase {
   }
 
   createHoverGraphic() {
-    let node = this.graph.currentActionContext();
+    const node = this.graph.getCurrentActionContextNode();
     if (!node) return null;
-    if (node instanceof RefViewModel) node = node.node();
     return new MergeViewModel(this.graph, this.node, node);
   }
 
@@ -208,14 +218,13 @@ class Merge extends ActionBase {
   }
 }
 
-class Push extends ActionBase {
+export class Push extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Push', 'push', octicons['repo-push'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().node() == this.node &&
         this.graph.currentActionContext().canBePushed(this.graph.currentRemote())
       );
@@ -249,13 +258,12 @@ class Push extends ActionBase {
   }
 }
 
-class Checkout extends ActionBase {
+export class Checkout extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Checkout', 'checkout', octicons['desktop-download'].toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
-      if (this.graph.currentActionContext() instanceof RefViewModel)
+      if (this.graph.isCurrentActionContextRef())
         return (
           this.graph.currentActionContext().node() == this.node &&
           !this.graph.currentActionContext().current()
@@ -269,14 +277,13 @@ class Checkout extends ActionBase {
   }
 }
 
-class Delete extends ActionBase {
+export class Delete extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Delete', 'delete', octicons.x.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().node() == this.node &&
         !this.graph.currentActionContext().current()
       );
@@ -299,19 +306,18 @@ class Delete extends ActionBase {
           if (isYes) {
             await context.remove().then(resolve).catch(reject);
           }
-          this.isRunning(false);
+          this.graph.isActionRunning(false);
         },
       });
     });
   }
 }
 
-class CherryPick extends ActionBase {
+export class CherryPick extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Cherry pick', 'cherry-pick', octicons.cpu.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       const context = this.graph.currentActionContext();
       return context === this.node && this.graph.HEAD() && context.sha1 !== this.graph.HEAD().sha1;
     });
@@ -330,12 +336,11 @@ class CherryPick extends ActionBase {
   }
 }
 
-class Uncommit extends ActionBase {
+export class Uncommit extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Uncommit', 'uncommit', octicons.zap.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node && this.graph.HEAD() == this.node;
     });
   }
@@ -354,12 +359,11 @@ class Uncommit extends ActionBase {
   }
 }
 
-class Revert extends ActionBase {
+export class Revert extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Revert', 'revert', octicons.history.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return this.graph.currentActionContext() == this.node;
     });
   }
@@ -372,14 +376,13 @@ class Revert extends ActionBase {
   }
 }
 
-class Squash extends ActionBase {
+export class Squash extends ActionBase {
   constructor(graph, node) {
     super(graph, 'Squash', 'squash', octicons.fold.toSVG({ height: 18 }));
     this.node = node;
     this.visible = ko.computed(() => {
-      if (this.isRunning()) return true;
       return (
-        this.graph.currentActionContext() instanceof RefViewModel &&
+        this.graph.isCurrentActionContextRef() &&
         this.graph.currentActionContext().current() &&
         this.graph.currentActionContext().node() != this.node
       );
@@ -387,19 +390,17 @@ class Squash extends ActionBase {
   }
 
   createHoverGraphic() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
 
-    return new SquashViewModel(this.node, onto);
+    return new SquashViewModel(this.graph, this.node, onto);
   }
 
   perform() {
-    let onto = this.graph.currentActionContext();
+    const onto = this.graph.getCurrentActionContextNode();
     if (!onto) return;
-    if (onto instanceof RefViewModel) onto = onto.node();
     // remove last element as it would be a common ancestor.
-    const path = this.node.getPathToCommonAncestor(onto).slice(0, -1);
+    const path = this.graph.nodesEdges.getPathToCommonAncestor(this.node, onto).slice(0, -1);
 
     if (path.length > 0) {
       // squashing branched out lineage
@@ -430,18 +431,3 @@ class Squash extends ActionBase {
     }
   }
 }
-
-const GraphActions = {
-  Move: Move,
-  Rebase: Rebase,
-  Merge: Merge,
-  Push: Push,
-  Reset: Reset,
-  Checkout: Checkout,
-  Delete: Delete,
-  CherryPick: CherryPick,
-  Uncommit: Uncommit,
-  Revert: Revert,
-  Squash: Squash,
-};
-module.exports = GraphActions;
