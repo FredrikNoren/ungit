@@ -82,7 +82,7 @@ export class NodeViewModel extends AbstractNode {
   branchOrder = ko.observable<number>();
   refSearchFormVisible = ko.observable(false);
   getGraphAttr: ko.Computed<number[]>
-  dropareaGraphActions: ko.Computed<ActionBase[]>
+  _dropAreaGraphActions: ActionBase[] | undefined
 
   constructor(graph: AbstractGraph, sha1: string) {
     super(graph);
@@ -90,25 +90,6 @@ export class NodeViewModel extends AbstractNode {
     this.selected.subscribe(() => {
       ungit.programEvents.dispatch({ event: 'graph-render' });
     });
-    this.dropareaGraphActions = ko.pureComputed(() => {
-      if (this.isViewable()) {
-        return [
-          new Move(this.graph, this),
-          new Rebase(this.graph, this),
-          new Merge(this.graph, this),
-          new Push(this.graph, this),
-          new Reset(this.graph, this),
-          new Checkout(this.graph, this),
-          new Delete(this.graph, this),
-          new CherryPick(this.graph, this),
-          new Uncommit(this.graph, this),
-          new Revert(this.graph, this),
-          new Squash(this.graph, this),
-        ];
-      } else {
-        return []
-      }
-    }).extend({ rateLimit: { timeout: 250, method: "notifyWhenChangesStop" } });
 
     this.commitComponent = components.create('commit', this);
     this.r = ko.observable<number>();
@@ -123,6 +104,28 @@ export class NodeViewModel extends AbstractNode {
       return !this.graph.currentActionContext();
     });
     this.getGraphAttr = ko.pureComputed(() => [this.cx(), this.cy()]);
+  }
+
+  getDropAreaGraphActions() {
+    if (this.isViewable() && !this._dropAreaGraphActions) {
+      this._dropAreaGraphActions = [
+        new Move(this.graph, this),
+        new Rebase(this.graph, this),
+        new Merge(this.graph, this),
+        new Push(this.graph, this),
+        new Reset(this.graph, this),
+        new Checkout(this.graph, this),
+        new Delete(this.graph, this),
+        new CherryPick(this.graph, this),
+        new Uncommit(this.graph, this),
+        new Revert(this.graph, this),
+        new Squash(this.graph, this),
+      ];
+    } else if (!this.isViewable() && this._dropAreaGraphActions) {
+      this._dropAreaGraphActions = undefined;
+    }
+
+    return this._dropAreaGraphActions;
   }
 
 

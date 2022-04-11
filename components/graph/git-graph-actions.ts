@@ -54,36 +54,22 @@ export class ActionBase {
     if (!this.visible() || this.graph.isBigRepo()) {
       return;
     }
-    if (this.graph.hoverGraphAction() !== this) {
-      this.graph.hoverGraphAction(this);
-    }
+    this.graph.hoverGraphAction(this);
   }
 
   dragLeave() {
-    if (!this.visible() || this.graph.isBigRepo()) {
-      return;
-    }
-    if (this.graph.hoverGraphAction() !== null) {
-      this.graph.hoverGraphAction(null);
-    }
+    this.graph.hoverGraphAction(null);
   }
 
   mouseover() {
     if (!this.visible() || this.graph.isBigRepo()) {
       return;
     }
-    if (this.graph.hoverGraphAction() !== this) {
-      this.graph.hoverGraphAction(this);
-    }
+    this.graph.hoverGraphAction(this);
   }
 
   mouseout() {
-    if (!this.visible() || this.graph.isBigRepo()) {
-      return;
-    }
-    if (this.graph.hoverGraphAction() !== null) {
-      this.graph.hoverGraphAction(null);
-    }
+    this.graph.hoverGraphAction(null);
   }
 
   perform(): Promise<unknown> {
