@@ -72,7 +72,6 @@ class TextDiffViewModel {
     this.editState = args.editState;
     this.wordWrap = args.wordWrap;
     this.patchLineList = args.patchLineList;
-    this.numberOfSelectedPatchLines = 0;
     this.htmlSrc = undefined;
     this.isParsed = ko.observable(false);
 
@@ -166,23 +165,29 @@ class TextDiffViewModel {
         drawFileList: false,
       });
 
-      this.numberOfSelectedPatchLines = 0;
+      const rerender = this.patchLineList && !this.patchLineList().length;
       let index = 0;
 
       // ko's binding resolution is not recursive, which means below ko.bind refresh method doesn't work for
       // data bind at getPatchCheckBox that is rendered with "html" binding.
       // which is reason why manually updating the html content and refreshing kobinding to have it render...
       if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, (match, capture) => {
-          if (this.patchLineList()[index] === undefined) {
-            this.patchLineList()[index] = true;
+        html = html.replace(
+          /<td class="(d2h-(?:del|ins)[^"]*)">([\s\S]*?)<\/td>/g,
+          (match, tdClass, content) => {
+            if (this.patchLineList()[index] === undefined) {
+              this.patchLineList()[index] = true;
+            }
+            content = content.replace(
+              /<span class="d2h-code-line-[a-z]+">(\+|-)<\/span>/g,
+              (match, capture) => this.getPatchCheckBox(capture, index)
+            );
+            return `<td class="${tdClass}" data-bind="click: (editState() === 'patched') ? togglePatchLine.bind($data, ${index++}) : null, css: { patched: editState() === 'patched' }">${content}</td>`;
           }
-
-          return this.getPatchCheckBox(capture, index, this.patchLineList()[index++]);
-        });
+        );
       }
 
-      if (html !== this.htmlSrc) {
+      if (html !== this.htmlSrc || rerender) {
         // diff has changed since last we displayed and need refresh
         this.htmlSrc = html;
         this.isParsed(false);
@@ -196,27 +201,22 @@ class TextDiffViewModel {
     this.render();
   }
 
-  getPatchCheckBox(symbol, index, isActive) {
-    if (isActive) {
-      this.numberOfSelectedPatchLines++;
-    }
-    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
-      isActive ? 'checked' : ''
-    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index})"></input></div>`;
+  getPatchCheckBox(symbol, index) {
+    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input type="checkbox" data-bind="visible: editState() === 'patched', checked: patchLineList()[${index}]"></input></div>`;
   }
 
   togglePatchLine(index) {
+    // Selecting text, not toggling the line's patch status
+    if (window.getSelection().toString().length !== 0) return true;
+
     this.patchLineList()[index] = !this.patchLineList()[index];
 
-    if (this.patchLineList()[index]) {
-      this.numberOfSelectedPatchLines++;
-    } else {
-      this.numberOfSelectedPatchLines--;
-    }
-
-    if (this.numberOfSelectedPatchLines === 0) {
+    if (this.patchLineList().filter(Boolean).length === 0) {
       this.editState('none');
     }
+
+    this.isParsed(false);
+    this.isParsed(true);
 
     return true;
   }

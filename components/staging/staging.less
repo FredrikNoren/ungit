@@ -98,9 +98,14 @@
     }
   }
 
+  .d2h-code-linenumber {
+    pointer-events: none;
+  }
+
   .d2h-code-line-prefix input[type='checkbox'] {
     margin: 0;
     margin-right: -6px;
+    pointer-events: none;
     vertical-align: sub;
   }
 
@@ -213,6 +218,10 @@
         }
       }
     }
+  }
+
+  .d2h-diff-table td.patched {
+    cursor: pointer;
   }
 }
 
