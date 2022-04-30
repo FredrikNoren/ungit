@@ -5,6 +5,12 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.20...master)
 
+### Changed
+- Bump Dependencies [#1512](https://github.com/FredrikNoren/ungit/pull/1512)
+
+### Removed
+- Remove node 12 from build matrix [#1516](https://github.com/FredrikNoren/ungit/pull/1516)
+
 ## [1.5.20](https://github.com/FredrikNoren/ungit/compare/v1.5.19...v1.5.20)
 
 ### Fixes
