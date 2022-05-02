@@ -173,7 +173,7 @@ class TextDiffViewModel {
       // data bind at getPatchCheckBox that is rendered with "html" binding.
       // which is reason why manually updating the html content and refreshing kobinding to have it render...
       if (this.patchLineList) {
-        html = html.replace(/<span class="d2h-code-line-[a-z]+">(\+|-)/g, (match, capture) => {
+        html = html.replace(/<span class="d2h-code-line-prefix">(\+|-)/g, (match, capture) => {
           if (this.patchLineList()[index] === undefined) {
             this.patchLineList()[index] = true;
           }
@@ -200,9 +200,9 @@ class TextDiffViewModel {
     if (isActive) {
       this.numberOfSelectedPatchLines++;
     }
-    return `<div class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
+    return `<span class="d2h-code-line-prefix"><span data-bind="visible: editState() !== 'patched'">${symbol}</span><input ${
       isActive ? 'checked' : ''
-    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index})"></input></div>`;
+    } type="checkbox" data-bind="visible: editState() === 'patched', click: togglePatchLine.bind($data, ${index})">`;
   }
 
   togglePatchLine(index) {
