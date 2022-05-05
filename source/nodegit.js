@@ -186,6 +186,16 @@ class NGWrap {
     return this.r.isBare() ? this.r.path().slice(0, -1) : this.r.workdir().slice(0, -1);
   }
 
+  async getGitFile(name) {
+    const messagePath = `${this.r.path()}${name}`;
+    try {
+      return (await fs.readFile(messagePath, { encoding: 'utf8' })).toString();
+    } catch (err) {
+      if (err.code !== 'ENOENT') console.log(`reading ${messagePath}`, err);
+      return undefined;
+    }
+  }
+
   async status() {
     const { r } = this;
     const branch = await r.getCurrentBranch();
@@ -194,6 +204,8 @@ class NGWrap {
     const inMerge = r.isMerging();
     const inRebase = r.isRebasing();
     const inConflict = index.hasConflicts();
+    const commitMessage =
+      inMerge || inCherry || inRebase ? await this.getGitFile('MERGE_MSG') : undefined;
 
     /** @type {GitStatus} */
     return {
@@ -202,9 +214,11 @@ class NGWrap {
       inMerge,
       inRebase,
       inConflict,
+      commitMessage,
       // TODO show staged changes separately
-      // index: await this.getChanges({ oid: 'index' }),
+      index: await this.getChanges({ oid: 'index' }),
       // worktree: await this.getChanges({ oid: 'worktree' }),
+      wt: await this.getChanges({ oid: 'worktree' }),
       worktree: await this.getChanges({ oid: 'combined' }),
     };
   }

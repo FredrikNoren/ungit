@@ -199,15 +199,13 @@ class StagingViewModel extends ComponentRoot {
     // in such cases we should ignore exception as no good way to resolve it.
     this.inCherry(!!status.inCherry && !!status.inConflict);
 
-    if (this.inRebase()) {
-      // TODO allow changing commit messages in rebase
-      this.commitMessageTitle('Rebase conflict');
-      this.commitMessageBody('Commit messages are not applicable!\n(╯°□°）╯︵ ┻━┻');
-    } else if (this.inMerge() || this.inCherry()) {
+    if (status.commitMessage && !this.commitMessageTitle()) {
       const lines = status.commitMessage.split('\n');
-      if (!this.commitMessageTitle()) {
+      if (lines[0] && lines[0][0] !== '#') {
         this.commitMessageTitle(lines[0]);
         this.commitMessageBody(lines.slice(1).join('\n'));
+      } else {
+        this.commitMessageBody(lines.join('\n'));
       }
     }
   }
