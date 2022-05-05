@@ -13,7 +13,7 @@ components.register('branches', (args) => {
 });
 
 class BranchesViewModel extends ComponentRoot {
-  constructor(server, graph, repoPath) {
+  constructor(server, /** @type {GitGraph} */ graph, repoPath) {
     super();
     this.repoPath = repoPath;
     this.server = server;
@@ -45,6 +45,7 @@ class BranchesViewModel extends ComponentRoot {
     this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
     this.branchIcon = octicons['git-branch'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
+    this.firstFetch = true;
   }
 
   checkoutBranch(branch) {
@@ -68,6 +69,7 @@ class BranchesViewModel extends ComponentRoot {
   }
   async _updateRefs(forceRemoteFetch) {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
+    if (this.firstFetch) forceRemoteFetch = '';
 
     const branchProm = this.server.getPromise('/checkout', { path: this.repoPath() });
     const refsProm = this.server.getPromise('/refs', {
@@ -129,6 +131,12 @@ class BranchesViewModel extends ComponentRoot {
           ref.remove(true);
         }
       });
+
+      if (this.firstFetch) {
+        this.firstFetch = false;
+        // Fetch remotes on first load
+        await this._updateRefs(true);
+      }
     } catch (e) {
       ungit.logger.error('error during branch update: ', e);
     }
