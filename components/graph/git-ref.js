@@ -54,6 +54,10 @@ class RefViewModel extends Selectable {
     );
     this.color = this._colorFromHashOfString(this.name);
 
+    // This optimization is for autocomplete display
+    this.value = splitedName[splitedName.length - 1];
+    this.label = this.localRefName;
+
     this.node.subscribe(
       (oldNode) => {
         if (oldNode) oldNode.removeRef(this);
@@ -64,24 +68,20 @@ class RefViewModel extends Selectable {
     this.node.subscribe((newNode) => {
       if (newNode) newNode.pushRef(this);
     });
+  }
 
-    // This optimization is for autocomplete display
-    this.value = splitedName[splitedName.length - 1];
-    this.label = this.localRefName;
-
-    this.displayHtml = (largeCurrent) => {
-      const size = largeCurrent && this.current() ? 26 : 18;
-      let prefix = '';
-      if (this.isRemote) {
-        prefix = `<span>${octicons.globe.toSVG({ height: size })}</span> `;
-      }
-      if (this.isBranch) {
-        prefix += `<span>${octicons['git-branch'].toSVG({ height: size })}</span> `;
-      } else if (this.isTag) {
-        prefix += `<span>${octicons.tag.toSVG({ height: size })}</span> `;
-      }
-      return prefix + this.localRefName;
-    };
+  displayHtml(largeCurrent) {
+    const size = largeCurrent && this.current() ? 26 : 18;
+    let prefix = '';
+    if (this.isRemote) {
+      prefix = `<span>${octicons.globe.toSVG({ height: size })}</span> `;
+    }
+    if (this.isBranch) {
+      prefix += `<span>${octicons['git-branch'].toSVG({ height: size })}</span> `;
+    } else if (this.isTag) {
+      prefix += `<span>${octicons.tag.toSVG({ height: size })}</span> `;
+    }
+    return prefix + this.localRefName;
   }
 
   _colorFromHashOfString(string) {
