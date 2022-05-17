@@ -381,6 +381,8 @@ class NGWrap {
       ? await nodegit.Diff.treeToWorkdir(this.r, oldTree, {
           flags:
             flags |
+            nodegit.Diff.OPTION.ENABLE_FAST_UNTRACKED_DIRS |
+            nodegit.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
             nodegit.Diff.OPTION.INCLUDE_UNTRACKED |
             nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
         })
@@ -388,6 +390,9 @@ class NGWrap {
       ? await nodegit.Diff.treeToWorkdirWithIndex(this.r, oldTree, {
           flags:
             flags |
+            nodegit.Diff.OPTION.UPDATE_INDEX |
+            nodegit.Diff.OPTION.ENABLE_FAST_UNTRACKED_DIRS |
+            nodegit.Diff.OPTION.SHOW_UNTRACKED_CONTENT |
             nodegit.Diff.OPTION.INCLUDE_UNTRACKED |
             nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
         })
@@ -421,7 +426,7 @@ class NGWrap {
 
     const fileLineDiffs = patches.map((p, idx) => {
       const fileName = p.isDeleted() ? undefined : p.newFile().path();
-      const oldFileName = p.isAdded() ? undefined : p.oldFile().path();
+      const oldFileName = p.isAdded() || p.isUntracked() ? undefined : p.oldFile().path();
       const hasConflict = p.isConflicted() || undefined;
       const { total_additions, total_deletions } = p.lineStats();
 
