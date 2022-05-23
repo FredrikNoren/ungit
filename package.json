@@ -88,13 +88,16 @@
     "less": "~4.2.0",
     "mocha": "~10.2.0",
     "nodemon": "~3.0.1",
-    "npm-check-updates": "~16.10.18",
+    "npm-check-updates": "^16.11.1",
     "nyc": "~15.1.0",
     "portfinder": "~1.0.32",
     "prettier": "~3.0.1",
     "puppeteer": "~21.0.3",
     "superagent": "~8.0.9",
     "supertest": "~6.3.3"
+  },
+  "optionalDependencies": {
+    "fsevents": "*"
   },
   "engines": {
     "node": ">=16"
