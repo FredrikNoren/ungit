@@ -81,8 +81,8 @@ const gitExecutorProm = (args, retryCount) => {
       } else {
         gitProcess.stdout.on('data', (data) => (stdout += data.toString()));
       }
-      if (args.inPipe) {
-        gitProcess.stdin.end(args.inPipe);
+      if (args.stdin) {
+        gitProcess.stdin.end(args.stdin);
       }
       gitProcess.stderr.on('data', (data) => (stderr += data.toString()));
       gitProcess.on('error', (error) => (rejectedError = error));
@@ -135,7 +135,7 @@ const gitExecutorProm = (args, retryCount) => {
  *                                          errors are acceptable.
  * @param {WritableStream}    [outPipe]     - If this argument exists, stdout is piped to this
  *                                          object.
- * @param {ReadableStream}    [inPipe]      - If this argument exists, data is piped to stdin
+ * @param {string | Buffer}   [stdin]       - If this argument exists, data is piped to stdin
  *                                          process on start.
  * @param {number}            [timeout]     - Execution timeout in ms, default is 2 mins.
  * @returns {Promise<string>} Execution promise.
@@ -148,13 +148,13 @@ const gitExecutorProm = (args, retryCount) => {
  *   getGitExecuteTask(['show'], '/tmp');
  *
  */
-const git = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
+const git = (commands, repoPath, allowError, outPipe, stdin, timeout) => {
   let args = {};
   if (Array.isArray(commands)) {
     args.commands = commands;
     args.repoPath = repoPath;
     args.outPipe = outPipe;
-    args.inPipe = inPipe;
+    args.stdin = stdin;
     args.allowError = allowError;
     args.timeout = timeout;
   } else {
@@ -285,18 +285,21 @@ git.status = (repoPath, file) => {
           })
           .then(() => {
             if (status.inMerge || status.inCherry) {
-              return fs
-                .readFile(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
-                .then((commitMessage) => {
-                  status.commitMessage = commitMessage;
-                  return status;
-                })
-                .catch((err) => {
-                  // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
-                  // and state changed while this call is being made.
-                  status.inMerge = status.inCherry = false;
-                  return status;
-                });
+              return (
+                fs
+                  .readFile(path.join(repoPath, '.git', 'MERGE_MSG'), { encoding: 'utf8' })
+                  .then((commitMessage) => {
+                    status.commitMessage = commitMessage;
+                    return status;
+                  })
+                  // @ts-ignore
+                  .catch((err) => {
+                    // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
+                    // and state changed while this call is being made.
+                    status.inMerge = status.inCherry = false;
+                    return status;
+                  })
+              );
             }
             return status;
           });
@@ -307,10 +310,12 @@ git.status = (repoPath, file) => {
     status.inConflict = false;
 
     // merge numstats
+    // @ts-ignore
     Object.keys(status.files).forEach((filename) => {
       // git diff returns paths relative to git repo but git status does not
       const absoluteFilename = filename.replace(/\.\.\//g, '');
       const stats = numstats[absoluteFilename] || { additions: null, deletions: null };
+      // @ts-ignore
       const fileObj = status.files[filename];
       fileObj.additions = stats.additions;
       fileObj.deletions = stats.deletions;
@@ -350,7 +355,7 @@ git.resolveConflicts = (repoPath, files) => {
   });
 };
 
-git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeout) => {
+git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, stdin, timeout) => {
   let hadLocalChanges = true;
 
   return git(['stash'], repoPath)
@@ -365,7 +370,7 @@ git.stashExecuteAndPop = (commands, repoPath, allowError, outPipe, inPipe, timeo
       if (!result || result.indexOf('No local changes to save') != -1) {
         hadLocalChanges = false;
       }
-      return git(commands, repoPath, allowError, outPipe, inPipe, timeout);
+      return git(commands, repoPath, allowError, outPipe, stdin, timeout);
     })
     .then(() => {
       return hadLocalChanges ? git(['stash', 'pop'], repoPath) : null;
@@ -404,43 +409,48 @@ git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
     });
   }
 
-  return git
-    .revParse(repoPath)
-    .then((revParse) => {
-      return revParse.type === 'bare' ? { files: {} } : git.status(repoPath);
-    }) // if bare do not call status
-    .then((status) => {
-      const file = status.files[filename];
-      if (!file) {
-        return fs
-          .access(path.join(repoPath, filename))
-          .then(() => {
-            return [];
-          })
-          .catch(() => {
-            throw { error: `No such file: ${filename}`, errorCode: 'no-such-file' };
-          });
-        // If the file is new or if it's a directory, i.e. a submodule
-      } else {
-        if (file && file.isNew) {
-          return git(
-            ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()],
-            repoPath,
-            true
-          );
-        } else if (file && file.renamed) {
-          return git(
-            ['diff', ignoreWhiteSpace ? '-w' : '', `HEAD:${oldFilename}`, filename.trim()],
-            repoPath
-          );
+  return (
+    git
+      .revParse(repoPath)
+      // @ts-ignore
+      .then((revParse) => {
+        return revParse.type === 'bare' ? { files: {} } : git.status(repoPath);
+      }) // if bare do not call status
+      // @ts-ignore
+      .then((status) => {
+        // @ts-ignore
+        const file = status.files[filename];
+        if (!file) {
+          return fs
+            .access(path.join(repoPath, filename))
+            .then(() => {
+              return [];
+            })
+            .catch(() => {
+              throw { error: `No such file: ${filename}`, errorCode: 'no-such-file' };
+            });
+          // If the file is new or if it's a directory, i.e. a submodule
         } else {
-          return git(
-            ['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()],
-            repoPath
-          );
+          if (file && file.isNew) {
+            return git(
+              ['diff', '--no-index', isWindows ? 'NUL' : '/dev/null', filename.trim()],
+              repoPath,
+              true
+            );
+          } else if (file && file.renamed) {
+            return git(
+              ['diff', ignoreWhiteSpace ? '-w' : '', `HEAD:${oldFilename}`, filename.trim()],
+              repoPath
+            );
+          } else {
+            return git(
+              ['diff', ignoreWhiteSpace ? '-w' : '', 'HEAD', '--', filename.trim()],
+              repoPath
+            );
+          }
         }
-      }
-    });
+      })
+  );
 };
 
 git.getCurrentBranch = (repoPath) => {
@@ -463,9 +473,12 @@ git.discardAllChanges = (repoPath) => {
 };
 
 git.discardChangesInFile = (repoPath, filename) => {
+  // @ts-ignore
   return git.status(repoPath, filename).then((status) => {
+    // @ts-ignore
     if (Object.keys(status.files).length == 0)
       throw new Error(`No files in status in discard, filename: ${filename}`);
+    // @ts-ignore
     const fileStatus = status.files[Object.keys(status.files)[0]];
     const fullPath = path.join(repoPath, filename);
 
@@ -522,6 +535,7 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       for (const v in files) {
         const file = files[v];
         const fileStatus =
+          // @ts-ignore
           status.files[file.name] || status.files[path.relative(repoPath, file.name)];
         if (!fileStatus) {
           throw { error: `No such file in staging: ${file.name}` };
@@ -587,24 +601,27 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
 };
 
 git.revParse = (repoPath) => {
-  return git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository'], repoPath)
-    .then((result) => {
-      const resultLines = result.split('\n');
-      if (resultLines[1].indexOf('true') > -1) {
-        // bare repositories don't support `--show-toplevel` since git 2.25
-        return { type: 'bare', gitRootPath: repoPath };
-      }
-      return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
-        const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
-        if (resultLines[0].indexOf('true') > -1) {
-          return { type: 'inited', gitRootPath: rootPath };
+  return (
+    git(['rev-parse', '--is-inside-work-tree', '--is-bare-repository'], repoPath)
+      .then((result) => {
+        const resultLines = result.split('\n');
+        if (resultLines[1].indexOf('true') > -1) {
+          // bare repositories don't support `--show-toplevel` since git 2.25
+          return { type: 'bare', gitRootPath: repoPath };
         }
-        return { type: 'uninited', gitRootPath: rootPath };
-      });
-    })
-    .catch((err) => {
-      return { type: 'uninited', gitRootPath: path.normalize(repoPath) };
-    });
+        return git(['rev-parse', '--show-toplevel'], repoPath).then((topLevel) => {
+          const rootPath = path.normalize(topLevel.trim() ? topLevel.trim() : repoPath);
+          if (resultLines[0].indexOf('true') > -1) {
+            return { type: 'inited', gitRootPath: rootPath };
+          }
+          return { type: 'uninited', gitRootPath: rootPath };
+        });
+      })
+      // @ts-ignore
+      .catch((err) => {
+        return { type: 'uninited', gitRootPath: path.normalize(repoPath) };
+      })
+  );
 };
 
 git.log = (path, limit, skip, maxActiveBranchSearchIteration) => {

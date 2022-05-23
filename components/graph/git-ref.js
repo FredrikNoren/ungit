@@ -91,6 +91,7 @@ class RefViewModel extends Selectable {
   dragStart() {
     this.graph.currentActionContext(this);
     this.isDragging(true);
+    // @ts-ignore
     if (document.activeElement) document.activeElement.blur();
   }
 

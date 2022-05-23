@@ -14,6 +14,7 @@ const { EventEmitter } = require('events');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
+/** @type {string} */
 exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
@@ -64,6 +65,7 @@ exports.registerApi = (env) => {
         logger.debug(`[${this.watcherId}] path does not exist`, item);
         return;
       }
+      // @ts-ignore
       const watcher = watch(item, options);
       watcher.on('change', (_event, changedPath) => {
         logger.silly(`[${this.watcherId}] ${name}`, changedPath);
@@ -84,6 +86,7 @@ exports.registerApi = (env) => {
 
   const readIgnore = async (pathToWatch) => {
     logger.debug(`Parsing .gitignore for ${pathToWatch}`);
+    // @ts-ignore -- wrong type definition
     const out = ignore();
     const ignoreContent = await fs
       .readFile(path.join(pathToWatch, '.gitignore'), { encoding: 'utf8' })
@@ -489,6 +492,7 @@ exports.registerApi = (env) => {
 
     let task = Promise.resolve();
     if (req.query.remoteFetch) {
+      // @ts-ignore
       task = task.then(() =>
         gitPromise(['remote'], req.query.path).then((remoteText) => {
           const remotes = remoteText.trim().split('\n');
@@ -507,6 +511,7 @@ exports.registerApi = (env) => {
         })
       );
     }
+    // @ts-ignore
     task = task
       .then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
@@ -758,7 +763,7 @@ exports.registerApi = (env) => {
       const args = {
         commands: ['commit', '--file=-'],
         repoPath: req.body.path,
-        inPipe: req.body.message,
+        stdin: req.body.message,
       };
 
       jsonResultOrFailProm(res, gitPromise(args))
@@ -958,6 +963,7 @@ exports.registerApi = (env) => {
             );
           })
           .then((pathRevParses) => {
+            // @ts-ignore
             revParseRes.subRepos = pathRevParses
               .filter(
                 (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'

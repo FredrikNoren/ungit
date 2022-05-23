@@ -2,12 +2,20 @@
   "root": true,
   "extends": [
     "eslint:recommended",
+    "plugin:mocha/recommended",
     "plugin:prettier/recommended"
   ],
+  "globals": {
+    "io": "readonly",
+    "jQuery": "writeable",
+    "Raven": "readonly",
+    "ungit": "readonly"
+  },
   "parserOptions": {
     "ecmaVersion": 2020
   },
   "env": {
+    "browser": true,
     "es6": true,
     "node": true
   },

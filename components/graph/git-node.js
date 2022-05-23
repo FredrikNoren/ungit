@@ -5,7 +5,7 @@ const programEvents = require('ungit-program-events');
 const Animateable = require('./animateable');
 const GraphActions = require('./git-graph-actions');
 
-const maxBranchesToDisplay = parseInt((ungit.config.numRefsToShow / 5) * 3); // 3/5 of refs to show to branches
+const maxBranchesToDisplay = Math.round((parseInt(ungit.config.numRefsToShow) * 3) / 5) || 4; // 3/5 of refs to show to branches
 const maxTagsToDisplay = ungit.config.numRefsToShow - maxBranchesToDisplay; // 2/5 of refs to show to tags
 
 class GitNodeViewModel extends Animateable {

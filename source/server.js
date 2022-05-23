@@ -75,6 +75,7 @@ if (config.allowedIPs) {
       req.ip ||
       req.connection.remoteAddress ||
       req.socket.remoteAddress ||
+      // @ts-ignore
       req.connection.socket.remoteAddress;
     if (config.allowedIPs.indexOf(ip) >= 0) next();
     else {
@@ -148,6 +149,7 @@ if (config.authentication) {
         res.status(401).json({ errorCode: 'authentication-failed', error: info.message });
         return;
       }
+      // @ts-ignore
       req.logIn(user, (err) => {
         if (err) {
           return next(err);
@@ -159,11 +161,13 @@ if (config.authentication) {
   });
 
   app.get('/api/loggedin', (req, res) => {
+    // @ts-ignore
     if (req.isAuthenticated()) res.json({ loggedIn: true });
     else res.json({ loggedIn: false });
   });
 
   app.get('/api/logout', (req, res) => {
+    // @ts-ignore
     req.logout();
     res.json({ ok: true });
   });
@@ -187,10 +191,12 @@ const indexHtmlCacheKey = cache.registerFunc(() => {
           return plugin.compile();
         })
       ).then((results) => {
-        data = data.replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
-        data = data.replace(/__ROOT_PATH__/g, config.rootPath);
+        const out = data
+          .toString()
+          .replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'))
+          .replace(/__ROOT_PATH__/g, config.rootPath);
 
-        return data;
+        return out;
       });
     });
   });
@@ -212,6 +218,7 @@ app.use(serveStatic(__dirname + '/../public'));
 const socketIO = require('socket.io');
 const socketsById = {};
 let socketIdCounter = 0;
+// @ts-ignore
 const io = socketIO(server, {
   path: config.rootPath + '/socket.io',
   logger: {
@@ -377,7 +384,9 @@ app.post('/api/userconfig', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
-  fs.access(req.query['path'])
+  const { path } = req.query;
+  if (typeof path !== 'string' || !path) throw new Error('need path');
+  fs.access(path)
     .then(() => {
       res.json(true);
     })
@@ -387,6 +396,7 @@ app.get('/api/fs/exists', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
+  // @ts-ignore
   const dir = path.resolve(req.query.term.trim()).replace('/~', '');
 
   fs.readdir(dir, { withFileTypes: true })

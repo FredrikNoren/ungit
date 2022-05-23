@@ -38,5 +38,12 @@ class Animateable extends Selectable {
       }
     };
   }
+  /** @returns {any} */
+  getGraphAttr() {
+    throw new Error('define getGraphAttr');
+  }
+  setGraphAttr(_graph) {
+    throw new Error('define setGraphAttr');
+  }
 }
 module.exports = Animateable;

@@ -81,7 +81,6 @@
     "eslint": "~8.47.0",
     "eslint-config-prettier": "~9.0.0",
     "eslint-plugin-mocha": "~10.1.0",
-    "eslint-plugin-node": "~11.1.0",
     "eslint-plugin-prettier": "~5.0.0",
     "exorcist": "~2.0.0",
     "expect.js": "~0.3.1",

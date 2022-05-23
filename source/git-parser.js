@@ -27,6 +27,7 @@ exports.parseGitStatus = (/** @type {string} */ text, args) => {
     files[newFileName] = {
       fileName: newFileName,
       oldFileName: oldFileName,
+      // @ts-ignore
       displayName: displayName,
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
@@ -37,6 +38,7 @@ exports.parseGitStatus = (/** @type {string} */ text, args) => {
     };
   }
 
+  // @ts-ignore
   return /** @type {GitStatus} */ ({
     branch: branch,
     files: files,
@@ -199,6 +201,7 @@ exports.parseGitLog = (/** @type {string} */ data) => {
         deletions: isNaN(dels) ? null : dels,
         fileName: fileName,
         oldFileName: oldFileName,
+        // @ts-ignore
         displayName: displayName,
         type: fileType(fileName),
       });
@@ -214,6 +217,7 @@ exports.parseGitLog = (/** @type {string} */ data) => {
     }
     return;
   };
+  /** @type {(row: string, index:number)=>void} */
   let parser = parseCommitLine;
   const rows = data.split('\n');
   rows.forEach((row, index) => {

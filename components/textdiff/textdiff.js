@@ -64,6 +64,7 @@ class TextDiffViewModel {
     this.server = args.server;
     this.sha1 = args.sha1;
     this.hasMore = ko.observable(false);
+    /** @type {(ReturnType<diff2html.parse>[0] & { allBlocks?: any[] })[]} */
     this.diffJson = null;
     this.loadCount = loadLimit;
     this.textDiffType = args.textDiffType;
