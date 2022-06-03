@@ -516,7 +516,7 @@ exports.registerApi = (env) => {
     jw(async (req, res) => {
       if (req.query.remoteFetch) {
         if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
-        await req.repo.remoteAllFetch().catch((err) => {
+        await req.repo.remoteAllFetch(config.autoPruneOnFetch).catch((err) => {
           console.warn('ignoring fetch error', err);
         });
       }

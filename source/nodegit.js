@@ -275,12 +275,13 @@ class NGWrap {
    */
   async remoteFetch(remoteName, refs = null, prune) {
     const remote = await this.r.getRemote(remoteName).catch(normalizeError);
-    // TODO use credentialshelper
     await remote.fetch(
       refs,
       {
         callbacks: {
-          credentials: (url, userName) => nodegit.Cred.sshKeyFromAgent(userName),
+          // TODO use credentialshelper
+          // @ts-ignore -- Credential does exist, bad typing
+          credentials: (url, userName) => nodegit.Credential.sshKeyFromAgent(userName),
         },
         prune: prune ? nodegit.Fetch.PRUNE.GIT_FETCH_PRUNE : undefined,
       },
@@ -288,11 +289,11 @@ class NGWrap {
     );
   }
 
-  async remoteAllFetch() {
+  async remoteAllFetch(prune) {
     const remotes = await this.getRemotes();
     // making calls serially as credential helpers may get confused to which cred to get.
     for (const name of remotes) {
-      await this.remoteFetch(name);
+      await this.remoteFetch(name, null, prune);
     }
   }
 
