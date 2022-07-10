@@ -107,14 +107,6 @@ jobs:
           path: dist/ungit-linux-armv7l.zip
           retention-days: 7
 
-      - name: Upload ungit-linux-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '14'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ungit-linux-ia32
-          path: dist/ungit-linux-ia32.zip
-          retention-days: 7
-
       - name: Upload ungit-linux-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '14'
         uses: actions/upload-artifact@v3
