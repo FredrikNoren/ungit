@@ -3,10 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.20...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.21...master)
+
+## [1.5.21](https://github.com/FredrikNoren/ungit/compare/v1.5.20...v1.5.21)
+
+### Fixes
+- fix patch checkbox html [#1517](https://github.com/FredrikNoren/ungit/pull/1517)
 
 ### Changed
 - Bump Dependencies [#1512](https://github.com/FredrikNoren/ungit/pull/1512)
+- Bump Dependencies [#1518](https://github.com/FredrikNoren/ungit/pull/1518)
 
 ### Removed
 - Remove node 12 from build matrix [#1516](https://github.com/FredrikNoren/ungit/pull/1516)
