@@ -30,6 +30,9 @@ type Commit = {
   fileLineDiffs?: DiffStat[];
   additions?: number;
   deletions?: number;
+  diffKey?: string;
+  // For stashes
+  newFiles?: { sha1: string; fileLineDiffs: DiffStat[] };
 };
 type FileStatus = {
   fileName: string;

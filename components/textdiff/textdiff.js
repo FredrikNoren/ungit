@@ -58,12 +58,12 @@ class WhiteSpace {
 
 class TextDiffViewModel {
   constructor(args) {
-    this.filename = args.filename;
-    this.oldFilename = args.oldFilename;
-    this.patchNum = args.patchNum;
     this.repoPath = args.repoPath;
     this.server = args.server;
-    this.sha1 = args.sha1;
+    this.diffKey = args.diffKey;
+    this.idx = args.idx;
+    this.filename = args.filename;
+    this.oldFilename = args.oldFilename;
     this.hasMore = ko.observable(false);
     /** @type {(ReturnType<diff2html.parse>[0] & { allBlocks?: any[] })[]} */
     this.diffJson = null;
@@ -98,12 +98,11 @@ class TextDiffViewModel {
   }
 
   getDiffArguments() {
-    if (this.sha1)
+    if (this.diffKey)
       return {
         path: this.repoPath(),
-        sha1: this.sha1,
-        patchNum: this.patchNum,
-        whiteSpace: this.whiteSpace.value(),
+        diffKey: this.diffKey,
+        idx: this.idx,
       };
     return {
       file: this.filename || '',

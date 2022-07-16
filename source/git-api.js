@@ -363,12 +363,12 @@ exports.registerApi = (env) => {
   );
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const { path, file, oldFile, patchNum: pn, sha1, whiteSpace } = req.query;
-    const patchNum = pn && pn !== true ? getNumber(pn, -1) : -1;
+    const { diffKey, idx: i, path, file, oldFile, sha1, whiteSpace } = req.query;
+    const idx = i && i !== true ? getNumber(i, -1) : -1;
     jsonResultOrFailProm(
       res,
-      sha1 && patchNum >= 0
-        ? req.repo.diffFile({ sha1, patchNum, ignoreWhiteSpace: whiteSpace === 'true' })
+      diffKey
+        ? req.repo.diffFile({ diffKey, idx })
         : gitPromise.diffFile(path, file || oldFile, oldFile || file, sha1, whiteSpace === 'true')
     );
   });
