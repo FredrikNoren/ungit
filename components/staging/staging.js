@@ -3,11 +3,13 @@ const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
-const filesToDisplayIncrmentBy = 50;
+const filesToDisplayIncrmentBy = 250;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
 const { ComponentRoot } = require('../ComponentRoot');
 
+// when in staging mode, checkmark means "in index". Otherwise it means "will commit"
+// patching or having a non-empty index means staging mode
 components.register(
   'staging',
   (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
@@ -21,6 +23,7 @@ class StagingViewModel extends ComponentRoot {
     this.refreshContent = _.debounce(this._refreshContent, 250, this.defaultDebounceOption);
     this.graph = graph;
     this.filesByPath = {};
+    this.indexByPath = {};
     this.files = ko.observableArray();
     this.commitMessageTitleCount = ko.observable(0);
     this.commitMessageTitle = ko.observable();
@@ -34,7 +37,7 @@ class StagingViewModel extends ComponentRoot {
     this.inRebase = ko.observable(false);
     this.inMerge = ko.observable(false);
     this.inCherry = ko.observable(false);
-    this.conflictText = ko.computed(() => {
+    this.conflictText = ko.pureComputed(() => {
       if (this.inMerge()) {
         this.conflictContinue = this.conflictResolution.bind(this, '/merge/continue');
         this.conflictAbort = this.conflictResolution.bind(this, '/merge/abort');
@@ -54,26 +57,34 @@ class StagingViewModel extends ComponentRoot {
       }
     });
     this.HEAD = ko.observable();
-    this.isStageValid = ko.computed(() => !this.inRebase() && !this.inMerge() && !this.inCherry());
-    this.nFiles = ko.computed(() => this.files().length);
-    this.nStagedFiles = ko.computed(
+    this.isStageValid = ko.pureComputed(
+      () => !this.inRebase() && !this.inMerge() && !this.inCherry()
+    );
+    this.nFiles = ko.pureComputed(() => this.files().length);
+    this.nStagedFiles = ko.pureComputed(
       () => this.files().filter((f) => f.editState() === 'staged').length
     );
-    this.allStageFlag = ko.computed(() => this.nFiles() !== this.nStagedFiles());
-    this.stats = ko.computed(() => `${this.nFiles()} files, ${this.nStagedFiles()} to be commited`);
+    this.allStageFlag = ko.pureComputed(() => this.nFiles() !== this.nStagedFiles());
+    this.useStaging = ko.observable(false);
+    this.stats = ko.pureComputed(
+      () =>
+        `${
+          this.useStaging() ? '[STAGING MODE]' : ''
+        } ${this.nFiles()} files, ${this.nStagedFiles()} to be commited`
+    );
     this.amend = ko.observable(false);
-    this.canAmend = ko.computed(
+    this.canAmend = ko.pureComputed(
       () => this.HEAD() && !this.inRebase() && !this.inMerge() && !this.emptyCommit()
     );
     this.emptyCommit = ko.observable(false);
-    this.canEmptyCommit = ko.computed(() => this.HEAD() && !this.inRebase() && !this.inMerge());
-    this.canStashAll = ko.computed(() => !this.amend());
-    this.canPush = ko.computed(() => !!this.graph.currentRemote());
-    this.showNux = ko.computed(
+    this.canEmptyCommit = ko.pureComputed(() => this.HEAD() && !this.inRebase() && !this.inMerge());
+    this.canStashAll = ko.pureComputed(() => !this.amend());
+    this.canPush = ko.pureComputed(() => !!this.graph.currentRemote());
+    this.showNux = ko.pureComputed(
       () => this.files().length == 0 && !this.amend() && !this.inRebase() && !this.emptyCommit()
     );
-    this.showCancelButton = ko.computed(() => this.amend() || this.emptyCommit());
-    this.commitValidationError = ko.computed(() => {
+    this.showCancelButton = ko.pureComputed(() => this.amend() || this.emptyCommit());
+    this.commitValidationError = ko.pureComputed(() => {
       if (this.conflictText()) {
         if (this.files().some((file) => file.conflict())) return 'Files in conflict';
       } else {
@@ -97,7 +108,7 @@ class StagingViewModel extends ComponentRoot {
       }
       return '';
     });
-    this.toggleSelectAllGlyphClass = ko.computed(() => {
+    this.toggleSelectAllGlyphClass = ko.pureComputed(() => {
       if (this.allStageFlag()) return 'glyphicon-unchecked';
       else return 'glyphicon-check';
     });
@@ -192,7 +203,17 @@ class StagingViewModel extends ComponentRoot {
   }
 
   loadStatus(/** @type {GitStatus} */ status) {
-    this.setFiles(status.worktree);
+    const { index, worktree } = status;
+    let files;
+    if (index.fileLineDiffs.length) {
+      this.useStaging(true);
+      files = [...this.makeFiles(index, true), ...this.makeFiles(worktree, false)];
+    } else {
+      files = this.makeFiles(worktree);
+    }
+    files.sort((a, b) => (a.sortName > b.sortName ? 1 : a.sortName < b.sortName ? -1 : 0));
+    this.files(files);
+
     this.inRebase(!!status.inRebase);
     this.inMerge(!!status.inMerge);
     // There are time where '.git/CHERRY_PICK_HEAD' file is created and no files are in conflicts.
@@ -210,25 +231,27 @@ class StagingViewModel extends ComponentRoot {
     }
   }
 
-  setFiles(/** @type {GitStatus['worktree']} */ worktree) {
+  makeFiles(/** @type {DiffStatTotal} */ stats, inIndex) {
     const newFiles = [];
-    for (const fileStatus of worktree.fileLineDiffs) {
+    for (const fileStatus of stats.fileLineDiffs) {
+      const filesByPath = inIndex ? this.indexByPath : this.filesByPath;
       const { fileName, oldFileName } = fileStatus;
       const name = fileName ? `N${fileName}` : `O${oldFileName}`;
       /** @type {FileViewModel} */
-      let fileViewModel = this.filesByPath[name];
+      let fileViewModel = filesByPath[name];
       if (!fileViewModel) {
-        this.filesByPath[name] = fileViewModel = new FileViewModel(
+        filesByPath[name] = fileViewModel = new FileViewModel(
           this,
           fileStatus,
-          worktree.diffKey
+          stats.diffKey,
+          inIndex
         );
       } else {
-        fileViewModel.updateFrom(fileStatus, worktree.diffKey);
+        fileViewModel.updateFrom(fileStatus, stats.diffKey);
       }
       newFiles.push(fileViewModel);
     }
-    this.files(newFiles);
+    return newFiles;
   }
 
   toggleAmend() {
@@ -256,6 +279,7 @@ class StagingViewModel extends ComponentRoot {
   resetMessages() {
     this.commitMessageTitle('');
     this.commitMessageBody('');
+    // TODO - perhaps better just redownload
     for (const key in this.filesByPath) {
       const element = this.filesByPath[key];
       element.diff().invalidateDiff();
@@ -400,13 +424,16 @@ class StagingViewModel extends ComponentRoot {
 }
 
 class FileViewModel {
-  constructor(staging, /** @type {DiffStat} */ stat, diffKey) {
+  constructor(staging, /** @type {DiffStat} */ stat, diffKey, inIndex) {
+    /** @type {StagingViewModel} */
     this.staging = staging;
     this.server = staging.server;
     this.idx = stat.idx;
     this.diffKey = diffKey;
     this.stat = ko.observable(stat);
-    this.editState = ko.observable('staged'); // staged, patched and none
+    const editState = inIndex || !this.staging.useStaging() ? 'staged' : 'none';
+    this.editState = ko.observable(editState); // staged, patched and none
+    this.isPending = ko.observable(false);
     this.isShowingDiffs = ko.observable(false);
 
     this.name = ko.pureComputed(() => this.stat().fileName);
@@ -421,6 +448,7 @@ class FileViewModel {
           : `[new] ${this.name()}`
         : `[del] ${this.oldName()}`
     );
+    this.sortName = ko.pureComputed(() => this.displayName().toLocaleLowerCase());
     this.isNew = ko.pureComputed(() => !this.oldName());
     this.removed = ko.pureComputed(() => !this.name());
     this.conflict = ko.pureComputed(() => !!this.stat().hasConflict);
@@ -504,10 +532,22 @@ class FileViewModel {
     });
   }
 
-  toggleStaged() {
+  async toggleStaged() {
     if (this.editState() === 'none') {
+      if (this.staging.useStaging()) {
+        await this.server.postPromise('/stage', {
+          path: this.staging.repoPath(),
+          file: this.name() || this.oldName(),
+        });
+      }
       this.editState('staged');
     } else {
+      if (this.staging.useStaging()) {
+        await this.server.postPromise('/unstage', {
+          path: this.staging.repoPath(),
+          file: this.name() || this.oldName(),
+        });
+      }
       this.editState('none');
     }
     this.patchLineList([]);

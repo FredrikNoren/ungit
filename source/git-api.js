@@ -424,6 +424,26 @@ exports.registerApi = (env) => {
     }
   );
 
+  app.post(`${exports.pathPrefix}/stage`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, file } = req.body;
+    jsonResultOrFailProm(
+      res,
+      req.repo.stage(file).finally(() => {
+        emitGitDirectoryChanged(path);
+      })
+    );
+  });
+
+  app.post(`${exports.pathPrefix}/unstage`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, file } = req.body;
+    jsonResultOrFailProm(
+      res,
+      req.repo.unstage(file).finally(() => {
+        emitGitDirectoryChanged(path);
+      })
+    );
+  });
+
   app.post(`${exports.pathPrefix}/commit`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const { path, amend, emptyCommit, message, files } = req.body;
     jsonResultOrFailProm(

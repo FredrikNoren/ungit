@@ -213,10 +213,7 @@ class NGWrap {
       inRebase,
       inConflict,
       commitMessage,
-      // TODO show staged changes separately
       index: await this.getChanges({ oid: 'index' }),
-      // worktree: await this.getChanges({ oid: 'worktree' }),
-      wt: await this.getChanges({ oid: 'worktree' }),
       worktree: await this.getChanges({ oid: 'combined' }),
     };
   }
@@ -388,7 +385,7 @@ class NGWrap {
             nodegit.Diff.OPTION.RECURSE_UNTRACKED_DIRS,
         })
       : toBoth
-      ? await nodegit.Diff.treeToWorkdirWithIndex(this.r, oldTree, {
+      ? await nodegit.Diff.indexToWorkdir(this.r, null, {
           flags:
             flags |
             nodegit.Diff.OPTION.UPDATE_INDEX |
@@ -461,6 +458,13 @@ class NGWrap {
       );
     }
     return text.join('\n');
+  }
+
+  async stage(file) {
+    await this.r.stageFilemode(file, true);
+  }
+  async unstage(file) {
+    await this.r.stageFilemode(file, false);
   }
 }
 

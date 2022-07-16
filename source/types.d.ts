@@ -10,6 +10,12 @@ type DiffStat = {
   oldFileName?: string;
   type: string;
 };
+type DiffStatTotal = {
+  fileLineDiffs?: DiffStat[];
+  additions?: number;
+  deletions?: number;
+  diffKey?: string;
+};
 type Commit = {
   sha1: Hash;
   parents: Hash[];
@@ -60,11 +66,7 @@ type GitStatus = {
   inMerge?: boolean;
   inRebase?: boolean;
   commitMessage?: string;
-  worktree: {
-    fileLineDiffs?: DiffStat[];
-    additions?: number;
-    deletions?: number;
-    diffKey?: string;
-  };
+  index: DiffStatTotal;
+  worktree: DiffStatTotal;
 };
 type SubModule = { name: string; path?: string; url?: string; rawUrl?: string };
