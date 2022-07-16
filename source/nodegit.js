@@ -181,7 +181,9 @@ class NGWrap {
     await nodegit.Stash.foreach(this.r, (index, message, oid) => {
       oids.push(oid);
     }).catch(normalizeError);
-    const stashes = await Promise.all(oids.map((oid) => this.r.getCommit(oid)));
+    const stashes = await Promise.all(
+      oids.map((oid) => this.r.getCommit(oid).catch(normalizeError))
+    );
     /** @type {Commit[]} */
     return Promise.all(
       stashes.map(async (stash, index) => ({
@@ -260,6 +262,19 @@ class NGWrap {
       commits.map(async (c) => ({ ...(await getFileStats(c)), ...formatCommit(c, headId) }))
     );
     return result;
+  }
+
+  async refs() {
+    // TODO need to make this smart for many tags
+    const refs = await this.r.getReferences().catch(normalizeError);
+    /** @type {Ref[]} */
+    const out = await Promise.all(
+      refs.map(async (ref) => ({
+        name: ref.name(),
+        sha1: `${ref.isTag() ? (await ref.peel(1)).id() : ref.target()}`,
+      }))
+    );
+    return out;
   }
 }
 
