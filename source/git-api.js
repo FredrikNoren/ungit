@@ -11,8 +11,20 @@ const fs = require('fs').promises;
 const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
-const crypto = require('crypto');
-const nodegit = require('nodegit');
+const {
+  initGit,
+  popStash,
+  addStash,
+  getTags,
+  getRemotes,
+  deleteTag,
+  addRemote,
+  deleteRemote,
+  quickStatus,
+  getStashes,
+  applyStash,
+  deleteStash,
+} = require('./nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
@@ -155,9 +167,7 @@ exports.registerApi = (env) => {
 
   const ensurePathExists = (req, res, next) => {
     fs.access(req.query.path || req.body.path)
-      .then(() => {
-        next();
-      })
+      .then(() => next())
       .catch(() => {
         res.status(400).json({ error: `'No such path: ${path}`, errorCode: 'no-such-path' });
       });
@@ -197,20 +207,6 @@ exports.registerApi = (env) => {
     { maxWait: 1000 }
   );
 
-  const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
-    if (config.autoStashAndPop) {
-      return gitPromise.stashExecuteAndPop(
-        commands,
-        repoPath,
-        allowedCodes,
-        outPipe,
-        inPipe,
-        timeout
-      );
-    } else {
-      return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
-    }
-  };
   const jsonResultOrFailProm = (res, promise) => {
     const now = Date.now();
     return promise
@@ -258,6 +254,21 @@ exports.registerApi = (env) => {
     }
   };
 
+  const autoStash = async (repoPath, fn) => {
+    if (config.autoStashAndPop) {
+      const oid = await addStash(repoPath, 'Ungit: automatic stash').catch((err) => {
+        // Nothing to save
+        if (err.errno === -3) return;
+        throw err;
+      });
+      const out = await fn();
+      await popStash(repoPath, oid);
+      return out;
+    } else {
+      return fn();
+    }
+  };
+
   app.get(
     `${exports.pathPrefix}/status`,
     ensureAuthenticated,
@@ -269,12 +280,7 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/init`,
     ensureAuthenticated,
     ensurePathExists,
-    jw((req) => {
-      var path = req.body.path;
-      // nodegit requires a number https://github.com/nodegit/nodegit/issues/538
-      var is_bare = req.body.bare ? 1 : 0;
-      return nodegit.Repository.init(path, is_bare);
-    })
+    jw((req) => initGit(req.body.path, req.body.bare))
   );
 
   app.post(
@@ -356,14 +362,19 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.post(`${exports.pathPrefix}/reset`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      autoStashExecuteAndPop(['reset', `--${req.body.mode}`, req.body.to], req.body.path)
-    )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/reset`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const repoPath = req.body.path;
+      await autoStash(repoPath, () =>
+        gitPromise(['reset', `--${req.body.mode}`, req.body.to], repoPath)
+      );
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+    })
+  );
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
     const isIgnoreWhiteSpace = req.query.whiteSpace === 'true' ? true : false;
@@ -393,10 +404,14 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      const task = req.body.all
-        ? gitPromise.discardAllChanges(req.body.path)
-        : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
-      jsonResultOrFailProm(res, task.then(emitWorkingTreeChanged.bind(null, req.body.path)));
+      const { all, path, file } = req.body;
+      const task = all
+        ? gitPromise.discardAllChanges(path)
+        : gitPromise.discardChangesInFile(path, file.trim());
+      jsonResultOrFailProm(
+        res,
+        task.finally(() => emitWorkingTreeChanged(path))
+      );
     }
   );
 
@@ -405,33 +420,31 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      const currentPath = req.body.path.trim();
-      const gitIgnoreFile = `${currentPath}/.gitignore`;
-      const ignoreFile = req.body.file.trim();
-      const task = fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile).catch((err) => {
-        throw {
-          errorCode: 'error-appending-ignore',
-          error: 'Error while appending to .gitignore file.',
-        };
-      });
+      const { path, file } = req.body;
+      const gitIgnoreFile = `${path}/.gitignore`;
+      const task = fs
+        .appendFile(gitIgnoreFile, os.EOL + file)
+        .catch((err) => {
+          throw {
+            errorCode: 'error-appending-ignore',
+            error: 'Error while appending to .gitignore file.',
+          };
+        })
+        .finally(() => emitWorkingTreeChanged(path));
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task);
     }
   );
 
   app.post(`${exports.pathPrefix}/commit`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, amend, emptyCommit, message, files } = req.body;
     jsonResultOrFailProm(
       res,
-      gitPromise.commit(
-        req.body.path,
-        req.body.amend,
-        req.body.emptyCommit,
-        req.body.message,
-        req.body.files
-      )
-    )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
+      gitPromise.commit(path, amend, emptyCommit, message, files).finally(() => {
+        emitGitDirectoryChanged(path);
+        emitWorkingTreeChanged(path);
+      })
+    );
   });
 
   app.post(`${exports.pathPrefix}/revert`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -623,12 +636,12 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.get(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    let pathToRepo = req.query.path;
-    nodegit.Repository.open(pathToRepo).then(function (repo) {
-      jsonResultOrFailProm(res, nodegit.Tag.list(repo));
-    });
-  });
+  app.get(
+    `${exports.pathPrefix}/tags`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => getTags(req.query.path))
+  );
 
   app.get(
     `${exports.pathPrefix}/remote/tags`,
@@ -674,15 +687,16 @@ exports.registerApi = (env) => {
     );
   });
 
-  app.delete(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    let pathToRepo = req.query.path;
-    let tagName = req.query.name.trim();
-    nodegit.Repository.open(pathToRepo).then(function (repo) {
-      jsonResultOrFailProm(res, nodegit.Tag.delete(repo, tagName)).finally(
-        emitGitDirectoryChanged.bind(null, req.query.path)
-      );
-    });
-  });
+  app.delete(
+    `${exports.pathPrefix}/tags`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) =>
+      deleteTag(req.query.path, req.query.name).finally(() =>
+        emitGitDirectoryChanged(req.query.path)
+      )
+    )
+  );
 
   app.delete(
     `${exports.pathPrefix}/remote/tags`,
@@ -702,40 +716,46 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.post(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const arg = req.body.sha1
-      ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
-      : ['checkout', req.body.name.trim()];
-
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/checkout`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const arg = req.body.sha1
+        ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
+        : ['checkout', req.body.name.trim()];
+      const repoPath = req.body.path;
+      try {
+        return await autoStash(repoPath, () => gitPromise(arg, repoPath));
+      } finally {
+        await emitGitDirectoryChanged(repoPath);
+        await emitWorkingTreeChanged(repoPath);
+      }
+    })
+  );
 
   app.post(
     `${exports.pathPrefix}/cherrypick`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path)
-      )
-        .then(emitGitDirectoryChanged.bind(null, req.body.path))
-        .then(emitWorkingTreeChanged.bind(null, req.body.path));
-    }
+    jw(async (req) => {
+      const repoPath = req.body.path;
+      await autoStash(repoPath, () => gitPromise(['cherry-pick', req.body.name.trim()], repoPath));
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+    })
   );
 
   app.get(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(res, gitPromise.getCurrentBranch(req.query.path));
   });
 
-  app.get(`${exports.pathPrefix}/remotes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    let pathToRepo = req.query.path;
-    nodegit.Repository.open(pathToRepo).then(function (repo) {
-      jsonResultOrFailProm(res, nodegit.Remote.list(repo));
-    });
-  });
+  app.get(
+    `${exports.pathPrefix}/remotes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => getRemotes(req.query.path))
+  );
 
   app.get(
     `${exports.pathPrefix}/remotes/:name`,
@@ -750,27 +770,14 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      let name = req.params.name;
-      let url = req.body.url;
-      let pathToRepo = req.body.path;
-      nodegit.Repository.open(pathToRepo).then(function (repo) {
-        jsonResultOrFailProm(res, nodegit.Remote.create(repo, name, url));
-      });
-    }
+    jw(async (req) => addRemote(req.body.path, req.params.name, req.body.url))
   );
 
   app.delete(
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      let name = req.params.name;
-      let pathToRepo = req.body.path;
-      nodegit.Repository.open(pathToRepo).then(function (repo) {
-        jsonResultOrFailProm(res, nodegit.Remote.delete(repo, name));
-      });
-    }
+    jw(async (req) => deleteRemote(req.body.path, req.params.name))
   );
 
   app.post(`${exports.pathPrefix}/merge`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -967,75 +974,52 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.get(`${exports.pathPrefix}/quickstatus`, ensureAuthenticated, (req, res) => {
-    const task = fs
-      .access(req.query.path)
-      .then(() => {
-        return gitPromise.revParse(req.query.path);
-      })
-      .then((revParseRes) => {
-        if (revParseRes.type !== 'uninited') {
-          return revParseRes;
-        }
+  app.get(
+    `${exports.pathPrefix}/quickstatus`,
+    ensureAuthenticated,
+    jw(async (req) => quickStatus(req.query.path))
+  );
 
-        // for uninited directory, let's check if it's any immediate directories are
-        // git repository so we can display them.
-        return fs
-          .readdir(req.query.path)
-          .then((filePaths) => {
-            return Promise.all(
-              filePaths
-                .filter((filePath) => !filePath.startsWith('.'))
-                .map((filePath) => gitPromise.revParse(path.join(req.query.path, filePath)))
-            );
-          })
-          .then((pathRevParses) => {
-            // @ts-ignore
-            revParseRes.subRepos = pathRevParses
-              .filter(
-                (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'
-              )
-              .map((pathRevParse) => pathRevParse.gitRootPath);
-            return revParseRes;
-          });
-      })
-      .catch((e) => {
-        logger.error('failed during /quickstatus', e);
-        return { type: 'no-such-path', gitRootPath: req.query.path };
-      });
-    jsonResultOrFailProm(res, task);
-  });
+  app.get(
+    `${exports.pathPrefix}/stashes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => getStashes(req.query.path))
+  );
 
-  app.get(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(
-      ['stash', 'list', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--numstat'],
-      req.query.path
-    ).then(gitParser.parseGitLog);
-    jsonResultOrFailProm(res, task);
-  });
-
-  app.post(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['stash', 'save', '--include-untracked', req.body.message || ''], req.body.path)
-    )
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
-      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/stashes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const { path: repoPath, message = '' } = req.body;
+      const oid = await addStash(repoPath, message);
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+      return oid;
+    })
+  );
 
   app.delete(
     `${exports.pathPrefix}/stashes/:id`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      const type = req.query.apply === 'true' ? 'apply' : 'drop';
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['stash', type, `stash@{${req.params.id}}`], req.query.path)
-      )
-        .finally(emitGitDirectoryChanged.bind(null, req.query.path))
-        .finally(emitWorkingTreeChanged.bind(null, req.query.path));
-    }
+    jw(async (req) => {
+      const { path: repoPath, apply } = req.query;
+      const { id } = req.params;
+      const index = Number(id);
+      if (isNaN(index) || index < 0) throw new Error(`Invalid index ${id}`);
+      try {
+        if (apply === 'true') {
+          await applyStash(repoPath, index);
+        } else {
+          await deleteStash(repoPath, index);
+        }
+      } finally {
+        await emitGitDirectoryChanged(repoPath);
+        await emitWorkingTreeChanged(repoPath);
+      }
+    })
   );
 
   app.get(`${exports.pathPrefix}/gitconfig`, ensureAuthenticated, (req, res) => {
