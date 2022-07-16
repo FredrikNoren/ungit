@@ -2,6 +2,7 @@
   class="commit"
   data-bind="css: { highlighted: highlighted, hover: nodeIsMousehover, selected: selected }"
 >
+  <!-- ko if: isInited() && title() -->
   <div
     class="commit-box panel panel-default"
     data-bind="element: element, click: stopClickPropagation"
@@ -66,4 +67,5 @@
       <!-- /ko -->
     </div>
   </div>
+  <!-- /ko -->
 </div>

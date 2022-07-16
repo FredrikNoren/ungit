@@ -1,3 +1,5 @@
+// get ideas from https://github.com/git-up/GitUp/blob/9e4b37f7648e1fe48cb6261af468af8d8f8ee55e/GitUpKit/Core/GCRepository%2BBare.m#L244
+
 const fs = require('fs').promises;
 const sysPath = require('path');
 const nodegit = require('nodegit');
@@ -61,18 +63,14 @@ const splitMail = (signature) => {
   return match ? [match[1].trim(), match[2].trim()] : [];
 };
 
-/**
- * @param {nodegit.Commit} c
- * @param {nodegit.Oid}    [hId]
- */
-const formatCommit = (c, hId) => {
+/** @param {nodegit.Commit} c */
+const formatCommit = (c) => {
   const [authorName, authorEmail] = splitMail(c.author().toString());
   const [committerName, committerEmail] = splitMail(c.author().toString());
   /** @type {Commit} */
   const out = {
     sha1: c.sha(),
     parents: c.parents().map(String),
-    refs: hId && hId.equal(c.id()) ? ['HEAD'] : [], // TODO cached refs on client, don't include here
     message: c.message(),
     // TODO find out how to extract from rawHeader()
     authorDate: c.date().toJSON(),
@@ -223,21 +221,22 @@ class NGWrap {
     };
   }
 
-  // TODO accept SHAs to walk
-  async log(limit = 500, skip) {
+  async log(limit = 25, skip, ids) {
     const walker = this.r.createRevWalk();
     walker.sorting(nodegit.Revwalk.SORT.TIME);
-    const head = await this.r.getHeadCommit().catch(normalizeError);
-    if (head) walker.push(head.id());
-    walker.pushGlob('*');
-    if (skip) await walker.fastWalk(skip).catch(normalizeError);
+    if (ids && ids.length) {
+      for (const id of ids) walker.push(id);
+    } else {
+      const head = await this.r.getHeadCommit().catch(normalizeError);
+      if (head) walker.push(head.id());
+      walker.pushGlob('*');
+      if (skip) await walker.fastWalk(skip).catch(normalizeError);
+    }
     const commits = await walker.getCommits(limit).catch(normalizeError);
-    // TODO detect head client-side
-    const headId = head && head.id();
-    // TODO only keep formatCommit, the stats are for a details call
+    // TODO only keep formatCommit, the stats should go in a details call
     /** @type {Commit[]} */
     const result = await Promise.all(
-      commits.map(async (c) => ({ ...(await getFileStats(c)), ...formatCommit(c, headId) }))
+      commits.map(async (c) => ({ ...(await this.getChanges({ commit: c })), ...formatCommit(c) }))
     );
     return result;
   }
@@ -247,11 +246,15 @@ class NGWrap {
     const refs = await this.r.getReferences().catch(normalizeError);
     /** @type {Ref[]} */
     const out = await Promise.all(
-      refs.map(async (ref) => ({
-        name: ref.name(),
-        sha1: `${ref.isTag() ? (await ref.peel(1)).id() : ref.target()}`,
-      }))
+      refs.map(async (ref) => {
+        const sha1 = `${ref.isTag() ? (await ref.peel(1)).id() : ref.target()}`;
+        const commit = await this.r.getCommit(sha1);
+        const date = commit.date().toJSON();
+        return { name: ref.name(), sha1, date };
+      })
     );
+    const head = await this.r.getHeadCommit();
+    if (head) out.unshift({ name: 'HEAD', sha1: head.sha(), date: head.date().toJSON() });
     return out;
   }
 
@@ -262,7 +265,7 @@ class NGWrap {
 
   async getHead() {
     const head = await this.r.getHeadCommit().catch(normalizeError);
-    return formatCommit(head, head.id());
+    return formatCommit(head);
   }
 
   /**

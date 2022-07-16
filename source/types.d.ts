@@ -13,7 +13,7 @@ type DiffStat = {
 type Commit = {
   sha1: Hash;
   parents: Hash[];
-  refs: RefName[];
+  refs?: RefName[];
   isHead?: boolean;
   message: string;
   authorName?: string;
@@ -47,7 +47,7 @@ type FileStatus = {
   additions?: number;
   deletions?: number;
 };
-type Ref = { name: RefName; current?: boolean; sha1?: Hash; remote?: string };
+type Ref = { name: RefName; current?: boolean; sha1?: Hash; remote?: string; date?: Date | string };
 type QuickStatus = {
   gitRootPath: string;
   type: 'inited' | 'uninited' | 'bare' | 'no-such-path';
