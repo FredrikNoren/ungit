@@ -69,7 +69,7 @@ class BranchesViewModel extends ComponentRoot {
   async _updateRefs(forceRemoteFetch) {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
 
-    const branchesProm = this.server.getPromise('/branches', { path: this.repoPath() });
+    const branchProm = this.server.getPromise('/checkout', { path: this.repoPath() });
     const refsProm = this.server.getPromise('/refs', {
       path: this.repoPath(),
       remoteFetch: forceRemoteFetch,
@@ -77,11 +77,8 @@ class BranchesViewModel extends ComponentRoot {
 
     try {
       // set current branch
-      (await branchesProm).forEach((b) => {
-        if (b.current) {
-          this.current(b.name);
-        }
-      });
+      const branch = await branchProm;
+      this.current(branch);
     } catch (e) {
       this.current('~error');
       ungit.logger.warn('error while setting current branch', e);

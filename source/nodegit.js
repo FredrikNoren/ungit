@@ -43,7 +43,7 @@ const nodegitErrors = {
   '-35': 'GIT_EAPPLYFAIL', // Patch application failed
 };
 const normalizeError = (err) => {
-  console.error('normalizing', err);
+  // console.error('normalizing', err);
   if (!err.errorCode && err.errno) err.errorCode = nodegitErrors[err.errno];
   throw err;
 };
@@ -56,7 +56,7 @@ const splitMail = (signature) => {
 
 /**
  * @param {nodegit.Commit} c
- * @param {nodegit.Oid}    hId
+ * @param {nodegit.Oid}    [hId]
  */
 const formatCommit = (c, hId) => {
   const [authorName, authorEmail] = splitMail(c.author().toString());
@@ -87,8 +87,8 @@ const getFileStats = async (c, isStash) => {
     const stat = await diff.getStats();
     // Stashes have 0-change diffs with the whole repo as a patch
     if (stat.filesChanged() === 0) continue;
-    out.additions += stat.insertions();
-    out.deletions += stat.deletions();
+    out.additions += +stat.insertions();
+    out.deletions += +stat.deletions();
 
     const patches = await diff.patches();
     // TODO probably need to aggregate by file path
@@ -98,7 +98,7 @@ const getFileStats = async (c, isStash) => {
         const oldFileName = p.isAdded() ? fileName : p.oldFile().path();
         const displayName = p.isRenamed() ? `${oldFileName} → ${fileName}` : fileName;
         const { total_additions, total_deletions } = p.lineStats();
-        /** @type{DiffStat} */
+        /** @type {DiffStat} */
         const fileStat = {
           oldFileName,
           fileName,
@@ -247,12 +247,10 @@ class NGWrap {
   async log(limit = 500, skip) {
     const walker = this.r.createRevWalk();
     walker.sorting(nodegit.Revwalk.SORT.TIME);
-    const head = await this.r.getHeadCommit();
+    const head = await this.r.getHeadCommit().catch(normalizeError);
+    if (head) walker.push(head.id());
+    walker.pushGlob('*');
     if (skip) await walker.fastWalk(skip).catch(normalizeError);
-    else {
-      if (head) walker.push(head.id());
-      walker.pushGlob('*');
-    }
     const commits = await walker.getCommits(limit).catch(normalizeError);
     // TODO detect head client-side
     const headId = head && head.id();
@@ -274,6 +272,66 @@ class NGWrap {
         sha1: `${ref.isTag() ? (await ref.peel(1)).id() : ref.target()}`,
       }))
     );
+    return out;
+  }
+
+  async getCurrentBranch() {
+    const ref = await this.r.getCurrentBranch().catch(normalizeError);
+    return ref.shorthand();
+  }
+
+  async getHead() {
+    const head = await this.r.getHeadCommit().catch(normalizeError);
+    return formatCommit(head, head.id());
+  }
+
+  /**
+   * @param {string}    remoteName
+   * @param {RefName[]} [refs]
+   * @param {boolean}   [prune]
+   */
+  async remoteFetch(remoteName, refs = null, prune) {
+    const remote = await this.r.getRemote(remoteName).catch(normalizeError);
+    // TODO use credentialshelper
+    await remote.fetch(
+      refs,
+      {
+        callbacks: {
+          credentials: (url, userName) => nodegit.Cred.sshKeyFromAgent(userName),
+        },
+        prune: prune ? nodegit.Fetch.PRUNE.GIT_FETCH_PRUNE : undefined,
+      },
+      undefined
+    );
+  }
+
+  async remoteAllFetch() {
+    const remotes = await this.getRemotes();
+    // making calls serially as credential helpers may get confused to which cred to get.
+    for (const name of remotes) {
+      await this.remoteFetch(name);
+    }
+  }
+
+  // TODO not sure if we should have this
+  async remoteFetchTags(remoteName) {
+    const remote = await this.r.getRemote(remoteName).catch(normalizeError);
+    // TODO use credentialshelper
+    await remote.connect(nodegit.Enums.DIRECTION.FETCH, {
+      credentials: (url, userName) => nodegit.Cred.sshKeyFromAgent(userName),
+    });
+    const refs = await remote.referenceList();
+    await remote.disconnect();
+    /** @type {Ref[]} */
+    const out = [];
+    for (const t of refs) {
+      const name = t.name();
+      if (!name.startsWith('/refs/tags/')) continue;
+      const sha1 = t.oid().toString();
+      const ref = { name, sha1, remote: remoteName };
+      if (name.endsWith('{}')) out[out.length - 1] = ref;
+      else out.push(ref);
+    }
     return out;
   }
 }

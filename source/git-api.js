@@ -27,6 +27,7 @@ exports.registerApi = (env) => {
   const socketsById = env.socketsById || {};
 
   if (config.dev) temp.track();
+  // app.all('*', (q, r, n) => console.log(q.method, q.path, q.query, q.body) || n());
 
   if (io) {
     io.on('connection', (socket) => {
@@ -264,7 +265,6 @@ exports.registerApi = (env) => {
       return fn();
     }
   };
-  // app.all('*', (q, r, n) => console.log(q.method, q.path, q.query, q.body) || n());
 
   app.get(
     `${exports.pathPrefix}/status`,
@@ -314,24 +314,14 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
+    jw(async (req, res) => {
       // Allow a little longer timeout on fetch (10min)
       if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
-
-      const task = gitPromise({
-        commands: credentialsOption(req.body.socketId, req.body.remote).concat([
-          'fetch',
-          config.autoPruneOnFetch ? '--prune' : '',
-          '--',
-          req.body.remote,
-          req.body.ref ? req.body.ref : '',
-        ]),
-        repoPath: req.body.path,
-        timeout: tenMinTimeoutMs,
-      });
-
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
-    }
+      const { path, ref, remote } = req.body;
+      await req.repo
+        .remoteFetch(remote, ref ? [ref] : null, config.autoPruneOnFetch)
+        .finally(() => emitGitDirectoryChanged(path));
+    })
   );
 
   app.post(
@@ -460,7 +450,7 @@ exports.registerApi = (env) => {
       // TODO ask for more not via skip but via oid
       const skip = getNumber(req.query.skip, 0);
       const nodes = await req.repo.log(limit, skip, config.maxActiveBranchSearchIteration);
-      return { limit, skip, nodes, isHeadExist: true };
+      return { skip: skip + nodes.length, nodes, isHeadExist: true };
     })
   );
 
@@ -504,38 +494,14 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     jw(async (req, res) => {
-      if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
-
-      if (req.query.remoteFetch)
-        await gitPromise(['remote'], req.query.path).then((remoteText) => {
-          const remotes = remoteText.trim().split('\n');
-
-          // making calls serially as credential helpers may get confused to which cred to get.
-          return remotes.reduce((promise, remote) => {
-            if (!remote || remote === '') return promise;
-            return promise.then(() => {
-              return gitPromise({
-                commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
-                repoPath: req.query.path,
-                timeout: tenMinTimeoutMs,
-              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
-            });
-          }, Promise.resolve());
+      if (req.query.remoteFetch) {
+        if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
+        await req.repo.remoteAllFetch().catch((err) => {
+          console.warn('ignoring fetch error', err);
         });
+      }
 
       return req.repo.refs();
-    })
-  );
-
-  app.get(
-    `${exports.pathPrefix}/branches`,
-    ensureAuthenticated,
-    ensurePathExists,
-    jw((req) => {
-      const isLocalBranchOnly = req.query.isLocalBranchOnly == 'false';
-      return gitPromise(['branch', isLocalBranchOnly ? '-a' : ''], req.query.path).then(
-        gitParser.parseGitBranches
-      );
     })
   );
 
@@ -603,24 +569,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
-      const task = gitPromise(
-        credentialsOption(req.query.socketId, req.query.remote).concat([
-          'ls-remote',
-          '--tags',
-          req.query.remote,
-        ]),
-        req.query.path
-      )
-        .then(gitParser.parseGitLsRemote)
-        .then((result) => {
-          result.forEach((r) => {
-            r.remote = req.query.remote;
-          });
-          return result;
-        });
-      jsonResultOrFailProm(res, task);
-    }
+    jw((req) => req.repo.remoteFetchTags(req.query.remote))
   );
 
   app.post(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -699,19 +648,18 @@ exports.registerApi = (env) => {
     })
   );
 
-  app.get(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise.getCurrentBranch(req.query.path));
-  });
+  app.get(
+    `${exports.pathPrefix}/checkout`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => req.repo.getCurrentBranch())
+  );
 
   app.get(
     `${exports.pathPrefix}/remotes`,
     ensureAuthenticated,
     ensurePathExists,
-    jw(async (req) => {
-      const foo = await req.repo.getRemotes();
-      console.log({ foo });
-      return foo;
-    })
+    jw(async (req) => await req.repo.getRemotes())
   );
 
   app.get(
@@ -847,7 +795,7 @@ exports.registerApi = (env) => {
     jw(async (req) => {
       const currentPath = path.resolve(path.join(req.query.path, '..'));
       const stat = await quickStatus(currentPath);
-      if (stat.type === 'no-such-path') return {};
+      if (stat.type === 'no-such-path' || stat.type === 'uninited') return {};
       return { path: stat.gitRootPath };
     })
   );
