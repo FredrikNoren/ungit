@@ -35,7 +35,7 @@ class SubmodulesViewModel extends ComponentRoot {
   async _fetchSubmodules() {
     try {
       const submodules = await this.server.getPromise('/submodules', { path: this.repoPath() });
-      this.submodules(submodules && Array.isArray(submodules) ? submodules : []);
+      this.submodules(submodules);
       return this;
     } catch (e) {
       ungit.logger.error('error during fetchSubmodules', e);

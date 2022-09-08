@@ -29,7 +29,7 @@ exports.parseGitStatus = (text, args) => {
       displayName: displayName,
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
-      isNew: (status[0] == '?' || status[0] == 'A') && !(status[0] == 'D' || status[1] == 'D'),
+      isNew: (status[0] == '?' || status[0] == 'A') && status[1] != 'D',
       conflict: (status[0] == 'A' && status[1] == 'A') || status[0] == 'U' || status[1] == 'U',
       renamed: status[0] == 'R',
       type: fileType(newFileName),
@@ -37,9 +37,7 @@ exports.parseGitStatus = (text, args) => {
   }
 
   return {
-    isMoreToLoad: false,
     branch: branch,
-    inited: true,
     files: files,
   };
 };
@@ -272,9 +270,9 @@ exports.parseGitStashShow = (text) => {
   });
 };
 
-exports.parseGitSubmodule = (text, args) => {
+exports.parseGitSubmodule = (text) => {
   if (!text) {
-    return {};
+    return [];
   }
 
   let submodule;
