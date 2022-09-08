@@ -184,6 +184,10 @@ const getGitError = (args, stderr, stdout) => {
   err.stderrLower = (stderr || '').toLowerCase();
   if (err.stderrLower.indexOf('not a git repository') >= 0) {
     err.errorCode = 'not-a-repository';
+  } else if (err.stderrLower.indexOf("bad default revision 'head'") != -1) {
+    err.errorCode = 'no-head';
+  } else if (err.stderrLower.indexOf('does not have any commits yet') != -1) {
+    err.errorCode = 'no-commits';
   } else if (err.stderrLower.indexOf('connection timed out') != -1) {
     err.errorCode = 'remote-timeout';
   } else if (err.stderrLower.indexOf('permission denied (publickey)') != -1) {
