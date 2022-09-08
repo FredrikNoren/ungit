@@ -121,8 +121,8 @@ const baseDir = path.join(__dirname, '..');
 })();
 
 async function lessFile(source, destination) {
-  const input = await fs.readFile(source);
-  const output = await less.render(input.toString(), {
+  const input = await fs.readFile(source, { encoding: 'utf8' });
+  const output = await less.render(input, {
     filename: source,
     sourceMap: {
       outputSourceFiles: true,

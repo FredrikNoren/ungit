@@ -14,7 +14,9 @@ class UngitPlugin {
     this.dir = args.dir;
     this.path = args.path;
     this.httpBasePath = args.httpBasePath;
-    this.manifest = JSON.parse(fsSync.readFileSync(path.join(this.path, 'ungit-plugin.json')));
+    this.manifest = JSON.parse(
+      fsSync.readFileSync(path.join(this.path, 'ungit-plugin.json'), { encoding: 'utf8' })
+    );
     this.name = this.manifest.name || this.dir;
     this.config = config.pluginConfigs[this.name] || {};
   }
@@ -48,9 +50,11 @@ class UngitPlugin {
         if (exports.raw) {
           return Promise.all(
             assureArray(exports.raw).map((rawSource) => {
-              return fs.readFile(path.join(this.path, rawSource)).then((text) => {
-                return text + '\n';
-              });
+              return fs
+                .readFile(path.join(this.path, rawSource), { encoding: 'utf8' })
+                .then((text) => {
+                  return text + '\n';
+                });
             })
           ).then((result) => {
             return result.join('\n');
@@ -78,7 +82,9 @@ class UngitPlugin {
           return Promise.all(
             Object.keys(exports.knockoutTemplates).map((templateName) => {
               return fs
-                .readFile(path.join(this.path, exports.knockoutTemplates[templateName]))
+                .readFile(path.join(this.path, exports.knockoutTemplates[templateName]), {
+                  encoding: 'utf8',
+                })
                 .then((text) => {
                   return `<script type="text/html" id="${templateName}">\n${text}\n</script>`;
                 });
