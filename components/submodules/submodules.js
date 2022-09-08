@@ -1,9 +1,9 @@
 const ko = require('knockout');
+const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
 const { ComponentRoot } = require('../ComponentRoot');
-const _ = require('lodash');
 
 components.register('submodules', (args) => new SubmodulesViewModel(args.server, args.repoPath));
 

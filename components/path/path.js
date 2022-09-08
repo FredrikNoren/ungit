@@ -1,10 +1,10 @@
-const components = require('ungit-components');
 const ko = require('knockout');
+const octicons = require('octicons');
+const components = require('ungit-components');
 const addressParser = require('ungit-address-parser');
 const navigation = require('ungit-navigation');
 const programEvents = require('ungit-program-events');
 const { encodePath } = require('ungit-address-parser');
-const octicons = require('octicons');
 const storage = require('ungit-storage');
 const { ComponentRoot } = require('../ComponentRoot');
 const showCreateRepoKey = 'isShowCreateRepo';
