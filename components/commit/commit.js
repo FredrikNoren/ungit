@@ -17,12 +17,10 @@ class CommitViewModel {
     this.pgpVerifiedString = gitNode.pgpVerifiedString;
     this.pgpIcon = octicons.verified.toSVG({ height: 18 });
     this.element = ko.observable();
-    this.commitTime = ko.observable();
-    this.authorTime = ko.observable();
     this.message = ko.observable();
     this.title = ko.observable();
     this.body = ko.observable();
-    this.authorDate = ko.observable(0);
+    this.authorDate = ko.observable();
     this.authorDateFromNow = ko.observable();
     this.authorName = ko.observable();
     this.authorEmail = ko.observable();
@@ -48,8 +46,6 @@ class CommitViewModel {
   }
 
   setData(args) {
-    this.commitTime(moment(new Date(args.commitDate)));
-    this.authorTime(moment(new Date(args.authorDate)));
     const message = args.message.split('\n');
     this.message(args.message);
     this.title(message[0]);
@@ -61,7 +57,6 @@ class CommitViewModel {
     this.numberOfAddedLines(args.additions);
     this.numberOfRemovedLines(args.deletions);
     this.fileLineDiffs(args.fileLineDiffs);
-    this.isInited = true;
     this.commitDiff = ko.observable(
       components.create('commitDiff', {
         fileLineDiffs: this.fileLineDiffs(),
