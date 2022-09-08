@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = async ({ github, context, core, exec }) => {
   core.info('Preparing npm publish');
   const hash = context.sha.substring(0, 8);
-  const packageJson = JSON.parse(await fs.readFile('package.json'));
+  const packageJson = JSON.parse(await fs.readFile('package.json', { encoding: 'utf8' }));
   const version = packageJson.version;
   const tag = `v${version}`;
   packageJson.version += `+${hash}`;

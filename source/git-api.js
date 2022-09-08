@@ -85,8 +85,10 @@ exports.registerApi = (env) => {
   const readIgnore = async (pathToWatch) => {
     logger.debug(`Parsing .gitignore for ${pathToWatch}`);
     const out = ignore();
-    const ignoreContent = await fs.readFile(path.join(pathToWatch, '.gitignore')).catch(() => null);
-    if (ignoreContent) out.add(ignoreContent.toString());
+    const ignoreContent = await fs
+      .readFile(path.join(pathToWatch, '.gitignore'), { encoding: 'utf8' })
+      .catch(() => null);
+    if (ignoreContent) out.add(ignoreContent);
     return out;
   };
 
@@ -1018,8 +1020,8 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    fs.readFile(path.join(req.query.path, '.gitignore'))
-      .then((ignoreContent) => res.status(200).json({ content: ignoreContent.toString() }))
+    fs.readFile(path.join(req.query.path, '.gitignore'), { encoding: 'utf8' })
+      .then((ignoreContent) => res.status(200).json({ content: ignoreContent }))
       .catch((e) => {
         if (e && e.message && e.message.indexOf('no such file or directory') > -1) {
           res.status(200).json({ content: '' });
