@@ -27,6 +27,7 @@ class GraphViewModel extends ComponentRoot {
     this.edges = ko.observableArray();
     this.refs = ko.observableArray();
     this.nodesById = {};
+    this.edgesById = {};
     this.refsByRefName = {};
     this.checkedOutBranch = ko.observable();
     this.checkedOutRef = ko.computed(() =>
@@ -39,9 +40,7 @@ class GraphViewModel extends ComponentRoot {
       if (!this.HEAD() || !this.HEAD().cx() || !this.HEAD().cy()) return;
       return `M 610 68 L ${this.HEAD().cx()} ${this.HEAD().cy()}`;
     });
-    this.showCommitNode = ko.observable(false);
     this.currentActionContext = ko.observable();
-    this.edgesById = {};
     this.scrolledToEnd = _.debounce(
       () => {
         this.limit(numberOfNodesPerLoad + this.limit());
@@ -166,8 +165,6 @@ class GraphViewModel extends ComponentRoot {
   }
 
   computeNode(nodes) {
-    nodes = nodes || this.nodes();
-
     this.markNodesIdeologicalBranches(this.refs());
 
     const updateTimeStamp = moment().valueOf();
