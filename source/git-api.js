@@ -428,17 +428,13 @@ exports.registerApi = (env) => {
     const task = gitPromise
       .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
       .catch((err) => {
-        if (err.stderr && err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) {
+        if (
+          err.errorCode === 'no-head' ||
+          err.errorCode === 'no-commits' ||
+          err.errorCode === 'not-a-repository'
+        )
           return { limit: limit, skip: skip, nodes: [] };
-        } else if (
-          /fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr)
-        ) {
-          return { limit: limit, skip: skip, nodes: [] };
-        } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
-          return { limit: limit, skip: skip, nodes: [] };
-        } else {
-          throw err;
-        }
+        throw err;
       });
     jsonResultOrFailProm(res, task);
   });
@@ -459,10 +455,12 @@ exports.registerApi = (env) => {
     )
       .then(gitParser.parseGitLog)
       .catch((err) => {
-        if (err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) return [];
-        else if (/fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr))
+        if (
+          err.errorCode === 'no-head' ||
+          err.errorCode === 'no-commits' ||
+          err.errorCode === 'not-a-repository'
+        )
           return [];
-        else if (err.stderr.indexOf('fatal: Not a git repository') == 0) return [];
         throw err;
       });
     jsonResultOrFailProm(res, task);
