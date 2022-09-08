@@ -70,7 +70,7 @@ class StashViewModel extends ComponentRoot {
   }
 
   updateNode(parentElement) {
-    if (!this.isDisabled) ko.renderTemplate('stash', this, {}, parentElement);
+    ko.renderTemplate('stash', this, {}, parentElement);
   }
 
   onProgramEvent(event) {
