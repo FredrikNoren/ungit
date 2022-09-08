@@ -75,8 +75,8 @@ const baseDir = path.join(__dirname, '..');
 
   console.log('browserify:components');
   for (const component of components) {
-    const sourcePrefix = path.join(baseDir, `components/${component}/${component}`);
     console.log(`browserify:components:${component}`);
+    const sourcePrefix = path.join(baseDir, `components/${component}/${component}`);
     const destination = path.join(baseDir, `components/${component}/${component}.bundle.js`);
 
     const jsSource = `${sourcePrefix}.js`;
