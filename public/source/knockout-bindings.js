@@ -1,5 +1,5 @@
-var $ = require('jquery');
 var ko = require('knockout');
+var $ = require('jquery');
 
 ko.bindingHandlers.debug = {
   init: function (element, valueAccessor) {
