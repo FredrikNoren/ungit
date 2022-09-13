@@ -48,8 +48,6 @@ class CommitViewModel {
   }
 
   setData(/** @type {Commit} */ args) {
-    this.commitTime(moment(new Date(args.commitDate)));
-    this.authorTime(moment(new Date(args.authorDate)));
     const message = args.message.split('\n');
     this.message(args.message);
     this.title(message[0]);
