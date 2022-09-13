@@ -13,7 +13,8 @@
 
           nativeBuildInputs = with pkgs; [
             bashInteractive
-            nodejs-14_x
+            python3
+            nodejs-16_x
           ];
 
           # libgit2 needs these
