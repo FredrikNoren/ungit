@@ -25,21 +25,21 @@ jobs:
 
       # linux dependencies
       - run: sudo apt update
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '14'
       - run: sudo apt install -y wine64
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '14'
       - run: wine --version
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '14'
       - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
       # macos dependencies
 # required for electron-packager
 #      - run: brew update
-#        if: matrix.os == 'macos-latest'
+#        if: matrix.os == 'macos-latest' && matrix.node-version == '14'
 #      - run: brew cask install xquartz wine-stable
-#        if: matrix.os == 'macos-latest'
+#        if: matrix.os == 'macos-latest' && matrix.node-version == '14'
 #      - run: wine64 --version
-#        if: matrix.os == 'macos-latest'
+#        if: matrix.os == 'macos-latest' && matrix.node-version == '14'
       - run: brew reinstall git
         if: matrix.os == 'macos-latest' && matrix.node-version == '*'
       # windows dependencies
