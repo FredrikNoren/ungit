@@ -200,7 +200,7 @@ describe('[GENERIC]', () => {
     await environment.click('[data-ta-action="revert"]');
     await environment.ensureRedraw();
     await environment.waitForElementVisible(
-      '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"]'
+      '[data-ta-node-title^="Revert \\"Merge branch \'testbranch\'"] .commit-container'
     );
   });
 

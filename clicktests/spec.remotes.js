@@ -122,7 +122,9 @@ describe('[REMOTES]', () => {
     await environment.wait(250);
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
-    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push"]');
+    await environment.waitForElementVisible(
+      '[data-ta-node-title="Commit & Push"] .commit-container'
+    );
   });
 
   it('Should be possible to commitnpush with ff', async () => {
@@ -131,6 +133,8 @@ describe('[REMOTES]', () => {
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
-    await environment.waitForElementVisible('[data-ta-node-title="Commit & Push with ff"]');
+    await environment.waitForElementVisible(
+      '[data-ta-node-title="Commit & Push with ff"] .commit-container'
+    );
   });
 });
