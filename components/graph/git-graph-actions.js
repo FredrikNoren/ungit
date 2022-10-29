@@ -111,20 +111,26 @@ class Reset extends ActionBase {
   perform() {
     const context = this.graph.currentActionContext();
     const remoteRef = context.getRemoteRef(this.graph.currentRemote());
-    return components
-      .create('yesnodialog', {
+    return new Promise((resolve, reject) => {
+      components.showModal('yesnomodal', {
         title: 'Are you sure?',
         details: 'Resetting to ref: ' + remoteRef.name + ' cannot be undone with ungit.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (!diag.result()) return;
-        return this.server
-          .postPromise('/reset', { path: this.graph.repoPath(), to: remoteRef.name, mode: 'hard' })
-          .then(() => {
+        closeFunc: async (isYes) => {
+          if (isYes) {
+            await this.server
+              .postPromise('/reset', {
+                path: this.graph.repoPath(),
+                to: remoteRef.name,
+                mode: 'hard',
+              })
+              .then(resolve)
+              .catch(reject);
             context.node(remoteRef.node());
-          });
-      }).closePromise;
+          }
+          this.isRunning(false);
+        },
+      });
+    });
   }
 }
 
@@ -155,7 +161,11 @@ class Rebase extends ActionBase {
     return this.server
       .postPromise('/rebase', { path: this.graph.repoPath(), onto: this.node.sha1 })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('rebase failed', err);
+        }
       });
   }
 }
@@ -189,7 +199,11 @@ class Merge extends ActionBase {
         with: this.graph.currentActionContext().localRefName,
       })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('merge failed', err);
+        }
       });
   }
 }
@@ -227,7 +241,7 @@ class Push extends ActionBase {
         .createRemoteRef()
         .then(() => {
           if (this.graph.HEAD().name == ref.name) {
-            this.grah.HEADref().node(ref.node());
+            this.graph.HEADref().node(ref.node());
           }
         })
         .finally(() => programEvents.dispatch({ event: 'request-fetch-tags' }));
@@ -277,12 +291,18 @@ class Delete extends ActionBase {
     }
     details = `Deleting ${details} branch or tag cannot be undone with ungit.`;
 
-    return components
-      .create('yesnodialog', { title: 'Are you sure?', details: details })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) return context.remove();
-      }).closePromise;
+    return new Promise((resolve, reject) => {
+      components.showModal('yesnomodal', {
+        title: 'Are you sure?',
+        details: details,
+        closeFunc: async (isYes) => {
+          if (isYes) {
+            await context.remove().then(resolve).catch(reject);
+          }
+          this.isRunning(false);
+        },
+      });
+    });
   }
 }
 
@@ -301,7 +321,11 @@ class CherryPick extends ActionBase {
     return this.server
       .postPromise('/cherrypick', { path: this.graph.repoPath(), name: this.node.sha1 })
       .catch((err) => {
-        if (err.errorCode != 'merge-failed') this.server.unhandledRejection(err);
+        if (err.errorCode != 'merge-failed') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('cherrypick failed', err);
+        }
       });
   }
 }

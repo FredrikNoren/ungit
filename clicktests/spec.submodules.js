@@ -22,23 +22,25 @@ describe('[SUMBODULES]', () => {
 
     await environment.insert('.modal #Path', 'subrepo');
     await environment.insert('.modal #Url', testRepoPaths[0]);
-    await environment.click('.modal-dialog .btn-primary');
+    await environment.awaitAndClick('.modal-dialog .btn-primary');
+    await environment.ensureRedraw();
+  });
 
+  it('Submodule update', async () => {
     await environment.click('.submodule .dropdown-toggle');
     await environment.waitForElementVisible(
       '.fetchButton .dropdown-menu [data-ta-clickable="subrepo"]'
     );
-  });
-
-  it('Submodule update', async () => {
-    await environment.click('.fetchButton .update-submodule');
-    await environment.waitForElementHidden('#nprogress');
+    const submoduleResponseProm = environment.setApiListener('/submodules/update', 'POST');
+    await environment.awaitAndClick('.fetchButton .update-submodule');
+    await submoduleResponseProm;
   });
 
   it('Submodule delete check', async () => {
+    const submoduleDeleteResponseProm = environment.setApiListener('/submodules?', 'DELETE');
     await environment.click('.submodule .dropdown-toggle');
     await environment.click('[data-ta-clickable="subrepo-remove"]');
-    await environment.click('.modal-dialog .btn-primary');
-    await environment.waitForElementHidden('#nprogress');
+    await environment.awaitAndClick('.modal-dialog .btn-primary');
+    await submoduleDeleteResponseProm;
   });
 });

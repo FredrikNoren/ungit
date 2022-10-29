@@ -26,8 +26,6 @@ class RemotesViewModel {
 
     this.shouldAutoFetch = ungit.config.autoFetch;
     this.updateRemotes();
-    this.isFetching = false;
-    this.fetchDebounced = _.debounce(() => this.fetch({ tags: true }), 500);
   }
 
   updateNode(parentElement) {
@@ -38,83 +36,68 @@ class RemotesViewModel {
     this.fetch({ nodes: true, tags: true });
   }
 
-  onProgramEvent(event) {
-    if (
-      event.event === 'working-tree-changed' ||
-      event.event === 'request-app-content-refresh' ||
-      event.event === 'request-fetch-tags' ||
-      event.event === 'git-directory-changed'
-    ) {
-      if (
-        (event.event != 'working-tree-changed' && event.event != 'git-directory-changed') ||
-        this.shouldAutoFetch
-      )
-        this.fetchDebounced();
+  async onProgramEvent(event) {
+    if (event.event === 'request-app-content-refresh' || event.event === 'request-fetch-tags') {
+      await this.fetch({ tags: true });
+    } else if (event.event === 'git-directory-changed' && this.shouldAutoFetch) {
+      await this.fetch({ tags: true });
+    } else if (event.event === 'update-remote') {
+      await this.updateRemotes();
     }
   }
 
-  fetch(options) {
-    if (this.isFetching || !this.currentRemote()) return;
+  async fetch(options) {
+    if (!this.currentRemote() || !options.tags) return;
+    ungit.logger.debug('remotes.fetch() triggered');
 
-    this.isFetching = true;
-    const tagPromise = options.tags
-      ? this.server.getPromise('/remote/tags', {
-          path: this.repoPath(),
-          remote: this.currentRemote(),
-        })
-      : null;
-    const fetchPromise = options.nodes
-      ? this.server.postPromise('/fetch', { path: this.repoPath(), remote: this.currentRemote() })
-      : null;
-    return Promise.all([tagPromise, fetchPromise])
-      .then((result) => {
-        if (options.tags) {
-          programEvents.dispatch({ event: 'remote-tags-update', tags: result[0] });
-        }
-        if (!this.server.isInternetConnected) {
-          this.server.isInternetConnected = true;
-        }
-      })
-      .catch((err) => {
-        let errorMessage;
-        let stdout;
-        let stderr;
-        try {
-          errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
-          stdout = err.res.body.stdout;
-          stderr = err.res.body.stderr;
-        } catch (e) {
-          errorMessage = '';
-        }
-
-        if (errorMessage.includes('Could not resolve host')) {
-          if (this.server.isInternetConnected) {
-            this.server.isInternetConnected = false;
-            errorMessage =
-              'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
-            stdout = '';
-            stderr = '';
-          } else {
-            // Message is already seen, just return
-            return;
-          }
-        }
-
-        programEvents.dispatch({
-          event: 'git-error',
-          data: {
-            isWarning: true,
-            command: err.res.body.command,
-            error: err.res.body.error,
-            stdout,
-            stderr,
-            repoPath: err.res.body.workingDirectory,
-          },
-        });
-      })
-      .finally(() => {
-        this.isFetching = false;
+    try {
+      const tagPromise = this.server.getPromise('/remote/tags', {
+        path: this.repoPath(),
+        remote: this.currentRemote(),
       });
+      programEvents.dispatch({ event: 'remote-tags-update', tags: await tagPromise });
+      if (!this.server.isInternetConnected) {
+        this.server.isInternetConnected = true;
+      }
+    } catch (err) {
+      let errorMessage;
+      let stdout;
+      let stderr;
+      try {
+        errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
+        stdout = err.res.body.stdout;
+        stderr = err.res.body.stderr;
+      } catch (e) {
+        errorMessage = '';
+      }
+
+      if (errorMessage.includes('Could not resolve host')) {
+        if (this.server.isInternetConnected) {
+          this.server.isInternetConnected = false;
+          errorMessage =
+            'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
+          stdout = '';
+          stderr = '';
+        } else {
+          // Message is already seen, just return
+          return;
+        }
+      }
+
+      programEvents.dispatch({
+        event: 'git-error',
+        data: {
+          isWarning: true,
+          command: err.res.body.command,
+          error: err.res.body.error,
+          stdout,
+          stderr,
+          repoPath: err.res.body.workingDirectory,
+        },
+      });
+    } finally {
+      ungit.logger.debug('remotes.fetch() finished');
+    }
   }
 
   updateRemotes() {
@@ -144,45 +127,32 @@ class RemotesViewModel {
         }
       })
       .catch((err) => {
-        if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
-      });
-  }
-
-  showAddRemoteDialog() {
-    components
-      .create('addremotedialog')
-      .show()
-      .closeThen((diag) => {
-        if (diag.isSubmitted()) {
-          return this.server
-            .postPromise(`/remotes/${encodeURIComponent(diag.name())}`, {
-              path: this.repoPath(),
-              url: diag.url(),
-            })
-            .then(() => {
-              this.updateRemotes();
-            })
-            .catch((e) => this.server.unhandledRejection(e));
+        if (err.errorCode != 'not-a-repository') {
+          this.server.unhandledRejection(err);
+        } else {
+          ungit.logger.warn('updateRemotes failed', err);
         }
       });
   }
 
+  showAddRemoteDialog() {
+    components.showModal('addremotemodal', { path: this.repoPath() });
+  }
+
   remoteRemove(remote) {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure?',
-        details: `Deleting ${remote.name} remote cannot be undone with ungit.`,
-      })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) {
-          return this.server
+    components.showModal('yesnomodal', {
+      title: 'Are you sure?',
+      details: `Deleting ${remote.name} remote cannot be undone with ungit.`,
+      closeFunc: (isYes) => {
+        if (isYes) {
+          this.server
             .delPromise(`/remotes/${remote.name}`, { path: this.repoPath() })
             .then(() => {
               this.updateRemotes();
             })
             .catch((e) => this.server.unhandledRejection(e));
         }
-      });
+      },
+    });
   }
 }

@@ -251,7 +251,7 @@ describe('git-api', () => {
     return common.post(req, '/discardchanges', { path: testDir, file: testFile });
   });
 
-  it('modifying a test file should work', () => {
+  it('modifying a test file should work part deux', () => {
     return common.post(req, '/testing/changefile', { file: path.join(testDir, testFile) });
   });
 
@@ -323,7 +323,7 @@ describe('git-api', () => {
     return common.post(req, '/testing/createfile', { file: path.join(testDir, testFile3) });
   });
 
-  it('status should list the new file', () => {
+  it('status should list the new file once again', () => {
     return common.get(req, '/status', { path: testDir }).then((res) => {
       expect(Object.keys(res.files).length).to.be(1);
       expect(res.files[testFile3]).to.eql({

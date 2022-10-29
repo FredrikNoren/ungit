@@ -19,8 +19,6 @@ const testFile1 = 'testFile1.txt';
 const testFile2 = 'testFile2.txt';
 
 describe('git-api conflict rebase', function () {
-  this.timeout(8000);
-
   before(() => {
     return common.createSmallRepo(req).then((dir) => {
       testDir = dir;

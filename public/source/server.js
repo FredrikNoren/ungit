@@ -31,7 +31,7 @@ Server.prototype.initSocket = function () {
   this.socket.on('connect_error', function (err) {
     self._isConnected(function (connected) {
       if (connected) throw err;
-      else self._onDisconnect();
+      else self._onDisconnect(err);
     });
   });
   this.socket.on('disconnect', function () {
@@ -99,9 +99,11 @@ Server.prototype._isConnected = function (callback) {
     callback(!err && res);
   });
 };
-Server.prototype._onDisconnect = function () {
+Server.prototype._onDisconnect = function (err) {
   if (!this.isUnloading) {
-    programEvents.dispatch({ event: 'disconnected' });
+    const stacktrace = Error().stack;
+    console.warn('disconnecting...', err, stacktrace);
+    programEvents.dispatch({ event: 'disconnected', stacktrace: stacktrace, error: err });
   }
 };
 Server.prototype._getCredentials = function (callback, args) {
@@ -135,7 +137,7 @@ Server.prototype.queryPromise = function (method, path, body) {
             if (connected) {
               reject({ errorCode: 'cross-domain-error', error: error });
             } else {
-              self._onDisconnect();
+              self._onDisconnect(error);
               resolve();
             }
           });
@@ -192,8 +194,8 @@ Server.prototype.unhandledRejection = function (err) {
     });
   } else {
     // Everything else is handled as a pure error, using the precreated error (to get a better stacktrace)
-    console.error('Unhandled Promise ERROR: ', err);
-    programEvents.dispatch({ event: 'git-crash-error' });
+    console.trace('Unhandled Promise ERROR: ', err, JSON.stringify(err));
+    programEvents.dispatch({ event: 'git-crash-error', error: err });
     Raven.captureException(err);
   }
 };

@@ -1,6 +1,9 @@
 {
   "root": true,
-  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020
   },
@@ -10,8 +13,19 @@
   },
   "rules": {
     "array-callback-return": "error",
-    "no-unused-vars": ["error", { "args": "none" }],
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
     "prefer-const": "warn",
-    "quotes": ["warn", "single", { "avoidEscape": true }]
+    "quotes": [
+      "warn",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ]
   }
 }

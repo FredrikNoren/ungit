@@ -14,7 +14,10 @@ describe('[BARE]', () => {
   });
 
   it('update branches button without branches', async () => {
+    const apiResponseProm = environment.setApiListener('/branches?', 'GET');
+    const refResponseProm = environment.setApiListener('/refs?', 'GET');
     await environment.click('.btn-group.branch .btn-main');
-    await environment.waitForElementHidden('#nprogress');
+    await apiResponseProm;
+    await refResponseProm;
   });
 });

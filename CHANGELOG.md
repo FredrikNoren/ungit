@@ -3,7 +3,41 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.18...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.21...master)
+
+## [1.5.21](https://github.com/FredrikNoren/ungit/compare/v1.5.20...v1.5.21)
+
+### Fixes
+- fix patch checkbox html [#1517](https://github.com/FredrikNoren/ungit/pull/1517)
+
+### Changed
+- Bump Dependencies [#1512](https://github.com/FredrikNoren/ungit/pull/1512)
+- Bump Dependencies [#1518](https://github.com/FredrikNoren/ungit/pull/1518)
+
+### Removed
+- Remove node 12 from build matrix [#1516](https://github.com/FredrikNoren/ungit/pull/1516)
+
+## [1.5.20](https://github.com/FredrikNoren/ungit/compare/v1.5.19...v1.5.20)
+
+### Fixes
+- Fix potential remote code exec [#1510](https://github.com/FredrikNoren/ungit/pull/1510)
+- Fix intermittent test failures [#1495](https://github.com/FredrikNoren/ungit/issues/1495)
+- lint: small bugs + jsdoc [#1504](https://github.com/FredrikNoren/ungit/pull/1504)
+
+### Changed
+- Bump Dependencies [#1503](https://github.com/FredrikNoren/ungit/pull/1503)
+
+## [1.5.19](https://github.com/FredrikNoren/ungit/compare/v1.5.18...v1.5.19)
+
+### Added
+- Add Tab Size Configuration [#1499](https://github.com/FredrikNoren/ungit/pull/1499)
+- Types: add support for VSCode IntelliSense [#1466](https://github.com/FredrikNoren/ungit/pull/1466)
+
+### Changed
+- Directory view [#1491](https://github.com/FredrikNoren/ungit/pull/1491)
+- Node watch [#1465](https://github.com/FredrikNoren/ungit/pull/1465)
+- Bump cached-path-relative from 1.0.2 to 1.1.0 [#1501](https://github.com/FredrikNoren/ungit/pull/1501)
+- Bump Dependencies [#1483](https://github.com/FredrikNoren/ungit/pull/1483), [#1487](https://github.com/FredrikNoren/ungit/pull/1487), [#1492](https://github.com/FredrikNoren/ungit/pull/1492), [#1494](https://github.com/FredrikNoren/ungit/pull/1494)
 
 ## [1.5.18](https://github.com/FredrikNoren/ungit/compare/v1.5.17...v1.5.18)
 

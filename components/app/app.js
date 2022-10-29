@@ -1,7 +1,7 @@
 const ko = require('knockout');
 const components = require('ungit-components');
-const programEvents = require('ungit-program-events');
 const storage = require('ungit-storage');
+const $ = require('jquery');
 
 components.register('app', (args) => {
   return new AppViewModel(args.appContainer, args.server);
@@ -15,7 +15,7 @@ class AppViewModel {
     if (window.location.search.indexOf('noheader=true') < 0) {
       this.header = components.create('header', { app: this });
     }
-    this.dialog = ko.observable(null);
+    this.modal = ko.observable(null);
     this.repoList = ko.observableArray(this.getRepoList()); // visitedRepositories is legacy, remove in the next version
     this.repoList.subscribe((newValue) => {
       storage.setItem('repositories', JSON.stringify(newValue));
@@ -94,12 +94,23 @@ class AppViewModel {
       this.content().updateAnimationFrame(deltaT);
   }
   onProgramEvent(event) {
-    if (event.event == 'request-credentials') this._handleCredentialsRequested(event);
-    else if (event.event == 'request-show-dialog') this.showDialog(event.dialog);
-    else if (event.event == 'request-remember-repo') this._handleRequestRememberRepo(event);
+    if (event.event === 'request-credentials') {
+      this._handleCredentialsRequested(event);
+    } else if (event.event === 'request-remember-repo') {
+      this._handleRequestRememberRepo(event);
+    } else if (event.event === 'modal-show-dialog') {
+      this.showModal(event.modal);
+    } else if (event.event === 'modal-close-dialog') {
+      $('.modal.fade').modal('hide');
+      this.modal(undefined);
+    }
 
-    if (this.content() && this.content().onProgramEvent) this.content().onProgramEvent(event);
-    if (this.header && this.header.onProgramEvent) this.header.onProgramEvent(event);
+    if (this.content() && this.content().onProgramEvent) {
+      this.content().onProgramEvent(event);
+    }
+    if (this.header && this.header.onProgramEvent) {
+      this.header.onProgramEvent(event);
+    }
   }
   _handleRequestRememberRepo(event) {
     const repoPath = event.repoPath;
@@ -111,26 +122,23 @@ class AppViewModel {
     // This happens for instance when we fetch nodes and remote tags at the same time
     if (!this._isShowingCredentialsDialog) {
       this._isShowingCredentialsDialog = true;
-      components
-        .create('credentialsdialog', { remote: event.remote })
-        .show()
-        .closeThen((diag) => {
-          this._isShowingCredentialsDialog = false;
-          programEvents.dispatch({
-            event: 'request-credentials-response',
-            username: diag.username(),
-            password: diag.password(),
-          });
-        });
+      components.showModal('credentialsmodal', { remote: event.remote });
     }
   }
-  showDialog(dialog) {
-    this.dialog(
-      dialog.closeThen(() => {
-        this.dialog(null);
-        return dialog;
-      })
-    );
+  showModal(modal) {
+    this.modal(modal);
+
+    // when dom is ready, open the modal
+    const checkExists = setInterval(() => {
+      const modalDom = $('.modal.fade');
+      if (modalDom.length) {
+        clearInterval(checkExists);
+        modalDom.modal();
+        modalDom.on('hidden.bs.modal', function () {
+          modal.close();
+        });
+      }
+    }, 200);
   }
   gitSetUserConfig(bugTracking) {
     this.server.getPromise('/userconfig').then((userConfig) => {

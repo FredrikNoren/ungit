@@ -5,9 +5,11 @@ const path = require('path');
 const fs = require('fs');
 const yargs = require('yargs');
 const homedir = require('os').homedir();
-const winston = require('winston');
 const child_process = require('child_process');
+const process = require('process');
 const semver = require('semver');
+
+const isTestRun = process.argv.filter((arg) => arg.indexOf('mocha') >= 0).length > 0;
 
 const defaultConfig = {
   // The port ungit is exposed on.
@@ -140,6 +142,9 @@ const defaultConfig = {
 
   // Specify whether to Ignore or Show white space diff
   ignoreWhiteSpaceDiff: false,
+
+  // Specify tab size as number of spaces
+  tabSize: null,
 
   // Number of refs to show on git commit bubbles to limit too many refs to appear.
   numRefsToShow: 5,
@@ -302,6 +307,7 @@ const argv = yargs
     'numRefsToShow',
     'Number of refs to show on git commit bubbles to limit too many refs to appear.'
   )
+  .describe('tabSize', 'Specify tab size as number of spaces')
   .describe('isForceGPGSign', 'Force gpg sign for tags and commits.')
   .boolean('isForceGPGSign')
   .describe(
@@ -343,7 +349,7 @@ if (!argvConfig.cliconfigonly) {
     delete rcConfig['config'];
     delete rcConfig['configs'];
   } catch (err) {
-    winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+    console.error(`Stop at reading ~/.ungitrc because ${err}`);
     process.exit(0);
   }
 }
@@ -385,7 +391,7 @@ try {
     child_process.execSync('git --version').toString()
   )[1];
 } catch (e) {
-  winston.error(
+  console.error(
     'Can\'t run "git --version". Is git installed and available in your path?',
     e.stderr
   );
@@ -394,19 +400,25 @@ try {
 
 module.exports.ungitPackageVersion = require('../package.json').version;
 
+let devVersion = module.exports.ungitPackageVersion;
 if (fs.existsSync(path.join(__dirname, '..', '.git'))) {
   const revision = child_process
     .execSync('git rev-parse --short HEAD', { cwd: path.join(__dirname, '..') })
     .toString()
     .replace('\n', ' ')
     .trim();
-  module.exports.ungitDevVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
-} else {
-  module.exports.ungitDevVersion = module.exports.ungitPackageVersion;
+  devVersion = `dev-${module.exports.ungitPackageVersion}-${revision}`;
 }
+module.exports.ungitDevVersion = devVersion;
 
 if (module.exports.alwaysLoadActiveBranch) {
   module.exports.maxActiveBranchSearchIteration = 25;
 }
 
 module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');
+
+if (isTestRun) {
+  console.warn('Running mocha test run, overriding few test variables...');
+  module.exports.logLevel = 'debug';
+  module.exports.dev = true;
+}

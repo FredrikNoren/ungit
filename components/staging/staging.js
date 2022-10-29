@@ -6,16 +6,19 @@ const programEvents = require('ungit-program-events');
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
+const { ComponentRoot } = require('../ComponentRoot');
 
 components.register(
   'staging',
   (args) => new StagingViewModel(args.server, args.repoPath, args.graph)
 );
 
-class StagingViewModel {
+class StagingViewModel extends ComponentRoot {
   constructor(server, repoPath, graph) {
+    super();
     this.server = server;
     this.repoPath = repoPath;
+    this.refreshContent = _.debounce(this._refreshContent, 250, this.defaultDebounceOption);
     this.graph = graph;
     this.filesByPath = {};
     this.files = ko.observableArray();
@@ -99,10 +102,12 @@ class StagingViewModel {
       else return 'glyphicon-check';
     });
 
-    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 400, {
+    this.refreshContentThrottled = _.throttle(this.refreshContent.bind(this), 500, {
+      leading: false,
       trailing: true,
     });
-    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 400, {
+    this.invalidateFilesDiffsThrottled = _.throttle(this.invalidateFilesDiffs.bind(this), 500, {
+      leading: false,
       trailing: true,
     });
     this.refreshContentThrottled();
@@ -132,64 +137,68 @@ class StagingViewModel {
   }
 
   onProgramEvent(event) {
-    if (event.event == 'request-app-content-refresh') {
+    if (
+      event.event == 'request-app-content-refresh' ||
+      event.event === 'working-tree-changed' ||
+      event.event === 'git-directory-changed'
+    ) {
       this.refreshContent();
       this.invalidateFilesDiffs();
     }
-    if (event.event == 'working-tree-changed') {
-      this.refreshContentThrottled();
-      this.invalidateFilesDiffsThrottled();
-    }
   }
 
-  refreshContent() {
-    return Promise.all([
-      this.server
-        .getPromise('/head', { path: this.repoPath(), limit: 1 })
-        .then((log) => {
-          if (log.length > 0) {
-            const array = log[0].message.split('\n');
-            this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
-          } else this.HEAD(null);
-        })
-        .catch((err) => {
-          if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-            this.server.unhandledRejection(err);
-          }
-        }),
-      this.server
-        .getPromise('/status', { path: this.repoPath(), fileLimit: filesToDisplayLimit })
-        .then((status) => {
-          if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
-            if (this.isDiagOpen) {
-              return;
+  async _refreshContent() {
+    ungit.logger.debug('staging.refreshContent() triggered');
+
+    try {
+      const headPromise = this.server.getPromise('/head', { path: this.repoPath(), limit: 1 });
+      const statusPromise = this.server.getPromise('/status', {
+        path: this.repoPath(),
+        fileLimit: filesToDisplayLimit,
+      });
+      const log = await headPromise;
+      if (log.length > 0) {
+        const array = log[0].message.split('\n');
+        this.HEAD({ title: array[0], body: array.slice(2).join('\n') });
+      } else {
+        this.HEAD(null);
+      }
+
+      const status = await statusPromise;
+      if (this.isSamePayload(status)) {
+        return;
+      }
+
+      if (Object.keys(status.files).length > filesToDisplayLimit && !this.loadAnyway) {
+        if (this.isDiagOpen) {
+          return;
+        }
+        this.isDiagOpen = true;
+        components.showModal('toomanyfilesmodal', {
+          title: 'Too many unstaged files',
+          details: 'It is recommended to use command line as ungit may be too slow.',
+          closeFunc: (isYes) => {
+            this.isDiagOpen = false;
+            if (isYes) {
+              window.location.href = '/#/';
+            } else {
+              this.loadAnyway = true;
+              this.loadStatus(status);
             }
-            this.isDiagOpen = true;
-            return components
-              .create('toomanyfilesdialogviewmodel', {
-                title: 'Too many unstaged files',
-                details: 'It is recommended to use command line as ungit may be too slow.',
-              })
-              .show()
-              .closeThen((diag) => {
-                this.isDiagOpen = false;
-                if (diag.result()) {
-                  this.loadAnyway = true;
-                  this.loadStatus(status);
-                } else {
-                  window.location.href = '/#/';
-                }
-              });
-          } else {
-            this.loadStatus(status);
-          }
-        })
-        .catch((err) => {
-          if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
-            this.server.unhandledRejection(err);
-          }
-        }),
-    ]);
+          },
+        });
+      } else {
+        this.loadStatus(status);
+      }
+    } catch (err) {
+      if (err.errorCode != 'must-be-in-working-tree' && err.errorCode != 'no-such-path') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.error('error during staging refresh: ', err);
+      }
+    } finally {
+      ungit.logger.debug('staging.refreshContent() finished');
+    }
   }
 
   loadStatus(status) {
@@ -305,6 +314,7 @@ class StagingViewModel {
       })
       .then(() => {
         this.resetMessages();
+        programEvents.dispatch({ event: 'branch-updated' });
       })
       .catch((e) => this.server.unhandledRejection(e));
   }
@@ -336,20 +346,18 @@ class StagingViewModel {
       })
       .catch((err) => {
         if (err.errorCode == 'non-fast-forward') {
-          return components
-            .create('yesnodialog', {
-              title: 'Force push?',
-              details: "The remote branch can't be fast-forwarded.",
-            })
-            .show()
-            .closeThen((diag) => {
-              if (!diag.result()) return false;
-              return this.server.postPromise('/push', {
+          components.showModal('yesnomodal', {
+            title: 'Force push?',
+            details: "The remote branch can't be fast-forwarded.",
+            closeFunc: (isYes) => {
+              if (!isYes) return;
+              this.server.postPromise('/push', {
                 path: this.repoPath(),
                 remote: this.graph.currentRemote(),
                 force: true,
               });
-            }).closePromise;
+            },
+          });
         } else {
           this.server.unhandledRejection(err);
         }
@@ -378,19 +386,16 @@ class StagingViewModel {
   }
 
   discardAllChanges() {
-    components
-      .create('yesnodialog', {
-        title: 'Are you sure you want to discard all changes?',
-        details: 'This operation cannot be undone.',
-      })
-      .show()
-      .closeThen((diag) => {
-        if (diag.result()) {
-          this.server
-            .postPromise('/discardchanges', { path: this.repoPath(), all: true })
-            .catch((e) => this.server.unhandledRejection(e));
-        }
-      });
+    components.showModal('yesnomodal', {
+      title: 'Are you sure you want to discard all changes?',
+      details: 'This operation cannot be undone.',
+      closeFunc: (isYes) => {
+        if (!isYes) return;
+        this.server
+          .postPromise('/discardchanges', { path: this.repoPath(), all: true })
+          .catch((e) => this.server.unhandledRejection(e));
+      },
+    });
   }
 
   stashAll() {
@@ -518,28 +523,30 @@ class FileViewModel {
   }
 
   discardChanges() {
-    if (
-      ungit.config.disableDiscardWarning ||
-      new Date().getTime() - this.staging.mutedTime < ungit.config.disableDiscardMuteTime
-    ) {
+    const timeSinceLastMute = new Date().getTime() - this.staging.mutedTime;
+    const isMuteWarning = timeSinceLastMute < ungit.config.disableDiscardMuteTime;
+    ungit.logger.debug(
+      `discard time since mute: ${timeSinceLastMute}, isMuteWarning: ${isMuteWarning}`
+    );
+    if (ungit.config.disableDiscardWarning || isMuteWarning) {
       this.server
         .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
         .catch((e) => this.server.unhandledRejection(e));
     } else {
-      components
-        .create('yesnomutedialog', {
-          title: 'Are you sure you want to discard these changes?',
-          details: 'This operation cannot be undone.',
-        })
-        .show()
-        .closeThen((diag) => {
-          if (diag.result()) {
+      components.showModal('yesnomutemodal', {
+        title: 'Are you sure you want to discard these changes?',
+        details: 'This operation cannot be undone.',
+        closeFunc: (isYes, isMute) => {
+          if (isYes) {
             this.server
               .postPromise('/discardchanges', { path: this.staging.repoPath(), file: this.name() })
               .catch((e) => this.server.unhandledRejection(e));
           }
-          if (diag.result() === 'mute') this.staging.mutedTime = new Date().getTime();
-        });
+          if (isMute) {
+            this.staging.mutedTime = new Date().getTime();
+          }
+        },
+      });
     }
   }
 

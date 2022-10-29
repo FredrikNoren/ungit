@@ -1,18 +1,17 @@
 const path = require('path');
 const temp = require('temp');
 const gitParser = require('./git-parser');
-const winston = require('winston');
+const logger = require('./utils/logger');
 const os = require('os');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('fs').promises;
-const watch = require('fs').watch;
+const watch = require('node-watch');
 const ignore = require('ignore');
+const { EventEmitter } = require('events');
 
-const isMac = /^darwin/.test(process.platform);
-const isWindows = /^win/.test(process.platform);
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
 exports.pathPrefix = '';
@@ -31,87 +30,122 @@ exports.registerApi = (env) => {
       socket.on('disconnect', () => {
         stopDirectoryWatch(socket);
       });
-      socket.on('watch', (data, callback) => {
+      socket.on('watch', async (data) => {
         stopDirectoryWatch(socket); // clean possibly lingering connections
         socket.watcherPath = path.normalize(data.path);
         socket.join(socket.watcherPath); // join room for this path
 
-        fs.readFile(path.join(socket.watcherPath, '.gitignore'))
-          .then((ignoreContent) => (socket.ignore = ignore().add(ignoreContent.toString())))
-          .catch(() => {})
-          .then(() => {
-            socket.watcher = [];
-            return watchPath(socket, '.', { recursive: isMac || isWindows });
-          })
-          .then(() => {
-            if (!isMac && !isWindows) {
-              // recursive fs.watch only works on mac and windows
-              const promises = [];
-              promises.push(watchPath(socket, path.join('.git', 'HEAD')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'heads')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'remotes')));
-              promises.push(watchPath(socket, path.join('.git', 'refs', 'tags')));
-              return Promise.all(promises);
-            }
-          })
-          .finally(callback);
+        const watcher = await watchRepo(socket.watcherPath);
+        watcher.on('workdir', (changedPath) => {
+          logger.info(`${changedPath} triggered workdir refresh for ${socket.watcherPath}`);
+          emitWorkingTreeChanged(socket.watcherPath);
+        });
+        watcher.on('git', (changedPath) => {
+          logger.info(`${changedPath} triggered git refresh for ${socket.watcherPath}`);
+          emitGitDirectoryChanged(socket.watcherPath);
+        });
+        watcher.on('error', (err) => {
+          logger.warn(`Error watching ${socket.watcherPath}: `, JSON.stringify(err));
+        });
+        socket.watcher = watcher;
       });
     });
   }
 
-  const watchPath = (socket, subfolderPath, options) => {
-    const pathToWatch = path.join(socket.watcherPath, subfolderPath);
-    winston.info(`Start watching ${pathToWatch}`);
-    return fs
-      .access(pathToWatch)
-      .catch(() => {
-        // Sometimes necessary folders, '.../.git/refs/heads' and etc, are not created on git init
-        winston.debug(`intended folder to watch doesn't exists, creating: ${pathToWatch}`);
-        return mkdirp(pathToWatch);
-      })
-      .then(() => {
-        const watcher = watch(pathToWatch, options || {});
-        watcher.on('change', (event, filename) => {
-          if (!filename) return;
-          const filePath = path.join(subfolderPath, filename);
-          winston.debug(`File change: ${filePath}`);
-          if (isFileWatched(filePath, socket.ignore)) {
-            winston.info(`${filePath} triggered refresh for ${socket.watcherPath}`);
-            emitGitDirectoryChanged(socket.watcherPath);
-            emitWorkingTreeChanged(socket.watcherPath);
-          }
-        });
-        watcher.on('error', (err) => {
-          winston.warn(`Error watching ${pathToWatch}: `, JSON.stringify(err));
-        });
-        socket.watcher.push(watcher);
+  let watcherId = 1;
+  class RepoWatcher extends EventEmitter {
+    constructor() {
+      super();
+      this.watcherId = watcherId++;
+      this.watchers = [];
+    }
+    async watchItem(name, item, options = {}) {
+      if ((await fs.access(item).catch(() => false)) === false) {
+        logger.debug(`[${this.watcherId}] path does not exist`, item);
+        return;
+      }
+      const watcher = watch(item, options);
+      watcher.on('change', (_event, changedPath) => {
+        logger.silly(`[${this.watcherId}] ${name}`, changedPath);
+        this.emit(name, changedPath);
       });
+      this.watchers.push(watcher);
+    }
+    addWorkdir(item, options) {
+      return this.watchItem('workdir', item, options);
+    }
+    addGit(item, options) {
+      return this.watchItem('git', item, options);
+    }
+    close() {
+      this.watchers.forEach((w) => w.close());
+    }
+  }
+
+  const readIgnore = async (pathToWatch) => {
+    logger.debug(`Parsing .gitignore for ${pathToWatch}`);
+    const out = ignore();
+    const ignoreContent = await fs
+      .readFile(path.join(pathToWatch, '.gitignore'), { encoding: 'utf8' })
+      .catch(() => null);
+    if (ignoreContent) out.add(ignoreContent);
+    return out;
+  };
+
+  // TODO move to nodegit
+  const watchRepo = async (pathToWatch) => {
+    logger.info(`Start watching ${pathToWatch}`);
+    const watcher = new RepoWatcher();
+    let repoPath = path.join(pathToWatch, '.git');
+    if ((await fs.access(repoPath).catch(() => false)) === undefined) {
+      // Looks like a repo, let's watch workdir
+      let gitIgnore = await readIgnore(pathToWatch);
+      await watcher.addWorkdir(pathToWatch, {
+        recursive: true,
+        filter: (changedPath, skip) => {
+          const filePath = path.relative(pathToWatch, changedPath);
+          if (!filePath) return false;
+          if (filePath === '.gitignore') {
+            readIgnore(pathToWatch).then(
+              (ign) => (gitIgnore = ign),
+              (err) => logger.error('Could not parse .gitignore for', pathToWatch, err)
+            );
+          }
+          // We monitor the repo separately
+          if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return skip;
+          // We add / to test for directories, we can't have a file named like a directory
+          // and otherwise directory `foo` won't match ignore `foo/`
+          if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
+            // TODO https://github.com/kaelzhang/node-ignore/issues/78
+            // optimization: assume these are permanent skips
+            if (filePath.includes('node_modules')) return skip;
+            return false;
+          }
+          return true;
+        },
+      });
+    } else {
+      // Could be bare
+      repoPath = pathToWatch;
+    }
+    // Here we watch the git state
+    await watcher.addGit(path.join(repoPath, 'refs'), {
+      recursive: true,
+      filter: (f) => !f.endsWith('.lock'),
+    });
+    await watcher.addGit(path.join(repoPath, 'HEAD'));
+    await watcher.addGit(path.join(repoPath, 'index'));
+
+    return watcher;
   };
 
   const stopDirectoryWatch = (socket) => {
+    if (!socket.watcherPath) return;
+    logger.info(`Stop watching ${socket.watcherPath}`);
     socket.leave(socket.watcherPath);
+    socket.watcherPath = undefined;
     socket.ignore = undefined;
-    (socket.watcher || []).forEach((watcher) => watcher.close());
-    winston.info(`Stop watching ${socket.watcherPath}`);
-  };
-
-  // The .git dir changes on for instance 'git status', so we
-  // can't trigger a change here (since that would lead to an endless
-  // loop of the client getting the change and then requesting the new data)
-  const isFileWatched = (filename, ignore) => {
-    if (ignore && ignore.filter(filename).length == 0) {
-      return false; // ignore files that are in .gitignore
-    } else if (filename.endsWith('.lock')) {
-      return false;
-    } else if (filename.indexOf(path.join('.git', 'refs')) > -1) {
-      return true; // trigger for all changes under refs
-    } else if (filename == path.join('.git', 'HEAD')) {
-      return true; // Explicitly return true for ".git/HEAD" for branch changes
-    } else if (filename.indexOf('.git') > -1) {
-      return false; // Ignore other changes under ".git/*"
-    } else {
-      return true;
-    }
+    socket.watcher && socket.watcher.close();
   };
 
   const ensurePathExists = (req, res, next) => {
@@ -141,21 +175,21 @@ exports.registerApi = (env) => {
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
-        winston.info('emitting working-tree-changed to sockets, manually triggered');
+        logger.info('emitting working-tree-changed to sockets, manually triggered');
       }
     },
     500,
-    { maxWait: 2000 }
+    { maxWait: 1000 }
   );
   const emitGitDirectoryChanged = _.debounce(
     (repoPath) => {
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
-        winston.info('emitting git-directory-changed to sockets, manually triggered');
+        logger.info('emitting git-directory-changed to sockets, manually triggered');
       }
     },
     500,
-    { maxWait: 2000 }
+    { maxWait: 1000 }
   );
 
   const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
@@ -179,7 +213,7 @@ exports.registerApi = (env) => {
         res.json(result || {});
       })
       .catch((err) => {
-        winston.warn('Responding with ERROR: ', JSON.stringify(err));
+        logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
@@ -260,9 +294,10 @@ exports.registerApi = (env) => {
       const task = gitPromise({
         commands: credentialsOption(req.body.socketId, req.body.remote).concat([
           'fetch',
+          config.autoPruneOnFetch ? '--prune' : '',
+          '--',
           req.body.remote,
           req.body.ref ? req.body.ref : '',
-          config.autoPruneOnFetch ? '--prune' : '',
         ]),
         repoPath: req.body.path,
         timeout: tenMinTimeoutMs,
@@ -393,17 +428,13 @@ exports.registerApi = (env) => {
     const task = gitPromise
       .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
       .catch((err) => {
-        if (err.stderr && err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) {
+        if (
+          err.errorCode === 'no-head' ||
+          err.errorCode === 'no-commits' ||
+          err.errorCode === 'not-a-repository'
+        )
           return { limit: limit, skip: skip, nodes: [] };
-        } else if (
-          /fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr)
-        ) {
-          return { limit: limit, skip: skip, nodes: [] };
-        } else if (err.stderr && err.stderr.indexOf('fatal: Not a git repository') == 0) {
-          return { limit: limit, skip: skip, nodes: [] };
-        } else {
-          throw err;
-        }
+        throw err;
       });
     jsonResultOrFailProm(res, task);
   });
@@ -424,10 +455,12 @@ exports.registerApi = (env) => {
     )
       .then(gitParser.parseGitLog)
       .catch((err) => {
-        if (err.stderr.indexOf("fatal: bad default revision 'HEAD'") == 0) return [];
-        else if (/fatal: your current branch '.+' does not have any commits yet.*/.test(err.stderr))
+        if (
+          err.errorCode === 'no-head' ||
+          err.errorCode === 'no-commits' ||
+          err.errorCode === 'not-a-repository'
+        )
           return [];
-        else if (err.stderr.indexOf('fatal: Not a git repository') == 0) return [];
         throw err;
       });
     jsonResultOrFailProm(res, task);
@@ -450,7 +483,7 @@ exports.registerApi = (env) => {
                 commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
                 repoPath: req.query.path,
                 timeout: tenMinTimeoutMs,
-              }).catch((e) => winston.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
+              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
             });
           }, Promise.resolve());
         })
@@ -761,7 +794,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      winston.info('resolve conflicts');
+      logger.info('resolve conflicts');
       jsonResultOrFailProm(res, gitPromise.resolveConflicts(req.body.path, req.body.files)).then(
         emitWorkingTreeChanged.bind(null, req.body.path)
       );
@@ -906,6 +939,7 @@ exports.registerApi = (env) => {
           });
       })
       .catch((e) => {
+        logger.error('failed during /quickstatus', e);
         return { type: 'no-such-path', gitRootPath: req.query.path };
       });
     jsonResultOrFailProm(res, task);
@@ -952,7 +986,7 @@ exports.registerApi = (env) => {
     // this endpoint can only be invoked from localhost, since the credentials-helper is always
     // on the same machine that we're running ungit on
     if (req.ip != '127.0.0.1' && req.ip != '::ffff:127.0.0.1') {
-      winston.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
+      logger.info(`Trying to get credentials from unathorized ip: ${req.ip}`);
       res.status(400).json({ errorCode: 'request-from-unathorized-location' });
       return;
     }
@@ -961,7 +995,7 @@ exports.registerApi = (env) => {
     if (!socket) {
       // We're using the socket to display an authentication dialog in the ui,
       // so if the socket is closed/unavailable we pretty much can't get the username/password.
-      winston.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
+      logger.info(`Trying to get credentials from unavailable socket: ${req.query.socketId}`);
       res.status(400).json({ errorCode: 'socket-unavailable' });
     } else {
       socket.once('credentials', (data) => res.json(data));
@@ -984,8 +1018,8 @@ exports.registerApi = (env) => {
   });
 
   app.get(`${exports.pathPrefix}/gitignore`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    fs.readFile(path.join(req.query.path, '.gitignore'))
-      .then((ignoreContent) => res.status(200).json({ content: ignoreContent.toString() }))
+    fs.readFile(path.join(req.query.path, '.gitignore'), { encoding: 'utf8' })
+      .then((ignoreContent) => res.status(200).json({ content: ignoreContent }))
       .catch((e) => {
         if (e && e.message && e.message.indexOf('no such file or directory') > -1) {
           res.status(200).json({ content: '' });
@@ -1042,7 +1076,7 @@ exports.registerApi = (env) => {
     });
     app.post(`${exports.pathPrefix}/testing/cleanup`, (req, res) => {
       temp.cleanup((err, cleaned) => {
-        winston.info('Cleaned up: ' + JSON.stringify(cleaned));
+        logger.info('Cleaned up: ' + JSON.stringify(cleaned));
         res.json({ result: cleaned });
       });
     });

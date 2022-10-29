@@ -31,8 +31,8 @@ describe('git-api: test ignorefile call', () => {
           });
         })
         .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
+          return fs.readFile(path.join(dir, '.gitignore'), { encoding: 'utf8' }).then((data) => {
+            if (data.indexOf(testFile) < 0) {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });
@@ -53,8 +53,8 @@ describe('git-api: test ignorefile call', () => {
           });
         })
         .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
+          return fs.readFile(path.join(dir, '.gitignore'), { encoding: 'utf8' }).then((data) => {
+            if (data.indexOf(testFile) < 0) {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });
@@ -77,8 +77,8 @@ describe('git-api: test ignorefile call', () => {
           });
         })
         .then(() => {
-          return fs.readFile(path.join(dir, '.gitignore')).then((data) => {
-            if (data.toString().indexOf(testFile) < 0) {
+          return fs.readFile(path.join(dir, '.gitignore'), { encoding: 'utf8' }).then((data) => {
+            if (data.indexOf(testFile) < 0) {
               throw new Error('Test file is not added to the .gitignore file.');
             }
           });

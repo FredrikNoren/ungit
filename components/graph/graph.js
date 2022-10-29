@@ -6,12 +6,17 @@ const components = require('ungit-components');
 const GitNodeViewModel = require('./git-node');
 const GitRefViewModel = require('./git-ref');
 const EdgeViewModel = require('./edge');
+const { ComponentRoot } = require('../ComponentRoot');
 const numberOfNodesPerLoad = ungit.config.numberOfNodesPerLoad;
 
 components.register('graph', (args) => new GraphViewModel(args.server, args.repoPath));
 
-class GraphViewModel {
+class GraphViewModel extends ComponentRoot {
   constructor(server, repoPath) {
+    super();
+    this._isLoadNodesFromApiRunning = false;
+    this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
+    this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
     this.limit = ko.observable(numberOfNodesPerLoad);
@@ -22,6 +27,7 @@ class GraphViewModel {
     this.edges = ko.observableArray();
     this.refs = ko.observableArray();
     this.nodesById = {};
+    this.edgesById = {};
     this.refsByRefName = {};
     this.checkedOutBranch = ko.observable();
     this.checkedOutRef = ko.computed(() =>
@@ -34,9 +40,7 @@ class GraphViewModel {
       if (!this.HEAD() || !this.HEAD().cx() || !this.HEAD().cy()) return;
       return `M 610 68 L ${this.HEAD().cx()} ${this.HEAD().cy()}`;
     });
-    this.showCommitNode = ko.observable(false);
     this.currentActionContext = ko.observable();
-    this.edgesById = {};
     this.scrolledToEnd = _.debounce(
       () => {
         this.limit(numberOfNodesPerLoad + this.limit());
@@ -74,8 +78,6 @@ class GraphViewModel {
       }
     });
 
-    this.loadNodesFromApiThrottled = _.throttle(this.loadNodesFromApi.bind(this), 1000);
-    this.updateBranchesThrottled = _.throttle(this.updateBranches.bind(this), 1000);
     this.loadNodesFromApi();
     this.updateBranches();
     this.graphWidth = ko.observable();
@@ -108,48 +110,50 @@ class GraphViewModel {
     return refViewModel;
   }
 
-  loadNodesFromApi() {
+  async _loadNodesFromApi() {
+    this._isLoadNodesFromApiRunning = true;
+    ungit.logger.debug('graph.loadNodesFromApi() triggered');
     const nodeSize = this.nodes().length;
+    const edges = [];
 
-    return this.server
-      .getPromise('/gitlog', { path: this.repoPath(), limit: this.limit(), skip: this.skip() })
-      .then((log) => {
-        // set new limit and skip
-        this.limit(parseInt(log.limit));
-        this.skip(parseInt(log.skip));
-        return log.nodes || [];
-      })
-      .then((nodes) =>
-        // create and/or calculate nodes
-        this.computeNode(
-          nodes.map((logEntry) => {
-            return this.getNode(logEntry.sha1, logEntry); // convert to node object
-          })
-        )
-      )
-      .then((nodes) => {
-        // create edges
-        const edges = [];
-        nodes.forEach((node) => {
-          node.parents().forEach((parentSha1) => {
-            edges.push(this.getEdge(node.sha1, parentSha1));
-          });
-          node.render();
-        });
-
-        this.edges(edges);
-        this.nodes(nodes);
-        if (nodes.length > 0) {
-          this.graphHeight(nodes[nodes.length - 1].cy() + 80);
-        }
-        this.graphWidth(1000 + this.heighstBranchOrder * 90);
-      })
-      .catch((e) => this.server.unhandledRejection(e))
-      .finally(() => {
-        if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
-          this.scrolledToEnd();
-        }
+    try {
+      const log = await this.server.getPromise('/gitlog', {
+        path: this.repoPath(),
+        limit: this.limit(),
+        skip: this.skip(),
       });
+      if (this.isSamePayload(log)) {
+        return;
+      }
+      const nodes = this.computeNode(
+        (log.nodes || []).map((logEntry) => {
+          return this.getNode(logEntry.sha1, logEntry); // convert to node object
+        })
+      );
+
+      // create edges
+      nodes.forEach((node) => {
+        node.parents().forEach((parentSha1) => {
+          edges.push(this.getEdge(node.sha1, parentSha1));
+        });
+        node.render();
+      });
+
+      this.edges(edges);
+      this.nodes(nodes);
+      if (nodes.length > 0) {
+        this.graphHeight(nodes[nodes.length - 1].cy() + 80);
+      }
+      this.graphWidth(1000 + this.heighstBranchOrder * 90);
+    } catch (e) {
+      this.server.unhandledRejection(e);
+    } finally {
+      if (window.innerHeight - this.graphHeight() > 0 && nodeSize != this.nodes().length) {
+        this.scrolledToEnd();
+      }
+      this._isLoadNodesFromApiRunning = false;
+      ungit.logger.debug('graph.loadNodesFromApi() finished');
+    }
   }
 
   traverseNodeLeftParents(node, callback) {
@@ -161,9 +165,7 @@ class GraphViewModel {
   }
 
   computeNode(nodes) {
-    nodes = nodes || this.nodes();
-
-    this.markNodesIdeologicalBranches(this.refs(), nodes, this.nodesById);
+    this.markNodesIdeologicalBranches(this.refs());
 
     const updateTimeStamp = moment().valueOf();
     if (this.HEAD()) {
@@ -218,7 +220,7 @@ class GraphViewModel {
     return edge;
   }
 
-  markNodesIdeologicalBranches(refs, nodes, nodesById) {
+  markNodesIdeologicalBranches(refs) {
     refs = refs.filter((r) => !!r.node());
     refs = refs.sort((a, b) => {
       if (a.isLocal && !b.isLocal) return -1;
@@ -272,11 +274,11 @@ class GraphViewModel {
   }
 
   onProgramEvent(event) {
-    if (event.event == 'git-directory-changed') {
-      this.loadNodesFromApiThrottled();
-      this.updateBranchesThrottled();
+    if (event.event == 'git-directory-changed' || event.event === 'working-tree-changed') {
+      this.loadNodesFromApi();
+      this.updateBranches();
     } else if (event.event == 'request-app-content-refresh') {
-      this.loadNodesFromApiThrottled();
+      this.loadNodesFromApi();
     } else if (event.event == 'remote-tags-update') {
       this.setRemoteTags(event.tags);
     } else if (event.event == 'current-remote-changed') {
@@ -294,15 +296,19 @@ class GraphViewModel {
     });
   }
 
-  updateBranches() {
-    this.server
-      .getPromise('/checkout', { path: this.repoPath() })
-      .then((res) => {
-        this.checkedOutBranch(res);
-      })
-      .catch((err) => {
-        if (err.errorCode != 'not-a-repository') this.server.unhandledRejection(err);
-      });
+  async _updateBranches() {
+    const checkout = await this.server.getPromise('/checkout', { path: this.repoPath() });
+
+    try {
+      ungit.logger.debug('setting checkedOutBranch', checkout);
+      this.checkedOutBranch(checkout);
+    } catch (err) {
+      if (err.errorCode != 'not-a-repository') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.warn('updateBranches failed', err);
+      }
+    }
   }
 
   setRemoteTags(remoteTags) {
@@ -337,7 +343,7 @@ class GraphViewModel {
 
   checkHeadMove(toNode) {
     if (this.HEAD() === toNode) {
-      this.HEADref.node(toNode);
+      this.HEADref().node(toNode);
     }
   }
 }

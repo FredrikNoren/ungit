@@ -1,4 +1,4 @@
-const winston = require('./utils/winston');
+const logger = require('./utils/logger');
 const config = require('./config');
 const BugTracker = require('./bugtracker');
 const bugtracker = new BugTracker('server');
@@ -17,28 +17,10 @@ const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
 
 process.on('uncaughtException', (err) => {
-  winston.error(err.stack ? err.stack.toString() : err.toString());
+  logger.error(err.stack ? err.stack.toString() : err.toString());
   bugtracker.notify(err, 'ungit-launcher');
   process.exit();
 });
-
-console.log('Setting log level to ' + config.logLevel);
-const consoleTransport = winston.default.transports.find((transport) => {
-  return transport instanceof winston.transports.Console;
-});
-if (consoleTransport) {
-  consoleTransport.level = config.logLevel;
-}
-if (config.logDirectory) {
-  winston.add(
-    new winston.transports.File({
-      filename: path.join(config.logDirectory, 'server.log'),
-      maxsize: 100 * 1024,
-      maxFiles: 2,
-      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-    })
-  );
-}
 
 const users = config.users;
 config.users = null; // So that we don't send the users to the client
@@ -82,7 +64,7 @@ app.use((req, res, next) => {
 
 if (config.logRESTRequests) {
   app.use((req, res, next) => {
-    winston.info(req.method + ' ' + req.url);
+    logger.info(req.method + ' ' + req.url);
     next();
   });
 }
@@ -102,7 +84,7 @@ if (config.allowedIPs) {
           '<h3>This host is not authorized to connect</h3>' +
             '<p>You are trying to connect to an Ungit instance from an unauthorized host.</p>'
         );
-      winston.warn(`Host trying but not authorized to connect: ${ip}`);
+      logger.warn(`Host trying but not authorized to connect: ${ip}`);
     }
   });
 }
@@ -122,10 +104,8 @@ if (config.autoShutdownTimeout) {
   const refreshAutoShutdownTimeout = () => {
     if (autoShutdownTimeout) clearTimeout(autoShutdownTimeout);
     autoShutdownTimeout = setTimeout(() => {
-      winston.info(
-        'Shutting down ungit due to unactivity. (autoShutdownTimeout is set to ' +
-          config.autoShutdownTimeout +
-          'ms)'
+      logger.info(
+        `Shutting down ungit due to inactivity. (autoShutdownTimeout is set to ${config.autoShutdownTimeout} ms`
       );
       process.exit(0);
     }, config.autoShutdownTimeout);
@@ -201,13 +181,13 @@ if (config.authentication) {
 
 const indexHtmlCacheKey = cache.registerFunc(() => {
   return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
-    return fs.readFile(__dirname + '/../public/index.html').then((data) => {
+    return fs.readFile(__dirname + '/../public/index.html', { encoding: 'utf8' }).then((data) => {
       return Promise.all(
         Object.values(plugins).map((plugin) => {
           return plugin.compile();
         })
       ).then((results) => {
-        data = data.toString().replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
+        data = data.replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
         data = data.replace(/__ROOT_PATH__/g, config.rootPath);
 
         return data;
@@ -235,10 +215,10 @@ let socketIdCounter = 0;
 const io = socketIO(server, {
   path: config.rootPath + '/socket.io',
   logger: {
-    debug: winston.debug.bind(winston),
-    info: winston.info.bind(winston),
-    error: winston.error.bind(winston),
-    warn: winston.warn.bind(winston),
+    debug: logger.debug.bind(logger),
+    info: logger.info.bind(logger),
+    error: logger.error.bind(logger),
+    warn: logger.warn.bind(logger),
   },
 });
 io.on('connection', (socket) => {
@@ -270,19 +250,19 @@ const loadPlugins = (plugins, pluginBasePath) => {
         return fs
           .access(path.join(pluginPath, 'ungit-plugin.json'))
           .then(() => {
-            winston.info('Loading plugin: ' + pluginPath);
+            logger.info('Loading plugin: ' + pluginPath);
             const plugin = new UngitPlugin({
               dir: pluginDir,
               httpBasePath: 'plugins/' + pluginDir,
               path: pluginPath,
             });
             if (plugin.manifest.disabled || plugin.config.disabled) {
-              winston.info('Plugin disabled: ' + pluginDir);
+              logger.info('Plugin disabled: ' + pluginDir);
               return;
             }
             plugin.init(apiEnvironment);
             plugins.push(plugin);
-            winston.info('Plugin loaded: ' + pluginDir);
+            logger.info('Plugin loaded: ' + pluginDir);
           })
           .catch(() => {
             // Skip direcories that don't contain an "ungit-plugin.json".
@@ -362,10 +342,10 @@ const readUserConfig = () => {
       return fs
         .readFile(userConfigPath, { encoding: 'utf8' })
         .then((content) => {
-          return JSON.parse(content.toString());
+          return JSON.parse(content);
         })
         .catch((err) => {
-          winston.error(`Stop at reading ~/.ungitrc because ${err}`);
+          logger.error(`Stop at reading ~/.ungitrc because ${err}`);
           process.exit(0);
         });
     })
@@ -429,14 +409,14 @@ app.get('/api/fs/listDirectories', ensureAuthenticated, (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   bugtracker.notify(err, 'ungit-node');
-  winston.error(err.stack);
+  logger.error(err.stack);
   res.status(500).send({ error: err.message, errorType: err.name, stack: err.stack });
 });
 
 exports.started = new signals.Signal();
 
-server.listen(config.port, config.ungitBindIp, () => {
-  winston.info('Listening on port ' + config.port);
+server.listen({ port: config.port, host: config.ungitBindIp }, () => {
+  logger.info('Listening on port ' + config.port);
   console.log('## Ungit started ##'); // Consumed by bin/ungit to figure out when the app is started
   exports.started.dispatch();
 });

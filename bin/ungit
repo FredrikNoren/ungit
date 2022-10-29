@@ -3,7 +3,6 @@
 const startLaunchTime = Date.now();
 
 // eslint-disable-next-line no-unused-vars -- Imported for side effects
-const winston = require('../source/utils/winston');
 const config = require('../source/config');
 const open = require('open');
 const path = require('path');
@@ -84,7 +83,7 @@ const launch = () => {
   child.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`));
 };
 
-server.listen(config.port, config.ungitBindIp, (err) => {
+server.listen({ port: config.port, host: config.ungitBindIp }, (err) => {
   server.close(launch);
 });
 server.on('error', (e) => {

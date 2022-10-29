@@ -68,8 +68,8 @@ describe('cache', () => {
     const key1 = 'func1';
     const key2 = 'func2';
     const func = () => i++;
-    cache.registerFunc(key1, func);
-    cache.registerFunc(key2, func);
+    cache.registerFunc(func, key1);
+    cache.registerFunc(func, key2);
 
     return cache
       .resolveFunc(key1)
@@ -100,7 +100,7 @@ describe('cache', () => {
   it('Testing ttl', function () {
     let i = 0;
     const func = () => i++;
-    const key = cache.registerFunc(1, null, func);
+    const key = cache.registerFunc(func, null, 1);
     this.timeout(3000);
 
     return cache

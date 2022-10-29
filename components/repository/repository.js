@@ -73,14 +73,12 @@ class RepositoryViewModel {
           return this.server
             .getPromise('/submodules', { path: baseRepoPath.path })
             .then((submodules) => {
-              if (Array.isArray(submodules)) {
-                const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
-                for (let n = 0; n < submodules.length; n++) {
-                  if (submodules[n].path === baseName) {
-                    this.parentModulePath(baseRepoPath.path);
-                    this.parentModuleLink(`/#/repository?path=${encodePath(baseRepoPath.path)}`);
-                    return;
-                  }
+              const baseName = this.repoPath().substring(baseRepoPath.path.length + 1);
+              for (let n = 0; n < submodules.length; n++) {
+                if (submodules[n].path === baseName) {
+                  this.parentModulePath(baseRepoPath.path);
+                  this.parentModuleLink(`/#/repository?path=${encodePath(baseRepoPath.path)}`);
+                  return;
                 }
               }
             });
@@ -96,20 +94,18 @@ class RepositoryViewModel {
     return this.server
       .getPromise('/gitignore', { path: this.repoPath() })
       .then((res) => {
-        return components
-          .create('texteditdialog', {
-            title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
-            content: res.content,
-          })
-          .show()
-          .closeThen((diag) => {
-            if (diag.result()) {
-              return this.server.putPromise('/gitignore', {
+        return components.showModal('texteditmodal', {
+          title: `${this.repoPath()}${ungit.config.fileSeparator}.gitignore`,
+          content: res.content,
+          closeFunc: (isYes) => {
+            if (isYes) {
+              this.server.putPromise('/gitignore', {
                 path: this.repoPath(),
-                data: diag.textAreaContent,
+                data: document.querySelector('.modal-body .text-area-content').value,
               });
             }
-          });
+          },
+        });
       })
       .catch((e) => {
         // Not a git error but we are going to treat like one

@@ -202,7 +202,7 @@ class GitNodeViewModel extends Animateable {
           return false;
         },
       });
-      $textBox.focus((event) => {
+      $textBox.on('focus', (event) => {
         $(event.target).autocomplete('search', event.target.value);
       });
       $textBox.autocomplete('search', '');
