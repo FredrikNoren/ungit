@@ -48,6 +48,7 @@ jobs:
       - run: git --version
       - run: git config --global user.email "test@testy.com"
       - run: git config --global user.name "Test testy"
+      - run: git config --global protocol.file.allow always # tests use file based submodules see #1539
 
       - run: npm ci
       - run: npm run lint
