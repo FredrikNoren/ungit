@@ -25,10 +25,9 @@ jobs:
       - run: |
           body="$(npm run bumpdependencies)"
           echo "$body"
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo "::set-output name=body::$body"
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         id: bumpdependencies
       - run: npm install
 
