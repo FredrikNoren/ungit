@@ -3,7 +3,20 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.21...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.22...master)
+
+## [1.5.22](https://github.com/FredrikNoren/ungit/compare/v1.5.21...v1.5.22)
+
+### Fixes
+- build: fix memory use by building serially [#1529](https://github.com/FredrikNoren/ungit/pull/1529)
+- Small fixes and cleanups [#1530](https://github.com/FredrikNoren/ungit/pull/1530)
+
+### Changed
+- Update README.md [#1526](https://github.com/FredrikNoren/ungit/pull/1526)
+- Update git version dependency to 2.34.x [#1536](https://github.com/FredrikNoren/ungit/pull/1536)
+- Use fork to spawn a new node process [#1537](https://github.com/FredrikNoren/ungit/pull/1537)
+- CI: git allow file protocol which is used in submodule tests [#1540](https://github.com/FredrikNoren/ungit/pull/1540)
+- Bump Dependencies [#1525](https://github.com/FredrikNoren/ungit/pull/1525), [#1531](https://github.com/FredrikNoren/ungit/pull/1531), [#1533](https://github.com/FredrikNoren/ungit/pull/1533)
 
 ## [1.5.21](https://github.com/FredrikNoren/ungit/compare/v1.5.20...v1.5.21)
 
@@ -11,8 +24,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 - fix patch checkbox html [#1517](https://github.com/FredrikNoren/ungit/pull/1517)
 
 ### Changed
-- Bump Dependencies [#1512](https://github.com/FredrikNoren/ungit/pull/1512)
-- Bump Dependencies [#1518](https://github.com/FredrikNoren/ungit/pull/1518)
+- Bump Dependencies [#1512](https://github.com/FredrikNoren/ungit/pull/1512), [#1518](https://github.com/FredrikNoren/ungit/pull/1518)
 
 ### Removed
 - Remove node 12 from build matrix [#1516](https://github.com/FredrikNoren/ungit/pull/1516)
