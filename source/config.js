@@ -330,7 +330,7 @@ const argvConfig = argv.argv;
 // When ungit is started normally, $0 == ungit, and non-hyphenated options exists, show help and exit.
 if (argvConfig.$0.endsWith('ungit') && argvConfig._ && argvConfig._.length > 0) {
   yargs.showHelp();
-  process.exit(0);
+  process.exit(1);
 }
 
 let rcConfig = {};
@@ -342,7 +342,7 @@ if (!argvConfig.cliconfigonly) {
     delete rcConfig['configs'];
   } catch (err) {
     console.error(`Stop at reading ~/.ungitrc because ${err}`);
-    process.exit(0);
+    process.exit(1);
   }
 }
 
