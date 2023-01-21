@@ -3,7 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.22...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.23...master)
+
+## [1.5.23](https://github.com/FredrikNoren/ungit/compare/v1.5.22...v1.5.23)
+
+### Fixes
+- Ungit returns 0 when wrong arguments are used [#1548](https://github.com/FredrikNoren/ungit/issues/1548)
+- Server process keeps running when parent gets killed [#1552](https://github.com/FredrikNoren/ungit/issues/1552)
+
+### Changed
+- Bump Dependencies [#1542](https://github.com/FredrikNoren/ungit/pull/1542), [#1545](https://github.com/FredrikNoren/ungit/pull/1545), [#1551](https://github.com/FredrikNoren/ungit/pull/1551)
 
 ## [1.5.22](https://github.com/FredrikNoren/ungit/compare/v1.5.21...v1.5.22)
 
