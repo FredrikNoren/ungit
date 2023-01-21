@@ -14,7 +14,13 @@ const bugtracker = new BugTracker('launcher');
 // Fastest way to find out if a port is used or not/i.e. if ungit is running
 const net = require('net');
 const server = net.createServer();
-const cleanExit = () => process.exit();
+let child;
+const cleanExit = () => {
+  if (child) {
+    child.kill('SIGINT');
+  }
+  process.exit();
+};
 
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
@@ -58,7 +64,7 @@ const navigate = () => {
 };
 
 const launch = () => {
-  const child = child_process.fork(
+  child = child_process.fork(
     path.join(__dirname, '..', 'source', 'server.js'),
     process.argv.slice(2),
     { cwd: path.join(process.cwd(), '..'), silent: true }
