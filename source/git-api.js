@@ -899,8 +899,10 @@ exports.registerApi = (env) => {
       )
         .then(gitPromise.bind(null, ['rm', '-f', req.query.submoduleName], req.query.path))
         .then(() => {
-          rimraf.sync(path.join(req.query.path, req.query.submodulePath));
-          rimraf.sync(path.join(req.query.path, '.git', 'modules', req.query.submodulePath));
+          return Promise.all([
+            rimraf(path.join(req.query.path, req.query.submodulePath)),
+            rimraf(path.join(req.query.path, '.git', 'modules', req.query.submodulePath)),
+          ]);
         });
 
       jsonResultOrFailProm(res, task);
