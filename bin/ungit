@@ -16,8 +16,9 @@ const net = require('net');
 const server = net.createServer();
 let child;
 const cleanExit = () => {
-  if (child != undefined)
+  if (child) {
     child.kill('SIGINT');
+  }
   process.exit();
 };
 
