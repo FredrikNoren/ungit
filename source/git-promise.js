@@ -6,6 +6,8 @@ const logger = require('./utils/logger');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
+// eslint-disable-next-line node/no-unsupported-features/es-syntax
+const pLimitPromise = import('p-limit');
 const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
 const gitEmptyReproSha256 = '6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321'; // https://stackoverflow.com/q/9765453
@@ -44,8 +46,7 @@ let pLimit = (fn) => {
     return Promise.reject(err);
   }
 };
-// eslint-disable-next-line node/no-unsupported-features/es-syntax
-import('p-limit').then((limit) => {
+pLimitPromise.then((limit) => {
   pLimit = limit.default(config.maxConcurrentGitOperations);
 });
 

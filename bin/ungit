@@ -2,9 +2,8 @@
 
 const startLaunchTime = Date.now();
 
-// eslint-disable-next-line no-unused-vars -- Imported for side effects
 const config = require('../source/config');
-const open = require('open');
+const openPromise = import('open');
 const path = require('path');
 const child_process = require('child_process');
 const { encodePath } = require('../source/address-parser');
@@ -33,9 +32,11 @@ process.on('uncaughtException', (err) => {
 
 const openUngitBrowser = (pathToNavigateTo) => {
   console.log(`Navigate to ${pathToNavigateTo}`);
-  return open(pathToNavigateTo).catch((err) =>
-    console.log(`failed to navigate to ${pathToNavigateTo}`, err)
-  );
+  return openPromise
+    .then((open) => {
+      return open.default(pathToNavigateTo);
+    })
+    .catch((err) => console.log(`failed to navigate to ${pathToNavigateTo}`, err));
 };
 
 const navigate = () => {
