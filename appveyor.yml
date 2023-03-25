@@ -1,4 +1,5 @@
 skip_branch_with_pr: true
+image: Visual Studio 2022
 
 environment:
   matrix:
