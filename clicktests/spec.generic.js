@@ -3,8 +3,8 @@ const environment = require('./environment')({
   serverStartupOptions: ['--no-disableDiscardWarning'],
   rootPath: '/deep/root/path/to/app',
 });
-const mkdirp = require('mkdirp');
-const rimraf = require('rimraf');
+const mkdirp = require('mkdirp').mkdirp;
+const rimraf = require('rimraf').rimraf;
 const testRepoPaths = [];
 
 const changeTestFile = async (filename, repoPath) => {

@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const restGit = require('../source/git-api');
 const common = require('./common-es6.js');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp').mkdirp;
 
 const app = express();
 app.use(require('body-parser').json());
