@@ -1,6 +1,6 @@
 'use strict';
 const environment = require('./environment')();
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp').mkdirp;
 const rimraf = require('rimraf');
 const { encodePath } = require('../source/address-parser');
 const testRepoPaths = [];

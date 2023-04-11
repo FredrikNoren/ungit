@@ -3,7 +3,7 @@ const environment = require('./environment')({
   serverStartupOptions: ['--no-disableDiscardWarning'],
   rootPath: '/deep/root/path/to/app',
 });
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp').mkdirp;
 const rimraf = require('rimraf');
 const testRepoPaths = [];
 

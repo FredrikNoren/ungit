@@ -5,7 +5,7 @@ const path = require('path');
 const browserify = require('browserify');
 const exorcist = require('exorcist');
 const less = require('less');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp').mkdirp;
 const tsify = require('tsify');
 
 const baseDir = path.join(__dirname, '..');
