@@ -4,7 +4,7 @@ const environment = require('./environment')({
   rootPath: '/deep/root/path/to/app',
 });
 const mkdirp = require('mkdirp').mkdirp;
-const rimraf = require('rimraf');
+const rimraf = require('rimraf').rimraf;
 const testRepoPaths = [];
 
 const changeTestFile = async (filename, repoPath) => {
