@@ -115,7 +115,11 @@ describe('git-api conflict checkout', function () {
       return common
         .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
         .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] })
+          common.post(req, '/commit', {
+            path: testDir,
+            message: 'a',
+            files: [{ name: testFile1 }],
+          })
         )
         .then(() =>
           common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' })
@@ -124,7 +128,11 @@ describe('git-api conflict checkout', function () {
           common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
         )
         .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] })
+          common.post(req, '/commit', {
+            path: testDir,
+            message: 'b',
+            files: [{ name: testFile1 }],
+          })
         );
     });
   });
@@ -177,7 +185,11 @@ describe('git-api conflict merge', function () {
       return common
         .post(req, '/testing/createfile', { file: path.join(testDir, testFile1) })
         .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'a', files: [{ name: testFile1 }] })
+          common.post(req, '/commit', {
+            path: testDir,
+            message: 'a',
+            files: [{ name: testFile1 }],
+          })
         )
         .then(() =>
           common.post(req, '/branches', { path: testDir, name: testBranch, startPoint: 'master' })
@@ -186,14 +198,22 @@ describe('git-api conflict merge', function () {
           common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
         )
         .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'b', files: [{ name: testFile1 }] })
+          common.post(req, '/commit', {
+            path: testDir,
+            message: 'b',
+            files: [{ name: testFile1 }],
+          })
         )
         .then(() => common.post(req, '/checkout', { path: testDir, name: testBranch }))
         .then(() =>
           common.post(req, '/testing/changefile', { file: path.join(testDir, testFile1) })
         )
         .then(() =>
-          common.post(req, '/commit', { path: testDir, message: 'c', files: [{ name: testFile1 }] })
+          common.post(req, '/commit', {
+            path: testDir,
+            message: 'c',
+            files: [{ name: testFile1 }],
+          })
         );
     });
   });
