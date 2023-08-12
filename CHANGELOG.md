@@ -3,7 +3,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.23...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.24...master)
+
+## [1.5.24](https://github.com/FredrikNoren/ungit/compare/v1.5.23...v1.5.24)
+
+### Fixes
+- Fallback for font if bundled font dont support glyphs [#1564](https://github.com/FredrikNoren/ungit/pull/1564)
+
+### Changed
+- Bump Dependencies [#1555](https://github.com/FredrikNoren/ungit/pull/1555), [#1559](https://github.com/FredrikNoren/ungit/pull/1559), [#1560](https://github.com/FredrikNoren/ungit/pull/1560), [#1561](https://github.com/FredrikNoren/ungit/pull/1561), [#1563](https://github.com/FredrikNoren/ungit/pull/1563)
 
 ## [1.5.23](https://github.com/FredrikNoren/ungit/compare/v1.5.22...v1.5.23)
 
