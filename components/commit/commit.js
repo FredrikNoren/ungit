@@ -20,7 +20,7 @@ class CommitViewModel {
     this.message = ko.observable();
     this.title = ko.observable();
     this.body = ko.observable();
-    this.authorDate = ko.observable();
+    this.authorDate = ko.observable(/** @type {moment.Moment} */ (null));
     this.authorDateFromNow = ko.observable();
     this.authorName = ko.observable();
     this.authorEmail = ko.observable();

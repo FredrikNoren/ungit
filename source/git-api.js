@@ -14,6 +14,7 @@ const { EventEmitter } = require('events');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
+/** @type {string} */
 exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
@@ -64,6 +65,7 @@ exports.registerApi = (env) => {
         logger.debug(`[${this.watcherId}] path does not exist`, item);
         return;
       }
+      // @ts-ignore
       const watcher = watch(item, options);
       watcher.on('change', (_event, changedPath) => {
         logger.silly(`[${this.watcherId}] ${name}`, changedPath);
@@ -84,6 +86,7 @@ exports.registerApi = (env) => {
 
   const readIgnore = async (pathToWatch) => {
     logger.debug(`Parsing .gitignore for ${pathToWatch}`);
+    // @ts-ignore -- wrong type definition
     const out = ignore();
     const ignoreContent = await fs
       .readFile(path.join(pathToWatch, '.gitignore'), { encoding: 'utf8' })
@@ -206,17 +209,29 @@ exports.registerApi = (env) => {
       return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
     }
   };
-
   const jsonResultOrFailProm = (res, promise) => {
+    const now = Date.now();
     return promise
-      .then((result) => {
-        res.json(result || {});
+      .then((o) => {
+        const elapsed = Date.now() - now;
+        res.header('X-elapsed', elapsed);
+        // TODO shouldn't this be a boolean instead of an object?
+        return res.json(o == null ? {} : o);
       })
       .catch((err) => {
         logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
+
+  const w = (fn) => (req, res) =>
+    new Promise((resolve) => resolve(fn(req, res))).catch((err) => {
+      logger.warn('Responding with ERROR: ', err);
+      res.status(500).json(err);
+    });
+
+  const jw = (fn) => (req, res) =>
+    jsonResultOrFailProm(res, new Promise((resolve) => resolve(fn(req, res))));
 
   const credentialsOption = (socketId, remote) => {
     let portAndRootPath = `${config.port}`;
@@ -241,9 +256,12 @@ exports.registerApi = (env) => {
     }
   };
 
-  app.get(`${exports.pathPrefix}/status`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise.status(req.query.path, null));
-  });
+  app.get(
+    `${exports.pathPrefix}/status`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => gitPromise.status(req.query.path, null))
+  );
 
   app.post(`${exports.pathPrefix}/init`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(
@@ -257,7 +275,7 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
+    w((req, res) => {
       // Default timeout is 2min but clone can take much longer than that (allows up to 2h)
       const timeoutMs = 2 * 60 * 60 * 1000;
       if (res.setTimeout) res.setTimeout(timeoutMs);
@@ -279,7 +297,7 @@ exports.registerApi = (env) => {
       });
 
       jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
-    }
+    })
   );
 
   app.post(
@@ -422,55 +440,68 @@ exports.registerApi = (env) => {
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
-  app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
-    const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise
-      .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
-      .catch((err) => {
-        if (
-          err.errorCode === 'no-head' ||
-          err.errorCode === 'no-commits' ||
-          err.errorCode === 'not-a-repository'
-        )
-          return { limit: limit, skip: skip, nodes: [] };
-        throw err;
-      });
-    jsonResultOrFailProm(res, task);
-  });
+  app.get(
+    `${exports.pathPrefix}/gitlog`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => {
+      const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
+      const skip = getNumber(req.query.skip, 0);
+      return gitPromise
+        .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
+        .catch((err) => {
+          if (
+            err.errorCode === 'no-head' ||
+            err.errorCode === 'no-commits' ||
+            err.errorCode === 'not-a-repository'
+          )
+            return { limit: limit, skip: skip, nodes: [] };
+          throw err;
+        });
+    })
+  );
 
-  app.get(`${exports.pathPrefix}/show`, ensureAuthenticated, (req, res) => {
-    jsonResultOrFailProm(
-      res,
+  app.get(
+    `${exports.pathPrefix}/show`,
+    ensureAuthenticated,
+    jw((req) =>
       gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(
         gitParser.parseGitLog
       )
-    );
-  });
-
-  app.get(`${exports.pathPrefix}/head`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(
-      ['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'],
-      req.query.path
     )
-      .then(gitParser.parseGitLog)
-      .catch((err) => {
-        if (
-          err.errorCode === 'no-head' ||
-          err.errorCode === 'no-commits' ||
-          err.errorCode === 'not-a-repository'
-        )
-          return [];
-        throw err;
-      });
-    jsonResultOrFailProm(res, task);
-  });
+  );
+
+  app.get(
+    `${exports.pathPrefix}/head`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) =>
+      gitPromise(
+        ['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'],
+        req.query.path
+      )
+        .then((text) => {
+          const out = gitParser.parseGitLog(text);
+          return out[0];
+        })
+        .catch((err) => {
+          if (
+            err.errorCode === 'no-head' ||
+            err.errorCode === 'no-commits' ||
+            err.errorCode === 'not-a-repository'
+          )
+            return false;
+          throw err;
+        })
+    )
+  );
 
   app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
     if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
 
     let task = Promise.resolve();
     if (req.query.remoteFetch) {
+      // @ts-ignore
       task = task.then(() =>
         gitPromise(['remote'], req.query.path).then((remoteText) => {
           const remotes = remoteText.trim().split('\n');
@@ -489,6 +520,7 @@ exports.registerApi = (env) => {
         })
       );
     }
+    // @ts-ignore
     task = task
       .then(() => gitPromise(['show-ref', '-d'], req.query.path))
       // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
@@ -520,39 +552,47 @@ exports.registerApi = (env) => {
     jsonResultOrFailProm(res, task);
   });
 
-  app.get(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const isLocalBranchOnly = req.query.isLocalBranchOnly == 'false';
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['branch', isLocalBranchOnly ? '-a' : ''], req.query.path).then(
+  app.get(
+    `${exports.pathPrefix}/branches`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => {
+      const isLocalBranchOnly = req.query.isLocalBranchOnly == 'false';
+      return gitPromise(['branch', isLocalBranchOnly ? '-a' : ''], req.query.path).then(
         gitParser.parseGitBranches
-      )
-    );
-  });
+      );
+    })
+  );
 
-  app.post(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = [
-      'branch',
-      req.body.force ? '-f' : '',
-      req.body.name.trim(),
-      (req.body.sha1 || 'HEAD').trim(),
-    ];
+  app.post(
+    `${exports.pathPrefix}/branches`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => {
+      const commands = [
+        'branch',
+        req.body.force ? '-f' : '',
+        req.body.name.trim(),
+        (req.body.sha1 || 'HEAD').trim(),
+      ];
 
-    jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitGitDirectoryChanged.bind(null, req.body.path)
-    );
-  });
+      return gitPromise(commands, req.body.path).finally(
+        emitGitDirectoryChanged.bind(null, req.body.path)
+      );
+    })
+  );
 
   app.delete(
     `${exports.pathPrefix}/branches`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['branch', '-D', req.query.name.trim()], req.query.path)
-      ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
-    }
+    jw(async (req) => {
+      const name = typeof req.query.name === 'string' && req.query.name;
+      if (!name) throw new Error('need a name');
+      return await gitPromise(['branch', '-D', name.trim()], req.query.path).finally(
+        emitGitDirectoryChanged.bind(null, req.query.path)
+      );
+    })
   );
 
   app.delete(
@@ -732,7 +772,7 @@ exports.registerApi = (env) => {
       const args = {
         commands: ['commit', '--file=-'],
         repoPath: req.body.path,
-        inPipe: req.body.message,
+        stdin: req.body.message,
       };
 
       jsonResultOrFailProm(res, gitPromise(args))
@@ -932,6 +972,7 @@ exports.registerApi = (env) => {
             );
           })
           .then((pathRevParses) => {
+            // @ts-ignore
             revParseRes.subRepos = pathRevParses
               .filter(
                 (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'

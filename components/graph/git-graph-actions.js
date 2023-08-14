@@ -31,6 +31,13 @@ class ActionBase {
     });
   }
 
+  async perform() {
+    throw new Error('implement perform');
+  }
+  visible() {
+    return false;
+  }
+
   doPerform() {
     if (this.isRunning()) return;
     this.graph.hoverGraphAction(null);

@@ -41,7 +41,7 @@
   <div class="file">
     <div class="head commit-diff-filename" data-bind="click: fileNameClick">
       <span data-bind="text: displayName"></span>
-      <span class="file-stats" data-bind="visible: added() != '-'">
+      <span class="file-stats" data-bind="visible: added() != null">
         (
         <span data-bind="text: added"></span>
         <span data-bind="text: removed"></span>

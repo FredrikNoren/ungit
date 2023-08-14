@@ -15,7 +15,7 @@ class UngitPlugin {
     this.path = args.path;
     this.httpBasePath = args.httpBasePath;
     this.manifest = JSON.parse(
-      fsSync.readFileSync(path.join(this.path, 'ungit-plugin.json'), { encoding: 'utf8' })
+      fsSync.readFileSync(path.join(this.path, 'ungit-plugin.json'), { encoding: 'utf-8' })
     );
     this.name = this.manifest.name || this.dir;
     this.config = config.pluginConfigs[this.name] || {};

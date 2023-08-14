@@ -2,11 +2,12 @@ const path = require('path');
 const fileType = require('./utils/file-type.js');
 const _ = require('lodash');
 
-exports.parseGitStatus = (text, args) => {
+exports.parseGitStatus = (/** @type {string} */ text, args) => {
   let lines = text.split('\x00');
   const branch = lines[0].split(' ').pop();
   // skipping first line...
   lines = lines.slice(1);
+  /** @type {Record<FileName, FileStatus>} */
   const files = {};
 
   for (let i = 0; i < lines.length; i++) {
@@ -26,6 +27,7 @@ exports.parseGitStatus = (text, args) => {
     files[newFileName] = {
       fileName: newFileName,
       oldFileName: oldFileName,
+      // @ts-ignore
       displayName: displayName,
       staged: status[0] == 'A' || status[0] == 'M',
       removed: status[0] == 'D' || status[1] == 'D',
@@ -36,23 +38,27 @@ exports.parseGitStatus = (text, args) => {
     };
   }
 
-  return {
+  // @ts-ignore
+  return /** @type {GitStatus} */ ({
     branch: branch,
     files: files,
-  };
+  });
 };
 
 const fileChangeRegex =
   /(?<additions>[\d-]+)\t(?<deletions>[\d-]+)\t((?<fileName>[^\x00]+?)\x00|\x00(?<oldFileName>[^\x00]+?)\x00(?<newFileName>[^\x00]+?)\x00)/g;
 
-exports.parseGitStatusNumstat = (text) => {
+exports.parseGitStatusNumstat = (/** @type {string} */ text) => {
+  /** @type {Record<FileName, { additions: number | null; deletions: number | null }>} */
   const result = {};
   fileChangeRegex.lastIndex = 0;
   let match = fileChangeRegex.exec(text);
   while (match !== null) {
+    const adds = parseInt(match.groups.additions, 10);
+    const dels = parseInt(match.groups.deletions, 10);
     result[match.groups.fileName || match.groups.newFileName] = {
-      additions: match.groups.additions,
-      deletions: match.groups.deletions,
+      additions: isNaN(adds) ? null : adds,
+      deletions: isNaN(dels) ? null : dels,
     };
     match = fileChangeRegex.exec(text);
   }
@@ -60,6 +66,7 @@ exports.parseGitStatusNumstat = (text) => {
 };
 
 const authorRegexp = /([^<]+)<([^>]+)>/;
+/** @type {Record<string, (commit: Commit, data: string) => void>} */
 const gitLogHeaders = {
   Author: (currentCommmit, author) => {
     const capture = authorRegexp.exec(author);
@@ -113,12 +120,13 @@ const gitLogHeaders = {
     }
   },
 };
-exports.parseGitLog = (data) => {
+exports.parseGitLog = (/** @type {string} */ data) => {
+  /** @type {Commit[] & { isHeadExist?: boolean }} */
   const commits = [];
+  /** @type {Commit} */
   let currentCommmit;
   const parseCommitLine = (row) => {
     if (!row.trim()) return;
-    currentCommmit = { refs: [], fileLineDiffs: [], additions: 0, deletions: 0 };
     const refStartIndex = row.indexOf('(');
     const sha1s = row
       .substring(0, refStartIndex < 0 ? row.length : refStartIndex)
@@ -127,15 +135,19 @@ exports.parseGitLog = (data) => {
       .filter((sha1) => {
         return sha1 && sha1.length;
       });
-    currentCommmit.sha1 = sha1s[0];
-    currentCommmit.parents = sha1s.slice(1);
-    if (refStartIndex > 0) {
-      const refs = row.substring(refStartIndex + 1, row.length - 1);
-      currentCommmit.refs = refs.split(/ -> |, /g);
-    }
-    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => {
-      return item.trim() === 'HEAD';
-    });
+    const refs =
+      refStartIndex > 0 ? row.substring(refStartIndex + 1, row.length - 1).split(/ -> |, /g) : [];
+    const isHead = !!_.find(refs, (item) => item.trim() === 'HEAD');
+    currentCommmit = {
+      sha1: sha1s[0],
+      parents: sha1s.slice(1),
+      refs,
+      isHead,
+      message: '',
+      fileLineDiffs: [],
+      additions: 0,
+      deletions: 0,
+    };
     commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;
     commits.push(currentCommmit);
     parser = parseHeaderLine;
@@ -182,23 +194,22 @@ exports.parseGitLog = (data) => {
       } else {
         displayName = fileName;
       }
+      const adds = parseInt(match.groups.additions, 10);
+      const dels = parseInt(match.groups.deletions, 10);
       currentCommmit.fileLineDiffs.push({
-        additions: match.groups.additions,
-        deletions: match.groups.deletions,
+        additions: isNaN(adds) ? null : adds,
+        deletions: isNaN(dels) ? null : dels,
         fileName: fileName,
         oldFileName: oldFileName,
+        // @ts-ignore
         displayName: displayName,
         type: fileType(fileName),
       });
     }
     const nextRow = row.slice(fileChangeRegex.lastIndex + 1);
     for (const fileLineDiff of currentCommmit.fileLineDiffs) {
-      if (!isNaN(parseInt(fileLineDiff.additions, 10))) {
-        currentCommmit.additions += fileLineDiff.additions = parseInt(fileLineDiff.additions, 10);
-      }
-      if (!isNaN(parseInt(fileLineDiff.deletions, 10))) {
-        currentCommmit.deletions += fileLineDiff.deletions = parseInt(fileLineDiff.deletions, 10);
-      }
+      currentCommmit.additions += fileLineDiff.additions || 0;
+      currentCommmit.deletions += fileLineDiff.deletions || 0;
     }
     parser = parseCommitLine;
     if (nextRow) {
@@ -206,6 +217,7 @@ exports.parseGitLog = (data) => {
     }
     return;
   };
+  /** @type {(row: string, index:number)=>void} */
   let parser = parseCommitLine;
   const rows = data.split('\n');
   rows.forEach((row, index) => {
@@ -218,7 +230,8 @@ exports.parseGitLog = (data) => {
   return commits;
 };
 
-exports.parseGitConfig = (text) => {
+exports.parseGitConfig = (/** @type {string} */ text) => {
+  /** @type {Record<string, string>} */
   const conf = {};
   text.split('\n').forEach((row) => {
     const ss = row.split('=');
@@ -227,7 +240,8 @@ exports.parseGitConfig = (text) => {
   return conf;
 };
 
-exports.parseGitBranches = (text) => {
+exports.parseGitBranches = (/** @type {string} */ text) => {
+  /** @type {Ref[]} */
   const branches = [];
   text.split('\n').forEach((row) => {
     if (row.trim() == '') return;
@@ -238,44 +252,36 @@ exports.parseGitBranches = (text) => {
   return branches;
 };
 
-exports.parseGitTags = (text) => {
-  return text.split('\n').filter((tag) => {
+exports.parseGitTags = (/** @type {string} */ text) =>
+  text.split('\n').filter((tag) => {
     return tag != '';
   });
-};
 
-exports.parseGitRemotes = (text) => {
-  return text.split('\n').filter((remote) => {
-    return remote != '';
-  });
-};
+exports.parseGitRemotes = (/** @type {string} */ text) =>
+  text.split('\n').filter((remote) => remote != '');
 
-exports.parseGitLsRemote = (text) => {
-  return text
+exports.parseGitLsRemote = (/** @type {string} */ text) =>
+  text
     .split('\n')
-    .filter((item) => {
-      return item && item.indexOf('From ') != 0;
-    })
+    .filter((item) => item && item.indexOf('From ') != 0)
     .map((line) => {
       const sha1 = line.slice(0, 40);
       const name = line.slice(41).trim();
-      return { sha1: sha1, name: name };
+      return /** @type {Ref} */ ({ sha1: sha1, name: name });
     });
-};
 
-exports.parseGitStashShow = (text) => {
+exports.parseGitStashShow = (/** @type {string} */ text) => {
   const lines = text.split('\n').filter((item) => item);
   return lines.slice(0, lines.length - 1).map((line) => {
     return { filename: line.substring(0, line.indexOf('|')).trim() };
   });
 };
 
-exports.parseGitSubmodule = (text) => {
-  if (!text) {
-    return [];
-  }
-
+exports.parseGitSubmodule = (/** @type {string} */ text) => {
+  if (!text) return [];
+  /** @type {SubModule} */
   let submodule;
+  /** @type {SubModule[]} */
   const submodules = [];
 
   text
