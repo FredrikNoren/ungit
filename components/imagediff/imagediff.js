@@ -10,21 +10,21 @@ class ImageDiffViewModel {
     this.filename = args.filename;
     this.oldFilename = args.oldFilename;
     this.repoPath = args.repoPath;
-    this.isNew = ko.observable(false);
-    this.isRemoved = ko.observable(false);
-    this.sha1 = args.sha1;
-    this.state = ko.computed(() => {
-      if (this.isNew()) return 'new';
-      if (this.isRemoved()) return 'removed';
-      return 'changed';
-    });
+    this.isNew = ko.observable(args.filename && !args.oldFilename);
+    this.isRemoved = ko.observable(args.oldFilename && !args.filename);
+    // TODO indicator component
+    this.state = ko.observable(
+      args.isNew ? 'new' : args.removed ? 'removed' : args.conflict ? 'conflict' : 'changed'
+    );
     const gitDiffURL = `${ungit.config.rootPath}/api/diff/image?path=${encodePath(
       this.repoPath()
     )}`;
+    const [newSha1, oldSha1] = args.diffKey.split('.');
     this.oldImageSrc =
-      gitDiffURL + `&filename=${this.oldFilename}&version=${this.sha1 ? this.sha1 + '^' : 'HEAD'}`;
-    this.newImageSrc =
-      gitDiffURL + `&filename=${this.filename}&version=${this.sha1 ? this.sha1 : 'current'}`;
+      oldSha1 === 'null'
+        ? undefined
+        : gitDiffURL + `&filename=${this.oldFilename}&version=${oldSha1}`;
+    this.newImageSrc = gitDiffURL + `&filename=${this.filename}&version=${newSha1}`;
     this.isShowingDiffs = args.isShowingDiffs;
     this.rightArrowIcon = octicons['arrow-right'].toSVG({ height: 100 });
     this.downArrowIcon = octicons['arrow-down'].toSVG({ height: 100 });

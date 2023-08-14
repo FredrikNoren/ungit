@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
+    "target": "ES2021",
     "forceConsistentCasingInFileNames": false,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
     "module": "commonjs",
+    "alwaysStrict": true,
     // Check JS files too
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     // Used for temp builds
     "outDir": "build",
     "paths": {
@@ -22,5 +24,14 @@
       "ungit-storage": ["./public/source/storage"]
     }
   },
-  "exclude": ["node_modules", "build", "coverage", "public/js", "**/*.min.js", "**/*.bundle.js", "clicktests", "test"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "coverage",
+    "public/js",
+    "**/*.min.js",
+    "**/*.bundle.js",
+    "clicktests",
+    "test"
+  ]
 }

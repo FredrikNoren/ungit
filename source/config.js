@@ -49,7 +49,8 @@ const defaultConfig = {
   maxConcurrentGitOperations: 4,
 
   // Launch a browser window with ungit when ungit is started
-  launchBrowser: true,
+  //launchBrowser: true,
+  launchBrowser: false,
 
   // Instead of launching ungit with the current folder force a different path to be used. Can be set to null to force the home screen.
   forcedLaunchPath: undefined,

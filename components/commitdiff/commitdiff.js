@@ -6,7 +6,7 @@ components.register('commitDiff', (args) => new CommitDiff(args));
 
 class CommitDiff {
   constructor(args) {
-    this.sha1 = args.sha1;
+    this.diffKey = args.diffKey;
 
     this.showDiffButtons = args.showDiffButtons;
     this.textDiffType = args.textDiffType = args.textDiffType || components.create('textdiff.type');

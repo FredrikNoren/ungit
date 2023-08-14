@@ -28,6 +28,7 @@ Server.prototype.initSocket = function () {
   this.socket = io('', {
     path: rootPath + '/socket.io',
   });
+  this.socketId = undefined;
   this.socket.on('connect_error', function (err) {
     self._isConnected(function (connected) {
       if (connected) throw err;

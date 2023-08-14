@@ -13,11 +13,10 @@ components.register('branches', (args) => {
 });
 
 class BranchesViewModel extends ComponentRoot {
-  constructor(server, graph, repoPath) {
+  constructor(server, /** @type {GitGraph} */ graph, repoPath) {
     super();
     this.repoPath = repoPath;
     this.server = server;
-    this.updateRefs = _.debounce(this._updateRefs, 250, this.defaultDebounceOption);
     this.branchesAndLocalTags = ko.observableArray();
     this.current = ko.observable();
     this.isShowRemote = ko.observable(storage.getItem(showRemote) != 'false');
@@ -45,6 +44,7 @@ class BranchesViewModel extends ComponentRoot {
     this.refsLabel = ko.computed(() => this.current() || 'master (no commits yet)');
     this.branchIcon = octicons['git-branch'].toSVG({ height: 18 });
     this.closeIcon = octicons.x.toSVG({ height: 18 });
+    this.firstFetch = true;
   }
 
   checkoutBranch(branch) {
@@ -66,75 +66,77 @@ class BranchesViewModel extends ComponentRoot {
       this.updateRefs();
     }
   }
-  async _updateRefs(forceRemoteFetch) {
+  updateRefs(forceRemoteFetch) {
     forceRemoteFetch = forceRemoteFetch || this.shouldAutoFetch || '';
+    if (this.firstFetch) forceRemoteFetch = '';
 
-    const branchesProm = this.server.getPromise('/branches', { path: this.repoPath() });
-    const refsProm = this.server.getPromise('/refs', {
-      path: this.repoPath(),
-      remoteFetch: forceRemoteFetch,
-    });
+    const currentBranchProm = this.server
+      .getPromise('/checkout', { path: this.repoPath() })
+      .then((branch) => this.current(branch))
+      .catch((err) => this.current('~error'));
 
-    try {
-      // set current branch
-      (await branchesProm).forEach((b) => {
-        if (b.current) {
-          this.current(b.name);
-        }
-      });
-    } catch (e) {
-      this.current('~error');
-      ungit.logger.warn('error while setting current branch', e);
-    }
-
-    try {
-      // update branches and tags references.
-      const refs = await refsProm;
-      if (this.isSamePayload(refs)) {
-        return;
-      }
-
-      const version = Date.now();
-      const sorted = refs
-        .map((r) => {
-          const ref = this.graph.getRef(r.name.replace('refs/tags', 'tag: refs/tags'));
-          ref.node(this.graph.getNode(r.sha1));
-          ref.version = version;
-          return ref;
-        })
-        .sort((a, b) => {
-          if (a.current() || b.current()) {
-            return a.current() ? -1 : 1;
-          } else if (a.isRemoteBranch === b.isRemoteBranch) {
-            if (a.name < b.name) {
-              return -1;
-            }
-            if (a.name > b.name) {
-              return 1;
-            }
-            return 0;
-          } else {
-            return a.isRemoteBranch ? 1 : -1;
+    // refreshes tags branches and remote branches
+    // TODO refresh remote refs separately, notify autofetch via ws
+    const refsProm = this.server
+      .getPromise('/refs', { path: this.repoPath(), remoteFetch: forceRemoteFetch })
+      .then((refs) => {
+        const stamp = Date.now();
+        const locals = [];
+        for (const { name, sha1, date } of refs) {
+          const lname = name.replace('refs/tags', 'tag: refs/tags');
+          // side effect: registers the ref
+          const ref = this.graph.getRef(lname, sha1);
+          const node = ref.node();
+          if (date && !node.isInited()) {
+            const ts = Date.parse(date);
+            // Push down uninited nodes based on date
+            if (!node.date || node.date > ts) node.date = ts;
           }
-        })
-        .filter((ref) => {
-          if (ref.localRefName == 'refs/stash') return false;
-          if (ref.localRefName.endsWith('/HEAD')) return false;
-          if (!this.isShowRemote() && ref.isRemote) return false;
-          if (!this.isShowBranch() && ref.isBranch) return false;
-          if (!this.isShowTag() && ref.isTag) return false;
-          return true;
-        });
-      this.branchesAndLocalTags(sorted);
-      this.graph.refs().forEach((ref) => {
-        // ref was removed from another source
-        if (!ref.isRemoteTag && ref.value !== 'HEAD' && (!ref.version || ref.version < version)) {
-          ref.remove(true);
+          ref.stamp = stamp;
+          const { localRefName, isRemote, isBranch, isTag } = ref;
+          if (
+            !(
+              localRefName == 'refs/stash' ||
+              // Remote HEAD
+              localRefName.endsWith('/HEAD') ||
+              (isRemote && !this.isShowRemote()) ||
+              (isBranch && !this.isShowBranch()) ||
+              (isTag && !this.isShowTag())
+            )
+          )
+            locals.push(ref);
         }
+        locals.sort((a, b) => {
+          if (a.current() || b.current()) {
+            // Current branch is always first
+            return a.current() ? -1 : 1;
+          } else if (a.isRemoteBranch !== b.isRemoteBranch) {
+            // Remote branches show last
+            return a.isRemoteBranch ? 1 : -1;
+          } else {
+            // Otherwise, sort by name, grouped by remoteness
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+          }
+        });
+        this.branchesAndLocalTags(locals);
+        this.graph.refs().forEach((ref) => {
+          // ref was removed from another source
+          if (!ref.isRemoteTag && ref.value !== 'HEAD' && ref.stamp !== stamp) {
+            ref.remove(true);
+          }
+        });
+        this.graph.fetchCommits();
+      })
+      .catch((e) => this.server.unhandledRejection(e));
+
+    if (this.firstFetch) {
+      refsProm.then(() => {
+        this.firstFetch = false;
+        // Fetch remotes on first load
+        this.updateRefs(true);
       });
-    } catch (e) {
-      ungit.logger.error('error during branch update: ', e);
     }
+    return Promise.all([currentBranchProm, refsProm]);
   }
 
   branchRemove(branch) {

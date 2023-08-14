@@ -8,6 +8,7 @@ class Selectable {
       },
       write(val) {
         // val is this if we're called from a click ko binding
+        // @ts-ignore
         if (val === this || val === true) {
           graph.currentActionContext(this);
         } else if (graph.currentActionContext() == this) {

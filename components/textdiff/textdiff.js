@@ -58,12 +58,14 @@ class WhiteSpace {
 
 class TextDiffViewModel {
   constructor(args) {
-    this.filename = args.filename;
-    this.oldFilename = args.oldFilename;
     this.repoPath = args.repoPath;
     this.server = args.server;
-    this.sha1 = args.sha1;
+    this.diffKey = args.diffKey;
+    this.idx = args.idx;
+    this.filename = args.filename;
+    this.oldFilename = args.oldFilename;
     this.hasMore = ko.observable(false);
+    /** @type {(ReturnType<diff2html.parse>[0] & { allBlocks?: any[] })[]} */
     this.diffJson = null;
     this.loadCount = loadLimit;
     this.textDiffType = args.textDiffType;
@@ -96,17 +98,23 @@ class TextDiffViewModel {
   }
 
   getDiffArguments() {
+    if (this.diffKey)
+      return {
+        path: this.repoPath(),
+        diffKey: this.diffKey,
+        idx: this.idx,
+      };
     return {
-      file: this.filename,
-      oldFile: this.oldFilename,
+      file: this.filename || '',
+      oldFile: this.oldFilename || '',
       path: this.repoPath(),
-      sha1: this.sha1 ? this.sha1 : '',
       whiteSpace: this.whiteSpace.value(),
     };
   }
 
   invalidateDiff() {
     this.diffJson = null;
+    this.diffKey = null;
     if (this.isShowingDiffs()) this.render();
   }
 
@@ -114,7 +122,7 @@ class TextDiffViewModel {
     return this.server
       .getPromise('/diff', this.getDiffArguments())
       .then((diffs) => {
-        if (typeof diffs !== 'string') {
+        if (!diffs || typeof diffs !== 'string') {
           // Invalid value means there is no changes, show dummy diff without any changes
           diffs = `diff --git a/${this.filename} b/${this.filename}
                   index aaaaaaaa..bbbbbbbb 111111
@@ -124,6 +132,10 @@ class TextDiffViewModel {
         this.diffJson = diff2html.parse(diffs);
       })
       .catch((err) => {
+        if (err.errorCode === 'invalid-diff') {
+          this.invalidateDiff();
+          return;
+        }
         // The file existed before but has been removed, but we're trying to get a diff for it
         // Most likely it will just disappear with the next refresh of the staging area
         // so we just ignore the error here

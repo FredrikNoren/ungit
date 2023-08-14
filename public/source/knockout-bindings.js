@@ -17,6 +17,7 @@ ko.bindingHandlers.component = {
     ko.virtualElements.emptyNode(element);
     return { controlsDescendantBindings: true };
   },
+  // @ts-ignore
   update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
     var component = ko.utils.unwrapObservable(valueAccessor());
     if (!component || !component.updateNode) {

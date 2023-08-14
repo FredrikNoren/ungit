@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var $ = require('jquery');
+// @ts-ignore
 jQuery = $; // this is for old backward compatability of bootrap modules
 var ko = require('knockout');
 var dndPageScroll = require('dnd-page-scroll');
@@ -13,6 +14,7 @@ ungit.logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.colorize(),
     winston.format.printf((info) => {
+      // @ts-ignore
       const splat = info[Symbol.for('splat')];
       if (splat) {
         const splatStr = splat.map((arg) => JSON.stringify(arg)).join('\n');

@@ -1,4 +1,5 @@
 # Ignore generated folders
+.direnv
 .nyc_output/
 build/
 coverage/
@@ -18,3 +19,4 @@ components/**/*.css.map
 .vscode/
 .ungitrc
 ungit-*.tgz
+

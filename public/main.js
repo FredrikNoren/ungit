@@ -51,6 +51,7 @@ function checkIfUngitIsRunning(callback) {
   var net = require('net');
   var server = net.createServer();
   server.on('error', function (e) {
+    // @ts-ignore
     if (e.code == 'EADDRINUSE') {
       callback(true);
     }
@@ -139,6 +140,7 @@ app.on('ready', function () {
         console.log('Took ' + launchTime + 'ms to start server.');
       });
 
+      // @ts-ignore
       Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
       mainWindow = new BrowserWindow({

@@ -7,28 +7,19 @@ class EdgeViewModel extends Animateable {
     this.nodeA = graph.getNode(nodeAsha1);
     this.nodeB = graph.getNode(nodeBsha1);
     this.getGraphAttr = ko.computed(() => {
-      if (this.nodeA.isViewable() && (!this.nodeB.isViewable() || !this.nodeB.isInited)) {
-        return [
-          this.nodeA.cx(),
-          this.nodeA.cy(),
-          this.nodeA.cx(),
-          this.nodeA.cy(),
-          this.nodeA.cx(),
-          graph.graphHeight(),
-          this.nodeA.cx(),
-          graph.graphHeight(),
-        ];
-      } else if (this.nodeB.isInited && this.nodeB.cx() && this.nodeB.cy()) {
-        return [
-          this.nodeA.cx(),
-          this.nodeA.cy(),
-          this.nodeA.cx(),
-          this.nodeA.cy(),
-          this.nodeB.cx(),
-          this.nodeB.cy(),
-          this.nodeB.cx(),
-          this.nodeB.cy(),
-        ];
+      if (this.nodeA.cx() && this.nodeA.cy()) {
+        if (this.nodeB.cx() && this.nodeB.cy()) {
+          return [
+            this.nodeA.cx(),
+            this.nodeA.cy(),
+            this.nodeA.cx(),
+            this.nodeA.cy(),
+            this.nodeB.cx(),
+            this.nodeB.cy(),
+            this.nodeB.cx(),
+            this.nodeB.cy(),
+          ];
+        }
       } else {
         return [0, 0, 0, 0, 0, 0, 0, 0];
       }
@@ -38,6 +29,7 @@ class EdgeViewModel extends Animateable {
 
   setGraphAttr(val) {
     this.element().setAttribute('d', `M${val.slice(0, 4).join(',')}L${val.slice(4, 8).join(',')}`);
+    this.element().setAttribute('stroke', this.nodeA.color());
   }
 
   edgeMouseOver() {

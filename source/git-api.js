@@ -11,9 +11,12 @@ const fs = require('fs').promises;
 const watch = require('node-watch');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
+// eslint-disable-next-line no-unused-vars
+const { getRepo, initGit, quickStatus, uncacheRepo, NGWrap } = require('./nodegit');
 
 const tenMinTimeoutMs = 10 * 60 * 1000;
 
+/** @type {string} */
 exports.pathPrefix = '';
 
 exports.registerApi = (env) => {
@@ -24,6 +27,7 @@ exports.registerApi = (env) => {
   const socketsById = env.socketsById || {};
 
   if (config.dev) temp.track();
+  // app.all('*', (q, r, n) => console.log(q.method, q.path, q.query, q.body) || n());
 
   if (io) {
     io.on('connection', (socket) => {
@@ -64,6 +68,7 @@ exports.registerApi = (env) => {
         logger.debug(`[${this.watcherId}] path does not exist`, item);
         return;
       }
+      // @ts-ignore
       const watcher = watch(item, options);
       watcher.on('change', (_event, changedPath) => {
         logger.silly(`[${this.watcherId}] ${name}`, changedPath);
@@ -84,6 +89,7 @@ exports.registerApi = (env) => {
 
   const readIgnore = async (pathToWatch) => {
     logger.debug(`Parsing .gitignore for ${pathToWatch}`);
+    // @ts-ignore -- wrong type definition
     const out = ignore();
     const ignoreContent = await fs
       .readFile(path.join(pathToWatch, '.gitignore'), { encoding: 'utf8' })
@@ -148,14 +154,14 @@ exports.registerApi = (env) => {
     socket.watcher && socket.watcher.close();
   };
 
-  const ensurePathExists = (req, res, next) => {
-    fs.access(req.query.path || req.body.path)
-      .then(() => {
-        next();
-      })
-      .catch(() => {
-        res.status(400).json({ error: `'No such path: ${path}`, errorCode: 'no-such-path' });
-      });
+  const ensurePathExists = async (req, res, next) => {
+    try {
+      const path = req.query.path || req.body.path;
+      req.repo = await getRepo(path);
+      next();
+    } catch (err) {
+      res.status(400).json({ error: err.message, errorCode: err.errorCode || 'no-such-path' });
+    }
   };
 
   const ensureValidSocketId = (req, res, next) => {
@@ -173,50 +179,55 @@ exports.registerApi = (env) => {
 
   const emitWorkingTreeChanged = _.debounce(
     (repoPath) => {
+      if (repoPath) uncacheRepo(repoPath);
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('working-tree-changed', { repository: repoPath });
         logger.info('emitting working-tree-changed to sockets, manually triggered');
       }
     },
-    500,
-    { maxWait: 1000 }
+    100,
+    { maxWait: 500 }
   );
   const emitGitDirectoryChanged = _.debounce(
     (repoPath) => {
+      if (repoPath) uncacheRepo(repoPath);
       if (io && repoPath) {
         io.in(path.normalize(repoPath)).emit('git-directory-changed', { repository: repoPath });
         logger.info('emitting git-directory-changed to sockets, manually triggered');
       }
     },
-    500,
-    { maxWait: 1000 }
+    100,
+    { maxWait: 500 }
   );
 
-  const autoStashExecuteAndPop = (commands, repoPath, allowedCodes, outPipe, inPipe, timeout) => {
-    if (config.autoStashAndPop) {
-      return gitPromise.stashExecuteAndPop(
-        commands,
-        repoPath,
-        allowedCodes,
-        outPipe,
-        inPipe,
-        timeout
-      );
-    } else {
-      return gitPromise(commands, repoPath, allowedCodes, outPipe, inPipe, timeout);
-    }
-  };
-
   const jsonResultOrFailProm = (res, promise) => {
+    const now = Date.now();
     return promise
-      .then((result) => {
-        res.json(result || {});
+      .then((o) => {
+        const elapsed = Date.now() - now;
+        res.header('X-elapsed', elapsed);
+        // TODO shouldn't this be a boolean instead of an object?
+        return res.json(o == null ? {} : o);
       })
       .catch((err) => {
         logger.warn('Responding with ERROR: ', JSON.stringify(err));
         res.status(400).json(err);
       });
   };
+
+  /** @typedef {import('express').Request & { repo: NGWrap; query: { path?: string } }} Req */
+  /** @typedef {import('express').Response} Res */
+
+  /** @type {(fn: (req: Req, res: Res) => void) => (req: Req, res: Res) => Promise<void>} */
+  const w = (fn) => (req, res) =>
+    new Promise((resolve) => resolve(fn(req, res))).catch((err) => {
+      logger.warn('Responding with ERROR: ', err);
+      res.status(500).json(err);
+    });
+
+  /** @type {(fn: (req: Req, res: Res) => any) => (req: Req, res: Res) => Promise<void>} */
+  const jw = (fn) => (req, res) =>
+    jsonResultOrFailProm(res, new Promise((resolve) => resolve(fn(req, res))));
 
   const credentialsOption = (socketId, remote) => {
     let portAndRootPath = `${config.port}`;
@@ -241,23 +252,41 @@ exports.registerApi = (env) => {
     }
   };
 
-  app.get(`${exports.pathPrefix}/status`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise.status(req.query.path, null));
-  });
+  /** @param {NGWrap} repo */
+  const autoStash = async (repo, fn) => {
+    if (config.autoStashAndPop) {
+      const oid = await repo.addStash('Ungit: automatic stash').catch((err) => {
+        // Nothing to save
+        if (err.errno === -3) return;
+        throw err;
+      });
+      const out = await fn();
+      await repo.popStash(oid);
+      return out;
+    } else {
+      return fn();
+    }
+  };
 
-  app.post(`${exports.pathPrefix}/init`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(req.body.bare ? ['init', '--bare', '--shared'] : ['init'], req.body.path)
-    );
-  });
+  app.get(
+    `${exports.pathPrefix}/status`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => req.repo.status())
+  );
+
+  app.post(
+    `${exports.pathPrefix}/init`,
+    ensureAuthenticated,
+    jw((req) => initGit(req.body.path, req.body.bare))
+  );
 
   app.post(
     `${exports.pathPrefix}/clone`,
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
+    w((req, res) => {
       // Default timeout is 2min but clone can take much longer than that (allows up to 2h)
       const timeoutMs = 2 * 60 * 60 * 1000;
       if (res.setTimeout) res.setTimeout(timeoutMs);
@@ -279,7 +308,7 @@ exports.registerApi = (env) => {
       });
 
       jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
-    }
+    })
   );
 
   app.post(
@@ -287,24 +316,14 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
+    jw(async (req, res) => {
       // Allow a little longer timeout on fetch (10min)
       if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
-
-      const task = gitPromise({
-        commands: credentialsOption(req.body.socketId, req.body.remote).concat([
-          'fetch',
-          config.autoPruneOnFetch ? '--prune' : '',
-          '--',
-          req.body.remote,
-          req.body.ref ? req.body.ref : '',
-        ]),
-        repoPath: req.body.path,
-        timeout: tenMinTimeoutMs,
-      });
-
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
-    }
+      const { path, ref, remote } = req.body;
+      await req.repo
+        .remoteFetch(remote, ref ? [ref] : null, config.autoPruneOnFetch)
+        .finally(() => emitGitDirectoryChanged(path));
+    })
   );
 
   app.post(
@@ -331,32 +350,37 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.post(`${exports.pathPrefix}/reset`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      autoStashExecuteAndPop(['reset', `--${req.body.mode}`, req.body.to], req.body.path)
-    )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/reset`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const repoPath = req.body.path;
+      await autoStash(req.repo, () =>
+        gitPromise(['reset', `--${req.body.mode}`, req.body.to], repoPath)
+      );
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+      const head = await req.repo.getHead();
+      return head.sha1;
+    })
+  );
 
   app.get(`${exports.pathPrefix}/diff`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const isIgnoreWhiteSpace = req.query.whiteSpace === 'true' ? true : false;
+    const { diffKey, idx: i, path, file, oldFile, sha1, whiteSpace } = req.query;
+    const idx = i && i !== true ? getNumber(i, -1) : -1;
     jsonResultOrFailProm(
       res,
-      gitPromise.diffFile(
-        req.query.path,
-        req.query.file,
-        req.query.oldFile,
-        req.query.sha1,
-        isIgnoreWhiteSpace
-      )
+      diffKey
+        ? req.repo.diffFile({ diffKey, idx })
+        : gitPromise.diffFile(path, file || oldFile, oldFile || file, sha1, whiteSpace === 'true')
     );
   });
 
   app.get(`${exports.pathPrefix}/diff/image`, ensureAuthenticated, ensurePathExists, (req, res) => {
     res.type(path.extname(req.query.filename));
-    if (req.query.version !== 'current') {
+    // index, worktree, combined, current
+    if (req.query.version.length > 8) {
       gitPromise.binaryFileContent(req.query.path, req.query.filename, req.query.version, res);
     } else {
       res.sendFile(path.join(req.query.path, req.query.filename));
@@ -368,10 +392,14 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      const task = req.body.all
-        ? gitPromise.discardAllChanges(req.body.path)
-        : gitPromise.discardChangesInFile(req.body.path, req.body.file.trim());
-      jsonResultOrFailProm(res, task.then(emitWorkingTreeChanged.bind(null, req.body.path)));
+      const { all, path, file } = req.body;
+      const task = all
+        ? gitPromise.discardAllChanges(path)
+        : gitPromise.discardChangesInFile(path, file.trim());
+      jsonResultOrFailProm(
+        res,
+        task.finally(() => emitWorkingTreeChanged(path))
+      );
     }
   );
 
@@ -380,33 +408,51 @@ exports.registerApi = (env) => {
     ensureAuthenticated,
     ensurePathExists,
     (req, res) => {
-      const currentPath = req.body.path.trim();
-      const gitIgnoreFile = `${currentPath}/.gitignore`;
-      const ignoreFile = req.body.file.trim();
-      const task = fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile).catch((err) => {
-        throw {
-          errorCode: 'error-appending-ignore',
-          error: 'Error while appending to .gitignore file.',
-        };
-      });
+      const { path, file } = req.body;
+      const gitIgnoreFile = `${path}/.gitignore`;
+      const task = fs
+        .appendFile(gitIgnoreFile, os.EOL + file)
+        .catch((err) => {
+          throw {
+            errorCode: 'error-appending-ignore',
+            error: 'Error while appending to .gitignore file.',
+          };
+        })
+        .finally(() => emitWorkingTreeChanged(path));
 
-      jsonResultOrFailProm(res, task).finally(emitWorkingTreeChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task);
     }
   );
 
-  app.post(`${exports.pathPrefix}/commit`, ensureAuthenticated, ensurePathExists, (req, res) => {
+  app.post(`${exports.pathPrefix}/stage`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, file } = req.body;
     jsonResultOrFailProm(
       res,
-      gitPromise.commit(
-        req.body.path,
-        req.body.amend,
-        req.body.emptyCommit,
-        req.body.message,
-        req.body.files
-      )
-    )
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
+      req.repo.stage(file).finally(() => {
+        emitGitDirectoryChanged(path);
+      })
+    );
+  });
+
+  app.post(`${exports.pathPrefix}/unstage`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, file } = req.body;
+    jsonResultOrFailProm(
+      res,
+      req.repo.unstage(file).finally(() => {
+        emitGitDirectoryChanged(path);
+      })
+    );
+  });
+
+  app.post(`${exports.pathPrefix}/commit`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    const { path, amend, emptyCommit, message, files } = req.body;
+    jsonResultOrFailProm(
+      res,
+      gitPromise.commit(path, amend, emptyCommit, message, files).finally(() => {
+        emitGitDirectoryChanged(path);
+        emitWorkingTreeChanged(path);
+      })
+    );
   });
 
   app.post(`${exports.pathPrefix}/revert`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -422,137 +468,112 @@ exports.registerApi = (env) => {
       .finally(emitWorkingTreeChanged.bind(null, req.body.path));
   });
 
-  app.get(`${exports.pathPrefix}/gitlog`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
-    const skip = getNumber(req.query.skip, 0);
-    const task = gitPromise
-      .log(req.query.path, limit, skip, config.maxActiveBranchSearchIteration)
-      .catch((err) => {
-        if (
-          err.errorCode === 'no-head' ||
-          err.errorCode === 'no-commits' ||
-          err.errorCode === 'not-a-repository'
-        )
-          return { limit: limit, skip: skip, nodes: [] };
-        throw err;
-      });
-    jsonResultOrFailProm(res, task);
-  });
+  app.get(
+    `${exports.pathPrefix}/commits`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const { limit: limitParam, ids: idsParam } = req.query;
+      const limit = getNumber(limitParam, config.numberOfNodesPerLoad || 25);
+      const ids = typeof idsParam === 'string' && idsParam ? idsParam.split(',') : [];
+      if (!idsParam.length) return [];
+      const nodes = await req.repo.log(limit, 0, ids);
+      return nodes;
+    })
+  );
 
-  app.get(`${exports.pathPrefix}/show`, ensureAuthenticated, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(
-        gitParser.parseGitLog
+  app.get(
+    `${exports.pathPrefix}/gitlog`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const limit = getNumber(req.query.limit, config.numberOfNodesPerLoad || 25);
+      const skip = getNumber(req.query.skip, 0);
+      const nodes = await req.repo.log(limit, skip, config.maxActiveBranchSearchIteration);
+      return { skip: skip + nodes.length, nodes, isHeadExist: true };
+    })
+  );
+
+  // app.get(
+  //   `${exports.pathPrefix}/show`,
+  //   ensureAuthenticated,
+  //   jw((req) =>
+  //     gitPromise(['show', '--numstat', '-z', req.query.sha1], req.query.path).then(
+  //       gitParser.parseGitLog
+  //     )
+  //   )
+  // );
+
+  app.get(
+    `${exports.pathPrefix}/head`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) =>
+      gitPromise(
+        ['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'],
+        req.query.path
       )
-    );
-  });
-
-  app.get(`${exports.pathPrefix}/head`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(
-      ['log', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--max-count=1'],
-      req.query.path
-    )
-      .then(gitParser.parseGitLog)
-      .catch((err) => {
-        if (
-          err.errorCode === 'no-head' ||
-          err.errorCode === 'no-commits' ||
-          err.errorCode === 'not-a-repository'
-        )
-          return [];
-        throw err;
-      });
-    jsonResultOrFailProm(res, task);
-  });
-
-  app.get(`${exports.pathPrefix}/refs`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
-
-    let task = Promise.resolve();
-    if (req.query.remoteFetch) {
-      task = task.then(() =>
-        gitPromise(['remote'], req.query.path).then((remoteText) => {
-          const remotes = remoteText.trim().split('\n');
-
-          // making calls serially as credential helpers may get confused to which cred to get.
-          return remotes.reduce((promise, remote) => {
-            if (!remote || remote === '') return promise;
-            return promise.then(() => {
-              return gitPromise({
-                commands: credentialsOption(req.query.socketId, remote).concat(['fetch', remote]),
-                repoPath: req.query.path,
-                timeout: tenMinTimeoutMs,
-              }).catch((e) => logger.warn('err during remote fetch for /refs', e)); // ignore fetch err as it is most likely credential
-            });
-          }, Promise.resolve());
+        .then((text) => {
+          const out = gitParser.parseGitLog(text);
+          return out[0];
         })
+        .catch((err) => {
+          if (
+            err.errorCode === 'no-head' ||
+            err.errorCode === 'no-commits' ||
+            err.errorCode === 'not-a-repository'
+          )
+            return false;
+          throw err;
+        })
+    )
+  );
+
+  app.get(
+    `${exports.pathPrefix}/refs`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req, res) => {
+      if (req.query.remoteFetch) {
+        if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
+        await req.repo.remoteAllFetch(config.autoPruneOnFetch).catch((err) => {
+          console.warn('ignoring fetch error', err);
+        });
+      }
+
+      return req.repo.refs();
+    })
+  );
+
+  app.post(
+    `${exports.pathPrefix}/branches`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => {
+      const commands = [
+        'branch',
+        req.body.force ? '-f' : '',
+        req.body.name.trim(),
+        (req.body.sha1 || 'HEAD').trim(),
+      ];
+
+      return gitPromise(commands, req.body.path).finally(
+        emitGitDirectoryChanged.bind(null, req.body.path)
       );
-    }
-    task = task
-      .then(() => gitPromise(['show-ref', '-d'], req.query.path))
-      // On new fresh repos, empty string is returned but has status code of error, simply ignoring them
-      .catch((e) => {
-        if (e.message !== '') throw e;
-      })
-      .then((refs) => {
-        const results = [];
-        if (refs) {
-          refs
-            .trim()
-            .split('\n')
-            .forEach((n) => {
-              const splitted = n.split(' ');
-              const sha1 = splitted[0];
-              const name = splitted[1];
-              if (name.indexOf('refs/tags') > -1 && name.indexOf('^{}') > -1) {
-                results[results.length - 1].sha1 = sha1;
-              } else {
-                results.push({
-                  name: name,
-                  sha1: sha1,
-                });
-              }
-            });
-        }
-        return results;
-      });
-    jsonResultOrFailProm(res, task);
-  });
-
-  app.get(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const isLocalBranchOnly = req.query.isLocalBranchOnly == 'false';
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['branch', isLocalBranchOnly ? '-a' : ''], req.query.path).then(
-        gitParser.parseGitBranches
-      )
-    );
-  });
-
-  app.post(`${exports.pathPrefix}/branches`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const commands = [
-      'branch',
-      req.body.force ? '-f' : '',
-      req.body.name.trim(),
-      (req.body.sha1 || 'HEAD').trim(),
-    ];
-
-    jsonResultOrFailProm(res, gitPromise(commands, req.body.path)).finally(
-      emitGitDirectoryChanged.bind(null, req.body.path)
-    );
-  });
+    })
+  );
 
   app.delete(
     `${exports.pathPrefix}/branches`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['branch', '-D', req.query.name.trim()], req.query.path)
-      ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
-    }
+    jw(async (req) => {
+      const name = typeof req.query.name === 'string' && req.query.name;
+      if (!name) throw new Error('need a name');
+      return await gitPromise(['branch', '-D', name.trim()], req.query.path).finally(
+        emitGitDirectoryChanged.bind(null, req.query.path)
+      );
+    })
   );
 
   app.delete(
@@ -576,34 +597,19 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.get(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(['tag', '-l'], req.query.path).then(gitParser.parseGitTags);
-    jsonResultOrFailProm(res, task);
-  });
+  app.get(
+    `${exports.pathPrefix}/tags`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => req.repo.getTags())
+  );
 
   app.get(
     `${exports.pathPrefix}/remote/tags`,
     ensureAuthenticated,
     ensurePathExists,
     ensureValidSocketId,
-    (req, res) => {
-      const task = gitPromise(
-        credentialsOption(req.query.socketId, req.query.remote).concat([
-          'ls-remote',
-          '--tags',
-          req.query.remote,
-        ]),
-        req.query.path
-      )
-        .then(gitParser.parseGitLsRemote)
-        .then((result) => {
-          result.forEach((r) => {
-            r.remote = req.query.remote;
-          });
-          return result;
-        });
-      jsonResultOrFailProm(res, task);
-    }
+    jw((req) => req.repo.remoteFetchTags(req.query.remote))
   );
 
   app.post(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -625,12 +631,14 @@ exports.registerApi = (env) => {
     );
   });
 
-  app.delete(`${exports.pathPrefix}/tags`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['tag', '-d', req.query.name.trim()], req.query.path)
-    ).finally(emitGitDirectoryChanged.bind(null, req.query.path));
-  });
+  app.delete(
+    `${exports.pathPrefix}/tags`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) =>
+      req.repo.deleteTag(req.query.name).finally(() => emitGitDirectoryChanged(req.query.path))
+    )
+  );
 
   app.delete(
     `${exports.pathPrefix}/remote/tags`,
@@ -650,40 +658,49 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.post(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const arg = req.body.sha1
-      ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
-      : ['checkout', req.body.name.trim()];
-
-    jsonResultOrFailProm(res, autoStashExecuteAndPop(arg, req.body.path))
-      .then(emitGitDirectoryChanged.bind(null, req.body.path))
-      .then(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/checkout`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const arg = req.body.sha1
+        ? ['checkout', '-b', req.body.name.trim(), req.body.sha1]
+        : ['checkout', req.body.name.trim()];
+      const repoPath = req.body.path;
+      try {
+        return await autoStash(req.repo, () => gitPromise(arg, repoPath));
+      } finally {
+        await emitGitDirectoryChanged(repoPath);
+        await emitWorkingTreeChanged(repoPath);
+      }
+    })
+  );
 
   app.post(
     `${exports.pathPrefix}/cherrypick`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        autoStashExecuteAndPop(['cherry-pick', req.body.name.trim()], req.body.path)
-      )
-        .then(emitGitDirectoryChanged.bind(null, req.body.path))
-        .then(emitWorkingTreeChanged.bind(null, req.body.path));
-    }
+    jw(async (req) => {
+      const repoPath = req.body.path;
+      await autoStash(req.repo, () => gitPromise(['cherry-pick', req.body.name.trim()], repoPath));
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+    })
   );
 
-  app.get(`${exports.pathPrefix}/checkout`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(res, gitPromise.getCurrentBranch(req.query.path));
-  });
+  app.get(
+    `${exports.pathPrefix}/checkout`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw((req) => req.repo.getCurrentBranch())
+  );
 
-  app.get(`${exports.pathPrefix}/remotes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['remote'], req.query.path).then(gitParser.parseGitRemotes)
-    );
-  });
+  app.get(
+    `${exports.pathPrefix}/remotes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => await req.repo.getRemotes())
+  );
 
   app.get(
     `${exports.pathPrefix}/remotes/:name`,
@@ -698,21 +715,14 @@ exports.registerApi = (env) => {
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['remote', 'add', req.params.name, req.body.url], req.body.path)
-      );
-    }
+    jw(async (req) => req.repo.addRemote(req.params.name, req.body.url))
   );
 
   app.delete(
     `${exports.pathPrefix}/remotes/:name`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      jsonResultOrFailProm(res, gitPromise(['remote', 'remove', req.params.name], req.query.path));
-    }
+    jw(async (req) => req.repo.deleteRemote(req.params.name))
   );
 
   app.post(`${exports.pathPrefix}/merge`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -732,7 +742,7 @@ exports.registerApi = (env) => {
       const args = {
         commands: ['commit', '--file=-'],
         repoPath: req.body.path,
-        inPipe: req.body.message,
+        stdin: req.body.message,
       };
 
       jsonResultOrFailProm(res, gitPromise(args))
@@ -822,24 +832,12 @@ exports.registerApi = (env) => {
   app.get(
     `${exports.pathPrefix}/baserepopath`,
     ensureAuthenticated,
-    ensurePathExists,
-    (req, res) => {
+    jw(async (req) => {
       const currentPath = path.resolve(path.join(req.query.path, '..'));
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['rev-parse', '--show-toplevel'], currentPath)
-          .then((baseRepoPath) => {
-            return { path: path.resolve(baseRepoPath.trim()) };
-          })
-          .catch((e) => {
-            if (e.errorCode === 'not-a-repository' || e.errorCode === 'must-be-in-working-tree') {
-              // not a repository or a bare repository
-              return {};
-            }
-            throw e;
-          })
-      );
-    }
+      const stat = await quickStatus(currentPath);
+      if (stat.type === 'no-such-path' || stat.type === 'uninited') return {};
+      return { path: stat.gitRootPath };
+    })
   );
 
   app.get(`${exports.pathPrefix}/submodules`, ensureAuthenticated, ensurePathExists, (req, res) => {
@@ -909,74 +907,52 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.get(`${exports.pathPrefix}/quickstatus`, ensureAuthenticated, (req, res) => {
-    const task = fs
-      .access(req.query.path)
-      .then(() => {
-        return gitPromise.revParse(req.query.path);
-      })
-      .then((revParseRes) => {
-        if (revParseRes.type !== 'uninited') {
-          return revParseRes;
-        }
+  app.get(
+    `${exports.pathPrefix}/quickstatus`,
+    ensureAuthenticated,
+    jw(async (req) => quickStatus(req.query.path))
+  );
 
-        // for uninited directory, let's check if it's any immediate directories are
-        // git repository so we can display them.
-        return fs
-          .readdir(req.query.path)
-          .then((filePaths) => {
-            return Promise.all(
-              filePaths
-                .filter((filePath) => !filePath.startsWith('.'))
-                .map((filePath) => gitPromise.revParse(path.join(req.query.path, filePath)))
-            );
-          })
-          .then((pathRevParses) => {
-            revParseRes.subRepos = pathRevParses
-              .filter(
-                (pathRevParse) => pathRevParse.type === 'inited' || pathRevParse.type === 'bare'
-              )
-              .map((pathRevParse) => pathRevParse.gitRootPath);
-            return revParseRes;
-          });
-      })
-      .catch((e) => {
-        logger.error('failed during /quickstatus', e);
-        return { type: 'no-such-path', gitRootPath: req.query.path };
-      });
-    jsonResultOrFailProm(res, task);
-  });
+  app.get(
+    `${exports.pathPrefix}/stashes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => req.repo.getStashes())
+  );
 
-  app.get(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const task = gitPromise(
-      ['stash', 'list', '--decorate=full', '--pretty=fuller', '-z', '--parents', '--numstat'],
-      req.query.path
-    ).then(gitParser.parseGitLog);
-    jsonResultOrFailProm(res, task);
-  });
-
-  app.post(`${exports.pathPrefix}/stashes`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    jsonResultOrFailProm(
-      res,
-      gitPromise(['stash', 'save', '--include-untracked', req.body.message || ''], req.body.path)
-    )
-      .finally(emitGitDirectoryChanged.bind(null, req.body.path))
-      .finally(emitWorkingTreeChanged.bind(null, req.body.path));
-  });
+  app.post(
+    `${exports.pathPrefix}/stashes`,
+    ensureAuthenticated,
+    ensurePathExists,
+    jw(async (req) => {
+      const { path: repoPath, message = '' } = req.body;
+      const oid = await req.repo.addStash(message);
+      await emitGitDirectoryChanged(repoPath);
+      await emitWorkingTreeChanged(repoPath);
+      return oid;
+    })
+  );
 
   app.delete(
     `${exports.pathPrefix}/stashes/:id`,
     ensureAuthenticated,
     ensurePathExists,
-    (req, res) => {
-      const type = req.query.apply === 'true' ? 'apply' : 'drop';
-      jsonResultOrFailProm(
-        res,
-        gitPromise(['stash', type, `stash@{${req.params.id}}`], req.query.path)
-      )
-        .finally(emitGitDirectoryChanged.bind(null, req.query.path))
-        .finally(emitWorkingTreeChanged.bind(null, req.query.path));
-    }
+    jw(async (req) => {
+      const { path: repoPath, apply } = req.query;
+      const { id } = req.params;
+      const index = Number(id);
+      if (isNaN(index) || index < 0) throw new Error(`Invalid index ${id}`);
+      try {
+        if (apply === 'true') {
+          await req.repo.applyStash(index);
+        } else {
+          await req.repo.deleteStash(index);
+        }
+      } finally {
+        await emitGitDirectoryChanged(repoPath);
+        await emitWorkingTreeChanged(repoPath);
+      }
+    })
   );
 
   app.get(`${exports.pathPrefix}/gitconfig`, ensureAuthenticated, (req, res) => {

@@ -30,7 +30,6 @@ class RepositoryViewModel {
       this.server.watchRepository(value);
     });
     this.server.watchRepository(this.repoPath());
-    this.showLog = this.isBareDir ? ko.observable(true) : this.staging.isStageValid;
     this.parentModulePath = ko.observable();
     this.parentModuleLink = ko.observable();
     this.isSubmodule = ko.computed(() => this.parentModulePath() && this.parentModuleLink());
@@ -101,7 +100,7 @@ class RepositoryViewModel {
             if (isYes) {
               this.server.putPromise('/gitignore', {
                 path: this.repoPath(),
-                data: document.querySelector('.modal-body .text-area-content').value,
+                data: document.querySelector('.modal-body .text-area-content').textContent,
               });
             }
           },

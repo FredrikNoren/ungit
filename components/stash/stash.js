@@ -21,11 +21,22 @@ class StashItemViewModel {
     this.commitDiff = ko.observable(
       components.create('commitDiff', {
         fileLineDiffs: data.fileLineDiffs.slice(),
-        sha1: this.sha1,
+        diffKey: data.diffKey,
         repoPath: stash.repoPath,
         server: stash.server,
         showDiffButtons: ko.observable(true),
       })
+    );
+    this.newDiff = ko.observable(
+      data.newFiles
+        ? components.create('commitDiff', {
+            fileLineDiffs: data.newFiles.fileLineDiffs.slice(),
+            diffKey: data.newFiles.diffKey,
+            repoPath: stash.repoPath,
+            server: stash.server,
+            showDiffButtons: ko.observable(true),
+          })
+        : null
     );
     this.dropIcon = octicons.x.toSVG({ height: 18 });
     this.applyIcon = octicons.pencil.toSVG({ height: 20 });

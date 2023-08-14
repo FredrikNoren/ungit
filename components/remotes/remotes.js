@@ -25,7 +25,8 @@ class RemotesViewModel {
     this.fetchEnabled = ko.computed(() => this.remotes().length > 0);
 
     this.shouldAutoFetch = ungit.config.autoFetch;
-    this.updateRemotes();
+    // don't block initial load
+    setTimeout(() => this.updateRemotes(), 200);
   }
 
   updateNode(parentElement) {
@@ -51,11 +52,10 @@ class RemotesViewModel {
     ungit.logger.debug('remotes.fetch() triggered');
 
     try {
-      const tagPromise = this.server.getPromise('/remote/tags', {
+      await this.server.postPromise('/fetch', {
         path: this.repoPath(),
         remote: this.currentRemote(),
       });
-      programEvents.dispatch({ event: 'remote-tags-update', tags: await tagPromise });
       if (!this.server.isInternetConnected) {
         this.server.isInternetConnected = true;
       }
