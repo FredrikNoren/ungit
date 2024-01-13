@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.24...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.25...master)
+
+## [1.5.25](https://github.com/FredrikNoren/ungit/compare/v1.5.24...v1.5.25)
+
+### Changed
+- Bump Dependencies [#1566](https://github.com/FredrikNoren/ungit/pull/1566), [#1571](https://github.com/FredrikNoren/ungit/pull/1571), [#1574](https://github.com/FredrikNoren/ungit/pull/1574), [#1578](https://github.com/FredrikNoren/ungit/pull/1578)
 
 ## [1.5.24](https://github.com/FredrikNoren/ungit/compare/v1.5.23...v1.5.24)
 
