@@ -235,7 +235,7 @@ class Environment {
     return this.page.waitForSelector(selector, { hidden: true, timeout: timeout || 6000 });
   }
   wait(duration) {
-    return this.page.waitForTimeout(duration);
+    return new Promise((resolve) => setTimeout(resolve, duration));
   }
 
   type(text) {
