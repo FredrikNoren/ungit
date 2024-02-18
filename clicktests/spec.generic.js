@@ -37,6 +37,7 @@ describe('[GENERIC]', () => {
     await rimraf(testRepoPaths[1]);
     await mkdirp(testRepoPaths[1]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open repo screen', () => {

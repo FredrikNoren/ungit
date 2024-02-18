@@ -7,6 +7,7 @@ describe('[STASH]', () => {
     await environment.init();
     await environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {

@@ -44,6 +44,7 @@ describe('git-api conflict checkout no auto stash', function () {
         );
     });
   });
+
   after(() => {
     return common.post(req, '/testing/cleanup');
   });

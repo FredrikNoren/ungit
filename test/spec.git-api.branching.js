@@ -27,6 +27,7 @@ describe('git-api branching', function () {
         gitConfig = res;
       });
   });
+
   after(() => common.post(req, '/testing/cleanup'));
 
   const commitMessage = 'Commit 1';
