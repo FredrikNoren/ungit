@@ -14,6 +14,7 @@ describe('[REMOTES]', () => {
     await rimraf(testRepoPaths[2]); // clean clone test dir
     await mkdirp(testRepoPaths[2]); // create clone test dir
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {

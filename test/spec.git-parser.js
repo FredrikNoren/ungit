@@ -49,6 +49,7 @@ describe('git-parser parseDiffResult', () => {
         "supertest": "~3.3.0"
     `);
   });
+
   it('no diff selected', () => {
     const gitDiff = dedent`
       diff --git a/package.json b/package.json
@@ -69,6 +70,7 @@ describe('git-parser parseDiffResult', () => {
 
     expect(gitParser.parsePatchDiffResult([false, false, false], gitDiff)).to.eql(null);
   });
+
   it('one +- diff selected', () => {
     const gitDiff = dedent`
       diff --git a/package.json b/package.json
@@ -103,6 +105,7 @@ describe('git-parser parseDiffResult', () => {
       	"supertest": "~3.3.0"
     `);
   });
+
   it('only one + diff selected', () => {
     const gitDiff = dedent`
       diff --git a/package.json b/package.json
@@ -125,6 +128,7 @@ describe('git-parser parseDiffResult', () => {
       'diff --git a/package.json b/package.json\nindex f71e0064..08964575 100644\n--- a/package.json\n+++ b/package.json\n@@ -87,9 +87,10 @@\n\t"grunt-mocha-test": "~0.13.3",\n\t"grunt-plato": "~1.4.0",\n\t"grunt-release": "~0.14.0",\n \t"istanbul": "~0.4.5",\n\t"mocha": "~5.2.0",\n\t"nightmare": "~3.0.1",\n+\t"nyc": "^13.1.0",\n\t"supertest": "~3.3.0"'
     );
   });
+
   it('works with multiple diffs', () => {
     const gitDiff = dedent`
       diff --git a/README.md b/README.md
@@ -147,6 +151,7 @@ describe('git-parser parseDiffResult', () => {
       'diff --git a/README.md b/README.md\nindex 96700c3a..dc141a51 100644\n--- a/README.md\n+++ b/README.md\n@@ -1,4 +1,3 @@\n-ungit\n======\n[![NPM version](https://badge.fury.io/js/ungit.svg)](http://badge.fury.io/js/ungit)\n[![Build Status](https://travis-ci.org/FredrikNoren/ungit.svg)](https://travis-ci.org/FredrikNoren/ungit)\n@@ -133,7 +132,7 @@ Changelog\nSee [CHANGELOG.md](CHANGELOG.md).\n\n License (MIT)\nSee [LICENSE.md](LICENSE.md). To read about the Faircode experiment go to [#974](https://github.com/FredrikNoren/ungit/issues/974). Ungit is now once again MIT.'
     );
   });
+
   it('works with empty diff', () => {
     expect(gitParser.parsePatchDiffResult([], null)).to.eql(null);
   });
@@ -157,13 +162,16 @@ describe('git-parser parseGitLog', () => {
     const refs = gitParser.parseGitLog('commit AAA BBB (HEAD, (test), fw(4rw), 5), ((, ()')[0].refs;
     expect(refs.length).to.be(6);
   });
+
   it('should work with no branch name', () => {
     const refs = gitParser.parseGitLog('commit AAA BBB')[0].refs;
     expect(refs.length).to.be(0);
   });
+
   it('should work with empty lines', () => {
     expect(gitParser.parseGitLog('')).to.eql([]);
   });
+
   it('parses authors without emails', () => {
     const gitLog = dedent`
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)
@@ -184,6 +192,7 @@ describe('git-parser parseGitLog', () => {
       sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
     });
   });
+
   it('parses multiple commits in a row', () => {
     const gitLog = dedent(`
       commit 5867e2766b0a0f81ad59ce9e9895d9b1a3523aa4 37d1154434b70854ed243967e0d7e37aa3564551 (HEAD -> refs/heads/git-parser-specs)
@@ -351,6 +360,7 @@ describe('git-parser parseGitLog', () => {
       sha1: '621a04f931ea9007ac826c04a1a02832e20aa470',
     });
   });
+
   it('parses multiple commits in a row multiple nul separators', () => {
     const gitLog = dedent(`
       commit ad4c559f05796e78095a51679324cefd9afca879 47185090d5096033db0d5c0bbf883d9295ca084e b360295026ae6afac3525b89145aa22d61e818ff (HEAD -> refs/heads/dev)
@@ -390,6 +400,7 @@ describe('git-parser parseGitLog', () => {
     expect(res[2].message).to.eql('a');
     expect(res[3].message).to.eql('Initial commit');
   });
+
   it('parses reflog commits without email', () => {
     const gitLog = dedent(`
       commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)
@@ -433,6 +444,7 @@ describe('git-parser parseGitLog', () => {
       sha1: '37d11544',
     });
   });
+
   it('parses reflog commits', () => {
     const gitLog = dedent(`
       commit 37d11544 d58c8e11 (HEAD -> refs/heads/git-parser-specs)
@@ -477,6 +489,7 @@ describe('git-parser parseGitLog', () => {
       sha1: '37d11544',
     });
   });
+
   it('parses wrongly signed commits', () => {
     const gitLog = dedent`
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)
@@ -500,6 +513,7 @@ describe('git-parser parseGitLog', () => {
       sha1: '37d1154434b70854ed243967e0d7e37aa3564551',
     });
   });
+
   it('parses signed commits', () => {
     const gitLog = dedent`
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)
@@ -525,6 +539,7 @@ describe('git-parser parseGitLog', () => {
       signatureMade: '"Test ungit (Git signing key) <test@example.com>"',
     });
   });
+
   it('parses the git log', () => {
     const gitLog = dedent(`
       commit 37d1154434b70854ed243967e0d7e37aa3564551 d58c8e117fc257520d90b099fd2c6acd7c1e8861 (HEAD -> refs/heads/git-parser-specs)
@@ -571,6 +586,7 @@ describe('git-parser submodule', () => {
     const submodules = gitParser.parseGitSubmodule(gitmodules);
     expect(submodules).to.eql([]);
   });
+
   it('should work with name, path and url', () => {
     const gitmodules = '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com';
     const submodules = gitParser.parseGitSubmodule(gitmodules);
@@ -582,6 +598,7 @@ describe('git-parser submodule', () => {
       url: 'http://example1.com',
     });
   });
+
   it('should work with multiple name, path and url', () => {
     const gitmodules = [
       '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com',
@@ -602,6 +619,7 @@ describe('git-parser submodule', () => {
       url: 'http://example2.com',
     });
   });
+
   it('should work with multiple name, path, url, update, branch, fetchRecurseSubmodules and ignore', () => {
     const gitmodules = [
       '[submodule "test1"]\npath = /path/to/sub1\nurl = http://example1.com\nupdate = checkout\nbranch = master\nfetchRecurseSubmodules = true\nignore = all',
@@ -626,6 +644,7 @@ describe('git-parser submodule', () => {
       url: 'http://example2.com',
     });
   });
+
   it('should work with git submodules', () => {
     const gitmodules = dedent`
       [submodule "test1"]
@@ -650,6 +669,7 @@ describe('git-parser submodule', () => {
       },
     ]);
   });
+
   it('should work with ssh submodules', () => {
     const gitmodules = dedent`
       [submodule "test1"]
@@ -772,6 +792,7 @@ describe('parseGitStatusNumstat', () => {
       'test/spec.git-parser.js': { additions: '13', deletions: '0' },
     });
   });
+
   it('skips empty lines', () => {
     const gitStatusNumstat = dedent(`
       1459	202	package-lock.json\x00

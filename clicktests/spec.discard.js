@@ -34,6 +34,7 @@ describe('[DISCARD - noWarn]', () => {
     await environment.init();
     await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
@@ -58,6 +59,7 @@ describe('[DISCARD - withWarn]', () => {
     await environment.init();
     await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {

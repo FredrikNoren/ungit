@@ -9,6 +9,7 @@ describe('[LOAD-AHEAD]', () => {
     await environment.init();
     await environment.createRepos(testRepoPaths, [{ bare: false }]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {

@@ -7,6 +7,7 @@ const environment = require('./environment')({
 
 describe('[AUTHENTICATION]', () => {
   before('Environment init without temp folder', () => environment.init());
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open home screen should show authentication dialog', async function () {

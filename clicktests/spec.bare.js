@@ -7,6 +7,7 @@ describe('[BARE]', () => {
     await environment.init();
     await environment.createRepos(testRepoPaths, [{ bare: true }]);
   });
+
   after('Environment stop', () => environment.shutdown());
 
   it('Open path screen', () => {
