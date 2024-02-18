@@ -118,6 +118,18 @@ class StagingViewModel extends ComponentRoot {
     this.stashIcon = octicons.pin.toSVG({ height: 15 });
     this.discardIcon = octicons.x.toSVG({ height: 18 });
     this.ignoreIcon = octicons.skip.toSVG({ height: 18 });
+    this.commitMessageTags = [];
+
+    ungit.config.commitMessageTags.forEach((elt) => {
+      let selected = ko.observable(false);
+      this.commitMessageTags.push({
+        text: elt,
+        selected,
+        toggle() {
+          selected(!selected());
+        },
+      });
+    });
   }
 
   updateNode(parentElement) {
@@ -265,6 +277,21 @@ class StagingViewModel extends ComponentRoot {
     }
     this.amend(false);
     this.emptyCommit(false);
+    this.commitMessageTags.forEach(function (elt) {
+      elt.selected(false);
+    });
+  }
+
+  buildCommitMessage() {
+    var commitMessage = this.commitMessageTitle();
+    if (this.commitMessageBody()) commitMessage += '\n\n' + this.commitMessageBody();
+
+    this.commitMessageTags.forEach(function (elt) {
+      if (elt.selected()) {
+        commitMessage = elt.text + ' ' + commitMessage;
+      }
+    });
+    return commitMessage;
   }
 
   commit() {
@@ -274,8 +301,8 @@ class StagingViewModel extends ComponentRoot {
         name: file.name(),
         patchLineList: file.editState() === 'patched' ? file.patchLineList() : null,
       }));
-    let commitMessage = this.commitMessageTitle();
-    if (this.commitMessageBody()) commitMessage += `\n\n${this.commitMessageBody()}`;
+
+    let commitMessage = this.buildCommitMessage();
 
     this.server
       .postPromise('/commit', {
@@ -299,8 +326,8 @@ class StagingViewModel extends ComponentRoot {
         name: file.name(),
         patchLineList: file.editState() === 'patched' ? file.patchLineList() : null,
       }));
-    let commitMessage = this.commitMessageTitle();
-    if (this.commitMessageBody()) commitMessage += `\n\n${this.commitMessageBody()}`;
+
+    let commitMessage = this.buildCommitMessage();
 
     this.server
       .postPromise('/commit', {
