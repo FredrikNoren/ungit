@@ -8,7 +8,7 @@ const rimraf = require('rimraf').rimraf;
 const _ = require('lodash');
 const gitPromise = require('./git-promise');
 const fs = require('fs').promises;
-const watch = require('node-watch');
+const chokidar = require('chokidar');
 const ignore = require('ignore');
 const { EventEmitter } = require('events');
 
@@ -59,23 +59,29 @@ exports.registerApi = (env) => {
       this.watcherId = watcherId++;
       this.watchers = [];
     }
-    async watchItem(name, item, options = {}) {
+    async watchItem(name, item, filter) {
       if ((await fs.access(item).catch(() => false)) === false) {
         logger.debug(`[${this.watcherId}] path does not exist`, item);
         return;
       }
-      const watcher = watch(item, options);
-      watcher.on('change', (_event, changedPath) => {
+      const watcher = chokidar.watch(item, { ignored: filter });
+      let changed = (changedPath) => {
         logger.silly(`[${this.watcherId}] ${name}`, changedPath);
         this.emit(name, changedPath);
-      });
+      }
+
+      watcher.on('change', changed);
+      watcher.on('add', changed);
+      watcher.on('unlink', changed);
+      watcher.on('addDir', changed);
+      watcher.on('unlinkDir', changed);
       this.watchers.push(watcher);
     }
-    addWorkdir(item, options) {
-      return this.watchItem('workdir', item, options);
+    addWorkdir(item, filter) {
+      return this.watchItem('workdir', item, filter);
     }
-    addGit(item, options) {
-      return this.watchItem('git', item, options);
+    addGit(item, filter) {
+      return this.watchItem('git', item, filter);
     }
     close() {
       this.watchers.forEach((w) => w.close());
@@ -100,11 +106,10 @@ exports.registerApi = (env) => {
     if ((await fs.access(repoPath).catch(() => false)) === undefined) {
       // Looks like a repo, let's watch workdir
       let gitIgnore = await readIgnore(pathToWatch);
-      await watcher.addWorkdir(pathToWatch, {
-        recursive: true,
-        filter: (changedPath, skip) => {
-          const filePath = path.relative(pathToWatch, changedPath);
-          if (!filePath) return false;
+      await watcher.addWorkdir(pathToWatch, (watch_path) => {
+          let ignore = true, watch = false;
+          const filePath = path.relative(pathToWatch, watch_path);
+          if (!filePath) return watch; // root
           if (filePath === '.gitignore') {
             readIgnore(pathToWatch).then(
               (ign) => (gitIgnore = ign),
@@ -112,27 +117,24 @@ exports.registerApi = (env) => {
             );
           }
           // We monitor the repo separately
-          if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return skip;
+          if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return ignore;
           // We add / to test for directories, we can't have a file named like a directory
           // and otherwise directory `foo` won't match ignore `foo/`
           if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
             // TODO https://github.com/kaelzhang/node-ignore/issues/78
             // optimization: assume these are permanent skips
-            if (filePath.includes('node_modules')) return skip;
-            return false;
+            if (filePath.includes('node_modules')) return ignore;
+            return ignore;
           }
-          return true;
+          return watch;
         },
-      });
+      );
     } else {
       // Could be bare
       repoPath = pathToWatch;
     }
     // Here we watch the git state
-    await watcher.addGit(path.join(repoPath, 'refs'), {
-      recursive: true,
-      filter: (f) => !f.endsWith('.lock'),
-    });
+    await watcher.addGit(path.join(repoPath, 'refs'), (path) => !path.endsWith('.lock'));
     await watcher.addGit(path.join(repoPath, 'HEAD'));
     await watcher.addGit(path.join(repoPath, 'index'));
 
