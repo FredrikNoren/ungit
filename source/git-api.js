@@ -135,10 +135,10 @@ exports.registerApi = (env) => {
     }
     // Here we watch the git state
     await watcher.addGit(path.join(repoPath, 'refs'), (watch_path) => {
-        const ignore = true,
-          watch = false;
+      const ignore = true,
+        watch = false;
 
-      if (watch_path.endsWith('.lock')) {
+      if (watch_path.endsWith('.lock')) {
         return ignore;
       }
 
