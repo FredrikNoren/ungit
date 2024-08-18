@@ -134,7 +134,16 @@ exports.registerApi = (env) => {
       repoPath = pathToWatch;
     }
     // Here we watch the git state
-    await watcher.addGit(path.join(repoPath, 'refs'), (path) => !path.endsWith('.lock'));
+    await watcher.addGit(path.join(repoPath, 'refs'), (watch_path) => {
+        const ignore = true,
+          watch = false;
+
+      if (watch_path.endsWith('.lock')) {
+        return ignore;
+      }
+
+      return watch;
+    });
     await watcher.addGit(path.join(repoPath, 'HEAD'));
     await watcher.addGit(path.join(repoPath, 'index'));
 
