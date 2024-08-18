@@ -65,10 +65,10 @@ exports.registerApi = (env) => {
         return;
       }
       const watcher = chokidar.watch(item, { ignored: filter });
-      let changed = (changedPath) => {
+      const changed = (changedPath) => {
         logger.silly(`[${this.watcherId}] ${name}`, changedPath);
         this.emit(name, changedPath);
-      }
+      };
 
       watcher.on('change', changed);
       watcher.on('add', changed);
@@ -107,28 +107,28 @@ exports.registerApi = (env) => {
       // Looks like a repo, let's watch workdir
       let gitIgnore = await readIgnore(pathToWatch);
       await watcher.addWorkdir(pathToWatch, (watch_path) => {
-          let ignore = true, watch = false;
-          const filePath = path.relative(pathToWatch, watch_path);
-          if (!filePath) return watch; // root
-          if (filePath === '.gitignore') {
-            readIgnore(pathToWatch).then(
-              (ign) => (gitIgnore = ign),
-              (err) => logger.error('Could not parse .gitignore for', pathToWatch, err)
-            );
-          }
-          // We monitor the repo separately
-          if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return ignore;
-          // We add / to test for directories, we can't have a file named like a directory
-          // and otherwise directory `foo` won't match ignore `foo/`
-          if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
-            // TODO https://github.com/kaelzhang/node-ignore/issues/78
-            // optimization: assume these are permanent skips
-            if (filePath.includes('node_modules')) return ignore;
-            return ignore;
-          }
-          return watch;
-        },
-      );
+        const ignore = true,
+          watch = false;
+        const filePath = path.relative(pathToWatch, watch_path);
+        if (!filePath) return watch; // root
+        if (filePath === '.gitignore') {
+          readIgnore(pathToWatch).then(
+            (ign) => (gitIgnore = ign),
+            (err) => logger.error('Could not parse .gitignore for', pathToWatch, err)
+          );
+        }
+        // We monitor the repo separately
+        if (filePath === '.git' || filePath.startsWith('.git' + path.sep)) return ignore;
+        // We add / to test for directories, we can't have a file named like a directory
+        // and otherwise directory `foo` won't match ignore `foo/`
+        if (gitIgnore.ignores(filePath) || gitIgnore.ignores(`${filePath}/`)) {
+          // TODO https://github.com/kaelzhang/node-ignore/issues/78
+          // optimization: assume these are permanent skips
+          if (filePath.includes('node_modules')) return ignore;
+          return ignore;
+        }
+        return watch;
+      });
     } else {
       // Could be bare
       repoPath = pathToWatch;
