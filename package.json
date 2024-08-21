@@ -92,7 +92,7 @@
     "nyc": "~15.1.0",
     "portfinder": "~1.0.32",
     "prettier": "~3.2.5",
-    "puppeteer": "~22.6.3",
+    "puppeteer": "~22.15.0",
     "superagent": "~8.1.2",
     "supertest": "~6.3.4"
   },
