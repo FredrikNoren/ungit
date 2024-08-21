@@ -42,9 +42,12 @@
               data-bind="text: numberOfRemovedLines"
             ></span>
             |
-            <span data-bind="text: sha1.substr(0, 8)"></span>
-            <!-- ko if: navigator.clipboard && (selected() || nodeIsMousehover()) -->
+            <span title="Commit" data-bind="text: sha1.substring(0, 8)"></span>
+            <!-- ko if: navigator.clipboard -->
             <button class="btn btn-default btn-xs" type="button" data-bind="click: copyHash"><span class="glyphicon glyphicon-copy"></span></button>
+            <!-- /ko -->
+            <!-- ko foreach: parents -->
+            | <a href="#" title="Parent Commit" data-bind="text: $data.substring(0, 8), click: $parent.gotoCommit.bind($parent, $data)"></a>
             <!-- /ko -->
           </div>
         </div>
