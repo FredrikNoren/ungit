@@ -8,6 +8,7 @@ components.register('commit', (args) => new CommitViewModel(args));
 
 class CommitViewModel {
   constructor(gitNode) {
+    this.graph = gitNode.graph;
     this.repoPath = gitNode.graph.repoPath;
     this.sha1 = gitNode.sha1;
     this.server = gitNode.graph.server;
@@ -27,6 +28,7 @@ class CommitViewModel {
     this.fileLineDiffs = ko.observable();
     this.numberOfAddedLines = ko.observable();
     this.numberOfRemovedLines = ko.observable();
+    this.parents = ko.observable();
     this.authorGravatar = ko.computed(() => md5((this.authorEmail() || '').trim().toLowerCase()));
 
     this.showCommitDiff = ko.computed(
@@ -56,6 +58,7 @@ class CommitViewModel {
     this.authorEmail(args.authorEmail);
     this.numberOfAddedLines(args.additions);
     this.numberOfRemovedLines(args.deletions);
+    this.parents(args.parents || []);
     this.fileLineDiffs(args.fileLineDiffs);
     this.commitDiff = ko.observable(
       components.create('commitDiff', {
@@ -87,5 +90,12 @@ class CommitViewModel {
 
   copyHash() {
     navigator.clipboard.writeText(this.sha1);
+  }
+
+  gotoCommit(sha1) {
+    const node = this.graph.nodesById[sha1];
+    if (node) {
+      node.toggleSelected();
+    }
   }
 }

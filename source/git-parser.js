@@ -301,10 +301,10 @@ exports.parseGitSubmodule = (text) => {
           if (url.indexOf('http') != 0) {
             if (url.indexOf('git:') == 0) {
               // git
-              url = `http${url.substr(url.indexOf(':'))}`;
+              url = `http${url.substring(url.indexOf(':'))}`;
             } else {
               // ssh
-              url = `http://${url.substr(url.indexOf('@') + 1).replace(':', '/')}`;
+              url = `http://${url.substring(url.indexOf('@') + 1).replace(':', '/')}`;
             }
           }
 
