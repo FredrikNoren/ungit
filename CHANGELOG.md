@@ -3,7 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.26...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.27...master)
+
+## [1.5.27](https://github.com/FredrikNoren/ungit/compare/v1.5.26...v1.5.27)
+
+### Added
+- Show parent commit ids and try to select them on click [#1581](https://github.com/FredrikNoren/ungit/issues/1581)
+
+### Changed
+- Use monospace font-family in commit body [#1598](https://github.com/FredrikNoren/ungit/pull/1598)
+- Change watcher to properly filter ignored directories [#1597](https://github.com/FredrikNoren/ungit/pull/1597)
 
 ## [1.5.26](https://github.com/FredrikNoren/ungit/compare/v1.5.25...v1.5.26)
 
