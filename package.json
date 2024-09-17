@@ -61,7 +61,7 @@
     "rc": "~1.2.8",
     "rimraf": "~5.0.5",
     "semver": "~7.6.0",
-    "serve-static": "~1.15.0",
+    "serve-static": "~1.16.0",
     "signals": "~1.0.0",
     "snapsvg": "~0.5.1",
     "socket.io": "~4.7.5",
