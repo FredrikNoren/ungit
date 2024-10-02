@@ -131,7 +131,7 @@ describe('git-api remote', function () {
   });
 
   it('fetching in "local2" should work', () => {
-    return common.post(req, '/fetch', { path: testDirLocal2, remote: 'origin' });
+    return common.get(req, '/fetch', { path: testDirLocal2, remote: 'origin' });
   });
 
   it('log in "local2" should show the branch as one behind', () => {
