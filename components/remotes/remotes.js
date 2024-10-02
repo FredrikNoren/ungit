@@ -47,15 +47,26 @@ class RemotesViewModel {
   }
 
   async fetch(options) {
-    if (!this.currentRemote() || !options.tags) return;
+    if (!this.currentRemote()) return;
     ungit.logger.debug('remotes.fetch() triggered');
 
     try {
-      const tagPromise = this.server.getPromise('/remote/tags', {
-        path: this.repoPath(),
-        remote: this.currentRemote(),
-      });
-      programEvents.dispatch({ event: 'remote-tags-update', tags: await tagPromise });
+      const tagPromise = options.tags
+        ? this.server.getPromise('/remote/tags', {
+            path: this.repoPath(),
+            remote: this.currentRemote(),
+          })
+        : null;
+      const fetchPromise = options.nodes
+        ? this.server.getPromise('/fetch', { path: this.repoPath(), remote: this.currentRemote() })
+        : null;
+
+      if (tagPromise) {
+        programEvents.dispatch({ event: 'remote-tags-update', tags: await tagPromise });
+      }
+      if (fetchPromise) {
+        await fetchPromise;
+      }
       if (!this.server.isInternetConnected) {
         this.server.isInternetConnected = true;
       }

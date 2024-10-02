@@ -293,7 +293,7 @@ exports.registerApi = (env) => {
     }
   );
 
-  app.post(
+  app.get(
     `${exports.pathPrefix}/fetch`,
     ensureAuthenticated,
     ensurePathExists,
@@ -303,18 +303,18 @@ exports.registerApi = (env) => {
       if (res.setTimeout) res.setTimeout(tenMinTimeoutMs);
 
       const task = gitPromise({
-        commands: credentialsOption(req.body.socketId, req.body.remote).concat([
+        commands: credentialsOption(req.query.socketId, req.query.remote).concat([
           'fetch',
           config.autoPruneOnFetch ? '--prune' : '',
           '--',
-          req.body.remote,
-          req.body.ref ? req.body.ref : '',
+          req.query.remote,
+          req.query.ref ? req.query.ref : '',
         ]),
-        repoPath: req.body.path,
+        repoPath: req.query.path,
         timeout: tenMinTimeoutMs,
       });
 
-      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.body.path));
+      jsonResultOrFailProm(res, task).finally(emitGitDirectoryChanged.bind(null, req.query.path));
     }
   );
 
