@@ -24,6 +24,9 @@ jobs:
           cache: 'npm'
 
       # linux dependencies
+      # https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+        if: matrix.os == 'ubuntu-latest'
       - run: sudo apt update && sudo apt install -y wine64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
       - run: wine --version
