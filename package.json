@@ -43,7 +43,7 @@
     "hasher": "~1.2.0",
     "ignore": "~6.0.2",
     "jquery": "~3.7.1",
-    "jquery-ui": "~1.13.2",
+    "jquery-ui": "~1.14.0",
     "just-detect-adblock": "~1.1.0",
     "knockout": "~3.5.1",
     "latest-version": "~9.0.0",

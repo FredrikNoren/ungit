@@ -9,7 +9,6 @@ require('jquery-ui/ui/version');
 // Shared files, used by menu and autocomplete, in alphabetical order
 require('jquery-ui/ui/keycode');
 require('jquery-ui/ui/position');
-require('jquery-ui/ui/safe-active-element');
 require('jquery-ui/ui/unique-id');
 require('jquery-ui/ui/widget');
 
