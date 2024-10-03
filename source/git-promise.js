@@ -6,7 +6,6 @@ const logger = require('./utils/logger');
 const addressParser = require('./address-parser');
 const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
-// eslint-disable-next-line node/no-unsupported-features/es-syntax
 const pLimitPromise = import('p-limit');
 const fs = require('fs').promises;
 const gitEmptyReproSha1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'; // https://stackoverflow.com/q/9765453
@@ -290,7 +289,7 @@ git.status = (repoPath, file) => {
                   status.commitMessage = commitMessage;
                   return status;
                 })
-                .catch((err) => {
+                .catch(() => {
                   // 'MERGE_MSG' file is gone away, which means we are no longer in merge state
                   // and state changed while this call is being made.
                   status.inMerge = status.inCherry = false;
@@ -601,7 +600,7 @@ git.revParse = (repoPath) => {
         return { type: 'uninited', gitRootPath: rootPath };
       });
     })
-    .catch((err) => {
+    .catch(() => {
       return { type: 'uninited', gitRootPath: path.normalize(repoPath) };
     });
 };

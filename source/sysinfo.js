@@ -5,7 +5,6 @@ const logger = require('./utils/logger');
 const config = require('./config');
 
 exports.getUngitLatestVersion = () => {
-  // eslint-disable-next-line node/no-unsupported-features/es-syntax
   return import('latest-version').then((latestVersion) => {
     return latestVersion.default('ungit');
   });

@@ -32,7 +32,7 @@ class HomeRepositoryViewModel {
       .then((remote) => {
         this.remote(remote.address.replace(/\/\/.*?@/, '//***@'));
       })
-      .catch((err) => {
+      .catch(() => {
         this.remote('');
       });
   }

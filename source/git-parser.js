@@ -2,7 +2,7 @@ const path = require('path');
 const fileType = require('./utils/file-type.js');
 const _ = require('lodash');
 
-exports.parseGitStatus = (text, args) => {
+exports.parseGitStatus = (text) => {
   let lines = text.split('\x00');
   const branch = lines[0].split(' ').pop();
   // skipping first line...

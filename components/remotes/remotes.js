@@ -78,7 +78,7 @@ class RemotesViewModel {
         errorMessage = `Ungit has failed to fetch a remote.  ${err.res.body.error}`;
         stdout = err.res.body.stdout;
         stderr = err.res.body.stderr;
-      } catch (e) {
+      } catch {
         errorMessage = '';
       }
 

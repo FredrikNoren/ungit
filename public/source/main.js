@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var $ = require('jquery');
 jQuery = $; // this is for old backward compatability of bootrap modules
 var ko = require('knockout');
@@ -27,9 +26,7 @@ var components = require('ungit-components');
 var Server = require('./server');
 var programEvents = require('ungit-program-events');
 var navigation = require('ungit-navigation');
-var storage = require('ungit-storage');
 var adBlocker = require('just-detect-adblock');
-var { encodePath } = require('ungit-address-parser');
 
 // Request animation frame polyfill and init tooltips
 (function () {
@@ -43,7 +40,7 @@ var { encodePath } = require('ungit-address-parser');
   }
 
   if (!window.requestAnimationFrame)
-    window.requestAnimationFrame = function (callback, element) {
+    window.requestAnimationFrame = function (callback) {
       var currTime = new Date().getTime();
       var timeToCall = Math.max(0, 16 - (currTime - lastTime));
       var id = window.setTimeout(function () {
@@ -62,73 +59,6 @@ var { encodePath } = require('ungit-address-parser');
     selector: '[data-toggle="tooltip"]',
   });
 })();
-
-ko.bindingHandlers.autocomplete = {
-  init: (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) => {
-    const setAutoCompleteOptions = (sources) => {
-      $(element)
-        .autocomplete({
-          classes: {
-            'ui-autocomplete': 'dropdown-menu',
-          },
-          source: sources,
-          minLength: 0,
-          messages: {
-            noResults: '',
-            results: () => {},
-          },
-        })
-        .data('ui-autocomplete')._renderItem = (ul, item) => {
-        return $('<li></li>').append($('<a>').text(item.label)).appendTo(ul);
-      };
-    };
-
-    const handleKeyEvent = (event) => {
-      const value = $(element).val();
-      const lastChar = value.slice(-1);
-      if (lastChar == ungit.config.fileSeparator) {
-        // When file separator is entered, list what is in given path, and rest auto complete options
-        server
-          .getPromise('/fs/listDirectories', { term: value })
-          .then((directoryList) => {
-            const currentDir = directoryList.shift();
-            $(element).val(
-              currentDir.endsWith(ungit.config.fileSeparator)
-                ? currentDir
-                : currentDir + ungit.config.fileSeparator
-            );
-            setAutoCompleteOptions(directoryList);
-            $(element).autocomplete('search', value);
-          })
-          .catch((err) => {
-            if (
-              !err.errorSummary.startsWith('ENOENT: no such file or directory') &&
-              err.errorCode !== 'read-dir-failed'
-            ) {
-              throw err;
-            }
-          });
-      } else if (event.keyCode === 13) {
-        // enter key is struck, navigate to the path
-        event.preventDefault();
-        navigation.browseTo(`repository?path=${encodePath(value)}`);
-      } else if (value === '' && storage.getItem('repositories')) {
-        // if path is emptied out, show save path options
-        const folderNames = JSON.parse(storage.getItem('repositories')).map((value) => {
-          return {
-            value: value,
-            label: value.substring(value.lastIndexOf(ungit.config.fileSeparator) + 1),
-          };
-        });
-        setAutoCompleteOptions(folderNames);
-        $(element).autocomplete('search', '');
-      }
-
-      return true;
-    };
-    ko.utils.registerEventHandler(element, 'keyup', _.debounce(handleKeyEvent, 100));
-  },
-};
 
 function WindowTitle() {
   this.path = 'ungit';

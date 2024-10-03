@@ -11,7 +11,7 @@ const distDir = path.join(baseDir, 'dist');
   let distFiles = [];
   try {
     distFiles = await fs.readdir(distDir);
-  } catch (e) {
+  } catch {
     await fs.mkdir(distDir);
   }
   for (const distFile of distFiles) {

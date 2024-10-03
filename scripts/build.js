@@ -32,7 +32,7 @@ const baseDir = path.join(__dirname, '..');
       const componentPath = path.join(baseDir, `components/${component}/${component}`);
       try {
         await fs.access(`${componentPath}.less`);
-      } catch (e) {
+      } catch {
         /* ignore */
         return;
       }
@@ -83,12 +83,12 @@ const baseDir = path.join(__dirname, '..');
     try {
       await fs.access(jsSource);
       await browserifyFile(jsSource, destination);
-    } catch (_) {
+    } catch {
       const tsSource = `${sourcePrefix}.ts`;
       try {
         await fs.access(tsSource);
         await browserifyFile(tsSource, destination);
-      } catch (e) {
+      } catch {
         console.warn(
           `${sourcePrefix} does not exist. If this component is obsolete, please remove that directory or perform a clean build.`
         );

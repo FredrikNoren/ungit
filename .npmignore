@@ -21,14 +21,13 @@ public/source/
 public/vendor/
 
 # Ignore dot-files
-.eslintignore
-.eslintrc.json
 .gitattributes
 .mochaclicktest.json
 .mochatest.json
 .prettierignore
 .prettierrc
 appveyor.yml
+eslint.config.mjs
 tsconfig.json
 
 # Ignore docs

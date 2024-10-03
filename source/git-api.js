@@ -394,7 +394,7 @@ exports.registerApi = (env) => {
       const currentPath = req.body.path.trim();
       const gitIgnoreFile = `${currentPath}/.gitignore`;
       const ignoreFile = req.body.file.trim();
-      const task = fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile).catch((err) => {
+      const task = fs.appendFile(gitIgnoreFile, os.EOL + ignoreFile).catch(() => {
         throw {
           errorCode: 'error-appending-ignore',
           error: 'Error while appending to .gitignore file.',

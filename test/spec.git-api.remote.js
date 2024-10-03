@@ -103,7 +103,7 @@ describe('git-api remote', function () {
   });
 
   it('log in "local2" should show the init commit', () => {
-    common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(1);
       const init = res.nodes[0];
@@ -135,7 +135,7 @@ describe('git-api remote', function () {
   });
 
   it('log in "local2" should show the branch as one behind', () => {
-    common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
+    return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
       const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
@@ -153,8 +153,8 @@ describe('git-api remote', function () {
     return common.post(req, '/rebase', { path: testDirLocal2, onto: 'origin/master' });
   });
 
-  it('log in "local2" should show the branch as in sync', () => {
-    common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
+  it('log in "local2" should show the branch as in sync after rebase', () => {
+    return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
       const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
@@ -187,7 +187,7 @@ describe('git-api remote', function () {
     return common.post(req, '/reset', { path: testDirLocal2, to: 'origin/master', mode: 'hard' });
   });
 
-  it('log in "local2" should show the branch as in sync', () => {
+  it('log in "local2" should show the branch as in sync after reset', () => {
     return common.get(req, '/gitlog', { path: testDirLocal2 }, (res) => {
       expect(res.nodes.length).to.be(2);
       const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);

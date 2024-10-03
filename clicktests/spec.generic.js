@@ -18,7 +18,7 @@ const amendCommit = async () => {
   try {
     await environment.page.waitForSelector('.amend-button', { visible: true, timeout: 2000 });
     await environment.click('.amend-button');
-  } catch (err) {
+  } catch {
     await environment.click('.amend-link');
   }
   await environment.ensureRedraw();
@@ -156,7 +156,6 @@ describe('[GENERIC]', () => {
     await environment.waitForElementHidden('.files .file .btn-default');
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('Should be possible to patch a file', async () => {
     await changeTestFile(`${testRepoPaths[0]}/testfile.txt`, testRepoPaths[0]);
     //   .patch('patch')

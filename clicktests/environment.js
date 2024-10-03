@@ -311,7 +311,7 @@ class Environment {
         timeout: 2000,
       }); // not all ref actions opens dialog, this line may throw exception.
       await this.awaitAndClick('.modal-dialog .btn-primary');
-    } catch (err) {
+    } catch {
       /* ignore */
     }
     await this.waitForElementHidden(`[data-ta-action="${action}"]:not([style*="display: none"])`);
@@ -396,7 +396,7 @@ class Environment {
   // Usually these events are triggered by mouse movements, or api calls
   // and etc.  This function is to help mimic those movements.
   triggerProgramEvents() {
-    return this.page.evaluate((_) => {
+    return this.page.evaluate(() => {
       const isActive = ungit.programEvents.active;
       if (!isActive) {
         ungit.programEvents.active = true;
