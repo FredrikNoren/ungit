@@ -196,7 +196,7 @@ describe('git-api diff', () => {
     return common.post(req, '/testing/removefile', { file: path.join(testDir, testFile2) });
   });
 
-  it('should be possible to commit an image file', () => {
+  it('should be possible to commit an image file for removal', () => {
     return common.post(req, '/commit', {
       path: testDir,
       message: 'Init',
@@ -215,7 +215,7 @@ describe('git-api diff', () => {
     });
   });
 
-  it('getting previous image file should work', () => {
+  it('getting previous image file should work after removal', () => {
     return common
       .getPng(req, '/diff/image', { path: testDir, filename: testImage, version: 'HEAD' })
       .then((res) => expect(res.toString()).to.be('png ~~'));

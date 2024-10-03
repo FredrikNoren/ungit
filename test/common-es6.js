@@ -36,7 +36,7 @@ exports.makeRequest = (method, req, path, payload) => {
         let data = (res || {}).body;
         try {
           data = JSON.parse(data);
-        } catch (ex) {
+        } catch {
           /* Ignore error */
         }
         resolve(data);

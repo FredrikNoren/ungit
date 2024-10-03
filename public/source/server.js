@@ -56,7 +56,7 @@ Server.prototype.initSocket = function () {
 Server.prototype._queryToString = function (query) {
   var str = [];
   for (var p in query)
-    if (query.hasOwnProperty(p)) {
+    if (Object.prototype.hasOwnProperty.call(query, p)) {
       str.push(encodeURIComponent(p) + '=' + encodeURIComponent(query[p]));
     }
   return str.join('&');
@@ -71,7 +71,7 @@ Server.prototype._httpJsonRequest = function (request, callback) {
       var body;
       try {
         body = JSON.parse(httpRequest.responseText);
-      } catch (ex) {
+      } catch {
         body = null;
       }
       if (httpRequest.status == 0) callback({ error: 'connection-lost' });

@@ -18,7 +18,7 @@ class BugTracker {
     this.appVersion = config.ungitDevVersion;
     logger.info(`BugTracker set version: ${this.appVersion}`);
   }
-  notify(exception, clientName) {
+  notify(exception) {
     if (!config.bugtracking) return;
 
     const options = {

@@ -8,7 +8,7 @@ try {
     getItem: localStorage.getItem.bind(localStorage),
     setItem: localStorage.setItem.bind(localStorage),
   };
-} catch (e) {
+} catch {
   /* Ignore Exception, use fallback implementation. */
 }
 

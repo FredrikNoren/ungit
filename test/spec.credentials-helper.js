@@ -27,7 +27,7 @@ describe('credentials-helper', () => {
 
     server.listen({ port: config.port }, () => {
       const command = `node bin/credentials-helper ${socketId} ${config.port} ${remote} get`;
-      child_process.exec(command, (err, stdout, stderr) => {
+      child_process.exec(command, (err, stdout) => {
         server.close();
         expect(err).to.not.be.ok();
         const ss = stdout.split('\n');

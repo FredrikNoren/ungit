@@ -342,7 +342,7 @@ if (!argvConfig.cliconfigonly) {
     delete rcConfig['configs'];
   } catch (err) {
     console.error(`Stop at reading ~/.ungitrc because ${err}`);
-    process.exit(1);
+    throw err;
   }
 }
 

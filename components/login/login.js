@@ -22,7 +22,7 @@ class LoginViewModel {
           this.status('login');
         }
       })
-      .catch((err) => {});
+      .catch(() => {});
   }
 
   updateNode(parentElement) {
@@ -32,7 +32,7 @@ class LoginViewModel {
   login() {
     this.server
       .postPromise('/login', { username: this.username(), password: this.password() })
-      .then((res) => {
+      .then(() => {
         this.loggedIn.dispatch();
         this.status('loggedIn');
       })

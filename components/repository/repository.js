@@ -84,7 +84,7 @@ class RepositoryViewModel {
             });
         }
       })
-      .catch((err) => {
+      .catch(() => {
         this.parentModuleLink(undefined);
         this.parentModulePath(undefined);
       });
