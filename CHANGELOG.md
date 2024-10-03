@@ -3,7 +3,17 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.27...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.28...master)
+
+## [1.5.28](https://github.com/FredrikNoren/ungit/compare/v1.5.27...v1.5.28)
+
+### Fixes
+- Enable git fetch again [#1604](https://github.com/FredrikNoren/ungit/pull/1604)
+
+### Changed
+- Bump Dependencies https://github.com/FredrikNoren/ungit/commit/dd9b7a35c92fafc3883a2ad7d04814049e04406a, https://github.com/FredrikNoren/ungit/commit/7e4e830cb71bdcbdd92d903419e1ad5e23a5ddc2, https://github.com/FredrikNoren/ungit/commit/944835dc8627c767c7145dad94b9fb4a2028e685, https://github.com/FredrikNoren/ungit/commit/ea063f47acf1f733b2a0af80d9c94293c3d880b7
+- CI Fixes https://github.com/FredrikNoren/ungit/commit/c02db509c2c334e7541e8f3dea4f615c7a614ccb, https://github.com/FredrikNoren/ungit/commit/a32668649836d7fd382574615333807ef3eed370, https://github.com/FredrikNoren/ungit/commit/7349b941a58f95117801fa36029fd44769dee8f8, 
+- Replace node 21 with 22 https://github.com/FredrikNoren/ungit/commit/571d03f5fd9f4dca073152b123f117b5fb9bde8b
 
 ## [1.5.27](https://github.com/FredrikNoren/ungit/compare/v1.5.26...v1.5.27)
 
