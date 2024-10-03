@@ -1,8 +1,10 @@
 const process = require('process');
 const path = require('path');
+const fs = require('fs').promises;
 const electronPackager = require('electron-packager');
 
 const baseDir = path.join(__dirname, '..');
+const outDir = path.join(baseDir, 'build');
 
 const builds = process.argv.includes('--all') // keep in sync with ci.yml (https://github.com/electron/electron-packager/blob/af334e33c9228493597afcc3931336124d6180c6/src/targets.js#L9-L14)
   ? {
@@ -13,10 +15,18 @@ const builds = process.argv.includes('--all') // keep in sync with ci.yml (https
   : { current: undefined };
 
 (async () => {
+  try {
+    await fs.mkdir(outDir);
+  } catch (e) {
+    if (e.code != 'EEXIST') {
+      throw e;
+    }
+  }
+
   for (const platform of Object.keys(builds)) {
     await electronPackager({
       dir: baseDir,
-      out: path.join(baseDir, 'build'),
+      out: outDir,
       icon: path.join(baseDir, 'public/images/icon'),
       platform: platform == 'current' ? undefined : platform,
       arch: builds[platform],
