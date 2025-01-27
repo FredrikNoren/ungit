@@ -3,13 +3,11 @@
 const rc = require('rc');
 const path = require('path');
 const fs = require('fs');
-const yargs = require('yargs');
+const process = require('process');
+const yargs = require('yargs/yargs')(process.argv.slice(2));
 const homedir = require('os').homedir();
 const child_process = require('child_process');
-const process = require('process');
 const semver = require('semver');
-
-const isTestRun = process.argv.filter((arg) => arg.indexOf('mocha') >= 0).length > 0;
 
 const defaultConfig = {
   // The port ungit is exposed on.
@@ -409,7 +407,7 @@ if (module.exports.alwaysLoadActiveBranch) {
 
 module.exports.isGitOptionalLocks = semver.satisfies(module.exports.gitVersion, '2.15.0');
 
-if (isTestRun) {
+if (argvConfig.$0.endsWith('mocha')) {
   console.warn('Running mocha test run, overriding few test variables...');
   module.exports.logLevel = 'debug';
   module.exports.dev = true;
