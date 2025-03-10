@@ -99,10 +99,6 @@ Text Editor Integrations
 
 ![brackets-ungit Screenshot](https://raw.githubusercontent.com/Hirse/brackets-ungit/master/images/viewer.png)
 
-* [Codiad-OpenUngit](https://github.com/viharm/Codiad-OpenUngit) for [Codiad](http://codiad.com/) by [@viharm](https://github.com/viharm)
-
-![Codiad-OpenUngit screenshot](https://cloud.githubusercontent.com/assets/2663937/21566609/6d107410-ce9c-11e6-91e1-2d8a1607b718.png)
-
 * [vscode-ungit](https://marketplace.visualstudio.com/items?itemName=Hirse.vscode-ungit) for [Visual Studio Code](https://code.visualstudio.com/) by [@Hirse](https://github.com/Hirse)
 
 ![VSCode-Ungit screenshot](https://raw.githubusercontent.com/hirse/vscode-ungit/master/screenshots/ungit.gif)
