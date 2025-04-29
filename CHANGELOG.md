@@ -6,7 +6,8 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.28...master)
 
 ### Changed
-- Update README.md #1615
+- Update README.md [#1615](https://github.com/FredrikNoren/ungit/pull/1615)
+- Bump Dependencies [#1614](https://github.com/FredrikNoren/ungit/pull/1614)
 
 ## [1.5.28](https://github.com/FredrikNoren/ungit/compare/v1.5.27...v1.5.28)
 

@@ -10,7 +10,7 @@ export default [
   },
 
   js.configs.recommended,
-  mochaPlugin.configs.flat.recommended,
+  mochaPlugin.configs.recommended,
   nodePlugin.configs['flat/recommended'],
   prettierPlugin,
 
