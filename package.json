@@ -32,7 +32,7 @@
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.0",
     "bootstrap": "~3.4.1",
-    "chokidar": "~4.0.3",
+    "chokidar": "~3.6.0",
     "cookie-parser": "~1.4.7",
     "crossroads": "~0.12.2",
     "diff2html": "~3.4.51",
@@ -98,7 +98,7 @@
     "supertest": "~7.1.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "license": "MIT",
   "main": "public/main.js"

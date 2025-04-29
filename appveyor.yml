@@ -4,8 +4,8 @@ image: Visual Studio 2022
 environment:
   matrix:
     - nodejs_version: '' # latest
+    - nodejs_version: '22'
     - nodejs_version: '20'
-    - nodejs_version: '18'
 
 branches:
   only:

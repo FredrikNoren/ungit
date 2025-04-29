@@ -4,7 +4,6 @@ const path = require('path');
 const config = require('./config');
 const logger = require('./utils/logger');
 const addressParser = require('./address-parser');
-const _ = require('lodash');
 const isWindows = /^win/.test(process.platform);
 const pLimitPromise = import('p-limit');
 const fs = require('fs').promises;
@@ -300,7 +299,7 @@ git.status = (repoPath, file) => {
           });
       }),
   ]).then((result) => {
-    const numstats = [result[0], result[1]].reduce(_.extend, {});
+    const numstats = [result[0], result[1]].reduce(Object.assign, {});
     const status = result[2];
     status.inConflict = false;
 

@@ -4,10 +4,11 @@ on: [push, pull_request]
 
 jobs:
   test:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['18', '20', '22']
+        node-version: ['20', '22', '*']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 #    env:
@@ -28,17 +29,17 @@ jobs:
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
         if: matrix.os == 'ubuntu-latest'
       - run: sudo apt update && sudo apt install -y wine64 && sudo ln -sf /usr/bin/wine /usr/bin/wine64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: wine64 --version
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
       # macos dependencies
 # required for electron-packager
 #      - run: brew update && brew cask install xquartz wine-stable
-#        if: matrix.os == 'macos-latest' && matrix.node-version == '18'
+#        if: matrix.os == 'macos-latest' && matrix.node-version == '20'
 #      - run: wine64 --version
-#        if: matrix.os == 'macos-latest' && matrix.node-version == '18'
+#        if: matrix.os == 'macos-latest' && matrix.node-version == '20'
       - run: brew reinstall git
         if: matrix.os == 'macos-latest' && matrix.node-version == '*'
       # windows dependencies
@@ -55,20 +56,20 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: npm run build
       - run: npm test
 
       # publish artifacts
       - run: npm pack
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: npm run electronpackage -- --all
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: npm run electronzip
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
 
       - name: Upload npm pack
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit
@@ -76,7 +77,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-darwin-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-darwin-arm64
@@ -84,7 +85,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-darwin-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-darwin-x64
@@ -92,7 +93,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-linux-arm64
@@ -100,7 +101,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-armv7l
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-linux-armv7l
@@ -108,7 +109,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-linux-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-linux-x64
@@ -116,7 +117,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-arm64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-win32-arm64
@@ -124,7 +125,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-ia32
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-win32-ia32
@@ -132,7 +133,7 @@ jobs:
           retention-days: 7
 
       - name: Upload ungit-win32-x64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
         uses: actions/upload-artifact@v4
         with:
           name: ungit-win32-x64
@@ -140,7 +141,7 @@ jobs:
           retention-days: 7
 
       - name: npm publish
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
         uses: actions/github-script@v7
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,6 +1,5 @@
 const path = require('path');
 const fileType = require('./utils/file-type.js');
-const _ = require('lodash');
 
 exports.parseGitStatus = (text) => {
   let lines = text.split('\x00');
@@ -133,7 +132,7 @@ exports.parseGitLog = (data) => {
       const refs = row.substring(refStartIndex + 1, row.length - 1);
       currentCommmit.refs = refs.split(/ -> |, /g);
     }
-    currentCommmit.isHead = !!_.find(currentCommmit.refs, (item) => {
+    currentCommmit.isHead = currentCommmit.refs.some((item) => {
       return item.trim() === 'HEAD';
     });
     commits.isHeadExist = commits.isHeadExist || currentCommmit.isHead;

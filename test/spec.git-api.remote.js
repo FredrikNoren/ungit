@@ -1,6 +1,5 @@
 const expect = require('expect.js');
 const request = require('supertest');
-const _ = require('lodash');
 const express = require('express');
 const path = require('path');
 const restGit = require('../source/git-api');
@@ -138,8 +137,8 @@ describe('git-api remote', function () {
     return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
-      const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
-      const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
+      const init = res.nodes.find((node) => node.message.indexOf('Init') == 0);
+      const commit2 = res.nodes.find((node) => node.message.indexOf('Commit2') == 0);
       expect(init).to.be.ok();
       expect(commit2).to.be.ok();
       expect(init.refs).to.contain('HEAD');
@@ -157,8 +156,8 @@ describe('git-api remote', function () {
     return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
       expect(res.nodes).to.be.a('array');
       expect(res.nodes.length).to.be(2);
-      const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
-      const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
+      const init = res.nodes.find((node) => node.message.indexOf('Init') == 0);
+      const commit2 = res.nodes.find((node) => node.message.indexOf('Commit2') == 0);
       expect(init).to.be.ok();
       expect(commit2).to.be.ok();
       expect(init.refs).to.eql([]);
@@ -190,8 +189,8 @@ describe('git-api remote', function () {
   it('log in "local2" should show the branch as in sync after reset', () => {
     return common.get(req, '/gitlog', { path: testDirLocal2 }, (res) => {
       expect(res.nodes.length).to.be(2);
-      const init = _.find(res.nodes, (node) => node.message.indexOf('Init') == 0);
-      const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
+      const init = res.nodes.find((node) => node.message.indexOf('Init') == 0);
+      const commit2 = res.nodes.find((node) => node.message.indexOf('Commit2') == 0);
       expect(init.refs).to.eql([]);
       expect(commit2.refs).to.contain('HEAD');
       expect(commit2.refs).to.contain('refs/heads/master');
@@ -221,7 +220,7 @@ describe('git-api remote', function () {
 
   it('log in "local2" should show the local tag', () => {
     return common.get(req, '/gitlog', { path: testDirLocal2 }).then((res) => {
-      const commit2 = _.find(res.nodes, (node) => node.message.indexOf('Commit2') == 0);
+      const commit2 = res.nodes.find((node) => node.message.indexOf('Commit2') == 0);
       expect(commit2.refs).to.contain('tag: refs/tags/v1.0');
     });
   });
