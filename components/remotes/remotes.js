@@ -116,9 +116,13 @@ class RemotesViewModel {
       .getPromise('/remotes', { path: this.repoPath() })
       .then((remotes) => {
         remotes = remotes.map((remote) => ({
-          name: remote,
+          name: remote.name,
+          title:
+            remote.fetchUrl == remote.pushUrl
+              ? `Fetch/Push ${remote.fetchUrl || remote.pushUrl || remote.url}`
+              : `Fetch ${remote.fetchUrl || remote.url}\nPush ${remote.pushUrl || remote.url}`,
           changeRemote: () => {
-            this.currentRemote(remote);
+            this.currentRemote(remote.name);
           },
         }));
         this.remotes(remotes);

@@ -56,7 +56,10 @@ describe('git-api remote', function () {
   it('remotes in cloned-repo should be one', () => {
     return common.get(req, '/remotes', { path: testDirLocal1 }).then((res) => {
       expect(res.length).to.be(1);
-      expect(res[0]).to.be('origin');
+      const remote = res[0];
+      expect(remote.name).to.be('origin');
+      expect(remote.pushUrl).to.be(testDirRemote);
+      expect(remote.fetchUrl).to.be(testDirRemote);
     });
   });
 

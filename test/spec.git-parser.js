@@ -759,7 +759,23 @@ describe('parseGitRemotes', () => {
       upstream
     `;
 
-    expect(gitParser.parseGitRemotes(gitRemotes)).to.eql(['origin', 'upstream']);
+    expect(gitParser.parseGitRemotes(gitRemotes)).to.eql([
+      { name: 'origin' },
+      { name: 'upstream' },
+    ]);
+  });
+
+  it('parses the remotes with fetch and push url', () => {
+    const gitRemotes = dedent`
+      origin	http://example1.com
+      upstream	http://example2.com (fetch)
+      upstream	http://example3.com (push)
+    `;
+
+    expect(gitParser.parseGitRemotes(gitRemotes)).to.eql([
+      { name: 'origin', url: 'http://example1.com' },
+      { name: 'upstream', fetchUrl: 'http://example2.com', pushUrl: 'http://example3.com' },
+    ]);
   });
 });
 
