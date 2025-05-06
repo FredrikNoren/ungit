@@ -692,7 +692,7 @@ exports.registerApi = (env) => {
   app.get(`${exports.pathPrefix}/remotes`, ensureAuthenticated, ensurePathExists, (req, res) => {
     jsonResultOrFailProm(
       res,
-      gitPromise(['remote'], req.query.path).then(gitParser.parseGitRemotes)
+      gitPromise(['remote', '-v'], req.query.path).then(gitParser.parseGitRemotes)
     );
   });
 
