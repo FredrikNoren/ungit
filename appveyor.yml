@@ -4,8 +4,8 @@ image: Visual Studio 2022
 environment:
   matrix:
     - nodejs_version: '' # latest
-    - nodejs_version: '22'
-    - nodejs_version: '20'
+    - nodejs_version: '22.12'
+    - nodejs_version: '20.19'
 
 branches:
   only:
@@ -14,9 +14,9 @@ branches:
 install:
   - ps: |
       try {
-        Install-Product node $env:nodejs_version
+        Install-Product node $env:nodejs_version x64
       } catch {
-        Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version)
+        Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) x64
       }
   - node --version
   - npm --version
