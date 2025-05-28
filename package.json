@@ -32,7 +32,7 @@
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.0",
     "bootstrap": "~3.4.1",
-    "chokidar": "~3.6.0",
+    "chokidar": "~4.0.3",
     "cookie-parser": "~1.4.7",
     "crossroads": "~0.12.2",
     "diff2html": "~3.4.51",
@@ -69,7 +69,7 @@
     "tsify": "~5.0.4",
     "typescript": "~5.8.3",
     "winston": "~3.17.0",
-    "yargs": "~17.7.2"
+    "yargs": "~18.0.0"
   },
   "devDependencies": {
     "@eslint/js": "~9.27.0",
