@@ -13,7 +13,7 @@
     "coverage": "nyc npm run unittest",
     "lint": "eslint .",
     "format": "npm run lint -- --fix",
-    "build": "node ./scripts/build.js",
+    "build": "node --trace-deprecation ./scripts/build.js",
     "watch": "nodemon -C --exec \"npm run build\" -e js,less -w public/source -w public/less -w components/ -i \"*.bundle.js\"",
     "bumpdependencies": "ncu --upgrade --reject bootstrap",
     "electronpackage": "node ./scripts/electronpackage.js",
@@ -32,7 +32,7 @@
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.0",
     "bootstrap": "~3.4.1",
-    "chokidar": "~4.0.3",
+    "chokidar": "~3.6.0",
     "cookie-parser": "~1.4.7",
     "crossroads": "~0.12.2",
     "diff2html": "~3.4.51",
@@ -98,7 +98,7 @@
     "supertest": "~7.1.1"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^20.19.0 || ^22.12.0 || >=23"
   },
   "license": "MIT",
   "main": "public/main.js"
