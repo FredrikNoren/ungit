@@ -76,9 +76,9 @@ describe('[GENERIC]', () => {
     );
     await environment.click('.files button.ignore');
     await environment.page.waitForFunction(
-      'document.querySelector(".name.btn.btn-default").innerText.trim() === ".gitignore"'
-    ),
-      { polling: 250 };
+      'document.querySelector(".name.btn.btn-default").innerText.trim() === ".gitignore"',
+      { polling: 250 }
+    );
     await environment.click('.files button.ignore');
     await environment.waitForElementHidden('.files .file .btn-default');
   });
