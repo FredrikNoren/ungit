@@ -28,7 +28,7 @@
     "0ungit-credentials-helper": "./bin/credentials-helper"
   },
   "dependencies": {
-    "@primer/octicons": "~19.15.5",
+    "@primer/octicons": "~19.16.0",
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.0",
     "bootstrap": "~3.4.1",
