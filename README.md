@@ -59,8 +59,17 @@ Example of `~/.ungitrc` configuration file to change default port and enable bug
 }
 ```
 
+
+SSH Authentication
+-----------------
+Ungit does run git commands in background and authentication will be asked continously when working with private repos.  Easiest way to prevent this is to set up ssh authorization and cache it.
+
+1. Follow github's [instruction](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+2. Ensure `ssh-add -K ~/.ssh/id_rsa` or with whatever ssh key file name is executed.
+
+
 PGP
----
+----
 [Git](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work) and [github](https://help.github.com/articles/signing-commits-using-gpg/) both supports PGP signing.  Within Ungit these features can be enabled via doing either one of the below two actions.
 
 - `git config --global commit.gpgsign true` (or without `--global` at the repo)
@@ -124,6 +133,7 @@ Known issues
 * Debian Wheezy's supported git and nodejs packages are too old, therefore download newest [git](https://github.com/git/git/releases) and [nodejs](https://nodejs.org/download/) tarballs and [build from source](https://www.control-escape.com/linux/lx-swinstall-tar.html).
 * Adblocker may block Ungit! Some ad blockers, such as [Adblock plus](https://adblockplus.org) and [uBlock](https://www.ublock.org/), don't like localhost api calls and assume that it is a cross domain attack.  Please whitelist `{localhost|127.0.0.1|$UngitURL}:{ungit port number}`. [#887](https://github.com/FredrikNoren/ungit/issues/887) [#892](https://github.com/FredrikNoren/ungit/issues/892)
 * Running git in non English language will result in unexpected behavior!  Ungit parses git command results in English to detect repos' states and this causes confusion when git results are not in English. [#959](https://github.com/FredrikNoren/ungit/issues/959)
+* Ungit does make frequent git requests and may ask for credentials frequently.  To fix this, please follow the SSH instructions above.
 
 Changelog
 ---------
