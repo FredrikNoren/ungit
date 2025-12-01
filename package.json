@@ -37,7 +37,7 @@
     "crossroads": "~0.12.2",
     "diff2html": "~3.4.52",
     "dnd-page-scroll": "0.0.4",
-    "express": "~5.1.0",
+    "express": "~5.2.0",
     "express-session": "~1.18.2",
     "getmac": "~6.6.0",
     "hasher": "~1.2.0",
