@@ -28,7 +28,7 @@
     "0ungit-credentials-helper": "./bin/credentials-helper"
   },
   "dependencies": {
-    "@primer/octicons": "~19.21.0",
+    "@primer/octicons": "~19.21.1",
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.1",
     "bootstrap": "~3.4.1",
@@ -37,7 +37,7 @@
     "crossroads": "~0.12.2",
     "diff2html": "~3.4.52",
     "dnd-page-scroll": "0.0.4",
-    "express": "~5.1.0",
+    "express": "~5.2.1",
     "express-session": "~1.18.2",
     "getmac": "~6.6.0",
     "hasher": "~1.2.0",
@@ -73,11 +73,11 @@
   },
   "devDependencies": {
     "@eslint/js": "~9.39.1",
-    "@homer0/prettier-plugin-jsdoc": "~10.0.0",
+    "@homer0/prettier-plugin-jsdoc": "~10.0.1",
     "archiver": "~7.0.1",
     "browserify": "~17.0.1",
     "dedent": "~1.7.0",
-    "electron": "~39.2.3",
+    "electron": "~39.2.5",
     "electron-packager": "~17.1.2",
     "eslint": "~9.39.1",
     "eslint-config-prettier": "~10.1.8",
@@ -93,8 +93,8 @@
     "npm-check-updates": "~19.1.2",
     "nyc": "~17.1.0",
     "portfinder": "~1.0.38",
-    "prettier": "~3.6.2",
-    "puppeteer": "~24.31.0",
+    "prettier": "~3.7.4",
+    "puppeteer": "~24.32.0",
     "superagent": "~10.2.3",
     "supertest": "~7.1.4"
   },
