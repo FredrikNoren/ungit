@@ -15,7 +15,7 @@
     "format": "npm run lint -- --fix",
     "build": "node --trace-deprecation ./scripts/build.js",
     "watch": "nodemon -C --exec \"npm run build\" -e js,less -w public/source -w public/less -w components/ -i \"*.bundle.js\"",
-    "bumpdependencies": "ncu --upgrade --reject bootstrap",
+    "bumpdependencies": "ncu --upgrade --reject jquery --reject bootstrap",
     "electronpackage": "node ./scripts/electronpackage.js",
     "electronzip": "node ./scripts/electronzip.js"
   },
@@ -42,7 +42,7 @@
     "getmac": "~6.6.0",
     "hasher": "~1.2.0",
     "ignore": "~7.0.5",
-    "jquery": "~4.0.0",
+    "jquery": "~3.7.1",
     "jquery-ui": "~1.14.1",
     "just-detect-adblock": "~1.1.0",
     "knockout": "~3.5.1",
