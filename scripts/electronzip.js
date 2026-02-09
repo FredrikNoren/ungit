@@ -18,7 +18,7 @@ const distDir = path.join(baseDir, 'dist');
     await fs.unlink(path.join(distDir, distFile));
   }
 
-  let buildFolders = [];
+  let buildFolders;
   try {
     buildFolders = await fs.readdir(buildDir);
   } catch (e) {

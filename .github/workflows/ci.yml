@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload npm pack
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit
           path: ungit-*.tgz
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload ungit-darwin-arm64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-darwin-arm64
           path: dist/ungit-darwin-arm64.zip
@@ -86,7 +86,7 @@ jobs:
 
       - name: Upload ungit-darwin-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-darwin-x64
           path: dist/ungit-darwin-x64.zip
@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload ungit-linux-arm64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-linux-arm64
           path: dist/ungit-linux-arm64.zip
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload ungit-linux-armv7l
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-linux-armv7l
           path: dist/ungit-linux-armv7l.zip
@@ -110,7 +110,7 @@ jobs:
 
       - name: Upload ungit-linux-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-linux-x64
           path: dist/ungit-linux-x64.zip
@@ -118,7 +118,7 @@ jobs:
 
       - name: Upload ungit-win32-arm64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-win32-arm64
           path: dist/ungit-win32-arm64.zip
@@ -126,7 +126,7 @@ jobs:
 
       - name: Upload ungit-win32-ia32
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-win32-ia32
           path: dist/ungit-win32-ia32.zip
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload ungit-win32-x64
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ungit-win32-x64
           path: dist/ungit-win32-x64.zip

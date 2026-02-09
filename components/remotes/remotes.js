@@ -85,8 +85,6 @@ class RemotesViewModel {
       if (errorMessage.includes('Could not resolve host')) {
         if (this.server.isInternetConnected) {
           this.server.isInternetConnected = false;
-          errorMessage =
-            'Could not resolve host. This usually means you are disconnected from internet and no longer push or fetch from remote. However, Ungit will be functional for local git operations.';
           stdout = '';
           stderr = '';
         } else {
