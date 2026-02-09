@@ -49,7 +49,7 @@ class Environment {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (err) {
       logger.error(err);
-      throw new Error('Cannot confirm ungit start!!\n' + err);
+      throw new Error('Cannot confirm ungit start!!', { cause: err });
     }
   }
 

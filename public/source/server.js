@@ -142,7 +142,7 @@ Server.prototype.queryPromise = function (method, path, body) {
             }
           });
         }
-        var errorSummary = 'unknown';
+        var errorSummary;
         if (error.body) {
           if (error.body.errorCode && error.body.errorCode != 'unknown')
             errorSummary = error.body.errorCode;
