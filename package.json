@@ -28,7 +28,7 @@
     "0ungit-credentials-helper": "./bin/credentials-helper"
   },
   "dependencies": {
-    "@primer/octicons": "~19.21.2",
+    "@primer/octicons": "~19.22.0",
     "blueimp-md5": "~2.19.0",
     "body-parser": "~2.2.2",
     "bootstrap": "~3.4.1",
@@ -77,12 +77,12 @@
     "archiver": "~7.0.1",
     "browserify": "~17.0.1",
     "dedent": "~1.7.1",
-    "electron": "~40.2.1",
+    "electron": "~40.4.1",
     "electron-packager": "~17.1.2",
     "eslint": "~10.0.0",
     "eslint-config-prettier": "~10.1.8",
     "eslint-plugin-mocha": "~11.2.0",
-    "eslint-plugin-n": "~17.23.2",
+    "eslint-plugin-n": "~17.24.0",
     "eslint-plugin-prettier": "~5.5.5",
     "exorcist": "~2.0.0",
     "expect.js": "~0.3.1",
@@ -94,7 +94,7 @@
     "nyc": "~17.1.0",
     "portfinder": "~1.0.38",
     "prettier": "~3.8.1",
-    "puppeteer": "~24.37.2",
+    "puppeteer": "~24.37.3",
     "superagent": "~10.3.0",
     "supertest": "~7.2.2"
   },
