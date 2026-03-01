@@ -3,11 +3,18 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.28...master)
+## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.29...master)
+
+## [1.5.29](https://github.com/FredrikNoren/ungit/compare/v1.5.28...v1.5.29)
 
 ### Changed
 - Update README.md [#1615](https://github.com/FredrikNoren/ungit/pull/1615)
-- Bump Dependencies [#1614](https://github.com/FredrikNoren/ungit/pull/1614)
+- Bump Dependencies [#1614](https://github.com/FredrikNoren/ungit/pull/1614), [#1645](https://github.com/FredrikNoren/ungit/pull/1645), [#1643](https://github.com/FredrikNoren/ungit/pull/1643), [#1641](https://github.com/FredrikNoren/ungit/pull/1641), [#1639](https://github.com/FredrikNoren/ungit/pull/1639), [#1636](https://github.com/FredrikNoren/ungit/pull/1636), [#1634](https://github.com/FredrikNoren/ungit/pull/1634), [#1632](https://github.com/FredrikNoren/ungit/pull/1632), [#1630](https://github.com/FredrikNoren/ungit/pull/1630), [#1629](https://github.com/FredrikNoren/ungit/pull/1629), [#1626](https://github.com/FredrikNoren/ungit/pull/1626), [#1624](https://github.com/FredrikNoren/ungit/pull/1624), [#1620](https://github.com/FredrikNoren/ungit/pull/1620), [#1619](https://github.com/FredrikNoren/ungit/pull/1619), [#1616](https://github.com/FredrikNoren/ungit/pull/1616), [#1592](https://github.com/FredrikNoren/ungit/pull/1592)
+- Migrate to eslint flat config [#1607](https://github.com/FredrikNoren/ungit/pull/1607)
+- Bump formidable from 3.5.2 to 3.5.4 [#1617](https://github.com/FredrikNoren/ungit/pull/1617)
+- show remote fetch / push url in title [#1618](https://github.com/FredrikNoren/ungit/pull/1618)
+- Bump qs from 6.14.1 to 6.14.2 [#1644](https://github.com/FredrikNoren/ungit/pull/1644)
+- Bump actions/upload-artifact to 7 [#1649](https://github.com/FredrikNoren/ungit/pull/1649)
 
 ## [1.5.28](https://github.com/FredrikNoren/ungit/compare/v1.5.27...v1.5.28)
 
