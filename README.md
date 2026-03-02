@@ -1,6 +1,6 @@
 ungit
 ======
-[![NPM version](https://badge.fury.io/js/ungit.svg)](https://badge.fury.io/js/ungit)
+[![Release](https://img.shields.io/github/v/release/FredrikNoren/ungit)](https://github.com/FredrikNoren/ungit/releases)
 [![CI](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml/badge.svg)](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
