@@ -154,6 +154,7 @@ jobs:
         uses: actions/github-script@v8
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
             const script = require('./scripts/npmpublish.js')

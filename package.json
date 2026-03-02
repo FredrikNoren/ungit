@@ -1,8 +1,9 @@
 {
-  "name": "ungit",
+  "name": "@fredriknoren/ungit",
+  "productName": "ungit",
   "author": "Fredrik Norén <fredrik.jw.noren@gmail.com>",
   "description": "Git made easy",
-  "version": "1.5.29",
+  "version": "1.5.30",
   "ungitPluginApiVersion": "0.2.0",
   "scripts": {
     "start": "node ./bin/ungit",

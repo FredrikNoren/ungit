@@ -32,7 +32,7 @@ const builds = process.argv.includes('--all') // keep in sync with ci.yml (https
       arch: builds[platform],
       asar: true,
       overwrite: platform == 'current',
-      appCopyright: 'Copyright (c) 2013-2024 Fredrik Norén',
+      appCopyright: 'Copyright (c) 2013-2026 Fredrik Norén',
       ignore: [
         /^\/(?:[^/]+?\/)*(?:\..+|.+\.less)$/, // dot-files and less files anywhere
         /^\/(?:\..+|assets|clicktests|coverage|dist|scripts|test)\//, // folders in root
