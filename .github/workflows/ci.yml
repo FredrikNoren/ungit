@@ -2,6 +2,10 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  id-token: write   # Required for npm OIDC provenance publishing
+  contents: read
+
 jobs:
   test:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
@@ -23,6 +27,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       # linux dependencies
       # https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces
@@ -151,11 +156,4 @@ jobs:
 
       - name: npm publish
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
-        uses: actions/github-script@v8
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const script = require('./scripts/npmpublish.js')
-            await script({github, context, core, exec})
+        run: npm publish --provenance --access public
