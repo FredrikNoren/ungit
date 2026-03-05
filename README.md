@@ -26,21 +26,13 @@ Quick intro to ungit: [https://youtu.be/hkBVAi3oKvo](https://youtu.be/hkBVAi3oKv
 
 Installing
 ----------
-Requires [node.js](https://nodejs.org) (≥ 20.19.0), [npm](https://www.npmjs.com/) (≥ 10.8.2, comes with node.js) and [git](https://git-scm.com/) (≥ 2.34.x). To install ungit:
+Requires [node.js](https://nodejs.org) (≥ 20.19.0), [npm](https://www.npmjs.com/) (≥ 10.8.2, comes with node.js) and [git](https://git-scm.com/) (≥ 2.34.x). To install ungit just type:
 
-1. Create or update `.npmrc` file with the following contents:
-```
-@fredriknoren:registry=https://npm.pkg.github.com/
-```
-2. [GitHub npm registry requires authentication](https://docs.github.com/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token)
-3. Run
-```bash
-npm install -g @fredriknoren/ungit
-```
+	npm install -g ungit
 
 NOTE: If your system requires root access to install global npm packages, make sure you use the -H flag:
 
-	sudo -H npm install -g @fredriknoren/ungit
+	sudo -H npm install -g ungit
 
 Prebuilt [electron](https://electronjs.org/) packages are available [here](https://github.com/FredrikNoren/ungit/releases) (git is still required).
 
