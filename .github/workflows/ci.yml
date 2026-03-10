@@ -154,57 +154,14 @@ jobs:
           archive: false
           retention-days: 7
 
-      # publish to npm and create github release
-      - name: Append commit hash to version
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          HASH=${GITHUB_SHA::8}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG=v$VERSION" >> $GITHUB_ENV
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version += '+${HASH}';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-
       - name: Upgrade npm for trusted publishing
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
         run: npm install -g npm@latest
 
       - name: npm publish
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
-        run: npm publish --provenance --access public
-
-      - name: Create GitHub Release and upload assets
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
         uses: actions/github-script@v8
         with:
           script: |
-            const fs = require('fs').promises;
-            const path = require('path');
-            const version = process.env.VERSION;
-            const tag = process.env.TAG;
-
-            core.info(`Creating release ${tag}`);
-            const release = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: tag,
-              tag_name: tag,
-              body: `[Changelog](https://github.com/FredrikNoren/ungit/blob/master/CHANGELOG.md#${version.replace(/\./g, '')})`,
-            });
-
-            const filePaths = await fs.readdir('dist');
-            for (const file of filePaths) {
-              const filePath = path.join('dist', file);
-              core.info(`Uploading release asset ${filePath}`);
-              await github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: release.data.id,
-                name: file.replace('ungit', `ungit-${version}`),
-                data: await fs.readFile(filePath),
-              });
-            }
+            const script = require('./scripts/npmpublish.js')
+            await script({github, context, core, exec})
