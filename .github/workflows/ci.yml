@@ -169,6 +169,10 @@ jobs:
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
+      - name: Upgrade npm for trusted publishing
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
+        run: npm install -g npm@latest
+
       - name: npm publish
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
         run: npm publish --provenance --access public
