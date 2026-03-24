@@ -1,7 +1,7 @@
 declare var ungit: any;
 
 export class ComponentRoot {
-  _apiCache: string;
+  _apiCache: string | undefined;
   defaultDebounceOption = {
     maxWait: 1500,
     leading: false,
