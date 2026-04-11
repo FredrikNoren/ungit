@@ -160,7 +160,7 @@ jobs:
 
       - name: npm publish
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20' && github.repository == 'FredrikNoren/ungit' && github.ref == 'refs/heads/master'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const script = require('./scripts/npmpublish.js')
