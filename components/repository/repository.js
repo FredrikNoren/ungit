@@ -15,6 +15,7 @@ class RepositoryViewModel {
     this.graph = components.create('graph', { server, repoPath: this.repoPath });
     this.remotes = components.create('remotes', { server, repoPath: this.repoPath });
     this.submodules = components.create('submodules', { server, repoPath: this.repoPath });
+    this.worktrees = components.create('worktrees', { server, repoPath: this.repoPath });
     this.stash = this.isBareDir
       ? {}
       : components.create('stash', { server, repoPath: this.repoPath });
@@ -54,6 +55,7 @@ class RepositoryViewModel {
     if (this.stash.onProgramEvent) this.stash.onProgramEvent(event);
     if (this.remotes.onProgramEvent) this.remotes.onProgramEvent(event);
     if (this.submodules.onProgramEvent) this.submodules.onProgramEvent(event);
+    if (this.worktrees.onProgramEvent) this.worktrees.onProgramEvent(event);
     if (this.branches.onProgramEvent) this.branches.onProgramEvent(event);
     if (event.event == 'connected') this.server.watchRepository(this.repoPath());
 

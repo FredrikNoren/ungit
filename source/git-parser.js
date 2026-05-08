@@ -430,3 +430,31 @@ exports.parsePatchDiffResult = (patchLineList, text) => {
     return null;
   }
 };
+
+exports.parseWorktreeList = (text) => {
+  if (!text || !text.trim()) return [];
+
+  const worktrees = [];
+  const lines = text.trim().split('\n');
+  let current = null;
+
+  for (const line of lines) {
+    if (line.startsWith('worktree ')) {
+      if (current) worktrees.push(current);
+      current = { path: line.slice(9) };
+    } else if (current) {
+      if (line.startsWith('HEAD ')) {
+        current.head = line.slice(5);
+      } else if (line.startsWith('branch ')) {
+        current.branch = line.slice(7).replace('refs/heads/', '');
+      } else if (line.startsWith('locked ')) {
+        current.locked = line.slice(7) || true;
+      } else if (line.startsWith('prunable ')) {
+        current.prunable = line.slice(9) || true;
+      }
+    }
+  }
+
+  if (current) worktrees.push(current);
+  return worktrees;
+};

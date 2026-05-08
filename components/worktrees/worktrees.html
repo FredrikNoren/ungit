@@ -1,0 +1,74 @@
+<div class="worktrees-component">
+  <div class="btn-group worktrees-button">
+    <button type="button" class="btn btn-default btn-main" data-bind="click: loadWorktrees">
+      <span>Worktrees</span>
+      <!-- ko if: worktreeCount() > 0 -->
+      <span class="badge" data-bind="text: worktreeCount"></span>
+      <!-- /ko -->
+    </button>
+    <button
+      type="button"
+      class="btn btn-default dropdown-toggle"
+      data-bind="click: loadWorktrees"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      <span class="caret"></span>
+      <span class="sr-only">Toggle Worktree List</span>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-right worktrees-menu" role="menu">
+      <!-- ko if: error -->
+      <li class="dropdown-header worktree-error" data-bind="text: error"></li>
+      <li class="divider" role="separator"></li>
+      <!-- /ko -->
+
+      <!-- ko if: isLoading -->
+      <li class="dropdown-header">Loading worktrees...</li>
+      <!-- /ko -->
+
+      <!-- ko if: !isLoading() && !hasWorktrees() -->
+      <li class="dropdown-header">No worktrees found.</li>
+      <!-- /ko -->
+
+      <!-- ko foreach: worktrees -->
+      <li data-bind="css: { active: $parent.isCurrentWorktree($data) }">
+        <a
+          class="linked-url worktree-link"
+          href="#"
+          data-bind="click: $parent.switchToWorktree.bind($parent), attr: { title: path }"
+        >
+          <span data-bind="html: $parent.branchIcon"></span>
+          <span data-bind="text: $parent.branchLabel($data)"></span>
+          <!-- ko if: $parent.isCurrentWorktree($data) -->
+          <span class="worktree-current-label">Current</span>
+          <!-- /ko -->
+          <span
+            class="worktree-status"
+            data-bind="text: $parent.statusLabel($data), css: status"
+          ></span>
+        </a>
+        <a
+          class="list-link list-url worktree-open"
+          href="#"
+          data-bind="html: $parent.linkIcon, click: $parent.openInNewTab.bind($parent), attr: { title: 'Open ' + path + ' in a new tab' }"
+        ></a>
+        <a
+          class="list-link list-remove worktree-remove"
+          href="#"
+          data-bind="html: $parent.closeIcon, click: $parent.removeWorktree.bind($parent), attr: { title: 'Remove ' + path }"
+        ></a>
+      </li>
+      <!-- /ko -->
+      <!-- ko if: hasWorktrees -->
+      <li class="divider" role="separator"></li>
+      <!-- /ko -->
+      <li>
+        <a href="#" class="add-worktree" data-bind="click: function() { openCreateForm(); }">
+          Create worktree
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
