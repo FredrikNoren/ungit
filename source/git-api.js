@@ -1016,64 +1016,81 @@ exports.registerApi = (env) => {
     );
   });
 
-  app.post(`${exports.pathPrefix}/worktrees`, ensureAuthenticated, ensurePathExists, async (req, res) => {
-    const { worktreePath, branch, createBranch } = req.body;
-    const repoPath = req.body.path || req.query.path;
+  app.post(
+    `${exports.pathPrefix}/worktrees`,
+    ensureAuthenticated,
+    ensurePathExists,
+    async (req, res) => {
+      const { worktreePath, branch, createBranch } = req.body;
+      const repoPath = req.body.path || req.query.path;
 
-    if (!worktreePath || !branch) {
-      return res.status(400).json({ error: 'path and branch are required' });
+      if (!worktreePath || !branch) {
+        return res.status(400).json({ error: 'path and branch are required' });
+      }
+
+      try {
+        await fs.access(worktreePath);
+        return res.status(400).json({ error: 'path already exists' });
+      } catch {
+        // path does not exist, continue
+      }
+
+      const args = ['worktree', 'add'];
+      if (createBranch) {
+        args.push('-b', branch, worktreePath);
+      } else {
+        args.push(worktreePath, branch);
+      }
+
+      jsonResultOrFailProm(
+        res,
+        gitPromise(args, repoPath).then(() =>
+          gitPromise(['worktree', 'list', '--porcelain'], repoPath)
+            .then(gitParser.parseWorktreeList)
+            .then((worktrees) => worktrees.find((w) => w.path === worktreePath))
+        )
+      );
     }
+  );
 
-    try {
-      await fs.access(worktreePath);
-      return res.status(400).json({ error: 'path already exists' });
-    } catch {}
+  app.delete(
+    `${exports.pathPrefix}/worktrees`,
+    ensureAuthenticated,
+    ensurePathExists,
+    (req, res) => {
+      const { worktreePath, force } = req.query;
+      const repoPath = req.query.path;
 
-    const args = ['worktree', 'add'];
-    if (createBranch) {
-      args.push('-b', branch, worktreePath);
-    } else {
-      args.push(worktreePath, branch);
+      if (!worktreePath) {
+        return res.status(400).json({ error: 'path is required' });
+      }
+
+      const args = ['worktree', 'remove'];
+      if (force === 'true') {
+        args.push('--force');
+      }
+      args.push(worktreePath);
+
+      jsonResultOrFailProm(res, gitPromise(args, repoPath));
     }
+  );
 
-    jsonResultOrFailProm(
-      res,
-      gitPromise(args, repoPath).then(() =>
-        gitPromise(['worktree', 'list', '--porcelain'], repoPath)
-          .then(gitParser.parseWorktreeList)
-          .then((worktrees) => worktrees.find((w) => w.path === worktreePath))
-      )
-    );
-  });
+  app.post(
+    `${exports.pathPrefix}/worktrees/lock`,
+    ensureAuthenticated,
+    ensurePathExists,
+    (req, res) => {
+      const { worktreePath, lock } = req.body;
+      const repoPath = req.body.path || req.query.path;
 
-  app.delete(`${exports.pathPrefix}/worktrees`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const { worktreePath, force } = req.query;
-    const repoPath = req.query.path;
+      if (!worktreePath) {
+        return res.status(400).json({ error: 'path is required' });
+      }
 
-    if (!worktreePath) {
-      return res.status(400).json({ error: 'path is required' });
+      const args = ['worktree', lock ? 'lock' : 'unlock', worktreePath];
+      jsonResultOrFailProm(res, gitPromise(args, repoPath));
     }
-
-    const args = ['worktree', 'remove'];
-    if (force === 'true') {
-      args.push('--force');
-    }
-    args.push(worktreePath);
-
-    jsonResultOrFailProm(res, gitPromise(args, repoPath));
-  });
-
-  app.post(`${exports.pathPrefix}/worktrees/lock`, ensureAuthenticated, ensurePathExists, (req, res) => {
-    const { worktreePath, lock } = req.body;
-    const repoPath = req.body.path || req.query.path;
-
-    if (!worktreePath) {
-      return res.status(400).json({ error: 'path is required' });
-    }
-
-    const args = ['worktree', lock ? 'lock' : 'unlock', worktreePath];
-    jsonResultOrFailProm(res, gitPromise(args, repoPath));
-  });
+  );
 
   app.get(`${exports.pathPrefix}/gitconfig`, ensureAuthenticated, (req, res) => {
     jsonResultOrFailProm(res, gitPromise(['config', '--list']).then(gitParser.parseGitConfig));
