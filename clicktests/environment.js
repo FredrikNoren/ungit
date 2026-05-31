@@ -251,14 +251,14 @@ class Environment {
     return this.page.keyboard.press(key);
   }
 
-  async click(selector, clickCount) {
+  async click(selector, count) {
     logger.info(`clicking "${selector}"`);
 
     for (let i = 0; i < 3; i++) {
       try {
         const toClick = await this.waitForElementVisible(selector);
         await this.wait(200);
-        await toClick.click({ delay: 100, clickCount: clickCount });
+        await toClick.click({ delay: 100, count: count });
         break;
       } catch (err) {
         logger.error('error while clicking', err);
