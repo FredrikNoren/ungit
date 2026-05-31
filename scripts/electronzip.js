@@ -37,7 +37,7 @@ const distDir = path.join(baseDir, 'dist');
 async function zipDirectory(source, destination) {
   console.log(`start zip ${path.relative(baseDir, destination)}`);
   await new Promise((resolve, reject) => {
-    const archive = archiver.create('zip', {
+    const archive = new archiver.ZipArchive({
       zlib: { level: 9 },
     });
     const stream = fsSync.createWriteStream(destination);
