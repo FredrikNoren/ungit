@@ -1,0 +1,9 @@
+{
+  "exports": {
+    "knockoutTemplates": {
+      "worktrees": "worktrees.html"
+    },
+    "javascript": "worktrees.bundle.js",
+    "css": "worktrees.css"
+  }
+}

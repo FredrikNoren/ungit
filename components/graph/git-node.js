@@ -250,6 +250,14 @@ class GitNodeViewModel extends Animateable {
       });
   }
 
+  createWorktree() {
+    if (!this.canCreateRef()) return;
+    const branchName = this.newBranchName();
+    this.branchingFormVisible(false);
+    this.newBranchName('');
+    programEvents.dispatch({ event: 'create-worktree', branch: branchName });
+  }
+
   toggleSelected() {
     this.selected(!this.selected());
     if (this.selected()) {
