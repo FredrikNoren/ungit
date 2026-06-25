@@ -15,9 +15,6 @@ jobs:
         node-version: ['20', '22', '*']
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-#    env:
-      # electron-packager (win32 ia32 on macos) https://github.com/electron/electron-packager/pull/449#issuecomment-240508298
-#      WINEDLLOVERRIDES: 'mscoree,mshtml='
 
     steps:
       - uses: actions/checkout@v6
@@ -33,18 +30,9 @@ jobs:
       # https://ubuntu.com/blog/ubuntu-23-10-restricted-unprivileged-user-namespaces
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
         if: matrix.os == 'ubuntu-latest'
-      - run: sudo apt update && sudo apt install -y wine64 && sudo ln -sf /usr/bin/wine /usr/bin/wine64
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
-      - run: wine64 --version
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20'
       - run: sudo add-apt-repository ppa:git-core/ppa -y && sudo apt-get update -q && sudo apt-get install -y git
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == '*'
       # macos dependencies
-# required for electron-packager
-#      - run: brew update && brew cask install xquartz wine-stable
-#        if: matrix.os == 'macos-latest' && matrix.node-version == '20'
-#      - run: wine64 --version
-#        if: matrix.os == 'macos-latest' && matrix.node-version == '20'
       - run: brew reinstall git
         if: matrix.os == 'macos-latest' && matrix.node-version == '*'
       # windows dependencies
