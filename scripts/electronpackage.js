@@ -1,7 +1,7 @@
 const process = require('process');
 const path = require('path');
 const fs = require('fs').promises;
-const electronPackager = require('electron-packager');
+const electronPackager = require('@electron/packager');
 
 const baseDir = path.join(__dirname, '..');
 const outDir = path.join(baseDir, 'build');
@@ -24,7 +24,7 @@ const builds = process.argv.includes('--all') // keep in sync with ci.yml (https
   }
 
   for (const platform of Object.keys(builds)) {
-    await electronPackager({
+    await electronPackager.packager({
       dir: baseDir,
       out: outDir,
       icon: path.join(baseDir, 'public/images/icon'),

@@ -73,13 +73,13 @@
     "yargs": "~18.0.0"
   },
   "devDependencies": {
+    "@electron/packager": "~20.0.1",
     "@eslint/js": "~10.0.1",
     "@homer0/prettier-plugin-jsdoc": "~12.0.0",
     "archiver": "~8.0.0",
     "browserify": "~17.0.1",
     "dedent": "~1.7.2",
     "electron": "~42.5.0",
-    "electron-packager": "~17.1.2",
     "eslint": "~10.5.0",
     "eslint-config-prettier": "~10.1.8",
     "eslint-plugin-mocha": "~11.3.0",
