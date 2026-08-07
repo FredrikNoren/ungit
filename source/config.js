@@ -168,6 +168,9 @@ const defaultConfig = {
 
   // when false, disable numstats durin status for performance.  see #1193
   isEnableNumStat: true,
+
+  // tags prepended to the commit message when selected (e.g. [SKIP CI])
+  commitMessageTags: [],
 };
 
 // Works for now but should be moved to bin/ungit
@@ -322,7 +325,12 @@ const argv = yargs
     'isEnableNumStat',
     'when false, disables numstats during git status for performance.  see #1193'
   )
-  .boolean('isEnableNumStat');
+  .boolean('isEnableNumStat')
+  .describe(
+    'commitMessageTags',
+    'tags prepended to the commit message when selected (e.g. [SKIP CI])'
+  )
+  .array('commitMessageTags');
 const argvConfig = argv.argv;
 
 // When ungit is started normally, $0 == ungit, and non-hyphenated options exists, show help and exit.
