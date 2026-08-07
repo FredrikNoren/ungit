@@ -16,6 +16,7 @@ class GraphViewModel extends ComponentRoot {
     super();
     this._isLoadNodesFromApiRunning = false;
     this.updateBranches = _.debounce(this._updateBranches, 250, this.defaultDebounceOption);
+    this.updateWorktrees = _.debounce(this._updateWorktrees, 250, this.defaultDebounceOption);
     this.loadNodesFromApi = _.debounce(this._loadNodesFromApi, 250, this.defaultDebounceOption);
     this._markIdeologicalStamp = 0;
     this.repoPath = repoPath;
@@ -26,6 +27,7 @@ class GraphViewModel extends ComponentRoot {
     this.nodes = ko.observableArray();
     this.edges = ko.observableArray();
     this.refs = ko.observableArray();
+    this.worktrees = ko.observableArray();
     this.nodesById = {};
     this.edgesById = {};
     this.refsByRefName = {};
@@ -80,6 +82,7 @@ class GraphViewModel extends ComponentRoot {
 
     this.loadNodesFromApi();
     this.updateBranches();
+    this.updateWorktrees();
     this.graphWidth = ko.observable();
     this.graphHeight = ko.observable(800);
     this.searchIcon = octicons.search.toSVG({ height: 18 });
@@ -107,6 +110,7 @@ class GraphViewModel extends ComponentRoot {
         this.HEADref(refViewModel);
       }
     }
+    if (refViewModel) this.attachWorktreeToRef(refViewModel);
     return refViewModel;
   }
 
@@ -277,6 +281,7 @@ class GraphViewModel extends ComponentRoot {
     if (event.event == 'git-directory-changed' || event.event === 'working-tree-changed') {
       this.loadNodesFromApi();
       this.updateBranches();
+      this.updateWorktrees();
     } else if (event.event == 'request-app-content-refresh') {
       this.loadNodesFromApi();
     } else if (event.event == 'remote-tags-update') {
@@ -309,6 +314,32 @@ class GraphViewModel extends ComponentRoot {
         ungit.logger.warn('updateBranches failed', err);
       }
     }
+  }
+
+  async _updateWorktrees() {
+    try {
+      const worktrees = await this.server.getPromise('/worktrees', { path: this.repoPath() });
+      this.setWorktrees(worktrees || []);
+    } catch (err) {
+      if (err.errorCode != 'not-a-repository') {
+        this.server.unhandledRejection(err);
+      } else {
+        ungit.logger.warn('updateWorktrees failed', err);
+      }
+    }
+  }
+
+  setWorktrees(worktrees) {
+    this.worktrees(worktrees);
+    this.refs().forEach((ref) => {
+      if (ref.worktree) ref.worktree(null);
+    });
+    this.refs().forEach((ref) => this.attachWorktreeToRef(ref));
+  }
+
+  attachWorktreeToRef(ref) {
+    if (!ref.worktree || !ref.isLocalBranch) return;
+    ref.worktree(this.worktrees().find((worktree) => worktree.branch === ref.refName));
   }
 
   setRemoteTags(remoteTags) {

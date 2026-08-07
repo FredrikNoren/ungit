@@ -8,6 +8,7 @@ ungit.components.register(
 );
 ungit.components.register('addremotemodal', (arg: any) => new AddRemoteModalViewModel(arg.path));
 ungit.components.register('addsubmodulemodal', (arg: any) => new AddSubmoduleModalViewModel(arg.path));
+ungit.components.register('addworktreemodal', (arg: any) => new AddWorktreeModalViewModel(arg));
 
 /**
  * Form receives collection of user inputs, i.e. username, password and etc.
@@ -86,6 +87,35 @@ class AddSubmoduleModalViewModel extends FormModalViewModel {
         submoduleUrl: this.items[1].value(),
       });
       ungit.programEvents.dispatch({ event: 'submodule-fetch' });
+    } catch (e) {
+      ungit.server.unhandledRejection(e);
+    }
+  }
+}
+
+class AddWorktreeModalViewModel extends FormModalViewModel {
+  repoPath: string
+  createBranch: boolean
+  constructor(arg: any) {
+    super('Create worktree', 'add-worktree', true);
+    this.repoPath = arg.path;
+    this.createBranch = arg.createBranch !== false;
+    this.items.push(new FormItems('Branch', ko.observable(arg.branch || ''), 'text', true))
+    this.items.push(new FormItems('Path', ko.observable(arg.worktreePath || ''), 'text', false))
+  }
+
+  async submit() {
+    super.submit();
+    try {
+      await ungit.server.postPromise('/worktrees', {
+        path: this.repoPath,
+        worktreePath: this.items[1].value(),
+        branch: this.items[0].value(),
+        createBranch: this.createBranch,
+      });
+      ungit.programEvents.dispatch({ event: 'branch-updated' });
+      ungit.programEvents.dispatch({ event: 'request-app-content-refresh' });
+      ungit.programEvents.dispatch({ event: 'worktree-changed' });
     } catch (e) {
       ungit.server.unhandledRejection(e);
     }

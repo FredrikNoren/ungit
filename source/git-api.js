@@ -146,6 +146,7 @@ exports.registerApi = (env) => {
     });
     await watcher.addGit(path.join(repoPath, 'HEAD'));
     await watcher.addGit(path.join(repoPath, 'index'));
+    await watcher.addGit(path.join(repoPath, 'worktrees'));
 
     return watcher;
   };
@@ -987,6 +988,107 @@ exports.registerApi = (env) => {
       )
         .finally(emitGitDirectoryChanged.bind(null, req.query.path))
         .finally(emitWorkingTreeChanged.bind(null, req.query.path));
+    }
+  );
+
+  app.get(`${exports.pathPrefix}/worktrees`, ensureAuthenticated, ensurePathExists, (req, res) => {
+    jsonResultOrFailProm(
+      res,
+      gitPromise(['worktree', 'list', '--porcelain'], req.query.path)
+        .then(gitParser.parseWorktreeList)
+        .then(async (worktrees) => {
+          for (const worktree of worktrees) {
+            try {
+              const status = await gitPromise(['status', '--porcelain'], worktree.path);
+              if (!status || status.trim() === '') {
+                worktree.status = 'clean';
+              } else if (status.includes('UU ') || status.includes('AA ')) {
+                worktree.status = 'conflicts';
+              } else {
+                worktree.status = 'dirty';
+              }
+            } catch {
+              worktree.status = 'unknown';
+            }
+          }
+          return worktrees;
+        })
+    );
+  });
+
+  app.post(
+    `${exports.pathPrefix}/worktrees`,
+    ensureAuthenticated,
+    ensurePathExists,
+    async (req, res) => {
+      const { worktreePath, branch, createBranch } = req.body;
+      const repoPath = req.body.path || req.query.path;
+
+      if (!worktreePath || !branch) {
+        return res.status(400).json({ error: 'path and branch are required' });
+      }
+
+      try {
+        await fs.access(worktreePath);
+        return res.status(400).json({ error: 'path already exists' });
+      } catch {
+        // path does not exist, continue
+      }
+
+      const args = ['worktree', 'add'];
+      if (createBranch) {
+        args.push('-b', branch, worktreePath);
+      } else {
+        args.push(worktreePath, branch);
+      }
+
+      jsonResultOrFailProm(
+        res,
+        gitPromise(args, repoPath).then(() =>
+          gitPromise(['worktree', 'list', '--porcelain'], repoPath)
+            .then(gitParser.parseWorktreeList)
+            .then((worktrees) => worktrees.find((w) => w.path === worktreePath))
+        )
+      );
+    }
+  );
+
+  app.delete(
+    `${exports.pathPrefix}/worktrees`,
+    ensureAuthenticated,
+    ensurePathExists,
+    (req, res) => {
+      const { worktreePath, force } = req.query;
+      const repoPath = req.query.path;
+
+      if (!worktreePath) {
+        return res.status(400).json({ error: 'path is required' });
+      }
+
+      const args = ['worktree', 'remove'];
+      if (force === 'true') {
+        args.push('--force');
+      }
+      args.push(worktreePath);
+
+      jsonResultOrFailProm(res, gitPromise(args, repoPath));
+    }
+  );
+
+  app.post(
+    `${exports.pathPrefix}/worktrees/lock`,
+    ensureAuthenticated,
+    ensurePathExists,
+    (req, res) => {
+      const { worktreePath, lock } = req.body;
+      const repoPath = req.body.path || req.query.path;
+
+      if (!worktreePath) {
+        return res.status(400).json({ error: 'path is required' });
+      }
+
+      const args = ['worktree', lock ? 'lock' : 'unlock', worktreePath];
+      jsonResultOrFailProm(res, gitPromise(args, repoPath));
     }
   );
 

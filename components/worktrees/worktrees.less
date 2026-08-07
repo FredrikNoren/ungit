@@ -1,0 +1,84 @@
+.worktrees-component {
+  display: inline-block;
+  vertical-align: middle;
+
+  .worktrees-button {
+    .btn {
+      .badge {
+        margin-left: 6px;
+        background: #1976d2;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 7px;
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+.worktrees-menu {
+  min-width: 360px;
+  max-width: 480px;
+
+  .worktree-error {
+    color: #b54848;
+    white-space: normal;
+  }
+
+  > li {
+    &.active {
+      > a {
+        background: #eef4fb;
+        color: #222;
+      }
+    }
+  }
+
+  .worktree-link {
+    overflow: hidden;
+    padding-right: 92px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .worktree-current-label,
+  .worktree-status {
+    border-radius: 3px;
+    display: inline-block;
+    font-size: 11px;
+    margin-left: 6px;
+    padding: 1px 5px;
+    text-transform: capitalize;
+    vertical-align: middle;
+  }
+
+  .worktree-current-label {
+    background: #1976d2;
+    color: #fff;
+  }
+
+  .worktree-open {
+    margin-right: 40px;
+  }
+
+  .worktree-status {
+    &.clean {
+      background: #dff0d8;
+      color: #3c763d;
+    }
+
+    &.dirty {
+      background: #fcf8e3;
+      color: #8a6d3b;
+    }
+
+    &.conflicts {
+      background: #f2dede;
+      color: #a94442;
+    }
+  }
+
+  .worktree-remove {
+    color: #b54848;
+  }
+}

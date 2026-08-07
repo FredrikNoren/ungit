@@ -3,6 +3,8 @@ const md5 = require('blueimp-md5');
 const octicons = require('octicons');
 const programEvents = require('ungit-program-events');
 const components = require('ungit-components');
+const navigation = require('ungit-navigation');
+const { encodePath } = require('ungit-address-parser');
 const Selectable = require('./selectable');
 
 class RefViewModel extends Selectable {
@@ -49,6 +51,7 @@ class RefViewModel extends Selectable {
     this.show = true;
     this.server = this.graph.server;
     this.isDragging = ko.observable(false);
+    this.worktree = ko.observable();
     this.current = ko.computed(
       () => this.isLocalBranch && this.graph.checkedOutBranch() == this.refName
     );
@@ -80,8 +83,43 @@ class RefViewModel extends Selectable {
       } else if (this.isTag) {
         prefix += `<span>${octicons.tag.toSVG({ height: size })}</span> `;
       }
-      return prefix + this.localRefName;
+      return prefix + this.localRefName + this.worktreeMarkerHtml();
     };
+  }
+
+  worktreeMarkerHtml() {
+    const worktree = this.worktree();
+    if (!worktree || this.isCurrentWorktreePath(worktree.path)) return '';
+    const status = this.sanitizeCssClass(worktree.status || 'unknown');
+    const title = this.escapeHtml(`Checked out in ${worktree.path}`);
+    const label = this.escapeHtml(this.worktreeLabel(worktree.path));
+    return ` <span class="worktree-ref-marker status-${status}" title="${title}">${label}</span>`;
+  }
+
+  worktreeLabel(path) {
+    const normalizedPath = this.normalizePath(path);
+    const slashIndex = normalizedPath.lastIndexOf('/');
+    return slashIndex >= 0 ? normalizedPath.slice(slashIndex + 1) : normalizedPath;
+  }
+
+  isCurrentWorktreePath(path) {
+    return this.normalizePath(path) === this.normalizePath(this.graph.repoPath());
+  }
+
+  normalizePath(path) {
+    return (path || '').replace(/\\/g, '/').replace(/\/+$/, '');
+  }
+
+  sanitizeCssClass(value) {
+    return `${value}`.replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+  }
+
+  escapeHtml(value) {
+    return `${value}`
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   _colorFromHashOfString(string) {
@@ -243,6 +281,12 @@ class RefViewModel extends Selectable {
   }
 
   checkout() {
+    const worktree = this.worktree();
+    if (worktree && !this.isCurrentWorktreePath(worktree.path)) {
+      navigation.browseTo(`repository?path=${encodePath(worktree.path)}`);
+      return Promise.resolve();
+    }
+
     const isRemote = this.isRemoteBranch;
     const isLocalCurrent = this.getLocalRef() && this.getLocalRef().current();
 

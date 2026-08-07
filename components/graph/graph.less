@@ -79,6 +79,30 @@
       &.tag {
         color: #eef266;
       }
+
+      .worktree-ref-marker {
+        border: 2px dashed rgba(255, 255, 255, 0.75);
+        border-radius: 8px;
+        display: inline-block;
+        font-size: 12px;
+        font-weight: normal;
+        line-height: 16px;
+        margin-left: 6px;
+        padding: 0 6px;
+        vertical-align: 2px;
+
+        &.status-dirty {
+          border-color: #f0ad4e;
+        }
+
+        &.status-conflicts {
+          border-color: #d9534f;
+        }
+
+        &.status-clean {
+          border-color: #5cb85c;
+        }
+      }
     }
 
     .graphAction {

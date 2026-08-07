@@ -5,6 +5,14 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.29...master)
 
+### Added
+- Git worktree support in the repository view
+  - List repository worktrees from a new Worktrees dropdown, including branch name, current-worktree marker, and clean/dirty/conflict status
+  - Create/remove a worktree
+  - Switch the current ungit view to another worktree or open it in a new browser tab
+  - Mark graph branch labels when a branch is checked out in another worktree
+  - Refresh graph and worktree UI when Git worktree metadata changes
+
 ## [1.5.29](https://github.com/FredrikNoren/ungit/compare/v1.5.28...v1.5.29)
 
 ### Changed
