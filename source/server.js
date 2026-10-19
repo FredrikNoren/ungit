@@ -9,12 +9,15 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const semver = require('semver');
 const path = require('path');
+const crypto = require('node:crypto');
 const fs = require('fs').promises;
 const signals = require('signals');
 const os = require('os');
 const cache = require('./utils/cache');
 const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
+
+const ungitBundlePath = path.join(__dirname, '../public/js/ungit.js');
 
 process.on('uncaughtException', (err) => {
   logger.error(err.stack ? err.stack.toString() : err.toString());
@@ -182,15 +185,19 @@ if (config.authentication) {
 const indexHtmlCacheKey = cache.registerFunc(() => {
   return cache.resolveFunc(pluginsCacheKey).then((plugins) => {
     return fs.readFile(__dirname + '/../public/index.html', { encoding: 'utf8' }).then((data) => {
-      return Promise.all(
-        Object.values(plugins).map((plugin) => {
-          return plugin.compile();
-        })
-      ).then((results) => {
-        data = data.replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
-        data = data.replace(/__ROOT_PATH__/g, config.rootPath);
+      return fs.readFile(ungitBundlePath).then((js) => {
+        const hash = crypto.createHash('sha256').update(js).digest('hex').slice(0, 12);
+        return Promise.all(
+          Object.values(plugins).map((plugin) => {
+            return plugin.compile();
+          })
+        ).then((results) => {
+          data = data.replace('<!-- ungit-plugins-placeholder -->', results.join('\n\n'));
+          data = data.replace(/__ROOT_PATH__/g, config.rootPath);
+          data = data.replace(/__UNGIT_JS_HASH__/g, hash);
 
-        return data;
+          return data;
+        });
       });
     });
   });
@@ -206,7 +213,17 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use(serveStatic(__dirname + '/../public'));
+app.use(
+  serveStatic(__dirname + '/../public', {
+    setHeaders(res, filePath) {
+      if (filePath === ungitBundlePath) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.removeHeader('Pragma');
+        res.removeHeader('Expires');
+      }
+    },
+  })
+);
 
 // Socket-IO
 const socketIO = require('socket.io');
