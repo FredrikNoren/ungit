@@ -7,7 +7,11 @@ const requests = [];
 describe('[COMMIT OPTIONS]', () => {
   before('Environment init', async () => {
     await environment.init();
-    await environment.createRepos(testRepoPaths, [{ bare: false, initCommits: 1 }, { bare: true }]);
+    await environment.createRepos(testRepoPaths, [
+      { bare: false, initCommits: 1 },
+      { bare: true },
+      { bare: false, initCommits: 1 },
+    ]);
     await environment.openUngit(testRepoPaths[0]);
     environment.page.on('request', (request) => {
       if (request.method() === 'POST' && /\/api\/(commit|push)$/.test(request.url())) {
@@ -84,4 +88,46 @@ describe('[COMMIT OPTIONS]', () => {
       }
     });
   }
+
+  it('remembers the selected action across reloads and projects without executing it', async () => {
+    const before = requests.length;
+    await environment.click('.amend-link');
+    await environment.click('.commit-grp .dropdown-toggle');
+    await environment.click('.commit-skip-hooks-n-push');
+    await environment.page.reload();
+    await environment.waitForElementVisible('.amend-link');
+    await environment.click('.amend-link');
+    expect(await environment.page.$eval('.commit-btn', (el) => el.textContent)).to.be(
+      'Commit (skip hooks) & Push'
+    );
+
+    await environment.openUngit(testRepoPaths[2]);
+    await environment.click('.amend-link');
+    expect(await environment.page.$eval('.commit-btn', (el) => el.textContent)).to.be(
+      'Commit (skip hooks) & Push'
+    );
+    expect(await environment.page.$eval('.commit-btn', (el) => el.disabled)).to.be(true);
+    await environment.click('.commit-grp .dropdown-toggle');
+    await environment.click('.commit-skip-hooks');
+
+    await environment.openUngit(testRepoPaths[0]);
+    await environment.click('.amend-link');
+    expect(await environment.page.$eval('.commit-btn', (el) => el.textContent)).to.be(
+      'Commit (skip hooks)'
+    );
+    await environment.page.waitForNetworkIdle();
+    expect(requests.length).to.be(before);
+  });
+
+  it('falls back to Commit when the stored action is unknown', async () => {
+    await environment.page.evaluate(() => {
+      // Runs in the browser, not Node.js.
+      // eslint-disable-next-line n/no-unsupported-features/node-builtins
+      window.localStorage.setItem('selectedCommitAction', 'unknown-action');
+    });
+    await environment.page.reload();
+    await environment.waitForElementVisible('.amend-link');
+    await environment.click('.amend-link');
+    expect(await environment.page.$eval('.commit-btn', (el) => el.textContent)).to.be('Commit');
+  });
 });

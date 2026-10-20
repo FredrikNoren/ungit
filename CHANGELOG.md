@@ -10,6 +10,7 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ### Changed
 - Selecting a commit option updates the main button without executing it; click the main button to run the selected action.
+- Remember the selected commit action in localStorage across page reloads and all projects.
 
 ## [1.5.29](https://github.com/FredrikNoren/ungit/compare/v1.5.28...v1.5.29)
 

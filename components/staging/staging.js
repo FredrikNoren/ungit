@@ -3,6 +3,8 @@ const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const storage = require('ungit-storage');
+const commitActionStorageKey = 'selectedCommitAction';
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
@@ -44,7 +46,14 @@ class StagingViewModel extends ComponentRoot {
         push: true,
       },
     ];
-    this.selectedCommitAction = ko.observable(this.commitActions[0]);
+    const savedCommitAction = storage.getItem(commitActionStorageKey);
+    this.selectedCommitAction = ko.observable(
+      this.commitActions.find((action) => action.className === savedCommitAction) ||
+        this.commitActions[0]
+    );
+    this.selectedCommitAction.subscribe((action) => {
+      storage.setItem(commitActionStorageKey, action.className);
+    });
     this.wordWrap = components.create('textdiff.wordwrap');
     this.textDiffType = components.create('textdiff.type');
     this.whiteSpace = components.create('textdiff.whitespace');
