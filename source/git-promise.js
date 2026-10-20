@@ -1,6 +1,7 @@
 const child_process = require('child_process');
 const gitParser = require('./git-parser');
 const path = require('path');
+const { devNull } = require('os');
 const config = require('./config');
 const logger = require('./utils/logger');
 const addressParser = require('./address-parser');
@@ -498,7 +499,7 @@ git.applyPatchedDiff = (repoPath, patchedDiff) => {
   }
 };
 
-git.commit = (repoPath, amend, emptyCommit, message, files) => {
+git.commit = (repoPath, amend, emptyCommit, message, files, skipHooks = false) => {
   return new Promise((resolve, reject) => {
     if (message == undefined) {
       reject({ error: 'Must specify commit message' });
@@ -568,7 +569,14 @@ git.commit = (repoPath, amend, emptyCommit, message, files) => {
       const allowedEmptyFlag = emptyCommit || amend ? '--allow-empty' : '';
       const isGPGSign = config.isForceGPGSign ? '-S' : '';
       return git(
-        ['commit', ammendFlag, allowedEmptyFlag, isGPGSign, '--file=-'],
+        [
+          ...(skipHooks ? ['-c', `core.hooksPath=${devNull}`] : []),
+          'commit',
+          ammendFlag,
+          allowedEmptyFlag,
+          isGPGSign,
+          '--file=-',
+        ],
         repoPath,
         null,
         null,

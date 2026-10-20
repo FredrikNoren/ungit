@@ -122,6 +122,7 @@ describe('[REMOTES]', () => {
     await environment.wait(250);
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
+    await environment.click('.commit-btn');
     await environment.waitForElementVisible(
       '[data-ta-node-title="Commit & Push"] .commit-container'
     );
@@ -132,6 +133,7 @@ describe('[REMOTES]', () => {
     await environment.insert('.staging input.form-control', 'Commit & Push with ff');
     await environment.click('.commit-grp .dropdown-toggle');
     await environment.click('.commitnpush');
+    await environment.click('.commit-btn');
     await environment.awaitAndClick('.modal-dialog .btn-primary');
     await environment.waitForElementVisible(
       '[data-ta-node-title="Commit & Push with ff"] .commit-container'

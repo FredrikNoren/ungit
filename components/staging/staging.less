@@ -23,7 +23,21 @@
     bottom: -30px;
   }
 
-  .commitnpush.disabled {
+  .commit-grp {
+    display: inline-flex;
+    max-width: 100%;
+
+    .commit-btn {
+      min-width: 0;
+      white-space: normal;
+    }
+
+    .dropdown-toggle {
+      flex-shrink: 0;
+    }
+  }
+
+  .commit-grp .dropdown-menu .disabled {
     pointer-events: none;
     opacity: 0.5;
   }

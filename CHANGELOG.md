@@ -5,6 +5,12 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.29...master)
 
+### Added
+- Add Commit (skip hooks) and Commit (skip hooks) & Push options.
+
+### Changed
+- Selecting a commit option updates the main button without executing it; click the main button to run the selected action.
+
 ## [1.5.29](https://github.com/FredrikNoren/ungit/compare/v1.5.28...v1.5.29)
 
 ### Changed
