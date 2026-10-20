@@ -19,7 +19,7 @@
       <a
         class="linked-url"
         href="#"
-        data-bind="text: name, click: $parent.submodulePathClick, attr: { 'data-ta-clickable': name }"
+        data-bind="text: name, click: $parent.submodulePathClick.bind($parent), attr: { 'data-ta-clickable': name }"
       ></a>
       <a
         class="list-link list-url"

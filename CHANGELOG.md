@@ -5,6 +5,9 @@ We are following the [Keep a Changelog](https://keepachangelog.com/) format.
 
 ## [Unreleased](https://github.com/FredrikNoren/ungit/compare/v1.5.29...master)
 
+### Fixed
+- Resolve submodule navigation from the repository root when opening Ungit in a subdirectory, and encode special characters in submodule paths.
+
 ## [1.5.29](https://github.com/FredrikNoren/ungit/compare/v1.5.28...v1.5.29)
 
 ### Changed
