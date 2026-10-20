@@ -3,6 +3,8 @@ const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const storage = require('ungit-storage');
+const commitActionStorageKey = 'selectedCommitAction';
 const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
@@ -28,6 +30,30 @@ class StagingViewModel extends ComponentRoot {
       this.commitMessageTitleCount(value.length);
     });
     this.commitMessageBody = ko.observable();
+    this.commitActions = [
+      { label: 'Commit', className: 'commit-only', skipHooks: false, push: false },
+      { label: 'Commit & Push', className: 'commitnpush', skipHooks: false, push: true },
+      {
+        label: 'Commit (skip hooks)',
+        className: 'commit-skip-hooks',
+        skipHooks: true,
+        push: false,
+      },
+      {
+        label: 'Commit (skip hooks) & Push',
+        className: 'commit-skip-hooks-n-push',
+        skipHooks: true,
+        push: true,
+      },
+    ];
+    const savedCommitAction = storage.getItem(commitActionStorageKey);
+    this.selectedCommitAction = ko.observable(
+      this.commitActions.find((action) => action.className === savedCommitAction) ||
+        this.commitActions[0]
+    );
+    this.selectedCommitAction.subscribe((action) => {
+      storage.setItem(commitActionStorageKey, action.className);
+    });
     this.wordWrap = components.create('textdiff.wordwrap');
     this.textDiffType = components.create('textdiff.type');
     this.whiteSpace = components.create('textdiff.whitespace');
@@ -267,7 +293,21 @@ class StagingViewModel extends ComponentRoot {
     this.emptyCommit(false);
   }
 
-  commit() {
+  selectCommitAction(action) {
+    if (!action.push || this.canPush()) this.selectedCommitAction(action);
+  }
+
+  runSelectedCommitAction() {
+    if (this.commitValidationError()) return;
+    const action = this.selectedCommitAction();
+    if (action.push) {
+      if (this.canPush()) this.commitnpush(action.skipHooks);
+    } else {
+      this.commit(action.skipHooks);
+    }
+  }
+
+  commit(skipHooks = false) {
     const files = this.files()
       .filter((file) => file.editState() !== 'none')
       .map((file) => ({
@@ -284,6 +324,7 @@ class StagingViewModel extends ComponentRoot {
         files,
         amend: this.amend(),
         emptyCommit: this.emptyCommit(),
+        skipHooks: skipHooks === true,
       })
       .then(() => {
         this.resetMessages();
@@ -292,7 +333,8 @@ class StagingViewModel extends ComponentRoot {
       .catch((e) => this.server.unhandledRejection(e));
   }
 
-  commitnpush() {
+  commitnpush(skipHooks = false) {
+    if (!this.canPush()) return;
     const files = this.files()
       .filter((file) => file.editState() !== 'none')
       .map((file) => ({
@@ -309,6 +351,7 @@ class StagingViewModel extends ComponentRoot {
         files,
         amend: this.amend(),
         emptyCommit: this.emptyCommit(),
+        skipHooks: skipHooks === true,
       })
       .then(() => {
         this.resetMessages();

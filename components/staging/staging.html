@@ -50,7 +50,7 @@
         <div class="btn-group commit-grp" data-bind="visible: isStageValid">
           <button
             class="btn btn-primary btn-lg commit-btn"
-            data-bind="click: commit, enable: !commitValidationError()"
+            data-bind="click: runSelectedCommitAction, text: selectedCommitAction().label, enable: !commitValidationError() && (!selectedCommitAction().push || canPush())"
           >
             Commit
           </button>
@@ -65,14 +65,12 @@
             <span class="caret"></span>
             <span class="sr-only">Toggle Commit Options</span>
           </button>
-          <ul class="dropdown-menu" role="menu">
+          <ul class="dropdown-menu" role="menu" data-bind="foreach: commitActions">
             <li>
               <a
                 href="#"
-                data-bind="click: commitnpush, css: { disabled: !canPush() }"
-                class="commitnpush"
-                >Commit & Push</a
-              >
+                data-bind="click: $parent.selectCommitAction.bind($parent), text: label, attr: { class: className, 'aria-disabled': push && !$parent.canPush() }, css: { disabled: push && !$parent.canPush(), active: $parent.selectedCommitAction() === $data }"
+              ></a>
             </li>
           </ul>
         </div>
