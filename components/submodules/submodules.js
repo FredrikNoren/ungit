@@ -3,6 +3,8 @@ const _ = require('lodash');
 const octicons = require('octicons');
 const components = require('ungit-components');
 const programEvents = require('ungit-program-events');
+const navigation = require('ungit-navigation');
+const { encodePath } = require('ungit-address-parser');
 const { ComponentRoot } = require('../ComponentRoot');
 
 components.register('submodules', (args) => new SubmodulesViewModel(args.server, args.repoPath));
@@ -57,7 +59,8 @@ class SubmodulesViewModel extends ComponentRoot {
   }
 
   submodulePathClick(submodule) {
-    window.location.href = document.URL + ungit.config.fileSeparator + submodule.path;
+    const submodulePath = this.repoPath() + ungit.config.fileSeparator + submodule.path;
+    navigation.browseTo(`repository?path=${encodePath(submodulePath)}`);
   }
 
   submoduleRemove(submodule) {
