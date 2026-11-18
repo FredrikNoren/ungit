@@ -1,0 +1,51 @@
+name: Release tarball
+
+# Builds the npm package (built bundles included) for a tag and attaches it to a GitHub release,
+# with its SHA-512 integrity, so it can be pinned by URL and integrity in a package-lock.json.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to release'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - run: npm pack
+      - name: Integrity
+        id: sum
+        run: |
+          f=$(ls ungit-*.tgz)
+          echo "file=$f" >> "$GITHUB_OUTPUT"
+          echo "sha512=sha512-$(openssl dgst -sha512 -binary "$f" | base64 -w0)" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(sha256sum "$f" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="npm integrity: ${{ steps.sum.outputs.sha512 }}
+          sha256: ${{ steps.sum.outputs.sha256 }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${{ steps.sum.outputs.file }}" --clobber
+          else
+            gh release create "$TAG" "${{ steps.sum.outputs.file }}" --title "$TAG" --notes "$notes"
+          fi
